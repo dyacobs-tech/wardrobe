@@ -102,7 +102,7 @@
 
       /* ---------- Tabs — two tiers: sections on top, pages under ----------
          The top row names five destinations: Today, Studio, Inspiration,
-         Find me, Profile. Studio and Inspiration are sections: a second
+         Find it, Profile. Studio and Inspiration are sections: a second
          row beneath names their pages (Studio: Home, Closet, Watches,
          Looks — Inspiration: Palettes, Icons) and shows only while one
          of that section's pages is open. Both rows stick together. */
@@ -629,7 +629,7 @@
       .loc-quick { display: flex; flex-wrap: wrap; gap: 8px; }
       .loc-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 
-      /* ---------- Find me & Profile ---------- */
+      /* ---------- Find it & Profile ---------- */
       .find-card { padding: 18px; display: grid; gap: 8px; align-content: start; }
       .find-card h4 { font-family: var(--font-display); font-size: 22px; font-weight: 600; margin: 0; line-height: 1.2; }
       .find-card .meta { margin: 0; font-size: 13px; color: var(--dim); }
@@ -979,7 +979,7 @@
       .brand-row .b-shop { flex: none; font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
       .brand-row:active { background: var(--surface-alt); }
 
-      /* ---------- Find me — budget scale ----------
+      /* ---------- Find it — budget scale ----------
          The budget guidance runs as a slim slider in the same
          register as the Formality meter: price-conscious at one
          end, no budget at the other, named levels in between. */
@@ -988,6 +988,176 @@
       #panel-find .formality-name { font-size: 16px; }
       #panel-find .formality input[type="range"] { min-height: 26px; }
       #panel-find .formality-scale { font-size: 9.5px; margin-top: -2px; }
+
+      /* ---------- Audit round — My Looks, menus, chips, undo ----------
+         Looks grid: two across with larger photographs (three on
+         wide screens). One action per card — the ••• menu — with
+         Queue / Mark worn / Remove inside it; tapping the photo or
+         title opens the look. Formality is a scrollable row of
+         tappable chips, one per level, in Studio and on Today. */
+      .saved-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      @media (min-width: 760px) { .saved-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+      .saved-card { position: relative; }
+      .saved-card .sb { padding: 8px 9px 9px; }
+      .saved-card h4 { font-size: 14px; }
+      .saved-card img { cursor: pointer; }
+      .saved-card h4[data-open-look], .saved-card h4[data-fav-open] { cursor: pointer; }
+      .card-menu-btn {
+        position: absolute; top: 6px; right: 6px; z-index: 4;
+        width: 30px; height: 30px; min-height: 30px; padding: 0;
+        border-radius: 50%; border: 1px solid var(--border);
+        background: color-mix(in srgb, var(--surface) 88%, transparent);
+        color: var(--text); font-size: 15px; font-weight: 700; line-height: 1;
+        display: grid; place-items: center; letter-spacing: .05em;
+      }
+      .card-menu {
+        position: absolute; top: 40px; right: 6px; z-index: 5; min-width: 132px;
+        background: var(--surface); border: 1px solid var(--border-strong);
+        border-radius: var(--radius); box-shadow: var(--shadow-lift); padding: 4px;
+        display: grid; gap: 2px;
+      }
+      .card-menu[hidden] { display: none; }
+      .card-menu button {
+        background: none; border: none; text-align: left; color: var(--text);
+        font-size: 12.5px; font-weight: 600; letter-spacing: .04em;
+        padding: 7px 9px; min-height: 32px; border-radius: 2px; width: 100%;
+      }
+      .card-menu button:hover { background: var(--surface-alt); }
+      .card-menu button.danger { color: var(--accent); }
+      .queued-badge { display: inline-block; border: 1px solid var(--indigo); color: var(--indigo); font-size: 9px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; }
+
+      /* Studio Home — one-tap deal, wizard demoted to Customize */
+      .studio-home-bar { display: flex; gap: 8px; margin-bottom: 10px; }
+      .studio-home-bar .btn-accent { flex: 1; }
+      #panel-studio .studio-form { margin-bottom: 4px; }
+
+      /* Formality chips — one tappable chip per level */
+      .formality-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      .formality-chips::-webkit-scrollbar { display: none; }
+      .fchip {
+        flex: none; border: 1px solid var(--border-strong); background: transparent; color: var(--text);
+        border-radius: 999px; padding: 5px 11px; min-height: 30px;
+        font-size: 11.5px; font-weight: 600; letter-spacing: .04em; white-space: nowrap;
+      }
+      .fchip[aria-pressed="true"] { background: var(--ink-btn); color: var(--ink-btn-text); }
+      #formality-studio .formality-scale, #formality-today .formality-scale { display: none; }
+      .today-formality .fchip { border-color: rgba(247,241,229,.7); color: #f7f1e5; background: rgba(20,17,13,.25); }
+      .today-formality .fchip[aria-pressed="true"] { background: #f7f1e5; color: #191612; }
+
+      /* Today hero — location chips + swipe hint */
+      .today-loc-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; }
+      .today-loc-chips .tlc-label { font-size: 10px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: #d9c9a3; margin-right: 2px; }
+      .today-loc-chips .tlc {
+        border: 1px solid rgba(247,241,229,.65); background: rgba(20,17,13,.25); color: #f7f1e5;
+        border-radius: 999px; padding: 5px 11px; min-height: 30px; font-size: 12px; font-weight: 600; white-space: nowrap;
+      }
+      .today-loc-chips .tlc[aria-pressed="true"] { background: #f7f1e5; color: #191612; }
+      .today-swipe-hint { margin: 10px 0 0; font-size: 11px; letter-spacing: .06em; color: rgba(247,241,229,.65); }
+
+      /* Undo toast */
+      .undo-toast {
+        position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+        background: var(--ink-btn); color: var(--ink-btn-text); padding: 9px 10px 9px 16px; border-radius: var(--radius);
+        font-size: 13.5px; font-weight: 500; z-index: 70; display: flex; align-items: center; gap: 12px;
+        max-width: min(92vw, 480px); box-shadow: var(--shadow-lift);
+      }
+      .undo-toast[hidden] { display: none; }
+      .undo-toast button {
+        background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent);
+        border-radius: var(--radius); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+        padding: 6px 12px; min-height: 32px; flex: none;
+      }
+
+      /* Recently removed rows */
+      .removed-row { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius); padding: 7px 10px; margin-bottom: 6px; }
+      .removed-row img { width: 34px; height: 44px; object-fit: cover; object-position: top center; border: 1px solid var(--border); flex: none; }
+      .removed-row .r-name { flex: 1; min-width: 0; font-family: var(--font-display); font-size: 15px; font-weight: 600; line-height: 1.2; }
+      .removed-row .btn-ghost { min-height: 30px; padding: 4px 10px; font-size: 11px; flex: none; }
+
+      /* Palettes — Use this palette on every plate */
+      .plate-card { display: block; }
+      .plate-card .pc-open { display: block; width: 100%; background: none; border: none; padding: 0; text-align: left; min-height: 0; cursor: pointer; }
+      .plate-card .pc-use { width: calc(100% - 16px); margin: 0 8px 8px; min-height: 30px; padding: 4px 8px; font-size: 10.5px; }
+
+      /* Profile — Backup as one small row */
+      #panel-profile #data-card { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+      #panel-profile #data-card .card-head-info { flex: none; }
+      #panel-profile #data-card #data-status { flex-basis: 100%; }
+      #panel-profile #panel-watches .add-form { padding: 10px 12px; gap: 7px; }
+      #panel-profile #panel-watches label.field { font-size: 10.5px; letter-spacing: .14em; margin-bottom: 3px; }
+      #panel-profile #panel-watches input[type="text"], #panel-profile #panel-watches select, #panel-profile #panel-watches textarea { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
+      #panel-profile #panel-watches .item-card { padding: 9px 10px; gap: 5px; }
+      #panel-profile #panel-watches .item-card h4 { font-size: 16px; }
+
+      /* ---------- Audit round 2 — findings 12–19 + outline fix ----------
+         Best-match card: NO coloured outline — identical thin neutral
+         border to every other card; the BEST MATCH label does the
+         identifying. Active tab: no underline at all — a filled pill
+         with bold text. Selected values and labels run cream/gold
+         (brass); the accent keeps one job — the primary action.
+         Serif is reserved for the look/hero titles and the wordmark;
+         card titles, labels and body run in the tight sans. */
+      .option-card.selected { outline: none !important; }
+      .plate-card[aria-pressed="true"] { outline: 1px solid var(--brass); outline-offset: 1px; }
+      .inspo-thumb[aria-pressed="true"] { border-color: var(--brass); outline: 1px solid var(--brass); }
+      .tab[aria-selected="true"]::after, .subtab[aria-selected="true"]::after { display: none !important; }
+      .tab[aria-selected="true"] { background: var(--surface-alt); border-radius: 999px; font-weight: 700; color: var(--text); }
+      .subtab[aria-selected="true"] { background: var(--surface-alt); border-radius: 999px; font-weight: 700; color: var(--text); }
+      .tab, .subtab { border-bottom: none; margin: 3px 1px; min-height: 30px; }
+      .chip[aria-pressed="true"] { background: color-mix(in srgb, var(--brass) 24%, var(--surface)); border-color: var(--brass); color: var(--text); }
+      .basis-btn[aria-pressed="true"] { background: color-mix(in srgb, var(--brass) 24%, var(--surface)); border-color: var(--brass); color: var(--text); }
+      .fchip[aria-pressed="true"] { background: color-mix(in srgb, var(--brass) 30%, var(--surface)); border-color: var(--brass); color: var(--text); }
+      .today-formality .fchip[aria-pressed="true"] { background: #f7f1e5; color: #191612; border-color: #f7f1e5; }
+      .verdict-btn[aria-pressed="true"] { background: color-mix(in srgb, var(--brass) 26%, var(--surface)); border-color: var(--brass); color: var(--text); }
+      .choice-chip strong { color: var(--brass); }
+      .icon-card .lane, .icon-result .ir-lane, .source-line strong, .inspo-active .ia-main strong, .direction-preview .dp-lane { color: var(--brass); }
+      /* Sans for card titles and small headings; serif stays on the
+         hero/look titles, section titles and the wordmark. */
+      .saved-card h4, .item-card h4, .find-card h4, .custom-card h4, .option-card .oc-title,
+      .plate-card .pc-names, .icon-name-row .nm, .wrist .w-name, .loc-result .lr-name,
+      .icon-result .ir-name, .piece-row .p-name, .removed-row .r-name {
+        font-family: var(--font-ui); font-weight: 600; letter-spacing: .01em;
+      }
+      /* Strict card hierarchy: one-line truncated title, one-line meta */
+      .saved-card h4 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .saved-card .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .option-card .oc-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .option-card .oc-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .item-card h4 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      /* (i) pop-ups are bottom sheets at every width */
+      .info-pop-backdrop { place-items: end center !important; padding: 0 !important; }
+      .info-pop-backdrop .info-pop-card, .info-pop-backdrop .principles {
+        width: 100%; max-width: 720px; border-radius: 14px 14px 0 0; border-bottom: none;
+        max-height: min(86dvh, 720px); animation: sheetUp 220ms ease;
+      }
+      @keyframes sheetUp { from { transform: translateY(26px); opacity: .4; } to { transform: translateY(0); opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .info-pop-backdrop .info-pop-card, .info-pop-backdrop .principles { animation: none; } }
+      /* Closet Add — sticky Add button */
+      #panel-wardrobe #add-form { position: relative; }
+      #panel-wardrobe #item-submit { position: sticky; bottom: 10px; z-index: 3; box-shadow: var(--shadow-lift); }
+      .more-toggle { width: 100%; text-align: left; }
+      /* Dress for row */
+      .dress-for { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+      .dress-for .df-label { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); margin-right: 2px; }
+      .dress-for .chip { min-height: 28px; padding: 3px 11px; font-size: 12px; }
+      /* Profile measurement group heads */
+      .profile-group-head { grid-column: 1 / -1; font-size: 10.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--brass); margin: 6px 0 0; }
+      .profile-group-head:first-child { margin-top: 0; }
+      /* Wishlist / worn-log / capsule rows */
+      .wish-row, .worn-row { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius); padding: 7px 10px; margin-bottom: 6px; }
+      .wish-row .w-main, .worn-row .w-main { flex: 1; min-width: 0; }
+      .wish-row .w-name, .worn-row .w-name { font-weight: 600; font-size: 13.5px; line-height: 1.25; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .wish-row .w-sub, .worn-row .w-sub { font-size: 11.5px; color: var(--dim); display: block; line-height: 1.35; }
+      .wish-row .cdot { width: 18px; height: 18px; flex: none; border: 1px solid var(--border); border-radius: 2px; }
+      .wish-row .btn-ghost, .worn-row .btn-ghost { min-height: 30px; padding: 4px 10px; font-size: 11px; flex: none; }
+      .worn-row img { width: 34px; height: 44px; object-fit: cover; object-position: top center; border: 1px solid var(--border); flex: none; }
+      .pack-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+      .pack-list li { display: flex; gap: 8px; align-items: baseline; font-size: 13.5px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+      .pack-list li .pk-cat { flex: none; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); min-width: 74px; }
+      .capsule-note { font-size: 13px; color: var(--dim); margin: 8px 0 0; line-height: 1.45; }
+      .new-strip { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+      .new-strip .ns-label { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); }
+      .new-badge { display: inline-block; border: 1px solid var(--brass); color: var(--brass); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 1px 5px; border-radius: 2px; margin-left: 6px; vertical-align: middle; }
     </style>
   </head>
   <body>
@@ -1004,7 +1174,7 @@
           <button class="tab" role="tab" id="tab-today" aria-selected="true" aria-controls="panel-today" data-tab="today">Today</button>
           <button class="tab" role="tab" id="section-studio" aria-selected="false" data-section="studio">Studio</button>
           <button class="tab" role="tab" id="section-inspiration" aria-selected="false" data-section="inspiration">Inspiration</button>
-          <button class="tab" role="tab" id="tab-find" aria-selected="false" aria-controls="panel-find" data-tab="find">Find me</button>
+          <button class="tab" role="tab" id="tab-find" aria-selected="false" aria-controls="panel-find" data-tab="find">Find it</button>
           <button class="tab" role="tab" id="tab-profile" aria-selected="false" aria-controls="panel-profile" data-tab="profile">Profile</button>
         </div>
       </nav>
@@ -1013,14 +1183,11 @@
           <div class="subnav-group" id="subnav-studio" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Home</button>
             <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
-            <button class="subtab" role="tab" id="tab-watches" aria-selected="false" aria-controls="panel-watches" data-tab="watches">Watches</button>
-            <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks">Looks</button>
-            <button class="subtab" role="tab" id="tab-queue" aria-selected="false" aria-controls="panel-queue" data-tab="queue">Queue</button>
+            <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks">My Looks</button>
           </div>
           <div class="subnav-group" id="subnav-inspiration" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-palettes" aria-selected="false" aria-controls="panel-palettes" data-tab="palettes">Palettes <span class="count">348</span></button>
             <button class="subtab" role="tab" id="tab-icons" aria-selected="false" aria-controls="panel-icons" data-tab="icons">Icons <span class="count" id="icon-tab-count"></span></button>
-            <button class="subtab" role="tab" id="tab-favourites" aria-selected="false" aria-controls="panel-favourites" data-tab="favourites">Yours</button>
             <button class="subtab" role="tab" id="tab-brands" aria-selected="false" aria-controls="panel-brands" data-tab="brands">Brands <span class="count">14</span></button>
           </div>
         </div>
@@ -1040,10 +1207,19 @@
             <p class="today-loc" id="today-loc"><strong id="today-loc-name">Palm Beach, Florida</strong><span id="today-loc-weather"></span></p>
             <div class="today-dots" id="today-dots" aria-hidden="true"></div>
             <div class="today-actions">
-              <button type="button" class="btn-today btn-today-solid" id="today-deal">Deal me another</button>
+              <button type="button" class="btn-today btn-today-solid" id="today-like">I like it</button>
+              <button type="button" class="btn-today btn-today-line" id="today-wore">Wore this today</button>
+              <button type="button" class="btn-today btn-today-line" id="today-deal">Deal me another</button>
               <button type="button" class="btn-today btn-today-line" id="today-style">Style this look</button>
               <button type="button" class="btn-today btn-today-line" id="today-location">Location</button>
             </div>
+            <div class="today-loc-chips" id="today-loc-chips" role="group" aria-label="Location — recommendations follow the weather here">
+              <span class="tlc-label">Location</span>
+              <button type="button" class="tlc" data-today-loc="palm-beach">Palm Beach</button>
+              <button type="button" class="tlc" data-today-loc="new-york">New York</button>
+              <button type="button" class="tlc" data-today-loc="greenwich">Greenwich</button>
+            </div>
+            <p class="today-swipe-hint" aria-hidden="true">Swipe left for another look · right to like it</p>
             <div class="formality today-formality" id="formality-today">
               <div class="formality-head">
                 <label class="field" for="today-formality-range">Formality</label>
@@ -1061,7 +1237,20 @@
       <section id="panel-studio" role="tabpanel" aria-labelledby="tab-studio" hidden>
         <div class="studio-grid">
           <div>
-            <form class="card studio-form" id="studio-form">
+            <div class="dress-for" id="dress-for" role="group" aria-label="Dress for">
+              <span class="df-label">Dress for</span>
+              <button type="button" class="chip" data-dress="golf" aria-pressed="false">Golf</button>
+              <button type="button" class="chip" data-dress="padel" aria-pressed="false">Padel</button>
+              <button type="button" class="chip" data-dress="dinner" aria-pressed="false">Dinner</button>
+              <button type="button" class="chip" data-dress="work" aria-pressed="false">Work</button>
+              <button type="button" class="chip" data-dress="date" aria-pressed="false">Date</button>
+              <button type="button" class="chip" data-dress="travel" aria-pressed="false">Travel</button>
+            </div>
+            <div class="studio-home-bar">
+              <button type="button" class="btn-accent" id="studio-deal">Deal me a look</button>
+              <button type="button" class="btn-ghost" id="studio-customize" aria-expanded="false" aria-controls="studio-form">Customize</button>
+            </div>
+            <form class="card studio-form" id="studio-form" style="display:none">
               <div>
                 <label class="field" for="desc">Outfit</label>
                 <textarea id="desc" name="desc" placeholder=""></textarea>
@@ -1150,7 +1339,7 @@
                 </select>
               </div>
               <div>
-                <div class="label-row"><label class="field">Build from — where the outfit comes from</label><button type="button" class="info-btn sm" id="source-info" data-info-title="Build from" data-info-text="Combo — the default: each look is anchored in something you already own, and the rest is inspo to buy that completes it. Pieces that are yours are named as yours; the rest carries a Find this button." aria-label="About: build from">i</button></div>
+                <div class="label-row"><label class="field">Build from — where the outfit comes from</label><button type="button" class="info-btn sm" id="source-info" data-info-title="Build from" data-info-text="Combo — the default: each look is anchored in something you already own, and the rest is inspo to buy that completes it. Pieces that are yours are named as yours; the rest carries a Find it button." aria-label="About: build from">i</button></div>
                 <div class="source-row" id="source-row" role="group" aria-label="Build from — My wardrobe, Inspo, or Combo">
                   <button type="button" class="basis-btn" data-source="wardrobe" aria-pressed="false">My wardrobe<small>Only pieces you own</small></button>
                   <button type="button" class="basis-btn" data-source="inspo" aria-pressed="false">Inspo<small>Outside your wardrobe</small></button>
@@ -1248,71 +1437,6 @@
         </div>
       </section>
 
-      <!-- ================= WATCHES ================= -->
-      <section id="panel-watches" role="tabpanel" aria-labelledby="tab-watches" hidden>
-        <div class="filter-row" id="watch-subtabs" role="group" aria-label="Watch lists">
-          <button type="button" class="chip" data-watch-list="collection" aria-pressed="true">Collection <span class="count" id="watch-count-collection"></span></button>
-          <button type="button" class="chip" data-watch-list="sold" aria-pressed="false">Sold <span class="count" id="watch-count-sold"></span></button>
-          <button type="button" class="chip" data-watch-list="wants" aria-pressed="false">Wants <span class="count" id="watch-count-wants"></span></button>
-        </div>
-        <div class="ward-grid">
-          <div>
-            <div class="item-grid" id="watch-grid"></div>
-          </div>
-          <form class="card add-form" id="watch-form">
-            <h3 style="font-family:var(--font-display);font-size:24px;font-weight:600;margin:0">Add</h3>
-            <div>
-              <label class="field" for="watch-name">Name</label>
-              <input type="text" id="watch-name" placeholder="" required />
-            </div>
-            <div class="form-row">
-              <div>
-                <label class="field" for="watch-metal">Case metal</label>
-                <select id="watch-metal">
-                  <option>Yellow gold</option><option>Rose gold</option><option>Pink gold</option>
-                  <option>Steel</option><option>Platinum</option><option>White gold</option>
-                  <option>Titanium</option><option>Two-tone</option><option>Bronze</option>
-                </select>
-              </div>
-              <div>
-                <label class="field" for="watch-style">Character</label>
-                <select id="watch-style">
-                  <option>Dress</option><option>Everyday</option><option>Sport</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div>
-                <label class="field" for="watch-strap">Strap / bracelet</label>
-                <select id="watch-strap">
-                  <option>Metal bracelet</option><option>Brown leather strap</option>
-                  <option>Black leather strap</option><option>Tan suede strap</option>
-                  <option>Rubber strap</option><option>NATO / fabric strap</option>
-                </select>
-              </div>
-              <div>
-                <label class="field" for="watch-dial-name">Dial</label>
-                <div style="display:flex;gap:10px;align-items:center">
-                  <input type="text" id="watch-dial-name" placeholder="" style="flex:1" />
-                  <input type="color" id="watch-dial" value="#8a8d8f" aria-label="Pick the dial colour" />
-                </div>
-              </div>
-            </div>
-            <div>
-              <label class="field" for="watch-notes">Notes</label>
-              <textarea id="watch-notes" placeholder="" style="min-height:56px"></textarea>
-            </div>
-            <label class="photo-drop" for="watch-photo">
-              <span class="pd-title" id="watch-photo-label">Photo</span>
-              <img id="watch-photo-preview" alt="" hidden />
-              <input type="file" id="watch-photo" accept="image/*" />
-            </label>
-            <button type="submit" class="btn-ink" id="watch-submit">Add</button>
-            <button type="button" class="btn-ghost" id="watch-cancel-edit" hidden>Cancel edit</button>
-          </form>
-        </div>
-      </section>
-
       <!-- ================= PALETTES ================= -->
       <section id="panel-palettes" role="tabpanel" aria-labelledby="tab-palettes" hidden>
         <div class="drop pal-drop">
@@ -1385,11 +1509,33 @@
           <input type="search" id="looks-search" class="ward-search" placeholder="Search your looks — a colour, a piece, a note" autocomplete="off" />
           <div class="fb-chips" role="group" aria-label="Filter looks">
             <button type="button" class="chip" data-looks-filter="all" aria-pressed="true">All</button>
+            <button type="button" class="chip" data-looks-filter="queued" aria-pressed="false">Queued</button>
             <button type="button" class="chip" data-looks-filter="worn" aria-pressed="false">Worn</button>
+            <button type="button" class="chip" data-looks-filter="liked" aria-pressed="false">Liked</button>
             <button type="button" class="chip" data-looks-filter="new" aria-pressed="false">Not worn yet</button>
           </div>
         </div>
         <div class="saved-grid" id="saved-grid"></div>
+        <div id="recently-removed-wrap" hidden>
+          <h3 class="fav-head">Recently removed</h3>
+          <div id="recently-removed-list"></div>
+        </div>
+        <div id="worn-log-wrap">
+          <h3 class="fav-head">What I wore</h3>
+          <div id="worn-log-list"></div>
+        </div>
+        <div id="wishlist-wrap">
+          <h3 class="fav-head">Wishlist — pieces your looks are missing</h3>
+          <div id="wishlist-list"></div>
+        </div>
+        <div id="trips-wrap">
+          <h3 class="fav-head">Trips — capsule &amp; packing</h3>
+          <div class="fb-chips" role="group" aria-label="Trips">
+            <button type="button" class="chip" data-trip="marbella">Marbella · Jun 21 – Jul 5, 2027</button>
+            <button type="button" class="chip" data-trip="aspen">Aspen</button>
+          </div>
+          <div id="capsule-out" style="margin-top:10px"></div>
+        </div>
       </section>
 
       <!-- ================= QUEUE ================= -->
@@ -1593,7 +1739,7 @@
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Find me" data-info-text="Describe what you're after, set the budget on the scale — price-conscious at one end, no budget at the other — and your size comes from your Profile. Then search for it, or keep the brief here." aria-label="About Find me">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Find it" data-info-text="Describe what you're after, set the budget on the scale — price-conscious at one end, no budget at the other — and your size comes from your Profile. Then search for it, or keep the brief here." aria-label="About Find it">i</button></div>
         <div class="ward-grid">
           <div>
             <div class="find-grid" id="find-grid"></div>
@@ -1649,7 +1795,7 @@
               <label class="field" for="find-details">Details — brand, material, must-haves, things to avoid</label>
               <textarea id="find-details" placeholder="e.g. Italian suede if possible, no logos, rubber sole" style="min-height:64px"></textarea>
             </div>
-            <div class="label-row"><button type="submit" class="btn-accent">Add &amp; search</button><button type="button" class="info-btn sm" data-info-from="find-note" data-info-title="Find me briefs" aria-label="About: find me briefs">i</button></div>
+            <div class="label-row"><button type="submit" class="btn-accent">Add &amp; search</button><button type="button" class="info-btn sm" data-info-from="find-note" data-info-title="Find it briefs" aria-label="About: find me briefs">i</button></div>
             <p class="form-note" id="find-note" hidden>Each brief gets live search links in your size. Nothing is bought — you review and buy yourself.</p>
           </form>
         </div>
@@ -1657,7 +1803,7 @@
 
       <!-- ================= PROFILE ================= -->
       <section id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Profile" data-info-text="Your measurements and your location — Find me sizes every search from here, and recommendations follow the weather where you are." aria-label="About Profile">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Profile" data-info-text="Your measurements and your location — Find it sizes every search from here, and recommendations follow the weather where you are." aria-label="About Profile">i</button></div>
         <div class="card loc-card" id="loc-card" style="margin-top:0;margin-bottom:22px">
           <div>
             <div class="card-head-info"><h3>Location &amp; weather</h3><button type="button" class="info-btn sm" data-info-from="loc-note" data-info-title="Location &amp; weather" aria-label="About: location and weather">i</button></div>
@@ -1720,8 +1866,73 @@
           </div>
           <div><button type="submit" class="btn-ink">Save profile</button></div>
         </form>
+      <!-- ================= WATCHES ================= -->
+      <div id="panel-watches"><h3 style="font-family:var(--font-display);font-size:20px;font-weight:600;margin:18px 0 10px">Watches</h3>
+        <div class="filter-row" id="watch-subtabs" role="group" aria-label="Watch lists">
+          <button type="button" class="chip" data-watch-list="collection" aria-pressed="true">Collection <span class="count" id="watch-count-collection"></span></button>
+          <button type="button" class="chip" data-watch-list="sold" aria-pressed="false">Sold <span class="count" id="watch-count-sold"></span></button>
+          <button type="button" class="chip" data-watch-list="wants" aria-pressed="false">Wants <span class="count" id="watch-count-wants"></span></button>
+        </div>
+        <div class="ward-grid">
+          <div>
+            <div class="item-grid" id="watch-grid"></div>
+          </div>
+          <form class="card add-form" id="watch-form">
+            <h3 style="font-family:var(--font-display);font-size:24px;font-weight:600;margin:0">Add</h3>
+            <div>
+              <label class="field" for="watch-name">Name</label>
+              <input type="text" id="watch-name" placeholder="" required />
+            </div>
+            <div class="form-row">
+              <div>
+                <label class="field" for="watch-metal">Case metal</label>
+                <select id="watch-metal">
+                  <option>Yellow gold</option><option>Rose gold</option><option>Pink gold</option>
+                  <option>Steel</option><option>Platinum</option><option>White gold</option>
+                  <option>Titanium</option><option>Two-tone</option><option>Bronze</option>
+                </select>
+              </div>
+              <div>
+                <label class="field" for="watch-style">Character</label>
+                <select id="watch-style">
+                  <option>Dress</option><option>Everyday</option><option>Sport</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label class="field" for="watch-strap">Strap / bracelet</label>
+                <select id="watch-strap">
+                  <option>Metal bracelet</option><option>Brown leather strap</option>
+                  <option>Black leather strap</option><option>Tan suede strap</option>
+                  <option>Rubber strap</option><option>NATO / fabric strap</option>
+                </select>
+              </div>
+              <div>
+                <label class="field" for="watch-dial-name">Dial</label>
+                <div style="display:flex;gap:10px;align-items:center">
+                  <input type="text" id="watch-dial-name" placeholder="" style="flex:1" />
+                  <input type="color" id="watch-dial" value="#8a8d8f" aria-label="Pick the dial colour" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="field" for="watch-notes">Notes</label>
+              <textarea id="watch-notes" placeholder="" style="min-height:56px"></textarea>
+            </div>
+            <label class="photo-drop" for="watch-photo">
+              <span class="pd-title" id="watch-photo-label">Photo</span>
+              <img id="watch-photo-preview" alt="" hidden />
+              <input type="file" id="watch-photo" accept="image/*" />
+            </label>
+            <button type="submit" class="btn-ink" id="watch-submit">Add</button>
+            <button type="button" class="btn-ghost" id="watch-cancel-edit" hidden>Cancel edit</button>
+          </form>
+        </div>
+      </div>
+
         <div class="card data-card" id="data-card">
-          <div class="card-head-info"><h3>Your data — backup &amp; restore</h3><button type="button" class="info-btn sm" data-info-from="data-note" data-info-title="Your data — backup &amp; restore" aria-label="About: backup and restore">i</button></div>
+          <div class="card-head-info"><h3>Backup</h3><button type="button" class="info-btn sm" data-info-from="data-note" data-info-title="Backup" aria-label="About: backup and restore">i</button></div>
           <p id="data-note" hidden>Everything Wardrobe keeps — closet, watches, looks, palettes, icons, finds, profile — lives on this device. Export a backup file and keep it somewhere safe; import it on a new phone and everything comes back exactly as it was.</p>
           <div class="loc-actions">
             <button type="button" class="btn-ink" id="data-export">Export backup</button>
@@ -1746,6 +1957,7 @@
       </div>
     </div>
     <div class="toast" id="toast" role="status"></div>
+    <div class="undo-toast" id="undo-toast" role="status" hidden><span id="undo-msg"></span><button type="button" id="undo-btn">Undo</button></div>
 
     <script>
 window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],["Cameo Pink","#e0b3b6"],["Fawn","#d1b0a7"],["Light Brown Drab","#b59392"],["Coral Red","#f58e84"],["Fresh Color","#f6917e"],["Grenadine Pink","#f48067"],["Eosine Pink","#f37f94"],["Spinel Red","#f27291"],["Old Rose","#d46d7a"],["Eugenia Red | A","#e2625e"],["Eugenia Red | B","#da525d"],["Raw Sienna","#bb7125"],["Vinaceous Tawny","#c56127"],["Jasper Red","#eb5324"],["Spectrum Red","#e31f26"],["Red Orange","#dd4027"],["Etruscan Red","#c55347"],["Burnt Sienna","#ae5224"],["Ochre Red","#ab544d"],["Scarlet","#cb2f43"],["Carmine","#cc1236"],["Indian Lake","#c53c69"],["Rosolanc Purple","#b73f74"],["Pomegranite Purple","#b71f57"],["Hydrangea Red","#a94151"],["Brick Red","#a84222"],["Carmine Red","#a62c37"],["Pompeian Red","#ab2439"],["Red","#a72144"],["Brown","#7c4226"],["Hay's Russet","#793327"],["Vandyke Red","#82241f"],["Pansy Purple","#7d133a"],["Pale Burnt Lake","#802626"],["Violet Red","#642d5e"],["Vistoris Lake","#6d4145"],["Sulpher Yellow","#f5ecc2"],["Pale Lemon Yellow","#ffefae"],["Naples Yellow","#fbe6a0"],["Ivory Buff","#ebd3a2"],["Seashell Pink","#fdd4bd"],["Light Pinkish Cinnamon","#fcc79b"],["Pinkish Cinnamon","#eeb480"],["Cinnamon Buff","#fdc57e"],["Cream Yellow","#fdbf68"],["Golden Yellow","#f3a257"],["Vinaceous Cinnamon","#eea78c"],["Ochraceous Salmon","#d8a37b"],["Isabella Color","#c5a56e"],["Maple","#c59f6b"],["Olive Buff","#c1c494"],["Ecru","#c2ae93"],["Yellow","#fff200"],["Lemon Yellow","#f8ed43"],["Apricot Yellow","#ffdd00"],["Pyrite Yellow","#cab356"],["Olive Ocher","#d6b43e"],["Yellow Ocher","#e2b540"],["Orange Yellow","#fcb315"],["Yellow Orange","#f99d1b"],["Apricot Orange","#f68c50"],["Orange","#f37420"],["Peach Red","#f15a30"],["English Red","#d96629"],["Cinnamon Rufous","#c27544"],["Orange Rufous","#c16b27"],["Sulphine Yellow","#c19f2c"],["Khaki","#bc892b"],["Citron Yellow","#b2b73e"],["Citrine","#b09f36"],["Buffy Citrine","#96874d"],["Dark Citrine","#8b835b"],["Light Grayish Olive","#848061"],["Krongbergs Green","#84875e"],["Olive","#837e31"],["Orange Citrine","#986f2d"],["Sudan Brown","#a36752"],["Olive Green","#6b7140"],["Light Brownish Olive","#806e4b"],["Deep Grayish Olive","#635a3a"],["Pale Raw Umber","#71502f"],["Sepia","#644b1e"],["Madder Brown","#762c19"],["Mars Brown Tobacco","#653514"],["Vandyke Brown","#4b3317"],["Turquoise Green","#b5decc"],["Glaucous Green","#b4cdc2"],["Dark Greenish Glaucous","#b7c2a9"],["Yellow Green","#afd472"],["Light Green Yellow","#c7d14f"],["Night Green","#87c540"],["Olive Yellow","#a6a159"],["Artemesia Green","#709390"],["Andover Green","#6d7e77"],["Rainette Green","#8fa071"],["Chromium Green","#719470"],["Pistachio Green","#648f7b"],["Sea Green","#00b49b"],["Benzol Green","#00978d"],["Light Porcelain Green","#00908a"],["Green","#489b6e"],["Dull Viridian Green","#009465"],["Oil Green","#819238"],["Diamine Green","#1a7444"],["Cossack Green","#437742"],["Lincoln Green","#555832"],["Blackish Olive","#42533e"],["Deep Slate Olive","#253122"],["Nile Blue","#bce4e5"],["Pale King's Blue","#a7d4e4"],["Light Glaucous Blue","#a5c8d1"],["Salvia Blue","#97acc8"],["Cobalt Green","#96d1aa"],["Calamine BLue","#78cdd0"],["Venice Green","#62c6bf"],["Cerulian Blue","#0093a5"],["Peacock Blue","#00939b"],["Green Blue","#099197"],["Olympic Blue","#5a82b3"],["Blue","#006eb8"],["Antwarp Blue","#007190"],["Helvetia Blue","#005b8d"],["Dark Medici Blue","#547076"],["Dusky Green","#004f46"],["Deep Lyons Blue","#1c4286"],["Violet Blue","#40456a"],["Vandar Poel's Blue","#064f6e"],["Dark Tyrian Blue","#12354e"],["Dull Violet Black","#1e0e3f"],["Deep Indigo","#051230"],["Deep Slate Green","#112f2c"],["Grayish Lavender - A","#b5b1d8"],["Grayish Lavender - B","#c0a9b3"],["Laelia Pink","#ca92a8"],["Lilac","#b984af"],["Eupatorium Purple","#bf5892"],["Light Mauve","#9a72aa"],["Aconite Violet","#a36aa5"],["Dull Blue Violet","#80719e"],["Dark Soft Violet","#66629c"],["Blue Violet","#6450a1"],["Purple Drab","#84565b"],["Deep Violet / Plumbeous","#70727c"],["Veronia Purple","#8c4c62"],["Dark Slate Purple","#704357"],["Taupe Brown","#7a4456"],["Violet Carmine","#713b4c"],["Violet","#4f4086"],["Red Violet","#59256a"],["Cotinga Purple","#501345"],["Dusky Madder Violet","#4e1d4c"],["White","#ffffff"],["Neutral Gray","#b6bfc1"],["Mineral Gray","#a2b0ad"],["Warm Gray","#a1a39a"],["Slate Color","#34454c"],["Black","#111314"]],"plates":[[65,117],[61,129],[13,39],[50,150],[106,128],[7,131],[63,88],[66,133],[36,140],[66,73],[41,155],[50,119],[13,145],[9,40],[100,133],[33,111],[12,99],[3,152],[85,92],[115,135],[7,99],[54,126],[45,138],[83,145],[18,110],[47,82],[1,157],[84,131],[75,113],[29,155],[17,39],[49,92],[13,157],[8,154],[4,28],[68,87],[27,150],[105,126],[22,123],[14,70],[73,115],[59,149],[1,139],[101,120],[42,55],[63,158],[18,134],[24,123],[111,121],[41,152],[28,121],[38,158],[61,152],[100,112],[10,153],[134,149],[147,157],[32,99],[8,71],[39,129],[91,151],[54,158],[37,117],[139,141],[68,115],[58,79],[120,129],[4,54],[156,158],[13,107],[29,49],[38,111],[82,96],[87,119],[111,127],[39,156],[12,128],[44,116],[84,119],[38,138],[47,156],[32,152],[52,127],[42,132],[14,122],[13,99],[1,70],[42,121],[61,127],[8,139],[37,67],[5,100],[71,112],[41,125],[32,130],[59,76],[1,18],[84,127],[39,117],[72,140],[2,126],[41,67],[66,152],[28,38],[2,97],[122,130],[56,74],[8,27],[39,108],[31,86],[39,90],[7,158],[42,86],[60,122],[40,64],[2,142],[22,158],[59,86],[112,129],[2,29],[31,49,107],[22,46,100],[5,55,147],[35,59,93],[3,117,127],[41,59,126],[45,98,141],[1,116,138],[56,69,113],[13,28,149],[13,65,118],[38,47,71],[33,71,99],[8,138,150],[38,106,113],[21,103,150],[18,45,98],[47,55,116],[113,131,154],[47,122,157],[63,90,129],[26,68,113],[121,136,156],[24,63,158],[31,70,130],[69,81,105],[9,33,87],[58,60,117],[58,63,132],[42,70,88],[38,61,128],[18,32,112],[8,60,70],[22,54,121],[15,100,131],[58,114,149],[34,58,120],[55,66,92],[69,115,133],[68,82,124],[31,44,123],[10,96,136],[56,87,122],[17,60,149],[2,9,37],[7,40,132],[53,111,128],[55,128,145],[1,39,156],[24,60,150],[35,61,88],[66,122,150],[55,84,87],[1,134,147],[44,52,142],[0,42,115],[35,72,133],[41,112,119],[17,47,126],[45,138,154],[28,149,151],[13,86,131],[144,145,150],[9,41,74],[4,18,39],[32,49,121],[123,134,139],[96,113,114],[55,109,116],[41,65,158],[4,59,121],[46,86,144],[7,40,101],[15,42,120],[9,39,154],[70,111,142],[8,141,154],[19,56,102],[20,80,126],[28,52,97],[7,76,114],[87,114,157],[39,48,107],[24,66,112],[35,48,149],[1,47,66],[78,88,158],[38,119,122],[41,61,113],[45,55,107],[62,93,131],[29,77,113],[48,56,111],[41,78,149],[46,121,137],[15,102,158],[35,49,105],[123,133,144],[15,97,125],[25,49,139],[28,154,158],[59,61,67],[4,49,87],[9,124,147],[22,125,146],[37,46,149],[0,112,117],[28,39,154],[47,109,154],[7,87,114],[2,32,120],[22,44,131],[28,72,127],[45,82,111],[41,61,134],[69,126,143],[28,84,113],[49,151,156],[4,57,88],[6,54,117],[17,39,50,124],[8,19,105,158],[13,41,79,157],[4,14,95,122],[28,104,129,157],[1,27,38,45],[13,56,100,126],[8,69,133,146],[32,53,58,124],[57,64,99,110],[30,54,105,157],[12,13,68,119],[55,62,151,157],[1,38,76,135],[13,57,115,158],[48,63,103,158],[16,60,121,139],[35,44,76,122],[55,119,123,156],[10,48,88,99],[30,39,115,156],[12,41,71,106],[19,44,87,157],[1,17,89,117],[10,56,93,130],[16,41,96,100],[46,61,100,121],[4,13,109,110],[13,35,139,158],[12,38,79,106],[25,114,119,132],[39,63,87,113],[0,34,78,154],[64,73,120,138],[18,53,84,147],[8,42,90,158],[9,24,76,130],[46,58,106,125],[13,48,53,129],[12,107,135,147],[39,100,114,122],[12,51,114,136],[20,35,97,116],[11,56,99,125],[4,19,64,87],[19,60,118,127],[8,57,111,115],[61,83,147,158],[55,91,127,130],[37,39,107,114],[91,99,114,115],[39,44,50,53],[13,87,94,102],[38,46,106,113],[46,54,121,130],[38,49,82,157],[19,61,79,127],[13,55,64,158],[23,48,104,122],[7,46,87,115],[16,41,96,139],[46,53,110,122],[40,64,109,154],[32,46,73,100],[44,56,70,87],[55,100,103,110],[22,133,139,151],[3,21,65,114],[47,62,127,128],[38,44,76,109],[29,46,89,91],[19,61,94,123],[22,54,105,158],[8,32,126,152],[7,38,47,137],[33,103,149,150],[43,53,55,87],[80,108,125,132],[13,56,61,106],[5,38,104,112],[4,38,109,113],[16,27,137,142],[45,70,84,158],[29,120,139,154],[12,40,59,132],[38,64,90,92],[8,13,53,134],[27,62,86,101],[46,134,151,157],[52,110,113,119],[23,130,138,149],[5,21,109,125],[19,55,114,121],[42,76,90,122],[33,61,149,157],[8,32,39,108],[37,135,148,158],[28,60,125,134],[49,65,112,127],[64,99,154,158],[7,106,109,112],[1,46,77,109],[19,41,81,128],[45,126,139,158],[32,110,116,142],[24,87,91,95],[93,99,123,136],[52,106,109,151]]};
@@ -3219,13 +3431,27 @@ var formalityLevel = store.get("formality", 4);
 if (!(formalityLevel >= 1 && formalityLevel <= 7)) formalityLevel = 4;
 function formalityOf(img) { return RENDER_FORMALITY[img] || 4; }
 function formalityInfo(level) { return FORMALITY_LEVELS[level - 1] || FORMALITY_LEVELS[3]; }
+/* Formality weighting — the middle carries the wardrobe. The scale
+   keeps all seven levels, but dealing concentrates on Casual,
+   Smart Casual, Business Casual and Formal: when the meter sits
+   in that middle range, the extremes (Swim / Pool, Shorts & Tee,
+   Black Tie) cost extra bands, so they are dealt only once the
+   middle is used up — fewer looks at the extremes, by design.
+   Set the meter AT an extreme and the penalty lifts: that end was
+   asked for. With nothing chosen, the meter rests at Smart
+   Casual (4), so the default deal is the casual-to-dressy range. */
+function formalityBandCost(level) {
+  var d = Math.abs(level - formalityLevel);
+  var mid = formalityLevel >= 3 && formalityLevel <= 6;
+  if (mid && (level === 1 || level === 2 || level === 7)) d += 2;
+  if (level >= 3 && level <= 6) d -= 0.25;
+  return d;
+}
 function poolForFormality(level, need) {
-  var at = RENDER_POOL.filter(function (r) { return formalityOf(r.img) === level; });
-  for (var d = 1; at.length < need && d < 7; d++) {
-    [level - d, level + d].forEach(function (l) {
-      if (l < 1 || l > 7) return;
-      RENDER_POOL.forEach(function (r) { if (formalityOf(r.img) === l) at.push(r); });
-    });
+  var order = [1, 2, 3, 4, 5, 6, 7].slice().sort(function (a, b) { return formalityBandCost(a) - formalityBandCost(b); });
+  var at = [];
+  for (var i = 0; i < order.length && at.length < need; i++) {
+    RENDER_POOL.forEach(function (r) { if (formalityOf(r.img) === order[i]) at.push(r); });
   }
   return at;
 }
@@ -3345,7 +3571,7 @@ function renderByImg(img) {
 function pickDealt(candidates) {
   var best = null, bestKey = null;
   candidates.forEach(function (l) {
-    var key = Math.abs(formalityOf(l.img) - formalityLevel) * 100 + (dealtImgHistory.indexOf(l.img) === -1 ? 0 : 1);
+    var key = formalityBandCost(formalityOf(l.img)) * 100 + (dealtImgHistory.indexOf(l.img) === -1 ? 0 : 1);
     if (bestKey === null || key < bestKey) { bestKey = key; best = [l]; }
     else if (key === bestKey) best.push(l);
   });
@@ -3361,6 +3587,12 @@ function dealerLook(opts) {
   var pool = opts.pool && opts.pool.length ? opts.pool : DEAL_POOL;
   function notExcluded(l) { return !(opts.excludeImgs && opts.excludeImgs[l.img]); }
   var usable = pool.filter(notExcluded);
+  /* Every photograph dealt before? Create a new combination
+     instead of reshuffling — the deal stays new. */
+  if (!opts.pool && usable.length && usable.every(function (l) { return dealtImgHistory.indexOf(l.img) !== -1; })) {
+    var genLook = generateComboLook({ version: opts.version || 1, iconId: opts.iconId || null });
+    if (genLook) return genLook;
+  }
   var pick = pickDealt(usable.length ? usable : pool);
   var clone = JSON.parse(JSON.stringify(pick));
   clone.id = newLookId();
@@ -3397,8 +3629,79 @@ function recordCards(imgs) {
     if (at !== -1) dealtCardHistory.splice(at, 1);
     dealtCardHistory.push(img);
   });
-  if (dealtCardHistory.length > 400) dealtCardHistory = dealtCardHistory.slice(-400);
+  if (dealtCardHistory.length > 2000) dealtCardHistory = dealtCardHistory.slice(-2000);
   store.set("dealtCards", dealtCardHistory);
+}
+/* ================= The combination engine =================
+   The deck is finite; combinations are not. A look is a
+   combination — icon × palette × formality × closet anchor — and
+   every pairing is a different look: the icon's style applied in
+   the palette's colours. Nine icons × 348 plates is 3,132 base
+   pairings before formality and closet pieces multiply it
+   further. A persistent combination history records every pairing
+   dealt, and generation always picks a pairing that has never
+   been dealt — so dealing keeps producing new looks instead of
+   cycling back through the deck. */
+var dealtCombos = (store.get("dealtCombos", []) || []).filter(function (k) { return typeof k === "string"; });
+var dealtComboSet = {};
+dealtCombos.forEach(function (k) { dealtComboSet[k] = true; });
+function comboKey(iconId, plate, level, anchor) {
+  return (iconId || "auto") + "|" + (plate == null ? "x" : plate) + "|" + (level || "") + "|" + (anchor || "");
+}
+function recordCombo(key) {
+  if (!key || dealtComboSet[key]) return;
+  dealtComboSet[key] = true;
+  dealtCombos.push(key);
+  if (dealtCombos.length > 6000) dealtCombos = dealtCombos.slice(-6000);
+  store.set("dealtCombos", dealtCombos);
+}
+function recordLookCombos(looks) {
+  (looks || []).forEach(function (l) {
+    if (!l) return;
+    var level = formalityOf(l.img);
+    var anchor = (l.anchorNames && l.anchorNames[0]) || "";
+    recordCombo(comboKey(l.iconId, l.plate, level, anchor));
+    recordCombo(comboKey(l.iconId, l.plate, level, ""));
+    if (l.comboKey) recordCombo(l.comboKey);
+  });
+}
+/* Create one brand-new look from a combination that has never
+   been dealt: an icon whose direction has not yet been paired
+   with the chosen plate, styled by the full build engine in that
+   plate's colours. */
+function generateComboLook(opts) {
+  opts = opts || {};
+  var icons = allIcons();
+  if (!icons.length) return null;
+  /* Icon × plate pairings already dealt, at any formality or
+     anchor — a pairing is spent once dealt, however it was dealt. */
+  var dealtIP = {};
+  dealtCombos.forEach(function (k) { var parts = k.split("|"); if (parts.length > 1) dealtIP[parts[0] + "|" + parts[1]] = true; });
+  var icon = opts.iconId ? iconById(opts.iconId) : null;
+  if (!icon) {
+    var fresh = icons.filter(function (ic) {
+      return PLATES.some(function (p) { return !dealtIP[ic.id + "|" + p.plate]; });
+    });
+    var poolIcons = fresh.length ? fresh : icons;
+    icon = poolIcons[Math.floor(Math.random() * poolIcons.length)];
+  }
+  if (!icon) return null;
+  var plate = bestPlateFor(icon.palette.slice(0, 4), function (p) {
+    return !dealtIP[icon.id + "|" + p.plate];
+  }, icon.palette, null);
+  if (!plate) plate = PLATES[Math.floor(Math.random() * PLATES.length)];
+  var look = buildLook(icon.signatureDesc, opts.occasion || "", opts.season || "", {
+    iconId: icon.id, basis: "both", plate: plate, version: opts.version || 1,
+    excludeImgs: opts.excludeImgs || {}
+  });
+  if (!look) return null;
+  look.generated = true;
+  look.comboKey = comboKey(icon.id, plate.plate, formalityOf(look.img), "");
+  var names = plate.colors.map(function (c) { return shortName(c.name); });
+  look.title = names.length > 1 ? names[0] + " & " + names[1] : (names[0] || look.title);
+  look.meta = icon.name + " × Plate " + plate.plate + " · a new combination";
+  look.notes = ["A pairing dealt for the first time: " + icon.name + "'s direction in Plate " + plate.plate + "'s colours (" + plate.colors.map(function (c) { return c.name; }).join(", ") + ")."].concat(look.notes || []);
+  return look;
 }
 /* Disliked photographs: removing a look, or marking it Not for
    me, records its photograph here — and every deal path (the
@@ -3475,7 +3778,7 @@ function dealFromDeck(need, opts) {
        band: undealt cards at the level, then dealt ones, then the
        next level out — so a hand is six fresh cards at the level
        while the deck still has them there. */
-    return Math.abs(c.level - formalityLevel) * 1000 + (dealtCardHistory.indexOf(c.img) === -1 ? 0 : 1);
+    return formalityBandCost(c.level) * 1000 + (dealtCardHistory.indexOf(c.img) === -1 ? 0 : 1);
   }
   cards.sort(function (a, b) { return groupKey(a) - groupKey(b); });
   var picked = [], i = 0;
@@ -3485,6 +3788,18 @@ function dealFromDeck(need, opts) {
     var group = shuffleArr(cards.slice(i, j));
     for (var g = 0; g < group.length && picked.length < need; g++) picked.push(group[g]);
     i = j;
+  }
+  if (picked.length < need) {
+    /* The deck is dealt through — create new combinations instead
+       of cycling back: icon × palette pairings never dealt before. */
+    var guard = 0;
+    while (picked.length < need && guard < need + 2) {
+      guard++;
+      var gen = generateComboLook({ version: picked.length + 1, iconId: opts.iconId || null, excludeImgs: exclude });
+      if (!gen) break;
+      picked.push({ img: gen.img, level: formalityOf(gen.img), gen: gen });
+      exclude[gen.img] = true;
+    }
   }
   if (picked.length < need) {
     var oldest = dealtCardHistory.slice();
@@ -3498,6 +3813,7 @@ function dealFromDeck(need, opts) {
     }
   }
   return picked.map(function (c, k) {
+    if (c.gen) { c.gen.version = k + 1; return c.gen; }
     if (c.idea) return ideaAsLook(c.idea, k + 1);
     var look = dealerLook({ version: k + 1, iconId: opts.iconId || null, blendId: opts.blendId || null, pool: [renderAsLook(c.render)], excludeImgs: {} });
     if ((opts.basis || studioBasis) === "palette") { look.iconId = null; look.blendId = null; }
@@ -3614,10 +3930,10 @@ function styleFromIconic(ic, lk) {
   toast("Six takes styled from " + ic.name + " — " + lk.caption + ".");
 }
 
-/* ================= Find a piece from a look =================
-   Every item in a created outfit is selectable: tap Find this on
+/* ================= Find it from a look =================
+   Every item in a created outfit is selectable: tap Find it on
    any piece — knit, trousers, shoes, coat, any of them — and it
-   becomes a Find me brief in your size from your Profile, with
+   becomes a Find it brief in your size from your Profile, with
    the shopping search opened for that exact piece. */
 function lookPieces(look) {
   var out = [], seen = {};
@@ -3676,6 +3992,50 @@ function pieceDescription(p) {
   }
   return desc.charAt(0).toUpperCase() + desc.slice(1);
 }
+function swapHTML(look) {
+  var pieces = lookPieces(look);
+  if (!pieces.length) return "";
+  return '<div class="find-pieces bare">' + pieces.map(function (pc, i) {
+    return '<div class="piece-row">' +
+      '<span class="cdot" style="background:' + (pc.hex || "transparent") + '"></span>' +
+      '<span class="p-main"><span class="p-name">' + esc(pieceDescription(pc)) + '</span>' +
+      '<span class="p-sub">Deal a different one in the same palette</span></span>' +
+      '<button type="button" class="btn-ghost" data-swap-piece="' + i + '">Swap</button></div>';
+  }).join("") + "</div>";
+}
+function swapPiece(idx) {
+  if (!currentLook) return;
+  var pieces = lookPieces(currentLook);
+  var pc = pieces[idx];
+  if (!pc) return;
+  var look = JSON.parse(JSON.stringify(currentLook));
+  look.id = newLookId();
+  look.version = (currentLook.version || 1) + 1;
+  if (!look.flatlay || !look.flatlay.length) {
+    look.flatlay = (look.swatches || []).filter(function (s) { return s.role && s.role !== "Accent"; }).map(function (s) { return { hex: s.hex, label: s.role, detail: "" }; });
+  }
+  var cat = garmentCategory(pc.garment);
+  var changed = "";
+  if (cat === "Shoes") {
+    var isSneaker = /sneaker/i.test(pc.garment);
+    var repl = isSneaker
+      ? { hex: "#7c4226", name: "Brown", label: "Loafers", detail: "dark brown leather" }
+      : { hex: "#f7f5ef", name: "White", label: "Sneakers", detail: "clean white leather" };
+    look.flatlay.forEach(function (f) { if (f.hex === pc.hex) { f.hex = repl.hex; f.label = repl.label; f.detail = repl.detail; } });
+    look.swatches.forEach(function (s) { if (s.hex === pc.hex) { s.hex = repl.hex; s.name = repl.name; s.role = repl.label; } });
+    changed = repl.label.toLowerCase();
+  } else {
+    var others = (look.swatches || []).filter(function (s) { return s.hex !== pc.hex; });
+    if (!others.length) { toast("Nothing in this palette to swap to."); return; }
+    var target = others[Math.floor(Math.random() * others.length)];
+    look.flatlay.forEach(function (f) { if (f.hex === pc.hex) f.hex = target.hex; });
+    look.swatches.forEach(function (s) { if (s.hex === pc.hex) { s.hex = target.hex; s.name = target.name; } });
+    changed = pc.garment.toLowerCase() + " in " + target.name.toLowerCase();
+  }
+  look.notes = ["Swapped — " + changed + ", same palette, same direction."].concat(look.notes || []);
+  renderLook(look);
+  toast("Swapped — " + changed + ".");
+}
 function findPiecesHTML(look, bare) {
   var pieces = lookPieces(look);
   if (!pieces.length) return "";
@@ -3686,10 +4046,10 @@ function findPiecesHTML(look, bare) {
         '<span class="cdot" style="background:' + (p.hex || "transparent") + '"></span>' +
         '<span class="p-main"><span class="p-name">' + esc(pieceDescription(p)) + '</span>' +
         '<span class="p-sub">' + esc(cat) + (size ? " · Your size: " + esc(size) : "") + "</span></span>" +
-        '<button type="button" class="btn-accent" data-find-piece="' + i + '">Find this</button></div>';
+        '<button type="button" class="btn-accent" data-find-piece="' + i + '">Find it</button></div>';
     }).join("");
   if (bare) return '<div class="find-pieces bare">' + rows + "</div>";
-  return '<div class="find-pieces"><div class="info-inline-row"><h4>Find a piece from this look</h4><button type="button" class="info-btn sm" data-info-title="Find a piece from this look" data-info-text="Pick any item and it goes to Find me — in your size, with the search opened." aria-label="About: find a piece">i</button></div>' + rows + "</div>";
+  return '<div class="find-pieces"><div class="info-inline-row"><h4>Find it</h4><button type="button" class="info-btn sm" data-info-title="Find it" data-info-text="Pick any item and it goes to Find it — in your size, with the search opened." aria-label="About: find a piece">i</button></div>' + rows + "</div>";
 }
 function sendPieceToFind(look, idx) {
   var pieces = lookPieces(look);
@@ -3754,7 +4114,7 @@ function lookCardHTML(look, opts) {
   var metaLine = look.meta ? '<p class="meta">' + esc(look.meta) + "</p>" : "";
   var sourceLine = "";
   if (look.source === "wardrobe") sourceLine = '<p class="source-line"><strong>My wardrobe</strong>' + (look.anchorNames && look.anchorNames.length ? '<span>Yours: <span class="own">' + esc(look.anchorNames.join(", ")) + "</span></span>" : "") + '<button type="button" class="info-btn sm" data-info-title="My wardrobe" data-info-text="Built only from pieces you own — nothing here needs buying." aria-label="About: my wardrobe looks">i</button></p>';
-  else if (look.source === "combo") sourceLine = '<p class="source-line"><strong>Combo</strong>' + (look.anchorNames && look.anchorNames.length ? '<span>Yours: <span class="own">' + esc(look.anchorNames.join(", ")) + "</span></span>" : "") + '<button type="button" class="info-btn sm" data-info-title="Combo" data-info-text="Anchored in pieces you own; the other pieces are inspo to buy to complete it — use Find this on any of them." aria-label="About: combo looks">i</button></p>';
+  else if (look.source === "combo") sourceLine = '<p class="source-line"><strong>Combo</strong>' + (look.anchorNames && look.anchorNames.length ? '<span>Yours: <span class="own">' + esc(look.anchorNames.join(", ")) + "</span></span>" : "") + '<button type="button" class="info-btn sm" data-info-title="Combo" data-info-text="Anchored in pieces you own; the other pieces are inspo to buy to complete it — use Find it on any of them." aria-label="About: combo looks">i</button></p>';
   else if (look.source === "inspo") sourceLine = '<p class="source-line"><strong>Inspo</strong><button type="button" class="info-btn sm" data-info-title="Inspo" data-info-text="Built outside your wardrobe — fresh inspo, nothing pulled from your closet." aria-label="About: inspo looks">i</button></p>';
   var head = "<h3>" + esc(look.title) + (look.version > 1 ? ' <span style="font-size:18px;color:var(--brass);font-style:italic">· take ' + look.version + "</span>" : "") + "</h3>" +
     metaLine + dirLine + sourceLine;
@@ -3771,7 +4131,8 @@ function lookCardHTML(look, opts) {
     dropHTML("Why it works", notes.length ? notesHTML(notes) : "") +
     dropHTML("On the wrist", wristHTML(look, true)) +
     dropHTML("Sunglasses", shadesHTML(look, true)) +
-    dropHTML("Find a piece", findPiecesHTML(look, true)) +
+    dropHTML("Swap a piece", swapHTML(look)) +
+    dropHTML("Find it", findPiecesHTML(look, true)) +
     dropHTML("The reference", inspoHTML(look, true));
   return '<article class="card look-card">' + media + '<div class="look-body">' +
     head +
@@ -3787,7 +4148,7 @@ function lookCardHTML(look, opts) {
 function renderLook(look) {
   currentLook = look;
   currentOptions = [look];
-  if (look && look.img) recordDealt([look.img]);
+  if (look && look.img) { recordDealt([look.img]); recordLookCombos([look]); }
   document.getElementById("look-result").innerHTML = lookCardHTML(look);
   document.getElementById("look-result").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -3979,12 +4340,25 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
       }
     }
     var look = buildLook(variantDesc(desc, i, baseOpts), occasion, season, opts);
-    if (excludeImgs[look.img] || formalityOf(look.img) !== formalityLevel) {
+    if (excludeImgs[look.img] || formalityBandCost(formalityOf(look.img)) > 0.75) {
       var ranked = rankedPhotoLooks(look.swatches);
-      var swap = null;
-      for (var r = 0; r < ranked.length; r++) { if (!excludeImgs[ranked[r].img] && formalityOf(ranked[r].img) === formalityLevel) { swap = ranked[r]; break; } }
-      if (!swap && excludeImgs[look.img]) { for (var r2 = 0; r2 < ranked.length; r2++) { if (!excludeImgs[ranked[r2].img]) { swap = ranked[r2]; break; } } }
+      var swap = null, swapCost = Infinity;
+      for (var r = 0; r < ranked.length; r++) {
+        if (excludeImgs[ranked[r].img]) continue;
+        var rc = formalityBandCost(formalityOf(ranked[r].img));
+        if (rc < swapCost) { swapCost = rc; swap = ranked[r]; }
+      }
+      if (swap && !excludeImgs[look.img] && formalityBandCost(formalityOf(look.img)) <= swapCost) swap = null;
       if (swap) { look.img = swap.img; look.imgAlt = swap.imgAlt || look.imgAlt; if (!look.paletteName) look.title = titleForRender(swap); }
+    }
+    /* A combination already dealt is not a new look — rebuild on
+       a fresh plate until the pairing is one never dealt before. */
+    var comboTries = 0;
+    while (dealtComboSet[comboKey(look.iconId, look.plate, formalityOf(look.img), "")] && comboTries < 3) {
+      comboTries++;
+      if (look.plate && excludePlates.indexOf(look.plate) === -1) excludePlates.push(look.plate);
+      var retryOpts = Object.assign({}, opts, { excludePlates: excludePlates.slice(), excludeImgs: excludeImgs });
+      look = buildLook(variantDesc(desc, i, baseOpts), occasion, season, retryOpts);
     }
     looks.push(look);
     excludeImgs[look.img] = true;
@@ -4008,6 +4382,7 @@ function renderOptions(looks, request) {
   currentLook = currentOptions[0];
   recordDealt(currentOptions.map(function (l) { return l.img; }));
   recordCards(currentOptions.map(function (l) { return l.img; }));
+  recordLookCombos(currentOptions);
   var html = '<div class="options-head"><div class="info-inline-row"><h3>Six takes on your brief</h3><button type="button" class="info-btn sm" data-info-title="Six takes on your brief" data-info-text="Best match first — six different plates, photographs and colour stories. Tap one to see it full-size, save it, or find a piece from it." aria-label="About: six takes">i</button></div></div>' +
     '<button type="button" class="btn-ghost" data-action="redeal-six">Deal another six</button></div>' +
     '<div class="options-grid" role="list">' + currentOptions.map(function (look, idx) { return optionCardHTML(look, idx); }).join("") + "</div>" +
@@ -4489,6 +4864,8 @@ document.getElementById("look-result").addEventListener("click", function (e) {
   if (optBtn) { selectOption(parseInt(optBtn.getAttribute("data-option-idx"), 10)); return; }
   var pieceBtn = e.target.closest("[data-find-piece]");
   if (pieceBtn && currentLook) { sendPieceToFind(currentLook, parseInt(pieceBtn.getAttribute("data-find-piece"), 10)); return; }
+  var swapBtn = e.target.closest("[data-swap-piece]");
+  if (swapBtn && currentLook) { swapPiece(parseInt(swapBtn.getAttribute("data-swap-piece"), 10)); return; }
   var lookBtn = e.target.closest("[data-icon-look]");
   if (lookBtn) {
     var lIc = iconById(lookBtn.getAttribute("data-icon-look"));
@@ -4507,6 +4884,7 @@ document.getElementById("look-result").addEventListener("click", function (e) {
       currentLook.verdict = verdict.getAttribute("data-verdict");
       if (currentLook.verdict === "dislike") {
         recordDislike(currentLook.img);
+        if (typeof showDislikeUndo === "function") showDislikeUndo(currentLook);
         toast("Noted \u2014 not for you. This outfit won\u2019t be dealt again.");
       } else {
         toast("Noted \u2014 you like this one.");
@@ -4577,7 +4955,7 @@ document.getElementById("look-result").addEventListener("click", function (e) {
       queueLooks.unshift(JSON.parse(JSON.stringify(currentLook)));
       saveQueue();
       renderQueue();
-      toast("Added to your queue — Studio, Queue.");
+      toast("Queued — find it in Studio, My Looks.");
     }
     return;
   }
@@ -4590,6 +4968,7 @@ document.getElementById("look-result").addEventListener("click", function (e) {
     var victim = currentLook;
     victim.verdict = "dislike";
     recordDislike(victim.img);
+    if (typeof registerRemoved === "function") registerRemoved(victim, victim.img);
     if (savedLooks.some(function (l) { return l.id === victim.id; })) {
       savedLooks = savedLooks.filter(function (l) { return l.id !== victim.id; });
       renderSaved();
@@ -4846,7 +5225,7 @@ function renderCustomPalettes() {
     return '<article class="card custom-card"><h4>' + esc(pal.name) + "</h4>" +
       stripHTML(pal.colors, "sm") + legendHTML(pal.colors) +
       '<div class="look-actions">' +
-      '<button type="button" class="btn-accent" data-use-custom="' + pal.id + '">Style an outfit</button>' +
+      '<button type="button" class="btn-accent" data-use-custom="' + pal.id + '">Use this palette</button>' +
       '<button type="button" class="btn-ghost" data-delete-custom="' + pal.id + '">Delete</button>' +
       "</div></article>";
   }).join("");
@@ -5199,7 +5578,7 @@ function renderFeatured() {
     "<h3>" + esc(plateName(p)) + "</h3>" +
     stripHTML(p.colors, "lg") + legendHTML(p.colors) +
     '<div class="look-actions">' +
-    '<button type="button" class="btn-accent" id="use-plate-btn">Style this plate</button>' +
+    '<button type="button" class="btn-accent" id="use-plate-btn">Use this palette</button>' +
     '<button type="button" class="btn-ghost" id="next-plate-btn">Next plate</button>' +
     "</div>";
   document.getElementById("use-plate-btn").addEventListener("click", function () { usePlateInStudio(p); });
@@ -5211,7 +5590,8 @@ function renderFeatured() {
 }
 function markSelectedPlate() {
   document.querySelectorAll(".plate-card").forEach(function (c) {
-    c.setAttribute("aria-pressed", parseInt(c.getAttribute("data-plate"), 10) === featuredPlate.plate ? "true" : "false");
+    var b = c.querySelector("[data-plate]");
+    c.setAttribute("aria-pressed", b && parseInt(b.getAttribute("data-plate"), 10) === featuredPlate.plate ? "true" : "false");
   });
 }
 function filteredPlates() {
@@ -5233,13 +5613,21 @@ function renderPlates() {
   document.getElementById("plate-empty").innerHTML = list.length ? "" :
     '<div class="card empty">No matches</div>';
   grid.innerHTML = list.map(function (p) {
-    return '<button type="button" class="card plate-card" data-plate="' + p.plate + '" aria-pressed="' + (p.plate === featuredPlate.plate) + '">' +
+    return '<article class="card plate-card" aria-pressed="' + (p.plate === featuredPlate.plate) + '">' +
+      '<button type="button" class="pc-open" data-plate="' + p.plate + '" aria-label="Open Plate ' + p.plate + '">' +
       '<span class="pc-strip">' + p.colors.map(function (c) { return '<div style="background:' + c.hex + '"></div>'; }).join("") + "</span>" +
       '<span class="pc-body" style="display:block"><span class="pc-num">Plate ' + p.plate + " · " + p.colors.length + ' colours</span>' +
-      '<span class="pc-names" style="display:block">' + esc(p.colors.map(function (c) { return c.name; }).join(" & ")) + "</span></span></button>";
+      '<span class="pc-names" style="display:block">' + esc(p.colors.map(function (c) { return c.name; }).join(" & ")) + "</span></span></button>" +
+      '<button type="button" class="btn-ghost pc-use" data-use-plate="' + p.plate + '">Use this palette</button></article>';
   }).join("");
 }
 document.getElementById("plate-grid").addEventListener("click", function (e) {
+  var use = e.target.closest("[data-use-plate]");
+  if (use) {
+    var up = PLATES.filter(function (x) { return x.plate === parseInt(use.getAttribute("data-use-plate"), 10); })[0];
+    if (up) { featuredPlate = up; renderFeatured(); markSelectedPlate(); usePlateInStudio(up); }
+    return;
+  }
   var card = e.target.closest("[data-plate]");
   if (!card) return;
   openPlate(parseInt(card.getAttribute("data-plate"), 10), false);
@@ -5316,10 +5704,25 @@ function renderSaved() {
   /* Search (by title, colours, notes or comment) and the worn
      filter narrow what the grid shows; the catalogue underneath
      is untouched. */
+  var used = {};
+  var assigned = {};
   var searchEl = document.getElementById("looks-search");
   var q = searchEl ? searchEl.value.trim().toLowerCase() : "";
-  var shown = all.filter(function (l) {
+  /* Queue is a state, not a place: queued looks join this one
+     list — copies of saved looks show a Queued badge, and looks
+     queued straight from a take (never saved) join the list too. */
+  var queueIds = {};
+  queueLooks.forEach(function (q) { queueIds[q.id] = true; });
+  var queuedOnly = queueLooks.filter(function (q) {
+    return !savedLooks.some(function (s) { return s.id === q.id; }) &&
+      !SEED_LOOKS.some(function (s) { return s.id === q.id; });
+  });
+  queuedOnly.forEach(function (q) { if (q.img) assigned[q.id] = q.img; });
+  var universe = all.concat(queuedOnly);
+  var shown = universe.filter(function (l) {
+    if (looksFilter === "queued" && !queueIds[l.id]) return false;
     if (looksFilter === "worn" && !l.worn) return false;
+    if (looksFilter === "liked" && l.verdict !== "like") return false;
     if (looksFilter === "new" && l.worn) return false;
     if (!q) return true;
     var hay = [l.title, l.meta, l.notes, l.comment, (l.swatches || []).map(function (s) { return s.name + " " + (s.role || ""); }).join(" ")].join(" ").toLowerCase();
@@ -5331,8 +5734,6 @@ function renderSaved() {
      on the grid (its stored photograph included in the ranking), so a
      saved look whose stored photo duplicates another card is moved to
      its next-nearest distinct outfit instead of repeating it. */
-  var used = {};
-  var assigned = {};
   SEED_LOOKS.forEach(function (s) { used[s.img] = true; assigned[s.id] = s.img; });
   savedLooks.forEach(function (l) {
     /* A saved reference look keeps the icon's own photograph — it
@@ -5364,18 +5765,30 @@ function renderSaved() {
     var img = assigned[l.id] || lookImg(l);
     var alt = "";
     RENDER_POOL.forEach(function (r) { if (r.img === img && r.imgAlt) alt = r.imgAlt; });
+    var isSaved = savedLooks.indexOf(l) !== -1;
+    var isQueuedOnly = !isSaved && SEED_LOOKS.indexOf(l) === -1;
+    var removeItem = isQueuedOnly
+      ? '<button type="button" class="danger" data-queue-remove="' + l.id + '">Take off queue</button>'
+      : (isSaved
+        ? '<button type="button" class="danger" data-delete-look="' + l.id + '" aria-pressed="false">Remove</button>'
+        : '<button type="button" class="danger" data-remove-seed="' + l.id + '" aria-pressed="false">Remove</button>');
+    var openAttr = isQueuedOnly ? 'data-fav-open="' + l.id + '"' : 'data-open-look="' + l.id + '"';
     return '<article class="card saved-card">' +
-      '<img src="' + img + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" />' +
-      '<div class="sb"><h4>' + esc(l.title) + "</h4>" +
+      '<button type="button" class="card-menu-btn" data-menu-btn aria-label="Actions for ' + esc(l.title) + '" aria-haspopup="true" aria-expanded="false">•••</button>' +
+      '<div class="card-menu" hidden>' +
+      '<button type="button" ' + openAttr + '>Open</button>' +
+      '<button type="button" data-queue-add="' + l.id + '">Queue</button>' +
+      '<button type="button" data-worn-toggle="' + l.id + '">' + (l.worn ? "Worn ✓ — undo" : "Mark worn") + "</button>" +
+      removeItem +
+      "</div>" +
+      '<img src="' + img + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + openAttr + ' />' +
+      '<div class="sb"><h4 ' + openAttr + '>' + esc(l.title) + "</h4>" +
       (l.worn ? '<span class="your-badge">Worn' + (l.wornDate ? " · " + esc(fmtDateShort(l.wornDate)) : "") + "</span>" : "") +
+      (queueIds[l.id] ? '<span class="queued-badge">Queued</span>' : "") +
       (l.verdict === "like" ? '<span class="your-badge">Liked</span>' : l.verdict === "dislike" ? '<span class="sold-badge">Not for me</span>' : "") +
       (l.comment ? '<p class="meta">' + esc(l.comment) + "</p>" : "") +
-      stripHTML(l.swatches, "sm") + legendHTML(l.swatches) +
-      '<div class="look-actions"><button type="button" class="btn-ghost" data-open-look="' + l.id + '">Open</button>' +
-      '<button type="button" class="btn-ghost" data-queue-add="' + l.id + '">Queue</button>' +
-      '<button type="button" class="btn-ghost" data-worn-toggle="' + l.id + '">' + (l.worn ? "Worn \u2713" : "Mark worn") + "</button>" +
-      (savedLooks.indexOf(l) !== -1 ? '<button type="button" class="btn-ghost danger" data-delete-look="' + l.id + '" aria-pressed="false">Delete</button>' : '<button type="button" class="btn-ghost danger" data-remove-seed="' + l.id + '" aria-pressed="false">Remove</button>') +
-      "</div></div></article>";
+      stripHTML(l.swatches, "sm") +
+      "</div></article>";
   }).join("");
   renderQueue();
   renderFavourites();
@@ -5388,7 +5801,7 @@ document.getElementById("saved-grid").addEventListener("click", function (e) {
     var dlLook = savedLooks.filter(function (x) { return x.id === dlId; })[0];
     /* Deleting a look records it as not liked: the photograph
        shown joins dislikedImgs and is never dealt again. */
-    if (dlLook) recordDislike(gridImgById[dlId] || dlLook.img);
+    if (dlLook) { recordDislike(gridImgById[dlId] || dlLook.img); if (typeof registerRemoved === "function") registerRemoved(dlLook, gridImgById[dlId] || dlLook.img); }
     savedLooks = savedLooks.filter(function (x) { return x.id !== dlId; });
     renderSaved();
     persistAll();
@@ -5401,6 +5814,7 @@ document.getElementById("saved-grid").addEventListener("click", function (e) {
     var seed = SEED_LOOKS.filter(function (x) { return x.id === rs.getAttribute("data-remove-seed"); })[0];
     if (seed) {
       recordDislike(seed.img);
+      if (typeof registerRemoved === "function") registerRemoved(seed, seed.img);
       renderSaved();
       toast("Removed — noted as not for you. It won't be dealt again.");
     }
@@ -5445,7 +5859,7 @@ function addToQueue(id) {
   queueLooks.unshift(copy);
   saveQueue();
   renderQueue();
-  toast("Added to your queue — Studio, Queue.");
+  toast("Queued — find it in Studio, My Looks.");
 }
 function toggleWorn(id) {
   var f = findLookAnywhere(id);
@@ -5472,12 +5886,15 @@ function toggleWorn(id) {
   renderSaved();
 }
 function lookGridCard(l, actionsHTML) {
+  var menuItems = actionsHTML.replace(/class="btn-ghost/g, 'class="').replace(/class="btn-ghost danger/g, 'class="danger');
   return '<article class="card saved-card">' +
-    '<img src="' + (l.img || "assets/photos/316150a1e65e.webp") + '" alt="' + esc(l.imgAlt || "") + '" loading="lazy" />' +
-    '<div class="sb"><h4>' + esc(l.title) + "</h4>" +
+    '<button type="button" class="card-menu-btn" data-menu-btn aria-label="Actions for ' + esc(l.title) + '" aria-haspopup="true" aria-expanded="false">•••</button>' +
+    '<div class="card-menu" hidden>' + menuItems + "</div>" +
+    '<img src="' + (l.img || "assets/photos/316150a1e65e.webp") + '" alt="' + esc(l.imgAlt || "") + '" loading="lazy" data-fav-open="' + l.id + '" />' +
+    '<div class="sb"><h4 data-fav-open="' + l.id + '">' + esc(l.title) + "</h4>" +
     (l.worn ? '<span class="your-badge">Worn' + (l.wornDate ? " · " + esc(fmtDateShort(l.wornDate)) : "") + "</span>" : "") +
-    stripHTML(l.swatches, "sm") + legendHTML(l.swatches) +
-    '<div class="look-actions">' + actionsHTML + "</div></div></article>";
+    stripHTML(l.swatches, "sm") +
+    "</div></article>";
 }
 function renderQueue() {
   var grid = document.getElementById("queue-grid");
@@ -6067,7 +6484,7 @@ function iconDetailHTML(ic) {
     }).join("") + "</ol>" +
     '<p class="avoid">' + esc(ic.avoid) + "</p>" +
     '<div class="look-actions">' +
-    '<button type="button" class="btn-accent" data-style-icon="' + ic.id + '">Style me in this direction</button>' +
+    '<button type="button" class="btn-accent" data-style-icon="' + ic.id + '">Style like ' + esc(ic.name.split(" ").pop()) + "</button>" +
     '<button type="button" class="btn-ghost" data-set-direction="' + ic.id + '">Set as Studio direction</button>' +
     (ic.custom ? '<button type="button" class="btn-ghost" data-delete-icon="' + ic.id + '">Delete</button>' : "") +
     "</div></article>";
@@ -6675,7 +7092,7 @@ var closetOnly = false;
 var SOURCE_NOTES = {
   wardrobe: "My wardrobe: every look is built only from pieces in your Closet. Nothing to buy — where your closet has no piece for a slot, the book completes that one slot.",
   inspo: "Inspo: built outside your wardrobe — icons, plates and your brief lead, and nothing is pulled from your Closet.",
-  combo: "Combo — the default: each look is anchored in something you already own, and the rest is inspo to buy that completes it. Pieces that are yours are named as yours; the rest carries a Find this button."
+  combo: "Combo — the default: each look is anchored in something you already own, and the rest is inspo to buy that completes it. Pieces that are yours are named as yours; the rest carries a Find it button."
 };
 function setSource(s) {
   if (["wardrobe", "inspo", "combo"].indexOf(s) === -1) s = "combo";
@@ -7147,7 +7564,7 @@ document.getElementById("today-style").addEventListener("click", function () {
 /* ================= Profile =================
    Your measurements. Shoe US men's 9 and tee Small are known and
    pre-filled; the rest are yours to complete. Saved on this device
-   through the same store as the closet, and Find me reads its
+   through the same store as the closet, and Find it reads its
    sizes from here. */
 var PROFILE_FIELDS = ["shoe", "tee", "polo", "shirt", "knit", "blazer", "coat", "waist", "inseam", "jeans", "shorts", "glove", "hat", "belt", "sleeve", "chest", "height", "fit", "notes"];
 var profile = Object.assign({ shoe: "9", tee: "Small" }, store.get("profile", {}));
@@ -7163,7 +7580,7 @@ document.getElementById("profile-form").addEventListener("submit", function (e) 
   });
   store.set("profile", profile);
   syncFindSize();
-  toast("Profile saved — Find me will size from it.");
+  toast("Profile saved — Find it will size from it.");
 });
 function profileSizeFor(cat) {
   var p = profile;
@@ -7197,7 +7614,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos"];
 document.getElementById("data-export").addEventListener("click", function () {
   var data = {};
   DATA_KEYS.forEach(function (k) { var v = store.get(k, null); if (v !== null) data[k] = v; });
@@ -7239,7 +7656,7 @@ document.getElementById("data-import-file").addEventListener("change", function 
   reader.readAsText(file);
 });
 
-/* ================= Find me =================
+/* ================= Find it =================
    Describe a piece, with budget and details; the size is pulled
    from your Profile for the category. Each brief is kept here and
    carries live shopping searches in that size — the page itself
@@ -7386,7 +7803,7 @@ document.getElementById("find-grid").addEventListener("click", function (e) {
   if (cp) {
     var f2 = finds.filter(function (x) { return x.id === cp.getAttribute("data-copy-find"); })[0];
     if (!f2) return;
-    var text = "Find me: " + f2.desc + (f2.cat ? " (" + f2.cat + ")" : "") + (f2.size ? " — size " + f2.size : "") + (f2.budgetTier ? " — budget: " + f2.budgetTier + (f2.budgetNote ? " (" + f2.budgetNote + ")" : "") : "") + (f2.budget ? " — up to $" + f2.budget : "") + (f2.colour ? " — " + f2.colour : "") + (f2.details ? ". " + f2.details : "");
+    var text = "Find it: " + f2.desc + (f2.cat ? " (" + f2.cat + ")" : "") + (f2.size ? " — size " + f2.size : "") + (f2.budgetTier ? " — budget: " + f2.budgetTier + (f2.budgetNote ? " (" + f2.budgetNote + ")" : "") : "") + (f2.budget ? " — up to $" + f2.budget : "") + (f2.colour ? " — " + f2.colour : "") + (f2.details ? ". " + f2.details : "");
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast("Brief copied."); }, function () { toast(text); });
     else toast(text);
   }
@@ -7431,16 +7848,16 @@ document.getElementById("find-grid").addEventListener("click", function (e) {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "watches", "palettes", "looks", "queue", "icons", "favourites", "brands", "find", "profile"];
-/* Pages grouped under the top sections. Today, Find me and Profile
+var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands", "find", "profile"];
+/* Pages grouped under the top sections. Today, Find it and Profile
    are pages of their own; Studio holds Home (the Create-a-Look
    studio), Closet, Watches, Looks and the Queue; Inspiration
    holds Palettes, Icons, Yours — the user's own favourite
    looks, recycled — and Brands, the shops worth shopping.
    A section tab reopens the page last visited in it. */
 var SECTIONS = {
-  studio: ["studio", "wardrobe", "watches", "looks", "queue"],
-  inspiration: ["palettes", "icons", "favourites", "brands"],
+  studio: ["studio", "wardrobe", "looks"],
+  inspiration: ["palettes", "icons", "brands"],
   today: ["today"],
   find: ["find"],
   profile: ["profile"]
@@ -7464,6 +7881,11 @@ function persistTab() {
   } catch (e) {}
 }
 function switchTab(name, opts) {
+  /* Consolidated destinations: the old Queue and Yours pages are
+     states and filters inside My Looks now, and watch management
+     lives in Profile — old links and stored tabs land there. */
+  if (name === "queue" || name === "favourites") name = "looks";
+  if (name === "watches") name = "profile";
   if (TABS.indexOf(name) === -1) name = "today";
   currentTab = name;
   var sec = sectionOf(name);
@@ -7624,6 +8046,647 @@ document.addEventListener("visibilitychange", function () { if (document.visibil
   document.addEventListener("touchend", endTouch, { passive: true });
   document.addEventListener("touchcancel", function () { armed = false; startY = null; lastDy = 0; hide(); }, { passive: true });
 })();
+    </script>
+    <script>
+"use strict";
+/* ================= Audit round — findings 1–27 =================
+   Layered on the main script: Studio Home one-tap deal with the
+   wizard demoted to Customize (settings remembered), formality
+   chips, Today verdicts + swipe + location, card ••• menus, Undo
+   and Recently removed, the worn log, the wishlist, trip capsules,
+   Dress-for, and the compact-form / bottom-sheet / new-look
+   touches. Everything here reads and writes the same on-device
+   store as the rest of the app. */
+
+/* ---------- Undo toast ---------- */
+var pendingUndo = null, undoTimer = null;
+function showUndoToast(msg, action) {
+  var box = document.getElementById("undo-toast");
+  if (!box) return;
+  document.getElementById("undo-msg").textContent = msg;
+  pendingUndo = action;
+  box.hidden = false;
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(function () { box.hidden = true; pendingUndo = null; }, 6500);
+}
+document.getElementById("undo-btn").addEventListener("click", function () {
+  var box = document.getElementById("undo-toast");
+  box.hidden = true;
+  clearTimeout(undoTimer);
+  if (pendingUndo) { var a = pendingUndo; pendingUndo = null; a(); }
+});
+
+/* ---------- Recently removed (5) ---------- */
+var recentlyRemoved = store.get("recentlyRemoved", []);
+function renderRecentlyRemoved() {
+  var wrap = document.getElementById("recently-removed-wrap");
+  var list = document.getElementById("recently-removed-list");
+  if (!wrap || !list) return;
+  wrap.hidden = !recentlyRemoved.length;
+  list.innerHTML = recentlyRemoved.map(function (r) {
+    return '<div class="removed-row">' + (r._img || r.img ? '<img src="' + (r._img || r.img) + '" alt="" loading="lazy" />' : "") +
+      '<span class="r-name">' + esc(r.title || "Look") + '</span>' +
+      '<button type="button" class="btn-ghost" data-restore-removed="' + r.id + '">Restore</button></div>';
+  }).join("");
+}
+function registerRemoved(look, img) {
+  if (!look) return;
+  var snap = JSON.parse(JSON.stringify(look));
+  snap._img = img || look.img || "";
+  snap._removedAt = Date.now();
+  recentlyRemoved = recentlyRemoved.filter(function (r) { return r.id !== snap.id; });
+  recentlyRemoved.unshift(snap);
+  recentlyRemoved = recentlyRemoved.slice(0, 12);
+  store.set("recentlyRemoved", recentlyRemoved);
+  renderRecentlyRemoved();
+  var id = snap.id;
+  showUndoToast("Removed — " + (snap.title || "look") + ".", function () { restoreRemoved(id); });
+}
+function restoreRemoved(id) {
+  var snap = recentlyRemoved.filter(function (r) { return r.id === id; })[0];
+  if (!snap) return;
+  recentlyRemoved = recentlyRemoved.filter(function (r) { return r.id !== id; });
+  store.set("recentlyRemoved", recentlyRemoved);
+  var img = snap._img || snap.img;
+  var ix = img ? dislikedImgs.indexOf(img) : -1;
+  if (ix !== -1) { dislikedImgs.splice(ix, 1); store.set("dislikedImgs", dislikedImgs); }
+  var isSeed = SEED_LOOKS.some(function (s) { return s.id === id; });
+  if (!isSeed && !savedLooks.some(function (l) { return l.id === id; })) {
+    var copy = JSON.parse(JSON.stringify(snap));
+    delete copy._img; delete copy._removedAt;
+    if (copy.verdict === "dislike") copy.verdict = null;
+    savedLooks.unshift(copy);
+    persistAll();
+  }
+  renderSaved();
+  renderRecentlyRemoved();
+  toast("Restored — " + (snap.title || "look") + ".");
+}
+function showDislikeUndo(look) {
+  if (!look) return;
+  var img = look.img, id = look.id;
+  showUndoToast("Not for you — " + (look.title || "look") + ".", function () {
+    var ix = img ? dislikedImgs.indexOf(img) : -1;
+    if (ix !== -1) { dislikedImgs.splice(ix, 1); store.set("dislikedImgs", dislikedImgs); }
+    if (currentLook && currentLook.id === id) {
+      currentLook.verdict = null;
+      persistLookFeedback(currentLook);
+      document.querySelectorAll("[data-verdict]").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+    }
+    var saved = savedLooks.filter(function (l) { return l.id === id; })[0];
+    if (saved) { saved.verdict = null; persistAll(); renderSaved(); }
+    toast("Undone — that outfit is back in the deck.");
+  });
+}
+document.addEventListener("click", function (e) {
+  var b = e.target.closest("[data-restore-removed]");
+  if (b) restoreRemoved(b.getAttribute("data-restore-removed"));
+});
+
+/* ---------- Card ••• menus (2, 3) ---------- */
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest ? e.target.closest("[data-menu-btn]") : null;
+  if (btn) {
+    var card = btn.closest(".saved-card");
+    var menu = card ? card.querySelector(".card-menu") : null;
+    var willOpen = menu && menu.hidden;
+    document.querySelectorAll(".card-menu").forEach(function (m) { m.hidden = true; });
+    document.querySelectorAll("[data-menu-btn]").forEach(function (b2) { b2.setAttribute("aria-expanded", "false"); });
+    if (menu && willOpen) { menu.hidden = false; btn.setAttribute("aria-expanded", "true"); }
+    return;
+  }
+  if (!e.target.closest(".card-menu")) {
+    document.querySelectorAll(".card-menu").forEach(function (m) { m.hidden = true; });
+    document.querySelectorAll("[data-menu-btn]").forEach(function (b2) { b2.setAttribute("aria-expanded", "false"); });
+  } else {
+    var menu2 = e.target.closest(".card-menu");
+    setTimeout(function () { menu2.hidden = true; }, 60);
+  }
+});
+
+/* ---------- Studio Home — Deal me a look + Customize (1) ---------- */
+var STUDIO_FIELDS = ["desc", "occasion", "season", "occasion-text", "style-direction", "blend-direction", "palette-source"];
+var dressForKey = "";
+function saveStudioSettings() {
+  var s = { basis: studioBasis, source: studioSource, dress: dressForKey };
+  STUDIO_FIELDS.forEach(function (id) { var el = document.getElementById(id); if (el) s[id] = el.value; });
+  store.set("studioSettings", s);
+}
+function restoreStudioSettings() {
+  var s = store.get("studioSettings", null);
+  if (!s) return;
+  STUDIO_FIELDS.forEach(function (id) { var el = document.getElementById(id); if (el && typeof s[id] === "string") el.value = s[id]; });
+  if (s.basis && s.basis !== studioBasis) setBasis(s.basis);
+  if (s.source && s.source !== studioSource) setSource(s.source);
+  if (s.dress) applyDressFor(s.dress, true);
+  if (typeof renderDirectionPreview === "function") renderDirectionPreview();
+}
+(function studioHome() {
+  var form = document.getElementById("studio-form");
+  var deal = document.getElementById("studio-deal");
+  var cust = document.getElementById("studio-customize");
+  if (form) {
+    form.addEventListener("change", saveStudioSettings);
+    form.addEventListener("input", saveStudioSettings);
+  }
+  if (cust && form) cust.addEventListener("click", function () {
+    var open = form.style.display === "none";
+    form.style.display = open ? "" : "none";
+    cust.setAttribute("aria-expanded", open ? "true" : "false");
+    cust.textContent = open ? "Hide customize" : "Customize";
+    if (open) form.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+  if (deal) deal.addEventListener("click", function () {
+    saveStudioSettings();
+    var desc = document.getElementById("desc").value.trim();
+    var isDealer = /dealer|surprise/i.test(desc) ||
+      (!desc && !document.getElementById("occasion").value && !document.getElementById("season").value &&
+       document.getElementById("palette-source").value === "auto");
+    if (isDealer) runDealProgress(doStyleFromForm);
+    else doStyleFromForm();
+  });
+  var _sb = window.setBasis, _ss = window.setSource;
+  if (typeof _sb === "function") window.setBasis = function (b) { _sb(b); saveStudioSettings(); };
+  if (typeof _ss === "function") window.setSource = function (s2) { _ss(s2); saveStudioSettings(); };
+})();
+
+/* ---------- Dress for (24) ---------- */
+var DRESS_FOR = {
+  golf: { occ: "Club lunch", f: 4, label: "Golf" },
+  padel: { occ: "", f: 2, label: "Padel" },
+  dinner: { occ: "Dinner out", f: 4, label: "Dinner" },
+  work: { occ: "Smart casual", f: 5, label: "Work" },
+  date: { occ: "Dinner out", f: 5, label: "Date" },
+  travel: { occ: "Travel day", f: 3, label: "Travel" }
+};
+function applyDressFor(key, silent) {
+  var d = DRESS_FOR[key];
+  document.querySelectorAll("[data-dress]").forEach(function (b) {
+    b.setAttribute("aria-pressed", b.getAttribute("data-dress") === key ? "true" : "false");
+  });
+  dressForKey = d ? key : "";
+  if (!d) return;
+  var occ = document.getElementById("occasion");
+  if (occ) occ.value = d.occ;
+  setFormality(d.f, { silent: true });
+  if (!silent) toast("Dressing for " + d.label + " — " + formalityInfo(d.f).name.toLowerCase() + (d.occ ? ", " + d.occ.toLowerCase() : "") + ".");
+}
+document.getElementById("dress-for").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-dress]");
+  if (!b) return;
+  var key = b.getAttribute("data-dress");
+  if (dressForKey === key) { applyDressFor("", true); var occ = document.getElementById("occasion"); if (occ) occ.value = ""; saveStudioSettings(); return; }
+  applyDressFor(key);
+  saveStudioSettings();
+});
+
+/* ---------- Formality chips (11) ---------- */
+var FSHORT = ["Swim", "Shorts", "Casual", "Smart", "Business", "Formal", "Black Tie"];
+function buildFormalityChips(rangeId) {
+  var range = document.getElementById(rangeId);
+  if (!range || range.getAttribute("data-chips")) return;
+  range.setAttribute("data-chips", "1");
+  var wrap = document.createElement("div");
+  wrap.className = "formality-chips";
+  wrap.setAttribute("role", "group");
+  wrap.setAttribute("aria-label", "Formality — pick a level");
+  FORMALITY_LEVELS.forEach(function (lv) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "fchip";
+    b.textContent = FSHORT[lv.level - 1];
+    b.setAttribute("data-flevel", lv.level);
+    b.setAttribute("aria-pressed", lv.level === formalityLevel ? "true" : "false");
+    wrap.appendChild(b);
+  });
+  range.style.display = "none";
+  range.parentNode.insertBefore(wrap, range.nextSibling);
+  wrap.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-flevel]");
+    if (!b) return;
+    var v = parseInt(b.getAttribute("data-flevel"), 10);
+    var changed = v !== formalityLevel;
+    setFormality(v);
+    if (changed && rangeId === "today-formality-range") {
+      var d = document.getElementById("today-deal");
+      if (d) d.click();
+    }
+  });
+}
+buildFormalityChips("formality-range");
+buildFormalityChips("today-formality-range");
+(function wrapRenderFormality() {
+  var orig = window.renderFormality;
+  if (typeof orig !== "function") return;
+  window.renderFormality = function () {
+    orig();
+    document.querySelectorAll(".fchip").forEach(function (c) {
+      c.setAttribute("aria-pressed", parseInt(c.getAttribute("data-flevel"), 10) === formalityLevel ? "true" : "false");
+    });
+  };
+  window.renderFormality();
+})();
+
+/* ---------- Today — verdict, wore-it, swipe, location (4, 9, 21) ---------- */
+var wornLog = store.get("wornLog", []);
+function addWornLog(entry) {
+  var k = entry.date + "|" + entry.title;
+  if (wornLog.some(function (en) { return en.date + "|" + en.title === k; })) return;
+  wornLog.unshift(entry);
+  wornLog = wornLog.slice(0, 90);
+  store.set("wornLog", wornLog);
+}
+function likeToday() {
+  if (!todayLook) return;
+  todayLook.verdict = "like";
+  var saved = savedLooks.filter(function (l) { return l.id === todayLook.id; })[0];
+  if (saved) { saved.verdict = "like"; persistAll(); }
+  else { savedLooks.unshift(JSON.parse(JSON.stringify(todayLook))); persistAll(); }
+  if (!queueLooks.some(function (x) { return x.id === todayLook.id; })) {
+    queueLooks.unshift(JSON.parse(JSON.stringify(todayLook)));
+    saveQueue();
+  }
+  renderSaved();
+  toast("Liked — saved and queued in My Looks.");
+}
+function woreToday() {
+  if (!todayLook) return;
+  var today = new Date().toISOString().slice(0, 10);
+  var saved = savedLooks.filter(function (l) { return l.id === todayLook.id; })[0];
+  if (saved) { saved.worn = true; saved.wornDate = today; }
+  else {
+    var copy = JSON.parse(JSON.stringify(todayLook));
+    copy.worn = true; copy.wornDate = today;
+    savedLooks.unshift(copy);
+  }
+  var names = todayLook.anchorNames || [];
+  var wornNames = [];
+  wardrobeItems.forEach(function (it) {
+    var match = names.indexOf(it.name) !== -1;
+    if (!match && it.colourHex) {
+      match = (todayLook.swatches || []).some(function (s) { return s.hex.toLowerCase() === it.colourHex.toLowerCase(); });
+    }
+    if (match && !it.laundry) {
+      it.wearCount = (it.wearCount || 0) + 1;
+      it.lastWorn = today;
+      saveEntryEdit("items", it);
+      wornNames.push(it.name);
+    }
+  });
+  addWornLog({ date: today, title: todayLook.title, img: lookImg(todayLook), pieces: wornNames });
+  queueLooks = queueLooks.filter(function (x) { return x.id !== todayLook.id; });
+  saveQueue();
+  persistAll();
+  renderSaved();
+  renderWardrobe();
+  toast("Worn today — logged" + (wornNames.length ? ": " + wornNames.join(", ") : "") + ".");
+}
+(function todayControls() {
+  var like = document.getElementById("today-like");
+  if (like) like.addEventListener("click", likeToday);
+  var wore = document.getElementById("today-wore");
+  if (wore) wore.addEventListener("click", woreToday);
+  var hero = document.getElementById("today-hero");
+  if (hero) {
+    var sx = null, sy = null;
+    hero.addEventListener("touchstart", function (e) {
+      if (e.touches.length !== 1) { sx = null; return; }
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    }, { passive: true });
+    hero.addEventListener("touchend", function (e) {
+      if (sx === null || !e.changedTouches.length) return;
+      var dx = e.changedTouches[0].clientX - sx;
+      var dy = e.changedTouches[0].clientY - sy;
+      sx = null;
+      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
+      if (dx < 0) { var d = document.getElementById("today-deal"); if (d) d.click(); }
+      else likeToday();
+    }, { passive: true });
+  }
+  var chips = document.getElementById("today-loc-chips");
+  if (chips) {
+    function syncLocChips() {
+      chips.querySelectorAll("[data-today-loc]").forEach(function (b) {
+        var loc = QUICK_LOCS[b.getAttribute("data-today-loc")];
+        b.setAttribute("aria-pressed", loc && currentLoc.name === loc.name ? "true" : "false");
+      });
+    }
+    chips.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-today-loc]");
+      if (!b) return;
+      var loc = QUICK_LOCS[b.getAttribute("data-today-loc")];
+      if (loc) { setCurrentLoc(loc); syncLocChips(); }
+    });
+    syncLocChips();
+  }
+})();
+
+/* ---------- Worn log (22) ---------- */
+function renderWornLog() {
+  var list = document.getElementById("worn-log-list");
+  if (!list) return;
+  var entries = [], seen = {};
+  wornLog.forEach(function (en) {
+    var k = en.date + "|" + en.title;
+    if (!seen[k]) { seen[k] = 1; entries.push(en); }
+  });
+  savedLooks.forEach(function (l) {
+    if (l.worn && l.wornDate) {
+      var k = l.wornDate + "|" + l.title;
+      if (!seen[k]) { seen[k] = 1; entries.push({ date: l.wornDate, title: l.title, img: lookImg(l), pieces: [] }); }
+    }
+  });
+  entries.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  if (!entries.length) {
+    list.innerHTML = '<p class="meta">Nothing worn yet — tap “Wore this today” on Today, or Mark worn on a look.</p>';
+    return;
+  }
+  list.innerHTML = entries.slice(0, 30).map(function (en) {
+    return '<div class="worn-row">' + (en.img ? '<img src="' + en.img + '" alt="" loading="lazy" />' : "") +
+      '<span class="w-main"><span class="w-name">' + esc(en.title) + '</span>' +
+      '<span class="w-sub">' + esc(fmtDateShort(en.date)) + (en.pieces && en.pieces.length ? " · " + esc(en.pieces.join(", ")) : "") + "</span></span></div>";
+  }).join("");
+}
+(function wrapToggleWorn() {
+  var orig = window.toggleWorn;
+  if (typeof orig !== "function") return;
+  window.toggleWorn = function (id) {
+    orig(id);
+    var f = findLookAnywhere(id);
+    if (f && f.look.worn) {
+      addWornLog({ date: f.look.wornDate || new Date().toISOString().slice(0, 10), title: f.look.title, img: f.look.img || lookImg(f.look), pieces: [] });
+      renderWornLog();
+    }
+  };
+})();
+
+/* ---------- Wishlist — missing pieces, aggregated (25) ---------- */
+var lastWishlist = [];
+function renderWishlist() {
+  var list = document.getElementById("wishlist-list");
+  if (!list) return;
+  var agg = {}, order = [];
+  function consider(look) {
+    if (!look) return;
+    lookPieces(look).forEach(function (pc) {
+      var cat = garmentCategory(pc.garment);
+      var owned = wardrobeItems.some(function (it) {
+        if (it.category !== cat) return false;
+        if (pc.hex && it.colourHex && dist2(hexRgb(it.colourHex), hexRgb(pc.hex)) < 3200) return true;
+        return (it.name || "").toLowerCase().indexOf(pc.garment.toLowerCase().split(" ").pop()) !== -1;
+      });
+      if (owned) return;
+      var key = (cat + "|" + (pc.colourName || "") + "|" + pc.garment).toLowerCase();
+      if (!agg[key]) { agg[key] = { desc: pieceDescription(pc), cat: cat, hex: pc.hex, colour: pc.colourName || "", count: 0, titles: [] }; order.push(key); }
+      agg[key].count++;
+      if (agg[key].titles.indexOf(look.title) === -1) agg[key].titles.push(look.title);
+    });
+  }
+  savedLooks.forEach(consider);
+  SEED_LOOKS.forEach(consider);
+  queueLooks.forEach(consider);
+  (currentOptions || []).forEach(consider);
+  lastWishlist = order.map(function (k) { return agg[k]; }).sort(function (a, b) { return b.count - a.count; }).slice(0, 12);
+  if (!lastWishlist.length) {
+    list.innerHTML = '<p class="meta">Nothing missing — every piece in your looks is covered by your closet.</p>';
+    return;
+  }
+  list.innerHTML = lastWishlist.map(function (w, i) {
+    return '<div class="wish-row"><span class="cdot" style="background:' + (w.hex || "transparent") + '"></span>' +
+      '<span class="w-main"><span class="w-name">' + esc(w.desc) + '</span>' +
+      '<span class="w-sub">' + esc(w.cat) + " · needed by " + w.count + (w.count === 1 ? " look: " : " looks: ") + esc(w.titles.slice(0, 2).join(", ")) + "</span></span>" +
+      '<button type="button" class="btn-ghost" data-wish-find="' + i + '">Find it</button></div>';
+  }).join("");
+}
+document.addEventListener("click", function (e) {
+  var b = e.target.closest("[data-wish-find]");
+  if (!b) return;
+  var w = lastWishlist[parseInt(b.getAttribute("data-wish-find"), 10)];
+  if (!w) return;
+  var f = {
+    id: "find-" + Date.now(), desc: w.desc, cat: w.cat,
+    size: typeof profileSizeFor === "function" ? profileSizeFor(w.cat) : "",
+    budget: "", budgetTier: typeof budgetInfo === "function" ? budgetInfo(budgetLevel).name : "", budgetNote: "",
+    colour: w.colour, details: "From the wishlist — needed by: " + w.titles.join(", "), iconId: null
+  };
+  finds.unshift(f);
+  store.set("finds", finds);
+  renderFinds();
+  switchTab("find");
+  toast("On the hunt — " + w.desc + ".");
+});
+
+/* ---------- Trip capsules (23) ---------- */
+var TRIPS = {
+  marbella: { name: "Marbella", dates: "Jun 21 – Jul 5, 2027 · 14 nights", cats: ["Sweaters", "Polos", "Shirts", "Button downs", "Tees", "Trousers", "Jeans", "Shorts", "Bathing suits", "Shoes", "Sunglasses", "Blazers", "Jackets"],
+    note: "Marbella in late June: heat at midday, warm evenings. Light tailoring, linen, swim pieces and one smart layer for dinner — the pieces above are from your closet and mix across the fortnight." },
+  aspen: { name: "Aspen", dates: "Dates to set", cats: ["Sweaters", "Coats", "Jackets", "Leather jackets", "Blazers", "Shirts", "Button downs", "Trousers", "Jeans", "Shoes", "Scarves", "Gloves", "Hats", "Sunglasses"],
+    note: "Aspen: cold air, bright sun, dinners that dress up. Layers first — knits under blazers, a real coat, closed shoes — the pieces above are from your closet." }
+};
+function buildCapsule(key) {
+  var trip = TRIPS[key];
+  var out = document.getElementById("capsule-out");
+  if (!trip || !out) return;
+  var items = wardrobeItems.filter(function (i) { return !i.laundry && trip.cats.indexOf(i.category) !== -1; });
+  var html = '<article class="card custom-card"><h4>' + trip.name + ' capsule</h4><p class="meta">' + trip.dates + "</p>";
+  if (!items.length) {
+    html += '<p class="capsule-note">Your closet has no pieces in the capsule categories yet — add pieces in the Closet and the packing list builds itself from them.</p>';
+  } else {
+    html += '<ul class="pack-list">' + items.map(function (i) {
+      return '<li><span class="pk-cat">' + esc(i.category) + "</span><span>" + esc(i.name) + (i.colourName ? " — " + esc(i.colourName.split("·")[0].trim()) : "") + "</span></li>";
+    }).join("") + "</ul>";
+  }
+  html += '<p class="capsule-note">' + trip.note + "</p></article>";
+  out.innerHTML = html;
+}
+document.getElementById("trips-wrap").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-trip]");
+  if (b) buildCapsule(b.getAttribute("data-trip"));
+});
+
+/* ---------- My Looks extras refresh with the grid ---------- */
+(function wrapRenderSaved() {
+  var orig = window.renderSaved;
+  if (typeof orig !== "function") return;
+  window.renderSaved = function () {
+    orig();
+    renderWishlist();
+    renderWornLog();
+    renderRecentlyRemoved();
+  };
+})();
+
+/* ---------- Closet Add form — two columns, More details, sticky Add (12) ---------- */
+(function closetForm() {
+  var form = document.getElementById("add-form");
+  if (!form) return;
+  function wrap(id) {
+    var el = document.getElementById(id);
+    if (!el) return null;
+    var n = el;
+    while (n && n.parentNode !== form) n = n.parentNode;
+    return n;
+  }
+  var catDiv = wrap("item-cat"), colDiv = wrap("item-colour-name");
+  if (catDiv && colDiv) {
+    var row = document.createElement("div");
+    row.className = "form-row";
+    form.insertBefore(row, catDiv);
+    row.appendChild(catDiv);
+    row.appendChild(colDiv);
+  }
+  var notesDiv = wrap("item-notes"), costDiv = wrap("item-price");
+  if (notesDiv && costDiv) {
+    var tog = document.createElement("button");
+    tog.type = "button";
+    tog.className = "btn-ghost more-toggle";
+    tog.textContent = "More details ▾";
+    tog.setAttribute("aria-expanded", "false");
+    var body = document.createElement("div");
+    body.hidden = true;
+    body.style.display = "grid";
+    body.style.gap = "7px";
+    form.insertBefore(tog, notesDiv);
+    form.insertBefore(body, notesDiv);
+    body.appendChild(notesDiv);
+    body.appendChild(costDiv);
+    tog.addEventListener("click", function () {
+      var open = body.hidden;
+      body.hidden = !open;
+      tog.setAttribute("aria-expanded", open ? "true" : "false");
+      tog.textContent = open ? "More details ▴" : "More details ▾";
+    });
+  }
+})();
+
+/* ---------- Profile measurements — grouped, two columns (13) ---------- */
+(function profileGroups() {
+  var grid = document.querySelector("#profile-form .profile-grid");
+  if (!grid) return;
+  function wrap(id) { var el = document.getElementById(id); return el ? el.parentElement : null; }
+  var groups = [
+    ["Tops", ["pf-tee", "pf-polo", "pf-shirt", "pf-knit", "pf-blazer", "pf-coat"]],
+    ["Bottoms", ["pf-waist", "pf-inseam", "pf-jeans", "pf-shorts"]],
+    ["Shoes & extras", ["pf-shoe", "pf-glove", "pf-hat", "pf-belt", "pf-sleeve", "pf-chest", "pf-height", "pf-fit"]]
+  ];
+  var frag = document.createDocumentFragment();
+  groups.forEach(function (g) {
+    var h = document.createElement("p");
+    h.className = "profile-group-head";
+    h.textContent = g[0];
+    frag.appendChild(h);
+    g[1].forEach(function (id) { var w = wrap(id); if (w) frag.appendChild(w); });
+  });
+  Array.prototype.slice.call(grid.children).forEach(function (c) { frag.appendChild(c); });
+  grid.appendChild(frag);
+})();
+
+/* ---------- (i) pop-ups — swipe down to dismiss (15) ---------- */
+(function sheetSwipe() {
+  function wire(card, close) {
+    if (!card) return;
+    var sy = null;
+    card.addEventListener("touchstart", function (e) { sy = e.touches.length === 1 ? e.touches[0].clientY : null; }, { passive: true });
+    card.addEventListener("touchend", function (e) {
+      if (sy === null || !e.changedTouches.length) return;
+      var dy = e.changedTouches[0].clientY - sy;
+      sy = null;
+      if (dy > 70) close();
+    }, { passive: true });
+  }
+  wire(document.querySelector("#info-pop .info-pop-card"), function () { closeInfoPop(); });
+  wire(document.querySelector("#icons-info-pop .principles"), function () {
+    var c = document.getElementById("icons-info-close");
+    if (c) c.click();
+  });
+})();
+
+/* ---------- Individual image — one compact row, expands on tap (16) ---------- */
+(function imageInspoCollapse() {
+  var field = document.getElementById("image-inspo-field");
+  if (!field) return;
+  var labelRow = field.querySelector(".label-row");
+  if (!labelRow) return;
+  var body = document.createElement("div");
+  body.hidden = true;
+  Array.prototype.slice.call(field.children).forEach(function (c) { if (c !== labelRow) body.appendChild(c); });
+  field.appendChild(body);
+  labelRow.style.cursor = "pointer";
+  labelRow.setAttribute("role", "button");
+  labelRow.setAttribute("aria-expanded", "false");
+  var chev = document.createElement("span");
+  chev.textContent = "▾";
+  chev.style.marginLeft = "auto";
+  chev.style.color = "var(--brass)";
+  chev.setAttribute("aria-hidden", "true");
+  labelRow.appendChild(chev);
+  function setOpen(open) {
+    body.hidden = !open;
+    labelRow.setAttribute("aria-expanded", open ? "true" : "false");
+    chev.textContent = open ? "▴" : "▾";
+  }
+  labelRow.addEventListener("click", function (e) {
+    if (e.target.closest(".info-btn")) return;
+    setOpen(body.hidden);
+  });
+  var thumbs = document.getElementById("inspo-thumbs");
+  if (thumbs && thumbs.children.length) setOpen(true);
+})();
+
+/* ---------- Icons — new looks surfacing (26) ---------- */
+(function iconNews() {
+  if (typeof allIcons !== "function") return;
+  var counts = {};
+  allIcons().forEach(function (ic) { counts[ic.id] = (ic.looks || []).length; });
+  var seen = store.get("iconSeen", null);
+  if (!seen) { store.set("iconSeen", counts); seen = counts; }
+  var freshIds = allIcons().filter(function (ic) { return counts[ic.id] > (seen[ic.id] || 0); }).map(function (ic) { return ic.id; });
+  function badgeRows() {
+    document.querySelectorAll("[data-open-icon]").forEach(function (r) {
+      var id = r.getAttribute("data-open-icon");
+      if (freshIds.indexOf(id) !== -1 && !r.querySelector(".new-badge")) {
+        var s = document.createElement("span");
+        s.className = "new-badge";
+        s.textContent = "New";
+        var nm = r.querySelector(".nm");
+        if (nm) nm.appendChild(s);
+      }
+    });
+  }
+  if (freshIds.length) {
+    var panel = document.getElementById("panel-icons");
+    var strip = document.createElement("div");
+    strip.className = "new-strip";
+    strip.innerHTML = '<span class="ns-label">New looks</span>' + freshIds.map(function (id) {
+      var ic = iconById(id);
+      return '<button type="button" class="chip" data-new-icon="' + id + '">New from ' + esc(ic ? ic.name : id) + "</button>";
+    }).join("");
+    var infoRow = panel.querySelector(".page-info-row");
+    panel.insertBefore(strip, infoRow ? infoRow.nextSibling : panel.firstChild);
+    strip.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-new-icon]");
+      if (b) openIconDetail(b.getAttribute("data-new-icon"));
+    });
+  }
+  badgeRows();
+  document.getElementById("panel-icons").addEventListener("click", function (e) {
+    var o = e.target.closest("[data-open-icon]");
+    if (!o) return;
+    var id = o.getAttribute("data-open-icon");
+    var ic = iconById(id);
+    if (!ic) return;
+    var seenNow = store.get("iconSeen", {});
+    seenNow[id] = (ic.looks || []).length;
+    store.set("iconSeen", seenNow);
+    freshIds = freshIds.filter(function (x) { return x !== id; });
+  });
+})();
+
+/* ---------- Init ---------- */
+restoreStudioSettings();
+renderRecentlyRemoved();
+renderWishlist();
+renderWornLog();
     </script>
   </body>
 </html>
