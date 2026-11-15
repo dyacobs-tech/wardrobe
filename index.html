@@ -589,9 +589,9 @@
       .today-hero {
         position: relative; overflow: hidden; background: #14110d;
         margin: 0;
-        height: calc(100dvh - 92px); min-height: 0; max-height: none;
+        height: 54dvh; min-height: 400px; max-height: 500px;
       }
-      @media (min-width: 760px) { .today-hero { height: calc(100dvh - 116px); } }
+      @media (min-width: 760px) { .today-hero { height: 52dvh; max-height: 480px; } }
       .today-hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
       .today-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(16,13,9,.86) 0%, rgba(16,13,9,.38) 34%, rgba(16,13,9,0) 58%); }
       .today-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px clamp(18px, 5vw, 44px) calc(24px + env(safe-area-inset-bottom)); color: #f7f1e5; }
@@ -1158,6 +1158,45 @@
       .new-strip { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
       .new-strip .ns-label { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); }
       .new-badge { display: inline-block; border: 1px solid var(--brass); color: var(--brass); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 1px 5px; border-radius: 2px; margin-left: 6px; vertical-align: middle; }
+
+      /* ---------- Today — compact hero (front page) ----------
+         The opening look box was full-viewport tall and full-bleed,
+         so nothing else fit on screen. It now runs at roughly half
+         the height, contained with side margins and a border, and
+         every element inside it — title, dots, action buttons,
+         location chips, formality chips — runs small and tight,
+         so the whole Today page feels compact, not oversized. */
+      main:has(> #panel-today:not([hidden])) { max-width: 920px; margin: 0 auto; padding: 10px 12px 18px; }
+      body:has(> main > #panel-today:not([hidden])) .masthead .brand { font-size: clamp(24px, 5vw, 32px); }
+      body:has(> main > #panel-today:not([hidden])) footer { margin-top: 0; }
+      #panel-today .today-hero {
+        height: 54dvh; min-height: 400px; max-height: 500px;
+        border: 1px solid var(--border); border-radius: 10px;
+        box-shadow: var(--shadow-card);
+      }
+      @media (min-width: 760px) { #panel-today .today-hero { height: 52dvh; max-height: 480px; } }
+      @media (max-width: 480px) { #panel-today .today-hero { height: 56dvh; min-height: 380px; max-height: 480px; } }
+      #panel-today .today-shade { background: linear-gradient(to top, rgba(16,13,9,.88) 0%, rgba(16,13,9,.46) 46%, rgba(16,13,9,0) 74%); }
+      #panel-today .today-caption { padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); }
+      #panel-today .today-kicker { font-size: 9.5px; letter-spacing: .22em; margin: 0 0 3px; }
+      #panel-today .today-caption h2 { font-size: clamp(21px, 4.5vw, 28px); line-height: 1.05; margin: 0 0 4px; }
+      #panel-today .today-loc { margin: 0 0 6px; font-size: 12px; gap: 4px 8px; }
+      #panel-today .today-loc strong { font-size: 14.5px; }
+      #panel-today .today-loc .travel-badge { font-size: 9px; padding: 2px 6px; }
+      #panel-today .today-dots { gap: 5px; margin: 0 0 8px; }
+      #panel-today .today-dots span { width: 11px; height: 11px; }
+      #panel-today .today-actions { gap: 6px; }
+      #panel-today .btn-today { font-size: 10.5px; letter-spacing: .09em; padding: 7px 11px; min-height: 32px; }
+      #panel-today .today-loc-chips { margin-top: 7px; gap: 5px; }
+      #panel-today .today-loc-chips .tlc-label { font-size: 9px; letter-spacing: .18em; }
+      #panel-today .today-loc-chips .tlc { padding: 3px 9px; min-height: 24px; font-size: 11px; }
+      #panel-today .today-swipe-hint { margin: 5px 0 0; font-size: 10px; }
+      #panel-today .today-formality { margin-top: 8px; max-width: 380px; }
+      #panel-today .today-formality .formality-name { font-size: 15px; }
+      #panel-today .today-formality label.field { font-size: 10px; margin: 0; }
+      #panel-today .formality-chips { gap: 4px; padding: 1px 0 2px; }
+      #panel-today .today-formality .fchip { padding: 3px 9px; min-height: 24px; font-size: 10.5px; }
+      #panel-today .today-formality .info-btn.sm { width: 20px; height: 20px; min-height: 20px; font-size: 12px; }
     </style>
   </head>
   <body>
