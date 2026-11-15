@@ -3880,6 +3880,29 @@ function recordCombo(key) {
   if (dealtCombos.length > 6000) dealtCombos = dealtCombos.slice(-6000);
   store.set("dealtCombos", dealtCombos);
 }
+/* Every title ever dealt, persisted alongside the combinations.
+   A title is a look's name — if it was dealt in an earlier deal it
+   is spent, and the Studio escalates to a fresh combination rather
+   than deal the same-named look again. Together with the pairing
+   history this is what makes the options endless: pairings and
+   titles are drawn from the combination space (every icon × every
+   plate × formality × closet anchor), which runs to tens of
+   thousands, not from the fixed deck alone. */
+var dealtTitles = (store.get("dealtTitles", []) || []).filter(function (t) { return typeof t === "string"; });
+var dealtTitleSet = {};
+dealtTitles.forEach(function (t) { dealtTitleSet[t] = true; });
+function recordTitles(looks) {
+  var changed = false;
+  (looks || []).forEach(function (l) {
+    if (l && l.title && !dealtTitleSet[l.title]) { dealtTitleSet[l.title] = true; dealtTitles.push(l.title); changed = true; }
+  });
+  if (dealtTitles.length > 4000) {
+    dealtTitles = dealtTitles.slice(-4000);
+    dealtTitleSet = {};
+    dealtTitles.forEach(function (t) { dealtTitleSet[t] = true; });
+  }
+  if (changed) store.set("dealtTitles", dealtTitles);
+}
 function recordLookCombos(looks) {
   (looks || []).forEach(function (l) {
     if (!l) return;
@@ -3911,7 +3934,19 @@ function generateComboLook(opts) {
     icon = poolIcons[Math.floor(Math.random() * poolIcons.length)];
   }
   if (!icon) return null;
+  /* The generated look is titled from its plate's first two
+     colours — and a plate's title can already be spent even when
+     this icon × plate pairing is fresh (another icon wore the
+     same plate). Prefer a plate whose pairing AND title are both
+     undealt; fall back to pairing alone, then to any plate. */
+  function plateTitleOf(p) {
+    var n = p.colors.map(function (c) { return shortName(c.name); });
+    return n.length > 1 ? n[0] + " & " + n[1] : (n[0] || "");
+  }
   var plate = bestPlateFor(icon.palette.slice(0, 4), function (p) {
+    return !dealtIP[icon.id + "|" + p.plate] && !(typeof dealtTitleSet !== "undefined" && dealtTitleSet[plateTitleOf(p)]);
+  }, icon.palette, null);
+  if (!plate) plate = bestPlateFor(icon.palette.slice(0, 4), function (p) {
     return !dealtIP[icon.id + "|" + p.plate];
   }, icon.palette, null);
   if (!plate) plate = PLATES[Math.floor(Math.random() * PLATES.length)];
@@ -3999,11 +4034,13 @@ function dealFromDeck(need, opts) {
     if (!exclude[idea.img]) cards.push({ img: idea.img, level: idea.level, idea: idea });
   });
   function groupKey(c) {
-    /* Level bands first (the meter holds), freshness inside each
-       band: undealt cards at the level, then dealt ones, then the
-       next level out — so a hand is six fresh cards at the level
-       while the deck still has them there. */
-    return formalityBandCost(c.level) * 1000 + (dealtCardHistory.indexOf(c.img) === -1 ? 0 : 1);
+    /* Freshness first, level bands inside it: an undealt card at
+       ANY band beats a dealt card at the meter's own level, so no
+       photograph is dealt twice while an undealt one remains
+       anywhere in the deck; the band only orders the undealt.
+       (Band-first dealt a small level's photographs over and over
+       while hundreds of undealt cards sat a level out.) */
+    return (dealtCardHistory.indexOf(c.img) === -1 ? 0 : 100000) + formalityBandCost(c.level) * 1000;
   }
   cards.sort(function (a, b) { return groupKey(a) - groupKey(b); });
   var picked = [], i = 0;
@@ -4011,14 +4048,22 @@ function dealFromDeck(need, opts) {
     var j = i, key = groupKey(cards[i]);
     while (j < cards.length && groupKey(cards[j]) === key) j++;
     var group = shuffleArr(cards.slice(i, j));
-    for (var g = 0; g < group.length && picked.length < need; g++) picked.push(group[g]);
+    for (var g = 0; g < group.length && picked.length < need; g++) {
+      picked.push(group[g]);
+      /* A card in the hand is spent for this deal: the combination
+         fallback below deals against `exclude`, and without this a
+         generated take could land on a photograph already picked. */
+      exclude[group[g].img] = true;
+    }
     i = j;
   }
   if (picked.length < need) {
     /* The deck is dealt through — create new combinations instead
-       of cycling back: icon × palette pairings never dealt before. */
+       of cycling back: icon × palette pairings never dealt before.
+       Generation gets every chance to fill the hand before the
+       reshuffle below is even considered. */
     var guard = 0;
-    while (picked.length < need && guard < need + 2) {
+    while (picked.length < need && guard < need * 4 + 4) {
       guard++;
       var gen = generateComboLook({ version: picked.length + 1, iconId: opts.iconId || null, excludeImgs: exclude });
       if (!gen) break;
@@ -4645,6 +4690,56 @@ function variantDesc(desc, i, baseOpts) {
   }
   return d;
 }
+/* The six-takes guarantee, stated once and enforced everywhere a
+   hand is built: within one deal, no take repeats another take's
+   photograph, title or plate. takeConflict names the clash;
+   freshRenderFor deals in a photograph — and with it a caption —
+   that the rest of the hand is not already wearing, preferring
+   photographs never dealt before. */
+/* Freshness of a photograph, in whole deals: never dealt is
+   bucket 0; every six entries of the dealt history (one deal's
+   worth) is another bucket. Photographs from the most recent deal
+   sit in the highest bucket, so "smallest bucket" always reaches
+   past the last deal before it reaches back to it. */
+function dealtBucket(img) {
+  if (typeof dealtImgHistory === "undefined") return 0;
+  var i = dealtImgHistory.indexOf(img);
+  return i === -1 ? 0 : 1 + Math.floor(i / 6);
+}
+function takeConflict(others, look) {
+  if (!look) return null;
+  for (var i = 0; i < others.length; i++) {
+    var o = others[i];
+    if (!o) continue;
+    if (o.img && look.img && o.img === look.img) return "img";
+    if (o.title && look.title && o.title === look.title) return "title";
+    if (o.plate != null && look.plate != null && o.plate === look.plate) return "plate";
+  }
+  return null;
+}
+function freshRenderFor(others) {
+  var usedImg = {}, usedTitle = {};
+  (others || []).forEach(function (o) {
+    if (!o) return;
+    if (o.img) usedImg[o.img] = true;
+    if (o.title) usedTitle[o.title] = true;
+  });
+  var cands = RENDER_POOL.filter(function (r) { return !usedImg[r.img] && !usedTitle[titleForRender(r)] && !(typeof dealtTitleSet !== "undefined" && dealtTitleSet[titleForRender(r)]); });
+  if (!cands.length) cands = RENDER_POOL.filter(function (r) { return !usedImg[r.img] && !usedTitle[titleForRender(r)]; });
+  if (!cands.length) cands = RENDER_POOL.filter(function (r) { return !usedImg[r.img]; });
+  if (!cands.length) return null;
+  /* Freshest first: nothing from the most recent deal while
+     anything older remains, and among those, the oldest bucket —
+     a repair never deals last deal's photograph back in. */
+  var recent = {};
+  if (typeof dealtImgHistory !== "undefined") dealtImgHistory.slice(-6).forEach(function (img) { recent[img] = true; });
+  var notRecent = cands.filter(function (r) { return !recent[r.img]; });
+  var pool = notRecent.length ? notRecent : cands;
+  var bestBucket = Infinity;
+  pool.forEach(function (r) { var b = dealtBucket(r.img); if (b < bestBucket) bestBucket = b; });
+  var best = pool.filter(function (r) { return dealtBucket(r.img) === bestBucket; });
+  return best[Math.floor(Math.random() * best.length)];
+}
 function buildSixLooks(desc, occasion, season, baseOpts) {
   baseOpts = baseOpts || {};
   var looks = [];
@@ -4671,6 +4766,61 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
       if (fill.plate && excludePlates.indexOf(fill.plate) === -1) excludePlates.push(fill.plate);
       looks.push(fill);
     }
+    /* The guarantee holds on the dealer's hand too: no photograph,
+       title or plate repeats inside the six. A clashing take is
+       replaced by a combination never dealt before; if that still
+       wears an earlier take's photograph or title, a fresh render
+       is dealt in. A reference take whose only clash is the plate
+       the engine stamped on it simply drops the stamp — the
+       photograph is the icon's own, and a repeated "Plate 1" label
+       on it was never true. */
+    for (var di = 0; di < looks.length; di++) {
+      var dLook = looks[di];
+      /* A reference take whose ONLY clash is the plate the engine
+         stamped on it keeps its photograph and drops the stamp —
+         replacing it with a generated take would burn a render
+         photograph the hand does not need to spend. */
+      if (takeConflict(looks.slice(0, di), dLook) === "plate" && dLook.refLook && !(dLook.title && dealtTitleSet[dLook.title])) {
+        dLook.plate = null;
+        continue;
+      }
+      var dGuard = 0;
+      /* A take whose title was dealt in an earlier deal is
+         escalated to a fresh combination too — the dealer's hand
+         obeys the same endless rule as every other hand. */
+      while ((takeConflict(looks.slice(0, di), dLook) || (dLook.title && dealtTitleSet[dLook.title])) && dGuard < 3) {
+        dGuard++;
+        var seenImgs = {};
+        looks.forEach(function (x, xi) { if (xi !== di && x.img) seenImgs[x.img] = true; });
+        if (dLook.img) seenImgs[dLook.img] = true;
+        var gen2 = generateComboLook({ version: di + 1, iconId: baseOpts.iconId || null, excludeImgs: seenImgs });
+        if (!gen2 || takeConflict(looks.slice(0, di), gen2) === "plate") {
+          /* A fresh pairing can still land on a plate the hand
+             already shows (a pairing is icon × plate; the plate
+             alone can repeat). Rebuild the take outright with the
+             hand's plates excluded, so the new take's pairing is
+             different in the plate itself. */
+          var usedPlates = looks.slice(0, di).map(function (x) { return x.plate; }).filter(function (p) { return p != null; });
+          if (dLook.plate != null && usedPlates.indexOf(dLook.plate) === -1) usedPlates.push(dLook.plate);
+          var alt2 = buildLook("An outfit from my palette", occasion, season, { basis: baseOpts.basis || studioBasis, excludePlates: usedPlates, excludeImgs: Object.assign({}, seenImgs), version: di + 1, iconId: baseOpts.iconId || null, blendId: baseOpts.blendId || null });
+          if (alt2 && !takeConflict(looks.slice(0, di), alt2)) gen2 = alt2;
+        }
+        if (!gen2) break;
+        dLook = gen2;
+        looks[di] = dLook;
+      }
+      var dClash = takeConflict(looks.slice(0, di), dLook);
+      if (dClash === "img" || dClash === "title") {
+        var fr2 = freshRenderFor(looks.slice(0, di));
+        if (fr2) {
+          dLook.img = fr2.img;
+          dLook.imgAlt = fr2.imgAlt || dLook.imgAlt;
+          if (!dLook.paletteName) dLook.title = titleForRender(fr2);
+        }
+      } else if (dClash === "plate" && dLook.refLook) {
+        dLook.plate = null;
+      }
+    }
     return applySource(looks, baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc);
   }
   for (var i = 0; i < 6; i++) {
@@ -4690,13 +4840,36 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
     var look = buildLook(variantDesc(desc, i, baseOpts), occasion, season, opts);
     if (excludeImgs[look.img] || formalityBandCost(formalityOf(look.img)) > 0.75) {
       var ranked = rankedPhotoLooks(look.swatches);
-      var swap = null, swapCost = Infinity;
+      /* Nearest band first, as before — but freshness breaks the
+         tie inside a band: the old rule took the first photograph
+         in colour order at the best band, which was the same
+         photograph deal after deal. Now the least-recently dealt
+         photograph at the best band takes the swap. */
+      var recentSwap = {};
+      if (typeof dealtImgHistory !== "undefined") dealtImgHistory.slice(-6).forEach(function (img) { recentSwap[img] = true; });
+      /* Band is grouped, not absolute: at the meter's level or one
+         level out is one group, anything further is the far group.
+         Inside a group FRESHNESS decides — the old order (band
+         first, freshness as a tiebreak) dealt last deal's at-level
+         photographs straight back whenever the level's small pool
+         was exhausted, because a repeated at-level photo always
+         beat a fresh one a level out. */
+      function bandGroup(c) { return c <= 0.75 ? 0 : 1; }
+      var swap = null, swapCost = Infinity, swapRecent = Infinity, swapBucket = Infinity, swapGroup = Infinity;
       for (var r = 0; r < ranked.length; r++) {
         if (excludeImgs[ranked[r].img]) continue;
         var rc = formalityBandCost(formalityOf(ranked[r].img));
-        if (rc < swapCost) { swapCost = rc; swap = ranked[r]; }
+        var rg = bandGroup(rc);
+        var rr = recentSwap[ranked[r].img] ? 1 : 0;
+        var rb = dealtBucket(ranked[r].img);
+        if (rg < swapGroup || (rg === swapGroup && (rr < swapRecent || (rr === swapRecent && (rc < swapCost || (rc === swapCost && rb < swapBucket)))))) { swapGroup = rg; swapCost = rc; swapRecent = rr; swapBucket = rb; swap = ranked[r]; }
       }
-      if (swap && !excludeImgs[look.img] && formalityBandCost(formalityOf(look.img)) <= swapCost) swap = null;
+      if (swap && !excludeImgs[look.img]) {
+        var origCost = formalityBandCost(formalityOf(look.img));
+        var origGroup = bandGroup(origCost);
+        var origRecent = recentSwap[look.img] ? 1 : 0;
+        if (origGroup < swapGroup || (origGroup === swapGroup && (origRecent < swapRecent || (origRecent === swapRecent && (origCost < swapCost || (origCost === swapCost && dealtBucket(look.img) <= swapBucket)))))) swap = null;
+      }
       if (swap) { look.img = swap.img; look.imgAlt = swap.imgAlt || look.imgAlt; if (!look.paletteName) look.title = titleForRender(swap); }
     }
     /* A combination already dealt is not a new look — rebuild on
@@ -4707,6 +4880,59 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
       if (look.plate && excludePlates.indexOf(look.plate) === -1) excludePlates.push(look.plate);
       var retryOpts = Object.assign({}, opts, { excludePlates: excludePlates.slice(), excludeImgs: excludeImgs });
       look = buildLook(variantDesc(desc, i, baseOpts), occasion, season, retryOpts);
+    }
+    /* The guarantee, enforced on the FINAL look — the rebuilds
+       above replace the look wholesale, so a take is only checked
+       once it can no longer change. A take that still repeats an
+       earlier take's photograph, title or plate is re-dealt on
+       wider exclusions; if a re-deal still comes back wearing an
+       earlier take's photograph or title, a fresh render is dealt
+       in directly, caption and all. */
+    var repairTries = 0;
+    while (takeConflict(looks, look) && repairTries < 4) {
+      repairTries++;
+      if (look.img) excludeImgs[look.img] = true;
+      if (look.plate && excludePlates.indexOf(look.plate) === -1) excludePlates.push(look.plate);
+      look = buildLook(variantDesc(desc, i, baseOpts), occasion, season, Object.assign({}, opts, { excludePlates: excludePlates.slice(), excludeImgs: Object.assign({}, excludeImgs) }));
+    }
+    /* Endlessness, enforced LAST, on the finished take: if its
+       pairing was dealt in an earlier deal — or its title was —
+       the take is replaced by a generated combination from a
+       pairing that has never been dealt. The combination space
+       (every icon × every one of the 348 plates, multiplied by
+       formality and closet anchors) is effectively endless, so a
+       take never has to repeat a look from an earlier deal:
+       generation, not repetition, is the fallback. Running this
+       after the repair loop matters — a repair rebuild can land
+       on a pairing or a title that history has already spent,
+       and only a check on the final take catches it. */
+    if (dealtComboSet[comboKey(look.iconId, look.plate, formalityOf(look.img), "")] || (look.title && dealtTitleSet[look.title])) {
+      var escGen = null, escTries = 0;
+      while (escTries < 3) {
+        escTries++;
+        var escCand = generateComboLook({ version: i + 1, iconId: baseOpts.iconId || null, occasion: occasion, season: season, excludeImgs: Object.assign({}, excludeImgs) });
+        if (!escCand) break;
+        escGen = escCand;
+        if (!takeConflict(looks, escCand) && !(escCand.title && dealtTitleSet[escCand.title])) break;
+      }
+      if (escGen && (!takeConflict(looks, escGen) || takeConflict(looks, look))) look = escGen;
+    }
+    var clash = takeConflict(looks, look);
+    if (clash === "img" || clash === "title" || (look.title && dealtTitleSet[look.title])) {
+      var fr = freshRenderFor(looks);
+      if (fr) {
+        look.img = fr.img;
+        look.imgAlt = fr.imgAlt || look.imgAlt;
+        if (!look.paletteName) look.title = titleForRender(fr);
+      }
+    }
+    /* The render dealt in above can itself land on a pairing
+       history has spent — the swap changes the photograph, hence
+       its level, hence the pairing. One final generation pass
+       guards the pairing of the take exactly as it ships. */
+    if (dealtComboSet[comboKey(look.iconId, look.plate, formalityOf(look.img), "")]) {
+      var finGen = generateComboLook({ version: i + 1, iconId: baseOpts.iconId || null, occasion: occasion, season: season, excludeImgs: Object.assign({}, excludeImgs) });
+      if (finGen && !takeConflict(looks, finGen) && !(finGen.title && dealtTitleSet[finGen.title])) look = finGen;
     }
     looks.push(look);
     excludeImgs[look.img] = true;
@@ -4731,6 +4957,7 @@ function renderOptions(looks, request) {
   recordDealt(currentOptions.map(function (l) { return l.img; }));
   recordCards(currentOptions.map(function (l) { return l.img; }));
   recordLookCombos(currentOptions);
+  recordTitles(currentOptions);
   var html = '<div class="options-head"><div class="info-inline-row"><h3>Six takes on your brief</h3><button type="button" class="info-btn sm" data-info-title="Six takes on your brief" data-info-text="Best match first — six different plates, photographs and colour stories. Tap one to see it full-size, save it, or find a piece from it." aria-label="About: six takes">i</button></div></div>' +
     '<button type="button" class="btn-ghost" data-action="redeal-six">Deal another six</button></div>' +
     '<div class="options-grid" role="list">' + currentOptions.map(function (look, idx) { return optionCardHTML(look, idx); }).join("") + "</div>" +
@@ -4777,6 +5004,10 @@ function buildClosetLooks() {
   currentOptions.forEach(function (l) { if (l.img) usedImgs[l.img] = true; });
   dealtImgHistory.forEach(function (img) { usedImgs[img] = true; });
   dislikedImgs.forEach(function (img) { usedImgs[img] = true; });
+  /* Photographs already handed out in THIS deal — kept apart from
+     the preference set above: the history can cover the whole pool,
+     and a pick must never repeat inside the hand even then. */
+  var handImgs = {};
   return combos.slice(0, 6).map(function (pair, i) {
     var pieces = [pair[0], pair[1]];
     if (shoes.length) pieces.push(shoes[i % shoes.length]);
@@ -4793,9 +5024,10 @@ function buildClosetLooks() {
     });
     var ranked = rankedPhotoLooks(swatches);
     var pick = null;
-    for (var r = 0; r < ranked.length; r++) { if (!usedImgs[ranked[r].img]) { pick = ranked[r]; break; } }
+    for (var r = 0; r < ranked.length; r++) { if (!handImgs[ranked[r].img] && !usedImgs[ranked[r].img]) { pick = ranked[r]; break; } }
+    if (!pick) for (var r2 = 0; r2 < ranked.length; r2++) { if (!handImgs[ranked[r2].img]) { pick = ranked[r2]; break; } }
     if (!pick) pick = ranked[0] || null;
-    if (pick) usedImgs[pick.img] = true;
+    if (pick) handImgs[pick.img] = true;
     var names = pieces.map(function (p) { return p.name; });
     var seasonNote = (typeof weatherSeason === "function" && weatherSeason()) ? " · dressed for " + weatherSeason().toLowerCase() + " where you are" : "";
     return {
@@ -4861,7 +5093,15 @@ function buildLook(desc, occasion, season, opts) {
   } else if (opts.palette) {
     seedPlate = { plate: null, colors: opts.palette.colors, customName: opts.palette.name };
   } else if (/dealer|surprise|random/i.test(desc) || (!parsed.pieces.length && !parsed.anyColour)) {
-    seedPlate = PLATES[Math.floor(Math.random() * PLATES.length)];
+    /* A vague brief seeds a random plate — but never one this deal
+       has already used: the exclusion list is honoured here too, or
+       six vague takes can seed the same plate twice. */
+    var seedPool = PLATES;
+    if (opts.excludePlates && opts.excludePlates.length) {
+      var unseeded = PLATES.filter(function (p) { return opts.excludePlates.indexOf(p.plate) === -1; });
+      if (unseeded.length) seedPool = unseeded;
+    }
+    seedPlate = seedPool[Math.floor(Math.random() * seedPool.length)];
   }
   var hexes = parsed.pieces.filter(function (p) { return p.colourHex; }).map(function (p) { return p.colourHex; })
     .concat(parsed.extraColours);
@@ -4883,7 +5123,21 @@ function buildLook(desc, occasion, season, opts) {
      no fit bias — a plate, if picked at all, only lends accents. */
   var fitBias = basis === "both" && icon ? icon.palette : null;
   var fitBias2 = basis === "both" && blend ? blend.palette : null;
-  var plate = seedPlate || bestPlateFor(hexes, plateFilter, fitBias, fitBias2) || bestPlateFor(hexes, null, fitBias, fitBias2) || PLATES[0];
+  var plate = seedPlate || bestPlateFor(hexes, plateFilter, fitBias, fitBias2) || bestPlateFor(hexes, null, fitBias, fitBias2);
+  if (!plate) {
+    /* No colour in the brief and no icon to bias the choice:
+       bestPlateFor has nothing to score, so it returns null — and
+       the old fallback then handed EVERY such take Plate 1,
+       exclusions ignored, which is why a whole deal could read
+       "Plate 1" six times. Deal a plate the deal has not used
+       instead: any plate the filter allows, at random. */
+    var platePool = PLATES;
+    if (plateFilter) {
+      var allowedPlates = PLATES.filter(plateFilter);
+      if (allowedPlates.length) platePool = allowedPlates;
+    }
+    plate = platePool[Math.floor(Math.random() * platePool.length)];
+  }
 
   /* Pieces: from the description, completed sensibly. */
   var pieces = parsed.pieces.slice();
@@ -4993,32 +5247,81 @@ function buildLook(desc, occasion, season, opts) {
   }
   /* Distinctness: never hand a new look a render that a saved look —
      or the look currently on screen — is already wearing. The
-     next-nearest unused render takes its place. */
+     next-nearest unused render takes its place. These are the HARD
+     exclusions: saved, on screen, explicitly excluded by the
+     caller, disliked. */
   var usedImgs = {};
   savedLooks.forEach(function (l) { if (l.img) usedImgs[l.img] = true; });
   if (currentLook && currentLook.img) usedImgs[currentLook.img] = true;
   if (opts.excludeImgs) Object.keys(opts.excludeImgs).forEach(function (k) { usedImgs[k] = true; });
-  /* The dealt history counts too — this is the fix for brief-based
-     builds repeating themselves. Colour ranking alone is a pure
-     function of the brief, so the same brief dealt the same
-     photographs every time; the history (which persists across
-     visits) is only consulted here, never before. It stays a soft
-     exclusion: nearestPhotoLook falls back to the best-ranked
-     photograph when everything has been dealt, and within a
-     six-take build the explicit exclusions above still guarantee
-     six different photographs. */
-  if (typeof dealtImgHistory !== "undefined") dealtImgHistory.forEach(function (img) { usedImgs[img] = true; });
   if (typeof dislikedImgs !== "undefined") dislikedImgs.forEach(function (img) { usedImgs[img] = true; });
   var photoLook = nearestPhotoLook(swatches, usedImgs);
-  /* The meter steers the photograph too: when the colour-nearest
-     free render sits at another level, the nearest free render AT
-     the meter's level takes its place — the brief's colour match
-     breaks ties within the level, not across it. */
-  if (photoLook && formalityOf(photoLook.img) !== formalityLevel && !/taupe/i.test(desc)) {
-    var rankedAll = rankedPhotoLooks(swatches);
-    for (var fi = 0; fi < rankedAll.length; fi++) {
-      if (!usedImgs[rankedAll[fi].img] && formalityOf(rankedAll[fi].img) === formalityLevel) { photoLook = rankedAll[fi]; break; }
+  /* The dealt history is a PREFERENCE, never an exclusion. It used
+     to be folded into the exclusions above — and because it
+     persists across visits and soon covers the whole render pool,
+     every photograph counted as "used", nearestPhotoLook fell back
+     to the top colour-ranked photograph regardless of exclusions,
+     and the same brief dealt the same photographs deal after deal
+     (and twice inside one deal). Now: when the colour-nearest free
+     photograph has been dealt before, the best-ranked photograph
+     that has NEVER been dealt takes its place while one remains —
+     so each new deal genuinely shows new outfits, and only a fully
+     dealt-through library cycles back. */
+  var histSet = {};
+  if (typeof dealtImgHistory !== "undefined") dealtImgHistory.forEach(function (img) { histSet[img] = true; });
+  function histIdx(img) { return typeof dealtImgHistory === "undefined" ? -1 : dealtImgHistory.indexOf(img); }
+  if (photoLook && histSet[photoLook.img]) {
+    /* The history is ordered oldest-dealt first, so freshness is
+       measurable in whole deals (dealtBucket). Among the ten best
+       colour matches that are free, deal the one from the oldest
+       bucket — never dealt first, then dealt longest ago, colour
+       breaking ties inside a bucket. Colour still bounds the
+       choice (the window is the top of the ranking), but within it
+       the library rotates instead of handing the last deal's
+       outfits straight back. */
+    var rankedFresh = rankedPhotoLooks(swatches);
+    var recentF = {};
+    if (typeof dealtImgHistory !== "undefined") dealtImgHistory.slice(-6).forEach(function (img) { recentF[img] = true; });
+    var winF = [], wiF = 0;
+    while (wiF < rankedFresh.length && winF.length < 10) {
+      if (!usedImgs[rankedFresh[wiF].img] && !recentF[rankedFresh[wiF].img]) winF.push(rankedFresh[wiF]);
+      wiF++;
     }
+    if (!winF.length) {
+      wiF = 0;
+      while (wiF < rankedFresh.length && winF.length < 10) {
+        if (!usedImgs[rankedFresh[wiF].img]) winF.push(rankedFresh[wiF]);
+        wiF++;
+      }
+    }
+    var bestF = null, bestFBucket = Infinity;
+    winF.forEach(function (c) {
+      var cb = dealtBucket(c.img);
+      if (cb < bestFBucket) { bestFBucket = cb; bestF = c; }
+    });
+    if (bestF) photoLook = bestF;
+  }
+  /* The meter steers the photograph too: when the colour-nearest
+     free render sits at another level, a free render AT the meter's
+     level takes its place — while the level still has photographs
+     that were not in the most recent deal. Once every photograph
+     at the level was dealt in the last deal or this one, the level
+     is dealt through and the steer lets go: the colour-nearest
+     fresh photograph stands, a level out. That widening is what
+     stops a level with only a handful of photographs (eight at
+     Smart Casual) from dealing the same eight outfits forever. */
+  if (photoLook && formalityOf(photoLook.img) !== formalityLevel && !/taupe/i.test(desc)) {
+    var recentSet = {};
+    if (typeof dealtImgHistory !== "undefined") dealtImgHistory.slice(-6).forEach(function (img) { recentSet[img] = true; });
+    var rankedAll = rankedPhotoLooks(swatches);
+    var atLevel = null, atLevelBucket = Infinity;
+    for (var fi = 0; fi < rankedAll.length; fi++) {
+      if (usedImgs[rankedAll[fi].img] || recentSet[rankedAll[fi].img]) continue;
+      if (formalityOf(rankedAll[fi].img) !== formalityLevel) continue;
+      var ab = dealtBucket(rankedAll[fi].img);
+      if (ab < atLevelBucket) { atLevelBucket = ab; atLevel = rankedAll[fi]; }
+    }
+    if (atLevel) photoLook = atLevel;
   }
   var finalImg = /taupe/i.test(desc) ? TAUPE_RENDER : (photoLook ? photoLook.img : "assets/photos/316150a1e65e.webp");
   var finalRender = renderByImg(finalImg);
