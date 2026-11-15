@@ -1221,6 +1221,41 @@
         margin: 0; padding: 0; border: none;
       }
       .options-grid .option-card .oc-body { flex: 1 1 auto; }
+
+      /* ---------- Full-size photo pop-out (shared) ---------- */
+      .popout { position: fixed; inset: 0; z-index: 120; background: #0c0a07; display: flex; align-items: center; justify-content: center; }
+      .popout[hidden] { display: none; }
+      .popout img { width: 100%; height: 100%; object-fit: contain; display: block; }
+      .popout-close { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: 12px; width: 40px; height: 40px; min-height: 40px; border-radius: 50%; background: rgba(20,17,13,.55); color: #f7f1e5; border: 1px solid rgba(247,241,229,.5); font-size: 22px; line-height: 1; padding: 0; cursor: pointer; }
+      img[data-popout] { cursor: zoom-in; }
+      #today-hero { cursor: zoom-in; }
+      #today-hero .today-caption, #today-hero .today-caption * { cursor: auto; }
+      #today-hero .today-caption button { cursor: pointer; }
+
+      /* ---------- Change an item ---------- */
+      .change-item { margin-top: 8px; }
+      .change-toggle { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; background: transparent; color: #f7f1e5; border: 1px solid rgba(247,241,229,.75); border-radius: var(--radius); padding: 7px 11px; min-height: 32px; font-size: 10.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; cursor: pointer; }
+      .change-panel { margin-top: 6px; background: rgba(20,17,13,.78); border: 1px solid rgba(247,241,229,.35); border-radius: var(--radius); padding: 4px 6px; max-height: 44dvh; overflow-y: auto; }
+      .change-cat { display: flex; width: 100%; align-items: center; gap: 8px; background: none; border: none; border-bottom: 1px solid var(--border); color: var(--text); padding: 8px 4px; min-height: 38px; font-size: 13.5px; text-align: left; cursor: pointer; }
+      .change-cat:last-of-type { border-bottom: none; }
+      .change-cat .cdot { width: 16px; height: 16px; flex: none; border: 1px solid var(--border); border-radius: 2px; }
+      .change-cat .cc-name { flex: 1; min-width: 0; }
+      .change-cat .cc-cat { font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); flex: none; }
+      .hero-change .change-cat { color: #f7f1e5; border-bottom-color: rgba(247,241,229,.18); }
+      .hero-change .change-cat .cc-cat { color: #d9c9a3; }
+      .change-opts { display: grid; gap: 4px; padding: 6px 0; }
+      .change-opts[hidden] { display: none; }
+      .change-opt { display: flex; align-items: center; gap: 8px; width: 100%; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); color: var(--text); padding: 8px; min-height: 38px; font-size: 13.5px; text-align: left; cursor: pointer; }
+      .change-opt .cdot { width: 16px; height: 16px; flex: none; border: 1px solid var(--border); border-radius: 2px; }
+      .hero-change .change-opt { background: rgba(247,241,229,.08); border-color: rgba(247,241,229,.25); color: #f7f1e5; }
+      .change-note { font-size: 11.5px; line-height: 1.4; margin: 6px 2px 0; color: var(--dim); }
+      .hero-change .change-note { color: #efe3c8; }
+      .styling-note { font-size: 12.5px; font-weight: 600; color: var(--brass); margin: 6px 0 0; }
+
+      /* ---------- Studio — outfit type boxes under Deal ---------- */
+      .studio-type-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+      .studio-type-row button { border: 1px solid var(--border-strong); background: transparent; color: var(--text); border-radius: 999px; padding: 5px 10px; min-height: 28px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+      .studio-type-row button[aria-pressed="true"] { background: var(--ink-btn); color: var(--ink-btn-text); border-color: var(--ink-btn); }
     </style>
   </head>
   <body>
@@ -1270,13 +1305,15 @@
             <p class="today-loc" id="today-loc"><strong id="today-loc-name">Palm Beach, Florida</strong><span id="today-loc-weather"></span></p>
             <div class="today-dots" id="today-dots" aria-hidden="true"></div>
             <div class="today-actions">
-              <button type="button" class="btn-today btn-today-solid" id="today-like">I like it</button>
+              <button type="button" class="btn-today btn-today-line" id="today-like">I like it</button>
+              <button type="button" class="btn-today btn-today-line" id="today-dislike">Don’t like it</button>
               <button type="button" class="btn-today btn-today-line" id="today-wore">Wore this today</button>
               <button type="button" class="btn-today btn-today-line" id="today-deal">Deal me another</button>
               <button type="button" class="btn-today btn-today-line" id="today-style">Style this look</button>
               <button type="button" class="btn-today btn-today-line" id="today-find">Find it</button>
               <button type="button" class="btn-today btn-today-line" id="today-location">Location</button>
             </div>
+            <div id="today-change" class="change-item hero-change"></div>
             <div class="today-loc-chips" id="today-loc-chips" role="group" aria-label="Location — recommendations follow the weather here">
               <span class="tlc-label">Location</span>
               <button type="button" class="tlc" data-today-loc="palm-beach">Palm Beach</button>
@@ -1313,6 +1350,15 @@
             <div class="studio-home-bar">
               <button type="button" class="btn-accent" id="studio-deal">Deal me a look</button>
               <button type="button" class="btn-ghost" id="studio-customize" aria-expanded="false" aria-controls="studio-form">Customize</button>
+            </div>
+            <div class="studio-type-row" id="studio-type-row" role="group" aria-label="Outfit type">
+              <button type="button" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
+              <button type="button" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
+              <button type="button" data-studio-type="3" aria-pressed="false">Casual</button>
+              <button type="button" data-studio-type="4" aria-pressed="false">Smart Casual</button>
+              <button type="button" data-studio-type="5" aria-pressed="false">Business Casual</button>
+              <button type="button" data-studio-type="6" aria-pressed="false">Formal</button>
+              <button type="button" data-studio-type="7" aria-pressed="false">Black Tie</button>
             </div>
             <form class="card studio-form" id="studio-form" style="display:none">
               <div>
@@ -2029,6 +2075,10 @@
         <p class="meta" id="find-sheet-sub" style="margin:0 0 12px"></p>
         <div id="find-sheet-pieces"></div>
       </div>
+    </div>
+    <div class="popout" id="photo-popout" hidden>
+      <img id="popout-img" alt="" />
+      <button type="button" class="popout-close" id="popout-close" aria-label="Close full-size photo">&times;</button>
     </div>
     <div class="toast" id="toast" role="status"></div>
     <div class="undo-toast" id="undo-toast" role="status" hidden><span id="undo-msg"></span><button type="button" id="undo-btn">Undo</button></div>
@@ -3724,7 +3774,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/3c56c1513aca.webp",
+    img: "assets/photos/d8488041ceac.webp",
     imgAlt: "You wearing an indigo denim jacket over a white tee, with white jeans and tan desert boots",
     swatches: [
       { name: "Indigo", hex: "#2c3e63", role: "Denim jacket" },
@@ -3821,7 +3871,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/c78a62cde564.webp",
+    img: "assets/photos/a40eaa835f0f.webp",
     title: "Olive Knit & White Jeans",
     imgAlt: "You wearing an olive crew-neck knit, white jeans and dark brown suede loafers",
     swatches: [
@@ -6915,7 +6965,7 @@ var FORMALITY_LEVELS = [
 var RENDER_FORMALITY = {
   "assets/photos/316150a1e65e.webp": 3,
   "assets/photos/b19e3f161385.webp": 3,
-  "assets/photos/3c56c1513aca.webp": 3,
+  "assets/photos/d8488041ceac.webp": 3,
   "assets/photos/be5206b42e79.webp": 3,
   "assets/photos/9a543e585d8b.webp": 4,
   "assets/photos/26786f318a2d.webp": 4,
@@ -6932,7 +6982,7 @@ var RENDER_FORMALITY = {
   "assets/photos/a437aad1712d.webp": 2,
   "assets/photos/0bd7dfecc76a.webp": 6,
   "assets/photos/b70739cc3133.webp": 7,
-  "assets/photos/c78a62cde564.webp": 4,
+  "assets/photos/a40eaa835f0f.webp": 4,
   "assets/photos/8f3357c68b84.webp": 5,
   "assets/photos/c5d653c4049d.webp": 3,
   "assets/photos/ef3b352ca3f3.webp": 5,
@@ -7283,7 +7333,6 @@ function setFormality(level, opts) {
   formalityLevel = level;
   store.set("formality", level);
   renderFormality();
-  if (changed && !(opts && opts.silent)) toast("Formality: " + formalityInfo(level).name + " — deals now dress to this level.");
 }
 ["formality-range", "today-formality-range"].forEach(function (id) {
   var el = document.getElementById(id);
@@ -8164,10 +8213,67 @@ document.addEventListener("click", function (e) {
   t.classList.toggle("open", open);
 });
 
+/* ---------- Change an item — categories, alternatives, markup ---------- */
+function changeCatKey(pc) {
+  var c = garmentCategory(pc.garment);
+  if (c === "Shoes") return "shoes";
+  if (["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(c) !== -1) return "trousers";
+  if (["Blazers", "Jackets", "Coats", "Leather jackets", "Suits", "Vests"].indexOf(c) !== -1) return "jacket";
+  return "top";
+}
+var CHANGE_CAT_LABELS = { top: "Top", trousers: "Trousers", shoes: "Shoes", jacket: "Jacket", watch: "Watch" };
+function changeCats(look) {
+  var byCat = {};
+  lookPieces(look).forEach(function (pc) {
+    var k = changeCatKey(pc);
+    if (!byCat[k]) byCat[k] = pc;
+  });
+  var out = [];
+  ["top", "trousers", "shoes", "jacket"].forEach(function (k) {
+    if (byCat[k]) out.push({ key: k, label: CHANGE_CAT_LABELS[k], desc: pieceDescription(byCat[k]), hex: byCat[k].hex || "", piece: byCat[k] });
+  });
+  var rec = recommendWatch(look);
+  if (rec && rec.watch) out.push({ key: "watch", label: "Watch", desc: rec.watch.name, hex: rec.watch.dialHex || "", watchId: rec.watch.id });
+  return out;
+}
+function changeAlts(look, catKey) {
+  var cur = null;
+  changeCats(look).forEach(function (c) { if (c.key === catKey) cur = c; });
+  if (catKey === "watch") {
+    return watches.filter(function (w) { return !w.sold && (!cur || w.id !== cur.watchId); }).map(function (w) {
+      return { desc: w.name, hex: w.dialHex || "", watchId: w.id };
+    });
+  }
+  var seen = {}, out = [];
+  RENDER_POOL.forEach(function (r) {
+    lookPieces(r).forEach(function (pc) {
+      if (changeCatKey(pc) !== catKey) return;
+      var d = pieceDescription(pc);
+      if (cur && d === cur.desc) return;
+      if (seen[d]) return;
+      seen[d] = 1;
+      out.push({ desc: d, hex: pc.hex || "", name: pc.colourName || "", garment: pc.garment });
+    });
+  });
+  out.sort(function (a, b) { return a.desc < b.desc ? -1 : 1; });
+  return out.slice(0, 14);
+}
+function changeCatsHTML(look) {
+  return changeCats(look).map(function (c) {
+    return '<button type="button" class="change-cat" data-change-cat="' + c.key + '"><span class="cdot" style="background:' + (c.hex || "transparent") + '"></span><span class="cc-name">' + esc(c.desc) + '</span><span class="cc-cat">' + c.label + "</span></button>" +
+      '<div class="change-opts" data-change-opts="' + c.key + '" hidden></div>';
+  }).join("");
+}
+function changeItemHTML(look) {
+  return '<div class="change-item" data-change-ctx="detail">' + changeCatsHTML(look) + "</div>";
+}
+window.changeItemHTML = changeItemHTML;
+
 function lookCardHTML(look, opts) {
   opts = opts || {};
   var refTag = look.refLook ? '<span class="pane-tag">Reference — ' + esc(look.imgInspo ? "your image" : ((look.iconId ? (iconById(look.iconId) || {}).name : "") || "icon")) + "</span>" : "";
-  var media = '<div class="look-media single"><div class="pane"><img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '" />' + refTag + "</div></div>";
+  var mediaPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + lookImg(look) + '"';
+  var media = '<div class="look-media single"><div class="pane"><img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '"' + mediaPop + ' />' + refTag + "</div></div>";
   var cardIcon = look.iconId ? iconById(look.iconId) : null;
   var cardBlend = look.blendId ? iconById(look.blendId) : null;
   var dirLine = cardIcon ? '<p class="dir-line">In the direction of <strong>' + esc(cardIcon.name) + "</strong> — " + esc(cardIcon.lane) + (cardBlend ? ', blended with <strong>' + esc(cardBlend.name) + "</strong> — " + esc(cardBlend.lane) : "") + "</p>" : "";
@@ -8178,10 +8284,11 @@ function lookCardHTML(look, opts) {
   else if (look.source === "inspo") sourceLine = '<p class="source-line"><strong>Inspo</strong><button type="button" class="info-btn sm" data-info-title="Inspo" data-info-text="Built outside your wardrobe — fresh inspo, nothing pulled from your closet." aria-label="About: inspo looks">i</button></p>';
   var head = "<h3>" + esc(look.title) + (look.version > 1 ? ' <span style="font-size:18px;color:var(--brass);font-style:italic">· take ' + look.version + "</span>" : "") + "</h3>" +
     metaLine + dirLine + sourceLine;
+  var stylingLine = look.stylingNote ? '<p class="styling-note">' + esc(look.stylingNote) + "</p>" : "";
   var notes = (look.notes && look.notes.length) ? look.notes : (cardIcon ? [cardIcon.rules[0], cardIcon.rules[1]] : []);
   if (opts.actions === false) {
     return '<article class="card look-card">' + media + '<div class="look-body">' +
-      head +
+      head + stylingLine +
       stripHTML(look.swatches, "lg") + legendHTML(look.swatches) +
       (notes.length ? notesHTML(notes) : "") +
       "</div></article>";
@@ -8191,11 +8298,11 @@ function lookCardHTML(look, opts) {
     dropHTML("Why it works", notes.length ? notesHTML(notes) : "") +
     dropHTML("On the wrist", wristHTML(look, true)) +
     dropHTML("Sunglasses", shadesHTML(look, true)) +
-    dropHTML("Swap a piece", swapHTML(look)) +
+    dropHTML("Change an item", changeItemHTML(look)) +
     dropHTML("Find it", findPiecesHTML(look, true)) +
     dropHTML("The reference", inspoHTML(look, true));
   return '<article class="card look-card">' + media + '<div class="look-body">' +
-    head +
+    head + stylingLine +
     feedbackHTML(look) +
     '<div class="look-actions">' +
     '<button type="button" class="btn-accent" data-find-open>Find it</button>' +
@@ -8468,6 +8575,44 @@ function enforceFreshTake(look, others, ctx) {
   }
   return look;
 }
+/* Studio deals honour the outfit TYPE end-to-end: after a hand is
+   built, any take whose photograph sits at another formality level
+   than the meter's is replaced with an unused photograph AT the
+   chosen level — fresh first, never a disliked photograph, never
+   one already in the hand. Only when the level's whole library is
+   exhausted does the nearest take stand, rather than repeat one. */
+function strictFormalityPass(looks, baseOpts) {
+  if (!looks || !looks.length) return looks;
+  if (baseOpts && (baseOpts.palette || baseOpts.plate)) return looks;
+  var lvl = formalityLevel;
+  var used = {}, usedTitles = {};
+  looks.forEach(function (l) { if (l.img) used[l.img] = true; if (l.title) usedTitles[l.title] = true; });
+  function ideaLevel(img) { var f = null; ICON_IDEAS.forEach(function (x) { if (x.img === img) f = x.level; }); return f; }
+  function matches(l) {
+    if (!l || !l.img) return false;
+    if (renderByImg(l.img)) return formalityOf(l.img) === lvl;
+    if (l.refLook) { var il = ideaLevel(l.img); return il !== null && il === lvl; }
+    return formalityOf(l.img) === lvl;
+  }
+  var excl = {};
+  if (baseOpts && baseOpts.excludeImgs) Object.keys(baseOpts.excludeImgs).forEach(function (k) { excl[k] = true; });
+  return looks.map(function (l, i) {
+    if (matches(l)) return l;
+    var cands = RENDER_POOL.filter(function (r) {
+      return formalityOf(r.img) === lvl && !used[r.img] && !excl[r.img] && dislikedImgs.indexOf(r.img) === -1 && !usedTitles[titleForRender(r)];
+    });
+    if (!cands.length) cands = RENDER_POOL.filter(function (r) { return formalityOf(r.img) === lvl && !used[r.img] && dislikedImgs.indexOf(r.img) === -1; });
+    if (!cands.length) return l;
+    cands.sort(function (a, b) { return dealtBucket(a.img) - dealtBucket(b.img); });
+    var nl = renderAsLook(cands[0]);
+    nl.version = l.version || (i + 1);
+    if (l.source) nl.source = l.source;
+    if (l.anchorNames) nl.anchorNames = l.anchorNames;
+    used[nl.img] = true;
+    if (nl.title) usedTitles[nl.title] = true;
+    return nl;
+  });
+}
 function buildSixLooks(desc, occasion, season, baseOpts) {
   baseOpts = baseOpts || {};
   var looks = [];
@@ -8510,7 +8655,7 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
         occasion: occasion, season: season, excludeImgs: excludeImgs
       });
     }
-    return applySource(looks, baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc);
+    return applySource(strictFormalityPass(looks, baseOpts), baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc);
   }
   for (var i = 0; i < 6; i++) {
     var opts = Object.assign({}, baseOpts);
@@ -8605,15 +8750,15 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
     excludeImgs[look.img] = true;
     if (look.plate && excludePlates.indexOf(look.plate) === -1) excludePlates.push(look.plate);
   }
-  return applySource(looks, baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc);
+  return applySource(strictFormalityPass(looks, baseOpts), baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc);
 }
 function optionCardHTML(look, idx) {
   var label = OPTION_LABELS[idx] || ("Take " + (idx + 1));
+  var ocPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + lookImg(look) + '"';
   return '<button type="button" class="card option-card' + (idx === 0 ? " selected" : "") + '" data-option-idx="' + idx + '" aria-pressed="' + (idx === 0 ? "true" : "false") + '" role="listitem">' +
-    '<img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy" />' +
-    '<span class="oc-body"><span class="oc-label">' + esc(label) + (look.source === "wardrobe" ? " · My wardrobe" : look.source === "inspo" ? " · Inspo" : look.source === "combo" ? " · Combo" : "") + (look.imgInspo || look.fromImage ? " · Your image" : (look.plate ? " · Plate " + look.plate : (look.paletteName ? " · Your palette" : ""))) + '</span>' +
+    '<img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy"' + ocPop + ' />' +
+    '<span class="oc-body">' +
     '<span class="oc-title">' + esc(look.title) + '</span>' +
-    (look.meta ? '<span class="oc-meta">' + esc(look.meta) + "</span>" : "") +
     '<span class="mini-strip" style="display:flex;height:10px;border:1px solid var(--border);margin-top:8px">' + look.swatches.map(function (s) { return '<span style="flex:1;background:' + s.hex + '"></span>'; }).join("") + "</span></span></button>";
 }
 function renderOptions(looks, request) {
@@ -8625,8 +8770,7 @@ function renderOptions(looks, request) {
   recordCards(currentOptions.map(function (l) { return l.img; }));
   recordLookCombos(currentOptions);
   recordTitles(currentOptions);
-  var html = '<div class="options-head"><div class="info-inline-row"><h3>Six takes on your brief</h3><button type="button" class="info-btn sm" data-info-title="Six takes on your brief" data-info-text="Best match first — six different plates, photographs and colour stories. Tap one to see it full-size, save it, or find a piece from it." aria-label="About: six takes">i</button></div></div>' +
-    '<button type="button" class="btn-ghost" data-action="redeal-six">Deal another six</button></div>' +
+  var html = '<div class="options-head"><button type="button" class="btn-ghost" data-action="redeal-six">Deal another six</button></div>' +
     '<div class="options-grid" role="list">' + currentOptions.map(function (look, idx) { return optionCardHTML(look, idx); }).join("") + "</div>" +
     '<div id="option-detail">' + lookCardHTML(currentOptions[0]) + "</div>";
   document.getElementById("look-result").innerHTML = html;
@@ -10103,7 +10247,7 @@ function renderSaved() {
       '<button type="button" data-worn-toggle="' + l.id + '">' + (l.worn ? "Worn ✓ — undo" : "Mark worn") + "</button>" +
       removeItem +
       "</div>" +
-      '<img src="' + img + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + openAttr + ' />' +
+      '<img src="' + img + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + img + '"') + ' />' +
       '<div class="sb"><h4 ' + openAttr + '>' + esc(l.title) + "</h4>" +
       (l.worn ? '<span class="your-badge">Worn' + (l.wornDate ? " · " + esc(fmtDateShort(l.wornDate)) : "") + "</span>" : "") +
       (queueIds[l.id] ? '<span class="queued-badge">Queued</span>' : "") +
@@ -10212,7 +10356,7 @@ function lookGridCard(l, actionsHTML) {
   return '<article class="card saved-card">' +
     '<button type="button" class="card-menu-btn" data-menu-btn aria-label="Actions for ' + esc(l.title) + '" aria-haspopup="true" aria-expanded="false">•••</button>' +
     '<div class="card-menu" hidden>' + menuItems + "</div>" +
-    '<img src="' + (l.img || "assets/photos/316150a1e65e.webp") + '" alt="' + esc(l.imgAlt || "") + '" loading="lazy" data-fav-open="' + l.id + '" />' +
+    '<img src="' + (l.img || "assets/photos/316150a1e65e.webp") + '" alt="' + esc(l.imgAlt || "") + '" loading="lazy" ' + (l.refLook ? 'data-fav-open="' + l.id + '"' : 'data-popout="' + (l.img || "assets/photos/316150a1e65e.webp") + '"') + ' />' +
     '<div class="sb"><h4 data-fav-open="' + l.id + '">' + esc(l.title) + "</h4>" +
     (l.worn ? '<span class="your-badge">Worn' + (l.wornDate ? " · " + esc(fmtDateShort(l.wornDate)) : "") + "</span>" : "") +
     stripHTML(l.swatches, "sm") +
@@ -11041,7 +11185,7 @@ document.getElementById("panel-icons").addEventListener("click", function (e) {
   var sel = document.getElementById("style-direction");
   if (sel) sel.value = ic.id;
   renderDirectionPreview();
-  if (dirBtn) { toast(ic.name + " set as the Studio direction."); switchTab("studio"); return; }
+  if (dirBtn) { switchTab("studio"); return; }
   setBasis("icon");
   document.getElementById("desc").value = ic.signatureDesc;
   switchTab("studio");
@@ -11284,7 +11428,7 @@ document.getElementById("icon-search-results").addEventListener("click", functio
     var sel = document.getElementById("style-direction");
     if (sel && ic) sel.value = ic.id;
     renderDirectionPreview();
-    if (ic) { toast(ic.name + " set as the Studio direction."); switchTab("studio"); }
+    if (ic) { switchTab("studio"); }
     return;
   }
   var pre = e.target.closest("[data-search-prefill]");
@@ -11433,7 +11577,6 @@ document.getElementById("source-row").addEventListener("click", function (e) {
   var b = e.target.closest("[data-source]");
   if (!b) return;
   setSource(b.getAttribute("data-source"));
-  toast(studioSource === "wardrobe" ? "My wardrobe: looks built only from what you own." : studioSource === "inspo" ? "Inspo: looks built outside your wardrobe." : "Combo: your pieces, completed with pieces to buy.");
 });
 setSource("combo");
 var CLOSET_GARMENT = { "Sweaters": "knit", "Polos": "polo", "Shirts": "shirt", "Button downs": "shirt", "Tees": "tee", "Trousers": "trousers", "Jeans": "jeans", "Shorts": "shorts", "Bathing suits": "swim trunks", "Blazers": "blazer", "Jackets": "jacket", "Coats": "coat", "Leather jackets": "leather jacket", "Suits": "blazer", "Shoes": "loafers", "Gloves": "gloves", "Vests": "vest", "Ties": "tie", "Scarves": "scarf", "Hats": "hat", "Sunglasses": "sunglasses", "Belts": "belt", "Socks": "socks" };
@@ -11656,6 +11799,8 @@ function renderToday() {
   var img = document.getElementById("today-img");
   img.src = lookImg(todayLook);
   img.alt = todayLook.imgAlt || "";
+  img.setAttribute("data-popout", lookImg(todayLook));
+  img.setAttribute("data-popout-alt", todayLook.imgAlt || "");
   document.getElementById("today-name").textContent = todayLook.title;
   document.getElementById("today-dots").innerHTML = todayLook.swatches.map(function (s) {
     return '<span style="background:' + s.hex + '"></span>';
@@ -11789,7 +11934,6 @@ function setCurrentLoc(loc, silent) {
   document.getElementById("loc-weather").textContent = "Checking the weather there…";
   document.getElementById("loc-rec").textContent = "";
   fetchWeather();
-  if (!silent) toast("Location set to " + currentLoc.name + " — recommendations now follow its weather.");
 }
 document.getElementById("today-find").addEventListener("click", function () {
   if (todayLook) openFindSheet(todayLook);
@@ -11841,11 +11985,9 @@ document.getElementById("loc-set-home").addEventListener("click", function () {
   homeLoc = JSON.parse(JSON.stringify(currentLoc));
   saveLocs();
   renderLoc();
-  toast(currentLoc.name + " is now home — the default location.");
 });
 document.getElementById("loc-back-home").addEventListener("click", function () {
   setCurrentLoc(homeLoc, true);
-  toast("Back home — " + homeLoc.name + ".");
 });
 function initToday() {
   todayLook = dailyLook();
@@ -11873,20 +12015,12 @@ document.getElementById("today-deal").addEventListener("click", function () {
 });
 document.getElementById("today-style").addEventListener("click", function () {
   todayTouched = true;
+  if (!todayLook) return;
+  /* Style this look opens THIS look's own detail page — never
+     the Studio thumbnail grid. */
+  var copy = JSON.parse(JSON.stringify(todayLook));
   switchTab("studio");
-  /* Styling today's look in the Studio deals six takes on it —
-     today's own look first, then five alternates. Today itself
-     stays the single hero above. */
-  try {
-    var derived = todayLook.swatches.filter(function (s) { return s.role && s.role !== "Accent"; }).map(function (s) { return s.name + " " + s.role.toLowerCase(); }).join(" with ") || todayLook.title;
-    var excl = {}; excl[todayLook.img] = true;
-    var six = buildSixLooks(derived, "", "", { basis: "both", source: studioSource, iconId: todayLook.iconId || null, excludeImgs: excl });
-    six[0] = todayLook;
-    six[0].source = studioSource;
-    renderOptions(six, { desc: derived, occasion: "", season: "", opts: { basis: "both", source: studioSource, iconId: todayLook.iconId || null } });
-  } catch (e) {
-    renderLook(todayLook);
-  }
+  renderLook(copy);
 });
 
 /* ================= Profile =================
@@ -12412,7 +12546,7 @@ function renderRecentlyRemoved() {
   if (!wrap || !list) return;
   wrap.hidden = !recentlyRemoved.length;
   list.innerHTML = recentlyRemoved.map(function (r) {
-    return '<div class="removed-row">' + (r._img || r.img ? '<img src="' + (r._img || r.img) + '" alt="" loading="lazy" />' : "") +
+    return '<div class="removed-row">' + (r._img || r.img ? '<img src="' + (r._img || r.img) + '" alt="" loading="lazy" data-popout="' + (r._img || r.img) + '" />' : "") +
       '<span class="r-name">' + esc(r.title || "Look") + '</span>' +
       '<button type="button" class="btn-ghost" data-restore-removed="' + r.id + '">Restore</button></div>';
   }).join("");
@@ -12557,7 +12691,6 @@ function applyDressFor(key, silent) {
   var occ = document.getElementById("occasion");
   if (occ) occ.value = d.occ;
   setFormality(d.f, { silent: true });
-  if (!silent) toast("Dressing for " + d.label + " — " + formalityInfo(d.f).name.toLowerCase() + (d.occ ? ", " + d.occ.toLowerCase() : "") + ".");
 }
 document.getElementById("dress-for").addEventListener("click", function (e) {
   var b = e.target.closest("[data-dress]");
@@ -12627,15 +12760,17 @@ function addWornLog(entry) {
 function likeToday() {
   if (!todayLook) return;
   todayLook.verdict = "like";
-  var saved = savedLooks.filter(function (l) { return l.id === todayLook.id; })[0];
-  if (saved) { saved.verdict = "like"; persistAll(); }
-  else { savedLooks.unshift(JSON.parse(JSON.stringify(todayLook))); persistAll(); }
-  if (!queueLooks.some(function (x) { return x.id === todayLook.id; })) {
-    queueLooks.unshift(JSON.parse(JSON.stringify(todayLook)));
-    saveQueue();
-  }
+  /* Most recently liked sits FIRST in My Looks, in the Queued
+     state: any older copy of this look leaves both lists and a
+     fresh copy goes back on top of each. */
+  savedLooks = savedLooks.filter(function (l) { return l.id !== todayLook.id; });
+  savedLooks.unshift(JSON.parse(JSON.stringify(todayLook)));
+  queueLooks = queueLooks.filter(function (x) { return x.id !== todayLook.id; });
+  queueLooks.unshift(JSON.parse(JSON.stringify(todayLook)));
+  saveQueue();
+  persistAll();
   renderSaved();
-  toast("Liked — saved and queued in My Looks.");
+  toast("Liked \u2014 saved and queued in My Looks.");
 }
 function woreToday() {
   if (!todayLook) return;
@@ -12730,7 +12865,7 @@ function renderWornLog() {
     return;
   }
   list.innerHTML = entries.slice(0, 30).map(function (en) {
-    return '<div class="worn-row">' + (en.img ? '<img src="' + en.img + '" alt="" loading="lazy" />' : "") +
+    return '<div class="worn-row">' + (en.img ? '<img src="' + en.img + '" alt="" loading="lazy" data-popout="' + en.img + '" />' : "") +
       '<span class="w-main"><span class="w-name">' + esc(en.title) + '</span>' +
       '<span class="w-sub">' + esc(fmtDateShort(en.date)) + (en.pieces && en.pieces.length ? " · " + esc(en.pieces.join(", ")) : "") + "</span></span></div>";
   }).join("");
@@ -13015,6 +13150,227 @@ restoreStudioSettings();
 renderRecentlyRemoved();
 renderWishlist();
 renderWornLog();
+    </script>
+    <script>
+"use strict";
+/* ================= Narrow redo — pop-out, verdict, Change an item,
+   Studio outfit type ================= */
+
+/* ---------- Item 1: one shared full-size photo pop-out ---------- */
+var popoutEl = document.getElementById("photo-popout");
+var popoutImg = document.getElementById("popout-img");
+function openPopout(src, alt) {
+  if (!src || !popoutEl) return;
+  popoutImg.src = src;
+  popoutImg.alt = alt || "";
+  popoutEl.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+function closePopout() {
+  if (!popoutEl) return;
+  popoutEl.hidden = true;
+  popoutImg.removeAttribute("src");
+  document.body.style.overflow = "";
+}
+window.openPopout = openPopout;
+document.addEventListener("click", function (e) {
+  var t = e.target && e.target.closest ? e.target.closest("[data-popout]") : null;
+  if (!t) return;
+  var srcAttr = t.getAttribute("data-popout");
+  if (!srcAttr) return;
+  e.preventDefault();
+  e.stopPropagation();
+  openPopout(srcAttr, t.getAttribute("data-popout-alt") || t.getAttribute("alt") || "");
+}, true);
+if (popoutEl) popoutEl.addEventListener("click", closePopout);
+document.addEventListener("keydown", function (e) { if (e.key === "Escape" && popoutEl && !popoutEl.hidden) closePopout(); });
+
+/* Today hero: tapping the photo itself (not the caption controls)
+   opens the pop-out; a swipe still deals / likes as before. */
+var heroEl = document.getElementById("today-hero");
+if (heroEl) {
+  var htX = 0, htY = 0, htDist = 0, htEnd = 0;
+  heroEl.addEventListener("touchstart", function (e) {
+    if (e.touches.length === 1) { htX = e.touches[0].clientX; htY = e.touches[0].clientY; htDist = 0; }
+  }, { passive: true });
+  heroEl.addEventListener("touchend", function (e) {
+    if (e.changedTouches.length) {
+      var dx = e.changedTouches[0].clientX - htX, dy = e.changedTouches[0].clientY - htY;
+      htDist = Math.sqrt(dx * dx + dy * dy);
+      htEnd = Date.now();
+    }
+  }, { passive: true });
+  heroEl.addEventListener("click", function (e) {
+    if (Date.now() - htEnd < 600 && htDist > 40) return;
+    if (e.target.closest && e.target.closest(".today-caption")) return;
+    if (e.target.closest && e.target.closest("[data-popout]")) return;
+    if (typeof todayLook !== "undefined" && todayLook) openPopout(lookImg(todayLook), todayLook.imgAlt || "");
+  });
+}
+
+/* ---------- Item 2: Don't like it — dislike + remove + undo + new deal ---------- */
+var dislikeBtn = document.getElementById("today-dislike");
+if (dislikeBtn) dislikeBtn.addEventListener("click", function () {
+  if (!todayLook) return;
+  var look = JSON.parse(JSON.stringify(todayLook));
+  look.verdict = "dislike";
+  recordDislike(lookImg(look));
+  registerRemoved(look, lookImg(look));
+  savedLooks = savedLooks.filter(function (l) { return l.id !== look.id; });
+  queueLooks = queueLooks.filter(function (x) { return x.id !== look.id; });
+  saveQueue();
+  persistAll();
+  renderSaved();
+  var dealBtn = document.getElementById("today-deal");
+  if (dealBtn) dealBtn.click();
+});
+
+/* ---------- Item 4: Change an item — pick-list, photo-honest ---------- */
+function paintHeroChange() {
+  var box = document.getElementById("today-change");
+  if (!box || typeof todayLook === "undefined" || !todayLook) return;
+  box.innerHTML = '<button type="button" class="change-toggle" data-change-toggle aria-expanded="false"><span>Change an item</span><span aria-hidden="true">\u25BE</span></button>' +
+    '<div class="change-panel" data-change-ctx="today" hidden>' + changeCatsHTML(todayLook) + "</div>" +
+    (todayLook.stylingNote ? '<p class="change-note">' + esc(todayLook.stylingNote) + "</p>" : "");
+}
+var _origRenderToday = window.renderToday;
+if (typeof _origRenderToday === "function") {
+  window.renderToday = function () { _origRenderToday(); paintHeroChange(); };
+}
+function applyChange(ctx, catKey, alt) {
+  var look = ctx === "today" ? todayLook : currentLook;
+  if (!look) return;
+  var oldId = look.id;
+  function finish(nl) {
+    if (ctx === "today") { todayLook = nl; renderToday(); }
+    else renderLook(nl);
+  }
+  if (catKey === "watch") {
+    var wl = JSON.parse(JSON.stringify(look));
+    wl.watchId = alt.watchId;
+    wl.stylingNote = "Styling change \u2014 Watch: " + alt.desc + ". The photograph stays as it is.";
+    finish(wl);
+    return;
+  }
+  var target = {};
+  changeCats(look).forEach(function (c) { if (c.key !== "watch") target[c.key] = c.desc; });
+  target[catKey] = alt.desc;
+  var match = null;
+  RENDER_POOL.forEach(function (r) {
+    if (match) return;
+    if (dislikedImgs.indexOf(r.img) !== -1) return;
+    var rc = {};
+    lookPieces(r).forEach(function (pc) { var k = changeCatKey(pc); if (!(k in rc)) rc[k] = pieceDescription(pc); });
+    var keys = Object.keys(target);
+    for (var i = 0; i < keys.length; i++) { if (rc[keys[i]] !== target[keys[i]]) return; }
+    var rkeys = Object.keys(rc);
+    for (var j = 0; j < rkeys.length; j++) { if (target[rkeys[j]] !== rc[rkeys[j]]) return; }
+    match = r;
+  });
+  if (match) {
+    var ml = renderAsLook(match);
+    ml.id = oldId;
+    ml.verdict = look.verdict || null;
+    ml.comment = look.comment || "";
+    if (look.source) ml.source = look.source;
+    if (look.anchorNames) ml.anchorNames = look.anchorNames;
+    if (look.watchId) ml.watchId = look.watchId;
+    ml.stylingNote = "";
+    if (ctx === "today") {
+      var seedMatch = null;
+      SEED_LOOKS.forEach(function (s) { if (s.img === match.img) seedMatch = s; });
+      if (seedMatch) todaySeedId = seedMatch.id;
+    }
+    finish(ml);
+    return;
+  }
+  var sl = JSON.parse(JSON.stringify(look));
+  var cur = null;
+  changeCats(sl).forEach(function (c) { if (c.key === catKey) cur = c; });
+  if (cur && cur.piece) {
+    var pc = cur.piece;
+    if (sl.flatlay && sl.flatlay.length) {
+      sl.flatlay.forEach(function (f) { if (f.hex === pc.hex && f.label === pc.garment) { f.hex = alt.hex || f.hex; f.label = alt.garment || f.label; } });
+    }
+    (sl.swatches || []).forEach(function (s) {
+      if (s.hex === pc.hex && s.role === pc.garment) { s.hex = alt.hex || s.hex; s.name = alt.name || s.name; s.role = alt.garment || s.role; }
+    });
+  }
+  sl.stylingNote = "Styling change \u2014 " + CHANGE_CAT_LABELS[catKey] + ": " + alt.desc + ". No photograph of this combination exists, so the photo stays as it is.";
+  finish(sl);
+}
+document.addEventListener("click", function (e) {
+  if (!e.target.closest) return;
+  var tg = e.target.closest("[data-change-toggle]");
+  if (tg) {
+    var panel = tg.parentNode.querySelector(".change-panel");
+    if (panel) {
+      var willOpen = panel.hidden;
+      panel.hidden = !willOpen;
+      tg.setAttribute("aria-expanded", willOpen ? "true" : "false");
+    }
+    return;
+  }
+  var catBtn = e.target.closest("[data-change-cat]");
+  if (catBtn) {
+    var wrap = catBtn.closest("[data-change-ctx]");
+    if (!wrap) return;
+    var ctx = wrap.getAttribute("data-change-ctx");
+    var look = ctx === "today" ? todayLook : currentLook;
+    if (!look) return;
+    var key = catBtn.getAttribute("data-change-cat");
+    var optsBox = wrap.querySelector('[data-change-opts="' + key + '"]');
+    if (!optsBox) return;
+    if (!optsBox.hidden) { optsBox.hidden = true; return; }
+    wrap.querySelectorAll(".change-opts").forEach(function (o) { o.hidden = true; });
+    var alts = changeAlts(look, key);
+    window._changeAlts = alts;
+    window._changeCtx = ctx;
+    window._changeCat = key;
+    optsBox.innerHTML = alts.length ? alts.map(function (a, i) {
+      return '<button type="button" class="change-opt" data-change-opt="' + i + '"><span class="cdot" style="background:' + (a.hex || "transparent") + '"></span><span>' + esc(a.desc) + "</span></button>";
+    }).join("") : '<p class="change-note">No alternatives in the library for this piece.</p>';
+    optsBox.hidden = false;
+    return;
+  }
+  var optBtn = e.target.closest("[data-change-opt]");
+  if (optBtn) {
+    var alts2 = window._changeAlts || [];
+    var alt = alts2[parseInt(optBtn.getAttribute("data-change-opt"), 10)];
+    if (alt) applyChange(window._changeCtx || "detail", window._changeCat, alt);
+  }
+});
+
+/* A chosen watch is the watch the look wears: the wrist call
+   honours the pick instead of re-deriving one. */
+var _origRecommendWatch = recommendWatch;
+recommendWatch = function (look) {
+  if (look && look.watchId) {
+    var picked = null;
+    watches.forEach(function (w) { if (w.id === look.watchId) picked = w; });
+    if (picked) return { watch: picked, metalAdvice: "", reasons: [{ k: "Your pick", t: "You chose this watch for this look." }] };
+  }
+  return _origRecommendWatch(look);
+};
+
+/* ---------- Item 6 refinement: outfit-type boxes under Deal ---------- */
+function syncStudioType() {
+  document.querySelectorAll("[data-studio-type]").forEach(function (b) {
+    b.setAttribute("aria-pressed", parseInt(b.getAttribute("data-studio-type"), 10) === formalityLevel ? "true" : "false");
+  });
+}
+var _origRenderFormality = window.renderFormality;
+if (typeof _origRenderFormality === "function") {
+  window.renderFormality = function () { _origRenderFormality(); syncStudioType(); };
+}
+var studioTypeRow = document.getElementById("studio-type-row");
+if (studioTypeRow) studioTypeRow.addEventListener("click", function (e) {
+  var b = e.target.closest ? e.target.closest("[data-studio-type]") : null;
+  if (!b) return;
+  setFormality(parseInt(b.getAttribute("data-studio-type"), 10));
+});
+syncStudioType();
+paintHeroChange();
     </script>
   </body>
 </html>
