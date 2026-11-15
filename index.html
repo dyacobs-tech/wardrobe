@@ -11767,12 +11767,20 @@ function shareLookImage(look) {
 })();
 
 /* ================= Today — Outfit of the Day =================
-   The opening page: one look, dealt for this morning. The deal is
-   seeded by the date, so the whole day agrees on one outfit;
-   weekends deal from the casual end of the register, weekdays from
-   the tailored end. Palm Beach weather then has its say — a hot
-   morning swaps the deal to a light look, a cold one to layers —
-   unless the user has already dealt or styled for themselves. */
+   The opening page: one look, and it ROTATES on every fresh app
+   open — a new launch deals a new opening look, never the same
+   opening look as the previous open. The deal draws on the whole
+   render library, undealt photographs first (the permanent dealt
+   history decides what counts as dealt), and the previous open's
+   photograph is always excluded. Once dealt, the look stays put
+   for the whole session: switching tabs and coming back does not
+   re-deal, and a reload / pull-to-refresh within the session
+   restores this session's look instead of dealing a new one.
+   Palm Beach weather then has its say — a hot morning swaps the
+   deal to a light look, a cold one to layers — unless the user
+   has already dealt or styled for themselves. dailyLook() below
+   is kept for a location change, which re-deals the day on the
+   old date-seeded basis. */
 var todayLook = null;
 var todaySeedId = null;
 var todayTouched = false;
@@ -11792,6 +11800,79 @@ function dailyLook() {
   todaySeedId = pick.id;
   var clone = JSON.parse(JSON.stringify(pick));
   clone.id = "look-today-" + d.getFullYear() + "-" + doy;
+  return clone;
+}
+/* ---------- Opening rotation — fresh open vs in-session refresh ----------
+   Fresh open and refresh are told apart the same way restoreTab
+   tells them apart, plus the navigation type:
+     · Fresh open (home-screen launch, new tab, a fresh navigate):
+       no reload signal — deal a NEW opening look.
+     · Refresh inside the session (reload, pull-to-refresh,
+       back/forward): the navigation type says so, and the
+       session's opening look — mirrored in session storage when
+       it was dealt — is restored exactly, never re-dealt.
+   The previous open's photograph is kept in the long-term store
+   ("lastOpeningImg") so the no-repeat rule survives the app
+   being closed and reopened. */
+function navTypeToday() {
+  try {
+    var entries = performance.getEntriesByType ? performance.getEntriesByType("navigation") : null;
+    if (entries && entries.length && entries[0].type) return entries[0].type;
+    if (performance.navigation) return performance.navigation.type === 1 ? "reload" : (performance.navigation.type === 2 ? "back_forward" : "navigate");
+  } catch (e) {}
+  return "";
+}
+function sessionOpeningLook() {
+  try {
+    var raw = sessionStorage.getItem("wardrobe.todayOpening");
+    if (!raw) return null;
+    var look = JSON.parse(raw);
+    if (!look || !look.img || !look.swatches || !look.swatches.length) return null;
+    if (!RENDER_POOL.some(function (r) { return r.img === look.img; })) return null;
+    if (typeof dislikedImgs !== "undefined" && dislikedImgs.indexOf(look.img) !== -1) return null;
+    return look;
+  } catch (e) { return null; }
+}
+function persistOpeningLook(look) {
+  if (!look || !look.img) return;
+  try {
+    var copy = JSON.parse(JSON.stringify(look));
+    copy._seedId = todaySeedId || look.id;
+    sessionStorage.setItem("wardrobe.todayOpening", JSON.stringify(copy));
+  } catch (e) {}
+}
+function openingLook() {
+  var nav = navTypeToday();
+  var sess = sessionOpeningLook();
+  /* In-session refresh: restore this session's opening look. When
+     the navigation type cannot be read at all, a session look on
+     record is treated the same way — staying put is the safe
+     reading of an ambiguous load. */
+  if (sess && (nav === "reload" || nav === "back_forward" || nav === "")) {
+    todaySeedId = sess._seedId || sess.id;
+    var restored = JSON.parse(JSON.stringify(sess));
+    delete restored._seedId;
+    return restored;
+  }
+  /* Fresh open: deal a new opening look. The previous open's
+     photograph (long-term store first, then this tab's session
+     record) is excluded outright, and undealt photographs are
+     dealt before any dealt one, as far as the pool allows. */
+  var prevImg = store.get("lastOpeningImg", null) || (sess && sess.img) || null;
+  var pool = RENDER_POOL.map(renderAsLook);
+  var candidates = pool.filter(function (l) { return l.img !== prevImg && dislikedImgs.indexOf(l.img) === -1; });
+  if (!candidates.length) candidates = pool.filter(function (l) { return dislikedImgs.indexOf(l.img) === -1; });
+  if (!candidates.length) candidates = pool.filter(function (l) { return l.img !== prevImg; });
+  if (!candidates.length) candidates = pool;
+  var undealt = candidates.filter(function (l) { return dealtImgHistory.indexOf(l.img) === -1; });
+  var pickPool = undealt.length ? undealt : candidates;
+  var pick = pickDealt(pickPool) || pickPool[0];
+  if (!pick) return dailyLook();
+  todaySeedId = pick.id;
+  var clone = JSON.parse(JSON.stringify(pick));
+  clone.id = "look-" + Date.now();
+  store.set("lastOpeningImg", clone.img);
+  persistOpeningLook(clone);
   return clone;
 }
 function renderToday() {
@@ -11894,6 +11975,11 @@ function applyWeatherToToday() {
   var keepId = todayLook.id;
   todayLook = JSON.parse(JSON.stringify(cand));
   todayLook.id = keepId;
+  /* The swapped look is the one actually shown this session:
+     keep the session record (and the next open's no-repeat
+     guard) pointed at it. */
+  store.set("lastOpeningImg", todayLook.img);
+  persistOpeningLook(todayLook);
   renderToday();
   /* Today stays ONE in the hero — the Studio keeps its six takes. */
 }
@@ -11929,6 +12015,7 @@ function setCurrentLoc(loc, silent) {
   currentWeather = null;
   todayTouched = false;
   todayLook = dailyLook();
+  persistOpeningLook(todayLook);
   renderToday();
   renderLoc();
   document.getElementById("loc-weather").textContent = "Checking the weather there…";
@@ -11990,7 +12077,7 @@ document.getElementById("loc-back-home").addEventListener("click", function () {
   setCurrentLoc(homeLoc, true);
 });
 function initToday() {
-  todayLook = dailyLook();
+  todayLook = openingLook();
   recordDealt([todayLook.img]);
   renderToday();
   renderLoc();
@@ -12011,6 +12098,10 @@ document.getElementById("today-deal").addEventListener("click", function () {
   todayLook = JSON.parse(JSON.stringify(pick));
   todayLook.id = "look-" + Date.now();
   recordDealt([todayLook.img]);
+  /* The dealt look is now the session's hero: a refresh restores
+     it, and the next fresh open never repeats it. */
+  store.set("lastOpeningImg", todayLook.img);
+  persistOpeningLook(todayLook);
   renderToday();
 });
 document.getElementById("today-style").addEventListener("click", function () {
@@ -12076,7 +12167,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg"];
 document.getElementById("data-export").addEventListener("click", function () {
   var data = {};
   DATA_KEYS.forEach(function (k) { var v = store.get(k, null); if (v !== null) data[k] = v; });
@@ -13242,7 +13333,7 @@ function applyChange(ctx, catKey, alt) {
   if (!look) return;
   var oldId = look.id;
   function finish(nl) {
-    if (ctx === "today") { todayLook = nl; renderToday(); }
+    if (ctx === "today") { todayLook = nl; if (typeof persistOpeningLook === "function") persistOpeningLook(nl); renderToday(); }
     else renderLook(nl);
   }
   if (catKey === "watch") {
