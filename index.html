@@ -961,6 +961,33 @@
       #panel-profile .btn-ink, #panel-profile .btn-ghost, #panel-profile .btn-accent { min-height: 34px; padding: 6px 12px; font-size: 11.5px; }
       #panel-profile .loc-actions { gap: 6px; margin-top: 8px; }
       #panel-profile .loc-quick { gap: 6px; }
+
+      /* ---------- Brands — shops inside Inspiration ----------
+         A compact index of the houses and stores to shop: dense
+         name rows in the same register as the Icons index, each
+         row opening the brand's own store. No top title — the
+         description sits behind the (i) button, per the house rule. */
+      #panel-brands label.field { font-size: 10.5px; letter-spacing: .14em; margin-bottom: 3px; }
+      #panel-brands input[type="search"] { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
+      #panel-brands .brand-search { margin-bottom: 4px; }
+      .brand-group-head { font-size: 10.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--brass); margin: 14px 0 2px; }
+      .brand-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid var(--border); padding: 7px 4px; min-height: 42px; color: var(--text); text-decoration: none; border-radius: 0; }
+      .brand-row[hidden], .brand-group-head[hidden] { display: none; }
+      .brand-row .b-main { flex: 1; min-width: 0; }
+      .brand-row .b-name { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.1; display: block; }
+      .brand-row .b-meta { display: block; font-size: 11.5px; color: var(--dim); line-height: 1.35; margin-top: 1px; }
+      .brand-row .b-shop { flex: none; font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+      .brand-row:active { background: var(--surface-alt); }
+
+      /* ---------- Find me — budget scale ----------
+         The budget guidance runs as a slim slider in the same
+         register as the Formality meter: price-conscious at one
+         end, no budget at the other, named levels in between. */
+      #panel-find label.field { font-size: 10.5px; letter-spacing: .14em; margin-bottom: 3px; }
+      #panel-find .formality { gap: 3px; }
+      #panel-find .formality-name { font-size: 16px; }
+      #panel-find .formality input[type="range"] { min-height: 26px; }
+      #panel-find .formality-scale { font-size: 9.5px; margin-top: -2px; }
     </style>
   </head>
   <body>
@@ -994,6 +1021,7 @@
             <button class="subtab" role="tab" id="tab-palettes" aria-selected="false" aria-controls="panel-palettes" data-tab="palettes">Palettes <span class="count">348</span></button>
             <button class="subtab" role="tab" id="tab-icons" aria-selected="false" aria-controls="panel-icons" data-tab="icons">Icons <span class="count" id="icon-tab-count"></span></button>
             <button class="subtab" role="tab" id="tab-favourites" aria-selected="false" aria-controls="panel-favourites" data-tab="favourites">Yours</button>
+            <button class="subtab" role="tab" id="tab-brands" aria-selected="false" aria-controls="panel-brands" data-tab="brands">Brands <span class="count">14</span></button>
           </div>
         </div>
       </nav>
@@ -1377,6 +1405,63 @@
         <div class="saved-grid" id="fav-new-grid"></div>
       </section>
 
+      <!-- ================= BRANDS — SHOPS TO SHOP ================= -->
+      <section id="panel-brands" role="tabpanel" aria-labelledby="tab-brands" hidden>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Brands" data-info-text="The houses and shops worth shopping — quiet luxury and craft-led menswear from your Fashion Brands list: no visible logos, fabric and cut over branding. Tap a name to open its store." aria-label="About Brands">i</button></div>
+        <div class="brand-search">
+          <label class="field" for="brand-search">Search brands</label>
+          <input type="search" id="brand-search" placeholder="Name, place, knitwear, tailoring…" autocomplete="off" />
+        </div>
+        <div id="brand-list">
+          <p class="brand-group-head">Heritage knitwear</p>
+          <a class="brand-row" href="https://www.saint-james.com/" target="_blank" rel="noopener" data-brand-search="saint james normandy france breton mariniere sailor jumper knitwear wool">
+            <span class="b-main"><span class="b-name">Saint James</span><span class="b-meta">Normandy, France · est. 1889 — the Breton sailor jumper and marinière, pure new wool, knitted near Mont Saint-Michel.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.sns-herning.com/" target="_blank" rel="noopener" data-brand-search="s.n.s. herning sns denmark fisherman sweater bubble knit knitwear">
+            <span class="b-main"><span class="b-name">S.N.S. Herning</span><span class="b-meta">Herning, Denmark · est. 1931 — the Fisherman sweater in its signature bubble knit, still knitted in Herning.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.williamlockie.com/" target="_blank" rel="noopener" data-brand-search="william lockie hawick scotland cashmere lambswool knitwear">
+            <span class="b-main"><span class="b-name">William Lockie</span><span class="b-meta">Hawick, Scotland · est. 1874 — cashmere and lambswool knitwear from the Scottish Borders, still family-run.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.gransasso.it/" target="_blank" rel="noopener" data-brand-search="gran sasso abruzzo italy merino cashmere knitwear fine gauge">
+            <span class="b-main"><span class="b-name">Gran Sasso</span><span class="b-meta">Abruzzo, Italy · est. 1952 — fine-gauge merino and cashmere knitwear, fully fashioned in Italy.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.johnsmedley.com/" target="_blank" rel="noopener" data-brand-search="john smedley derbyshire england sea island cotton merino knitwear">
+            <span class="b-main"><span class="b-name">John Smedley</span><span class="b-meta">Derbyshire, England · est. 1784 — Sea Island cotton and extra-fine merino; the world's oldest knitwear maker.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <p class="brand-group-head">Quiet luxury &amp; tailoring</p>
+          <a class="brand-row" href="https://www.atemporubato.com/" target="_blank" rel="noopener" data-brand-search="rubato stockholm sweden knitwear officers chino trousers ivy">
+            <span class="b-main"><span class="b-name">Rubato</span><span class="b-meta">Stockholm · est. 2018 — cult lambswool knits and Japanese-made trousers; above all the Officer's Chino.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="http://stoffa.co/" target="_blank" rel="noopener" data-brand-search="stoffa new york made to order soft tailoring italy">
+            <span class="b-main"><span class="b-name">Stoffa</span><span class="b-meta">New York · est. 2014 — made-to-order soft tailoring, made in Italy; relaxed cuts, natural pastels.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://pjt.com/" target="_blank" rel="noopener" data-brand-search="p. johnson pjt sydney australia tailoring neapolitan made to measure suits">
+            <span class="b-main"><span class="b-name">P. Johnson</span><span class="b-meta">Sydney · est. 2009 — laid-back Australian tailoring with a Neapolitan soul; made-to-measure and ready-to-wear.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.samanamel.com/" target="_blank" rel="noopener" data-brand-search="saman amel stockholm sweden tailoring made to measure suits italian scandinavian">
+            <span class="b-main"><span class="b-name">Saman Amel</span><span class="b-meta">Stockholm — soft southern-Italian construction with Scandinavian restraint; made-to-measure tailoring.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.therow.com/" target="_blank" rel="noopener" data-brand-search="the row new york olsen no logo luxury tailoring">
+            <span class="b-main"><span class="b-name">The Row</span><span class="b-meta">New York — the original no-logo luxury house; understated, impeccably cut, the priciest name here.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.loropiana.com/" target="_blank" rel="noopener" data-brand-search="loro piana italy piedmont cashmere quiet luxury knitwear tailoring">
+            <span class="b-main"><span class="b-name">Loro Piana</span><span class="b-meta">Piedmont, Italy · est. 1924 — cashmere and the finest natural fibres, from its own mills; quiet luxury defined.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.brunellocucinelli.com/" target="_blank" rel="noopener" data-brand-search="brunello cucinelli solomeo italy cashmere knitwear soft tailoring luxury">
+            <span class="b-main"><span class="b-name">Brunello Cucinelli</span><span class="b-meta">Solomeo, Italy · est. 1978 — cashmere knitwear and soft tailoring, all made in Italy.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <p class="brand-group-head">Stores</p>
+          <a class="brand-row" href="https://www.mrporter.com/" target="_blank" rel="noopener" data-brand-search="mr porter mrporter london store multi brand designer menswear mr p watches shoes">
+            <span class="b-main"><span class="b-name">Mr Porter</span><span class="b-meta">London — the multi-brand store: designer menswear, shoes and watches, plus its own Mr P. label.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://suitsupply.com/" target="_blank" rel="noopener" data-brand-search="suitsupply suit supply amsterdam tailoring suits custom italian fabrics">
+            <span class="b-main"><span class="b-name">Suitsupply</span><span class="b-meta">Amsterdam · est. 2000 — sharp suits and tailoring in Italian fabrics, ready-to-wear and custom-made.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+        </div>
+        <div class="card empty" id="brand-empty" hidden>No brand matches that search.</div>
+      </section>
+
       <!-- ================= STYLE ICONS ================= -->
       <section id="panel-icons" role="tabpanel" aria-labelledby="tab-icons" hidden>
         <div class="page-info-row">
@@ -1508,7 +1593,7 @@
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Find me" data-info-text="Describe what you're after — your size comes from your Profile — then search for it, or keep the brief here." aria-label="About Find me">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Find me" data-info-text="Describe what you're after, set the budget on the scale — price-conscious at one end, no budget at the other — and your size comes from your Profile. Then search for it, or keep the brief here." aria-label="About Find me">i</button></div>
         <div class="ward-grid">
           <div>
             <div class="find-grid" id="find-grid"></div>
@@ -1535,9 +1620,17 @@
                 <input type="text" id="find-size" autocomplete="off" />
               </div>
             </div>
+            <div class="formality" id="budget-find">
+              <div class="formality-head">
+                <label class="field" for="find-budget-range">Budget — how far to go</label>
+                <span class="formality-side"><span class="formality-name" id="find-budget-name"></span><button type="button" class="info-btn sm" id="find-budget-info" data-info-title="Budget" data-info-text="" aria-label="About this budget level">i</button></span>
+              </div>
+              <input type="range" id="find-budget-range" min="1" max="5" step="1" value="3" />
+              <div class="formality-scale" aria-hidden="true"><span>Price-conscious</span><span>No budget</span></div>
+            </div>
             <div class="form-row">
               <div>
-                <label class="field" for="find-budget">Budget — up to ($)</label>
+                <label class="field" for="find-budget">Exact cap — optional ($)</label>
                 <input type="text" inputmode="numeric" id="find-budget" placeholder="e.g. 500" autocomplete="off" />
               </div>
               <div>
@@ -7152,6 +7245,40 @@ document.getElementById("data-import-file").addEventListener("change", function 
    carries live shopping searches in that size — the page itself
    buys nothing. */
 var finds = store.get("finds", []);
+/* Budget guidance — a five-stop scale, price-conscious to no
+   budget, set on a slider in the same register as the Formality
+   meter. The chosen level is remembered, named on every brief,
+   and carried into the copied brief; an exact dollar cap can
+   still be added beside it. */
+var BUDGET_LEVELS = [
+  { level: 1, name: "Price-conscious", desc: "Best value first — well-made staples, high-street and sale finds; never paying for a label." },
+  { level: 2, name: "Value-minded", desc: "Solid mid-range — proper fabrics and honest construction, fairly priced; the sweet spot for everyday pieces." },
+  { level: 3, name: "Quality first", desc: "Craft and fabric lead, price second — established makers, pieces bought once and kept for years." },
+  { level: 4, name: "Premium", desc: "Heritage houses and top materials — Loro Piana and Brunello Cucinelli territory; price is a consideration, not the driver." },
+  { level: 5, name: "No budget", desc: "The best version of the piece, whatever it costs — no ceiling, no compromising." }
+];
+var budgetLevel = store.get("findBudget", 3);
+if (!(budgetLevel >= 1 && budgetLevel <= 5)) budgetLevel = 3;
+function budgetInfo(level) { return BUDGET_LEVELS[level - 1] || BUDGET_LEVELS[2]; }
+function renderBudget() {
+  var info = budgetInfo(budgetLevel);
+  var range = document.getElementById("find-budget-range");
+  if (range) range.value = budgetLevel;
+  var nm = document.getElementById("find-budget-name");
+  if (nm) nm.textContent = info.name;
+  var ds = document.getElementById("find-budget-info");
+  if (ds) {
+    ds.setAttribute("data-info-title", "Budget — " + info.name);
+    ds.setAttribute("data-info-text", info.name + " — " + info.desc);
+  }
+}
+var budgetRangeEl = document.getElementById("find-budget-range");
+if (budgetRangeEl) budgetRangeEl.addEventListener("input", function () {
+  budgetLevel = Math.min(5, Math.max(1, parseInt(budgetRangeEl.value, 10) || 3));
+  store.set("findBudget", budgetLevel);
+  renderBudget();
+});
+renderBudget();
 /* Icons with their own stores. A brief tied to one of these icons
    also searches the icon's own shop — Squarzi's Fortela, Kraft's
    own Monte Carlo label — in the same size. Both search endpoints
@@ -7191,7 +7318,8 @@ function renderFinds() {
   grid.innerHTML = finds.map(function (f) {
     var q = encodeURIComponent(findQuery(f));
     var shop = iconShopFor(f);
-    var meta = [f.cat, f.size, f.budget ? "up to $" + f.budget : "", f.colour, shop ? "Inspo: " + shop.iconName : ""].filter(Boolean).join(" · ");
+    var budgetMeta = [f.budgetTier || "", f.budget ? "up to $" + f.budget : ""].filter(Boolean).join(" · ");
+    var meta = [f.cat, f.size, budgetMeta, f.colour, shop ? "Inspo: " + shop.iconName : ""].filter(Boolean).join(" · ");
     return '<article class="card find-card">' +
       "<h4>" + esc(f.desc) + "</h4>" +
       (meta ? '<p class="meta">' + esc(meta) + "</p>" : "") +
@@ -7224,6 +7352,8 @@ document.getElementById("find-form").addEventListener("submit", function (e) {
     cat: document.getElementById("find-cat").value,
     size: document.getElementById("find-size").value.trim(),
     budget: document.getElementById("find-budget").value.trim().replace(/[^0-9.]/g, ""),
+    budgetTier: budgetInfo(budgetLevel).name,
+    budgetNote: budgetInfo(budgetLevel).desc,
     colour: document.getElementById("find-colour").value.trim(),
     details: document.getElementById("find-details").value.trim(),
     iconId: document.getElementById("find-icon").value || null
@@ -7233,6 +7363,7 @@ document.getElementById("find-form").addEventListener("submit", function (e) {
   renderFinds();
   this.reset();
   syncFindSize();
+  renderBudget();
   var shopF = iconShopFor(f);
   if (shopF) {
     toast("On the hunt — searching " + shopF.brand + " first, in your size.");
@@ -7255,11 +7386,44 @@ document.getElementById("find-grid").addEventListener("click", function (e) {
   if (cp) {
     var f2 = finds.filter(function (x) { return x.id === cp.getAttribute("data-copy-find"); })[0];
     if (!f2) return;
-    var text = "Find me: " + f2.desc + (f2.cat ? " (" + f2.cat + ")" : "") + (f2.size ? " — size " + f2.size : "") + (f2.budget ? " — up to $" + f2.budget : "") + (f2.colour ? " — " + f2.colour : "") + (f2.details ? ". " + f2.details : "");
+    var text = "Find me: " + f2.desc + (f2.cat ? " (" + f2.cat + ")" : "") + (f2.size ? " — size " + f2.size : "") + (f2.budgetTier ? " — budget: " + f2.budgetTier + (f2.budgetNote ? " (" + f2.budgetNote + ")" : "") : "") + (f2.budget ? " — up to $" + f2.budget : "") + (f2.colour ? " — " + f2.colour : "") + (f2.details ? ". " + f2.details : "");
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast("Brief copied."); }, function () { toast(text); });
     else toast(text);
   }
 });
+
+/* ================= Brands — shops inside Inspiration =================
+   The fourteen houses and stores from the Fashion Brands list,
+   plus Loro Piana, Brunello Cucinelli, Mr Porter and Suitsupply.
+   Static rows in the page; the search box filters them by name,
+   place or speciality, and a group head hides when none of its
+   brands match. Tapping a row opens the brand's own store. */
+(function () {
+  var input = document.getElementById("brand-search");
+  var list = document.getElementById("brand-list");
+  if (!input || !list) return;
+  var rows = Array.prototype.slice.call(list.querySelectorAll(".brand-row"));
+  var heads = Array.prototype.slice.call(list.querySelectorAll(".brand-group-head"));
+  var empty = document.getElementById("brand-empty");
+  input.addEventListener("input", function () {
+    var q = input.value.trim().toLowerCase();
+    var any = false;
+    rows.forEach(function (r) {
+      var hit = !q || (r.getAttribute("data-brand-search") || "").indexOf(q) !== -1;
+      r.hidden = !hit;
+      if (hit) any = true;
+    });
+    heads.forEach(function (h) {
+      var n = h.nextElementSibling, vis = false;
+      while (n && !n.classList.contains("brand-group-head")) {
+        if (!n.hidden) { vis = true; break; }
+        n = n.nextElementSibling;
+      }
+      h.hidden = !vis;
+    });
+    if (empty) empty.hidden = any;
+  });
+})();
 
 /* ================= Tabs — refresh stays on the page =================
    The current section is kept three ways so a refresh lands back
@@ -7267,16 +7431,16 @@ document.getElementById("find-grid").addEventListener("click", function (e) {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "watches", "palettes", "looks", "queue", "icons", "favourites", "find", "profile"];
+var TABS = ["today", "studio", "wardrobe", "watches", "palettes", "looks", "queue", "icons", "favourites", "brands", "find", "profile"];
 /* Pages grouped under the top sections. Today, Find me and Profile
    are pages of their own; Studio holds Home (the Create-a-Look
    studio), Closet, Watches, Looks and the Queue; Inspiration
-   holds Palettes, Icons and Yours — the user's own favourite
-   looks, recycled. A section tab reopens the page last visited
-   in it. */
+   holds Palettes, Icons, Yours — the user's own favourite
+   looks, recycled — and Brands, the shops worth shopping.
+   A section tab reopens the page last visited in it. */
 var SECTIONS = {
   studio: ["studio", "wardrobe", "watches", "looks", "queue"],
-  inspiration: ["palettes", "icons", "favourites"],
+  inspiration: ["palettes", "icons", "favourites", "brands"],
   today: ["today"],
   find: ["find"],
   profile: ["profile"]
