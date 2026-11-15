@@ -565,6 +565,15 @@
       .studio-nav .btn-ghost { flex: 1; }
       .studio-nav .btn-ink { flex: 1; }
 
+      /* ---------- Studio — choices bar ---------- */
+      .choice-bar { display: flex; flex-wrap: wrap; gap: 8px; }
+      .choice-chip {
+        border: 1px solid var(--border-strong); background: var(--surface-alt); color: var(--dim);
+        border-radius: 999px; padding: 8px 14px; min-height: 40px;
+        font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+      }
+      .choice-chip strong { color: var(--accent); font-size: 13.5px; font-weight: 600; letter-spacing: .02em; text-transform: none; margin-left: 4px; }
+
       /* ---------- Direction preview (Studio) ---------- */
       .direction-preview { border: 1px solid var(--border); background: var(--surface-alt); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 7px; }
       .direction-preview .dp-kicker { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--brass); font-weight: 600; margin: 0; }
@@ -5773,8 +5782,11 @@ function shareLookImage(look) {
 
 /* ================= Studio — one question at a time =================
    The form's fields are gathered into five steps and shown one at a
-   time: the outfit, what leads, occasion & season, direction, then
-   palette and Create. No wall of boxes. */
+   time: the outfit, what leads (the basis AND the build-from source
+   together, so both steering choices sit on one screen), occasion &
+   season, direction, then palette and Create. No wall of boxes. A
+   choices bar above the steps names the current choices and jumps
+   straight to the question that holds each one. */
 (function studioSteps() {
   var form = document.getElementById("studio-form");
   if (!form) return;
@@ -5785,10 +5797,10 @@ function shareLookImage(look) {
   function field(id) { return F(document.getElementById(id)); }
   var groups = [
     { title: "The outfit", els: [field("desc"), document.getElementById("examples")] },
-    { title: "What leads", els: [field("basis-row")] },
+    { title: "What leads", els: [field("basis-row"), field("source-row")] },
     { title: "Occasion & season", els: [form.querySelector(".form-row"), field("occasion-text")] },
     { title: "Direction", els: [document.getElementById("inspo-pick-field"), field("style-direction"), field("blend-direction"), document.getElementById("direction-preview")] },
-    { title: "Palette — and create", els: [field("palette-source"), field("source-row"), document.getElementById("deal-progress"), field("style-btn")] }
+    { title: "Palette — and create", els: [field("palette-source"), document.getElementById("deal-progress"), field("style-btn")] }
   ];
   var steps = groups.map(function (g, i) {
     var sec = document.createElement("div");
@@ -5811,7 +5823,55 @@ function shareLookImage(look) {
   }
   document.getElementById("step-back").addEventListener("click", function () { show(idx - 1); });
   document.getElementById("step-next").addEventListener("click", function () { show(idx + 1); });
+  window.studioGoTo = show;
   show(0);
+})();
+
+/* ================= Studio — your choices, always in reach =================
+   The three choices that steer every look — what leads (Icon,
+   Palette or Both), where the outfit comes from (My wardrobe,
+   Inspo or Combo) and who the direction is — live in a bar pinned
+   to the top of the form, above the steps, so they are visible and
+   changeable from any question instead of hiding on a later page.
+   Each chip names the current choice; tapping one jumps straight
+   to the question that holds it. The bar re-reads the choices
+   whenever they change, whichever control changed them. */
+(function studioChoices() {
+  var form = document.getElementById("studio-form");
+  if (!form || typeof window.studioGoTo !== "function") return;
+  var bar = document.createElement("div");
+  bar.className = "choice-bar";
+  bar.setAttribute("role", "group");
+  bar.setAttribute("aria-label", "Your Studio choices — tap one to change it");
+  bar.innerHTML =
+    '<button type="button" class="choice-chip" id="choice-basis">Leads <strong></strong></button>' +
+    '<button type="button" class="choice-chip" id="choice-source">Build from <strong></strong></button>' +
+    '<button type="button" class="choice-chip" id="choice-direction">Direction <strong></strong></button>';
+  form.insertBefore(bar, form.firstChild);
+  var BASIS_LABEL = { icon: "Icon", palette: "Palette", both: "Both" };
+  var SOURCE_LABEL = { wardrobe: "My wardrobe", inspo: "Inspo", combo: "Combo" };
+  function directionLabel() {
+    var sel = document.getElementById("style-direction");
+    if (!sel || sel.value === "auto") return "Auto";
+    var ic = typeof iconById === "function" ? iconById(sel.value) : null;
+    return ic ? ic.name : sel.value;
+  }
+  function sync() {
+    bar.querySelector("#choice-basis strong").textContent = BASIS_LABEL[studioBasis] || "Both";
+    bar.querySelector("#choice-source strong").textContent = SOURCE_LABEL[studioSource] || "Combo";
+    bar.querySelector("#choice-direction strong").textContent = directionLabel();
+  }
+  var prevBasis = window.setBasis, prevSource = window.setSource;
+  if (typeof prevBasis === "function") window.setBasis = function (b) { prevBasis(b); sync(); };
+  if (typeof prevSource === "function") window.setSource = function (s) { prevSource(s); sync(); };
+  var dirSel = document.getElementById("style-direction");
+  if (dirSel) dirSel.addEventListener("change", sync);
+  var pick = document.getElementById("inspo-pick");
+  if (pick) pick.addEventListener("click", function () { setTimeout(sync, 0); });
+  document.getElementById("choice-basis").addEventListener("click", function () { window.studioGoTo(1); });
+  document.getElementById("choice-source").addEventListener("click", function () { window.studioGoTo(1); });
+  document.getElementById("choice-direction").addEventListener("click", function () { window.studioGoTo(3); });
+  sync();
 })();
 
 /* ================= Today — Outfit of the Day =================
