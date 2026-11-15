@@ -82,11 +82,11 @@
       .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
 
       /* ---------- Masthead ---------- */
-      .masthead { padding: calc(4px + env(safe-area-inset-top)) 0 0; text-align: center; }
+      .masthead { padding: env(safe-area-inset-top) 0 0; margin: 0; text-align: center; }
       .masthead .brand {
         font-family: var(--font-display);
         font-weight: 600;
-        font-size: clamp(44px, 9vw, 68px);
+        font-size: clamp(34px, 7vw, 50px);
         line-height: 1;
         letter-spacing: .01em;
         margin: 0;
@@ -97,7 +97,7 @@
       .masthead .vol {
         font-family: var(--font-display); font-style: italic; font-size: 17px; color: var(--brass); margin: 8px 0 0;
       }
-      .rule-double { border-top: 1px solid var(--border-strong); position: relative; margin-top: 4px; }
+      .rule-double { border-top: 1px solid var(--border-strong); position: relative; margin-top: 2px; }
       .rule-double::after { content: ""; position: absolute; top: 3px; left: 0; right: 0; border-top: 1px solid var(--border-strong); }
 
       /* ---------- Tabs — two tiers: sections on top, pages under ----------
@@ -125,7 +125,7 @@
         flex: 1 1 0; min-width: 0; text-align: center;
         background: none; border: none; border-bottom: 2px solid transparent;
         color: var(--dim); font-size: clamp(11px, 3.2vw, 13px); font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
-        padding: 5px 2px; min-height: 38px; white-space: nowrap;
+        padding: 4px 2px; min-height: 34px; white-space: nowrap;
       }
       .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
       .tab .count { color: var(--brass); letter-spacing: 0; margin-left: 4px; }
@@ -514,10 +514,10 @@
       .tools-body[hidden] { display: none; }
 
       /* ---------- Icon index — names, A–Z ---------- */
-      #panel-icons { scroll-margin-top: 110px; }
+      #panel-icons { scroll-margin-top: 84px; }
       .icons-browser { display: flex; gap: 10px; align-items: flex-start; }
       .icon-list-main { flex: 1 1 auto; min-width: 0; }
-      .icon-letter-group { scroll-margin-top: 126px; }
+      .icon-letter-group { scroll-margin-top: 96px; }
       .icon-letter-head { display: flex; align-items: center; gap: 12px; margin: 20px 0 2px; }
       .icon-letter-group:first-child .icon-letter-head { margin-top: 2px; }
       .icon-letter-head .letter { font-family: var(--font-display); font-size: 27px; font-weight: 700; color: var(--accent); line-height: 1; }
@@ -548,6 +548,42 @@
       .az-rail button.active { color: var(--accent); font-weight: 700; }
       .icon-back { margin-bottom: 14px; }
       .icon-detail-card { max-width: 760px; }
+
+      /* ---------- Icons — compact sizing ----------
+         The whole Icons page runs smaller and tighter: a modest heading,
+         slim collapsed tool boxes, and dense name rows, so far more of
+         the index fits on one phone screen. Scoped to #panel-icons so
+         no other page changes size. */
+      main:has(> #panel-icons:not([hidden])) { padding-top: 10px; }
+      #panel-icons .add-form { padding: 10px 12px; gap: 8px; }
+      #panel-icons .tools-toggle { font-size: 17px; min-height: 34px; padding: 0; }
+      #panel-icons .tools-toggle .tt-chev { font-size: 12px; }
+      #panel-icons .tools-body { gap: 10px; margin-top: 8px; }
+      #panel-icons label.field { margin-bottom: 3px; font-size: 11px; }
+      #panel-icons input[type="text"], #panel-icons input[type="search"], #panel-icons select, #panel-icons textarea { padding: 6px 9px; font-size: 14.5px; min-height: 2.3rem; }
+      #panel-icons textarea { min-height: 48px; }
+      #panel-icons .btn-accent, #panel-icons .btn-ghost, #panel-icons .btn-ink { min-height: 38px; padding: 7px 14px; }
+      #panel-icons .info-btn.sm { width: 22px; height: 22px; min-height: 22px; font-size: 13px; }
+      #panel-icons .icon-result { padding: 7px 10px; gap: 10px; }
+      #panel-icons .icon-result .ir-name { font-size: 16px; }
+      #panel-icons .icon-result .ir-desc { font-size: 12px; margin-top: 2px; }
+      #panel-icons .icon-result .btn-accent, #panel-icons .icon-result .btn-ghost { min-height: 36px; padding: 6px 12px; }
+      #panel-icons .icons-browser { gap: 8px; }
+      #panel-icons .icon-letter-head { margin: 12px 0 0; gap: 10px; }
+      #panel-icons .icon-letter-head .letter { font-size: 19px; }
+      #panel-icons .icon-letter-head .lcount { font-size: 10px; }
+      #panel-icons .icon-name-row { padding: 7px 4px; min-height: 40px; gap: 8px; }
+      #panel-icons .icon-name-row .nm { font-size: 18px; line-height: 1.1; }
+      #panel-icons .icon-name-row .ln { font-size: 9.5px; margin-top: 1px; letter-spacing: .14em; }
+      #panel-icons .icon-name-row .chev { font-size: 17px; }
+      #panel-icons .az-rail { width: 26px; }
+      #panel-icons .az-rail button { font-size: 10px; }
+      #panel-icons .icon-back { margin-bottom: 8px; }
+      #panel-icons .dir-line { font-size: 15px; margin-bottom: 6px; }
+      #panel-icons .icon-card { padding: 14px 16px; gap: 9px; }
+      #panel-icons .icon-card h3 { font-size: 23px; }
+      #panel-icons .icon-card .blurb { font-size: 14px; line-height: 1.45; }
+      #panel-icons .icon-rules li { font-size: 13.5px; line-height: 1.45; }
 
       /* ---------- Today — outfit of the day ---------- */
       .today-hero {
@@ -682,6 +718,125 @@
         box-shadow: var(--shadow-lift); white-space: nowrap;
       }
       .ptr.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+      /* ---------- Every page — compact, no top titles ----------
+         No page opens with a large descriptive title: each opens
+         straight to its content, with the page's description behind
+         a small (i) button in a slim row at the top-right
+         (.page-info-row). Sizing is small and tight throughout —
+         headings, cards, forms, buttons and rows all run compact,
+         and the active tab's underline hugs its label instead of
+         spanning the whole tab cell like a stray outline. */
+      .page-info-row { display: flex; justify-content: flex-end; align-items: center; margin: 0 0 8px; }
+      .page-info-row .info-btn { width: 28px; height: 28px; min-height: 28px; font-size: 16px; margin: 0; }
+      section[role="tabpanel"] { scroll-margin-top: 84px; }
+      main { padding: 12px 0 48px; }
+      .tab, .subtab { position: relative; }
+      .tab[aria-selected="true"] { border-bottom-color: transparent; }
+      .tab[aria-selected="true"]::after { content: ""; position: absolute; left: 50%; transform: translateX(-50%); bottom: -1px; height: 2px; width: min(56px, 70%); background: var(--accent); border-radius: 1px; }
+      .subtab[aria-selected="true"] { border-bottom-color: transparent; }
+      .subtab[aria-selected="true"]::after { content: ""; position: absolute; left: 50%; transform: translateX(-50%); bottom: -1px; height: 2px; width: min(48px, 70%); background: var(--brass); border-radius: 1px; }
+      .section-head { margin: 2px 0 12px; }
+      .section-head h2 { font-size: clamp(22px, 4vw, 28px); }
+      .add-form { padding: 14px 16px; gap: 10px; }
+      .add-form h3 { font-size: 19px !important; }
+      .studio-form { padding: 14px 16px; gap: 12px; }
+      .form-row { gap: 12px; }
+      input[type="text"], input[type="search"], select, textarea { padding: 8px 10px; }
+      .btn-ink, .btn-accent { min-height: 42px; padding: 10px 18px; }
+      .btn-ghost { min-height: 40px; padding: 8px 14px; }
+      .btn-today { min-height: 46px; padding: 11px 18px; }
+      .chip { min-height: 36px; padding: 6px 12px; }
+      .basis-btn { min-height: 46px; padding: 8px 6px; }
+      .verdict-btn { min-height: 42px; padding: 8px; }
+      .ward-grid, .studio-grid { gap: 16px; }
+      .item-grid { gap: 12px; }
+      .item-card { padding: 12px; }
+      .item-card h4 { font-size: 19px; }
+      .find-grid { gap: 12px; }
+      .find-card { padding: 16px; }
+      .find-card h4 { font-size: 19px; }
+      #panel-find .add-form input[type="text"], #panel-find .add-form select { min-height: 44px; }
+      .custom-card { padding: 14px; }
+      .custom-card h4 { font-size: 19px; }
+      .custom-grid { gap: 12px; }
+      .featured { padding: 16px; margin-bottom: 16px; }
+      .featured h3 { font-size: clamp(20px, 3.5vw, 26px); }
+      .plate-grid { gap: 10px; }
+      .pal-controls { margin-bottom: 12px; }
+      .colour-index { margin-top: 20px; }
+      .look-body { padding: 16px; }
+      .look-body h3 { font-size: clamp(22px, 4vw, 28px); }
+      .look-result { margin-top: 16px; }
+      .options-head h3 { font-size: clamp(20px, 3.5vw, 26px); }
+      .options-grid { margin-bottom: 14px; }
+      .swatch-strip > div { min-height: 44px; }
+      .swatch-strip.lg > div { min-height: 64px; }
+      .feedback { margin-top: 14px; padding-top: 12px; }
+      .feedback h4 { font-size: 19px; }
+      .wrist { margin-top: 14px; padding-top: 12px; }
+      .wrist h4 { font-size: 19px; }
+      .inspo { margin-top: 14px; padding-top: 12px; }
+      .inspo h4 { font-size: 19px; }
+      .find-pieces { margin-top: 14px; padding-top: 12px; }
+      .find-pieces h4 { font-size: 19px; }
+      .loc-card { padding: 16px; gap: 10px; margin-top: 16px; }
+      .loc-card h3 { font-size: 20px; }
+      .loc-now .loc-name { font-size: 20px; }
+      .data-card { padding: 16px; margin-top: 16px; gap: 10px; }
+      .data-card h3 { font-size: 20px; }
+      .principles { padding: 16px; }
+      .principles h3 { font-size: 22px; }
+      .info-pop-card { padding: 16px; }
+      #info-pop-title { font-size: 20px !important; }
+      .icon-card { padding: 16px; }
+      .icon-card h3 { font-size: 24px; }
+      .fav-head { font-size: 17px; margin: 14px 0 8px; }
+      .empty { padding: 16px; font-size: 16px; }
+      .filter-row { margin-bottom: 10px; }
+      .ward-search { margin-bottom: 10px; }
+      .direction-preview { padding: 10px 12px; gap: 5px; }
+      .direction-preview .dp-name { font-size: 20px; }
+      .deal-progress { padding: 10px 12px 12px; }
+      .formality-side { display: inline-flex; align-items: center; gap: 8px; }
+      .today-caption { padding: 16px clamp(18px, 5vw, 44px) calc(18px + env(safe-area-inset-bottom)); }
+      .today-caption h2 { font-size: clamp(28px, 6vw, 44px); margin-bottom: 8px; }
+      .today-dots { margin-bottom: 14px; }
+      /* Look card — verdict first, all detail in dropdowns */
+      .feedback { border-top: none; margin-top: 10px; padding-top: 0; }
+      .feedback textarea { min-height: 56px; }
+      .fb-chips { gap: 6px; margin-bottom: 10px; }
+      .verdict-row { gap: 8px; margin-bottom: 10px; }
+      .look-body .meta { font-size: 15px; margin-bottom: 10px; }
+      .dir-line { font-size: 15px; margin-bottom: 6px; }
+      .source-line { padding: 7px 10px; margin-bottom: 10px; font-size: 13px; }
+      .look-actions { margin-top: 10px; gap: 8px; }
+      .drop { border-top: 1px solid var(--border); margin-top: 10px; }
+      .drop-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; background: none; border: none; padding: 6px 0; min-height: 38px; font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--text); text-align: left; }
+      .drop-toggle .tt-chev { font-family: var(--font-ui); font-size: 12px; color: var(--brass); transition: transform 160ms ease; flex: none; }
+      .drop-toggle.open .tt-chev { transform: rotate(180deg); }
+      .drop-body { display: grid; gap: 10px; padding: 2px 0 10px; }
+      .drop-body[hidden] { display: none; }
+      .drop-body .wrist, .drop-body .find-pieces, .drop-body .inspo { border-top: none; margin-top: 0; padding-top: 0; }
+      .legend li { font-size: 13px; }
+      .legend .dot { width: 12px; height: 12px; }
+      .notes { gap: 7px; margin-top: 4px; }
+      .notes li { font-size: 14px; line-height: 1.45; }
+      .notes .n { font-size: 16px; }
+      .wrist { gap: 8px; }
+      .wrist .w-pick img { width: 64px; height: 64px; }
+      .wrist .w-name { font-size: 18px; }
+      .wrist li { font-size: 13.5px; line-height: 1.45; }
+      .piece-row { padding: 7px 10px; gap: 10px; }
+      .piece-row .cdot { width: 18px; height: 18px; }
+      .piece-row .p-name { font-size: 16px; }
+      .piece-row .btn-accent { min-height: 36px; padding: 6px 12px; font-size: 12px; }
+      .iconic figcaption { padding: 6px 8px 8px; gap: 5px; }
+      .iconic figcaption strong { font-size: 14px; }
+      .iconic figcaption .btn-ghost { min-height: 34px; }
+      .feedback .look-actions.verdict-actions { margin-top: 0; margin-bottom: 10px; }
+      #panel-palettes .pal-drop { border-top: none; margin-top: 0; margin-bottom: 12px; }
+      #panel-palettes .pal-drop .drop-body { padding-bottom: 2px; }
     </style>
   </head>
   <body>
@@ -740,11 +895,10 @@
             <div class="formality today-formality" id="formality-today">
               <div class="formality-head">
                 <label class="field" for="today-formality-range">Formality</label>
-                <span class="formality-name" id="today-formality-name"></span>
+                <span class="formality-side"><span class="formality-name" id="today-formality-name"></span><button type="button" class="info-btn sm" id="today-formality-info" data-info-title="Formality — Smart Casual" data-info-text="Smart Casual — Chinos, linen shirt, loafers — dinner out and drinks." aria-label="About this formality level">i</button></span>
               </div>
-              <input type="range" id="today-formality-range" min="1" max="7" step="1" value="4" aria-describedby="today-formality-desc" />
+              <input type="range" id="today-formality-range" min="1" max="7" step="1" value="4" />
               <div class="formality-scale" aria-hidden="true"><span>Swim / Pool</span><span>Black Tie</span></div>
-              <p class="formality-desc" id="today-formality-desc"></p>
             </div>
           </div>
         </div>
@@ -857,11 +1011,10 @@
               <div class="formality" id="formality-studio">
                 <div class="formality-head">
                   <label class="field" for="formality-range">Formality — how dressed</label>
-                  <span class="formality-name" id="formality-name"></span>
+                  <span class="formality-side"><span class="formality-name" id="formality-name"></span><button type="button" class="info-btn sm" id="formality-info" data-info-title="Formality — Smart Casual" data-info-text="Smart Casual — Chinos, linen shirt, loafers — dinner out and drinks." aria-label="About this formality level">i</button></span>
                 </div>
-                <input type="range" id="formality-range" min="1" max="7" step="1" value="4" aria-describedby="formality-desc" />
+                <input type="range" id="formality-range" min="1" max="7" step="1" value="4" />
                 <div class="formality-scale" aria-hidden="true"><span>Swim / Pool</span><span>Black Tie</span></div>
-                <p class="formality-desc" id="formality-desc"></p>
               </div>
               <div>
                 <div class="examples" id="examples">
@@ -916,7 +1069,7 @@
                 <option>Shoes</option><option>Shirts</option><option>Tees</option><option>Polos</option>
                 <option>Jeans</option><option>Shorts</option><option>Bathing suits</option><option>Trousers</option><option>Button downs</option>
                 <option>Suits</option><option>Blazers</option><option>Scarves</option><option>Jackets</option>
-                <option>Coats</option><option>Leather jackets</option><option>Hats</option><option>Sweaters</option>
+                <option>Coats</option><option>Leather jackets</option><option>Hats</option><option>Sunglasses</option><option>Sweaters</option>
                 <option>Socks</option><option>Belts</option><option>Gloves</option><option>Vests</option><option>Ties</option>
               </select>
             </div>
@@ -1013,8 +1166,10 @@
 
       <!-- ================= PALETTES ================= -->
       <section id="panel-palettes" role="tabpanel" aria-labelledby="tab-palettes" hidden>
-        <form class="card add-form" id="custom-form" style="margin-bottom:14px">
-          <h3 style="font-family:var(--font-display);font-size:26px;font-weight:600;margin:0">New palette</h3>
+        <div class="drop pal-drop">
+          <button type="button" class="drop-toggle" data-drop-toggle aria-expanded="false" aria-controls="drop-palette-form"><span>New palette</span><span class="tt-chev" aria-hidden="true">▾</span></button>
+          <div class="drop-body" id="drop-palette-form" hidden>
+        <form class="card add-form" id="custom-form">
           <div>
             <label class="field" for="custom-name">Palette name</label>
             <input type="text" id="custom-name" placeholder="" />
@@ -1040,6 +1195,8 @@
             <button type="submit" class="btn-ink">Save this palette</button>
           </div>
         </form>
+          </div>
+        </div>
         <div class="custom-grid" id="custom-grid"></div>
 
         <div class="pal-controls">
@@ -1101,12 +1258,11 @@
 
       <!-- ================= STYLE ICONS ================= -->
       <section id="panel-icons" role="tabpanel" aria-labelledby="tab-icons" hidden>
-        <div class="section-head with-info">
-          <h2>Style Icons</h2>
+        <div class="page-info-row">
           <button type="button" class="info-btn" id="icons-info-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="icons-info-pop" aria-label="About the House Rules — the description behind these icons" title="House Rules">i</button>
         </div>
 
-        <div class="card add-form icon-tools" id="icon-search-card" style="margin-bottom:14px">
+        <div class="card add-form icon-tools" id="icon-search-card" style="margin-bottom:8px">
           <button type="button" class="tools-toggle" id="icon-search-toggle" aria-expanded="false" aria-controls="icon-search-body"><span>Search for an icon</span><span class="tt-chev" aria-hidden="true">▾</span></button>
           <div class="tools-body" id="icon-search-body" hidden>
             <div>
@@ -1117,7 +1273,7 @@
           </div>
         </div>
 
-        <form class="card add-form icon-tools" id="icon-form" style="margin-bottom:22px">
+        <form class="card add-form icon-tools" id="icon-form" style="margin-bottom:12px">
           <div style="display:flex;align-items:center;gap:8px"><button type="button" class="tools-toggle" id="icon-form-toggle" aria-expanded="false" aria-controls="icon-form-body" style="flex:1"><span>Add your own icon</span><span class="tt-chev" aria-hidden="true">▾</span></button><button type="button" class="info-btn sm" data-info-from="icon-form-note" data-info-title="Add your own icon" aria-label="About: add your own icon">i</button></div>
           <div class="tools-body" id="icon-form-body" hidden>
           <p class="form-note" id="icon-form-note" hidden>For someone search can't find — a friend, your dad, anyone whose style you know first-hand. Build their profile from your own description and the engine styles from it the same way.</p>
@@ -1231,9 +1387,9 @@
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Find me" data-info-text="Describe what you're after — your size comes from your Profile — then search for it, or keep the brief here." aria-label="About Find me">i</button></div>
         <div class="ward-grid">
           <div>
-            <div class="section-head with-info"><h2>Find me</h2><button type="button" class="info-btn" data-info-title="Find me" data-info-text="Describe what you're after — your size comes from your Profile — then search for it, or keep the brief here." aria-label="About Find me">i</button></div>
             <div class="find-grid" id="find-grid"></div>
           </div>
           <form class="card add-form" id="find-form">
@@ -1249,7 +1405,7 @@
                   <option>Shoes</option><option>Shirts</option><option>Tees</option><option>Polos</option>
                   <option>Jeans</option><option>Shorts</option><option>Bathing suits</option><option>Trousers</option><option>Button downs</option>
                   <option>Suits</option><option>Blazers</option><option>Scarves</option><option>Jackets</option>
-                  <option>Coats</option><option>Leather jackets</option><option>Hats</option><option>Sweaters</option>
+                  <option>Coats</option><option>Leather jackets</option><option>Hats</option><option>Sunglasses</option><option>Sweaters</option>
                   <option>Socks</option><option>Belts</option><option>Gloves</option><option>Vests</option><option>Ties</option>
                 </select>
               </div>
@@ -1287,7 +1443,7 @@
 
       <!-- ================= PROFILE ================= -->
       <section id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" hidden>
-        <div class="section-head with-info"><h2>Profile</h2><button type="button" class="info-btn" data-info-title="Profile" data-info-text="Your measurements and your location — Find me sizes every search from here, and recommendations follow the weather where you are." aria-label="About Profile">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Profile" data-info-text="Your measurements and your location — Find me sizes every search from here, and recommendations follow the weather where you are." aria-label="About Profile">i</button></div>
         <div class="card loc-card" id="loc-card" style="margin-top:0;margin-bottom:22px">
           <div>
             <div class="card-head-info"><h3>Location &amp; weather</h3><button type="button" class="info-btn sm" data-info-from="loc-note" data-info-title="Location &amp; weather" aria-label="About: location and weather">i</button></div>
@@ -1494,7 +1650,8 @@ var GARMENTS = [
   { re: /\b(sneakers|trainers)\b/i, slot: "Shoes", label: "sneakers", shoe: "sneakers" },
   { re: /\b(boots|boot)\b/i, slot: "Shoes", label: "boots", shoe: "boots" },
   { re: /\b(shoes|shoe|espadrilles|moccasins)\b/i, slot: "Shoes", label: "shoes", shoe: "shoes" },
-  { re: /\b(belt|watch|scarf|cap|hat|sunglasses|pocket square)\b/i, slot: "Accessory", label: "accessory" }
+  { re: /\b(sunglasses|sunglass|shades|aviators?)\b/i, slot: "Sunglasses", label: "sunglasses" },
+  { re: /\b(belt|watch|scarf|cap|hat|pocket square)\b/i, slot: "Accessory", label: "accessory" }
 ];
 var SHOE_DEFAULT = { warm: "dark brown leather loafers", cool: "clean white leather sneakers", neutral: "dark brown leather loafers" };
 
@@ -2403,9 +2560,8 @@ function renderDirectionPreview() {
   if (blend && primary && blend.id === primary.id) blend = null;
   if (!primary && !blend) {
     el.innerHTML = '<p class="dp-kicker">Style direction</p>' +
-      '<p class="dp-name">Auto — let the outfit decide</p>' +
-      '<div class="swatch-strip sm">' + ["#1f2a44", "#f1e7cf", "#7c4226", "#6b6f3f"].map(function (h) { return '<div style="background:' + h + '"></div>'; }).join("") + "</div>" +
-      '<p class="dp-rule">No fixed icon: the engine reads the outfit itself. Pick an icon — or add your own in the Icons tab — and its signature outfit, its own colours, its shoe and its rules take over.</p>';
+      '<div class="info-inline-row"><p class="dp-name">Auto — let the outfit decide</p><button type="button" class="info-btn sm" data-info-title="Style direction" data-info-text="No fixed icon: the engine reads the outfit itself. Pick an icon — or add your own in the Icons tab — and its signature outfit, its own colours, its shoe and its rules take over." aria-label="About: style direction">i</button></div>' +
+      '<div class="swatch-strip sm">' + ["#1f2a44", "#f1e7cf", "#7c4226", "#6b6f3f"].map(function (h) { return '<div style="background:' + h + '"></div>'; }).join("") + "</div>";
     return;
   }
   var main = primary || blend;
@@ -2413,11 +2569,9 @@ function renderDirectionPreview() {
   var stripCols = main.palette.map(function (h) { return { name: h, hex: h }; });
   if (partner) stripCols = stripCols.concat(partner.palette.map(function (h) { return { name: h, hex: h }; }));
   el.innerHTML = '<p class="dp-kicker">Style direction' + (main.custom ? " — your icon" : "") + "</p>" +
-    '<p class="dp-name">' + esc(main.name) + (partner ? " × " + esc(partner.name) : "") + "</p>" +
+    '<div class="info-inline-row"><p class="dp-name">' + esc(main.name) + (partner ? " × " + esc(partner.name) : "") + '</p><button type="button" class="info-btn sm" data-info-title="' + esc(main.name) + '" data-info-text="' + esc(main.rules[0] + (partner ? " " + partner.rules[0] : "")) + '" aria-label="About: ' + esc(main.name) + '">i</button></div>' +
     '<p class="dp-lane">' + esc(main.lane) + (partner ? " · blended with " + esc(partner.lane) : "") + "</p>" +
-    stripHTML(stripCols, "sm") +
-    '<p class="dp-rule">' + esc(main.rules[0]) + "</p>" +
-    (partner ? '<p class="dp-rule">' + esc(partner.rules[0]) + "</p>" : "");
+    stripHTML(stripCols, "sm");
 }
 syncIconSelect();
 renderDirectionPreview();
@@ -2875,13 +3029,16 @@ function renderAsLook(r) {
 var DEAL_POOL = RENDER_POOL.map(renderAsLook);
 function renderFormality() {
   var info = formalityInfo(formalityLevel);
-  [["formality-range", "formality-name", "formality-desc"], ["today-formality-range", "today-formality-name", "today-formality-desc"]].forEach(function (ids) {
+  [["formality-range", "formality-name", "formality-info"], ["today-formality-range", "today-formality-name", "today-formality-info"]].forEach(function (ids) {
     var range = document.getElementById(ids[0]);
     if (range) range.value = formalityLevel;
     var nm = document.getElementById(ids[1]);
     if (nm) nm.textContent = info.name;
     var ds = document.getElementById(ids[2]);
-    if (ds) ds.textContent = info.desc;
+    if (ds) {
+      ds.setAttribute("data-info-title", "Formality — " + info.name);
+      ds.setAttribute("data-info-text", info.name + " — " + info.desc);
+    }
   });
 }
 function setFormality(level, opts) {
@@ -3194,16 +3351,18 @@ function feedbackHTML(look) {
     '<button type="button" class="verdict-btn" data-verdict="like" aria-pressed="' + (look.verdict === "like" ? "true" : "false") + '">I like it</button>' +
     '<button type="button" class="verdict-btn" data-verdict="dislike" aria-pressed="' + (look.verdict === "dislike" ? "true" : "false") + '">Not for me</button>' +
     "</div>" +
+    '<div class="look-actions verdict-actions">' +
+    '<button type="button" class="btn-accent" data-action="refresh-look">Refresh the look</button>' +
+    '<button type="button" class="btn-ghost" data-action="queue-look">Add to queue</button>' +
+    "</div>" +
     '<div class="fb-chips">' + chips.map(function (c) {
       return '<button type="button" class="chip" data-fb-chip="' + c + '" aria-pressed="false">' + c + "</button>";
     }).join("") + "</div>" +
     '<label class="field" for="fb-text">Your comment on this look</label>' +
     '<textarea id="fb-text" autocomplete="off" placeholder="What works, what doesn\u2019t — saved with the look">' + esc(look.comment || "") + "</textarea>" +
     '<div class="look-actions">' +
-    '<button type="button" class="btn-accent" data-action="refresh-look">Refresh the look</button>' +
     '<button type="button" class="btn-ghost" data-action="save-look">Save this version</button>' +
     '<button type="button" class="btn-ghost" data-action="save-feedback">Save feedback</button>' +
-    '<button type="button" class="btn-ghost" data-action="queue-look">Add to queue</button>' +
     '<button type="button" class="btn-ghost danger" data-action="remove-look" aria-pressed="false">Remove this look</button>' +
     "</div></div>";
 }
@@ -3218,9 +3377,10 @@ function iconicRowHTML(ic, limit) {
       '<button type="button" class="btn-ghost" data-icon-look="' + ic.id + '" data-look-idx="' + li + '">Style this look</button></figcaption></figure>';
   }).join("") + "</div>";
 }
-function inspoHTML(look) {
+function inspoHTML(look, bare) {
   var ic = look.iconId ? iconById(look.iconId) : null;
   if (!ic || !ic.looks || !ic.looks.length) return "";
+  if (bare) return '<div class="inspo bare">' + iconicRowHTML(ic, 6) + "</div>";
   var inspoInfo = "The photographs this direction is drawn from. Build straight from one and the engine works from the photograph's own outfit." + (ic.looks.length > 6 ? " The full library — " + ic.looks.length + " reference photographs — lives in " + ic.name + "'s page in the Icons tab." : "");
   return '<div class="inspo"><div class="info-inline-row"><h4>The reference — ' + esc(ic.name) + '</h4><button type="button" class="info-btn sm" data-info-title="The reference" data-info-text="' + esc(inspoInfo) + '" aria-label="About: the reference photographs">i</button></div>' +
     iconicRowHTML(ic, 6) + "</div>";
@@ -3280,6 +3440,7 @@ function garmentCategory(label) {
   if (/trouser|chino|pant/.test(l)) return "Trousers";
   if (/button/.test(l)) return "Button downs";
   if (/shirt/.test(l)) return "Shirts";
+  if (/sunglass|shades/.test(l)) return "Sunglasses";
   if (/scarf/.test(l)) return "Scarves";
   if (/glove/.test(l)) return "Gloves";
   if (/hat|cap/.test(l)) return "Hats";
@@ -3299,11 +3460,10 @@ function pieceDescription(p) {
   }
   return desc.charAt(0).toUpperCase() + desc.slice(1);
 }
-function findPiecesHTML(look) {
+function findPiecesHTML(look, bare) {
   var pieces = lookPieces(look);
   if (!pieces.length) return "";
-  return '<div class="find-pieces"><div class="info-inline-row"><h4>Find a piece from this look</h4><button type="button" class="info-btn sm" data-info-title="Find a piece from this look" data-info-text="Pick any item and it goes to Find me — in your size, with the search opened." aria-label="About: find a piece">i</button></div>' +
-    pieces.map(function (p, i) {
+  var rows = pieces.map(function (p, i) {
       var cat = garmentCategory(p.garment);
       var size = typeof profileSizeFor === "function" ? profileSizeFor(cat) : "";
       return '<div class="piece-row">' +
@@ -3311,7 +3471,9 @@ function findPiecesHTML(look) {
         '<span class="p-main"><span class="p-name">' + esc(pieceDescription(p)) + '</span>' +
         '<span class="p-sub">' + esc(cat) + (size ? " · Your size: " + esc(size) : "") + "</span></span>" +
         '<button type="button" class="btn-accent" data-find-piece="' + i + '">Find this</button></div>';
-    }).join("") + "</div>";
+    }).join("");
+  if (bare) return '<div class="find-pieces bare">' + rows + "</div>";
+  return '<div class="find-pieces"><div class="info-inline-row"><h4>Find a piece from this look</h4><button type="button" class="info-btn sm" data-info-title="Find a piece from this look" data-info-text="Pick any item and it goes to Find me — in your size, with the search opened." aria-label="About: find a piece">i</button></div>' + rows + "</div>";
 }
 function sendPieceToFind(look, idx) {
   var pieces = lookPieces(look);
@@ -3343,6 +3505,29 @@ function sendPieceToFind(look, idx) {
   }
 }
 
+/* Look details live in click dropdowns: the card itself stays
+   tight — photo, title, verdict and refresh up top — and the
+   colours, explanations, watch notes, find-a-piece and reference
+   photographs open only when tapped. */
+var dropSeq = 0;
+function dropHTML(title, inner) {
+  if (!inner) return "";
+  dropSeq++;
+  var id = "drop-" + dropSeq;
+  return '<div class="drop"><button type="button" class="drop-toggle" data-drop-toggle aria-expanded="false" aria-controls="' + id + '"><span>' + title + '</span><span class="tt-chev" aria-hidden="true">▾</span></button>' +
+    '<div class="drop-body" id="' + id + '" hidden>' + inner + "</div></div>";
+}
+document.addEventListener("click", function (e) {
+  var t = e.target.closest ? e.target.closest("[data-drop-toggle]") : null;
+  if (!t) return;
+  var body = document.getElementById(t.getAttribute("aria-controls"));
+  if (!body) return;
+  var open = body.hidden;
+  body.hidden = !open;
+  t.setAttribute("aria-expanded", open ? "true" : "false");
+  t.classList.toggle("open", open);
+});
+
 function lookCardHTML(look, opts) {
   opts = opts || {};
   var refTag = look.refLook ? '<span class="pane-tag">Reference — ' + esc(look.imgInspo ? "your image" : ((look.iconId ? (iconById(look.iconId) || {}).name : "") || "icon")) + "</span>" : "";
@@ -3352,21 +3537,34 @@ function lookCardHTML(look, opts) {
   var dirLine = cardIcon ? '<p class="dir-line">In the direction of <strong>' + esc(cardIcon.name) + "</strong> — " + esc(cardIcon.lane) + (cardBlend ? ', blended with <strong>' + esc(cardBlend.name) + "</strong> — " + esc(cardBlend.lane) : "") + "</p>" : "";
   var metaLine = look.meta ? '<p class="meta">' + esc(look.meta) + "</p>" : "";
   var sourceLine = "";
-  if (look.source === "wardrobe") sourceLine = '<p class="source-line"><strong>My wardrobe</strong><span>Built only from pieces you own' + (look.anchorNames && look.anchorNames.length ? ' — <span class="own">' + esc(look.anchorNames.join(", ")) + "</span>" : "") + '. Nothing here needs buying.</span></p>';
-  else if (look.source === "combo") sourceLine = '<p class="source-line"><strong>Combo</strong><span>Anchored in yours' + (look.anchorNames && look.anchorNames.length ? ' — <span class="own">' + esc(look.anchorNames.join(", ")) + "</span>" : "") + '. The other pieces are inspo to buy to complete it — use Find this on any of them.</span></p>';
-  else if (look.source === "inspo") sourceLine = '<p class="source-line"><strong>Inspo</strong><span>Built outside your wardrobe — fresh inspo, nothing pulled from your closet.</span></p>';
+  if (look.source === "wardrobe") sourceLine = '<p class="source-line"><strong>My wardrobe</strong>' + (look.anchorNames && look.anchorNames.length ? '<span>Yours: <span class="own">' + esc(look.anchorNames.join(", ")) + "</span></span>" : "") + '<button type="button" class="info-btn sm" data-info-title="My wardrobe" data-info-text="Built only from pieces you own — nothing here needs buying." aria-label="About: my wardrobe looks">i</button></p>';
+  else if (look.source === "combo") sourceLine = '<p class="source-line"><strong>Combo</strong>' + (look.anchorNames && look.anchorNames.length ? '<span>Yours: <span class="own">' + esc(look.anchorNames.join(", ")) + "</span></span>" : "") + '<button type="button" class="info-btn sm" data-info-title="Combo" data-info-text="Anchored in pieces you own; the other pieces are inspo to buy to complete it — use Find this on any of them." aria-label="About: combo looks">i</button></p>';
+  else if (look.source === "inspo") sourceLine = '<p class="source-line"><strong>Inspo</strong><button type="button" class="info-btn sm" data-info-title="Inspo" data-info-text="Built outside your wardrobe — fresh inspo, nothing pulled from your closet." aria-label="About: inspo looks">i</button></p>';
+  var head = "<h3>" + esc(look.title) + (look.version > 1 ? ' <span style="font-size:18px;color:var(--brass);font-style:italic">· take ' + look.version + "</span>" : "") + "</h3>" +
+    metaLine + dirLine + sourceLine;
+  var notes = (look.notes && look.notes.length) ? look.notes : (cardIcon ? [cardIcon.rules[0], cardIcon.rules[1]] : []);
+  if (opts.actions === false) {
+    return '<article class="card look-card">' + media + '<div class="look-body">' +
+      head +
+      stripHTML(look.swatches, "lg") + legendHTML(look.swatches) +
+      (notes.length ? notesHTML(notes) : "") +
+      "</div></article>";
+  }
+  var drops =
+    dropHTML("Colours", stripHTML(look.swatches, "sm") + legendHTML(look.swatches)) +
+    dropHTML("Why it works", notes.length ? notesHTML(notes) : "") +
+    dropHTML("On the wrist", wristHTML(look, true)) +
+    dropHTML("Sunglasses", shadesHTML(look, true)) +
+    dropHTML("Find a piece", findPiecesHTML(look, true)) +
+    dropHTML("The reference", inspoHTML(look, true));
   return '<article class="card look-card">' + media + '<div class="look-body">' +
-    "<h3>" + esc(look.title) + (look.version > 1 ? ' <span style="font-size:18px;color:var(--brass);font-style:italic">· take ' + look.version + "</span>" : "") + "</h3>" +
-    metaLine + dirLine + sourceLine +
-    stripHTML(look.swatches, "lg") + legendHTML(look.swatches) +
-    ((look.notes && look.notes.length) ? notesHTML(look.notes) : (cardIcon ? notesHTML([cardIcon.rules[0], cardIcon.rules[1]]) : "")) +
-    (opts.actions === false ? "" : findPiecesHTML(look)) +
-    (opts.actions === false ? "" : inspoHTML(look)) +
-    (opts.actions === false ? "" :
-      '<div class="look-actions">' +
-      (look.plate ? '<button type="button" class="btn-ghost" data-action="open-plate" data-plate="' + look.plate + '">Open Plate ' + look.plate + "</button>" : "") +
-      '<button type="button" class="btn-ghost" data-action="share-look">Share as image</button>' +
-      "</div>" + wristHTML(look) + feedbackHTML(look)) +
+    head +
+    feedbackHTML(look) +
+    '<div class="look-actions">' +
+    (look.plate ? '<button type="button" class="btn-ghost" data-action="open-plate" data-plate="' + look.plate + '">Open Plate ' + look.plate + "</button>" : "") +
+    '<button type="button" class="btn-ghost" data-action="share-look">Share as image</button>' +
+    "</div>" +
+    drops +
     "</div></article>";
 }
 
@@ -3434,7 +3632,8 @@ function closetAnchorItems() {
   var tops = poolItems.filter(function (i) { return ["Coats", "Leather jackets", "Sweaters", "Polos", "Shirts", "Button downs", "Tees", "Blazers", "Jackets", "Suits"].indexOf(i.category) !== -1; });
   var bottoms = poolItems.filter(function (i) { return ["Trousers", "Jeans", "Shorts"].indexOf(i.category) !== -1; });
   var shoes = poolItems.filter(function (i) { return i.category === "Shoes"; });
-  var out = tops.concat(bottoms).concat(shoes);
+  var shades = poolItems.filter(function (i) { return i.category === "Sunglasses"; });
+  var out = tops.concat(bottoms).concat(shoes).concat(shades);
   return out.length ? out : poolItems.slice();
 }
 function applySource(looks, source, origDesc) {
@@ -3630,6 +3829,7 @@ function buildClosetLooks() {
   var tops = avail.filter(function (i) { return ["Coats", "Leather jackets", "Sweaters", "Polos", "Shirts", "Button downs", "Tees", "Blazers", "Jackets", "Suits"].indexOf(i.category) !== -1; });
   var bottoms = avail.filter(function (i) { return ["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(i.category) !== -1; });
   var shoes = avail.filter(function (i) { return i.category === "Shoes"; });
+  var shades = avail.filter(function (i) { return i.category === "Sunglasses"; });
   if (!tops.length || !bottoms.length) return null;
   var combos = [];
   tops.forEach(function (t) { bottoms.forEach(function (b) { combos.push([t, b]); }); });
@@ -3641,6 +3841,7 @@ function buildClosetLooks() {
   return combos.slice(0, 6).map(function (pair, i) {
     var pieces = [pair[0], pair[1]];
     if (shoes.length) pieces.push(shoes[i % shoes.length]);
+    if (shades.length) pieces.push(shades[i % shades.length]);
     var swatches = [], seenHex = {};
     pieces.forEach(function (p) {
       if (p.colourHex && !seenHex[p.colourHex]) {
@@ -3670,7 +3871,7 @@ function buildClosetLooks() {
       flatlay: pieces.map(function (p) { return { hex: p.colourHex, label: cap(CLOSET_GARMENT[p.category] || "Piece"), detail: (p.colourName || "").split("·")[0].trim().toLowerCase() }; }),
       notes: ["Built entirely from pieces in your closet: " + names.join(", ") + ".", "Nothing here needs buying — it is already hanging in your wardrobe."],
       source: "wardrobe",
-      anchorNames: names.slice(0, 3)
+      anchorNames: names.slice(0, 4)
     };
   });
 }
@@ -4468,7 +4669,7 @@ renderCustomPalettes();
 syncPaletteSelect();
 
 /* ================= Wardrobe ================= */
-var CATEGORIES = ["All", "Shoes", "Shirts", "Tees", "Polos", "Jeans", "Shorts", "Bathing suits", "Trousers", "Button downs", "Suits", "Blazers", "Scarves", "Jackets", "Coats", "Leather jackets", "Hats", "Sweaters", "Socks", "Belts", "Gloves", "Vests", "Ties"];
+var CATEGORIES = ["All", "Shoes", "Shirts", "Tees", "Polos", "Jeans", "Shorts", "Bathing suits", "Trousers", "Button downs", "Suits", "Blazers", "Scarves", "Jackets", "Coats", "Leather jackets", "Hats", "Sunglasses", "Sweaters", "Socks", "Belts", "Gloves", "Vests", "Ties"];
 var wardrobeItems = [
   {
     id: "seed-cricket",
@@ -5370,17 +5571,81 @@ function recommendWatch(look) {
     { k: "Dial", t: top.why.dial }
   ]};
 }
-function wristHTML(look) {
+function wristHTML(look, bare) {
   var rec = recommendWatch(look);
   if (!rec.watch) return "";
   var pick = '<div class="w-pick">' +
     (rec.watch.photo ? '<img src="' + rec.watch.photo + '" alt="" />' : "") +
     '<div><div class="w-name">' + esc(rec.watch.name) + '</div>' +
     '<div class="w-sub">' + esc(rec.watch.metal) + " · " + esc(rec.watch.dialName) + (rec.watch.strap === "Not recorded" ? "" : " · " + esc(rec.watch.strap)) + "</div></div></div>";
-  return '<div class="wrist"><h4>On the wrist</h4>' + pick +
+  var inner = pick +
     "<ul>" + rec.reasons.map(function (r) {
       return '<li><span class="k">' + esc(r.k) + "</span><span>" + esc(r.t) + "</span></li>";
-    }).join("") + "</ul></div>";
+    }).join("") + "</ul>";
+  if (bare) return '<div class="wrist bare">' + inner + "</div>";
+  return '<div class="wrist"><h4>On the wrist</h4>' + inner + "</div>";
+}
+
+/* ================= Sunglasses — the eyewear call for a look =================
+   Sunglasses live in the Closet like any other piece, and every
+   look gets an eyewear call beside the watch call: the pair from
+   your closet whose frame colour sits closest to the look's
+   palette, with the reasoning spelled out. With no pair in the
+   closet yet, the call is generic — the frame family the palette
+   asks for — so inspo looks carry sunglasses either way, and
+   adding a pair in the Closet makes the call personal. */
+function recommendSunglasses(look) {
+  var warmth = paletteWarmth(look);
+  var warm = warmth > 14, cool = warmth < -14;
+  var frameAdvice = warm ? "tortoiseshell or a warm brown frame — the palette runs warm, and a warm frame glows against it"
+    : cool ? "black or a cool grey frame — the palette runs cool, and a dark frame keeps it crisp"
+    : "tortoiseshell or black — the palette is balanced, so either classic frame family works";
+  var pool = (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).filter(function (i) { return i.category === "Sunglasses" && !i.laundry; });
+  if (!pool.length) {
+    return { item: null, reasons: [
+      { k: "Frame", t: "Go " + frameAdvice + "." },
+      { k: "Lens", t: "A green or grey-green lens flatters warm and neutral palettes alike; brown lenses deepen an earthy look, grey keeps a cool one honest." },
+      { k: "Yours", t: "No sunglasses in your Closet yet — add a pair in the Closet and this call names it, the way the wrist names your watch." }
+    ]};
+  }
+  var scored = pool.map(function (it) {
+    var score = 0, why = { frame: "", lens: "" };
+    var d = hexRgb(it.colourHex || "#1c1a17"), bd = Infinity, nearest = null;
+    (look.swatches || []).forEach(function (sw) { var dd = dist2(d, hexRgb(sw.hex)); if (dd < bd) { bd = dd; nearest = sw; } });
+    var frameWarm = d[0] > d[2] + 18;
+    if (bd < 2600) { score += 3; why.frame = "The " + (it.colourName || "").split("·")[0].trim().toLowerCase() + " frame echoes " + (nearest ? nearest.name : "the palette") + " in the look — frame and outfit in one colour story."; }
+    else if (warm && frameWarm) { score += 2; why.frame = "The warm frame answers the palette's warmth — warm against warm reads intentional, never accidental."; }
+    else if (cool && !frameWarm) { score += 2; why.frame = "The dark, cool frame matches the palette's cool register and keeps the whole look crisp."; }
+    else { score += 1; why.frame = "The frame stands apart from the palette as a deliberate contrast — one strong note at the face."; }
+    var notes = (it.notes || "").toLowerCase();
+    if (/aviator/.test(notes)) why.lens = "The aviator shape suits this look's register — relaxed, a little cinematic.";
+    else if (/round/.test(notes)) why.lens = "The round frame softens tailoring — the classic Squarzi counterpoint to a structured outfit.";
+    else if (/wayfarer|square/.test(notes)) why.lens = "The squared frame holds its own against structured pieces — Ford's rule: the glasses finish the suit.";
+    else why.lens = "Dark lenses keep the look's register — sunglasses are the last piece on, and the first one noticed.";
+    return { item: it, score: score, why: why };
+  });
+  scored.sort(function (a, b) { return b.score - a.score; });
+  var top = scored[0];
+  return { item: top.item, reasons: [
+    { k: "Frame", t: top.why.frame },
+    { k: "Lens", t: top.why.lens }
+  ]};
+}
+function shadesHTML(look, bare) {
+  var rec = recommendSunglasses(look);
+  var pick = "";
+  if (rec.item) {
+    pick = '<div class="w-pick">' +
+      (rec.item.photo ? '<img src="' + rec.item.photo + '" alt="" />' : "") +
+      '<div><div class="w-name">' + esc(rec.item.name) + '</div>' +
+      '<div class="w-sub">' + esc((rec.item.colourName || "").split("·")[0].trim()) + " · From your closet</div></div></div>";
+  }
+  var inner = pick +
+    "<ul>" + rec.reasons.map(function (r) {
+      return '<li><span class="k">' + esc(r.k) + "</span><span>" + esc(r.t) + "</span></li>";
+    }).join("") + "</ul>";
+  if (bare) return '<div class="wrist bare">' + inner + "</div>";
+  return '<div class="wrist"><h4>Sunglasses</h4>' + inner + "</div>";
 }
 
 function renderWatches() {
@@ -6213,7 +6478,7 @@ document.getElementById("source-row").addEventListener("click", function (e) {
   toast(studioSource === "wardrobe" ? "My wardrobe: looks built only from what you own." : studioSource === "inspo" ? "Inspo: looks built outside your wardrobe." : "Combo: your pieces, completed with pieces to buy.");
 });
 setSource("combo");
-var CLOSET_GARMENT = { "Sweaters": "knit", "Polos": "polo", "Shirts": "shirt", "Button downs": "shirt", "Tees": "tee", "Trousers": "trousers", "Jeans": "jeans", "Shorts": "shorts", "Bathing suits": "swim trunks", "Blazers": "blazer", "Jackets": "jacket", "Coats": "coat", "Leather jackets": "leather jacket", "Suits": "blazer", "Shoes": "loafers", "Gloves": "gloves", "Vests": "vest", "Ties": "tie", "Scarves": "scarf", "Hats": "hat", "Belts": "belt", "Socks": "socks" };
+var CLOSET_GARMENT = { "Sweaters": "knit", "Polos": "polo", "Shirts": "shirt", "Button downs": "shirt", "Tees": "tee", "Trousers": "trousers", "Jeans": "jeans", "Shorts": "shorts", "Bathing suits": "swim trunks", "Blazers": "blazer", "Jackets": "jacket", "Coats": "coat", "Leather jackets": "leather jacket", "Suits": "blazer", "Shoes": "loafers", "Gloves": "gloves", "Vests": "vest", "Ties": "tie", "Scarves": "scarf", "Hats": "hat", "Sunglasses": "sunglasses", "Belts": "belt", "Socks": "socks" };
 function closetDescription() {
   function pick(cats) {
     var pool = wardrobeItems.filter(function (i) { return cats.indexOf(i.category) !== -1; });
@@ -6234,7 +6499,8 @@ function closetDescription() {
   var parts = [
     phrase(pick(["Coats", "Leather jackets", "Sweaters", "Polos", "Shirts", "Button downs", "Tees", "Blazers", "Jackets"])),
     phrase(pick(["Trousers", "Jeans", "Shorts"])),
-    phrase(pick(["Shoes"]))
+    phrase(pick(["Shoes"])),
+    phrase(pick(["Sunglasses"]))
   ].filter(Boolean);
   return parts.length ? parts.join(" with ") : "";
 }
