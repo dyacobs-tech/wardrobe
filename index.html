@@ -4290,6 +4290,16 @@ function dealerLook(opts) {
   if (opts.blendId) clone.blendId = opts.blendId;
   var ic = iconById(clone.iconId);
   if (ic && !clone.notes.length) clone.notes = [ic.rules[0], ic.rules[1]];
+  /* A free dealer's-choice look obeys the endless rule too: if
+     the picked look's title — or its pairing — was dealt in an
+     earlier deal, a combination never dealt before takes its
+     place. (A caller-passed pool is the caller's exact card and
+     is dealt as chosen.) */
+  if (!opts.pool && typeof dealtTitleSet !== "undefined" && typeof dealtComboSet !== "undefined" &&
+      ((clone.title && dealtTitleSet[clone.title]) || (clone.plate != null && dealtComboSet[comboKey(clone.iconId, clone.plate, formalityOf(clone.img), "")]))) {
+    var freshGen = generateComboLook({ version: opts.version || 1, iconId: opts.iconId || null });
+    if (freshGen) return freshGen;
+  }
   return clone;
 }
 
@@ -4302,9 +4312,10 @@ function dealerLook(opts) {
    across the nine icons, each with its own description the engine
    styles from. 479 cards in all. A persistent dealt-card history
    (separate from the render history, keyed by photograph) means no card — render
-   or reference — is dealt twice until the whole deck has been
-   dealt through; only then does the deck reshuffle, keeping
-   whatever is on screen out of the first new hand. Reference takes
+   or reference — is dealt twice: the deck never reshuffles into
+   a hand, so once the undealt cards cannot fill a hand the rest
+   of the hand is generated from combinations never dealt before
+   (the combination engine below). Reference takes
    are labelled as what they are: the icon's own photograph of the
    outfit, with the engine's styling of it underneath — tap Style
    this look on one and the Studio builds your version. */
@@ -4316,7 +4327,6 @@ function recordCards(imgs) {
     if (at !== -1) dealtCardHistory.splice(at, 1);
     dealtCardHistory.push(img);
   });
-  if (dealtCardHistory.length > 2000) dealtCardHistory = dealtCardHistory.slice(-2000);
   store.set("dealtCards", dealtCardHistory);
 }
 /* ================= The combination engine =================
@@ -4328,7 +4338,11 @@ function recordCards(imgs) {
    further. A persistent combination history records every pairing
    dealt, and generation always picks a pairing that has never
    been dealt — so dealing keeps producing new looks instead of
-   cycling back through the deck. */
+   cycling back through the deck. The history is PERMANENT:
+   nothing is ever evicted from it, because an evicted pairing
+   would read as undealt and deal again — permanence is what
+   makes "never repeats" true across any number of deals, not
+   just the first few hundred. */
 var dealtCombos = (store.get("dealtCombos", []) || []).filter(function (k) { return typeof k === "string"; });
 var dealtComboSet = {};
 dealtCombos.forEach(function (k) { dealtComboSet[k] = true; });
@@ -4339,7 +4353,6 @@ function recordCombo(key) {
   if (!key || dealtComboSet[key]) return;
   dealtComboSet[key] = true;
   dealtCombos.push(key);
-  if (dealtCombos.length > 6000) dealtCombos = dealtCombos.slice(-6000);
   store.set("dealtCombos", dealtCombos);
 }
 /* Every title ever dealt, persisted alongside the combinations.
@@ -4358,11 +4371,6 @@ function recordTitles(looks) {
   (looks || []).forEach(function (l) {
     if (l && l.title && !dealtTitleSet[l.title]) { dealtTitleSet[l.title] = true; dealtTitles.push(l.title); changed = true; }
   });
-  if (dealtTitles.length > 4000) {
-    dealtTitles = dealtTitles.slice(-4000);
-    dealtTitleSet = {};
-    dealtTitles.forEach(function (t) { dealtTitleSet[t] = true; });
-  }
   if (changed) store.set("dealtTitles", dealtTitles);
 }
 function recordLookCombos(looks) {
@@ -4375,55 +4383,141 @@ function recordLookCombos(looks) {
     if (l.comboKey) recordCombo(l.comboKey);
   });
 }
+/* A title for a generated combination that has never been dealt.
+   The name is drawn from the plate's own colours, rung by rung —
+   the plate's other colour pairings first, then its full colour
+   story, then the icon's name, then the plate number itself —
+   and every rung is checked against the permanent title history
+   and the titles already in the hand being built. The last rung
+   carries a serial drawn from the size of the history, which
+   only ever grows, so it cannot collide either: a fresh title
+   always exists, which is what lets generation promise one. */
+function freshComboTitle(icon, plate, usedTitles) {
+  function taken(t) {
+    return !!t && ((typeof dealtTitleSet !== "undefined" && dealtTitleSet[t]) || (usedTitles && usedTitles[t]));
+  }
+  var n = plate.colors.map(function (c) { return shortName(c.name); });
+  var cands = [];
+  if (n.length >= 2) cands.push(n[0] + " & " + n[1]);
+  if (n.length >= 3) cands.push(n[0] + " & " + n[2]);
+  if (n.length >= 3) cands.push(n[1] + " & " + n[2]);
+  if (n.length >= 4) cands.push(n[0] + " & " + n[3]);
+  if (n.length >= 4) cands.push(n[2] + " & " + n[3]);
+  if (n.length >= 4) cands.push(n[1] + " & " + n[3]);
+  if (n.length >= 3) cands.push(n.slice(0, n.length - 1).join(", ") + " & " + n[n.length - 1]);
+  if (n.length >= 2) cands.push(icon.name.split(" ").pop() + "’s " + n[0] + " & " + n[1]);
+  if (n.length >= 2) cands.push(n[0] + " & " + n[1] + " · Plate " + plate.plate);
+  if (n.length >= 2) cands.push(icon.name + " · " + n[0] + " & " + n[1] + " · Plate " + plate.plate);
+  if (n.length === 1) cands.push(n[0]);
+  for (var i = 0; i < cands.length; i++) { if (!taken(cands[i])) return cands[i]; }
+  var base = n.length >= 2 ? n[0] + " & " + n[1] : (n[0] || "The look");
+  var serial = (typeof dealtTitles !== "undefined" ? dealtTitles.length : 0) + 1;
+  while (taken(base + " · No. " + serial)) serial++;
+  return base + " · No. " + serial;
+}
 /* Create one brand-new look from a combination that has never
-   been dealt: an icon whose direction has not yet been paired
-   with the chosen plate, styled by the full build engine in that
-   plate's colours. */
+   been dealt. The pairing is chosen FROM the undealt space: the
+   permanent combination history is enumerated, and only
+   icon × plate pairings absent from it are eligible — so a
+   generated look is fresh by construction, not by luck, and
+   there is no random fallback that can land on a spent pairing.
+   Nine icons × 348 plates is 3,132 pairings before formality
+   and closet anchors multiply the space further; and if even
+   those were ever dealt through, generation moves on to the
+   formality × anchor variants of the space, whose full
+   combination keys have never been dealt, under a serial title
+   from the ladder above. The supply does not run out. */
 function generateComboLook(opts) {
   opts = opts || {};
   var icons = allIcons();
-  if (!icons.length) return null;
+  if (!icons.length || !PLATES.length) return null;
   /* Icon × plate pairings already dealt, at any formality or
      anchor — a pairing is spent once dealt, however it was dealt. */
   var dealtIP = {};
   dealtCombos.forEach(function (k) { var parts = k.split("|"); if (parts.length > 1) dealtIP[parts[0] + "|" + parts[1]] = true; });
-  var icon = opts.iconId ? iconById(opts.iconId) : null;
-  if (!icon) {
-    var fresh = icons.filter(function (ic) {
-      return PLATES.some(function (p) { return !dealtIP[ic.id + "|" + p.plate]; });
-    });
-    var poolIcons = fresh.length ? fresh : icons;
-    icon = poolIcons[Math.floor(Math.random() * poolIcons.length)];
-  }
-  if (!icon) return null;
-  /* The generated look is titled from its plate's first two
-     colours — and a plate's title can already be spent even when
-     this icon × plate pairing is fresh (another icon wore the
-     same plate). Prefer a plate whose pairing AND title are both
-     undealt; fall back to pairing alone, then to any plate. */
-  function plateTitleOf(p) {
+  var exclPlates = {};
+  (opts.excludePlates || []).forEach(function (p) { if (p != null) exclPlates[p] = true; });
+  var usedTitles = {};
+  (opts.excludeTitles || []).forEach(function (t) { if (t) usedTitles[t] = true; });
+  function rungTitle(ic, p) {
     var n = p.colors.map(function (c) { return shortName(c.name); });
     return n.length > 1 ? n[0] + " & " + n[1] : (n[0] || "");
   }
-  var plate = bestPlateFor(icon.palette.slice(0, 4), function (p) {
-    return !dealtIP[icon.id + "|" + p.plate] && !(typeof dealtTitleSet !== "undefined" && dealtTitleSet[plateTitleOf(p)]);
-  }, icon.palette, null);
-  if (!plate) plate = bestPlateFor(icon.palette.slice(0, 4), function (p) {
-    return !dealtIP[icon.id + "|" + p.plate];
-  }, icon.palette, null);
-  if (!plate) plate = PLATES[Math.floor(Math.random() * PLATES.length)];
-  var look = buildLook(icon.signatureDesc, opts.occasion || "", opts.season || "", {
-    iconId: icon.id, basis: "both", plate: plate, version: opts.version || 1,
-    excludeImgs: opts.excludeImgs || {}
-  });
-  if (!look) return null;
-  look.generated = true;
-  look.comboKey = comboKey(icon.id, plate.plate, formalityOf(look.img), "");
-  var names = plate.colors.map(function (c) { return shortName(c.name); });
-  look.title = names.length > 1 ? names[0] + " & " + names[1] : (names[0] || look.title);
-  look.meta = icon.name + " × Plate " + plate.plate + " · a new combination";
-  look.notes = ["A pairing dealt for the first time: " + icon.name + "'s direction in Plate " + plate.plate + "'s colours (" + plate.colors.map(function (c) { return c.name; }).join(", ") + ")."].concat(look.notes || []);
-  return look;
+  function plateFree(ic, p) { return !dealtIP[ic.id + "|" + p.plate] && !exclPlates[p.plate]; }
+  /* Icon order: the requested icon first, then the rest shuffled,
+     so generation spreads across all nine directions instead of
+     draining one icon's plates first. */
+  var iconOrder = shuffleArr(icons.slice());
+  var reqIcon = opts.iconId ? iconById(opts.iconId) : null;
+  if (reqIcon) {
+    iconOrder = iconOrder.filter(function (ic) { return ic.id !== reqIcon.id; });
+    iconOrder.unshift(reqIcon);
+  }
+  var icon = null, plate = null;
+  for (var ii = 0; ii < iconOrder.length && !plate; ii++) {
+    var ic = iconOrder[ii];
+    /* Best colour fit among plates whose pairing AND headline
+       title are both undealt; then among undealt pairings alone
+       (the title ladder still finds a fresh name for any of
+       them); then a random undealt plate for this icon. Only an
+       icon with no undealt plate at all is passed over. */
+    plate = bestPlateFor(ic.palette.slice(0, 4), function (p) {
+      var t = rungTitle(ic, p);
+      return plateFree(ic, p) && !(typeof dealtTitleSet !== "undefined" && dealtTitleSet[t]) && !usedTitles[t];
+    }, ic.palette, null);
+    if (!plate) plate = bestPlateFor(ic.palette.slice(0, 4), function (p) { return plateFree(ic, p); }, ic.palette, null);
+    if (!plate) {
+      var freePlates = PLATES.filter(function (p) { return plateFree(ic, p); });
+      if (freePlates.length) plate = freePlates[Math.floor(Math.random() * freePlates.length)];
+    }
+    if (plate) icon = ic;
+  }
+  if (plate && icon) {
+    var look = buildLook(icon.signatureDesc, opts.occasion || "", opts.season || "", {
+      iconId: icon.id, basis: "both", plate: plate, version: opts.version || 1,
+      excludeImgs: opts.excludeImgs || {}
+    });
+    if (!look) return null;
+    look.generated = true;
+    look.comboKey = comboKey(icon.id, plate.plate, formalityOf(look.img), "");
+    look.title = freshComboTitle(icon, plate, usedTitles);
+    look.meta = icon.name + " × Plate " + plate.plate + " · a new combination";
+    look.notes = ["A pairing dealt for the first time: " + icon.name + "'s direction in Plate " + plate.plate + "'s colours (" + plate.colors.map(function (c) { return c.name; }).join(", ") + ")."].concat(look.notes || []);
+    return look;
+  }
+  /* Every icon × plate pairing dealt — the far end of the base
+     space. Generation continues into the formality × anchor
+     variants: the same pairing at a level, or anchored in a
+     closet piece, whose FULL combination key has never been
+     dealt is a different outfit, and the title ladder's serial
+     rung names it freshly. With the closet's anchors counted,
+     this space runs to hundreds of thousands. */
+  var anchorNames = [""];
+  if (typeof closetAnchorItems !== "undefined") closetAnchorItems().forEach(function (a) { if (a && a.name && anchorNames.indexOf(a.name) === -1) anchorNames.push(a.name); });
+  var plateOrder = shuffleArr(PLATES.filter(function (p) { return !exclPlates[p.plate]; }));
+  for (var pi = 0; pi < plateOrder.length; pi++) {
+    var p2 = plateOrder[pi];
+    var ic2 = iconOrder[pi % iconOrder.length];
+    var look2 = buildLook(ic2.signatureDesc, opts.occasion || "", opts.season || "", {
+      iconId: ic2.id, basis: "both", plate: p2, version: opts.version || 1,
+      excludeImgs: opts.excludeImgs || {}
+    });
+    if (!look2) continue;
+    var level2 = formalityOf(look2.img);
+    var anchor2 = null;
+    for (var ai = 0; ai < anchorNames.length; ai++) {
+      if (!dealtComboSet[comboKey(ic2.id, p2.plate, level2, anchorNames[ai])]) { anchor2 = anchorNames[ai]; break; }
+    }
+    if (anchor2 === null) continue;
+    look2.generated = true;
+    look2.comboKey = comboKey(ic2.id, p2.plate, level2, anchor2);
+    if (anchor2) { look2.anchorNames = [anchor2]; }
+    look2.title = freshComboTitle(ic2, p2, usedTitles);
+    look2.meta = ic2.name + " × Plate " + p2.plate + " · a new combination";
+    look2.notes = ["A combination dealt for the first time: " + ic2.name + "'s direction in Plate " + p2.plate + "'s colours (" + p2.colors.map(function (c) { return c.name; }).join(", ") + ")" + (anchor2 ? ", anchored in your " + anchor2 : "") + "."].concat(look2.notes || []);
+    return look2;
+  }
+  return null;
 }
 /* Disliked photographs: removing a look, or marking it Not for
    me, records its photograph here — and every deal path (the
@@ -4477,11 +4571,12 @@ function shuffleArr(a) {
 /* Deal `need` takes from the whole deck: your renders and the
    icons' reference outfits together. Excluded photographs (the
    ones on screen, any the caller passes) never deal. Among the
-   rest, undealt cards at the meter's level come first, then
-   undealt cards a level away, and so on; dealt cards are only
-   reached for once the undealt run out at every distance — and if
-   even that cannot fill the hand, the oldest dealt cards return,
-   which is the deck reshuffling itself. */
+   rest, ONLY undealt cards are dealt — at the meter's level
+   first, then a level away, and so on. The deck never reshuffles
+   into a hand: when the undealt cards cannot fill the hand, the
+   rest of the hand is generated from combinations that have
+   never been dealt, so a dealt card — and with it a dealt
+   pairing and a dealt title — is never handed back. */
 function dealFromDeck(need, opts) {
   opts = opts || {};
   var exclude = {};
@@ -4495,53 +4590,56 @@ function dealFromDeck(need, opts) {
   ICON_IDEAS.forEach(function (idea) {
     if (!exclude[idea.img]) cards.push({ img: idea.img, level: idea.level, idea: idea });
   });
-  function groupKey(c) {
-    /* Freshness first, level bands inside it: an undealt card at
-       ANY band beats a dealt card at the meter's own level, so no
-       photograph is dealt twice while an undealt one remains
-       anywhere in the deck; the band only orders the undealt.
-       (Band-first dealt a small level's photographs over and over
-       while hundreds of undealt cards sat a level out.) */
-    return (dealtCardHistory.indexOf(c.img) === -1 ? 0 : 100000) + formalityBandCost(c.level) * 1000;
-  }
-  cards.sort(function (a, b) { return groupKey(a) - groupKey(b); });
+  /* Undealt cards only, ordered by formality band: cards at the
+     meter's level come first, then a level away, and so on.
+     Dealt cards are not in the running at all — freshness is not
+     a preference the sort can trade away, it is the filter. A
+     card whose title another card already dealt under is out of
+     the running too: it could never ship without repeating that
+     title, so leaving it in only wastes picks on takes the
+     freshness pass would have to replace. */
+  var undealt = cards.filter(function (c) {
+    if (dealtCardHistory.indexOf(c.img) !== -1) return false;
+    var t = c.idea ? c.idea.caption : (c.render ? titleForRender(c.render) : null);
+    return !(t && typeof dealtTitleSet !== "undefined" && dealtTitleSet[t]);
+  });
+  function groupKey(c) { return formalityBandCost(c.level) * 1000; }
+  undealt.sort(function (a, b) { return groupKey(a) - groupKey(b); });
   var picked = [], i = 0;
-  while (i < cards.length && picked.length < need) {
-    var j = i, key = groupKey(cards[i]);
-    while (j < cards.length && groupKey(cards[j]) === key) j++;
-    var group = shuffleArr(cards.slice(i, j));
+  while (i < undealt.length && picked.length < need) {
+    var j = i, key = groupKey(undealt[i]);
+    while (j < undealt.length && groupKey(undealt[j]) === key) j++;
+    var group = shuffleArr(undealt.slice(i, j));
     for (var g = 0; g < group.length && picked.length < need; g++) {
       picked.push(group[g]);
       /* A card in the hand is spent for this deal: the combination
-         fallback below deals against `exclude`, and without this a
+         generation below deals against `exclude`, and without this a
          generated take could land on a photograph already picked. */
       exclude[group[g].img] = true;
     }
     i = j;
   }
   if (picked.length < need) {
-    /* The deck is dealt through — create new combinations instead
-       of cycling back: icon × palette pairings never dealt before.
-       Generation gets every chance to fill the hand before the
-       reshuffle below is even considered. */
+    /* The undealt deck cannot fill the hand — create new
+       combinations instead of cycling back: icon × plate
+       pairings never dealt before, under titles never dealt
+       before. The picked cards' own titles are excluded too, so
+       a generated take cannot repeat a name the hand already
+       shows. Generation from the undealt space always fills the
+       hand; there is no reshuffle behind it. */
+    var handTitles = {};
+    picked.forEach(function (c) {
+      var t = c.idea ? c.idea.caption : (c.render ? titleForRender(c.render) : null);
+      if (t) handTitles[t] = true;
+    });
     var guard = 0;
     while (picked.length < need && guard < need * 4 + 4) {
       guard++;
-      var gen = generateComboLook({ version: picked.length + 1, iconId: opts.iconId || null, excludeImgs: exclude });
+      var gen = generateComboLook({ version: picked.length + 1, iconId: opts.iconId || null, excludeImgs: exclude, excludeTitles: Object.keys(handTitles) });
       if (!gen) break;
       picked.push({ img: gen.img, level: formalityOf(gen.img), gen: gen });
       exclude[gen.img] = true;
-    }
-  }
-  if (picked.length < need) {
-    var oldest = dealtCardHistory.slice();
-    for (var o = 0; o < oldest.length && picked.length < need; o++) {
-      if (exclude[oldest[o]]) continue;
-      if (picked.some(function (p) { return p.img === oldest[o]; })) continue;
-      var rc = null;
-      RENDER_POOL.forEach(function (r) { if (r.img === oldest[o]) rc = { img: r.img, level: formalityOf(r.img), render: r }; });
-      if (!rc) ICON_IDEAS.forEach(function (idea) { if (idea.img === oldest[o]) rc = { img: idea.img, level: idea.level, idea: idea }; });
-      if (rc) picked.push(rc);
+      if (gen.title) handTitles[gen.title] = true;
     }
   }
   return picked.map(function (c, k) {
@@ -5034,7 +5132,6 @@ function recordDealt(imgs) {
     if (at !== -1) dealtImgHistory.splice(at, 1);
     dealtImgHistory.push(img);
   });
-  if (dealtImgHistory.length > 48) dealtImgHistory = dealtImgHistory.slice(-48);
   store.set("dealtImgs", dealtImgHistory);
 }
 var OPTION_LABELS = ["Best match", "Take 2", "Take 3", "Take 4", "Take 5", "Take 6"];
@@ -5202,6 +5299,67 @@ function freshRenderFor(others) {
   var best = pool.filter(function (r) { return dealtBucket(r.img) === bestBucket; });
   return best[Math.floor(Math.random() * best.length)];
 }
+/* The endless rule, enforced on a finished take, whichever path
+   built it: the take ships only if (1) it does not repeat an
+   earlier take in this hand — photograph, title or plate;
+   (2) its pairing (icon × plate × formality) is absent from the
+   permanent combination history; and (3) its title is absent
+   from the permanent title history. A take that fails is made
+   fresh, never shipped as a repeat: an in-hand photograph/title
+   clash with a clean history is repaired with a fresh render,
+   and anything history has already spent is replaced by a
+   generated combination drawn from the undealt space, which is
+   fresh by construction — so the pass converges in a step or
+   two instead of giving up after a few tries and dealing the
+   repeat anyway. Reference takes are exempt from the pairing
+   check (the plate stamped on an icon's own photograph was
+   never a real pairing) and keep the stamp-drop rule for
+   in-hand plate clashes. */
+function enforceFreshTake(look, others, ctx) {
+  ctx = ctx || {};
+  var guard = 0;
+  while (look && guard < 10) {
+    guard++;
+    var clash = takeConflict(others, look);
+    if (clash === "plate" && look.refLook) { look.plate = null; clash = takeConflict(others, look); }
+    /* Pairings exist only where a plate does: a plate-less take
+       (most seed photographs) has no icon × plate pairing to
+       repeat — its freshness is the undealt-card rule and the
+       title rule, both checked here and in the deck. */
+    var pairingDealt = !look.refLook && look.plate != null && typeof dealtComboSet !== "undefined" &&
+      !!dealtComboSet[comboKey(look.iconId, look.plate, formalityOf(look.img), "")];
+    var titleDealt = !!(look.title && typeof dealtTitleSet !== "undefined" && dealtTitleSet[look.title]);
+    if (!clash && !pairingDealt && !titleDealt) return look;
+    if ((clash === "img" || clash === "title") && !pairingDealt && !titleDealt && !look.paletteName) {
+      var fr = freshRenderFor(others.concat([look]));
+      if (fr && fr.img !== look.img) {
+        var candTitle = titleForRender(fr);
+        if (!(typeof dealtTitleSet !== "undefined" && dealtTitleSet[candTitle])) {
+          look.img = fr.img;
+          look.imgAlt = fr.imgAlt || look.imgAlt;
+          look.title = candTitle;
+          continue;
+        }
+      }
+    }
+    var exclImgs = {};
+    if (ctx.excludeImgs) Object.keys(ctx.excludeImgs).forEach(function (k) { exclImgs[k] = true; });
+    others.forEach(function (o) { if (o && o.img) exclImgs[o.img] = true; });
+    if (look.img) exclImgs[look.img] = true;
+    var exclPlates = others.map(function (o) { return o ? o.plate : null; }).filter(function (p) { return p != null; });
+    if (look.plate != null && exclPlates.indexOf(look.plate) === -1) exclPlates.push(look.plate);
+    var exclTitles = others.map(function (o) { return o ? o.title : null; }).filter(function (t) { return !!t; });
+    var gen = generateComboLook({
+      version: ctx.version || look.version || 1,
+      iconId: ctx.iconId || null,
+      occasion: ctx.occasion || "", season: ctx.season || "",
+      excludeImgs: exclImgs, excludePlates: exclPlates, excludeTitles: exclTitles
+    });
+    if (!gen) return look;
+    look = gen;
+  }
+  return look;
+}
 function buildSixLooks(desc, occasion, season, baseOpts) {
   baseOpts = baseOpts || {};
   var looks = [];
@@ -5229,59 +5387,20 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
       looks.push(fill);
     }
     /* The guarantee holds on the dealer's hand too: no photograph,
-       title or plate repeats inside the six. A clashing take is
-       replaced by a combination never dealt before; if that still
-       wears an earlier take's photograph or title, a fresh render
-       is dealt in. A reference take whose only clash is the plate
-       the engine stamped on it simply drops the stamp — the
-       photograph is the icon's own, and a repeated "Plate 1" label
-       on it was never true. */
+       title or plate repeats inside the six, and no take's pairing
+       or title was dealt in an earlier deal. Every take goes
+       through the one enforcement pass: a take that repeats is
+       made fresh — a fresh render, or a combination drawn from
+       the undealt space — never shipped as the repeat. A
+       reference take whose only clash is the plate the engine
+       stamped on it simply drops the stamp — the photograph is
+       the icon's own, and a repeated "Plate 1" label on it was
+       never true. */
     for (var di = 0; di < looks.length; di++) {
-      var dLook = looks[di];
-      /* A reference take whose ONLY clash is the plate the engine
-         stamped on it keeps its photograph and drops the stamp —
-         replacing it with a generated take would burn a render
-         photograph the hand does not need to spend. */
-      if (takeConflict(looks.slice(0, di), dLook) === "plate" && dLook.refLook && !(dLook.title && dealtTitleSet[dLook.title])) {
-        dLook.plate = null;
-        continue;
-      }
-      var dGuard = 0;
-      /* A take whose title was dealt in an earlier deal is
-         escalated to a fresh combination too — the dealer's hand
-         obeys the same endless rule as every other hand. */
-      while ((takeConflict(looks.slice(0, di), dLook) || (dLook.title && dealtTitleSet[dLook.title])) && dGuard < 3) {
-        dGuard++;
-        var seenImgs = {};
-        looks.forEach(function (x, xi) { if (xi !== di && x.img) seenImgs[x.img] = true; });
-        if (dLook.img) seenImgs[dLook.img] = true;
-        var gen2 = generateComboLook({ version: di + 1, iconId: baseOpts.iconId || null, excludeImgs: seenImgs });
-        if (!gen2 || takeConflict(looks.slice(0, di), gen2) === "plate") {
-          /* A fresh pairing can still land on a plate the hand
-             already shows (a pairing is icon × plate; the plate
-             alone can repeat). Rebuild the take outright with the
-             hand's plates excluded, so the new take's pairing is
-             different in the plate itself. */
-          var usedPlates = looks.slice(0, di).map(function (x) { return x.plate; }).filter(function (p) { return p != null; });
-          if (dLook.plate != null && usedPlates.indexOf(dLook.plate) === -1) usedPlates.push(dLook.plate);
-          var alt2 = buildLook("An outfit from my palette", occasion, season, { basis: baseOpts.basis || studioBasis, excludePlates: usedPlates, excludeImgs: Object.assign({}, seenImgs), version: di + 1, iconId: baseOpts.iconId || null, blendId: baseOpts.blendId || null });
-          if (alt2 && !takeConflict(looks.slice(0, di), alt2)) gen2 = alt2;
-        }
-        if (!gen2) break;
-        dLook = gen2;
-        looks[di] = dLook;
-      }
-      var dClash = takeConflict(looks.slice(0, di), dLook);
-      if (dClash === "img" || dClash === "title") {
-        var fr2 = freshRenderFor(looks.slice(0, di));
-        if (fr2) {
-          dLook.img = fr2.img;
-          dLook.imgAlt = fr2.imgAlt || dLook.imgAlt;
-          if (!dLook.paletteName) dLook.title = titleForRender(fr2);
-        }
-      } else if (dClash === "plate" && dLook.refLook) {
-        dLook.plate = null;
-      }
+      looks[di] = enforceFreshTake(looks[di], looks.slice(0, di), {
+        version: di + 1, iconId: baseOpts.iconId || null,
+        occasion: occasion, season: season, excludeImgs: excludeImgs
+      });
     }
     return applySource(looks, baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc);
   }
@@ -5358,44 +5477,22 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
       look = buildLook(variantDesc(desc, i, baseOpts), occasion, season, Object.assign({}, opts, { excludePlates: excludePlates.slice(), excludeImgs: Object.assign({}, excludeImgs) }));
     }
     /* Endlessness, enforced LAST, on the finished take: if its
-       pairing was dealt in an earlier deal — or its title was —
-       the take is replaced by a generated combination from a
-       pairing that has never been dealt. The combination space
-       (every icon × every one of the 348 plates, multiplied by
-       formality and closet anchors) is effectively endless, so a
-       take never has to repeat a look from an earlier deal:
-       generation, not repetition, is the fallback. Running this
-       after the repair loop matters — a repair rebuild can land
-       on a pairing or a title that history has already spent,
-       and only a check on the final take catches it. */
-    if (dealtComboSet[comboKey(look.iconId, look.plate, formalityOf(look.img), "")] || (look.title && dealtTitleSet[look.title])) {
-      var escGen = null, escTries = 0;
-      while (escTries < 3) {
-        escTries++;
-        var escCand = generateComboLook({ version: i + 1, iconId: baseOpts.iconId || null, occasion: occasion, season: season, excludeImgs: Object.assign({}, excludeImgs) });
-        if (!escCand) break;
-        escGen = escCand;
-        if (!takeConflict(looks, escCand) && !(escCand.title && dealtTitleSet[escCand.title])) break;
-      }
-      if (escGen && (!takeConflict(looks, escGen) || takeConflict(looks, look))) look = escGen;
-    }
-    var clash = takeConflict(looks, look);
-    if (clash === "img" || clash === "title" || (look.title && dealtTitleSet[look.title])) {
-      var fr = freshRenderFor(looks);
-      if (fr) {
-        look.img = fr.img;
-        look.imgAlt = fr.imgAlt || look.imgAlt;
-        if (!look.paletteName) look.title = titleForRender(fr);
-      }
-    }
-    /* The render dealt in above can itself land on a pairing
-       history has spent — the swap changes the photograph, hence
-       its level, hence the pairing. One final generation pass
-       guards the pairing of the take exactly as it ships. */
-    if (dealtComboSet[comboKey(look.iconId, look.plate, formalityOf(look.img), "")]) {
-      var finGen = generateComboLook({ version: i + 1, iconId: baseOpts.iconId || null, occasion: occasion, season: season, excludeImgs: Object.assign({}, excludeImgs) });
-      if (finGen && !takeConflict(looks, finGen) && !(finGen.title && dealtTitleSet[finGen.title])) look = finGen;
-    }
+       pairing was dealt in an earlier deal, its title was, or it
+       still clashes with an earlier take in this hand, the one
+       enforcement pass makes it fresh — a combination drawn from
+       the undealt space, or a fresh render — and the take ships
+       only once it is clean. The combination space (every icon ×
+       every one of the 348 plates, multiplied by formality and
+       closet anchors) is effectively endless, so a take never
+       has to repeat a look from an earlier deal: generation, not
+       repetition, is the fallback. Running this after the repair
+       loop matters — a repair rebuild can land on a pairing or a
+       title that history has already spent, and only a check on
+       the final take catches it. */
+    look = enforceFreshTake(look, looks, {
+      version: i + 1, iconId: baseOpts.iconId || null,
+      occasion: occasion, season: season, excludeImgs: excludeImgs
+    });
     looks.push(look);
     excludeImgs[look.img] = true;
     if (look.plate && excludePlates.indexOf(look.plate) === -1) excludePlates.push(look.plate);
