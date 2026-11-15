@@ -101,11 +101,12 @@
       .rule-double::after { content: ""; position: absolute; top: 3px; left: 0; right: 0; border-top: 1px solid var(--border-strong); }
 
       /* ---------- Tabs — two tiers: sections on top, pages under ----------
-         The top row names five destinations: Today, Studio, Inspiration,
-         Find it, Profile. Studio and Inspiration are sections: a second
-         row beneath names their pages (Studio: Home, Closet, Watches,
-         Looks — Inspiration: Palettes, Icons) and shows only while one
-         of that section's pages is open. Both rows stick together. */
+         The top row names five destinations: Studio, Inspiration,
+         Find it, Calendar, Profile. Studio and Inspiration are sections:
+         a second row beneath names their pages (Studio: Today — the
+         cover page — Deal, Closet, My Looks; Inspiration: Palettes,
+         Icons, Brands) and shows only while one of that section's
+         pages is open. Both rows stick together. */
       .navstack {
         position: sticky; top: 0; z-index: 40;
         background: color-mix(in srgb, var(--bg) 92%, transparent);
@@ -1269,17 +1270,18 @@
     <div class="navstack">
       <nav class="tabbar" aria-label="Wardrobe sections">
         <div class="wrap" role="tablist">
-          <button class="tab" role="tab" id="tab-today" aria-selected="true" aria-controls="panel-today" data-tab="today">Today</button>
-          <button class="tab" role="tab" id="section-studio" aria-selected="false" data-section="studio">Studio</button>
+          <button class="tab" role="tab" id="section-studio" aria-selected="true" data-section="studio">Studio</button>
           <button class="tab" role="tab" id="section-inspiration" aria-selected="false" data-section="inspiration">Inspiration</button>
           <button class="tab" role="tab" id="tab-find" aria-selected="false" aria-controls="panel-find" data-tab="find">Find it</button>
+          <button class="tab" role="tab" id="tab-calendar" aria-selected="false" aria-controls="panel-calendar" data-tab="calendar">Calendar</button>
           <button class="tab" role="tab" id="tab-profile" aria-selected="false" aria-controls="panel-profile" data-tab="profile">Profile</button>
         </div>
       </nav>
-      <nav class="subnav" id="subnav" aria-label="Section pages" hidden>
+      <nav class="subnav" id="subnav" aria-label="Section pages">
         <div class="wrap">
-          <div class="subnav-group" id="subnav-studio" role="tablist" hidden>
-            <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Home</button>
+          <div class="subnav-group" id="subnav-studio" role="tablist">
+            <button class="subtab" role="tab" id="tab-today" aria-selected="true" aria-controls="panel-today" data-tab="today">Today</button>
+            <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Deal</button>
             <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
             <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks">My Looks</button>
           </div>
@@ -1630,21 +1632,25 @@
           <h3 class="fav-head">Recently removed</h3>
           <div id="recently-removed-list"></div>
         </div>
-        <div id="worn-log-wrap">
-          <h3 class="fav-head">What I wore</h3>
-          <div id="worn-log-list"></div>
-        </div>
         <div id="wishlist-wrap">
           <h3 class="fav-head">Wishlist — pieces your looks are missing</h3>
           <div id="wishlist-list"></div>
         </div>
+      </section>
+
+      <!-- ================= CALENDAR ================= -->
+      <section id="panel-calendar" role="tabpanel" aria-labelledby="tab-calendar" hidden>
         <div id="trips-wrap">
           <h3 class="fav-head">Trips — capsule &amp; packing</h3>
           <div class="fb-chips" role="group" aria-label="Trips">
-            <button type="button" class="chip" data-trip="marbella">Marbella · Jun 21 – Jul 5, 2027</button>
             <button type="button" class="chip" data-trip="aspen">Aspen</button>
+            <button type="button" class="chip" data-trip="marbella">Marbella · Jun 21 – Jul 5, 2027</button>
           </div>
           <div id="capsule-out" style="margin-top:10px"></div>
+        </div>
+        <div id="worn-log-wrap">
+          <h3 class="fav-head">What I wore</h3>
+          <div id="worn-log-list"></div>
         </div>
       </section>
 
@@ -12401,24 +12407,25 @@ document.getElementById("find-grid").addEventListener("click", function (e) {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands", "find", "profile"];
-/* Pages grouped under the top sections. Today, Find it and Profile
-   are pages of their own; Studio holds Home (the Create-a-Look
-   studio), Closet, Watches, Looks and the Queue; Inspiration
-   holds Palettes, Icons, Yours — the user's own favourite
-   looks, recycled — and Brands, the shops worth shopping.
+var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands", "find", "calendar", "profile"];
+/* Pages grouped under the top sections. Studio is the homepage
+   section: its first page is Today (the outfit of the day, as
+   Studio's cover page), then Deal (the Create-a-Look studio),
+   Closet and My Looks. Inspiration holds Palettes, Icons and
+   Brands. Find it, Calendar (trip capsules + What I wore) and
+   Profile are pages of their own.
    A section tab reopens the page last visited in it. */
 var SECTIONS = {
-  studio: ["studio", "wardrobe", "looks"],
+  studio: ["today", "studio", "wardrobe", "looks"],
   inspiration: ["palettes", "icons", "brands"],
-  today: ["today"],
   find: ["find"],
+  calendar: ["calendar"],
   profile: ["profile"]
 };
-var sectionHome = { studio: "studio", inspiration: "palettes", today: "today", find: "find", profile: "profile" };
+var sectionHome = { studio: "today", inspiration: "palettes", find: "find", calendar: "calendar", profile: "profile" };
 function sectionOf(name) {
   for (var k in SECTIONS) if (SECTIONS[k].indexOf(name) !== -1) return k;
-  return "today";
+  return "studio";
 }
 var currentTab = "today";
 function persistTab() {
