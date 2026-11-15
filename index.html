@@ -1159,23 +1159,25 @@
       .new-strip .ns-label { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); }
       .new-badge { display: inline-block; border: 1px solid var(--brass); color: var(--brass); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 1px 5px; border-radius: 2px; margin-left: 6px; vertical-align: middle; }
 
-      /* ---------- Today — compact hero (front page) ----------
-         The opening look box was full-viewport tall and full-bleed,
-         so nothing else fit on screen. It now runs at roughly half
-         the height, contained with side margins and a border, and
-         every element inside it — title, dots, action buttons,
-         location chips, formality chips — runs small and tight,
-         so the whole Today page feels compact, not oversized. */
-      main:has(> #panel-today:not([hidden])) { max-width: 920px; margin: 0 auto; padding: 10px 12px 18px; }
+      /* ---------- Today — full-screen hero, compact content ----------
+         The hero fills the whole screen: full-bleed, edge to edge,
+         stretching from under the tab bar to the bottom of the
+         viewport, so there is no compressed box and no empty space
+         below it. The page becomes a flex column exactly as tall as
+         the viewport while Today is open, and the hero takes all
+         the room under the header. Everything INSIDE the hero —
+         title, dots, action buttons, location chips, formality
+         chips — stays small and tight, as does the wordmark. */
+      body:has(> main > #panel-today:not([hidden])) { display: flex; flex-direction: column; min-height: 100dvh; }
+      main:has(> #panel-today:not([hidden])) { max-width: none; margin: 0; padding: 0; flex: 1 1 auto; display: flex; flex-direction: column; }
       body:has(> main > #panel-today:not([hidden])) .masthead .brand { font-size: clamp(24px, 5vw, 32px); }
       body:has(> main > #panel-today:not([hidden])) footer { margin-top: 0; }
+      #panel-today { flex: 1 1 auto; display: flex; flex-direction: column; }
       #panel-today .today-hero {
-        height: 54dvh; min-height: 400px; max-height: 500px;
-        border: 1px solid var(--border); border-radius: 10px;
-        box-shadow: var(--shadow-card);
+        flex: 1 1 auto; height: auto; min-height: 0; max-height: none;
+        border: none; border-radius: 0;
+        box-shadow: none;
       }
-      @media (min-width: 760px) { #panel-today .today-hero { height: 52dvh; max-height: 480px; } }
-      @media (max-width: 480px) { #panel-today .today-hero { height: 56dvh; min-height: 380px; max-height: 480px; } }
       #panel-today .today-shade { background: linear-gradient(to top, rgba(16,13,9,.88) 0%, rgba(16,13,9,.46) 46%, rgba(16,13,9,0) 74%); }
       #panel-today .today-caption { padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); }
       #panel-today .today-kicker { font-size: 9.5px; letter-spacing: .22em; margin: 0 0 3px; }
