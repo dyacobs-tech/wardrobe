@@ -112,9 +112,13 @@
         backdrop-filter: blur(10px);
         border-bottom: 1px solid var(--border);
         margin-top: 0;
-        /* Home-screen standalone: the sticky bar must not slide
-           under the notch — its own background fills the safe area. */
-        padding-top: env(safe-area-inset-top, 0px);
+        /* No safe-area padding here: that padding sat IN FLOW between
+           the masthead's rule and the tabs, and on a phone it resolved
+           to a large empty band under the title. The masthead above
+           already carries the safe-area inset (above the title), so at
+           the top of the page the whole header sits below the notch
+           with the nav directly under the rule — one compact header. */
+        padding-top: 0;
       }
       .tabbar .wrap { display: flex; gap: 2px; padding-top: 0; padding-bottom: 0; }
       .tab {
@@ -217,6 +221,17 @@
       @media (min-width: 640px) { .form-row { grid-template-columns: 1fr 1fr; } }
       .examples { display: flex; flex-wrap: wrap; gap: 8px; }
       .inspo-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+      .inspo-thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
+      .inspo-thumbs:empty { display: none; }
+      .inspo-thumb { width: 62px; height: 80px; min-height: 0; padding: 0; border: 2px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface-alt); flex: none; }
+      .inspo-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+      .inspo-thumb[aria-pressed="true"] { border-color: var(--accent); outline: 1px solid var(--accent); }
+      .inspo-active { display: flex; gap: 12px; align-items: center; border: 1px solid var(--border); background: var(--surface-alt); border-radius: var(--radius); padding: 9px 12px; }
+      .inspo-active[hidden] { display: none; }
+      .inspo-active img { width: 46px; height: 60px; object-fit: cover; object-position: top center; border: 1px solid var(--border); flex: none; }
+      .inspo-active .ia-main { flex: 1; min-width: 0; font-size: 13.5px; line-height: 1.4; }
+      .inspo-active .ia-main strong { display: block; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+      .inspo-active .btn-ghost { min-height: 38px; padding: 6px 10px; font-size: 11px; flex: none; }
       .look-result { margin-top: 24px; }
       /* ---------- Six takes (everywhere except Today) ---------- */
       .options-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; justify-content: space-between; margin-bottom: 14px; }
@@ -412,6 +427,45 @@
       .principles li { display: flex; gap: 12px; font-size: 15px; line-height: 1.55; }
       .principles li .n { font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--brass); flex: none; line-height: 1.25; }
       .principles li strong { display: block; font-family: var(--font-display); font-size: 18px; }
+      /* ---------- Icons — House Rules behind an info button ---------- */
+      .section-head.with-info { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+      .section-head.with-info h2 { margin: 0; }
+      .info-btn {
+        flex: none; width: 38px; height: 38px; min-height: 38px; margin-top: 6px;
+        border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text);
+        font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 21px; line-height: 1;
+        display: grid; place-items: center; padding: 0 0 2px;
+      }
+      .info-btn:hover { background: var(--surface-alt); }
+      .info-btn[aria-expanded="true"] { background: var(--ink-btn); color: var(--ink-btn-text); }
+      .info-pop-backdrop {
+        position: fixed; inset: 0; z-index: 80; background: rgba(20,17,13,.55);
+        display: grid; place-items: end center; padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+      }
+      @media (min-width: 640px) { .info-pop-backdrop { place-items: center; padding: 24px; } }
+      .info-pop-backdrop[hidden] { display: none; }
+      .info-pop-backdrop .principles {
+        margin-top: 0; width: 100%; max-width: 680px; max-height: min(84dvh, 720px); overflow-y: auto;
+        box-shadow: var(--shadow-lift);
+      }
+      .principles-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+      .principles-head h3 { margin: 0 0 6px; }
+      .info-pop-close {
+        flex: none; width: 38px; height: 38px; min-height: 38px; border-radius: 50%;
+        border: 1px solid var(--border-strong); background: transparent; color: var(--text);
+        font-size: 22px; line-height: 1; display: grid; place-items: center; padding: 0 0 2px;
+      }
+      .info-pop-close:hover { background: var(--surface-alt); }
+      .info-btn.sm { width: 26px; height: 26px; min-height: 26px; font-size: 15px; margin: 0; padding: 0 0 1px; flex: none; }
+      .label-row { display: flex; align-items: center; gap: 8px; }
+      .label-row label.field { margin: 0; }
+      .card-head-info { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+      .card-head-info h3, .card-head-info h4 { margin: 0; }
+      .info-pop-card { padding: 22px; width: 100%; max-width: 560px; max-height: min(84dvh, 640px); overflow-y: auto; box-shadow: var(--shadow-lift); margin-top: 0; }
+      .info-pop-card p { margin: 0; font-size: 15px; line-height: 1.6; }
+      .inspo h4, .find-pieces h4 { display: inline; }
+      .info-inline-row { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+      .info-inline-row h4 { margin: 0; }
       .sold-badge { display: inline-block; border: 1px solid var(--accent); color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; padding: 4px 9px; border-radius: 2px; }
       .want-badge { display: inline-block; border: 1px solid var(--brass); color: var(--brass); font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; padding: 4px 9px; border-radius: 2px; }
       .chip .count { color: var(--brass); margin-left: 2px; }
@@ -707,13 +761,13 @@
                 <textarea id="desc" name="desc" placeholder=""></textarea>
               </div>
               <div>
-                <label class="field">Base the outfit on</label>
+                <div class="label-row"><label class="field">Base the outfit on</label><button type="button" class="info-btn sm" data-info-from="basis-note" data-info-title="Base the outfit on" aria-label="About: base the outfit on">i</button></div>
                 <div class="basis-row" id="basis-row" role="group" aria-label="Base the outfit on">
                   <button type="button" class="basis-btn" data-basis="icon" aria-pressed="false">Icon<small>Who you're dressing as</small></button>
                   <button type="button" class="basis-btn" data-basis="palette" aria-pressed="false">Palette<small>Colour combinations lead</small></button>
                   <button type="button" class="basis-btn" data-basis="both" aria-pressed="true">Both<small>Icon leads, palette supports</small></button>
                 </div>
-                <p class="form-note" id="basis-note" style="margin-top:8px">The icon leads. The palette brings only colour combinations that fit the icon's own world — it never recolours the icon's decisions.</p>
+                <p class="form-note" id="basis-note" hidden>The icon leads. The palette brings only colour combinations that fit the icon's own world — it never recolours the icon's decisions.</p>
               </div>
               <div class="form-row">
                 <div>
@@ -742,9 +796,22 @@
                 </div>
               </div>
               <div id="inspo-pick-field">
-                <label class="field">Inspo — pick an icon to dress from</label>
+                <div class="label-row"><label class="field">Inspo — pick an icon to dress from</label><button type="button" class="info-btn sm" data-info-from="inspo-note" data-info-title="Inspo" aria-label="About: inspo icons">i</button></div>
                 <div class="inspo-pick" id="inspo-pick" role="group" aria-label="Pick an icon to use as inspo"></div>
-                <p class="form-note" style="margin-top:8px">Tap an icon and the look is built in their direction — their signature outfit, their colours, their shoe, their rules. Auto leaves it to the outfit itself.</p>
+                <p class="form-note" id="inspo-note" hidden>Tap an icon and the look is built in their direction — their signature outfit, their colours, their shoe, their rules. Auto leaves it to the outfit itself.</p>
+              </div>
+              <div id="image-inspo-field">
+                <div class="label-row"><label class="field">Individual image — build from your own photo</label><button type="button" class="info-btn sm" data-info-title="Individual image" data-info-text="Upload a screenshot or photo and the Studio builds the look from that image, the same way it builds from an icon or a palette. The image is saved here so you can pick it again later as inspo." aria-label="About: individual image">i</button></div>
+                <div class="inspo-thumbs" id="inspo-thumbs" role="group" aria-label="Your saved inspo images"></div>
+                <label class="photo-drop" for="inspo-photo" style="margin-top:8px">
+                  <span class="pd-title" id="inspo-photo-label">Upload a screenshot or photo</span>
+                  <input type="file" id="inspo-photo" accept="image/*" />
+                </label>
+                <div style="margin-top:10px">
+                  <label class="field" for="inspo-desc">What is in the image? — colours, pieces (optional)</label>
+                  <input type="text" id="inspo-desc" placeholder="e.g. Navy blazer with cream trousers and brown loafers" autocomplete="off" />
+                </div>
+                <div class="inspo-active" id="inspo-active" hidden></div>
               </div>
               <div>
                 <label class="field" for="style-direction">Style direction — who you're dressing as</label>
@@ -779,13 +846,13 @@
                 </select>
               </div>
               <div>
-                <label class="field">Build from — where the outfit comes from</label>
+                <div class="label-row"><label class="field">Build from — where the outfit comes from</label><button type="button" class="info-btn sm" data-info-from="source-note" data-info-title="Build from" aria-label="About: build from">i</button></div>
                 <div class="source-row" id="source-row" role="group" aria-label="Build from — My wardrobe, Inspo, or Combo">
                   <button type="button" class="basis-btn" data-source="wardrobe" aria-pressed="false">My wardrobe<small>Only pieces you own</small></button>
                   <button type="button" class="basis-btn" data-source="inspo" aria-pressed="false">Inspo<small>Outside your wardrobe</small></button>
                   <button type="button" class="basis-btn" data-source="combo" aria-pressed="true">Combo<small>Yours + pieces to buy</small></button>
                 </div>
-                <p class="form-note" id="source-note" style="margin-top:8px">Combo — the default: each look is anchored in something you already own, and the rest is inspo to buy that completes it. Pieces that are yours are named as yours; the rest carries a Find this button.</p>
+                <p class="form-note" id="source-note" hidden>Combo — the default: each look is anchored in something you already own, and the rest is inspo to buy that completes it. Pieces that are yours are named as yours; the rest carries a Find this button.</p>
               </div>
               <div class="formality" id="formality-studio">
                 <div class="formality-head">
@@ -1034,8 +1101,9 @@
 
       <!-- ================= STYLE ICONS ================= -->
       <section id="panel-icons" role="tabpanel" aria-labelledby="tab-icons" hidden>
-        <div class="section-head">
+        <div class="section-head with-info">
           <h2>Style Icons</h2>
+          <button type="button" class="info-btn" id="icons-info-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="icons-info-pop" aria-label="About the House Rules — the description behind these icons" title="House Rules">i</button>
         </div>
 
         <div class="card add-form icon-tools" id="icon-search-card" style="margin-bottom:14px">
@@ -1050,9 +1118,9 @@
         </div>
 
         <form class="card add-form icon-tools" id="icon-form" style="margin-bottom:22px">
-          <button type="button" class="tools-toggle" id="icon-form-toggle" aria-expanded="false" aria-controls="icon-form-body"><span>Add your own icon</span><span class="tt-chev" aria-hidden="true">▾</span></button>
+          <div style="display:flex;align-items:center;gap:8px"><button type="button" class="tools-toggle" id="icon-form-toggle" aria-expanded="false" aria-controls="icon-form-body" style="flex:1"><span>Add your own icon</span><span class="tt-chev" aria-hidden="true">▾</span></button><button type="button" class="info-btn sm" data-info-from="icon-form-note" data-info-title="Add your own icon" aria-label="About: add your own icon">i</button></div>
           <div class="tools-body" id="icon-form-body" hidden>
-          <p class="form-note" style="margin:0">For someone search can't find — a friend, your dad, anyone whose style you know first-hand. Build their profile from your own description and the engine styles from it the same way.</p>
+          <p class="form-note" id="icon-form-note" hidden>For someone search can't find — a friend, your dad, anyone whose style you know first-hand. Build their profile from your own description and the engine styles from it the same way.</p>
           <div class="form-row">
             <div>
               <label class="field" for="icon-name">Name</label>
@@ -1140,8 +1208,12 @@
 
         <div id="icon-detail" hidden></div>
 
-        <div class="card principles" id="icon-principles">
-          <h3>The House Rules — what the engine enforces</h3>
+        <div class="info-pop-backdrop" id="icons-info-pop" hidden>
+        <div class="card principles" id="icon-principles" role="dialog" aria-modal="true" aria-labelledby="icon-principles-title">
+          <div class="principles-head">
+            <h3 id="icon-principles-title">The House Rules — what the engine enforces</h3>
+            <button type="button" class="info-pop-close" id="icons-info-close" aria-label="Close House Rules">&times;</button>
+          </div>
           <p style="margin:0;color:var(--dim)">Distilled from the canon — and from every icon you add yourself. Every look the Studio builds is checked against these before it reaches you.</p>
           <ol>
             <li><span class="n">01</span><span><strong>Fit before everything</strong>Sleeve length, trouser break, a nipped waist. Kraft's rule: get the details right and even an off-the-peg suit looks bespoke; get them wrong and a $7,000 suit looks borrowed.</span></li>
@@ -1154,13 +1226,14 @@
             <li><span class="n">08</span><span><strong>Know your trademark</strong>Every icon carries one — Grant's high collars, Agnelli's watch over the cuff, and whatever signature your own icons bring. When a colour or cut works for you, the engine returns to it instead of reinventing you weekly.</span></li>
           </ol>
         </div>
+        </div>
       </section>
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
         <div class="ward-grid">
           <div>
-            <div class="section-head"><h2>Find me</h2><p>Describe what you're after — your size comes from your Profile — then search for it, or keep the brief here.</p></div>
+            <div class="section-head with-info"><h2>Find me</h2><button type="button" class="info-btn" data-info-title="Find me" data-info-text="Describe what you're after — your size comes from your Profile — then search for it, or keep the brief here." aria-label="About Find me">i</button></div>
             <div class="find-grid" id="find-grid"></div>
           </div>
           <form class="card add-form" id="find-form">
@@ -1196,28 +1269,28 @@
               </div>
             </div>
             <div>
-              <label class="field" for="find-icon">Inspo icon — optional</label>
+              <div class="label-row"><label class="field" for="find-icon">Inspo icon — optional</label><button type="button" class="info-btn sm" data-info-from="find-icon-note" data-info-title="Inspo icon" aria-label="About: inspo icon shops">i</button></div>
               <select id="find-icon">
                 <option value="">No icon</option>
               </select>
-              <p class="form-note" style="margin-top:6px">If the icon has their own shop — Fortela for Squarzi, Alexander Kraft Monte Carlo for Kraft — the brief searches their store too, in your size.</p>
+              <p class="form-note" id="find-icon-note" hidden>If the icon has their own shop — Fortela for Squarzi, Alexander Kraft Monte Carlo for Kraft — the brief searches their store too, in your size.</p>
             </div>
             <div>
               <label class="field" for="find-details">Details — brand, material, must-haves, things to avoid</label>
               <textarea id="find-details" placeholder="e.g. Italian suede if possible, no logos, rubber sole" style="min-height:64px"></textarea>
             </div>
-            <button type="submit" class="btn-accent">Add &amp; search</button>
-            <p class="form-note" style="margin:0">Each brief gets live search links in your size. Nothing is bought — you review and buy yourself.</p>
+            <div class="label-row"><button type="submit" class="btn-accent">Add &amp; search</button><button type="button" class="info-btn sm" data-info-from="find-note" data-info-title="Find me briefs" aria-label="About: find me briefs">i</button></div>
+            <p class="form-note" id="find-note" hidden>Each brief gets live search links in your size. Nothing is bought — you review and buy yourself.</p>
           </form>
         </div>
       </section>
 
       <!-- ================= PROFILE ================= -->
       <section id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" hidden>
-        <div class="section-head"><h2>Profile</h2><p>Your measurements and your location — Find me sizes every search from here, and recommendations follow the weather where you are.</p></div>
+        <div class="section-head with-info"><h2>Profile</h2><button type="button" class="info-btn" data-info-title="Profile" data-info-text="Your measurements and your location — Find me sizes every search from here, and recommendations follow the weather where you are." aria-label="About Profile">i</button></div>
         <div class="card loc-card" id="loc-card" style="margin-top:0;margin-bottom:22px">
           <div>
-            <h3>Location &amp; weather</h3>
+            <div class="card-head-info"><h3>Location &amp; weather</h3><button type="button" class="info-btn sm" data-info-from="loc-note" data-info-title="Location &amp; weather" aria-label="About: location and weather">i</button></div>
             <div class="loc-now" style="margin-top:8px">
               <span class="loc-name" id="loc-current-name">Palm Beach, Florida</span>
               <span class="loc-kind" id="loc-current-kind">Home — default</span>
@@ -1245,7 +1318,7 @@
             <button type="button" class="btn-ghost" id="loc-set-home">Make this my home</button>
             <button type="button" class="btn-ghost" id="loc-back-home" hidden>Back to home</button>
           </div>
-          <p class="form-note" style="margin:0">Home is the default. Pick another place while you travel and the outfit of the day — and looks with no season chosen — follow the weather there. Come back home with one tap.</p>
+          <p class="form-note" id="loc-note" hidden>Home is the default. Pick another place while you travel and the outfit of the day — and looks with no season chosen — follow the weather there. Come back home with one tap.</p>
         </div>
         <form class="card add-form" id="profile-form">
           <div class="profile-grid">
@@ -1278,8 +1351,8 @@
           <div><button type="submit" class="btn-ink">Save profile</button></div>
         </form>
         <div class="card data-card" id="data-card">
-          <h3>Your data — backup &amp; restore</h3>
-          <p>Everything Wardrobe keeps — closet, watches, looks, palettes, icons, finds, profile — lives on this device. Export a backup file and keep it somewhere safe; import it on a new phone and everything comes back exactly as it was.</p>
+          <div class="card-head-info"><h3>Your data — backup &amp; restore</h3><button type="button" class="info-btn sm" data-info-from="data-note" data-info-title="Your data — backup &amp; restore" aria-label="About: backup and restore">i</button></div>
+          <p id="data-note" hidden>Everything Wardrobe keeps — closet, watches, looks, palettes, icons, finds, profile — lives on this device. Export a backup file and keep it somewhere safe; import it on a new phone and everything comes back exactly as it was.</p>
           <div class="loc-actions">
             <button type="button" class="btn-ink" id="data-export">Export backup</button>
             <label class="btn-ghost" for="data-import-file" style="display:inline-grid;place-items:center;cursor:pointer">Import backup</label>
@@ -1293,6 +1366,15 @@
 
 
     <div class="ptr" id="ptr" aria-hidden="true">Pull to refresh</div>
+    <div class="info-pop-backdrop" id="info-pop" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="info-pop-title">
+        <div class="principles-head">
+          <h3 id="info-pop-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">About</h3>
+          <button type="button" class="info-pop-close" id="info-pop-close" aria-label="Close description">&times;</button>
+        </div>
+        <p id="info-pop-body"></p>
+      </div>
+    </div>
     <div class="toast" id="toast" role="status"></div>
 
     <script src="data:application/javascript;base64,d2luZG93LldBREE9eyJjb2xvcnMiOltbIkhlcm1vc2EgUGluayIsIiNmOWMxY2UiXSxbIkNvcmludGhpYW4gUGluayIsIiNmOGI2YmEiXSxbIkNhbWVvIFBpbmsiLCIjZTBiM2I2Il0sWyJGYXduIiwiI2QxYjBhNyJdLFsiTGlnaHQgQnJvd24gRHJhYiIsIiNiNTkzOTIiXSxbIkNvcmFsIFJlZCIsIiNmNThlODQiXSxbIkZyZXNoIENvbG9yIiwiI2Y2OTE3ZSJdLFsiR3JlbmFkaW5lIFBpbmsiLCIjZjQ4MDY3Il0sWyJFb3NpbmUgUGluayIsIiNmMzdmOTQiXSxbIlNwaW5lbCBSZWQiLCIjZjI3MjkxIl0sWyJPbGQgUm9zZSIsIiNkNDZkN2EiXSxbIkV1Z2VuaWEgUmVkIHwgQSIsIiNlMjYyNWUiXSxbIkV1Z2VuaWEgUmVkIHwgQiIsIiNkYTUyNWQiXSxbIlJhdyBTaWVubmEiLCIjYmI3MTI1Il0sWyJWaW5hY2VvdXMgVGF3bnkiLCIjYzU2MTI3Il0sWyJKYXNwZXIgUmVkIiwiI2ViNTMyNCJdLFsiU3BlY3RydW0gUmVkIiwiI2UzMWYyNiJdLFsiUmVkIE9yYW5nZSIsIiNkZDQwMjciXSxbIkV0cnVzY2FuIFJlZCIsIiNjNTUzNDciXSxbIkJ1cm50IFNpZW5uYSIsIiNhZTUyMjQiXSxbIk9jaHJlIFJlZCIsIiNhYjU0NGQiXSxbIlNjYXJsZXQiLCIjY2IyZjQzIl0sWyJDYXJtaW5lIiwiI2NjMTIzNiJdLFsiSW5kaWFuIExha2UiLCIjYzUzYzY5Il0sWyJSb3NvbGFuYyBQdXJwbGUiLCIjYjczZjc0Il0sWyJQb21lZ3Jhbml0ZSBQdXJwbGUiLCIjYjcxZjU3Il0sWyJIeWRyYW5nZWEgUmVkIiwiI2E5NDE1MSJdLFsiQnJpY2sgUmVkIiwiI2E4NDIyMiJdLFsiQ2FybWluZSBSZWQiLCIjYTYyYzM3Il0sWyJQb21wZWlhbiBSZWQiLCIjYWIyNDM5Il0sWyJSZWQiLCIjYTcyMTQ0Il0sWyJCcm93biIsIiM3YzQyMjYiXSxbIkhheSdzIFJ1c3NldCIsIiM3OTMzMjciXSxbIlZhbmR5a2UgUmVkIiwiIzgyMjQxZiJdLFsiUGFuc3kgUHVycGxlIiwiIzdkMTMzYSJdLFsiUGFsZSBCdXJudCBMYWtlIiwiIzgwMjYyNiJdLFsiVmlvbGV0IFJlZCIsIiM2NDJkNWUiXSxbIlZpc3RvcmlzIExha2UiLCIjNmQ0MTQ1Il0sWyJTdWxwaGVyIFllbGxvdyIsIiNmNWVjYzIiXSxbIlBhbGUgTGVtb24gWWVsbG93IiwiI2ZmZWZhZSJdLFsiTmFwbGVzIFllbGxvdyIsIiNmYmU2YTAiXSxbIkl2b3J5IEJ1ZmYiLCIjZWJkM2EyIl0sWyJTZWFzaGVsbCBQaW5rIiwiI2ZkZDRiZCJdLFsiTGlnaHQgUGlua2lzaCBDaW5uYW1vbiIsIiNmY2M3OWIiXSxbIlBpbmtpc2ggQ2lubmFtb24iLCIjZWViNDgwIl0sWyJDaW5uYW1vbiBCdWZmIiwiI2ZkYzU3ZSJdLFsiQ3JlYW0gWWVsbG93IiwiI2ZkYmY2OCJdLFsiR29sZGVuIFllbGxvdyIsIiNmM2EyNTciXSxbIlZpbmFjZW91cyBDaW5uYW1vbiIsIiNlZWE3OGMiXSxbIk9jaHJhY2VvdXMgU2FsbW9uIiwiI2Q4YTM3YiJdLFsiSXNhYmVsbGEgQ29sb3IiLCIjYzVhNTZlIl0sWyJNYXBsZSIsIiNjNTlmNmIiXSxbIk9saXZlIEJ1ZmYiLCIjYzFjNDk0Il0sWyJFY3J1IiwiI2MyYWU5MyJdLFsiWWVsbG93IiwiI2ZmZjIwMCJdLFsiTGVtb24gWWVsbG93IiwiI2Y4ZWQ0MyJdLFsiQXByaWNvdCBZZWxsb3ciLCIjZmZkZDAwIl0sWyJQeXJpdGUgWWVsbG93IiwiI2NhYjM1NiJdLFsiT2xpdmUgT2NoZXIiLCIjZDZiNDNlIl0sWyJZZWxsb3cgT2NoZXIiLCIjZTJiNTQwIl0sWyJPcmFuZ2UgWWVsbG93IiwiI2ZjYjMxNSJdLFsiWWVsbG93IE9yYW5nZSIsIiNmOTlkMWIiXSxbIkFwcmljb3QgT3JhbmdlIiwiI2Y2OGM1MCJdLFsiT3JhbmdlIiwiI2YzNzQyMCJdLFsiUGVhY2ggUmVkIiwiI2YxNWEzMCJdLFsiRW5nbGlzaCBSZWQiLCIjZDk2NjI5Il0sWyJDaW5uYW1vbiBSdWZvdXMiLCIjYzI3NTQ0Il0sWyJPcmFuZ2UgUnVmb3VzIiwiI2MxNmIyNyJdLFsiU3VscGhpbmUgWWVsbG93IiwiI2MxOWYyYyJdLFsiS2hha2kiLCIjYmM4OTJiIl0sWyJDaXRyb24gWWVsbG93IiwiI2IyYjczZSJdLFsiQ2l0cmluZSIsIiNiMDlmMzYiXSxbIkJ1ZmZ5IENpdHJpbmUiLCIjOTY4NzRkIl0sWyJEYXJrIENpdHJpbmUiLCIjOGI4MzViIl0sWyJMaWdodCBHcmF5aXNoIE9saXZlIiwiIzg0ODA2MSJdLFsiS3JvbmdiZXJncyBHcmVlbiIsIiM4NDg3NWUiXSxbIk9saXZlIiwiIzgzN2UzMSJdLFsiT3JhbmdlIENpdHJpbmUiLCIjOTg2ZjJkIl0sWyJTdWRhbiBCcm93biIsIiNhMzY3NTIiXSxbIk9saXZlIEdyZWVuIiwiIzZiNzE0MCJdLFsiTGlnaHQgQnJvd25pc2ggT2xpdmUiLCIjODA2ZTRiIl0sWyJEZWVwIEdyYXlpc2ggT2xpdmUiLCIjNjM1YTNhIl0sWyJQYWxlIFJhdyBVbWJlciIsIiM3MTUwMmYiXSxbIlNlcGlhIiwiIzY0NGIxZSJdLFsiTWFkZGVyIEJyb3duIiwiIzc2MmMxOSJdLFsiTWFycyBCcm93biBUb2JhY2NvIiwiIzY1MzUxNCJdLFsiVmFuZHlrZSBCcm93biIsIiM0YjMzMTciXSxbIlR1cnF1b2lzZSBHcmVlbiIsIiNiNWRlY2MiXSxbIkdsYXVjb3VzIEdyZWVuIiwiI2I0Y2RjMiJdLFsiRGFyayBHcmVlbmlzaCBHbGF1Y291cyIsIiNiN2MyYTkiXSxbIlllbGxvdyBHcmVlbiIsIiNhZmQ0NzIiXSxbIkxpZ2h0IEdyZWVuIFllbGxvdyIsIiNjN2QxNGYiXSxbIk5pZ2h0IEdyZWVuIiwiIzg3YzU0MCJdLFsiT2xpdmUgWWVsbG93IiwiI2E2YTE1OSJdLFsiQXJ0ZW1lc2lhIEdyZWVuIiwiIzcwOTM5MCJdLFsiQW5kb3ZlciBHcmVlbiIsIiM2ZDdlNzciXSxbIlJhaW5ldHRlIEdyZWVuIiwiIzhmYTA3MSJdLFsiQ2hyb21pdW0gR3JlZW4iLCIjNzE5NDcwIl0sWyJQaXN0YWNoaW8gR3JlZW4iLCIjNjQ4ZjdiIl0sWyJTZWEgR3JlZW4iLCIjMDBiNDliIl0sWyJCZW56b2wgR3JlZW4iLCIjMDA5NzhkIl0sWyJMaWdodCBQb3JjZWxhaW4gR3JlZW4iLCIjMDA5MDhhIl0sWyJHcmVlbiIsIiM0ODliNmUiXSxbIkR1bGwgVmlyaWRpYW4gR3JlZW4iLCIjMDA5NDY1Il0sWyJPaWwgR3JlZW4iLCIjODE5MjM4Il0sWyJEaWFtaW5lIEdyZWVuIiwiIzFhNzQ0NCJdLFsiQ29zc2FjayBHcmVlbiIsIiM0Mzc3NDIiXSxbIkxpbmNvbG4gR3JlZW4iLCIjNTU1ODMyIl0sWyJCbGFja2lzaCBPbGl2ZSIsIiM0MjUzM2UiXSxbIkRlZXAgU2xhdGUgT2xpdmUiLCIjMjUzMTIyIl0sWyJOaWxlIEJsdWUiLCIjYmNlNGU1Il0sWyJQYWxlIEtpbmcncyBCbHVlIiwiI2E3ZDRlNCJdLFsiTGlnaHQgR2xhdWNvdXMgQmx1ZSIsIiNhNWM4ZDEiXSxbIlNhbHZpYSBCbHVlIiwiIzk3YWNjOCJdLFsiQ29iYWx0IEdyZWVuIiwiIzk2ZDFhYSJdLFsiQ2FsYW1pbmUgQkx1ZSIsIiM3OGNkZDAiXSxbIlZlbmljZSBHcmVlbiIsIiM2MmM2YmYiXSxbIkNlcnVsaWFuIEJsdWUiLCIjMDA5M2E1Il0sWyJQZWFjb2NrIEJsdWUiLCIjMDA5MzliIl0sWyJHcmVlbiBCbHVlIiwiIzA5OTE5NyJdLFsiT2x5bXBpYyBCbHVlIiwiIzVhODJiMyJdLFsiQmx1ZSIsIiMwMDZlYjgiXSxbIkFudHdhcnAgQmx1ZSIsIiMwMDcxOTAiXSxbIkhlbHZldGlhIEJsdWUiLCIjMDA1YjhkIl0sWyJEYXJrIE1lZGljaSBCbHVlIiwiIzU0NzA3NiJdLFsiRHVza3kgR3JlZW4iLCIjMDA0ZjQ2Il0sWyJEZWVwIEx5b25zIEJsdWUiLCIjMWM0Mjg2Il0sWyJWaW9sZXQgQmx1ZSIsIiM0MDQ1NmEiXSxbIlZhbmRhciBQb2VsJ3MgQmx1ZSIsIiMwNjRmNmUiXSxbIkRhcmsgVHlyaWFuIEJsdWUiLCIjMTIzNTRlIl0sWyJEdWxsIFZpb2xldCBCbGFjayIsIiMxZTBlM2YiXSxbIkRlZXAgSW5kaWdvIiwiIzA1MTIzMCJdLFsiRGVlcCBTbGF0ZSBHcmVlbiIsIiMxMTJmMmMiXSxbIkdyYXlpc2ggTGF2ZW5kZXIgLSBBIiwiI2I1YjFkOCJdLFsiR3JheWlzaCBMYXZlbmRlciAtIEIiLCIjYzBhOWIzIl0sWyJMYWVsaWEgUGluayIsIiNjYTkyYTgiXSxbIkxpbGFjIiwiI2I5ODRhZiJdLFsiRXVwYXRvcml1bSBQdXJwbGUiLCIjYmY1ODkyIl0sWyJMaWdodCBNYXV2ZSIsIiM5YTcyYWEiXSxbIkFjb25pdGUgVmlvbGV0IiwiI2EzNmFhNSJdLFsiRHVsbCBCbHVlIFZpb2xldCIsIiM4MDcxOWUiXSxbIkRhcmsgU29mdCBWaW9sZXQiLCIjNjY2MjljIl0sWyJCbHVlIFZpb2xldCIsIiM2NDUwYTEiXSxbIlB1cnBsZSBEcmFiIiwiIzg0NTY1YiJdLFsiRGVlcCBWaW9sZXQgLyBQbHVtYmVvdXMiLCIjNzA3MjdjIl0sWyJWZXJvbmlhIFB1cnBsZSIsIiM4YzRjNjIiXSxbIkRhcmsgU2xhdGUgUHVycGxlIiwiIzcwNDM1NyJdLFsiVGF1cGUgQnJvd24iLCIjN2E0NDU2Il0sWyJWaW9sZXQgQ2FybWluZSIsIiM3MTNiNGMiXSxbIlZpb2xldCIsIiM0ZjQwODYiXSxbIlJlZCBWaW9sZXQiLCIjNTkyNTZhIl0sWyJDb3RpbmdhIFB1cnBsZSIsIiM1MDEzNDUiXSxbIkR1c2t5IE1hZGRlciBWaW9sZXQiLCIjNGUxZDRjIl0sWyJXaGl0ZSIsIiNmZmZmZmYiXSxbIk5ldXRyYWwgR3JheSIsIiNiNmJmYzEiXSxbIk1pbmVyYWwgR3JheSIsIiNhMmIwYWQiXSxbIldhcm0gR3JheSIsIiNhMWEzOWEiXSxbIlNsYXRlIENvbG9yIiwiIzM0NDU0YyJdLFsiQmxhY2siLCIjMTExMzE0Il1dLCJwbGF0ZXMiOltbNjUsMTE3XSxbNjEsMTI5XSxbMTMsMzldLFs1MCwxNTBdLFsxMDYsMTI4XSxbNywxMzFdLFs2Myw4OF0sWzY2LDEzM10sWzM2LDE0MF0sWzY2LDczXSxbNDEsMTU1XSxbNTAsMTE5XSxbMTMsMTQ1XSxbOSw0MF0sWzEwMCwxMzNdLFszMywxMTFdLFsxMiw5OV0sWzMsMTUyXSxbODUsOTJdLFsxMTUsMTM1XSxbNyw5OV0sWzU0LDEyNl0sWzQ1LDEzOF0sWzgzLDE0NV0sWzE4LDExMF0sWzQ3LDgyXSxbMSwxNTddLFs4NCwxMzFdLFs3NSwxMTNdLFsyOSwxNTVdLFsxNywzOV0sWzQ5LDkyXSxbMTMsMTU3XSxbOCwxNTRdLFs0LDI4XSxbNjgsODddLFsyNywxNTBdLFsxMDUsMTI2XSxbMjIsMTIzXSxbMTQsNzBdLFs3MywxMTVdLFs1OSwxNDldLFsxLDEzOV0sWzEwMSwxMjBdLFs0Miw1NV0sWzYzLDE1OF0sWzE4LDEzNF0sWzI0LDEyM10sWzExMSwxMjFdLFs0MSwxNTJdLFsyOCwxMjFdLFszOCwxNThdLFs2MSwxNTJdLFsxMDAsMTEyXSxbMTAsMTUzXSxbMTM0LDE0OV0sWzE0NywxNTddLFszMiw5OV0sWzgsNzFdLFszOSwxMjldLFs5MSwxNTFdLFs1NCwxNThdLFszNywxMTddLFsxMzksMTQxXSxbNjgsMTE1XSxbNTgsNzldLFsxMjAsMTI5XSxbNCw1NF0sWzE1NiwxNThdLFsxMywxMDddLFsyOSw0OV0sWzM4LDExMV0sWzgyLDk2XSxbODcsMTE5XSxbMTExLDEyN10sWzM5LDE1Nl0sWzEyLDEyOF0sWzQ0LDExNl0sWzg0LDExOV0sWzM4LDEzOF0sWzQ3LDE1Nl0sWzMyLDE1Ml0sWzUyLDEyN10sWzQyLDEzMl0sWzE0LDEyMl0sWzEzLDk5XSxbMSw3MF0sWzQyLDEyMV0sWzYxLDEyN10sWzgsMTM5XSxbMzcsNjddLFs1LDEwMF0sWzcxLDExMl0sWzQxLDEyNV0sWzMyLDEzMF0sWzU5LDc2XSxbMSwxOF0sWzg0LDEyN10sWzM5LDExN10sWzcyLDE0MF0sWzIsMTI2XSxbNDEsNjddLFs2NiwxNTJdLFsyOCwzOF0sWzIsOTddLFsxMjIsMTMwXSxbNTYsNzRdLFs4LDI3XSxbMzksMTA4XSxbMzEsODZdLFszOSw5MF0sWzcsMTU4XSxbNDIsODZdLFs2MCwxMjJdLFs0MCw2NF0sWzIsMTQyXSxbMjIsMTU4XSxbNTksODZdLFsxMTIsMTI5XSxbMiwyOV0sWzMxLDQ5LDEwN10sWzIyLDQ2LDEwMF0sWzUsNTUsMTQ3XSxbMzUsNTksOTNdLFszLDExNywxMjddLFs0MSw1OSwxMjZdLFs0NSw5OCwxNDFdLFsxLDExNiwxMzhdLFs1Niw2OSwxMTNdLFsxMywyOCwxNDldLFsxMyw2NSwxMThdLFszOCw0Nyw3MV0sWzMzLDcxLDk5XSxbOCwxMzgsMTUwXSxbMzgsMTA2LDExM10sWzIxLDEwMywxNTBdLFsxOCw0NSw5OF0sWzQ3LDU1LDExNl0sWzExMywxMzEsMTU0XSxbNDcsMTIyLDE1N10sWzYzLDkwLDEyOV0sWzI2LDY4LDExM10sWzEyMSwxMzYsMTU2XSxbMjQsNjMsMTU4XSxbMzEsNzAsMTMwXSxbNjksODEsMTA1XSxbOSwzMyw4N10sWzU4LDYwLDExN10sWzU4LDYzLDEzMl0sWzQyLDcwLDg4XSxbMzgsNjEsMTI4XSxbMTgsMzIsMTEyXSxbOCw2MCw3MF0sWzIyLDU0LDEyMV0sWzE1LDEwMCwxMzFdLFs1OCwxMTQsMTQ5XSxbMzQsNTgsMTIwXSxbNTUsNjYsOTJdLFs2OSwxMTUsMTMzXSxbNjgsODIsMTI0XSxbMzEsNDQsMTIzXSxbMTAsOTYsMTM2XSxbNTYsODcsMTIyXSxbMTcsNjAsMTQ5XSxbMiw5LDM3XSxbNyw0MCwxMzJdLFs1MywxMTEsMTI4XSxbNTUsMTI4LDE0NV0sWzEsMzksMTU2XSxbMjQsNjAsMTUwXSxbMzUsNjEsODhdLFs2NiwxMjIsMTUwXSxbNTUsODQsODddLFsxLDEzNCwxNDddLFs0NCw1MiwxNDJdLFswLDQyLDExNV0sWzM1LDcyLDEzM10sWzQxLDExMiwxMTldLFsxNyw0NywxMjZdLFs0NSwxMzgsMTU0XSxbMjgsMTQ5LDE1MV0sWzEzLDg2LDEzMV0sWzE0NCwxNDUsMTUwXSxbOSw0MSw3NF0sWzQsMTgsMzldLFszMiw0OSwxMjFdLFsxMjMsMTM0LDEzOV0sWzk2LDExMywxMTRdLFs1NSwxMDksMTE2XSxbNDEsNjUsMTU4XSxbNCw1OSwxMjFdLFs0Niw4NiwxNDRdLFs3LDQwLDEwMV0sWzE1LDQyLDEyMF0sWzksMzksMTU0XSxbNzAsMTExLDE0Ml0sWzgsMTQxLDE1NF0sWzE5LDU2LDEwMl0sWzIwLDgwLDEyNl0sWzI4LDUyLDk3XSxbNyw3NiwxMTRdLFs4NywxMTQsMTU3XSxbMzksNDgsMTA3XSxbMjQsNjYsMTEyXSxbMzUsNDgsMTQ5XSxbMSw0Nyw2Nl0sWzc4LDg4LDE1OF0sWzM4LDExOSwxMjJdLFs0MSw2MSwxMTNdLFs0NSw1NSwxMDddLFs2Miw5MywxMzFdLFsyOSw3NywxMTNdLFs0OCw1NiwxMTFdLFs0MSw3OCwxNDldLFs0NiwxMjEsMTM3XSxbMTUsMTAyLDE1OF0sWzM1LDQ5LDEwNV0sWzEyMywxMzMsMTQ0XSxbMTUsOTcsMTI1XSxbMjUsNDksMTM5XSxbMjgsMTU0LDE1OF0sWzU5LDYxLDY3XSxbNCw0OSw4N10sWzksMTI0LDE0N10sWzIyLDEyNSwxNDZdLFszNyw0NiwxNDldLFswLDExMiwxMTddLFsyOCwzOSwxNTRdLFs0NywxMDksMTU0XSxbNyw4NywxMTRdLFsyLDMyLDEyMF0sWzIyLDQ0LDEzMV0sWzI4LDcyLDEyN10sWzQ1LDgyLDExMV0sWzQxLDYxLDEzNF0sWzY5LDEyNiwxNDNdLFsyOCw4NCwxMTNdLFs0OSwxNTEsMTU2XSxbNCw1Nyw4OF0sWzYsNTQsMTE3XSxbMTcsMzksNTAsMTI0XSxbOCwxOSwxMDUsMTU4XSxbMTMsNDEsNzksMTU3XSxbNCwxNCw5NSwxMjJdLFsyOCwxMDQsMTI5LDE1N10sWzEsMjcsMzgsNDVdLFsxMyw1NiwxMDAsMTI2XSxbOCw2OSwxMzMsMTQ2XSxbMzIsNTMsNTgsMTI0XSxbNTcsNjQsOTksMTEwXSxbMzAsNTQsMTA1LDE1N10sWzEyLDEzLDY4LDExOV0sWzU1LDYyLDE1MSwxNTddLFsxLDM4LDc2LDEzNV0sWzEzLDU3LDExNSwxNThdLFs0OCw2MywxMDMsMTU4XSxbMTYsNjAsMTIxLDEzOV0sWzM1LDQ0LDc2LDEyMl0sWzU1LDExOSwxMjMsMTU2XSxbMTAsNDgsODgsOTldLFszMCwzOSwxMTUsMTU2XSxbMTIsNDEsNzEsMTA2XSxbMTksNDQsODcsMTU3XSxbMSwxNyw4OSwxMTddLFsxMCw1Niw5MywxMzBdLFsxNiw0MSw5NiwxMDBdLFs0Niw2MSwxMDAsMTIxXSxbNCwxMywxMDksMTEwXSxbMTMsMzUsMTM5LDE1OF0sWzEyLDM4LDc5LDEwNl0sWzI1LDExNCwxMTksMTMyXSxbMzksNjMsODcsMTEzXSxbMCwzNCw3OCwxNTRdLFs2NCw3MywxMjAsMTM4XSxbMTgsNTMsODQsMTQ3XSxbOCw0Miw5MCwxNThdLFs5LDI0LDc2LDEzMF0sWzQ2LDU4LDEwNiwxMjVdLFsxMyw0OCw1MywxMjldLFsxMiwxMDcsMTM1LDE0N10sWzM5LDEwMCwxMTQsMTIyXSxbMTIsNTEsMTE0LDEzNl0sWzIwLDM1LDk3LDExNl0sWzExLDU2LDk5LDEyNV0sWzQsMTksNjQsODddLFsxOSw2MCwxMTgsMTI3XSxbOCw1NywxMTEsMTE1XSxbNjEsODMsMTQ3LDE1OF0sWzU1LDkxLDEyNywxMzBdLFszNywzOSwxMDcsMTE0XSxbOTEsOTksMTE0LDExNV0sWzM5LDQ0LDUwLDUzXSxbMTMsODcsOTQsMTAyXSxbMzgsNDYsMTA2LDExM10sWzQ2LDU0LDEyMSwxMzBdLFszOCw0OSw4MiwxNTddLFsxOSw2MSw3OSwxMjddLFsxMyw1NSw2NCwxNThdLFsyMyw0OCwxMDQsMTIyXSxbNyw0Niw4NywxMTVdLFsxNiw0MSw5NiwxMzldLFs0Niw1MywxMTAsMTIyXSxbNDAsNjQsMTA5LDE1NF0sWzMyLDQ2LDczLDEwMF0sWzQ0LDU2LDcwLDg3XSxbNTUsMTAwLDEwMywxMTBdLFsyMiwxMzMsMTM5LDE1MV0sWzMsMjEsNjUsMTE0XSxbNDcsNjIsMTI3LDEyOF0sWzM4LDQ0LDc2LDEwOV0sWzI5LDQ2LDg5LDkxXSxbMTksNjEsOTQsMTIzXSxbMjIsNTQsMTA1LDE1OF0sWzgsMzIsMTI2LDE1Ml0sWzcsMzgsNDcsMTM3XSxbMzMsMTAzLDE0OSwxNTBdLFs0Myw1Myw1NSw4N10sWzgwLDEwOCwxMjUsMTMyXSxbMTMsNTYsNjEsMTA2XSxbNSwzOCwxMDQsMTEyXSxbNCwzOCwxMDksMTEzXSxbMTYsMjcsMTM3LDE0Ml0sWzQ1LDcwLDg0LDE1OF0sWzI5LDEyMCwxMzksMTU0XSxbMTIsNDAsNTksMTMyXSxbMzgsNjQsOTAsOTJdLFs4LDEzLDUzLDEzNF0sWzI3LDYyLDg2LDEwMV0sWzQ2LDEzNCwxNTEsMTU3XSxbNTIsMTEwLDExMywxMTldLFsyMywxMzAsMTM4LDE0OV0sWzUsMjEsMTA5LDEyNV0sWzE5LDU1LDExNCwxMjFdLFs0Miw3Niw5MCwxMjJdLFszMyw2MSwxNDksMTU3XSxbOCwzMiwzOSwxMDhdLFszNywxMzUsMTQ4LDE1OF0sWzI4LDYwLDEyNSwxMzRdLFs0OSw2NSwxMTIsMTI3XSxbNjQsOTksMTU0LDE1OF0sWzcsMTA2LDEwOSwxMTJdLFsxLDQ2LDc3LDEwOV0sWzE5LDQxLDgxLDEyOF0sWzQ1LDEyNiwxMzksMTU4XSxbMzIsMTEwLDExNiwxNDJdLFsyNCw4Nyw5MSw5NV0sWzkzLDk5LDEyMywxMzZdLFs1MiwxMDYsMTA5LDE1MV1dfTsK"></script>
@@ -1608,7 +1690,7 @@ var STYLE_ICONS = [
     rules: [
       "Fit is the whole game: coat sleeves, trouser break and waist suppression exact — details make an off-the-peg suit read bespoke.",
       "A tie makes any suit — or slacks and a sports coat — infinitely more elegant. Open-necked by default is the uniform of men who stopped trying.",
-      "Away from the beach: long trousers in linen, cotton or light wool — cream, white or navy. Sockless, always; sandals, never."
+      "Away from the beach: long trousers in linen, cotton or light wool — cream, white or navy. Sockless, always; sandals, never.",
     ],
     avoid: "Avoid: logos, trends copied slavishly, and cheap quantity — quality is remembered long after price is forgotten.",
     shoeLabel: "Loafers", shoeDetail: "tobacco suede, sockless", shoeHex: "#7c4226", formality: 2,
@@ -1634,7 +1716,32 @@ var STYLE_ICONS = [
       { img: "assets/photos/689f2e4cd86c.jpg", caption: "Tan suit, Gussie resting", desc: "Tan suit with white shirt, tie and brown loafers" },
       { img: "assets/photos/8e2563a60464.jpg", caption: "Beige blazer, the green Jaguar", desc: "Beige blazer with white trousers and brown loafers" },
       { img: "assets/photos/f8b13422afb5.jpg", caption: "Navy blazer, the waistcoat", desc: "Navy blazer with cream waistcoat, white trousers and loafers" },
-      { img: "assets/photos/08178202085e.jpg", caption: "Navy blazer, the fountain", desc: "Navy blazer with white trousers and brown loafers" }
+      { img: "assets/photos/08178202085e.jpg", caption: "Navy blazer, the fountain", desc: "Navy blazer with white trousers and brown loafers" },
+      { img: "assets/photos/99ab9da6c0b2.jpg", caption: "A man walks outdoors on a stone patio beside a white building, le", desc: "A man walks outdoors on a stone patio beside a white building, leading a small dog on a leash, modeling a coordinated light tan suit. The" },
+      { img: "assets/photos/da10cbf476f3.jpg", caption: "A well-dressed man poses beside a classic car with a white dog at", desc: "A well-dressed man poses beside a classic car with a white dog at his feet, presenting a polished menswear look in an outdoor setting. The image" },
+      { img: "assets/photos/62583b3815e1.jpg", caption: "A sharply dressed man poses with his small dog in a Parisian-styl", desc: "A sharply dressed man poses with his small dog in a Parisian-style covered passageway. The man stands centered in a narrow, arched corridor with" },
+      { img: "assets/photos/be64a94cbef4.jpg", caption: "A well-dressed man in a suit walks down a city street while holding th", desc: "A well-dressed man in a suit walks down a city street while holding the leash of a small white dog" },
+      { img: "assets/photos/5771c6ef0f39.jpg", caption: "Alexander Kraft — reference look", desc: "Navy blazer with cream trousers and brown loafers" },
+      { img: "assets/photos/72ec91d8da5d.jpg", caption: "Alexander Kraft — reference look", desc: "Navy blazer with cream trousers and brown loafers" },
+      { img: "assets/photos/58ae677bd993.jpg", caption: "Alexander Kraft — reference look", desc: "Navy blazer with cream trousers and brown loafers" },
+      { img: "assets/photos/7d1487449723.jpg", caption: "Dark pinstripe double-breasted blazer over a black turtleneck, blue", desc: "Wearing dark pinstripe double-breasted blazer over a black turtleneck, blue jeans, and brown loafers" },
+      { img: "assets/photos/126ffc430f8e.jpg", caption: "A well-dressed man in a navy suit stands beside a classic silver car", desc: "A well-dressed man in a navy suit stands beside a classic silver car, with a small white dog nearby on a gravel driveway" },
+      { img: "assets/photos/5a8acb5b892c.jpg", caption: "A man in a tan suit stands indoors, leaning slightly, with a wooden sh", desc: "A man in a tan suit stands indoors, leaning slightly, with a wooden shelving unit filled with items visible behind him" },
+      { img: "assets/photos/cf821c097293.jpg", caption: "This is a polished promotional fashion photograph showcasing men'", desc: "This is a polished promotional fashion photograph showcasing men's tailored clothing, using a confident male model with a luxury car and upscale" },
+      { img: "assets/photos/702a82e13aa2.jpg", caption: "A man poses in a sunlit garden pathway to display a light check b", desc: "A man poses in a sunlit garden pathway to display a light check blazer as a fashion product. The image shows a middle-aged man with dark, neatly" },
+      { img: "assets/photos/685a08757481.jpg", caption: "A well-dressed man in a dark suit and tie stands next to a dark vehicl", desc: "A well-dressed man in a dark suit and tie stands next to a dark vehicle outdoors, with architectural elements visible in the background" },
+      { img: "assets/photos/cc24263d69b7.jpg", caption: "A black and white portrait features a man in a suit, leaning forward w", desc: "A black and white portrait features a man in a suit, leaning forward with his hand near his chin, looking directly at the viewer" },
+      { img: "assets/photos/d9938d3415bd.jpg", caption: "A stylish man stands beside a classic black Mercedes-Benz convertible", desc: "A stylish man stands beside a classic black Mercedes-Benz convertible, while a woman sits inside the car" },
+      { img: "assets/photos/899ed5fa9638.jpg", caption: "A middle-aged man in an olive green coat stands next to a vertical woo", desc: "A middle-aged man in an olive green coat stands next to a vertical wooden siding, holding a small bundle of colored pencils" },
+      { img: "assets/photos/9b435556f055.jpg", caption: "A man in a tan suit stands near a doorway, framed by lush green ivy gr", desc: "A man in a tan suit stands near a doorway, framed by lush green ivy growing over a large terracotta pot" },
+      { img: "assets/photos/54040efe7728.jpg", caption: "Alexander Kraft — reference look", desc: "Navy blazer with cream trousers and brown loafers" },
+      { img: "assets/photos/cc8566d43554.jpg", caption: "Alexander Kraft — reference look", desc: "Navy blazer with cream trousers and brown loafers" },
+      { img: "assets/photos/b234264b110d.jpg", caption: "Alexander Kraft — reference look", desc: "Navy blazer with cream trousers and brown loafers" },,
+      { img: "assets/photos/fd2b65cceca1.jpg", caption: "A well-dressed man sits in the open door of a classic dark-colore", desc: "A well-dressed man sits in the open door of a classic dark-colored sports car, posing for a fashion-oriented portrait. The man, identified as" },
+      { img: "assets/photos/9d8f270b531e.jpg", caption: "A well-dressed man stands by the open rear of a classic SUV with", desc: "A well-dressed man stands by the open rear of a classic SUV with a dog, presenting a polished menswear lifestyle scene. The image shows a" },
+      { img: "assets/photos/0e36550ef7ba.jpg", caption: "White linen jacket and a blue shirt", desc: "Wearing white linen jacket and a blue shirt" },
+      { img: "assets/photos/6b7fd1251205.jpg", caption: "Alexander Kraft — reference look", desc: "Navy blazer with cream trousers and brown loafers" },
+      { img: "assets/photos/7c641c425a26.jpg", caption: "A man in a light grey blazer and white trousers stands on a green spor", desc: "A man in a light grey blazer and white trousers stands on a green sports field next to a white dog" }
     ]
   },
   {
@@ -1646,7 +1753,7 @@ var STYLE_ICONS = [
     rules: [
       "Never more than three colours: navy, olive, white, brown — earth tones carry the look, one accent at most.",
       "Worn-in beats box-fresh. Vintage drapes better and reads honest; new pieces should be built to be kept for years, not seasons.",
-      "Anchor workwear with one dressed piece — Oxfords with white denim, a tailored jacket over a Western shirt. The friction is the style."
+      "Anchor workwear with one dressed piece — Oxfords with white denim, a tailored jacket over a Western shirt. The friction is the style.",
     ],
     avoid: "Avoid: head-to-toe newness, fast fashion, and anything worn for anyone but yourself.",
     shoeLabel: "Loafers", shoeDetail: "worn suede, broken in", shoeHex: "#8a5a33", formality: -1,
@@ -1675,7 +1782,42 @@ var STYLE_ICONS = [
       { img: "assets/photos/5d0a45e046f6.jpg", caption: "Navy blazer, on the phone", desc: "Navy blazer with shirt and trousers" },
       { img: "assets/photos/384996a01b35.jpg", caption: "The deck jacket, Pitti", desc: "Olive military jacket over a grey sweatshirt with white trousers" },
       { img: "assets/photos/e12985d04c9a.jpg", caption: "The tweed coat, red scarf", desc: "Brown tweed overcoat with a red scarf, blue jeans and brown boots" },
-      { img: "assets/photos/9a1516c5a90a.jpg", caption: "Black coat, white trousers", desc: "Black overcoat with white trousers and brown suede boots" }
+      { img: "assets/photos/9a1516c5a90a.jpg", caption: "Black coat, white trousers", desc: "Black overcoat with white trousers and brown suede boots" },
+      { img: "assets/photos/613aa287b4bb.jpg", caption: "A street-style photograph of a well-dressed middle-aged man walki", desc: "A street-style photograph of a well-dressed middle-aged man walking outdoors in daylight, illustrating a polished casual menswear look. The man" },
+      { img: "assets/photos/cefbaafe3d7a.jpg", caption: "A man in a dark grey suit stands outdoors against a rustic stone and b", desc: "A man in a dark grey suit stands outdoors against a rustic stone and brick wall, looking contemplative" },
+      { img: "assets/photos/ea31008fd6b3.jpg", caption: "A sharply dressed older man poses on a city street, projecting an", desc: "A sharply dressed older man poses on a city street, projecting an image of classic menswear style. The central figure is Alessandro Squarzi" },
+      { img: "assets/photos/e9b31e50f41a.jpg", caption: "A street-style fashion photograph of a man posing on a Paris side", desc: "A street-style fashion photograph of a man posing on a Paris sidewalk, showcasing an outfit with a relaxed, curated aesthetic. The image shows a" },
+      { img: "assets/photos/914059cee188.jpg", caption: "Alessandro Squarzi — reference look", desc: "Indigo denim jacket with white jeans and brown loafers" },
+      { img: "assets/photos/097344e7b920.jpg", caption: "Dark jacket, light blue shirt, and white pants", desc: "Wearing dark jacket, light blue shirt, and white pants" },
+      { img: "assets/photos/600d90b05c4c.jpg", caption: "Alessandro Squarzi — reference look", desc: "Indigo denim jacket with white jeans and brown loafers" },
+      { img: "assets/photos/1fd33e0bd47b.jpg", caption: "Green military-style jacket with patches reading 'GRAY' and 'U", desc: "Wearing green military-style jacket with patches reading 'GRAY' and 'U" },
+      { img: "assets/photos/089000554bc8.jpg", caption: "Dark sunglasses and an olive-green military-style jacket with visible", desc: "Wearing dark sunglasses and an olive-green military-style jacket with visible patches" },
+      { img: "assets/photos/40617d8adf82.jpg", caption: "Green olive jacket over a blue shirt and dark jeans", desc: "Wearing green olive jacket over a blue shirt and dark jeans" },
+      { img: "assets/photos/beaa98124660.jpg", caption: "Olive green military-style jacket and white pants", desc: "Wearing olive green military-style jacket and white pants" },
+      { img: "assets/photos/e5942958529b.jpg", caption: "A well-dressed older man poses in a doorway, presenting a classic", desc: "A well-dressed older man poses in a doorway, presenting a classic menswear look. The image shows Alessandro Squarzi standing in the entrance of" },
+      { img: "assets/photos/7b97365444bc.jpg", caption: "A man in a brown jacket and white pants walks with a young girl on a c", desc: "A man in a brown jacket and white pants walks with a young girl on a city street, flanked by parked vehicles" },
+      { img: "assets/photos/b37d945415c0.jpg", caption: "Cream-colored denim jacket and matching trousers", desc: "Wearing cream-colored denim jacket and matching trousers" },
+      { img: "assets/photos/9618f5d9b382.jpg", caption: "A man poses in front of a dark brown Mercedes-Benz G-Class SUV in", desc: "A man poses in front of a dark brown Mercedes-Benz G-Class SUV in a daylight outdoor setting, presenting a casual-luxury lifestyle image" },
+      { img: "assets/photos/a4cce8ca8199.jpg", caption: "Plaid jacket and sunglasses leans", desc: "Wearing plaid jacket and sunglasses leans" },
+      { img: "assets/photos/970d068057db.jpg", caption: "A man with graying hair and sunglasses wears a vibrant yellow and brow", desc: "A man with graying hair and sunglasses wears a vibrant yellow and brown plaid blazer over a light-colored shirt, standing outdoors" },
+      { img: "assets/photos/6785cbc3d3b7.jpg", caption: "Long beige coat over a dark vest and white trousers", desc: "Wearing long beige coat over a dark vest and white trousers" },
+      { img: "assets/photos/1afd2f99a041.jpg", caption: "A smiling, older man in a light beige trench coat stands outdoors next", desc: "A smiling, older man in a light beige trench coat stands outdoors next to a dark brick wall, with greenery and a wooden structure in the" },
+      { img: "assets/photos/b078ba1d26e4.jpg", caption: "An older man with a beard and sunglasses wears a mustard yellow jacket", desc: "An older man with a beard and sunglasses wears a mustard yellow jacket while looking intently toward the viewer outdoors" },
+      { img: "assets/photos/e593a1db79ec.jpg", caption: "A middle-aged man sits on a wooden bench outside a storefront, po", desc: "A middle-aged man sits on a wooden bench outside a storefront, posing for the camera in a styled outfit. He wears dark sunglasses, an olive" },
+      { img: "assets/photos/eada20ad778f.jpg", caption: "A street-style photo captures Italian menswear figure Alessandro", desc: "A street-style photo captures Italian menswear figure Alessandro Squarzi walking confidently across a sunlit city plaza in a crisp all-white" },
+      { img: "assets/photos/1f4f48c57c91.jpg", caption: "A street-style photograph captures a man walking across a crosswa", desc: "A street-style photograph captures a man walking across a crosswalk in an urban setting. He is turned slightly toward the camera, mid-stride" },
+      { img: "assets/photos/ee087336e4d3.jpg", caption: "A street-style photograph captures a moment on a busy sidewalk, c", desc: "A street-style photograph captures a moment on a busy sidewalk, centered on a smiling older man with gray curly hair, a full gray beard, and" },
+      { img: "assets/photos/a55a07155800.jpg", caption: "Alessandro Squarzi — reference look", desc: "Indigo denim jacket with white jeans and brown loafers" },
+      { img: "assets/photos/810a5c513b7d.jpg", caption: "Alessandro Squarzi — reference look", desc: "Indigo denim jacket with white jeans and brown loafers" },
+      { img: "assets/photos/95de3bbe0e62.jpg", caption: "Black double-breasted coat, a black shirt, and a straw fedora with a", desc: "Wearing black double-breasted coat, a black shirt, and a straw fedora with a patterned scarf" },,
+      { img: "assets/photos/cc6f7072e6f8.jpg", caption: "Alessandro Squarzi — reference look", desc: "Indigo denim jacket with white jeans and brown loafers" },
+      { img: "assets/photos/77d13066546b.jpg", caption: "Alessandro Squarzi — reference look", desc: "Indigo denim jacket with white jeans and brown loafers" },
+      { img: "assets/photos/a9f2a01a814c.jpg", caption: "Long brown coat and light trousers", desc: "Wearing long brown coat and light trousers" },
+      { img: "assets/photos/9a175a1b9087.jpg", caption: "Tweed jacket and scarf", desc: "Wearing tweed jacket and scarf" },
+      { img: "assets/photos/5a61b2eb0b39.jpg", caption: "Alessandro Squarzi — reference look", desc: "Indigo denim jacket with white jeans and brown loafers" },
+      { img: "assets/photos/4dc0b45dc633.jpg", caption: "Alessandro Squarzi — reference look", desc: "Indigo denim jacket with white jeans and brown loafers" },
+      { img: "assets/photos/85b0ee034c6d.jpg", caption: "A man sits on stone steps in front of a brown wooden door, posing", desc: "A man sits on stone steps in front of a brown wooden door, posing for a casual portrait that showcases his outfit and tattoos. He is middle-aged" },
+      { img: "assets/photos/05273fd138a1.jpg", caption: "A fashion lookbook photo shows a young man standing full-length a", desc: "A fashion lookbook photo shows a young man standing full-length against a studio backdrop, modeling a mixed formal-casual outfit. He wears a" }
     ]
   },
   {
@@ -1687,7 +1829,7 @@ var STYLE_ICONS = [
     rules: [
       "Master the rule first, then break one — watch over the cuff, boots with a suit. One deviation is sprezzatura; three is carelessness.",
       "Grey flannel and navy are a complete wardrobe. Texture does the talking so colour doesn't have to.",
-      "Everything slightly undone, nothing actually sloppy: the collar open, the tailoring immaculate."
+      "Everything slightly undone, nothing actually sloppy: the collar open, the tailoring immaculate.",
     ],
     avoid: "Avoid: trying to look effortless. Agnelli's ease was rehearsed for decades — earn yours the same way.",
     shoeLabel: "Boots", shoeDetail: "rustic brown, worn with tailoring", shoeHex: "#5d4030", formality: 2,
@@ -1717,7 +1859,21 @@ var STYLE_ICONS = [
       { img: "assets/photos/ec00fd6f354b.jpg", caption: "Denim on the terrace", desc: "Indigo denim shirt with jeans" },
       { img: "assets/photos/468c72ff400e.jpg", caption: "Striped tie, portrait", desc: "Charcoal suit with striped tie" },
       { img: "assets/photos/e07ffeb8064e.jpg", caption: "Arms crossed, the factory", desc: "Grey suit with white shirt and tie" },
-      { img: "assets/photos/cdb4274d3cc2.jpg", caption: "Navy suit, leaving the office", desc: "Navy suit with grey tie and white shirt" }
+      { img: "assets/photos/cdb4274d3cc2.jpg", caption: "Navy suit, leaving the office", desc: "Navy suit with grey tie and white shirt" },
+      { img: "assets/photos/19a27f9693a0.jpg", caption: "A middle-aged man in a grey suit and light blue shirt stands outdoors", desc: "A middle-aged man in a grey suit and light blue shirt stands outdoors, looking to the side. A white car is visible in the background" },
+      { img: "assets/photos/c76014b56808.jpg", caption: "A distinguished man in a grey suit is pictured outdoors, with several", desc: "A distinguished man in a grey suit is pictured outdoors, with several classic cars visible in the background" },
+      { img: "assets/photos/f1de4bff6f40.jpg", caption: "A distinguished man in a grey suit stands outdoors, with several class", desc: "A distinguished man in a grey suit stands outdoors, with several classic cars visible in the background" },
+      { img: "assets/photos/98b59a2fd342.jpg", caption: "Grey suit and tie, looks thoughtfully toward the side while seated", desc: "Wearing grey suit and tie, looks thoughtfully toward the side while seated among other people" },
+      { img: "assets/photos/3c6973c00eac.jpg", caption: "A color portrait of Italian industrialist Gianni Agnelli presente", desc: "A color portrait of Italian industrialist Gianni Agnelli presented as an exemplar of classic menswear sprezzatura. The image shows a close-up of" },
+      { img: "assets/photos/02687cdacc7d.jpg", caption: "A color photograph shows an older man in a tailored gray double-b", desc: "A color photograph shows an older man in a tailored gray double-breasted suit standing beside the driver's side of a vintage red convertible" },
+      { img: "assets/photos/7cddcb836a66.jpg", caption: "Gianni Agnelli — reference look", desc: "Charcoal blazer with grey trousers and brown boots" },,
+      { img: "assets/photos/c0e1bec37061.jpg", caption: "Dark suit, white shirt, and dark textured tie", desc: "Wearing dark suit, white shirt, and dark textured tie" },
+      { img: "assets/photos/e9af833b282c.jpg", caption: "This is a classic black-and-white studio portrait of a young man", desc: "This is a classic black-and-white studio portrait of a young man posing directly for the camera. The subject is a man with neatly combed dark" },
+      { img: "assets/photos/fd765b1032ff.jpg", caption: "A black-and-white portrait of Gianni Agnelli seated in a dark bus", desc: "A black-and-white portrait of Gianni Agnelli seated in a dark business suit, captured in a pensive, formal style typical of mid-20th century" },
+      { img: "assets/photos/5fb07c0a3256.jpg", caption: "Light gray suit jacket, light blue dress shirt, and patterned tie; his", desc: "Wearing light gray suit jacket, light blue dress shirt, and patterned tie; his hands are visible in his lap" },
+      { img: "assets/photos/8b45d1172a46.jpg", caption: "Navy blazer and dark jeans", desc: "Wearing navy blazer and dark jeans" },
+      { img: "assets/photos/422d5b796cfb.jpg", caption: "Pinstripe blazer and jeans", desc: "Wearing pinstripe blazer and jeans" },
+      { img: "assets/photos/8bb0642660ea.jpg", caption: "A distinguished man in a grey suit is pictured outdoors, with several", desc: "A distinguished man in a grey suit is pictured outdoors, with several classic cars visible in the background" }
     ]
   },
   {
@@ -1729,7 +1885,7 @@ var STYLE_ICONS = [
     rules: [
       "Fewer pieces, perfectly chosen. If an item needs explaining, it doesn't belong in the look.",
       "Basics are the wardrobe: the tee, the jean, the boot — buy the best version and wear it into the ground.",
-      "No logos, no decoration. Fit and fabric are the entire statement."
+      "No logos, no decoration. Fit and fabric are the entire statement.",
     ],
     avoid: "Avoid: anything that looks like it was bought to be photographed.",
     shoeLabel: "Boots", shoeDetail: "tan desert boots, fresh pair", shoeHex: "#c59f6b", formality: -2,
@@ -1753,7 +1909,30 @@ var STYLE_ICONS = [
       { img: "assets/photos/421e276e6c02.jpg", caption: "Blue leathers, older McQueen", desc: "Blue leather jacket with jeans" },
       { img: "assets/photos/bc31eadbe1b1.jpg", caption: "The ISDT leathers", desc: "Black racing jacket with trousers" },
       { img: "assets/photos/2ff4883fedeb.jpg", caption: "McQueen, a collage", desc: "Green jacket with shirt and jeans" },
-      { img: "assets/photos/b0a8278c8a15.jpg", caption: "Denim and the cowboy hat", desc: "Indigo denim jacket with white shirt and jeans" }
+      { img: "assets/photos/b0a8278c8a15.jpg", caption: "Denim and the cowboy hat", desc: "Indigo denim jacket with white shirt and jeans" },
+      { img: "assets/photos/f38f20259c69.jpg", caption: "Steve McQueen — reference look", desc: "White tee with indigo jeans and tan boots" },
+      { img: "assets/photos/768d544c3946.jpg", caption: "Steve McQueen — reference look", desc: "White tee with indigo jeans and tan boots" },
+      { img: "assets/photos/ac570f011d5f.jpg", caption: "Sunglasses and a black leather jacket is pictured indoors, looking off", desc: "Wearing sunglasses and a black leather jacket is pictured indoors, looking off to the side" },
+      { img: "assets/photos/edc671d4e350.jpg", caption: "Light-colored, zippered jacket", desc: "Wearing light-colored, zippered jacket" },
+      { img: "assets/photos/1766f63684f8.jpg", caption: "Dark turtleneck sweater and a backpack leans", desc: "Wearing dark turtleneck sweater and a backpack leans" },
+      { img: "assets/photos/e2d5afebfe42.jpg", caption: "Dark turtleneck sweater under an unbuttoned textured blazer and dark", desc: "Wearing dark turtleneck sweater under an unbuttoned textured blazer and dark trousers" },
+      { img: "assets/photos/125b12427566.jpg", caption: "A man in a dark suit and turtleneck stands outdoors in front of a stor", desc: "A man in a dark suit and turtleneck stands outdoors in front of a storefront window displaying some text" },
+      { img: "assets/photos/dedd89dc4ca1.jpg", caption: "A man in a dark turtleneck sweater and necklace walks outdoors, with a", desc: "A man in a dark turtleneck sweater and necklace walks outdoors, with a white car and other people visible in the background" },
+      { img: "assets/photos/49efc2324051.jpg", caption: "A middle-aged man with short gray hair models a casual outfit whi", desc: "A middle-aged man with short gray hair models a casual outfit while walking outdoors beside a plain dark gray building. He wears an olive green" },
+      { img: "assets/photos/21f40ca2afc7.jpg", caption: "A black-and-white photograph captures actor Steve McQueen standin", desc: "A black-and-white photograph captures actor Steve McQueen standing in a doorway, wearing a denim jacket and jeans over an unbuttoned collared" },
+      { img: "assets/photos/fec525dad6a7.jpg", caption: "Steve McQueen — reference look", desc: "White tee with indigo jeans and tan boots" },,
+      { img: "assets/photos/d45f6dfe15c9.jpg", caption: "Steve McQueen — reference look", desc: "White tee with indigo jeans and tan boots" },
+      { img: "assets/photos/a6e4ea59a6ad.jpg", caption: "Steve McQueen — reference look", desc: "White tee with indigo jeans and tan boots" },
+      { img: "assets/photos/eb315fa64c73.jpg", caption: "A man in a jacket and jeans sits in a wooden armchair indoors, with a", desc: "A man in a jacket and jeans sits in a wooden armchair indoors, with a shelf displaying striped fabric in the background" },
+      { img: "assets/photos/f9653a3169ca.jpg", caption: "A black-and-white photograph shows actor Steve McQueen outdoors i", desc: "A black-and-white photograph shows actor Steve McQueen outdoors in a desert landscape, preparing for a motorcycle ride. McQueen is crouched" },
+      { img: "assets/photos/ab0f85599614.jpg", caption: "Steve McQueen — reference look", desc: "White tee with indigo jeans and tan boots" },
+      { img: "assets/photos/d15a1e17c5bd.jpg", caption: "A vintage color photograph shows actor Steve McQueen in a white G", desc: "A vintage color photograph shows actor Steve McQueen in a white Gulf-branded racing suit standing in a motorsport pit area. He is centered in" },
+      { img: "assets/photos/c30c43ae2b3e.jpg", caption: "Steve McQueen — reference look", desc: "White tee with indigo jeans and tan boots" },
+      { img: "assets/photos/048552267e87.jpg", caption: "Dark clothing is seated on the boat", desc: "Wearing dark clothing is seated on the boat" },
+      { img: "assets/photos/8736233389c1.jpg", caption: "Thick, brown knitted cardigan over a denim shirt", desc: "Wearing thick, brown knitted cardigan over a denim shirt" },
+      { img: "assets/photos/8e6c7fcb905a.jpg", caption: "A middle-aged man with wavy, light brown hair wears a thick, knitted b", desc: "A middle-aged man with wavy, light brown hair wears a thick, knitted brown cardigan over a denim shirt outdoors" },
+      { img: "assets/photos/d5e3993a227c.jpg", caption: "A man in a brown cardigan and collared shirt stands outdoors near wate", desc: "A man in a brown cardigan and collared shirt stands outdoors near water, looking intently toward the viewer" },
+      { img: "assets/photos/d640f5d3df64.jpg", caption: "This is a color still photograph of actor Steve McQueen in costum", desc: "This is a color still photograph of actor Steve McQueen in costume as a prisoner character, leaning forward at the wheel of a boat on a dark" }
     ]
   },
   {
@@ -1765,7 +1944,7 @@ var STYLE_ICONS = [
     rules: [
       "Dress to camouflage your flaws and repeat what flatters you — Grant's high collars hid a thick neck for fifty years.",
       "Mid-grey is the most useful colour a man owns: it takes white, blue, navy and brown without argument.",
-      "Never look brand new. Clothes should appear to have been yours for years, because the good ones will be."
+      "Never look brand new. Clothes should appear to have been yours for years, because the good ones will be.",
     ],
     avoid: "Avoid: novelty. Grant wore essentially one look for five decades and never repeated the mistake of changing it.",
     shoeLabel: "Loafers", shoeDetail: "dark brown, polished but not gleaming", shoeHex: "#4e2e22", formality: 2,
@@ -1795,7 +1974,23 @@ var STYLE_ICONS = [
       { img: "assets/photos/440a9a4fbf66.jpg", caption: "Light suit, seated colour", desc: "Light blue-grey suit with navy tie" },
       { img: "assets/photos/1a54a9a6b807.jpg", caption: "Light suit, close crop", desc: "Light grey suit with tie" },
       { img: "assets/photos/16a801c37aa3.jpg", caption: "White suit, black and white", desc: "Cream suit with white shirt and tie" },
-      { img: "assets/photos/6e43e93b7764.jpg", caption: "North by Northwest energy", desc: "Charcoal suit with white shirt and tie" }
+      { img: "assets/photos/6e43e93b7764.jpg", caption: "North by Northwest energy", desc: "Charcoal suit with white shirt and tie" },
+      { img: "assets/photos/2c5fc3eecbbe.jpg", caption: "A man in a suit is seated, looking directly at the camera in a studio", desc: "A man in a suit is seated, looking directly at the camera in a studio setting with vertical background panels" },
+      { img: "assets/photos/eefdcdd9f3fb.jpg", caption: "Cary Grant — reference look", desc: "Grey blazer with light blue shirt and navy trousers" },
+      { img: "assets/photos/a03bdb979dee.jpg", caption: "A black and white portrait of a man in a pinstripe suit, seated a", desc: "A black and white portrait of a man in a pinstripe suit, seated against a floral patterned chair. Visible text includes '© C. GRANT-N 135' and" },
+      { img: "assets/photos/22eb5fbe8422.jpg", caption: "A formal portrait-style photograph shows actor Cary Grant leaning", desc: "A formal portrait-style photograph shows actor Cary Grant leaning slightly against a dark wood-paneled doorway, looking directly at the camera" },
+      { img: "assets/photos/b91624d3ffeb.jpg", caption: "A color photograph shows a man in a light gray double-breasted su", desc: "A color photograph shows a man in a light gray double-breasted suit standing indoors, leaning against a wooden door frame with his hands in his" },
+      { img: "assets/photos/86f8d23fe7c2.jpg", caption: "A man in a tailored suit leans against a dark wooden surface, smiling", desc: "A man in a tailored suit leans against a dark wooden surface, smiling while posing indoors" },
+      { img: "assets/photos/54e6c043c542.jpg", caption: "The post uses a vintage black-and-white photograph of actor Cary", desc: "The post uses a vintage black-and-white photograph of actor Cary Grant in a tailored suit to illustrate mid-20th-century ideals of masculinity" },,
+      { img: "assets/photos/603bc492dd88.jpg", caption: "A black-and-white studio publicity portrait of actor Cary Grant s", desc: "A black-and-white studio publicity portrait of actor Cary Grant seated in an ornate armchair, used as an illustration of wealth and celebrity" },
+      { img: "assets/photos/5d0ae9297a74.jpg", caption: "A classic black-and-white studio portrait of actor Cary Grant pos", desc: "A classic black-and-white studio portrait of actor Cary Grant posed in a sharp suit. The image shows Grant from the mid-thigh up, seated on what" },
+      { img: "assets/photos/0f48cab1aa27.jpg", caption: "This is a black-and-white studio publicity portrait of actor Cary", desc: "This is a black-and-white studio publicity portrait of actor Cary Grant seated in an upholstered armchair, projecting classic Hollywood suave" },
+      { img: "assets/photos/6de2683310cc.jpg", caption: "A man in a suit walks outdoors near a palm tree, with several other pe", desc: "A man in a suit walks outdoors near a palm tree, with several other people visible in the background" },
+      { img: "assets/photos/70fc352ee3dc.jpg", caption: "A classic black-and-white studio portrait of actor Cary Grant sea", desc: "A classic black-and-white studio portrait of actor Cary Grant seated and looking at the camera. He is dressed in a light-colored plaid suit" },
+      { img: "assets/photos/810414679a7b.jpg", caption: "A black-and-white still shows Cary Grant walking toward the camer", desc: "A black-and-white still shows Cary Grant walking toward the camera in a light-colored summer blazer, white trousers, and dark shoes, with a" },
+      { img: "assets/photos/cc500e16675c.jpg", caption: "Cary Grant — reference look", desc: "Grey blazer with light blue shirt and navy trousers" },
+      { img: "assets/photos/6ce7ff61bc91.jpg", caption: "A black and white portrait of a man in a suit and tie, looking directl", desc: "A black and white portrait of a man in a suit and tie, looking directly at the viewer with a slight smile" },
+      { img: "assets/photos/25499f37cd39.jpg", caption: "Pinstripe suit and tie, posing with one hand near his head", desc: "Wearing pinstripe suit and tie, posing with one hand near his head" }
     ]
   },
   {
@@ -1807,7 +2002,7 @@ var STYLE_ICONS = [
     rules: [
       "Layer across traditions: country tweed, American denim, a sporting knit. One look, three textures, zero conflict.",
       "Heritage colours only — cream, forest, navy, camel, burgundy. If it wouldn't appear on a 1930s clubhouse wall, leave it out.",
-      "Romance is a styling tool: clothes should suggest a life being lived, not a product being launched."
+      "Romance is a styling tool: clothes should suggest a life being lived, not a product being launched.",
     ],
     avoid: "Avoid: single-note outfits. A Lauren look with nothing layered is just clothes.",
     shoeLabel: "Loafers", shoeDetail: "dark brown leather, fresh pair", shoeHex: "#4e3428", formality: 0,
@@ -1829,7 +2024,58 @@ var STYLE_ICONS = [
       { img: "assets/photos/7ead863c6fb7.jpg", caption: "Navy double-breasted, waving", desc: "Navy double-breasted blazer with jeans" },
       { img: "assets/photos/b891583a60d9.jpg", caption: "Black double-breasted, black and white", desc: "Black double-breasted suit with tie" },
       { img: "assets/photos/48af8f5e3185.jpg", caption: "Pinstripe, the headshot", desc: "Charcoal pinstripe suit with black tie" },
-      { img: "assets/photos/191928d689c2.jpg", caption: "Light suit, seated", desc: "Light grey suit with black tie" }
+      { img: "assets/photos/191928d689c2.jpg", caption: "Light suit, seated", desc: "Light grey suit with black tie" },
+      { img: "assets/photos/ea5404c2dab1.jpg", caption: "Striped sweater, dark trousers, and sunglasses, while another model in", desc: "Wearing striped sweater, dark trousers, and sunglasses, while another model in white shorts" },
+      { img: "assets/photos/480fda75cc99.jpg", caption: "Striped sweater and dark trousers, while another model in white shorts", desc: "Wearing striped sweater and dark trousers, while another model in white shorts" },
+      { img: "assets/photos/e9c1a8e5e5e5.jpg", caption: "Black leather jacket, a white turtleneck, and white trousers", desc: "Wearing black leather jacket, a white turtleneck, and white trousers" },
+      { img: "assets/photos/f9eaab68a41a.jpg", caption: "Striped sweater, dark trousers, and a white skirt is visible on another", desc: "Wearing striped sweater, dark trousers, and a white skirt is visible on another model" },
+      { img: "assets/photos/3fbac5054ad0.jpg", caption: "Ralph Lauren — reference look", desc: "Cream cricket sweater with indigo jeans and brown loafers" },
+      { img: "assets/photos/14d36cf00f2b.jpg", caption: "This is a studio fashion photograph showcasing a men’s preppy lay", desc: "This is a studio fashion photograph showcasing a men’s preppy layered outfit centered on a Ralph Lauren cardigan. A young male model with" },
+      { img: "assets/photos/b6096241493b.jpg", caption: "A fashion model poses in a studio-style portrait showcasing a men", desc: "A fashion model poses in a studio-style portrait showcasing a men's casual outfit centered on a navy Ralph Lauren polo shirt. The young man with" },
+      { img: "assets/photos/f11fecbc947f.jpg", caption: "Matching tan Polo Ralph Lauren sweatsuit and cap", desc: "Wearing matching tan Polo Ralph Lauren sweatsuit and cap" },
+      { img: "assets/photos/791142df655a.jpg", caption: "A male model poses in a studio lookbook shot showcasing a coordin", desc: "A male model poses in a studio lookbook shot showcasing a coordinated casual men's outfit from Polo Ralph Lauren. The image shows a young man" },
+      { img: "assets/photos/c1ddcc2cc33f.jpg", caption: "A young male model poses in a full-body fashion shot against a pl", desc: "A young male model poses in a full-body fashion shot against a plain light-gray studio backdrop, showcasing a casual men’s outfit. He stands" },
+      { img: "assets/photos/b3d7c82fe327.jpg", caption: "A well-dressed man stands in a dark suit, featuring a double-breasted", desc: "A well-dressed man stands in a dark suit, featuring a double-breasted jacket and matching trousers, paired with a striped tie" },
+      { img: "assets/photos/0988af0ff395.jpg", caption: "A fashion editorial image showcases a male model in formal menswe", desc: "A fashion editorial image showcases a male model in formal menswear from Ralph Lauren Purple Label, presented as an autumn-winter 2024 look. The" },
+      { img: "assets/photos/53571dc6adcc.jpg", caption: "Ralph Lauren — reference look", desc: "Cream cricket sweater with indigo jeans and brown loafers" },
+      { img: "assets/photos/2cb8a5eed314.jpg", caption: "A man is dressed in a brown tweed jacket, a waistcoat, yellow trousers", desc: "A man is dressed in a brown tweed jacket, a waistcoat, yellow trousers, and a patterned shirt, posing against a neutral background" },
+      { img: "assets/photos/5311c0dcac8a.jpg", caption: "A studio fashion portrait showcases a men's tailored outfit cente", desc: "A studio fashion portrait showcases a men's tailored outfit centered on a tan and brown tweed sport coat. The image shows a single male model" },
+      { img: "assets/photos/ecf3c015ba54.jpg", caption: "A fashion studio photograph showcases a male model in a layered m", desc: "A fashion studio photograph showcases a male model in a layered menswear outfit. The image presents a full-body view of a Black man standing" },
+      { img: "assets/photos/3487dcc9e5a5.jpg", caption: "Brown tweed blazer, a dark green sweater, and khaki trousers", desc: "Wearing brown tweed blazer, a dark green sweater, and khaki trousers" },
+      { img: "assets/photos/d341308d99b5.jpg", caption: "Patterned tweed blazer over a cream sweater and a white collared shirt", desc: "Wearing patterned tweed blazer over a cream sweater and a white collared shirt, accessorized with a pocket square" },
+      { img: "assets/photos/936e90cbbf4c.jpg", caption: "Ralph Lauren — reference look", desc: "Cream cricket sweater with indigo jeans and brown loafers" },
+      { img: "assets/photos/78520c629ed9.jpg", caption: "Ralph Lauren — reference look", desc: "Cream cricket sweater with indigo jeans and brown loafers" },
+      { img: "assets/photos/60ede8e7d5e1.jpg", caption: "Cream-colored cable-knit cricket sweater", desc: "Wearing cream-colored cable-knit cricket sweater" },
+      { img: "assets/photos/20c9932bdb67.jpg", caption: "A male runway model walks toward the camera on an indoor fashion", desc: "A male runway model walks toward the camera on an indoor fashion show runway, presenting a layered menswear look from Ralph Lauren's Fall/Winter" },
+      { img: "assets/photos/691aaf077b06.jpg", caption: "A male fashion model walks toward the camera on an indoor runway", desc: "A male fashion model walks toward the camera on an indoor runway, modeling a full Ralph Lauren ensemble while another model in branded outerwear" },
+      { img: "assets/photos/40f1c90f70d7.jpg", caption: "A male model walks a fashion runway showcasing a colorful, layere", desc: "A male model walks a fashion runway showcasing a colorful, layered Polo Ralph Lauren menswear look. The model, a young man with curly brown" },
+      { img: "assets/photos/b99add400316.jpg", caption: "A model walks the runway showcasing a layered Ralph Lauren ensemb", desc: "A model walks the runway showcasing a layered Ralph Lauren ensemble from the brand's 2027 spring/summer men's collection during Milan Men's" },
+      { img: "assets/photos/62064e67a815.jpg", caption: "A male model walks a white runway showcasing a layered Ralph Laur", desc: "A male model walks a white runway showcasing a layered Ralph Lauren menswear look from the Spring/Summer 2027 collection. The model wears a navy" },
+      { img: "assets/photos/2fa0330f7334.jpg", caption: "A full-length studio fashion photograph showcases a men's tailore", desc: "A full-length studio fashion photograph showcases a men's tailored double-breasted pinstripe suit as the central focus, presenting the outfit in" },
+      { img: "assets/photos/988723be68c8.jpg", caption: "A fashion product photograph showcasing a men's double-breasted s", desc: "A fashion product photograph showcasing a men's double-breasted suit in a classic menswear pose. The image shows a single young adult male model" },
+      { img: "assets/photos/dcf104ebd29c.jpg", caption: "Brown leather loafers", desc: "Wearing brown leather loafers" },
+      { img: "assets/photos/1a1d6c7c8672.jpg", caption: "Ralph Lauren — reference look", desc: "Cream cricket sweater with indigo jeans and brown loafers" },
+      { img: "assets/photos/e94e90c61bce.jpg", caption: "Ralph Lauren — reference look", desc: "Cream cricket sweater with indigo jeans and brown loafers" },
+      { img: "assets/photos/72b7a139ed21.jpg", caption: "Ralph Lauren — reference look", desc: "Cream cricket sweater with indigo jeans and brown loafers" },
+      { img: "assets/photos/bf55e5886242.jpg", caption: "Ralph Lauren — reference look", desc: "Cream cricket sweater with indigo jeans and brown loafers" },
+      { img: "assets/photos/d3b85f15e204.jpg", caption: "Ralph Lauren — reference look", desc: "Cream cricket sweater with indigo jeans and brown loafers" },
+      { img: "assets/photos/5634d28d9327.jpg", caption: "A studio fashion photograph of a male model posing in western-ins", desc: "A studio fashion photograph of a male model posing in western-inspired denim attire. The image shows a young man with light brown hair and blue" },
+      { img: "assets/photos/8e5a4950fe19.jpg", caption: "Light blue denim button-down shirt and tan pants", desc: "Wearing light blue denim button-down shirt and tan pants" },
+      { img: "assets/photos/9dd69629c44e.jpg", caption: "A fashion product photograph shows a male model posing indoors to", desc: "A fashion product photograph shows a male model posing indoors to display men's clothing. The image is a clean, commercial studio-style shot" },
+      { img: "assets/photos/cde73fe328db.jpg", caption: "A male model walks a runway in an all-denim Western-inspired outf", desc: "A male model walks a runway in an all-denim Western-inspired outfit during a Ralph Lauren Fall 2026 menswear presentation. The model has long" },
+      { img: "assets/photos/6f85a1b53036.jpg", caption: "A young man models a denim jacket, light blue trousers, and a striped", desc: "A young man models a denim jacket, light blue trousers, and a striped shirt, accessorized with sunglasses" },
+      { img: "assets/photos/855ab11e380f.jpg", caption: "The post is a studio fashion photograph modeling a men's coordina", desc: "The post is a studio fashion photograph modeling a men's coordinated outfit. A young man with light brown hair stands facing the camera against" },
+      { img: "assets/photos/3415631bd4e3.jpg", caption: "A male fashion model poses in a full-length studio shot showcasin", desc: "A male fashion model poses in a full-length studio shot showcasing a preppy menswear outfit centered on a Polo Ralph Lauren blue and white check" },
+      { img: "assets/photos/edb6ebbfc238.jpg", caption: "A fashion product photograph shows a male model posing against a", desc: "A fashion product photograph shows a male model posing against a plain light wall. The man has light brown wavy hair and wears dark" },
+      { img: "assets/photos/dc82ab5d27af.jpg", caption: "A fashion product photograph shows a male model posing in formal", desc: "A fashion product photograph shows a male model posing in formal evening wear, presenting a Ralph Lauren Purple Label jacket. The model stands" },
+      { img: "assets/photos/b17a890e54cb.jpg", caption: "A male model poses on a staircase in formal evening wear, present", desc: "A male model poses on a staircase in formal evening wear, presenting a Ralph Lauren Purple Label look. The man has shoulder-length brown hair" },
+      { img: "assets/photos/6777dc56034f.jpg", caption: "A male model poses in formal evening wear in an elegant interior", desc: "A male model poses in formal evening wear in an elegant interior setting. The image shows a young man with light brown hair styled neatly" },
+      { img: "assets/photos/0487fcfea5b2.jpg", caption: "A studio fashion photograph of a man modeling formal evening wear", desc: "A studio fashion photograph of a man modeling formal evening wear against a dark backdrop. The image shows a single male model standing" },
+      { img: "assets/photos/003502cfad34.jpg", caption: "Olive green jacket and carrying a brown leather briefcase", desc: "Wearing olive green jacket and carrying a brown leather briefcase" },
+      { img: "assets/photos/96b9033b30fc.jpg", caption: "Olive green safari-style jacket and matching trousers", desc: "Wearing olive green safari-style jacket and matching trousers" },
+      { img: "assets/photos/8059e3781371.jpg", caption: "Dark sunglasses with light-colored frames", desc: "Wearing dark sunglasses with light-colored frames" },
+      { img: "assets/photos/56dc8e5933f0.jpg", caption: "Ralph Lauren — reference look", desc: "Cream cricket sweater with indigo jeans and brown loafers" },
+      { img: "assets/photos/589b10bddec1.jpg", caption: "Ralph Lauren Spring/Summer 2027 menswear ensemble, serving as a", desc: "Wearing Ralph Lauren Spring/Summer 2027 menswear ensemble, serving as a showcase for the brand's new men's collection" },
     ]
   },
   {
@@ -1841,7 +2087,7 @@ var STYLE_ICONS = [
     rules: [
       "Generous, never tight: wider lapels, a longer jacket, high-rise trousers harmonious from waist to hem — Neapolitan ease is cut in, not squeezed out.",
       "Hold the tradition, then colour it: master the classic rules first, then experiment with shape, weight and geometry until the formality softens.",
-      "Layer by hand and history: a fine knit or a scarf under tailoring, vintage cloth over new — style is the footprint of what you are, not a trend you followed."
+      "Layer by hand and history: a fine knit or a scarf under tailoring, vintage cloth over new — style is the footprint of what you are, not a trend you followed.",
     ],
     avoid: "Avoid: skinny cuts, stiff construction, and dressing by trend — Cavaliere never followed one, and the clothes show it.",
     shoeLabel: "Loafers", shoeDetail: "dark brown suede, worn sockless", shoeHex: "#7c4226", formality: 1,
@@ -1854,7 +2100,25 @@ var STYLE_ICONS = [
       { img: "assets/photos/2e4c9e7d44ea.jpg", caption: "Tan suit, Naples street", desc: "Tan suit with knit and brown shoes" },
       { img: "assets/photos/400f3155ea77.jpg", caption: "The cream blazer", desc: "Cream blazer with white shirt and trousers" },
       { img: "assets/photos/d8d6e669dd2b.jpg", caption: "Against the wall, Naples", desc: "Navy jacket with blue shirt and tan trousers" },
-      { img: "assets/photos/3f19b3857b68.jpg", caption: "At the cutting table", desc: "Navy blazer with white shirt, examining cloth in the atelier" }
+      { img: "assets/photos/3f19b3857b68.jpg", caption: "At the cutting table", desc: "Navy blazer with white shirt, examining cloth in the atelier" },
+      { img: "assets/photos/1e2b08490cff.jpg", caption: "Gerardo Cavaliere — reference look", desc: "Navy blazer with burgundy knit and cream trousers" },
+      { img: "assets/photos/144f573a4f3d.jpg", caption: "Gerardo Cavaliere — reference look", desc: "Navy blazer with burgundy knit and cream trousers" },
+      { img: "assets/photos/63a6574c004b.jpg", caption: "Two men are featured in this split image; one holds a camera while loo", desc: "Two men are featured in this split image; one holds a camera while looking down, and the other looks out of a vehicle window" },
+      { img: "assets/photos/644d7533e815.jpg", caption: "A studio fashion portrait of a man in a tailored dark suit posed", desc: "A studio fashion portrait of a man in a tailored dark suit posed beside a black metal chair. The man stands centrally against a plain gray" },
+      { img: "assets/photos/3a66f93d59b8.jpg", caption: "A man in a black tuxedo and bow tie is seated on a chair against a pla", desc: "A man in a black tuxedo and bow tie is seated on a chair against a plain gray background, looking directly at the camera" },
+      { img: "assets/photos/0d9e6434354f.jpg", caption: "Light-colored suit", desc: "Wearing light-colored suit" },
+      { img: "assets/photos/8072334ccb01.jpg", caption: "A man in a grey double-breasted suit leans over a dark surface, intent", desc: "A man in a grey double-breasted suit leans over a dark surface, intently looking down at some papers or plans" },
+      { img: "assets/photos/2b01b387d025.jpg", caption: "Measuring tape draped around his neck", desc: "Wearing measuring tape draped around his neck" },
+      { img: "assets/photos/723cdf42a8af.jpg", caption: "A black-and-white portrait shows a man identified as Giuseppe (Pi", desc: "A black-and-white portrait shows a man identified as Giuseppe (Pino) Peluso, a master tailor, seated on a stone wall by the sea while" },
+      { img: "assets/photos/ddfd74c4c2bf.jpg", caption: "A well-dressed man in a black tuxedo and bow tie poses against a light", desc: "A well-dressed man in a black tuxedo and bow tie poses against a light background, looking down thoughtfully" },
+      { img: "assets/photos/59588fd0a7d8.jpg", caption: "This is a 19th-century black-and-white engraved portrait of Giova", desc: "This is a 19th-century black-and-white engraved portrait of Giovanni Pacini, presented as a formal printed image. The central figure is a young" },
+      { img: "assets/photos/fb244a7f2324.jpg", caption: "Dark suit and glasses", desc: "Wearing dark suit and glasses" },,
+      { img: "assets/photos/fff70a8a0980.jpg", caption: "A studio portrait of a man in formal eveningwear, presented as a", desc: "A studio portrait of a man in formal eveningwear, presented as a fashion editorial image for a Naples-based tailor. The man stands against a" },
+      { img: "assets/photos/cd5edd59c833.jpg", caption: "A man in a black tuxedo with a velvet lapel and a bow tie stands again", desc: "A man in a black tuxedo with a velvet lapel and a bow tie stands against a solid gray background" },
+      { img: "assets/photos/a9d1397d5dc4.jpg", caption: "Gerardo Cavaliere — reference look", desc: "Navy blazer with burgundy knit and cream trousers" },
+      { img: "assets/photos/c9bdb32a8dc8.jpg", caption: "A man in a brown linen suit sits on a wooden stool inside what ap", desc: "A man in a brown linen suit sits on a wooden stool inside what appears to be a casual eatery or cafe, looking down with a relaxed posture. He" },
+      { img: "assets/photos/c4171520eb77.jpg", caption: "A man in a tailor's workshop stands beside a dressmaker's mannequ", desc: "A man in a tailor's workshop stands beside a dressmaker's mannequin dressed in an unfinished blue jacket, demonstrating bespoke tailoring. The" },
+      { img: "assets/photos/d70687a626df.jpg", caption: "Gerardo Cavaliere — reference look", desc: "Navy blazer with burgundy knit and cream trousers" }
     ]
   },
   {
@@ -1866,7 +2130,7 @@ var STYLE_ICONS = [
     rules: [
       "Fit is the signature: tailoring cut close and clean, basics fitted the same way — if it doesn't fit, it isn't finished.",
       "Heritage with a modern twist: British sporting cloth — check, tweed, the cricket jumper, the flat cap — updated for now, never worn as costume.",
-      "Dress the whole man: pocket square, grooming, the right watch — his detail runs from the socks to the velvet jacket, nothing left to chance."
+      "Dress the whole man: pocket square, grooming, the right watch — his detail runs from the socks to the velvet jacket, nothing left to chance.",
     ],
     avoid: "Avoid: the early-2000s experiments — the sarong-era novelty is the one chapter even Beckham left behind.",
     shoeLabel: "Boots", shoeDetail: "dark brown Chelsea boots, fresh pair", shoeHex: "#4e2e22", formality: 1,
@@ -1896,7 +2160,54 @@ var STYLE_ICONS = [
       { img: "assets/photos/4961ea447dc0.jpg", caption: "Olive knit, the scarf", desc: "Olive knit with scarf and brown trousers" },
       { img: "assets/photos/734974e2a6fc.jpg", caption: "Cream suit, standing", desc: "Cream suit with white shirt and tie" },
       { img: "assets/photos/12c88e69d5dd.jpg", caption: "Charcoal double-breasted", desc: "Charcoal double-breasted suit with tie" },
-      { img: "assets/photos/fe47b182653b.jpg", caption: "Light grey suit, the bag", desc: "Light grey suit with tie and brown shoes" }
+      { img: "assets/photos/fe47b182653b.jpg", caption: "Light grey suit, the bag", desc: "Light grey suit with tie and brown shoes" },
+      { img: "assets/photos/6ccf4752dcde.jpg", caption: "David Beckham — reference look", desc: "Charcoal blazer with white shirt, indigo jeans and brown boots" },
+      { img: "assets/photos/73c7de2e0746.jpg", caption: "A well-dressed man in a dark suit and white shirt sits on a wooden sto", desc: "A well-dressed man in a dark suit and white shirt sits on a wooden stool, looking directly at the camera with a serious expression" },
+      { img: "assets/photos/90fa84934238.jpg", caption: "Dark overcoat and a flat cap", desc: "Wearing dark overcoat and a flat cap" },
+      { img: "assets/photos/d9b36608eedd.jpg", caption: "A paparazzi-style street photograph captures David Beckham walkin", desc: "A paparazzi-style street photograph captures David Beckham walking on a city sidewalk during daytime. He is the central figure, moving toward" },
+      { img: "assets/photos/362b3db9f88b.jpg", caption: "David Beckham — reference look", desc: "Charcoal blazer with white shirt, indigo jeans and brown boots" },
+      { img: "assets/photos/b850ce1a7ec4.jpg", caption: "A fashion portrait of David Beckham in a tailored three-piece sui", desc: "A fashion portrait of David Beckham in a tailored three-piece suit standing on a soccer field beside a goalpost. The image shows a man with" },
+      { img: "assets/photos/ea0cb2e5ff00.jpg", caption: "A studio portrait of David Beckham in a dark suit adjusting his j", desc: "A studio portrait of David Beckham in a dark suit adjusting his jacket, displaying tattooed hands and a large wristwatch. The image shows a man" },
+      { img: "assets/photos/73d7789a51ff.jpg", caption: "A portrait-style photograph of David Beckham dressed in formal at", desc: "A portrait-style photograph of David Beckham dressed in formal attire at what appears to be a public sporting event. He is centered in the frame" },
+      { img: "assets/photos/411ad31123ba.jpg", caption: "David Beckham — reference look", desc: "Charcoal blazer with white shirt, indigo jeans and brown boots" },
+      { img: "assets/photos/85c5862d443b.jpg", caption: "A street-style photograph of David Beckham standing at an outdoor", desc: "A street-style photograph of David Beckham standing at an outdoor fashion event showcases a polished casual outfit and the atmosphere of a" },
+      { img: "assets/photos/71236fe3ff96.jpg", caption: "A paparazzi-style street photo of David Beckham walking outdoors", desc: "A paparazzi-style street photo of David Beckham walking outdoors in a fashionable casual outfit. The central figure is a man with short styled" },
+      { img: "assets/photos/734c43e3c3b7.jpg", caption: "A paparazzi-style street photograph of David Beckham walking outd", desc: "A paparazzi-style street photograph of David Beckham walking outdoors in a casual fashion-forward outfit. The man, identified as David Beckham" },
+      { img: "assets/photos/1de7003bb845.jpg", caption: "This is a candid street photograph of David Beckham walking outdo", desc: "This is a candid street photograph of David Beckham walking outdoors in a plain casual outfit. A man identified as David Beckham is captured" },
+      { img: "assets/photos/13b8e6596285.jpg", caption: "Tweed flat cap and a brown velvet blazer", desc: "Wearing tweed flat cap and a brown velvet blazer" },
+      { img: "assets/photos/dddf5042daed.jpg", caption: "Tweed flat cap, a dark overcoat, and a striped shirt", desc: "Wearing tweed flat cap, a dark overcoat, and a striped shirt" },
+      { img: "assets/photos/2b886cbaa635.jpg", caption: "A well-dressed man in a black leather jacket, white shirt, and dark ti", desc: "A well-dressed man in a black leather jacket, white shirt, and dark tie poses confidently against a plain background" },
+      { img: "assets/photos/f2572971b66d.jpg", caption: "A handsome man with styled brown hair wears a black leather jacket ove", desc: "A handsome man with styled brown hair wears a black leather jacket over a white collared shirt and dark tie" },
+      { img: "assets/photos/83b8632e4b09.jpg", caption: "Distressed black leather biker jacket with brass hardware over a black", desc: "Wearing distressed black leather biker jacket with brass hardware over a black ribbed shirt" },
+      { img: "assets/photos/133f30d4b2cf.jpg", caption: "Black leather motorcycle jacket", desc: "Wearing black leather motorcycle jacket" },
+      { img: "assets/photos/089009a5fedf.jpg", caption: "Black leather jacket and dark pants", desc: "Wearing black leather jacket and dark pants" },
+      { img: "assets/photos/d6aae35533b3.jpg", caption: "David Beckham — reference look", desc: "Charcoal blazer with white shirt, indigo jeans and brown boots" },
+      { img: "assets/photos/d9e2a23a0ee8.jpg", caption: "Light tan suit jacket over a white dress shirt, a brown patterned tie", desc: "Wearing light tan suit jacket over a white dress shirt, a brown patterned tie, and a matching patterned pocket square" },
+      { img: "assets/photos/d7c4dc91b2aa.jpg", caption: "The image shows David Beckham seated in the stands at Wimbledon", desc: "The image shows David Beckham seated in the stands at Wimbledon, watching a tennis match. He wears a light tan suit jacket over a light blue" },
+      { img: "assets/photos/5e2d2fb3216f.jpg", caption: "David Beckham — reference look", desc: "Charcoal blazer with white shirt, indigo jeans and brown boots" },
+      { img: "assets/photos/8d9319964683.jpg", caption: "A well-dressed man in a brown tweed jacket and dark trousers stands ou", desc: "A well-dressed man in a brown tweed jacket and dark trousers stands outdoors in a field, holding a wooden staff" },
+      { img: "assets/photos/2ef5fa2bf7c3.jpg", caption: "A paparazzi-style street photograph of David Beckham walking outd", desc: "A paparazzi-style street photograph of David Beckham walking outdoors in a winter outfit. He is captured mid-stride, moving from left to right" },
+      { img: "assets/photos/ff9c11460a8c.jpg", caption: "Brown tweed coat and dark trousers", desc: "Wearing brown tweed coat and dark trousers" },
+      { img: "assets/photos/467fed43000e.jpg", caption: "A well-dressed man with blonde hair and a beard wears a tan tweed jack", desc: "A well-dressed man with blonde hair and a beard wears a tan tweed jacket and a patterned tie while attending an outdoor event" },
+      { img: "assets/photos/6f97d3fc158e.jpg", caption: "A well-dressed man in a tweed blazer and tie waves to a crowd while at", desc: "A well-dressed man in a tweed blazer and tie waves to a crowd while attending an outdoor event" },
+      { img: "assets/photos/57cc63d30b56.jpg", caption: "A paparazzi-style photo captures David Beckham walking through an", desc: "A paparazzi-style photo captures David Beckham walking through an airport terminal while pulling a black rolling suitcase. Beckham, recognizable" },
+      { img: "assets/photos/3dd024600663.jpg", caption: "A paparazzi-style photo of David Beckham walking through an airpo", desc: "A paparazzi-style photo of David Beckham walking through an airport terminal, presented as an example of men's travel fashion. The man" },
+      { img: "assets/photos/898ed5c696ab.jpg", caption: "David Beckham — reference look", desc: "Charcoal blazer with white shirt, indigo jeans and brown boots" },
+      { img: "assets/photos/28702da487c6.jpg", caption: "David Beckham walks through the exterior of an international airp", desc: "David Beckham walks through the exterior of an international airport at night in casual clothing with a backpack over his shoulders. He is" },
+      { img: "assets/photos/568728f987c7.jpg", caption: "A portrait photograph of David Beckham dressed in formal evening", desc: "A portrait photograph of David Beckham dressed in formal evening wear. He is centered in the frame from the mid-torso up, facing slightly to his" },
+      { img: "assets/photos/81f8ebd96000.jpg", caption: "This is a black-and-white formal portrait of David Beckham in bla", desc: "This is a black-and-white formal portrait of David Beckham in black-tie attire, presented as a polished celebrity headshot. The image shows" },
+      { img: "assets/photos/b5f5348bf137.jpg", caption: "A polished publicity portrait of David Beckham in full black-tie", desc: "A polished publicity portrait of David Beckham in full black-tie attire serves as a visual example of formal evening dress. He stands centered" },
+      { img: "assets/photos/eeb8d41e7c82.jpg", caption: "David Beckham poses for a formal portrait in a black tuxedo and b", desc: "David Beckham poses for a formal portrait in a black tuxedo and bow tie at what looks like a red-carpet or gala event. The image is a tight" },
+      { img: "assets/photos/ccc31eba7cdd.jpg", caption: "This is a portrait photograph of David Beckham at a formal event", desc: "This is a portrait photograph of David Beckham at a formal event. The image shows him from the chest up, facing the camera with a slight smile" },
+      { img: "assets/photos/a5c4e02b4430.jpg", caption: "Grey knit sweater and black trousers", desc: "Wearing grey knit sweater and black trousers" },
+      { img: "assets/photos/2c313360d3b6.jpg", caption: "Brown knit sweater and dark trousers", desc: "Wearing brown knit sweater and dark trousers" },
+      { img: "assets/photos/677415313ab6.jpg", caption: "A paparazzi-style photograph of David Beckham walking outside at", desc: "A paparazzi-style photograph of David Beckham walking outside at night. Beckham is the central subject, captured from the chest up in a medium" },
+      { img: "assets/photos/781cd3144b43.jpg", caption: "The post shows David Beckham walking outdoors in casual cold-weat", desc: "The post shows David Beckham walking outdoors in casual cold-weather clothing, smiling as he is photographed on a street. The image is a" },
+      { img: "assets/photos/ada436e816b3.jpg", caption: "A candid street photograph shows David Beckham walking outdoors i", desc: "A candid street photograph shows David Beckham walking outdoors in cool weather attire. The image captures him from the mid-thigh up, centered" },
+      { img: "assets/photos/24212ab36108.jpg", caption: "David Beckham — reference look", desc: "Charcoal blazer with white shirt, indigo jeans and brown boots" },
+      { img: "assets/photos/a47ce42c6f42.jpg", caption: "David Beckham — reference look", desc: "Charcoal blazer with white shirt, indigo jeans and brown boots" },
+      { img: "assets/photos/488a51ae749f.jpg", caption: "A well-dressed man in a brown suit stands indoors, leaning against a d", desc: "A well-dressed man in a brown suit stands indoors, leaning against a dark vertical surface next to a bright, glass-paneled background" },
+      { img: "assets/photos/1875e2bfe018.jpg", caption: "David Beckham — reference look", desc: "Charcoal blazer with white shirt, indigo jeans and brown boots" },
     ]
   },
   {
@@ -1908,7 +2219,7 @@ var STYLE_ICONS = [
     rules: [
       "Build the V: strong roped shoulder, wide peak lapel, suppressed waist. Ford's jacket is structure first — the silhouette is the statement.",
       "Better overdressed than underdressed: a crisp white poplin shirt with any dark suit, and every detail finished — collar, pocket square, shine on the shoe.",
-      "After dark, commit: velvet or a shawl collar, midnight blue over black, one statement piece and everything else plain."
+      "After dark, commit: velvet or a shawl collar, midnight blue over black, one statement piece and everything else plain.",
     ],
     avoid: "Avoid: skinny modern cuts, notch lapels on a tuxedo, and loafers under black tie — Ford's rules are not suggestions.",
     shoeLabel: "Shoes", shoeDetail: "black polished, high shine", shoeHex: "#1c1a17", formality: 2,
@@ -1936,7 +2247,34 @@ var STYLE_ICONS = [
       { img: "assets/photos/ebf7ab7b7725.jpg", caption: "LACMA velvet", desc: "Black velvet dinner jacket with bow tie and white shirt" },
       { img: "assets/photos/5dafc90e7c41.jpg", caption: "The Oscar statue", desc: "Black dinner jacket with bow tie" },
       { img: "assets/photos/5c0a6f3515eb.jpg", caption: "Grey backdrop, sunglasses", desc: "Charcoal suit with white shirt and tie" },
-      { img: "assets/photos/cef9bb8dc22c.jpg", caption: "Reclining, black and white", desc: "Black suit with black tie and sunglasses" }
+      { img: "assets/photos/cef9bb8dc22c.jpg", caption: "Reclining, black and white", desc: "Black suit with black tie and sunglasses" },
+      { img: "assets/photos/4a3426005a8b.jpg", caption: "Orange-tinted sunglasses", desc: "Wearing orange-tinted sunglasses" },
+      { img: "assets/photos/cca2be750b6a.jpg", caption: "Tom Ford — reference look", desc: "Burgundy blazer with white shirt and black trousers" },
+      { img: "assets/photos/07016c676732.jpg", caption: "Tom Ford — reference look", desc: "Burgundy blazer with white shirt and black trousers" },
+      { img: "assets/photos/928d57e485b5.jpg", caption: "Tom Ford — reference look", desc: "Burgundy blazer with white shirt and black trousers" },
+      { img: "assets/photos/d7004c1ae850.jpg", caption: "Tom Ford — reference look", desc: "Burgundy blazer with white shirt and black trousers" },
+      { img: "assets/photos/e00d6c4c5a53.jpg", caption: "Tom Ford — reference look", desc: "Burgundy blazer with white shirt and black trousers" },
+      { img: "assets/photos/573a58c4d423.jpg", caption: "Tom Ford poses on the Met Gala red carpet in formal black tie att", desc: "Tom Ford poses on the Met Gala red carpet in formal black tie attire. The image shows a man with short dark hair and a trimmed beard wearing a" },
+      { img: "assets/photos/25dc94cad892.jpg", caption: "Classic black tuxedo with a white dress shirt, white bow tie, and white", desc: "Wearing classic black tuxedo with a white dress shirt, white bow tie, and white vest with visible studs and buttons" },
+      { img: "assets/photos/c843eeb85806.jpg", caption: "A man in a black tuxedo and bow tie poses against a backdrop featuring", desc: "A man in a black tuxedo and bow tie poses against a backdrop featuring partial text that reads 'EN BE'" },
+      { img: "assets/photos/0b7c9ec7e2fe.jpg", caption: "Tom Ford — reference look", desc: "Burgundy blazer with white shirt and black trousers" },
+      { img: "assets/photos/2ab21644e13b.jpg", caption: "A man in a black suit and sunglasses poses for the camera indoors", desc: "A man in a black suit and sunglasses poses for the camera indoors. The central figure is Tom Ford, standing on a light-colored carpet against a" },
+      { img: "assets/photos/fee869049bcb.jpg", caption: "Black suit, white shirt, black tie, and dark sunglasses", desc: "Wearing black suit, white shirt, black tie, and dark sunglasses" },
+      { img: "assets/photos/7efc5229ff11.jpg", caption: "A man in a black suit and sunglasses stands next to a white wall featu", desc: "A man in a black suit and sunglasses stands next to a white wall featuring the visible text 'FORD'" },
+      { img: "assets/photos/eb63a87a421c.jpg", caption: "A man in a black suit and sunglasses poses for a photo at what ap", desc: "A man in a black suit and sunglasses poses for a photo at what appears to be a Tom Ford event. The image shows Tom Ford standing indoors against" },
+      { img: "assets/photos/cce81d56aac8.jpg", caption: "Tom Ford walks the runway in a sharp black suit, closing his own", desc: "Tom Ford walks the runway in a sharp black suit, closing his own fashion show. The man is centered in the frame, walking toward the camera on a" },,
+      { img: "assets/photos/f1458deaab8e.jpg", caption: "Aviator sunglasses", desc: "Wearing aviator sunglasses" },
+      { img: "assets/photos/deef7e2b0180.jpg", caption: "A man in formal evening wear poses for photographers on a red car", desc: "A man in formal evening wear poses for photographers on a red carpet. The central figure is Tom Ford, standing facing the camera with a slight" },
+      { img: "assets/photos/b69c4b7cb166.jpg", caption: "Black velvet tuxedo jacket over a white dress shirt with a black bow tie", desc: "Wearing black velvet tuxedo jacket over a white dress shirt with a black bow tie" },
+      { img: "assets/photos/7303b16e0646.jpg", caption: "A man in formal evening wear poses for cameras on a red-carpet ev", desc: "A man in formal evening wear poses for cameras on a red-carpet event surrounded by greenery and photographers. The central figure is Tom Ford" },
+      { img: "assets/photos/a8bb7324bd7c.jpg", caption: "A man in formal evening wear poses on a red carpet at the Vanity", desc: "A man in formal evening wear poses on a red carpet at the Vanity Fair Oscars party. The image shows Tom Ford standing full-length, facing the" },
+      { img: "assets/photos/2e4e0ded6bc0.jpg", caption: "Tailored grey suit with a black satin shirt, while an audience watches", desc: "Wearing tailored grey suit with a black satin shirt, while an audience watches from the sides" },
+      { img: "assets/photos/fb3731623850.jpg", caption: "Tailored beige suit, black shirt, and sunglasses during a fashion show", desc: "Wearing tailored beige suit, black shirt, and sunglasses during a fashion show" },
+      { img: "assets/photos/37a98f992675.jpg", caption: "Light taupe two-piece suit covered in scattered glitter or crystal", desc: "Wearing light taupe two-piece suit covered in scattered glitter or crystal embellishments that catch the light" },
+      { img: "assets/photos/597c1b7227e6.jpg", caption: "Dark suit, black shirt, and dark sunglasses during a fashion show", desc: "Wearing dark suit, black shirt, and dark sunglasses during a fashion show" },
+      { img: "assets/photos/7df776d48635.jpg", caption: "Tom Ford — reference look", desc: "Burgundy blazer with white shirt and black trousers" },
+      { img: "assets/photos/21ab3d54bce6.jpg", caption: "Suit, a white shirt, and dark sunglasses", desc: "Wearing suit, a white shirt, and dark sunglasses" },
+      { img: "assets/photos/35308998ad8a.jpg", caption: "Sunglasses, a suit, and a tie is posed", desc: "Wearing sunglasses, a suit, and a tie is posed" }
     ]
   }
 ];
@@ -2122,6 +2460,105 @@ document.getElementById("inspo-pick").addEventListener("click", function (e) {
 });
 document.getElementById("style-direction").addEventListener("change", renderInspoPick);
 renderInspoPick();
+
+/* ================= Individual image — the user's own inspo photo =================
+   A fourth Studio source, alongside the wardrobe, the icons and the
+   palettes: upload a screenshot or photo and it becomes the
+   inspiration the look is built from, exactly the way an icon's
+   reference photograph is — the first take IS the uploaded image as
+   the reference look, and the other five takes are the engine's
+   builds from its description. Uploads are processed like closet
+   photos (orientation fixed, kept at 800px) and saved on the device
+   (and in backups via DATA_KEYS), so an image can be picked again
+   as inspo later; tapping a saved thumbnail arms it, tapping again
+   disarms it. */
+var inspoImages = store.get("inspoImages", []) || [];
+var activeInspoId = null;
+function inspoImageById(id) {
+  return inspoImages.filter(function (x) { return x.id === id; })[0] || null;
+}
+function saveInspoImages() {
+  if (!store.set("inspoImages", inspoImages)) toast("That image could not be saved on this device — storage is full. It still works for this session.");
+}
+function renderInspoImages() {
+  var box = document.getElementById("inspo-thumbs");
+  if (box) {
+    box.innerHTML = inspoImages.map(function (en) {
+      return '<button type="button" class="inspo-thumb" data-inspo-img="' + en.id + '" aria-pressed="' + (en.id === activeInspoId ? "true" : "false") + '" aria-label="Use this saved image as inspo"><img src="' + en.img + '" alt="" loading="lazy" /></button>';
+    }).join("");
+  }
+  var bar = document.getElementById("inspo-active");
+  if (!bar) return;
+  var active = activeInspoId ? inspoImageById(activeInspoId) : null;
+  if (!active) { bar.hidden = true; bar.innerHTML = ""; return; }
+  bar.hidden = false;
+  bar.innerHTML = '<img src="' + active.img + '" alt="" />' +
+    '<span class="ia-main"><strong>Building from your image</strong>' + esc(active.desc || "Your uploaded inspiration — tap Create look.") + "</span>" +
+    '<button type="button" class="btn-ghost" data-inspo-clear>Clear</button>' +
+    '<button type="button" class="btn-ghost" data-inspo-delete="' + active.id + '">Delete</button>';
+}
+document.getElementById("inspo-photo").addEventListener("change", function () {
+  var file = this.files && this.files[0];
+  if (!file) return;
+  var input = this;
+  processPhotoFile(file, function (url) {
+    var entry = {
+      id: "inspo-" + Date.now(),
+      img: url,
+      desc: document.getElementById("inspo-desc").value.trim(),
+      ts: Date.now()
+    };
+    inspoImages.unshift(entry);
+    if (inspoImages.length > 24) inspoImages = inspoImages.slice(0, 24);
+    activeInspoId = entry.id;
+    saveInspoImages();
+    renderInspoImages();
+    input.value = "";
+    toast("Saved — the Studio now builds from your image. Tap Create look.");
+  });
+});
+document.getElementById("image-inspo-field").addEventListener("click", function (e) {
+  var thumb = e.target.closest("[data-inspo-img]");
+  if (thumb) {
+    var id = thumb.getAttribute("data-inspo-img");
+    activeInspoId = activeInspoId === id ? null : id;
+    var en = inspoImageById(id);
+    if (en && en.desc) document.getElementById("inspo-desc").value = en.desc;
+    renderInspoImages();
+    if (activeInspoId) toast("Building from your saved image — tap Create look.");
+    return;
+  }
+  if (e.target.closest("[data-inspo-clear]")) { activeInspoId = null; renderInspoImages(); return; }
+  var del = e.target.closest("[data-inspo-delete]");
+  if (del) {
+    inspoImages = inspoImages.filter(function (x) { return x.id !== del.getAttribute("data-inspo-delete"); });
+    if (activeInspoId === del.getAttribute("data-inspo-delete")) activeInspoId = null;
+    saveInspoImages();
+    renderInspoImages();
+    toast("Image removed from your inspo library.");
+  }
+});
+document.getElementById("inspo-desc").addEventListener("change", function () {
+  var active = activeInspoId ? inspoImageById(activeInspoId) : null;
+  if (active) { active.desc = this.value.trim(); saveInspoImages(); renderInspoImages(); }
+});
+function buildImageLooks(entry, descText, occasion, season) {
+  var baseDesc = (descText || "").trim() || entry.desc || "An outfit inspired by my uploaded image";
+  var first = buildLook(baseDesc, occasion, season, { basis: "both", version: 1 });
+  first.img = entry.img;
+  first.imgAlt = "Your uploaded inspiration image" + (entry.desc ? ": " + entry.desc : "");
+  first.title = "From your image";
+  first.meta = "Your image · reference look" + (first.meta && first.meta.indexOf("·") !== -1 ? " · " + first.meta.split(" · ").slice(1).join(" · ") : "");
+  first.refLook = true;
+  first.imgInspo = true;
+  first.iconId = null;
+  first.blendId = null;
+  first.desc = baseDesc;
+  var rest = buildSixLooks(baseDesc, occasion, season, { basis: studioBasis, source: "inspo" }).slice(0, 5);
+  rest.forEach(function (l) { l.fromImage = true; });
+  return [first].concat(rest);
+}
+renderInspoImages();
 
 /* ================= What the outfit is based on =================
    The Studio's basis choice: "icon" (the icon leads alone — their
@@ -2569,9 +3006,9 @@ function dealerLook(opts) {
    them. Twenty-three photographs cannot deal six fresh takes for
    long, which is exactly why new looks kept repeating. The deck
    is everything dealable: those twenty-seven renders PLUS every
-   reference outfit in the icon library — 196 photographed outfits
+   reference outfit in the icon library — 452 photographed outfits
    across the nine icons, each with its own description the engine
-   styles from. 223 cards in all. A persistent dealt-card history
+   styles from. 479 cards in all. A persistent dealt-card history
    (separate from the render history, keyed by photograph) means no card — render
    or reference — is dealt twice until the whole deck has been
    dealt through; only then does the deck reshuffle, keeping
@@ -2784,9 +3221,9 @@ function iconicRowHTML(ic, limit) {
 function inspoHTML(look) {
   var ic = look.iconId ? iconById(look.iconId) : null;
   if (!ic || !ic.looks || !ic.looks.length) return "";
-  return '<div class="inspo"><h4>The reference — ' + esc(ic.name) + "</h4>" +
-    "<p>The photographs this direction is drawn from. Build straight from one and the engine works from the photograph's own outfit.</p>" +
-    iconicRowHTML(ic, 6) + (ic.looks.length > 6 ? '<p style="margin-top:10px">The full library — ' + ic.looks.length + " reference photographs — lives in " + esc(ic.name) + "'s page in the Icons tab.</p>" : "") + "</div>";
+  var inspoInfo = "The photographs this direction is drawn from. Build straight from one and the engine works from the photograph's own outfit." + (ic.looks.length > 6 ? " The full library — " + ic.looks.length + " reference photographs — lives in " + ic.name + "'s page in the Icons tab." : "");
+  return '<div class="inspo"><div class="info-inline-row"><h4>The reference — ' + esc(ic.name) + '</h4><button type="button" class="info-btn sm" data-info-title="The reference" data-info-text="' + esc(inspoInfo) + '" aria-label="About: the reference photographs">i</button></div>' +
+    iconicRowHTML(ic, 6) + "</div>";
 }
 function styleFromIconic(ic, lk) {
   setBasis("icon");
@@ -2865,8 +3302,7 @@ function pieceDescription(p) {
 function findPiecesHTML(look) {
   var pieces = lookPieces(look);
   if (!pieces.length) return "";
-  return '<div class="find-pieces"><h4>Find a piece from this look</h4>' +
-    "<p>Pick any item and it goes to Find me — in your size, with the search opened.</p>" +
+  return '<div class="find-pieces"><div class="info-inline-row"><h4>Find a piece from this look</h4><button type="button" class="info-btn sm" data-info-title="Find a piece from this look" data-info-text="Pick any item and it goes to Find me — in your size, with the search opened." aria-label="About: find a piece">i</button></div>' +
     pieces.map(function (p, i) {
       var cat = garmentCategory(p.garment);
       var size = typeof profileSizeFor === "function" ? profileSizeFor(cat) : "";
@@ -2909,7 +3345,7 @@ function sendPieceToFind(look, idx) {
 
 function lookCardHTML(look, opts) {
   opts = opts || {};
-  var refTag = look.refLook ? '<span class="pane-tag">Reference — ' + esc((look.iconId ? (iconById(look.iconId) || {}).name : "") || "icon") + "</span>" : "";
+  var refTag = look.refLook ? '<span class="pane-tag">Reference — ' + esc(look.imgInspo ? "your image" : ((look.iconId ? (iconById(look.iconId) || {}).name : "") || "icon")) + "</span>" : "";
   var media = '<div class="look-media single"><div class="pane"><img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '" />' + refTag + "</div></div>";
   var cardIcon = look.iconId ? iconById(look.iconId) : null;
   var cardBlend = look.blendId ? iconById(look.blendId) : null;
@@ -3145,7 +3581,7 @@ function optionCardHTML(look, idx) {
   var label = OPTION_LABELS[idx] || ("Take " + (idx + 1));
   return '<button type="button" class="card option-card' + (idx === 0 ? " selected" : "") + '" data-option-idx="' + idx + '" aria-pressed="' + (idx === 0 ? "true" : "false") + '" role="listitem">' +
     '<img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy" />' +
-    '<span class="oc-body"><span class="oc-label">' + esc(label) + (look.source === "wardrobe" ? " · My wardrobe" : look.source === "inspo" ? " · Inspo" : look.source === "combo" ? " · Combo" : "") + (look.plate ? " · Plate " + look.plate : (look.paletteName ? " · Your palette" : "")) + '</span>' +
+    '<span class="oc-body"><span class="oc-label">' + esc(label) + (look.source === "wardrobe" ? " · My wardrobe" : look.source === "inspo" ? " · Inspo" : look.source === "combo" ? " · Combo" : "") + (look.imgInspo || look.fromImage ? " · Your image" : (look.plate ? " · Plate " + look.plate : (look.paletteName ? " · Your palette" : ""))) + '</span>' +
     '<span class="oc-title">' + esc(look.title) + '</span>' +
     (look.meta ? '<span class="oc-meta">' + esc(look.meta) + "</span>" : "") +
     '<span class="mini-strip" style="display:flex;height:10px;border:1px solid var(--border);margin-top:8px">' + look.swatches.map(function (s) { return '<span style="flex:1;background:' + s.hex + '"></span>'; }).join("") + "</span></span></button>";
@@ -3157,7 +3593,7 @@ function renderOptions(looks, request) {
   currentLook = currentOptions[0];
   recordDealt(currentOptions.map(function (l) { return l.img; }));
   recordCards(currentOptions.map(function (l) { return l.img; }));
-  var html = '<div class="options-head"><div><h3>Six takes on your brief</h3><p>Best match first — six different plates, photographs and colour stories. Tap one to see it full-size, save it, or find a piece from it.</p></div>' +
+  var html = '<div class="options-head"><div class="info-inline-row"><h3>Six takes on your brief</h3><button type="button" class="info-btn sm" data-info-title="Six takes on your brief" data-info-text="Best match first — six different plates, photographs and colour stories. Tap one to see it full-size, save it, or find a piece from it." aria-label="About: six takes">i</button></div></div>' +
     '<button type="button" class="btn-ghost" data-action="redeal-six">Deal another six</button></div>' +
     '<div class="options-grid" role="list">' + currentOptions.map(function (look, idx) { return optionCardHTML(look, idx); }).join("") + "</div>" +
     '<div id="option-detail">' + lookCardHTML(currentOptions[0]) + "</div>";
@@ -3577,6 +4013,17 @@ function doStyleFromForm() {
     }
     if (!desc && !occasion && !season && !opts.palette) desc = "Dealer's choice from the book";
     var finalDesc = desc || "An outfit from my palette";
+    /* Individual image armed: it leads, like an icon would — the
+       uploaded photograph is the reference and the builds follow
+       its description (the Outfit field wins over the caption
+       saved with the image). */
+    var imgEntry = activeInspoId ? inspoImageById(activeInspoId) : null;
+    if (imgEntry) {
+      var imgLooks = buildImageLooks(imgEntry, userDesc, occasion, season);
+      renderOptions(imgLooks, { desc: userDesc || imgEntry.desc || "From your image", occasion: occasion, season: season, opts: { basis: studioBasis, source: "inspo", inspoImageId: imgEntry.id } });
+      toast("Six takes built from your image.");
+      return;
+    }
     renderOptions(buildSixLooks(finalDesc, occasion, season, opts), { desc: finalDesc, occasion: occasion, season: season, opts: opts });
     toast("Six takes created — " + (studioSource === "wardrobe" ? "all from your wardrobe." : studioSource === "inspo" ? "all inspo." : "combo: yours + pieces to buy."));
   } catch (err) {
@@ -3655,6 +4102,14 @@ document.getElementById("look-result").addEventListener("click", function (e) {
   if (!btn) return;
   if (btn.getAttribute("data-action") === "redeal-six") {
     if (lastSixRequest) {
+      if (lastSixRequest.opts && lastSixRequest.opts.inspoImageId) {
+        var rEntry = inspoImageById(lastSixRequest.opts.inspoImageId);
+        if (rEntry) {
+          renderOptions(buildImageLooks(rEntry, lastSixRequest.desc, lastSixRequest.occasion, lastSixRequest.season), lastSixRequest);
+          toast("Six more takes from your image.");
+          return;
+        }
+      }
       var prevPlates = currentOptions.map(function (l) { return l.plate; }).filter(Boolean);
       var ropts = Object.assign({}, lastSixRequest.opts || {});
       ropts._initialExcludePlates = prevPlates;
@@ -5116,8 +5571,7 @@ function iconDetailHTML(ic) {
     '<article class="card icon-card icon-detail-card">' +
     (ic.custom ? '<span class="your-badge">Your icon</span>' : "") +
     '<p class="lane">' + esc(ic.lane) + "</p>" +
-    "<h3>" + esc(ic.name) + "</h3>" +
-    '<p class="blurb">' + esc(ic.blurb) + "</p>" +
+    '<div class="card-head-info"><h3>' + esc(ic.name) + '</h3><button type="button" class="info-btn sm" data-info-title="' + esc(ic.name) + '" data-info-text="' + esc(ic.blurb) + '" aria-label="About ' + esc(ic.name) + '">i</button></div>' +
     stripHTML(pal, "sm") +
     "<h5>Signature outfit</h5>" +
     '<p class="blurb" style="font-family:var(--font-display);font-style:italic;font-size:17px">' + esc(ic.signatureDesc) + "</p>" +
@@ -5142,14 +5596,12 @@ function showIconList() {
   document.getElementById("icon-detail").hidden = true;
   document.getElementById("icon-search-card").hidden = false;
   document.getElementById("icon-form").hidden = false;
-  document.getElementById("icon-principles").hidden = false;
 }
 function showIconDetail() {
   document.getElementById("icon-list-view").hidden = true;
   document.getElementById("icon-detail").hidden = false;
   document.getElementById("icon-search-card").hidden = true;
   document.getElementById("icon-form").hidden = true;
-  document.getElementById("icon-principles").hidden = true;
 }
 function renderIcons() {
   var groups = {};
@@ -5259,6 +5711,74 @@ document.getElementById("icon-search-toggle").addEventListener("click", function
 });
 document.getElementById("icon-form-toggle").addEventListener("click", function () {
   setToolsOpen("form", document.getElementById("icon-form-body").hidden);
+});
+/* Generic description pop-up — every description in the app lives
+   behind a small (i) button: data-info-text carries the text directly,
+   data-info-from points at a hidden element whose current text is
+   shown (Studio's basis / source notes update as choices change). */
+var lastInfoBtn = null;
+function openInfoPop(title, text, btn) {
+  var pop = document.getElementById("info-pop");
+  if (!pop) return;
+  document.getElementById("info-pop-title").textContent = title || "About";
+  document.getElementById("info-pop-body").textContent = text || "";
+  pop.hidden = false;
+  lastInfoBtn = btn || null;
+  if (lastInfoBtn) lastInfoBtn.setAttribute("aria-expanded", "true");
+  var c = document.getElementById("info-pop-close");
+  if (c) c.focus();
+}
+function closeInfoPop() {
+  var pop = document.getElementById("info-pop");
+  if (!pop || pop.hidden) return;
+  pop.hidden = true;
+  if (lastInfoBtn) { lastInfoBtn.setAttribute("aria-expanded", "false"); lastInfoBtn.focus(); lastInfoBtn = null; }
+}
+document.addEventListener("click", function (e) {
+  var b = e.target.closest ? e.target.closest("[data-info-text],[data-info-from]") : null;
+  if (!b) return;
+  var text = b.getAttribute("data-info-text");
+  if (!text) {
+    var src = document.getElementById(b.getAttribute("data-info-from"));
+    text = src ? src.textContent : "";
+  }
+  openInfoPop(b.getAttribute("data-info-title") || "About", text, b);
+});
+document.getElementById("info-pop-close").addEventListener("click", closeInfoPop);
+document.getElementById("info-pop").addEventListener("click", function (e) {
+  if (e.target === this) closeInfoPop();
+});
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") closeInfoPop();
+});
+/* House Rules pop-up — the description that used to sit at the bottom
+   of the Icons tab now lives behind the small info button in the
+   section's top margin, and pops up only when tapped. */
+function setIconsInfoOpen(open) {
+  var pop = document.getElementById("icons-info-pop");
+  var btn = document.getElementById("icons-info-btn");
+  if (!pop || !btn) return;
+  pop.hidden = !open;
+  btn.setAttribute("aria-expanded", open ? "true" : "false");
+  if (open) {
+    var closeBtn = document.getElementById("icons-info-close");
+    if (closeBtn) closeBtn.focus();
+  } else {
+    btn.focus();
+  }
+}
+document.getElementById("icons-info-btn").addEventListener("click", function () {
+  setIconsInfoOpen(document.getElementById("icons-info-pop").hidden);
+});
+document.getElementById("icons-info-close").addEventListener("click", function () {
+  setIconsInfoOpen(false);
+});
+document.getElementById("icons-info-pop").addEventListener("click", function (e) {
+  if (e.target === this) setIconsInfoOpen(false);
+});
+document.addEventListener("keydown", function (e) {
+  var pop = document.getElementById("icons-info-pop");
+  if (e.key === "Escape" && pop && !pop.hidden) setIconsInfoOpen(false);
 });
 renderIcons();
 document.getElementById("panel-icons").addEventListener("click", function (e) {
@@ -6195,7 +6715,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages"];
 document.getElementById("data-export").addEventListener("click", function () {
   var data = {};
   DATA_KEYS.forEach(function (k) { var v = store.get(k, null); if (v !== null) data[k] = v; });
