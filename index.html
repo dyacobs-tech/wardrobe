@@ -13,8 +13,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
+    <link rel="icon" sizes="192x192" href="assets/icon-192.png" />
+    <link rel="icon" sizes="512x512" href="assets/icon-512.png" />
     <link rel="manifest" href="manifest.webmanifest" />
     <title>Wardrobe</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -253,6 +253,13 @@
       .option-card .oc-meta { display: block; font-size: 12px; color: var(--dim); font-style: italic; font-family: var(--font-display); font-size: 13.5px; margin-top: 2px; line-height: 1.35; }
       .option-card.selected { outline: 2px solid var(--accent); outline-offset: 1px; }
       .option-card .mini-strip span { display: block; }
+      /* ---------- From wardrobe (Studio) ---------- */
+      .from-wardrobe { margin-top: 22px; border-top: 1px solid var(--border); padding-top: 18px; }
+      .fw-head { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; justify-content: space-between; margin-bottom: 14px; }
+      .fw-head h3 { font-family: var(--font-display); font-weight: 600; font-size: clamp(26px, 4.5vw, 34px); line-height: 1.1; margin: 0 0 4px; }
+      .fw-head p { margin: 0; color: var(--dim); font-size: 14.5px; max-width: 58ch; }
+      .fw-head .btn-ghost { flex: none; }
+      .from-wardrobe .options-grid { margin-bottom: 4px; }
       /* ---------- Source: My wardrobe / Inspo / Combo ---------- */
       .source-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
       .source-line { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; border: 1px solid var(--border); background: var(--surface-alt); border-radius: var(--radius); padding: 9px 12px; margin: 0 0 14px; font-size: 13.5px; line-height: 1.45; }
@@ -889,6 +896,8 @@
       #panel-studio .deal-progress { padding: 8px 10px 10px; gap: 6px; }
       #panel-studio .look-result { margin-top: 10px; }
       #panel-studio .options-head { margin-bottom: 8px; }
+      #panel-studio .from-wardrobe { margin-top: 12px; padding-top: 12px; }
+      #panel-studio .fw-head { margin-bottom: 8px; }
 
       /* ---------- Closet — much more compact ----------
          The same treatment as Studio, scoped to the Closet panel:
@@ -1396,6 +1405,125 @@
       .myinspo-card .mi-desc { margin: 0; font-size: 12.5px; color: var(--dim); line-height: 1.4; }
       .myinspo-card .look-actions { margin-top: 0; }
       .myinspo-card .btn-ghost { min-height: 30px; padding: 4px 10px; font-size: 11px; }
+
+      /* ---------- Design consistency pass — ONE system app-wide ----------
+         A single compact button, a single chip, a single input, a
+         single label and a single card treatment on every surface —
+         Studio, Inspiration, Find it, Me and the look detail alike.
+         The metrics are the Find it build's compact ones, applied
+         without exception: the accent fill is reserved for the one
+         primary action in a view; everything else is the same quiet
+         outline. Panel-scoped size overrides from earlier rounds are
+         re-declared here at the same specificity so nothing drifts
+         back. Serif stays on look/hero titles and the wordmark; card
+         titles share one sans style and size on every grid. */
+      .btn-accent, .btn-ink, .btn-ghost, .verdict-btn,
+      #panel-palettes .btn-ink, #panel-palettes .btn-ghost,
+      #panel-icons .btn-accent, #panel-icons .btn-ghost, #panel-icons .btn-ink,
+      #panel-icons .icon-result .btn-accent, #panel-icons .icon-result .btn-ghost,
+      .icon-result .btn-accent, .icon-result .btn-ghost,
+      #panel-profile .btn-ink, #panel-profile .btn-ghost, #panel-profile .btn-accent,
+      #panel-studio .studio-nav .btn-ghost, #panel-studio .studio-nav .btn-ink,
+      #panel-studio #style-btn,
+      #panel-wardrobe .item-actions .btn-ghost,
+      #panel-wardrobe .add-form .btn-accent, #panel-wardrobe .add-form .btn-ink, #panel-wardrobe .add-form .btn-ghost,
+      #panel-find .find-card .btn-accent, #panel-find .find-card .btn-ghost,
+      .piece-row .btn-accent, .iconic figcaption .btn-ghost,
+      .saved-card .look-actions .btn-ghost, .inspo-active .btn-ghost,
+      #panel-wearing .wr-top .btn-ghost, .myinspo-card .btn-ghost,
+      .removed-row .btn-ghost, .wish-row .btn-ghost, .worn-row .btn-ghost,
+      .plate-card .pc-use, .draft-list button, .btn-ghost.shop-clear, .shop-clear {
+        min-height: 34px; padding: 6px 14px; font-size: 11.5px; font-weight: 600;
+        letter-spacing: .11em; text-transform: uppercase; border-radius: var(--radius);
+      }
+      .verdict-btn { text-transform: uppercase; }
+      .btn-today, #panel-today .btn-today {
+        min-height: 34px; padding: 6px 14px; font-size: 11.5px; font-weight: 600;
+        letter-spacing: .11em; text-transform: uppercase; border-radius: var(--radius);
+      }
+      /* One chip — filters, feedback, formality, places, selectors */
+      .chip, .fb-chips .chip, .fchip, .sel-opts .chip, .studio-type-row button,
+      .dress-for .chip, .choice-chip,
+      #panel-studio .chip, #panel-wardrobe .chip, #panel-looks .chip, #panel-profile .chip,
+      #panel-today .today-formality .fchip, .today-loc-chips .tlc {
+        min-height: 30px; padding: 4px 12px; font-size: 12.5px; font-weight: 500;
+        letter-spacing: .02em; border-radius: 999px;
+      }
+      .choice-chip { text-transform: uppercase; letter-spacing: .1em; font-size: 11px; font-weight: 600; }
+      .choice-chip strong { font-size: 12.5px; letter-spacing: .02em; text-transform: none; }
+      /* One input — same height, padding and size in every form.
+         Textareas share the padding and type size but keep their
+         own heights: a comment box is not a one-line field. */
+      input[type="text"], input[type="search"], select,
+      #panel-studio input[type="text"], #panel-studio input[type="search"], #panel-studio select,
+      #panel-wardrobe input[type="text"], #panel-wardrobe input[type="search"], #panel-wardrobe select,
+      #panel-profile input[type="text"], #panel-profile input[type="search"], #panel-profile select,
+      #panel-icons input[type="text"], #panel-icons input[type="search"], #panel-icons select,
+      #panel-palettes input[type="text"], #panel-palettes input[type="search"], #panel-palettes select,
+      #panel-brands input[type="search"], #panel-looks input[type="search"],
+      #panel-find .add-form input[type="text"], #panel-find .add-form select,
+      #panel-wearing input[type="text"], #panel-wearing select, #panel-wearing input[type="date"],
+      #panel-myinspo input[type="text"],
+      #panel-profile #panel-watches input[type="text"], #panel-profile #panel-watches select {
+        min-height: 38px; padding: 8px 11px; font-size: 15px;
+      }
+      textarea,
+      #panel-studio textarea, #panel-wardrobe textarea, #panel-profile textarea,
+      #panel-icons textarea, #panel-palettes textarea,
+      #panel-profile #panel-watches textarea {
+        padding: 8px 11px; font-size: 15px;
+      }
+      #panel-find .find-searchbar { min-height: 38px; padding: 8px 14px; font-size: 15px; }
+      /* One label — the small gold caps label, everywhere */
+      label.field,
+      #panel-studio label.field, #panel-wardrobe label.field, #panel-profile label.field,
+      #panel-icons label.field, #panel-palettes label.field, #panel-find label.field,
+      #panel-brands label.field, #panel-wearing label.field, #panel-myinspo label.field,
+      #panel-profile #panel-watches label.field {
+        font-size: 11px; letter-spacing: .16em; color: var(--brass); margin-bottom: 4px;
+      }
+      .sel-name { color: var(--brass); }
+      /* One card-title style and size on every grid */
+      .option-card .oc-title, .saved-card h4, .item-card h4, .plate-card .pc-names,
+      .find-card h4, .custom-card h4, .shop-piece h4,
+      #panel-wardrobe .item-card h4, #panel-profile #panel-watches .item-card h4,
+      #panel-find .find-card h4 {
+        font-family: var(--font-ui); font-size: 15px; font-weight: 600;
+        letter-spacing: .01em; line-height: 1.2;
+      }
+      /* One card — same border, radius, shadow and padding scale */
+      .card { border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-card); }
+      .add-form, .studio-form, .loc-card, .data-card, .featured, .item-detail-card,
+      .custom-card, .icon-card, .principles, .info-pop-card, .find-card,
+      #panel-profile #profile-form, #panel-profile .loc-card, #panel-profile .data-card,
+      #panel-wardrobe .add-form, #panel-wardrobe .item-detail-card,
+      #panel-palettes .add-form, #panel-icons .add-form, #panel-studio .studio-form,
+      #panel-wearing .wearing-form, #panel-myinspo .myinspo-form,
+      #panel-profile #panel-watches .add-form {
+        padding: 14px 16px;
+      }
+      .item-card, #panel-wardrobe .item-card, #panel-profile #panel-watches .item-card { padding: 10px 12px; }
+      .option-card .oc-body, .saved-card .sb, .plate-card .pc-body, .myinspo-card .mi-body { padding: 10px 12px; }
+      /* One row — same border, radius and padding for list rows */
+      .piece-row, .shop-row, .icon-result, .loc-result, .removed-row,
+      .wish-row, .worn-row, .wearing-entry {
+        border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px;
+      }
+      /* Me/Profile — Find sits at standard size beside its input,
+         never a full-width slab; the places chips and the home
+         actions take the shared chip/button metrics above. */
+      .loc-search-row { grid-template-columns: 1fr auto; align-items: center; }
+      /* Me subnav — one row, five equal shares, like every other
+         subnav; the long fifth label wraps inside its own share
+         instead of dropping to a centred second row. */
+      #subnav-me { flex-wrap: nowrap; }
+      #subnav-me #tab-wearing { flex: 1 1 0; white-space: normal; line-height: 1.15; }
+      /* Closet category selector — the sel-row's options sit tight
+         under the row, chips on the shared metrics above. */
+      .ward-cat-block { margin-bottom: 10px; }
+      #panel-wardrobe .sel-opts.filter-row { margin-bottom: 0; }
+      /* Find it look mode — the honest line on the shared type scale */
+      .shop-nomatch { font-size: 13px; }
     </style>
   </head>
   <body>
@@ -1631,6 +1759,18 @@
               </div>
             </form>
 
+            <section class="from-wardrobe" id="from-wardrobe" aria-label="From wardrobe">
+              <div class="fw-head">
+                <div class="fw-head-text">
+                  <h3>From wardrobe</h3>
+                  <p>Outfits built only from pieces you own — nothing to buy. <span id="fw-count"></span></p>
+                </div>
+                <button type="button" class="btn-ghost" id="fw-more">Six more</button>
+              </div>
+              <div class="options-grid" id="fw-grid" role="list"></div>
+              <p class="empty" id="fw-empty" hidden>Add a top and a bottom — or a pair of shoes — in Me → Closet, and outfits built from your own pieces will appear here.</p>
+            </section>
+
             <div class="look-result" id="look-result" aria-live="polite"></div>
           </div>
         </div>
@@ -1646,7 +1786,10 @@
               <label class="field" for="ward-search">Search your closet</label>
               <input type="search" id="ward-search" placeholder="Name, colour, category, notes…" autocomplete="off" />
             </div>
-            <div class="filter-row" id="ward-filters" role="group" aria-label="Filter by category"></div>
+            <div class="sel-block ward-cat-block">
+              <button type="button" class="sel-row" id="ward-cat-toggle" aria-expanded="false" aria-controls="ward-filters"><span class="sel-name">Category</span><span class="sel-val" id="ward-cat-val">All</span><span class="sel-chev" aria-hidden="true">▾</span></button>
+              <div class="sel-opts filter-row" id="ward-filters" role="group" aria-label="Filter by category" hidden></div>
+            </div>
             <div class="item-grid" id="item-grid"></div>
           </div>
           <form class="card add-form" id="add-form">
@@ -9633,9 +9776,18 @@ function buildClosetLooks() {
   var bottoms = avail.filter(function (i) { return ["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(i.category) !== -1; });
   var shoes = avail.filter(function (i) { return i.category === "Shoes"; });
   var shades = avail.filter(function (i) { return i.category === "Sunglasses"; });
-  if (!tops.length || !bottoms.length) return null;
+  if (!tops.length) return null;
+  if (!bottoms.length && !shoes.length) return null;
   var combos = [];
-  tops.forEach(function (t) { bottoms.forEach(function (b) { combos.push([t, b]); }); });
+  if (bottoms.length) {
+    tops.forEach(function (t) { bottoms.forEach(function (b) { combos.push([t, b]); }); });
+  } else {
+    /* No bottoms catalogued yet: the outfit is a top you own with
+       shoes you own — still built entirely from the closet. */
+    var shuffledTops = tops.slice();
+    shuffleArr(shuffledTops);
+    shuffledTops.forEach(function (t, ti) { combos.push([t, shoes[ti % shoes.length]]); });
+  }
   shuffleArr(combos);
   var usedImgs = {};
   currentOptions.forEach(function (l) { if (l.img) usedImgs[l.img] = true; });
@@ -9647,7 +9799,8 @@ function buildClosetLooks() {
   var handImgs = {};
   return combos.slice(0, 6).map(function (pair, i) {
     var pieces = [pair[0], pair[1]];
-    if (shoes.length) pieces.push(shoes[i % shoes.length]);
+    var hasShoe = pieces.some(function (p) { return p.category === "Shoes"; });
+    if (shoes.length && !hasShoe) pieces.push(shoes[i % shoes.length]);
     if (shades.length) pieces.push(shades[i % shades.length]);
     var swatches = [], seenHex = {};
     pieces.forEach(function (p) {
@@ -10131,7 +10284,7 @@ document.getElementById("examples").addEventListener("click", function (e) {
   if (closetBtn) {
     var cl = buildClosetLooks();
     if (!cl || !cl.length) {
-      toast("Your closet needs at least a top and a bottom before it can build outfits — add pieces in the Closet and it builds from them.");
+      toast("Your closet needs a top and a bottom — or a pair of shoes — before it can build outfits — add pieces in the Closet and it builds from them.");
       return;
     }
     renderOptions(cl, { desc: "From my closet", occasion: "", season: "", opts: { basis: "both", source: "wardrobe" } });
@@ -10813,6 +10966,666 @@ var wardrobeItems = [
     extraColours: [{ name: "Navy", hex: "#26304d" }],
     notes: "Short-sleeve white tee with navy chevron/zigzag stripes across the body, made in Italy. Brand unknown — label not legible.",
     photo: "assets/photos/aef25662ac90.jpg"
+  },
+  {
+    id: "seed-alexmill-polo",
+    name: "Alex Mill White Knit Polo",
+    category: "Polos",
+    colourName: "White",
+    colourHex: "#f6f3ec",
+    extraColours: [],
+    notes: "Short-sleeve knit polo, one-button placket, chest pocket, slub knit.",
+    photo: "assets/photos/93f1a6a3901d.jpg"
+  },
+  {
+    id: "seed-cucinelli-white-tee",
+    name: "Brunello Cucinelli White Knit Tee",
+    category: "Tees",
+    colourName: "White",
+    colourHex: "#f7f4ee",
+    extraColours: [],
+    notes: "Short-sleeve fine-knit crewneck tee, ribbed hem and cuffs.",
+    photo: "assets/photos/add5e0661464.jpg"
+  },
+  {
+    id: "seed-loropiana-charcoal-polo",
+    name: "Loro Piana Charcoal Ribbed Knit Polo",
+    category: "Polos",
+    colourName: "Charcoal",
+    colourHex: "#3a3a3c",
+    extraColours: [],
+    notes: "Short-sleeve knit polo, fine horizontal rib.",
+    photo: "assets/photos/fd784e4ae80a.jpg"
+  },
+  {
+    id: "seed-cucinelli-charcoal-polo",
+    name: "Brunello Cucinelli Charcoal Tipped Polo",
+    category: "Polos",
+    colourName: "Charcoal · white tipping",
+    colourHex: "#43413f",
+    extraColours: [{ name: "White", hex: "#f7f4ee" }],
+    notes: "Short-sleeve polo, white tipping on collar and cuffs.",
+    photo: "assets/photos/e4e6ffe093e7.jpg"
+  },
+  {
+    id: "seed-sunspel-polo",
+    name: "Sunspel Grey Piqué Polo",
+    category: "Polos",
+    colourName: "Grey",
+    colourHex: "#8d8d90",
+    extraColours: [],
+    notes: "Short-sleeve piqué polo, chest pocket, size M.",
+    photo: "assets/photos/22ccb0e92e62.jpg"
+  },
+  {
+    id: "seed-cucinelli-breton-polo",
+    name: "Brunello Cucinelli Navy Breton Stripe Polo",
+    category: "Polos",
+    colourName: "Navy · white stripes",
+    colourHex: "#26304d",
+    extraColours: [{ name: "White", hex: "#f7f4ee" }],
+    notes: "Slim fit, short-sleeve, chest pocket.",
+    photo: "assets/photos/debd8f96f495.jpg"
+  },
+  {
+    id: "seed-cucinelli-stripe-polo",
+    name: "Brunello Cucinelli Grey Navy Stripe Knit Polo",
+    category: "Polos",
+    colourName: "Grey · navy stripes",
+    colourHex: "#a9a49c",
+    extraColours: [{ name: "Navy", hex: "#26304d" }],
+    notes: "Grey top with navy Breton stripes across the body, two-button.",
+    photo: "assets/photos/01b7bde9e8a2.jpg"
+  },
+  {
+    id: "seed-cucinelli-beige-polo",
+    name: "Brunello Cucinelli Beige Pinstripe Knit Polo",
+    category: "Polos",
+    colourName: "Beige",
+    colourHex: "#d8cbb2",
+    extraColours: [],
+    notes: "Fine horizontal pinstripes, short-sleeve.",
+    photo: "assets/photos/cb84c01aed4d.jpg"
+  },
+  {
+    id: "seed-cucinelli-cream-tipped-polo",
+    name: "Brunello Cucinelli Cream Tipped Polo",
+    category: "Polos",
+    colourName: "Cream · navy/taupe collar stripes",
+    colourHex: "#f1e9d6",
+    extraColours: [{ name: "Navy", hex: "#26304d" }, { name: "Taupe", hex: "#a08b6d" }],
+    notes: "Piqué polo, navy and taupe stripes on the collar.",
+    photo: "assets/photos/953782dc00e1.jpg"
+  },
+  {
+    id: "seed-cucinelli-brown-stripe-polo",
+    name: "Brunello Cucinelli White Brown Stripe Polo",
+    category: "Polos",
+    colourName: "White · brown stripes",
+    colourHex: "#f5f1e8",
+    extraColours: [{ name: "Brown", hex: "#7c5a3e" }],
+    notes: "White with thin brown horizontal stripes.",
+    photo: "assets/photos/6a2d35338774.jpg"
+  },
+  {
+    id: "seed-cucinelli-ribbed-polo",
+    name: "Brunello Cucinelli Cream Ribbed Knit Polo",
+    category: "Polos",
+    colourName: "Cream",
+    colourHex: "#f2ecdc",
+    extraColours: [],
+    notes: "Vertical rib knit, horn buttons, chest pocket with grey trim, tipped collar edges, short-sleeve.",
+    photo: "assets/photos/5bef82b5636d.jpg"
+  },
+  {
+    id: "seed-missoni-navy-polo",
+    name: "Missoni Navy Zigzag Knit Polo",
+    category: "Polos",
+    colourName: "Navy",
+    colourHex: "#232c44",
+    extraColours: [],
+    notes: "Signature wave/chevron knit, short-sleeve.",
+    photo: "assets/photos/e3b0634287b6.jpg"
+  },
+  {
+    id: "seed-cucinelli-navy-polo",
+    name: "Brunello Cucinelli Navy Piqué Polo",
+    category: "Polos",
+    colourName: "Navy",
+    colourHex: "#232a3d",
+    extraColours: [],
+    notes: "Slim fit, tan and white striped cuff bands.",
+    photo: "assets/photos/a5815af40b66.jpg"
+  },
+  {
+    id: "seed-loropiana-navy-polo",
+    name: "Loro Piana Navy Tipped Polo",
+    category: "Polos",
+    colourName: "Navy · tan trim",
+    colourHex: "#26304d",
+    extraColours: [{ name: "Tan", hex: "#b99a6b" }],
+    notes: "Tan trim on collar and placket.",
+    photo: "assets/photos/5d62b4847aff.jpg"
+  },
+  {
+    id: "seed-zegna-polo",
+    name: "Zegna Black High Performance Polo",
+    category: "Polos",
+    colourName: "Black",
+    colourHex: "#17171a",
+    extraColours: [],
+    notes: "Technical knit polo, size S.",
+    photo: "assets/photos/d2f36db7e820.jpg"
+  },
+  {
+    id: "seed-theory-polo",
+    name: "Theory Navy Striped-Collar Polo",
+    category: "Polos",
+    colourName: "Navy · striped collar",
+    colourHex: "#26304d",
+    extraColours: [{ name: "Grey", hex: "#9a9a9c" }, { name: "White", hex: "#f7f4ee" }],
+    notes: "Grey, white and navy striped collar, size S.",
+    photo: "assets/photos/0a428d80ad2e.jpg"
+  },
+  {
+    id: "seed-loropiana-sage-polo",
+    name: "Loro Piana Sage Linen Polo",
+    category: "Polos",
+    colourName: "Sage",
+    colourHex: "#a9bfa5",
+    extraColours: [],
+    notes: "Pale green linen polo, one-button, size XS.",
+    photo: "assets/photos/933281811b35.jpg"
+  },
+  {
+    id: "seed-cucinelli-olive-polo",
+    name: "Brunello Cucinelli Olive Knit Polo",
+    category: "Polos",
+    colourName: "Olive",
+    colourHex: "#7a7a63",
+    extraColours: [],
+    notes: "Olive-taupe knit polo, one-button open collar.",
+    photo: "assets/photos/fcad4846c89d.jpg"
+  },
+  {
+    id: "seed-skyblue-polo",
+    name: "Sky Blue Knit Polo",
+    category: "Polos",
+    colourName: "Sky blue",
+    colourHex: "#a8ccd8",
+    extraColours: [],
+    notes: "One-button open collar, ribbed cuffs and hem. Brand unknown — label illegible.",
+    photo: "assets/photos/b6afe0f2c37e.jpg"
+  },
+  {
+    id: "seed-cucinelli-dustyblue-polo",
+    name: "Brunello Cucinelli Dusty Blue Knit Polo",
+    category: "Polos",
+    colourName: "Dusty blue",
+    colourHex: "#7d93a8",
+    extraColours: [],
+    notes: "Short-sleeve knit polo, two-button.",
+    photo: "assets/photos/0c8bfcf574c7.jpg"
+  },
+  {
+    id: "seed-loropiana-tipped-polo",
+    name: "Loro Piana Navy Tipped Knit Polo",
+    category: "Polos",
+    colourName: "Navy · teal/white tipping",
+    colourHex: "#26345c",
+    extraColours: [{ name: "Teal", hex: "#2e7d74" }, { name: "White", hex: "#f7f4ee" }],
+    notes: "Teal and white tipping on collar and placket, size 48.",
+    photo: "assets/photos/b0ce45edcd57.jpg"
+  },
+  {
+    id: "seed-cucinelli-skyblue-polo",
+    name: "Brunello Cucinelli Sky Blue Piqué Polo",
+    category: "Polos",
+    colourName: "Sky blue · striped collar",
+    colourHex: "#a9c6d8",
+    extraColours: [{ name: "White", hex: "#f7f4ee" }, { name: "Grey", hex: "#9a9a9c" }],
+    notes: "Slim fit, white and grey striped collar.",
+    photo: "assets/photos/66e22e794735.jpg"
+  },
+  {
+    id: "seed-cucinelli-terracotta-polo",
+    name: "Brunello Cucinelli Terracotta Piqué Polo",
+    category: "Polos",
+    colourName: "Terracotta",
+    colourHex: "#b4664a",
+    extraColours: [],
+    notes: "Rust piqué polo, grey trim at cuffs and hem.",
+    photo: "assets/photos/0d863b3962ef.jpg"
+  },
+  {
+    id: "seed-cucinelli-burgundy-polo",
+    name: "Brunello Cucinelli Burgundy Linen Polo",
+    category: "Polos",
+    colourName: "Burgundy",
+    colourHex: "#7e2f3a",
+    extraColours: [],
+    notes: "Lightweight sheer linen knit polo, grey cuff trim.",
+    photo: "assets/photos/b373e66c49ad.jpg"
+  },
+  {
+    id: "seed-isaia-burgundy-polo",
+    name: "Isaia Burgundy Knit Polo",
+    category: "Polos",
+    colourName: "Burgundy · cream striped collar",
+    colourHex: "#7e2f3a",
+    extraColours: [{ name: "Cream", hex: "#efe7d6" }],
+    notes: "Cream striped collar, one-button.",
+    photo: "assets/photos/baa344dba7da.jpg"
+  },
+  {
+    id: "seed-missoni-burgundy-polo",
+    name: "Missoni Burgundy Zigzag Knit Polo",
+    category: "Polos",
+    colourName: "Burgundy · navy wave",
+    colourHex: "#6e2438",
+    extraColours: [{ name: "Navy", hex: "#26304d" }],
+    notes: "Burgundy and navy wave knit, plum collar.",
+    photo: "assets/photos/00c0da282b35.jpg"
+  },
+  {
+    id: "seed-cucinelli-slate-polo",
+    name: "Brunello Cucinelli Slate Stripe Polo",
+    category: "Polos",
+    colourName: "Slate · white pinstripes",
+    colourHex: "#5d6a72",
+    extraColours: [{ name: "White", hex: "#f7f4ee" }],
+    notes: "Slate grey with white pinstripes, slim fit.",
+    photo: "assets/photos/bdfac065d134.jpg"
+  },
+  {
+    id: "seed-loropiana-espadrilles",
+    name: "Loro Piana Light Blue Knit Espadrilles",
+    category: "Shoes",
+    colourName: "Light blue",
+    colourHex: "#a9c6d4",
+    extraColours: [],
+    notes: "Slip-on knit espadrilles, jute sole, leather pull tab.",
+    photo: "assets/photos/01361316bcd9.jpg"
+  },
+  {
+    id: "seed-vibi-mustard",
+    name: "Vibi Venezia Mustard Check Furlane Slippers",
+    category: "Shoes",
+    colourName: "Mustard · cream check",
+    colourHex: "#c9973f",
+    extraColours: [{ name: "Cream", hex: "#efe7d6" }],
+    notes: "Woven mustard and cream check furlane slippers.",
+    photo: "assets/photos/52b9ffc3b4df.jpg"
+  },
+  {
+    id: "seed-vibi-navy",
+    name: "Vibi Venezia Navy Stripe Furlane Slippers",
+    category: "Shoes",
+    colourName: "Navy · cream stripes",
+    colourHex: "#26304d",
+    extraColours: [{ name: "Cream", hex: "#efe7d6" }],
+    notes: "Navy and cream Breton stripe furlane slippers.",
+    photo: "assets/photos/7c3e2a5e81a8.jpg"
+  },
+  {
+    id: "seed-loropiana-grey-sneakers",
+    name: "Loro Piana Grey Suede Tennis Sneakers",
+    category: "Shoes",
+    colourName: "Grey",
+    colourHex: "#7b7268",
+    extraColours: [],
+    notes: "Taupe-grey suede and mesh tennis sneakers.",
+    photo: "assets/photos/246315e14296.jpg"
+  },
+  {
+    id: "seed-adidas-sneakers",
+    name: "Adidas Cream Sneakers",
+    category: "Shoes",
+    colourName: "Cream · blush stripes",
+    colourHex: "#efe7da",
+    extraColours: [{ name: "Blush", hex: "#d9b8a6" }],
+    notes: "White and cream leather sneakers, blush suede stripes, gum sole. Collaboration — partner name not legible.",
+    photo: "assets/photos/38a7a31c0265.jpg"
+  },
+  {
+    id: "seed-grey-court-sneakers",
+    name: "Grey White Leather Court Sneakers",
+    category: "Shoes",
+    colourName: "Grey · white",
+    colourHex: "#b9bcbe",
+    extraColours: [{ name: "White", hex: "#f7f4ee" }],
+    notes: "Leather court sneakers, perforated toe. Brand unknown — not legible.",
+    photo: "assets/photos/bc949f1f9e2b.jpg"
+  },
+  {
+    id: "seed-stubbs-slippers",
+    name: "Stubbs & Wootton Blue Camo Needlepoint Slippers",
+    category: "Shoes",
+    colourName: "Blue camo",
+    colourHex: "#5d84a8",
+    extraColours: [{ name: "Navy", hex: "#26304d" }, { name: "Cream", hex: "#efe7d6" }],
+    notes: "Needlepoint slippers on a sneaker sole, tan leather trim.",
+    photo: "assets/photos/51d0bd772eb7.jpg"
+  },
+  {
+    id: "seed-loropiana-white-sneakers",
+    name: "Loro Piana White Leather Tennis Sneakers",
+    category: "Shoes",
+    colourName: "White",
+    colourHex: "#f4efe4",
+    extraColours: [{ name: "Brown", hex: "#7c5a3e" }],
+    notes: "Cream-white leather tennis sneakers, brown heel tab.",
+    photo: "assets/photos/e12c7c43452c.jpg"
+  },
+  {
+    id: "seed-loropiana-runners",
+    name: "Loro Piana Multicolour Runner Sneakers",
+    category: "Shoes",
+    colourName: "Cream · grey, teal, mustard",
+    colourHex: "#ddd5c2",
+    extraColours: [{ name: "Teal", hex: "#2e7d74" }, { name: "Mustard", hex: "#c9973f" }, { name: "Grey", hex: "#8d8578" }],
+    notes: "Runner sneakers — cream and grey with teal and mustard panels.",
+    photo: "assets/photos/8de3b5976a7c.jpg"
+  },
+  {
+    id: "seed-loropiana-summer-walk",
+    name: "Loro Piana Dark Brown Suede Summer Walk Loafers",
+    category: "Shoes",
+    colourName: "Dark brown",
+    colourHex: "#3d2b23",
+    extraColours: [],
+    notes: "Suede Summer Walk loafers.",
+    photo: "assets/photos/63ea6864c862.jpg"
+  },
+  {
+    id: "seed-vibi-black-velvet-furlane",
+    name: "Vibi Venezia Black Velvet Furlane Slippers",
+    category: "Shoes",
+    colourName: "Black",
+    colourHex: "#17150f",
+    extraColours: [{ name: "Tan", hex: "#b98d4f" }],
+    notes: "Black velvet furlane with tan grosgrain trim.",
+    photo: "assets/photos/8bc42f565095.jpg"
+  },
+  {
+    id: "seed-vibi-tan-velvet-furlane",
+    name: "Vibi Venezia Tan Velvet Furlane Slippers",
+    category: "Shoes",
+    colourName: "Tan",
+    colourHex: "#c2a878",
+    extraColours: [],
+    notes: "Tan velvet furlane. Size 42.",
+    photo: "assets/photos/1008501155a9.jpg"
+  },
+  {
+    id: "seed-edwardgreen-darkbrown-loafers",
+    name: "Edward Green Dark Brown Suede Penny Loafers",
+    category: "Shoes",
+    colourName: "Dark brown",
+    colourHex: "#4a3428",
+    extraColours: [],
+    notes: "Dark brown suede penny loafers.",
+    photo: "assets/photos/5c9700a790ab.jpg"
+  },
+  {
+    id: "seed-edwardgreen-tan-loafers",
+    name: "Edward Green Tan Suede Penny Loafers",
+    category: "Shoes",
+    colourName: "Tan",
+    colourHex: "#9c6b4a",
+    extraColours: [],
+    notes: "Tan suede penny loafers.",
+    photo: "assets/photos/4b75f919236b.jpg"
+  },
+  {
+    id: "seed-baudoin-rust-tassel-loafers",
+    name: "Baudoin & Lange Rust Suede Tassel Loafers",
+    category: "Shoes",
+    colourName: "Rust",
+    colourHex: "#8a4a2a",
+    extraColours: [],
+    notes: "Rust suede tassel loafers.",
+    photo: "assets/photos/1becae8b6079.jpg"
+  },
+  {
+    id: "seed-gucci-green-eel-loafers",
+    name: "Gucci Dark Green Eel Horsebit Loafers",
+    category: "Shoes",
+    colourName: "Dark green",
+    colourHex: "#1e3a2c",
+    extraColours: [{ name: "Gold", hex: "#b08d3f" }],
+    notes: "Dark green eel-skin horsebit loafers, gold bit.",
+    photo: "assets/photos/8f45110e90ab.jpg"
+  },
+  {
+    id: "seed-balenciaga-black-loafers",
+    name: "Balenciaga Black Leather Penny Loafers",
+    category: "Shoes",
+    colourName: "Black",
+    colourHex: "#141414",
+    extraColours: [],
+    notes: "Polished black leather penny loafers.",
+    photo: "assets/photos/7b2355d1c38f.jpg"
+  },
+  {
+    id: "seed-vibi-red-velvet-furlane",
+    name: "Vibi Venezia Red Velvet Furlane Slippers",
+    category: "Shoes",
+    colourName: "Red",
+    colourHex: "#9e1b30",
+    extraColours: [],
+    notes: "Red velvet furlane.",
+    photo: "assets/photos/1f9d99fa5c79.jpg"
+  },
+  {
+    id: "seed-gucci-twotone-loafers",
+    name: "Gucci Black White Horsebit Loafers",
+    category: "Shoes",
+    colourName: "White · black",
+    colourHex: "#efe9dd",
+    extraColours: [{ name: "Black", hex: "#141414" }, { name: "Gold", hex: "#b08d3f" }],
+    notes: "Two-tone horsebit loafers — white vamp, black trim, gold bit.",
+    photo: "assets/photos/50d4f4ec468b.jpg"
+  },
+  {
+    id: "seed-fortela-concho-slippers",
+    name: "Fortela Tan Suede Concho Slippers",
+    category: "Shoes",
+    colourName: "Tan",
+    colourHex: "#b08d5f",
+    extraColours: [{ name: "Turquoise", hex: "#3fa7a0" }, { name: "Silver", hex: "#b9bcbe" }],
+    notes: "Tan suede slippers with turquoise and silver concho studs. Size 41.",
+    photo: "assets/photos/a18976450cd3.jpg"
+  },
+  {
+    id: "seed-vibi-rust-corduroy-furlane",
+    name: "Vibi Venezia Rust Corduroy Furlane Slippers",
+    category: "Shoes",
+    colourName: "Rust",
+    colourHex: "#9a4f24",
+    extraColours: [{ name: "Dark brown", hex: "#3d2b23" }],
+    notes: "Rust ribbed corduroy-velvet furlane, dark brown trim.",
+    photo: "assets/photos/15ecdb334ffb.jpg"
+  },
+  {
+    id: "seed-armani-cream-loafers",
+    name: "Giorgio Armani Cream Woven Leather Loafers",
+    category: "Shoes",
+    colourName: "Cream",
+    colourHex: "#e6ddcb",
+    extraColours: [],
+    notes: "Cream leather loafers with braided woven trim.",
+    photo: "assets/photos/5925d273afe2.jpg"
+  },
+  {
+    id: "seed-loropiana-flexy-sneakers",
+    name: "Loro Piana Cream Knit 360 Flexy Walk Sneakers",
+    category: "Shoes",
+    colourName: "Cream · grey",
+    colourHex: "#e8e0cd",
+    extraColours: [{ name: "Grey", hex: "#a49a88" }],
+    notes: "360 LP Flexy Walk knit sneakers, beige and grey two-tone.",
+    photo: "assets/photos/47960be4c93d.jpg"
+  },
+  {
+    id: "seed-stubbs-navy-slipons",
+    name: "Stubbs & Wootton Navy Woven Slip-On Sneakers",
+    category: "Shoes",
+    colourName: "Navy",
+    colourHex: "#232c3f",
+    extraColours: [{ name: "White", hex: "#f7f4ee" }],
+    notes: "Navy woven slip-on sneakers, white sole.",
+    photo: "assets/photos/5ddcc8953aed.jpg"
+  },
+  {
+    id: "seed-belgian-brown-lizard-loafers",
+    name: "Belgian Shoes Brown Lizard Loafers",
+    category: "Shoes",
+    colourName: "Brown",
+    colourHex: "#7a4a2c",
+    extraColours: [{ name: "Black", hex: "#141414" }],
+    notes: "Brown lizard loafers, black bow and trim.",
+    photo: "assets/photos/53b1012744f5.jpg"
+  },
+  {
+    id: "seed-belgian-olive-loafers",
+    name: "Belgian Shoes Olive Suede Loafers",
+    category: "Shoes",
+    colourName: "Olive",
+    colourHex: "#7d7a5f",
+    extraColours: [{ name: "Burgundy", hex: "#5c2430" }],
+    notes: "Olive suede loafers, burgundy bow and trim.",
+    photo: "assets/photos/da5bdbfc2840.jpg"
+  },
+  {
+    id: "seed-belgian-black-velvet-loafers",
+    name: "Belgian Shoes Black Velvet Loafers",
+    category: "Shoes",
+    colourName: "Black",
+    colourHex: "#141414",
+    extraColours: [],
+    notes: "Black velvet loafers, patent bow.",
+    photo: "assets/photos/27578f316d10.jpg"
+  },
+  {
+    id: "seed-baudoin-brown-leather-loafers",
+    name: "Baudoin & Lange Dark Brown Leather Tassel Loafers",
+    category: "Shoes",
+    colourName: "Dark brown",
+    colourHex: "#3a2320",
+    extraColours: [],
+    notes: "Dark brown leather tassel loafers.",
+    photo: "assets/photos/5f5431c0db0e.jpg"
+  },
+  {
+    id: "seed-belgian-camo-loafers",
+    name: "Belgian Shoes Camo Pony-Hair Loafers",
+    category: "Shoes",
+    colourName: "Camo",
+    colourHex: "#6d5b3f",
+    extraColours: [{ name: "Olive", hex: "#7d7a5f" }, { name: "Black", hex: "#141414" }],
+    notes: "Camo pony-hair loafers, black bow.",
+    photo: "assets/photos/486e9bbb809e.jpg"
+  },
+  {
+    id: "seed-belgian-darkbrown-lizard-loafers",
+    name: "Belgian Shoes Dark Brown Lizard Loafers",
+    category: "Shoes",
+    colourName: "Dark brown",
+    colourHex: "#3d241c",
+    extraColours: [],
+    notes: "Dark brown lizard loafers, dark brown bow. Second, darker lizard pair.",
+    photo: "assets/photos/7bff29bd056d.jpg"
+  },
+  {
+    id: "seed-hermes-navy-polo",
+    name: "Hermès Navy Piqué Polo",
+    category: "Polos",
+    colourName: "Navy",
+    colourHex: "#232a3d",
+    extraColours: [],
+    notes: "Piqué polo, chest pocket with H stitch, size S.",
+    photo: "assets/photos/2c08754e232c.jpg"
+  },
+  {
+    id: "seed-hermes-black-polo",
+    name: "Hermès Black Piqué Polo",
+    category: "Polos",
+    colourName: "Black",
+    colourHex: "#17171a",
+    extraColours: [],
+    notes: "Piqué polo, chest pocket with H stitch.",
+    photo: "assets/photos/fac08c9a779a.jpg"
+  },
+  {
+    id: "seed-cucinelli-navy-pique-grey-polo",
+    name: "Brunello Cucinelli Navy Piqué Polo, Grey Cuffs",
+    category: "Polos",
+    colourName: "Navy · grey trim",
+    colourHex: "#232a3d",
+    extraColours: [{ name: "Grey", hex: "#9a9a9c" }],
+    notes: "Slim fit, grey cuff trim. Second navy piqué polo — distinct from the striped-cuff one.",
+    photo: "assets/photos/a7cbac3f2af1.jpg"
+  },
+  {
+    id: "seed-kiton-navy-polo",
+    name: "Kiton Navy Heather Knit Polo",
+    category: "Polos",
+    colourName: "Navy heather · cream tipping",
+    colourHex: "#2c3247",
+    extraColours: [{ name: "Cream", hex: "#efe7d6" }],
+    notes: "Linen knit polo, cream tipping on collar, cuffs and hem.",
+    photo: "assets/photos/976a390f99ee.jpg"
+  },
+  {
+    id: "seed-stefanoricci-red-tee",
+    name: "Stefano Ricci Red Geometric Knit Tee",
+    category: "Tees",
+    colourName: "Red · orange",
+    colourHex: "#b02a28",
+    extraColours: [{ name: "Orange", hex: "#d0602a" }],
+    notes: "Red/orange diamond geometric pattern, crewneck.",
+    photo: "assets/photos/56b2c1d0f86a.jpg"
+  },
+  {
+    id: "seed-cucinelli-safari-shirt",
+    name: "Brunello Cucinelli Olive Safari Shirt",
+    category: "Shirts",
+    colourName: "Olive",
+    colourHex: "#6d6a52",
+    extraColours: [],
+    notes: "Short-sleeve, leisure fit, two flap chest pockets.",
+    photo: "assets/photos/46b477c10086.jpg"
+  },
+  {
+    id: "seed-canali-charcoal-vest",
+    name: "Canali Charcoal Knit Vest",
+    category: "Vests",
+    colourName: "Charcoal",
+    colourHex: "#3c3f45",
+    extraColours: [],
+    notes: "Button-front knit waistcoat, size 48.",
+    photo: "assets/photos/f87dbf80bc27.jpg"
+  },
+  {
+    id: "seed-zanone-navy-vest",
+    name: "Zanone Navy Knit Vest",
+    category: "Vests",
+    colourName: "Navy",
+    colourHex: "#232a3d",
+    extraColours: [],
+    notes: "Button-front knit waistcoat.",
+    photo: "assets/photos/fca903966603.jpg"
+  },
+  {
+    id: "seed-fortela-navy-polo",
+    name: "Fortela Navy Knit Polo",
+    category: "Polos",
+    colourName: "Navy · cream tipping",
+    colourHex: "#232a3d",
+    extraColours: [{ name: "Cream", hex: "#efe7d6" }, { name: "Orange", hex: "#d0602a" }],
+    notes: "Cream tipping on collar, pocket and hem, orange stitch detail at the hem.",
+    photo: "assets/photos/5a65a3612329.jpg"
   }
 ];
 wardrobeItems = applyEntryState(wardrobeItems.concat(store.get("items", [])));
@@ -10835,6 +11648,28 @@ document.getElementById("ward-filters").addEventListener("click", function (e) {
   this.querySelectorAll("[data-cat]").forEach(function (b) { b.setAttribute("aria-pressed", b === btn ? "true" : "false"); });
   renderWardrobe();
 });
+/* Category filter — one slim closed selector row, the Studio
+   sel-row pattern: a tap opens the category options beneath the
+   row; a pick applies the same filter as before, updates the
+   row's value and closes the row. */
+(function () {
+  var toggle = document.getElementById("ward-cat-toggle");
+  var opts = document.getElementById("ward-filters");
+  var val = document.getElementById("ward-cat-val");
+  if (!toggle || !opts) return;
+  toggle.addEventListener("click", function () {
+    var willOpen = opts.hidden;
+    opts.hidden = !willOpen;
+    toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  });
+  opts.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-cat]");
+    if (!btn) return;
+    if (val) val.textContent = btn.getAttribute("data-cat");
+    opts.hidden = true;
+    toggle.setAttribute("aria-expanded", "false");
+  });
+})();
 var wardQuery = "";
 document.getElementById("ward-search").addEventListener("input", function () { wardQuery = this.value; renderWardrobe(); });
 document.getElementById("item-grid").addEventListener("click", function (e) {
@@ -15226,6 +16061,82 @@ if (myInspoPanel) myInspoPanel.addEventListener("click", function (e) {
     if (name === "wearing") refreshWearingPicks();
     if (name === "myinspo") renderMyInspo();
   };
+})();
+
+/* ---------- From wardrobe (Ideas) ----------
+   A standing section inside Ideas, dealt from the closet alone:
+   six outfits built only from pieces he owns — the same engine
+   behind the form's "From my closet" chip (buildClosetLooks),
+   given a home of its own. Tapping a take opens it full-size in
+   the Ideas results above, through the usual renderOptions flow,
+   so liking, saving and changing an item all work as elsewhere.
+   The grid re-deals when the closet itself changes (pieces added,
+   removed or sent to laundry), checked whenever Ideas is opened. */
+var fwLooks = [];
+var fwClosetSig = null;
+function closetSig() {
+  if (typeof wardrobeItems === "undefined") return "";
+  return wardrobeItems.map(function (i) { return i.id + (i.laundry ? "~" : ""); }).join("|");
+}
+function fwCardHTML(look, idx) {
+  var pieces = (look.anchorNames || []).join(" · ");
+  return '<button type="button" class="card option-card" data-fw-idx="' + idx + '" role="listitem">' +
+    '<img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy" data-popout="' + lookImg(look) + '" />' +
+    '<span class="oc-body">' +
+    '<span class="oc-label">From wardrobe</span>' +
+    '<span class="oc-title">' + esc(look.title) + '</span>' +
+    (pieces ? '<span class="oc-meta">' + esc(pieces) + '</span>' : "") +
+    '<span class="mini-strip" style="display:flex;height:10px;border:1px solid var(--border);margin-top:8px">' + look.swatches.map(function (s) { return '<span style="flex:1;background:' + s.hex + '"></span>'; }).join("") + "</span></span></button>";
+}
+function dealFromWardrobe() {
+  var grid = document.getElementById("fw-grid");
+  var empty = document.getElementById("fw-empty");
+  var more = document.getElementById("fw-more");
+  var count = document.getElementById("fw-count");
+  if (!grid) return;
+  if (count && typeof wardrobeItems !== "undefined") {
+    var availCount = wardrobeItems.filter(function (i) { return !i.laundry; }).length;
+    count.textContent = availCount ? availCount + (availCount === 1 ? " piece" : " pieces") + " in your closet." : "";
+  }
+  var looks = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
+  fwClosetSig = closetSig();
+  if (!looks || !looks.length) {
+    fwLooks = [];
+    grid.innerHTML = "";
+    if (empty) empty.hidden = false;
+    if (more) more.hidden = true;
+    return;
+  }
+  fwLooks = looks;
+  if (empty) empty.hidden = true;
+  if (more) more.hidden = false;
+  grid.innerHTML = fwLooks.map(function (look, idx) { return fwCardHTML(look, idx); }).join("");
+}
+(function initFromWardrobe() {
+  var grid = document.getElementById("fw-grid");
+  if (!grid) return;
+  dealFromWardrobe();
+  var more = document.getElementById("fw-more");
+  if (more) more.addEventListener("click", function () {
+    dealFromWardrobe();
+    toast(fwLooks.length ? "Six more outfits from your wardrobe." : "Your closet needs a top and a bottom — or a pair of shoes — before it can build outfits.");
+  });
+  grid.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-fw-idx]");
+    if (!btn || !fwLooks.length) return;
+    var idx = parseInt(btn.getAttribute("data-fw-idx"), 10);
+    if (!fwLooks[idx]) return;
+    var req = { desc: "From wardrobe", occasion: "", season: "", opts: { basis: "both", source: "wardrobe" } };
+    renderOptions(fwLooks, req);
+    selectOption(idx);
+  });
+  var prevSwitch = window.switchTab;
+  if (typeof prevSwitch === "function") {
+    window.switchTab = function (name, opts) {
+      prevSwitch(name, opts);
+      if (name === "studio" && closetSig() !== fwClosetSig) dealFromWardrobe();
+    };
+  }
 })();
 
 /* ---------- Init ---------- */
