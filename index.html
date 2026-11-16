@@ -1684,6 +1684,190 @@
       .card-menu-btn { width: 26px; height: 26px; min-height: 26px; font-size: 13px; }
       .card-menu button { min-height: 28px; padding: 5px 8px; font-size: 12px; }
       .undo-toast button { min-height: 26px; padding: 4px 10px; font-size: 11px; }
+
+      /* ================================================================
+         DESIGN PASS — Mr Porter editorial system (visual only)
+         One type scale, one rhythm, app-wide. Serif is reserved for
+         look titles and the wordmark; every label, button, chip and
+         meta line runs in the sans on the sizes below. Nothing here
+         changes structure or behaviour — it only re-specifies how
+         the existing elements are sized, spaced and aligned.
+         Scale: label 10px caps · meta 12.5px · body 13.5px ·
+         card title 15px · look title 26px · wordmark 17px.
+         ================================================================ */
+      :root {
+        --fs-label: 10px; --ls-label: .18em;
+        --fs-meta: 12.5px; --fs-body: 13.5px;
+        --fs-card-title: 15px; --fs-look-title: 26px;
+        --hero-label-w: 76px; --ctl-h: 32px;
+        --card-pad: 12px 14px; --card-body-pad: 12px;
+      }
+
+      /* ---------- 1 · Masthead — one slim line ---------- */
+      .masthead { padding-top: env(safe-area-inset-top); }
+      .masthead .wrap { padding-top: 10px; padding-bottom: 9px; }
+      .masthead .brand,
+      body:has(> main > #panel-today:not([hidden])) .masthead .brand {
+        font-family: var(--font-display); font-weight: 500;
+        font-size: 17px; line-height: 1; letter-spacing: .34em;
+        text-transform: uppercase; text-indent: .34em; /* optically re-centre letterspaced caps */
+        margin: 0;
+      }
+      .masthead .sub, .masthead .vol { display: none; }
+      .rule-double { border-top: 1px solid var(--border); margin-top: 0; }
+      .rule-double::after { display: none; }
+
+      /* ---------- 2 · Nav — equal-width segments, identical pill inset ---------- */
+      .navstack { border-bottom: 1px solid var(--border); }
+      .tabbar .wrap {
+        display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px; padding: 6px 12px;
+      }
+      .tab {
+        margin: 0; width: 100%; min-height: 34px; padding: 0 4px;
+        display: flex; align-items: center; justify-content: center;
+        text-align: center; border: none; border-radius: 999px;
+        font-size: 11px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase;
+        color: var(--dim); background: transparent; white-space: nowrap;
+      }
+      .tab[aria-selected="true"] { background: var(--surface-alt); color: var(--text); font-weight: 600; border-radius: 999px; }
+      .subnav { border-top: 1px solid var(--border); }
+      .subnav .wrap { display: block; padding: 6px 12px; }
+      .subnav-group:not([hidden]) { display: grid; gap: 6px; width: 100%; }
+      #subnav-studio { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #subnav-inspiration { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      #subnav-me { grid-template-columns: repeat(3, minmax(0, 1fr)); flex-wrap: nowrap; }
+      .subtab {
+        margin: 0; width: 100%; min-height: 32px; padding: 0 4px;
+        display: flex; align-items: center; justify-content: center;
+        text-align: center; border: none; border-radius: 999px;
+        font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+        color: var(--dim); background: transparent; white-space: nowrap;
+      }
+      .subtab[aria-selected="true"] { background: var(--surface-alt); color: var(--text); font-weight: 600; border-radius: 999px; }
+      #subnav-me #tab-wearing { flex: none; white-space: normal; line-height: 1.2; padding: 4px; }
+      @media (max-width: 480px) {
+        .tab { font-size: 10.5px; letter-spacing: .05em; padding: 0 2px; }
+        .subtab { font-size: 10.5px; letter-spacing: .04em; padding: 0 2px; }
+      }
+
+      /* ---------- 3 · Type system — gold caps labels on one scale ---------- */
+      label.field,
+      #panel-studio label.field, #panel-wardrobe label.field, #panel-profile label.field,
+      #panel-icons label.field, #panel-palettes label.field, #panel-find label.field,
+      #panel-brands label.field, #panel-wearing label.field, #panel-myinspo label.field,
+      #panel-watches label.field,
+      .sel-name, .dress-for .df-label, .profile-group-head, .brand-group-head {
+        font-family: var(--font-ui); font-size: var(--fs-label); font-weight: 600;
+        letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--brass);
+      }
+      /* Serif only where it belongs: look titles + wordmark */
+      .today-caption h2, .look-body h3, .fw-outfit h3, .section-head h2,
+      .options-head h3, .fw-head h3 { font-family: var(--font-display); }
+      .today-loc strong, .formality-name, .legend .role, .option-card .oc-meta,
+      .look-body .meta, .saved-card .meta, .deal-progress-note, .icon-card .avoid,
+      .loc-rec, .empty, .dir-line, .capsule-outfit .oc-title, .capsule-check-head,
+      .drop-toggle, .tools-toggle, .wearing-entry .we-date {
+        font-family: var(--font-ui); font-style: normal;
+      }
+      .formality-name { font-size: 13px; font-weight: 600; letter-spacing: .01em; }
+      .look-body .meta, .option-card .oc-meta, .saved-card .meta { font-size: var(--fs-meta); color: var(--dim); }
+      .dir-line { font-size: var(--fs-body); }
+      .empty { font-size: 14px; }
+
+      /* ---------- 4 · Today hero stack — one vertical rhythm ---------- */
+      #panel-today .today-caption {
+        display: flex; flex-direction: column; gap: 10px;
+        padding: 16px 16px calc(14px + env(safe-area-inset-bottom));
+      }
+      #panel-today .today-kicker {
+        margin: 0; font-size: var(--fs-label); font-weight: 600;
+        letter-spacing: .24em; text-transform: uppercase; color: #d9c9a3;
+      }
+      #panel-today .today-caption h2 {
+        font-size: clamp(24px, 6vw, 30px); line-height: 1.08; margin: 0;
+      }
+      #panel-today .today-loc {
+        margin: 0; font-family: var(--font-ui); font-size: var(--fs-meta);
+        letter-spacing: .02em; color: #efe3c8; gap: 4px 8px;
+      }
+      #panel-today .today-loc strong { font-size: var(--fs-meta); font-weight: 600; letter-spacing: .02em; }
+      #panel-today .today-dots { margin: 0; gap: 6px; }
+      #panel-today .today-dots span { width: 12px; height: 12px; }
+      #panel-today .today-suggest { margin: 0; font-size: var(--fs-meta); }
+      /* One control height for every hero button and pill */
+      #panel-today .btn-today, .btn-today,
+      #panel-today .today-loc-chips .tlc, .today-loc-chips .tlc,
+      .ts-btn, #panel-today .today-formality .fchip,
+      .change-toggle {
+        min-height: var(--ctl-h); padding: 0 12px;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 11.5px; font-weight: 600; letter-spacing: .06em; line-height: 1;
+        border-radius: 999px;
+      }
+      /* Hero pills run one notch smaller so each labelled row —
+         label column + all its pills — holds a single line at
+         390px and never wraps a pill back to the left edge. */
+      #panel-today .today-loc-chips .tlc, .today-loc-chips .tlc, .ts-btn {
+        padding: 0 9px; font-size: 10.5px; letter-spacing: .03em; white-space: nowrap;
+      }
+      .change-toggle { width: 100%; justify-content: space-between; border-radius: var(--radius); text-transform: uppercase; }
+      .change-item { margin-top: 0; }
+      #panel-today .today-actions { gap: 6px; margin: 0; }
+      /* Label rows: LOCATION / BUILD FROM / FORMALITY share one
+         fixed-width label column, so every pill row starts at the
+         same x and every row is separated by the caption's gap. */
+      #panel-today .today-loc-chips, .today-loc-chips {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0;
+      }
+      #panel-today .today-loc-chips .tlc-label, .today-source .ts-label {
+        flex: 0 0 var(--hero-label-w); margin: 0; white-space: nowrap;
+        font-size: 9.5px; font-weight: 600;
+        letter-spacing: .1em; text-transform: uppercase; color: #d9c9a3;
+      }
+      .today-source { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; }
+      .today-source .ts-label { color: rgba(247,241,229,.75); }
+      #panel-today .today-swipe-hint { margin: 0; font-size: 10.5px; letter-spacing: .05em; }
+      #panel-today .today-formality { margin: 0; max-width: none; }
+      #panel-today .today-formality .formality-head { display: flex; align-items: center; justify-content: flex-start; gap: 6px; }
+      #panel-today .today-formality label.field {
+        flex: 0 0 var(--hero-label-w); margin: 0; color: #d9c9a3; white-space: nowrap;
+        font-size: 9.5px; letter-spacing: .1em;
+      }
+      #panel-today .today-formality .formality-name { color: #f7f1e5; font-size: 13px; }
+      #panel-today .today-formality .formality-chips { margin-left: calc(var(--hero-label-w) + 6px); gap: 6px; padding: 0; }
+
+      /* ---------- 5 · Cards & lists — one padding, title, meta, swatch ---------- */
+      .option-card .oc-body, .saved-card .sb, .plate-card .pc-body, .myinspo-card .mi-body { padding: var(--card-body-pad); }
+      .item-card, #panel-wardrobe .item-card, #panel-watches .item-card,
+      .find-card, #panel-find .find-card { padding: var(--card-pad); }
+      .option-card .oc-title, .saved-card h4, .item-card h4, .plate-card .pc-names,
+      .find-card h4, .custom-card h4, .shop-piece h4,
+      #panel-wardrobe .item-card h4, #panel-watches .item-card h4, #panel-find .find-card h4 {
+        font-family: var(--font-ui); font-size: var(--fs-card-title); font-weight: 600;
+        letter-spacing: .01em; line-height: 1.2; color: var(--text);
+      }
+      .option-card .oc-label, .item-card .cat, .fw-outfit-head .oc-label {
+        font-size: var(--fs-label); font-weight: 600;
+        letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--brass);
+      }
+      .find-card .meta, .item-card p, .myinspo-card .mi-desc { font-size: var(--fs-meta); }
+      .piece-row .cdot, .item-colors .cdot, .wish-row .cdot,
+      .change-cat .cdot, .change-opt .cdot { width: 18px; height: 18px; }
+      .legend .dot, .draft-list .dot { width: 12px; height: 12px; }
+      .swatch-strip > div { min-height: 40px; }
+      .swatch-strip.lg > div { min-height: 64px; }
+      .swatch-strip.sm > div, .saved-card .swatch-strip.sm > div { min-height: 12px; }
+      /* Ideas source boxes — same radius and height as every control */
+      .src-seg { gap: 6px; margin-bottom: 12px; }
+      .src-seg-btn { min-height: 40px; padding: 6px 4px; font-size: 11px; letter-spacing: .07em; border-radius: var(--radius); }
+      /* Buttons app-wide settle on the hero control height */
+      .btn-accent, .btn-ink, .btn-ghost, .verdict-btn {
+        min-height: var(--ctl-h); padding: 0 14px;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 11.5px; letter-spacing: .1em; line-height: 1;
+      }
+      .verdict-btn { letter-spacing: .06em; }
 </style>
   </head>
   <body>
