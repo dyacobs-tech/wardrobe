@@ -101,12 +101,13 @@
       .rule-double::after { content: ""; position: absolute; top: 3px; left: 0; right: 0; border-top: 1px solid var(--border-strong); }
 
       /* ---------- Tabs — two tiers: sections on top, pages under ----------
-         The top row names five destinations: Studio, Inspiration,
-         Find it, Calendar, Profile. Studio and Inspiration are sections:
-         a second row beneath names their pages (Studio: Today — the
-         cover page — Deal, Closet, My Looks; Inspiration: Palettes,
-         Icons, Brands) and shows only while one of that section's
-         pages is open. Both rows stick together. */
+         The top row names four destinations: Studio, Inspiration,
+         Find it, Me. Studio, Inspiration and Me are sections: a
+         second row beneath names their pages (Studio: Today — the
+         cover page — Ideas; Inspiration: Palettes, Icons, Brands,
+         My Inspo; Me: Me, Closet, My Looks, Calendar, What I'm
+         Wearing Today) and shows only while one
+         of that section's pages is open. Both rows stick together. */
       .navstack {
         position: sticky; top: 0; z-index: 40;
         background: color-mix(in srgb, var(--bg) 92%, transparent);
@@ -990,6 +991,27 @@
       #panel-find .formality input[type="range"] { min-height: 26px; }
       #panel-find .formality-scale { font-size: 9.5px; margin-top: -2px; }
 
+      /* ---------- Find it — shop this look (look mode) ---------- */
+      .shop-look-head img { width: 100%; max-height: 52vh; object-fit: cover; object-position: top center; border: 1px solid var(--border); display: block; }
+      .shop-look-titlerow { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+      .shop-look-titlerow h3 { font-family: var(--font-display); font-size: 26px; font-weight: 600; margin: 0; flex: 1; min-width: 0; line-height: 1.1; }
+      .shop-clear { min-height: 30px; padding: 4px 10px; font-size: 11px; flex: none; }
+      .shop-honest { font-size: 12.5px; color: var(--dim); margin: 6px 0 0; }
+      .shop-budget { margin-top: 14px; }
+      .shop-piece { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 12px; display: grid; gap: 8px; }
+      .shop-piece h4 { font-family: var(--font-display); font-size: 19px; font-weight: 600; margin: 0; line-height: 1.2; }
+      .shop-row { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); background: var(--surface-alt); border-radius: var(--radius); padding: 7px 10px; text-decoration: none; color: var(--text); }
+      .shop-thumb { width: 52px; height: 52px; object-fit: cover; flex: none; border: 1px solid var(--border); }
+      .shop-main { flex: 1; min-width: 0; }
+      .shop-name { display: block; font-size: 14px; font-weight: 600; line-height: 1.25; }
+      .shop-sub { display: block; font-size: 12px; color: var(--dim); }
+      .shop-price { font-weight: 700; font-size: 14px; flex: none; }
+      .shop-nomatch { margin: 0; font-size: 13px; color: var(--dim); font-style: italic; }
+      .shop-brands { display: flex; flex-wrap: wrap; gap: 6px; }
+      .shop-chip { border: 1px solid var(--border-strong); border-radius: 999px; padding: 5px 11px; min-height: 28px; font-size: 11.5px; font-weight: 600; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; }
+      .shop-ebay { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; padding: 2px 0; }
+      .shop-look-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; border: 1px solid var(--border); background: var(--surface-alt); color: var(--text); border-radius: var(--radius); padding: 9px 12px; min-height: 38px; font-size: 13px; font-weight: 600; letter-spacing: .04em; margin-top: 8px; text-align: left; }
+
       /* ---------- Audit round — My Looks, menus, chips, undo ----------
          Looks grid: two across with larger photographs (three on
          wide screens). One action per card — the ••• menu — with
@@ -1293,6 +1315,58 @@
       .sel-opts { padding: 7px 0 2px; }
       .sel-opts[hidden] { display: none !important; }
       .sel-opts .chip { min-height: 28px; padding: 3px 11px; font-size: 12px; }
+
+      /* ---------- What I'm Wearing Today + My Inspo ----------
+         Me's fifth page is the selfie log: a compact sheet-style
+         form (photo, date, confirm-the-items rows) over a history
+         of logged outfits. Its fifth subtab wraps onto its own
+         full-width row so all five Me pages stay readable at
+         phone width. My Inspo is Inspiration's fourth page: his
+         uploaded images in a two-across gallery. Calendar's What
+         I wore shows a logged selfie large — the image IS the
+         entry's picture. */
+      #subnav-me { flex-wrap: wrap; }
+      #subnav-me #tab-wearing { flex: 1 1 100%; }
+      #panel-wearing .wearing-form, #panel-myinspo .myinspo-form { padding: 10px 12px; gap: 8px; }
+      #panel-wearing label.field, #panel-myinspo label.field { font-size: 10.5px; letter-spacing: .14em; margin-bottom: 3px; }
+      #panel-wearing input[type="text"], #panel-wearing select, #panel-myinspo input[type="text"] { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
+      #panel-wearing input[type="date"] { width: 100%; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 14.5px; padding: 6px 9px; min-height: 34px; }
+      #panel-wearing input[type="color"] { width: 40px; height: 34px; flex: none; }
+      #panel-wearing .photo-drop, #panel-myinspo .photo-drop { min-height: 36px; padding: 8px 10px; gap: 3px; }
+      #panel-wearing .photo-drop .pd-title, #panel-myinspo .photo-drop .pd-title { font-size: 11px; letter-spacing: .08em; }
+      .wearing-photo-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      #wearing-preview { width: 100%; max-height: 300px; object-fit: cover; object-position: top center; border: 1px solid var(--border); }
+      #wearing-preview[hidden] { display: none; }
+      #wearing-rows { display: grid; gap: 8px; }
+      .wearing-row { border: 1px solid var(--border); background: var(--surface-alt); border-radius: var(--radius); padding: 8px; display: grid; gap: 6px; }
+      .wr-top { display: flex; gap: 6px; align-items: center; }
+      .wr-top select { flex: 1; min-width: 0; }
+      .wr-top .btn-ghost { flex: none; min-height: 30px; padding: 4px 10px; font-size: 11px; }
+      .wr-colour-row { display: flex; gap: 8px; align-items: center; }
+      .wr-colour-row input[type="text"] { flex: 1; min-width: 0; }
+      .wearing-row .wr-picked { opacity: .55; }
+      .wearing-actions { display: flex; gap: 8px; }
+      .wearing-actions .btn-accent { flex: 1; }
+      .wearing-entry { display: flex; gap: 12px; padding: 10px 12px; margin-bottom: 8px; align-items: flex-start; }
+      .wearing-entry img { width: 84px; height: 112px; object-fit: cover; object-position: top center; border: 1px solid var(--border); flex: none; cursor: zoom-in; }
+      .wearing-entry .we-main { flex: 1; min-width: 0; }
+      .wearing-entry .we-date { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin: 0 0 4px; line-height: 1.2; }
+      .wearing-entry .we-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+      .wearing-entry .we-items li { font-size: 13.5px; line-height: 1.4; }
+      .wearing-entry .we-items .we-cat { font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); margin-right: 6px; }
+      .worn-row.selfie { align-items: flex-start; }
+      .worn-row.selfie img { width: 76px; height: 100px; cursor: zoom-in; }
+      .worn-row.selfie .w-name { white-space: normal; }
+      .worn-row.selfie .w-sub { white-space: normal; }
+      .myinspo-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
+      @media (min-width: 760px) { .myinspo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+      .myinspo-card { overflow: hidden; display: flex; flex-direction: column; }
+      .myinspo-imgbtn { padding: 0; border: none; background: none; min-height: 0; cursor: pointer; display: block; width: 100%; }
+      .myinspo-card .myinspo-imgbtn img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; display: block; }
+      .myinspo-card .mi-body { padding: 8px 10px 10px; display: grid; gap: 7px; }
+      .myinspo-card .mi-desc { margin: 0; font-size: 12.5px; color: var(--dim); line-height: 1.4; }
+      .myinspo-card .look-actions { margin-top: 0; }
+      .myinspo-card .btn-ghost { min-height: 30px; padding: 4px 10px; font-size: 11px; }
     </style>
   </head>
   <body>
@@ -1309,8 +1383,7 @@
           <button class="tab" role="tab" id="section-studio" aria-selected="true" data-section="studio">Studio</button>
           <button class="tab" role="tab" id="section-inspiration" aria-selected="false" data-section="inspiration">Inspiration</button>
           <button class="tab" role="tab" id="tab-find" aria-selected="false" aria-controls="panel-find" data-tab="find">Find it</button>
-          <button class="tab" role="tab" id="tab-calendar" aria-selected="false" aria-controls="panel-calendar" data-tab="calendar">Calendar</button>
-          <button class="tab" role="tab" id="tab-profile" aria-selected="false" aria-controls="panel-profile" data-tab="profile">Profile</button>
+          <button class="tab" role="tab" id="section-me" aria-selected="false" data-section="me">Me</button>
         </div>
       </nav>
       <nav class="subnav" id="subnav" aria-label="Section pages">
@@ -1318,13 +1391,19 @@
           <div class="subnav-group" id="subnav-studio" role="tablist">
             <button class="subtab" role="tab" id="tab-today" aria-selected="true" aria-controls="panel-today" data-tab="today">Today</button>
             <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Ideas</button>
-            <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
-            <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks">My Looks</button>
           </div>
           <div class="subnav-group" id="subnav-inspiration" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-palettes" aria-selected="false" aria-controls="panel-palettes" data-tab="palettes">Palettes <span class="count">348</span></button>
             <button class="subtab" role="tab" id="tab-icons" aria-selected="false" aria-controls="panel-icons" data-tab="icons">Icons <span class="count" id="icon-tab-count"></span></button>
             <button class="subtab" role="tab" id="tab-brands" aria-selected="false" aria-controls="panel-brands" data-tab="brands">Brands <span class="count">14</span></button>
+            <button class="subtab" role="tab" id="tab-myinspo" aria-selected="false" aria-controls="panel-myinspo" data-tab="myinspo">My Inspo</button>
+          </div>
+          <div class="subnav-group" id="subnav-me" role="tablist" hidden>
+            <button class="subtab" role="tab" id="tab-profile" aria-selected="false" aria-controls="panel-profile" data-tab="profile">Me</button>
+            <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
+            <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks">My Looks</button>
+            <button class="subtab" role="tab" id="tab-calendar" aria-selected="false" aria-controls="panel-calendar" data-tab="calendar">Calendar</button>
+            <button class="subtab" role="tab" id="tab-wearing" aria-selected="false" aria-controls="panel-wearing" data-tab="wearing">What I'm Wearing Today</button>
           </div>
         </div>
       </nav>
@@ -1449,19 +1528,9 @@
                 <div class="label-row"><label class="field">Inspo — pick an icon to dress from</label><button type="button" class="info-btn sm" data-info-title="Inspo" data-info-text="Tap an icon and the look is built in their direction — their signature outfit, their colours, their shoe, their rules. Auto leaves it to the outfit itself." aria-label="About: inspo icons">i</button></div>
                 <div class="inspo-pick" id="inspo-pick" role="group" aria-label="Pick an icon to use as inspo"></div>
               </div>
-              <div id="image-inspo-field">
-                <div class="label-row"><label class="field">Individual image — build from your own photo</label><button type="button" class="info-btn sm" data-info-title="Individual image" data-info-text="Upload a screenshot or photo and the Studio builds the look from that image, the same way it builds from an icon or a palette. The image is saved here so you can pick it again later as inspo." aria-label="About: individual image">i</button></div>
-                <div class="inspo-thumbs" id="inspo-thumbs" role="group" aria-label="Your saved inspo images"></div>
-                <label class="photo-drop" for="inspo-photo" style="margin-top:8px">
-                  <span class="pd-title" id="inspo-photo-label">Upload a screenshot or photo</span>
-                  <input type="file" id="inspo-photo" accept="image/*" />
-                </label>
-                <div style="margin-top:10px">
-                  <label class="field" for="inspo-desc">What is in the image? — colours, pieces (optional)</label>
-                  <input type="text" id="inspo-desc" placeholder="e.g. Navy blazer with cream trousers and brown loafers" autocomplete="off" />
-                </div>
-                <div class="inspo-active" id="inspo-active" hidden></div>
-              </div>
+              <!-- Your own inspo images live in Inspiration → My Inspo;
+                   the engine still builds from them exactly as before
+                   (buildImageLooks / activeInspoId), only the door moved. -->
               <div>
                 <label class="field" for="style-direction">Style direction — who you're dressing as</label>
                 <select id="style-direction" name="style-direction">
@@ -1698,6 +1767,31 @@
         </div>
       </section>
 
+      <!-- ================= WHAT I'M WEARING TODAY — SELFIE LOG ================= -->
+      <section id="panel-wearing" role="tabpanel" aria-labelledby="tab-wearing" hidden>
+        <div class="card add-form wearing-form">
+          <img id="wearing-preview" alt="Your outfit photo" hidden />
+          <div class="wearing-photo-btns">
+            <label class="photo-drop" for="wearing-photo-camera"><span class="pd-title">Take a photo</span><input type="file" id="wearing-photo-camera" accept="image/*" capture="user" /></label>
+            <label class="photo-drop" for="wearing-photo-upload"><span class="pd-title">Upload a photo</span><input type="file" id="wearing-photo-upload" accept="image/*" /></label>
+          </div>
+          <div>
+            <label class="field" for="wearing-date">Date</label>
+            <input type="date" id="wearing-date" />
+          </div>
+          <div>
+            <label class="field">Confirm the items</label>
+            <div id="wearing-rows"></div>
+          </div>
+          <div class="wearing-actions">
+            <button type="button" class="btn-ghost" id="wearing-add-row">Add row</button>
+            <button type="button" class="btn-accent" id="wearing-save">Save outfit</button>
+          </div>
+        </div>
+        <h3 class="fav-head">Logged outfits</h3>
+        <div id="wearing-history"></div>
+      </section>
+
       <!-- ================= QUEUE ================= -->
       <section id="panel-queue" role="tabpanel" aria-labelledby="tab-queue" hidden>
         <div class="saved-grid" id="queue-grid"></div>
@@ -1766,6 +1860,19 @@
           </a>
         </div>
         <div class="card empty" id="brand-empty" hidden>No brand matches that search.</div>
+      </section>
+
+      <!-- ================= MY INSPO — YOUR UPLOADED INSPIRATION ================= -->
+      <section id="panel-myinspo" role="tabpanel" aria-labelledby="tab-myinspo" hidden>
+        <div class="card add-form myinspo-form">
+          <label class="photo-drop" for="myinspo-photo"><span class="pd-title">Add a photo or screenshot</span><input type="file" id="myinspo-photo" accept="image/*" /></label>
+          <div>
+            <label class="field" for="myinspo-desc">What is in the image? — colours, pieces (optional)</label>
+            <input type="text" id="myinspo-desc" placeholder="e.g. Navy blazer with cream trousers and brown loafers" autocomplete="off" />
+          </div>
+        </div>
+        <div class="myinspo-grid" id="myinspo-grid"></div>
+        <div id="myinspo-empty"></div>
       </section>
 
       <!-- ================= STYLE ICONS ================= -->
@@ -1900,6 +2007,7 @@
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
         <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Find it" data-info-text="Describe what you're after, set the budget on the scale — price-conscious at one end, no budget at the other — and your size comes from your Profile. Then search for it, or keep the brief here." aria-label="About Find it">i</button></div>
+        <div id="find-look-mode" hidden></div>
         <div class="ward-grid">
           <div>
             <div class="find-grid" id="find-grid"></div>
@@ -3673,9 +3781,9 @@ renderInspoPick();
    the reference look, and the other five takes are the engine's
    builds from its description. Uploads are processed like closet
    photos (orientation fixed, kept at 800px) and saved on the device
-   (and in backups via DATA_KEYS), so an image can be picked again
-   as inspo later; tapping a saved thumbnail arms it, tapping again
-   disarms it. */
+   (and in backups via DATA_KEYS). The uploads live in Inspiration →
+   My Inspo: adding, styling from and deleting them happens there;
+   this store and the buildImageLooks engine are unchanged. */
 var inspoImages = store.get("inspoImages", []) || [];
 var activeInspoId = null;
 function inspoImageById(id) {
@@ -3701,7 +3809,8 @@ function renderInspoImages() {
     '<button type="button" class="btn-ghost" data-inspo-clear>Clear</button>' +
     '<button type="button" class="btn-ghost" data-inspo-delete="' + active.id + '">Delete</button>';
 }
-document.getElementById("inspo-photo").addEventListener("change", function () {
+var inspoPhotoInput = document.getElementById("inspo-photo");
+if (inspoPhotoInput) inspoPhotoInput.addEventListener("change", function () {
   var file = this.files && this.files[0];
   if (!file) return;
   var input = this;
@@ -3721,7 +3830,8 @@ document.getElementById("inspo-photo").addEventListener("change", function () {
     toast("Saved — the Studio now builds from your image. Tap Create look.");
   });
 });
-document.getElementById("image-inspo-field").addEventListener("click", function (e) {
+var imageInspoField = document.getElementById("image-inspo-field");
+if (imageInspoField) imageInspoField.addEventListener("click", function (e) {
   var thumb = e.target.closest("[data-inspo-img]");
   if (thumb) {
     var id = thumb.getAttribute("data-inspo-img");
@@ -3742,7 +3852,8 @@ document.getElementById("image-inspo-field").addEventListener("click", function 
     toast("Image removed from your inspo library.");
   }
 });
-document.getElementById("inspo-desc").addEventListener("change", function () {
+var inspoDescInput = document.getElementById("inspo-desc");
+if (inspoDescInput) inspoDescInput.addEventListener("change", function () {
   var active = activeInspoId ? inspoImageById(activeInspoId) : null;
   if (active) { active.desc = this.value.trim(); saveInspoImages(); renderInspoImages(); }
 });
@@ -8571,6 +8682,7 @@ function sendPieceToFind(look, idx) {
   finds.unshift(f);
   store.set("finds", finds);
   renderFinds();
+  clearFindLookMode();
   switchTab("find");
   var shopP = iconShopFor(f);
   if (shopP) {
@@ -8669,12 +8781,14 @@ function plateFindLook(p) {
 }
 document.addEventListener("click", function (e) {
   if (!e.target.closest) return;
+  var sh = e.target.closest("[data-shop-look]");
+  if (sh) { if (typeof currentLook !== "undefined" && currentLook) openFindLookMode(currentLook); return; }
   var fo = e.target.closest("[data-find-open]");
-  if (fo) { if (typeof currentLook !== "undefined" && currentLook) openFindSheet(currentLook); return; }
+  if (fo) { if (typeof currentLook !== "undefined" && currentLook) openFindLookMode(currentLook); return; }
   var fl = e.target.closest("[data-find-look-id]");
   if (fl) {
     var f = findLookAnywhere(fl.getAttribute("data-find-look-id"));
-    if (f) openFindSheet(f.look);
+    if (f) openFindLookMode(f.look);
     return;
   }
   var fi = e.target.closest("[data-find-icon-look]");
@@ -8863,6 +8977,7 @@ function lookCardHTML(look, opts) {
     (look.plate ? '<button type="button" class="btn-ghost" data-action="open-plate" data-plate="' + look.plate + '">Open Plate ' + look.plate + "</button>" : "") +
     '<button type="button" class="btn-ghost" data-action="share-look">Share as image</button>' +
     "</div>" +
+    '<button type="button" class="shop-look-row" data-shop-look><span>Shop this look</span><span aria-hidden="true">→</span></button>' +
     drops +
     "</div></article>";
 }
@@ -12577,7 +12692,7 @@ function setCurrentLoc(loc, silent) {
   fetchWeather();
 }
 document.getElementById("today-find").addEventListener("click", function () {
-  if (todayLook) openFindSheet(todayLook);
+  if (todayLook) openFindLookMode(todayLook);
 });
 var locResultsCache = [];
 function searchLocation() {
@@ -12782,6 +12897,10 @@ function renderBudget() {
   if (range) range.value = budgetLevel;
   var nm = document.getElementById("find-budget-name");
   if (nm) nm.textContent = info.name;
+  var sRange = document.getElementById("shop-budget-range");
+  if (sRange) sRange.value = budgetLevel;
+  var sNm = document.getElementById("shop-budget-name");
+  if (sNm) sNm.textContent = info.name;
   var ds = document.getElementById("find-budget-info");
   if (ds) {
     ds.setAttribute("data-info-title", "Budget — " + info.name);
@@ -12941,28 +13060,279 @@ document.getElementById("find-grid").addEventListener("click", function (e) {
   });
 })();
 
+/* ================= Shop this look — the Find it look mode =================
+   The researched product catalogue, embedded as data: matching
+   reads only SHOP_CATALOGUE, so adding a SKU later is a data
+   edit. Prices were checked on the retailers' live pages on
+   the checked date; two Mr Porter entries expose no image URL,
+   so their rows render without a thumbnail — never a
+   placeholder photo. Entering Find it from a look (the Today
+   hero, a look's detail page, a saved look) opens this page in
+   look mode with the look carried in; the tab on its own keeps
+   the free-form find exactly as before. */
+var SHOP_CATALOGUE_CHECKED = "Nov 15, 2026";
+var SHOP_CATALOGUE = [
+  {"brand": "Entire Studios", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262940M201005_1/entire-studios-navy-knit-cashmere-crewneck-sweater.jpg", "keys": ["navy", "crew-neck", "knit", "sweater", "cashmere"], "name": "Navy Knit Cashmere Crewneck Sweater", "price": 350, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/entire-studios/navy-knit-cashmere-crewneck-sweater/19608331"},
+  {"brand": "Suitsupply", "cat": "knitwear", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-default-mobile/f_auto,q_auto,w_1290/products/knitwear/default/winter/kcv10007n01_1", "keys": ["navy", "crew-neck", "knit", "sweater", "wool"], "name": "Navy Crewneck in Pure Wool", "price": 159, "retailer": "Suitsupply", "tier": "value", "url": "https://suitsupply.com/en-us/men/knitwear/navy-crewneck/KCV10007N01.html"},
+  {"brand": "Entire Studios", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262940M201000_1/entire-studios-off-white-knit-cashmere-crewneck-sweater.jpg", "keys": ["cream", "off-white", "ecru", "crew-neck", "knit", "sweater", "cashmere"], "name": "Off-White Knit Cashmere Crewneck Sweater", "price": 350, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/entire-studios/off-white-knit-cashmere-crewneck-sweater/19608281"},
+  {"brand": "Suitsupply", "cat": "knitwear", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-default-mobile/f_auto,q_auto,w_1290/products/knitwear/default/winter/sw1934_1", "keys": ["cream", "off-white", "ecru", "crew-neck", "knit", "sweater", "merino"], "name": "Off-White Ribbed Merino Crewneck", "price": 179, "retailer": "Suitsupply", "tier": "value", "url": "https://suitsupply.com/en-my/men/knitwear/off-white-ribbed-merino-crewneck/SW1934.html"},
+  {"brand": "Suitsupply", "cat": "knitwear", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-default-mobile/f_auto,q_auto,w_1290/products/knitwear/default/winter/kpl10003n01_1", "keys": ["navy", "knit polo", "polo", "long-sleeve", "cashmere"], "name": "Navy Long Sleeve Polo in Pure Cashmere", "price": 279, "retailer": "Suitsupply", "tier": "premium", "url": "https://suitsupply.com/en-us/men/knitwear/navy-long-sleeve-polo/KPL10003N01.html"},
+  {"brand": "Suitsupply", "cat": "knitwear", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-default-mobile/f_auto,q_auto,w_1290/products/knitwear/default/winter/sw2242_1", "keys": ["navy", "knit polo", "polo", "long-sleeve"], "name": "Navy Long Sleeve Polo in Cotton Silk", "price": 139, "retailer": "Suitsupply", "tier": "value", "url": "https://suitsupply.com/en-us/men/knitwear/navy-long-sleeve-polo/SW2242.html"},
+  {"brand": "Maison Margiela", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262168M205000_1/maison-margiela-navy-virgin-wool-turtleneck.jpg", "keys": ["navy", "roll-neck", "turtleneck", "knit", "sweater"], "name": "Navy Virgin Wool Turtleneck", "price": 1370, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/maison-margiela/navy-virgin-wool-turtleneck/19348841"},
+  {"brand": "Suitsupply", "cat": "knitwear", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-default-mobile/f_auto,q_auto,w_1290/products/knitwear/default/winter/sw1040_1", "keys": ["navy", "roll-neck", "turtleneck", "knit", "sweater", "wool"], "name": "Navy Turtleneck in Pure Wool", "price": 139, "retailer": "Suitsupply", "tier": "value", "url": "https://suitsupply.com/en-us/men/knitwear/navy-turtleneck/SW1040.html"},
+  {"brand": "We11done", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262327M202038_1/we11done-navy-chunky-embroidered-quarter-zip-sweater.jpg", "keys": ["navy", "quarter-zip", "zip-neck", "knit", "sweater"], "name": "Navy Chunky Embroidered Quarter-Zip Sweater", "price": 600, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/we11done/navy-chunky-embroidered-quarter-zip-sweater/19773341"},
+  {"brand": "RRL", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262435M200009_1/rrl-navy-wool-shawl-cardigan.jpg", "keys": ["navy", "cardigan", "shawl", "knit"], "name": "Navy Wool Shawl Cardigan", "price": 1200, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/rrl/navy-wool-shawl-cardigan/19146601"},
+  {"brand": "RRL", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262435M200007_1/rrl-navy-shawl-cotton-cardigan.jpg", "keys": ["navy", "cardigan", "shawl", "knit"], "name": "Navy Shawl Cotton Cardigan", "price": 495, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/rrl/navy-shawl-cotton-cardigan/19146581"},
+  {"brand": "LEMAIRE", "cat": "top", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262646M211001_1/lemaire-off-white-long-sleeve-henley-t-shirt.jpg", "keys": ["cream", "off-white", "henley", "long-sleeve"], "name": "Off-White Long Sleeve Henley T-shirt", "price": 395, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/lemaire/off-white-long-sleeve-henley-t-shirt/19441311"},
+  {"brand": "Polo Ralph Lauren", "cat": "shirt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261213M192068_1/polo-ralph-lauren-white-the-iconic-oxford-shirt.jpg", "keys": ["white", "oxford", "shirt", "button-down"], "name": "White 'The Iconic Oxford' Shirt", "price": 113, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/polo-ralph-lauren/white-the-iconic-oxford-shirt/18686271"},
+  {"brand": "Drake's", "cat": "shirt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262488M192000_1/drakes-blue-cotton-oxford-cloth-button-down-shirt.jpg", "keys": ["light blue", "blue", "oxford", "shirt", "button-down"], "name": "Blue Cotton Oxford Cloth Button-Down Shirt", "price": 300, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/drakes/blue-cotton-oxford-cloth-button-down-shirt/9009445"},
+  {"brand": "Thom Browne", "cat": "shirt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262381M192001_1/thom-browne-white-linen-4-bar-shirt.jpg", "keys": ["white", "linen", "shirt"], "name": "White Linen 4-Bar Shirt", "price": 790, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/thom-browne/white-linen-4-bar-shirt/19296781"},
+  {"brand": "Merz b. Schwanen", "cat": "top", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262328M213008_1/merz-b-schwanen-white-1950s-loopwheeled-classic-fit-lightweight-t-shirt.jpg", "keys": ["white", "tee", "t-shirt"], "name": "White 1950s Loopwheeled Classic Fit Lightweight T-shirt", "price": 100, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/merz-b-schwanen/white-1950s-loopwheeled-classic-fit-lightweight-t-shirt/19653271"},
+  {"brand": "Todd Snyder", "cat": "blazer", "img": "https://www.toddsnyder.com/cdn/shop/files/FEB26_BC202093_NAVY_FL1_R_1.jpg?v=1793196466&width=120", "keys": ["navy", "blazer", "sport coat", "midnight"], "name": "Navy Knit Sport Coat", "price": 698, "retailer": "Todd Snyder", "tier": "value", "url": "https://toddsnyder.com/products/knit-sportcoat-navy?variant=42004094091335"},
+  {"brand": "Suitsupply", "cat": "blazer", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-default-mobile/f_auto,q_auto,w_1290/products/jackets/default/summer/c2106_1", "keys": ["navy", "blazer", "checked", "midnight"], "name": "Navy Checked Tailored Fit Havana Blazer", "price": 579, "retailer": "Suitsupply", "tier": "value", "url": "https://us.suitsupply.com/en-us/men/jackets/navy-checked-tailored-fit-havana-blazer/C2106.html"},
+  {"brand": "Our Legacy", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261803M195008_1/our-legacy-gray-industry-blazer.jpg", "keys": ["grey", "gray", "blazer"], "name": "Gray Industry Blazer", "price": 608, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/our-legacy/gray-industry-blazer/18884591"},
+  {"brand": "A.P.C.", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261252M180017_1/apc-off-white-leo-blazer.jpg", "keys": ["cream", "ecru", "off-white", "blazer"], "name": "Off-White Leo Blazer", "price": 267, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/apc/off-white-leo-blazer/18864601"},
+  {"brand": "Suitsupply", "cat": "suit", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-default-mobile/f_auto,q_auto,w_1290/products/suits/default/winter/sns10014cn1_1", "keys": ["navy", "suit", "midnight"], "name": "Navy Checked Perennial Tailored Fit Havana Suit", "price": 549, "retailer": "Suitsupply", "tier": "value", "url": "https://us.suitsupply.com/en-us/men/suits/navy-checked-perennial-tailored-fit-havana-suit/SNS10014CN1.html"},
+  {"brand": "Todd Snyder", "cat": "suit", "img": "https://www.toddsnyder.com/cdn/shop/files/OCT26_BL365603_CHARCOAL_011_M1_R.jpg?v=1790348767&width=3840", "keys": ["charcoal", "suit", "glenplaid", "checked"], "name": "Italian Wool Glenplaid Wythe Suit — Charcoal", "price": 1196, "retailer": "Todd Snyder", "tier": "premium", "url": "https://www.toddsnyder.com/products/italian-wool-glenplaid-wythe-suit-charcoal?utm_content=Facebook_UA&utm_source=facebook&variant=42946436333639"},
+  {"brand": "Suitsupply", "cat": "suit", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-default-mobile/f_auto,q_auto,w_1290/products/mix_match/default/winter/c9665-s_1", "keys": ["charcoal", "grey", "gray", "suit", "midnight"], "name": "Dark Gray Perennial Tailored Fit Havana Suit", "price": 548, "retailer": "Suitsupply", "tier": "value", "url": "https://suitsupply.com/en-us/men/suits/dark-grey-perennial-tailored-fit-havana-suit/C9665-S.html"},
+  {"brand": "Ralph Lauren Purple Label", "cat": "trousers", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262261M191000_1/ralph-lauren-purple-label-gray-gregory-hand-tailored-flannel-trousers.jpg", "keys": ["grey", "gray", "flannel", "trousers", "wool"], "name": "Gray Gregory Hand-Tailored Flannel Trousers", "price": 695, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/ralph-lauren-purple-label/gray-gregory-hand-tailored-flannel-trousers/19264211"},
+  {"brand": "MMIC", "cat": "trousers", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262396M191001_1/mmic-gray-vantage-trousers.jpg", "keys": ["grey", "gray", "flannel", "trousers", "wool", "charcoal"], "name": "Gray Vantage Trousers", "price": 250, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/mmic/gray-vantage-trousers/19604951"},
+  {"brand": "Ernest W. Baker", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261600M195002_1/ernest-w-baker-black-tuxedo-blazer.jpg", "keys": ["black", "dinner jacket", "tuxedo", "blazer", "velvet"], "name": "Black Tuxedo Blazer", "price": 416, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/ernest-w-baker/black-tuxedo-blazer/19169711"},
+  {"brand": "Todd Snyder", "cat": "trousers", "img": "https://www.toddsnyder.com/cdn/shop/files/Aug26_JE037785_FOGSTONE_FL1_R.jpg?v=1783604531&width=120", "keys": ["stone", "beige", "chinos", "trousers", "khaki", "sand"], "name": "Slim Fit 5-Pocket Chino in Fogstone", "price": 148, "retailer": "Todd Snyder", "tier": "value", "url": "https://www.toddsnyder.com/products/slim-garment-dyed-5-pocket-twillfogstone"},
+  {"brand": "sacai", "cat": "trousers", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262445M191011_1/sacai-beige-cotton-chino-trousers.jpg", "keys": ["stone", "beige", "chinos", "trousers", "khaki", "sand"], "name": "Beige Cotton Chino Trousers", "price": 790, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/sacai/beige-cotton-chino-trousers/19503281"},
+  {"brand": "Suitsupply", "cat": "trousers", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-trousers-desktop/f_auto,q_auto,w_1290/products/trousers/default/winter/b17060_1", "keys": ["navy", "chinos", "trousers"], "name": "Navy Slim Leg Chinos in Stretch Cotton", "price": 129, "retailer": "Suitsupply", "tier": "value", "url": "https://suitsupply.com/en-us/men/trousers/navy-slim-leg-straight-chinos/B17060.html"},
+  {"brand": "Suitsupply", "cat": "trousers", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-trousers-desktop/f_auto,q_auto,w_1290/products/trousers/default/winter/b17059_1", "keys": ["ecru", "cream", "off-white", "chinos", "trousers"], "name": "Off-White Slim Leg Chinos in Stretch Cotton", "price": 129, "retailer": "Suitsupply", "tier": "value", "url": "https://suitsupply.com/en-us/men/trousers/off-white-slim-leg-chinos/B17059.html"},
+  {"brand": "A.P.C.", "cat": "jeans", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262252M186004_1/apc-navy-new-standard-jeans.jpg", "keys": ["indigo", "navy", "jeans", "denim"], "name": "Navy New Standard Jeans", "price": 340, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/apc/navy-new-standard-jeans/19293501"},
+  {"brand": "OUR LEGACY", "cat": "jeans", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262803M186018_1/our-legacy-indigo-third-cut-jeans.jpg", "keys": ["indigo", "jeans", "denim", "selvedge"], "name": "Indigo Third Cut Jeans", "price": 460, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/our-legacy/indigo-third-cut-jeans/19429051"},
+  {"brand": "Todd Snyder", "cat": "jeans", "img": "https://www.toddsnyder.com/cdn/shop/files/JE217660_WHITE_FEB_1807_R.jpg?v=1744822346&width=120", "keys": ["white", "jeans", "denim", "selvedge"], "name": "Straight Fit Japanese Selvedge Stretch Jean in White", "price": 348, "retailer": "Todd Snyder", "tier": "premium", "url": "https://www.toddsnyder.com/products/new-straight-fit-japanese-white-wash-jeanwhite?refSrc=7148291489863&nosto=productpage-nosto-8"},
+  {"brand": "AGOLDE", "cat": "jeans", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261214M186004_1/agolde-off-white-90s-jeans.jpg", "keys": ["white", "off-white", "jeans", "denim"], "name": "Off-White 90's Jeans", "price": 194, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/agolde/off-white-90s-jeans/19194811"},
+  {"brand": "Todd Snyder", "cat": "shorts", "img": "https://www.toddsnyder.com/cdn/shop/files/May26_PA1920426_NAVY_F1_R.jpg?v=1777038779&width=120", "keys": ["navy", "shorts", "tailored", "linen"], "name": "8\" Mylos Short in Navy", "price": 119, "retailer": "Todd Snyder", "tier": "value", "url": "https://www.toddsnyder.com/products/8-mylos-shortnavy"},
+  {"brand": "Orlebar Brown", "cat": "swim", "img": "https://orlebarbrown.com/cdn/shop/files/ORLEBAR-BROWN-SETTER-II-NAVY_250106_FRONT_OB.jpg?v=1711359092&width=1946", "keys": ["navy", "swim", "shorts", "swim shorts"], "name": "Setter Swim Shorts — Navy", "price": 345, "retailer": "Orlebar Brown", "tier": "premium", "url": "https://orlebarbrown.com/en-us/products/setter-navy-swimwear-250106"},
+  {"brand": "Todd Snyder", "cat": "outerwear", "img": "https://www.toddsnyder.com/cdn/shop/files/FW25_SH624245_BEIGE_AUG_FL1_R.jpg?v=1752071026&width=120", "keys": ["beige", "stone", "overshirt", "shirt jacket", "cotton"], "name": "Twill CPO Overshirt in Beige", "price": 124, "retailer": "Todd Snyder", "tier": "value", "url": "https://www.toddsnyder.com/products/twill-cpo-overshirtbeige?utm_content=Facebook_UA&utm_source=facebook&variant=41705254682695"},
+  {"brand": "Todd Snyder", "cat": "outerwear", "img": "https://www.toddsnyder.com/cdn/shop/files/FEB26_SH463129_CAVIAR_FL1_R.jpg?v=1769105927&width=120", "keys": ["black", "caviar", "overshirt", "shirt jacket", "canvas"], "name": "Draftsman Shirt in Caviar", "price": 209, "retailer": "Todd Snyder", "tier": "premium", "url": "https://www.toddsnyder.com/products/draftsman-shirtcaviar?utm_content=Facebook_UA&utm_source=facebook&variant=42142975492167"},
+  {"brand": "mfpen", "cat": "tie", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262505M158000_1/mfpen-navy-formal-tie.jpg", "keys": ["navy", "knitted tie", "tie", "knit", "silk"], "name": "Navy Formal Tie (Knit Silk)", "price": 140, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/mfpen/navy-formal-tie/19479481"},
+  {"brand": "Barbour", "cat": "outerwear", "img": "https://images.bloomingdalesassets.com/is/image/BLM/products/5/optimized/11075615_fpx.tif", "keys": ["olive", "quilted", "jacket", "field jacket"], "name": "Heritage Liddesdale Diamond Quilted Jacket — Olive", "price": 265, "retailer": "Bloomingdale's", "tier": "premium", "url": "https://bloomingdales.com/shop/product/barbour-heritage-liddesdale-diamond-quilted-jacket?ID=3794042"},
+  {"brand": "Common Projects", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262133M237048_1/common-projects-white-original-achilles-low-sneakers.jpg", "keys": ["white", "sneakers", "leather"], "name": "White Original Achilles Low Sneakers", "price": 565, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/common-projects/white-original-achilles-low-sneakers/19643381"},
+  {"brand": "Koio", "cat": "shoes", "img": "https://www.koio.co/cdn/shop/files/Capri-V2-triple-white-5-min_120x.jpg?v=1709753421", "keys": ["white", "sneakers", "leather"], "name": "Capri Leather Sneaker in Triple White", "price": 275, "retailer": "Koio", "tier": "value", "url": "https://www.koio.co/collections/capri-1/products/capri-triple-white-mens"},
+  {"brand": "John Lobb", "cat": "shoes", "img": "", "keys": ["brown", "suede", "loafers", "penny loafers"], "name": "Pace Suede Loafers — Brown", "price": 1100, "retailer": "Mr Porter", "tier": "premium", "url": "https://mrporter.com/en-us/mens/product/john-lobb/shoes/loafers/pace-suede-loafers/46376663163018461"},
+  {"brand": "MORJAS", "cat": "shoes", "img": "", "keys": ["brown", "suede", "loafers", "penny loafers"], "name": "Suede Penny Loafers — Brown", "price": 400, "retailer": "Mr Porter", "tier": "value", "url": "https://www.mrporter.com/en-us/mens/product/morjas/shoes/loafers/suede-penny-loafers/46376663163112544"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Cavendish29376A-B02L16_40890e97-65c0-4247-a6f8-c0a9372df5c4_1400x.png?v=1729064944", "keys": ["dark brown", "brown", "leather", "loafers", "penny loafers", "tassel"], "name": "Cavendish Dark Brown Burnished Calf Loafers", "price": 930, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/cavendish-darkbrown-calf?variant=37405227712680&utm_medium=feed&utm_campaign=meta_catalog&utm_content=product_card"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Connaught220106A-C01C16_1400x.png?v=1736298218", "keys": ["black", "oxford", "shoes", "leather", "formal", "patent"], "name": "Connaught 2 Black Calf Oxford Shoes", "price": 930, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/collections/all-mens-styles/products/connaught-2-black-calf"},
+  {"brand": "Clarks Originals", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262094M224008_1/clarks-originals-tan-suede-desert-boots.jpg", "keys": ["tan", "brown", "suede", "desert boots", "boots"], "name": "Tan Suede Desert Boots", "price": 195, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/clarks-originals/tan-suede-desert-boots/19396511"},
+  {"brand": "Common Projects", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262133M223003_1/common-projects-black-leather-chelsea-boots.jpg", "keys": ["black", "leather", "chelsea boots", "boots"], "name": "Black Leather Chelsea Boots", "price": 780, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/common-projects/black-leather-chelsea-boots/19643041"},
+  {"brand": "Hugo", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262084M223001_1/hugo-hugo-boss-black-leather-chelsea-boots.jpg", "keys": ["black", "leather", "chelsea boots", "boots"], "name": "Black Leather Chelsea Boots", "price": 200, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/hugo-hugo-boss/black-leather-chelsea-boots/19596861"}
+];
+/* Which of the fourteen Brands-section houses belong to each
+   stop on the Find-me budget scale — keyed off the app's
+   existing brand names and the scale's existing level names. */
+var BRAND_TIERS = {
+  "Price-conscious": ["Suitsupply", "Saint James"],
+  "Value-minded": ["Suitsupply", "Saint James", "John Smedley", "S.N.S. Herning", "Mr Porter"],
+  "Quality first": ["Suitsupply", "John Smedley", "S.N.S. Herning", "William Lockie", "Gran Sasso", "Rubato", "Mr Porter"],
+  "Premium": ["William Lockie", "Gran Sasso", "Rubato", "Stoffa", "P. Johnson", "Saman Amel", "The Row", "Mr Porter"],
+  "No budget": ["Loro Piana", "Brunello Cucinelli", "The Row", "Saman Amel", "P. Johnson", "Stoffa", "Mr Porter"]
+};
+/* Each brand's store domain, from its Brands-section row — a
+   brand option searches within that store for this piece. */
+var BRAND_DOMAINS = {
+  "Saint James": "saint-james.com", "S.N.S. Herning": "sns-herning.com",
+  "William Lockie": "williamlockie.com", "Gran Sasso": "gransasso.it",
+  "John Smedley": "johnsmedley.com", "Rubato": "atemporubato.com",
+  "Stoffa": "stoffa.co", "P. Johnson": "pjt.com",
+  "Saman Amel": "samanamel.com", "The Row": "therow.com",
+  "Loro Piana": "loropiana.com", "Brunello Cucinelli": "brunellocucinelli.com",
+  "Mr Porter": "mrporter.com", "Suitsupply": "suitsupply.com"
+};
+function brandSearchURL(brand, desc) {
+  var d = BRAND_DOMAINS[brand];
+  var q = "men's " + desc;
+  if (d) return "https://www.google.com/search?q=" + encodeURIComponent("site:" + d + " " + q);
+  return "https://www.google.com/search?tbm=shop&q=" + encodeURIComponent(brand + " " + q);
+}
+/* Colour families: the catalogue keys already share shades
+   within a family (khaki/sand, midnight/navy, charcoal/grey),
+   so the colour gate works family to family — a piece naming
+   a colour only matches entries in its own family. */
+var SHOP_COLOUR_FAMILIES = [
+  { keys: ["navy", "midnight", "indigo"], detect: ["navy", "midnight", "indigo"] },
+  { keys: ["blue", "light blue"], detect: ["blue"] },
+  { keys: ["grey", "gray", "charcoal"], detect: ["grey", "gray", "charcoal", "slate"] },
+  { keys: ["white", "cream", "off-white", "ecru"], detect: ["white", "cream", "ecru", "ivory", "off-white"] },
+  { keys: ["beige", "stone", "sand", "khaki"], detect: ["beige", "stone", "sand", "khaki", "fawn"] },
+  { keys: ["brown", "dark brown", "tan"], detect: ["brown", "tan", "chocolate"] },
+  { keys: ["olive"], detect: ["olive"] },
+  { keys: ["green"], detect: ["green"] },
+  { keys: ["black", "caviar"], detect: ["black", "caviar"] },
+  { keys: ["burgundy"], detect: ["burgundy", "crimson", "carmine", "claret"] },
+  { keys: ["red"], detect: ["red"] },
+  { keys: ["pink"], detect: ["pink", "rose"] },
+  { keys: ["yellow"], detect: ["yellow", "mustard", "lemon", "ochre"] }
+];
+var SHOP_COLOUR_KEYS = {};
+SHOP_COLOUR_FAMILIES.forEach(function (f) { f.keys.forEach(function (k) { SHOP_COLOUR_KEYS[k] = 1; }); });
+function pieceColourKeySet(pc) {
+  var text = (" " + (pc.colourName || "") + " " + (pc.garment || "") + " " + (pc.detail || "") + " ").toLowerCase();
+  var set = null;
+  SHOP_COLOUR_FAMILIES.forEach(function (f) {
+    var hit = f.detect.some(function (w) { return text.indexOf(" " + w) !== -1 || text.indexOf(w + " ") !== -1; });
+    if (hit) { set = set || {}; f.keys.forEach(function (k) { set[k] = 1; }); }
+  });
+  return set;
+}
+/* The piece's garment, mapped to a catalogue category.
+   Waistcoats and belts have no catalogue category. */
+function catalogueCatForPiece(pc) {
+  var g = (pc.garment || "").toLowerCase();
+  if (/watch/.test(g)) return null;
+  if (/waistcoat|gilet|\bvest\b|belt/.test(g)) return null;
+  if (/swim|bathing|trunk/.test(g)) return "swim";
+  if (/\btie\b|necktie/.test(g)) return "tie";
+  if (/loafer|sneaker|trainer|boot|shoe|sandal/.test(g)) return "shoes";
+  if (/dinner jacket|tuxedo/.test(g)) return "blazer";
+  if (/suit/.test(g)) return "suit";
+  if (/blazer|sport coat/.test(g)) return "blazer";
+  if (/overshirt|shirt jacket|field jacket|bomber|harrington|trucker|denim jacket|leather jacket|overcoat|trench|\bcoat\b|jacket|parka/.test(g)) return "outerwear";
+  if (/oxford|button-down|button down/.test(g)) return "shirt";
+  if (/shirt/.test(g)) return "shirt";
+  if (/jean|denim/.test(g)) return "jeans";
+  if (/short/.test(g)) return "shorts";
+  if (/knit polo/.test(g)) return "knitwear";
+  if (/knit|sweater|jumper|crew-neck|crewneck|roll-neck|rollneck|turtleneck|cardigan|quarter-zip|zip-neck|shawl/.test(g)) return "knitwear";
+  if (/polo/.test(g)) return "knitwear";
+  if (/henley|\btee\b|t-shirt/.test(g)) return "top";
+  if (/trouser|chino|pant|flannel/.test(g)) return "trousers";
+  return null;
+}
+/* Top two catalogue matches for a piece: same garment
+   category, colour family as a gate, then keyword overlap
+   between the piece description and the entry's keys — at
+   least two keys, one of them a garment or material key. */
+function catalogueMatches(pc) {
+  var cat = catalogueCatForPiece(pc);
+  if (!cat) return [];
+  var text = (pieceDescription(pc) + " " + (pc.garment || "") + " " + (pc.detail || "")).toLowerCase().replace(/-/g, " ");
+  var tokens = text.split(/[^a-z0-9]+/).filter(Boolean);
+  var fam = pieceColourKeySet(pc);
+  var scored = [];
+  SHOP_CATALOGUE.forEach(function (e) {
+    if (e.cat !== cat) return;
+    var eColours = e.keys.filter(function (k) { return SHOP_COLOUR_KEYS[k.toLowerCase()]; });
+    var colourOK = false, colourLiteral = false;
+    if (fam) {
+      if (eColours.length && !eColours.some(function (k) { return fam[k.toLowerCase()]; })) return;
+      colourOK = eColours.some(function (k) { return fam[k.toLowerCase()]; });
+    }
+    var matched = 0, garmentMatched = 0;
+    e.keys.forEach(function (k) {
+      var kk = k.toLowerCase().replace(/-/g, " ");
+      var hit = text.indexOf(kk) !== -1;
+      if (!hit && kk.indexOf(" ") !== -1) hit = kk.split(" ").every(function (w) { return tokens.indexOf(w) !== -1; });
+      if (hit) { matched++; if (SHOP_COLOUR_KEYS[k.toLowerCase()]) colourLiteral = true; else garmentMatched++; }
+    });
+    var score = matched + ((colourOK && !colourLiteral) ? 1 : 0);
+    if (score >= 2 && garmentMatched >= 1) scored.push({ e: e, score: score });
+  });
+  scored.sort(function (a, b) { return b.score - a.score; });
+  return scored.slice(0, 2).map(function (s) { return s.e; });
+}
+function shopRowHTML(e) {
+  var thumb = e.img ? '<img class="shop-thumb" src="' + esc(e.img) + '" alt="" loading="lazy" />' : "";
+  return '<a class="shop-row" target="_blank" rel="noopener" href="' + esc(e.url) + '">' + thumb +
+    '<span class="shop-main"><span class="shop-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="shop-sub">' + esc(e.retailer) + "</span></span>" +
+    '<span class="shop-price">$' + Number(e.price).toLocaleString("en-US") + "</span></a>";
+}
+var findLookMode = null;
+function shopPiecesForLook(look) {
+  /* The watch is his own collection, not shoppable — it never
+     gets a block here. */
+  return lookPieces(look).filter(function (pc) { return !/watch/i.test(pc.garment || ""); });
+}
+function openFindLookMode(look) {
+  if (!look) return;
+  if (!shopPiecesForLook(look).length) { toast("No pieces to find in this one."); return; }
+  findLookMode = look;
+  renderFindLookMode();
+  switchTab("find");
+}
+function clearFindLookMode() {
+  findLookMode = null;
+  renderFindLookMode();
+}
+function renderFindLookMode() {
+  var box = document.getElementById("find-look-mode");
+  if (!box) return;
+  var grid = document.querySelector("#panel-find .ward-grid");
+  var info = document.querySelector("#panel-find .page-info-row");
+  if (!findLookMode) {
+    box.hidden = true; box.innerHTML = "";
+    if (grid) grid.hidden = false;
+    if (info) info.hidden = false;
+    return;
+  }
+  box.hidden = false;
+  if (grid) grid.hidden = true;
+  if (info) info.hidden = true;
+  var look = findLookMode;
+  var tierName = budgetInfo(budgetLevel).name;
+  var brands = BRAND_TIERS[tierName] || [];
+  var img = lookImg(look);
+  var html = '<div class="shop-look-head"><img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" />' +
+    '<div class="shop-look-titlerow"><h3>' + esc(look.title || "Untitled") + '</h3><button type="button" class="btn-ghost shop-clear" id="shop-clear-look">✕ Clear look</button></div>' +
+    '<p class="shop-honest">Catalogue prices checked ' + SHOP_CATALOGUE_CHECKED + " — tap through for the live price.</p>" +
+    '<div class="formality shop-budget"><div class="formality-head"><label class="field" for="shop-budget-range">Price point</label><span class="formality-name" id="shop-budget-name">' + esc(tierName) + '</span></div><input type="range" id="shop-budget-range" min="1" max="5" step="1" value="' + budgetLevel + '" /><div class="formality-scale" aria-hidden="true"><span>Price-conscious</span><span>No budget</span></div></div></div>';
+  shopPiecesForLook(look).forEach(function (pc) {
+    var desc = pieceDescription(pc);
+    var matches = catalogueMatches(pc);
+    html += '<div class="shop-piece"><h4>' + esc(desc) + "</h4>";
+    if (matches.length) matches.forEach(function (e) { html += shopRowHTML(e); });
+    else html += '<p class="shop-nomatch">No exact match yet in the catalogue</p>';
+    html += '<div class="shop-brands">' + brands.map(function (b) {
+      return '<a class="shop-chip" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">Search at ' + esc(b) + "</a>";
+    }).join("") + "</div>";
+    var eq = encodeURIComponent("men's " + desc + " vintage");
+    html += '<a class="shop-ebay" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + eq + '">eBay — vintage <span aria-hidden="true">↗</span></a></div>';
+  });
+  box.innerHTML = html;
+}
+(function () {
+  var box = document.getElementById("find-look-mode");
+  if (!box) return;
+  box.addEventListener("click", function (e) {
+    if (e.target.closest && e.target.closest("#shop-clear-look")) clearFindLookMode();
+  });
+  box.addEventListener("input", function (e) {
+    if (!e.target || e.target.id !== "shop-budget-range") return;
+    budgetLevel = Math.min(5, Math.max(1, parseInt(e.target.value, 10) || 3));
+    store.set("findBudget", budgetLevel);
+    renderBudget();
+    renderFindLookMode();
+  });
+})();
+
+
 /* ================= Tabs — refresh stays on the page =================
    The current section is kept three ways so a refresh lands back
    on it, not on Today: in the URL hash (so the address itself
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands", "find", "calendar", "profile"];
+var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands", "find", "calendar", "profile", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
-   Studio's cover page), then Deal (the Create-a-Look studio),
-   Closet and My Looks. Inspiration holds Palettes, Icons and
-   Brands. Find it, Calendar (trip capsules + What I wore) and
-   Profile are pages of their own.
+   Studio's cover page), then Ideas (the Create-a-Look studio).
+   Inspiration holds Palettes, Icons, Brands and My Inspo (your
+   uploaded inspiration images). Me holds the Profile page (as
+   its first page, labelled Me), Closet, My Looks, Calendar (trip
+   capsules + What I wore) and What I'm Wearing Today (the selfie
+   outfit log). Find it is a page of its own.
    A section tab reopens the page last visited in it. */
 var SECTIONS = {
-  studio: ["today", "studio", "wardrobe", "looks"],
-  inspiration: ["palettes", "icons", "brands"],
+  studio: ["today", "studio"],
+  inspiration: ["palettes", "icons", "brands", "myinspo"],
   find: ["find"],
-  calendar: ["calendar"],
-  profile: ["profile"]
+  me: ["profile", "wardrobe", "looks", "calendar", "wearing"]
 };
-var sectionHome = { studio: "today", inspiration: "palettes", find: "find", calendar: "calendar", profile: "profile" };
+var sectionHome = { studio: "today", inspiration: "palettes", find: "find", me: "profile" };
 function sectionOf(name) {
   for (var k in SECTIONS) if (SECTIONS[k].indexOf(name) !== -1) return k;
   return "studio";
@@ -13014,7 +13384,13 @@ function switchTab(name, opts) {
 }
 document.querySelector(".navstack").addEventListener("click", function (e) {
   var tab = e.target.closest("[data-tab]");
-  if (tab) { switchTab(tab.getAttribute("data-tab")); return; }
+  if (tab) {
+    /* Tapping the Find it tab itself is a standalone entry — the
+       free-form find, with any carried look cleared. A look only
+       rides in when a look surface sends it (openFindLookMode). */
+    if (tab.getAttribute("data-tab") === "find") clearFindLookMode();
+    switchTab(tab.getAttribute("data-tab")); return;
+  }
   var secBtn = e.target.closest("[data-section]");
   if (secBtn) switchTab(sectionHome[secBtn.getAttribute("data-section")]);
 });
@@ -13446,7 +13822,10 @@ function woreToday() {
   var like = document.getElementById("today-like");
   if (like) like.addEventListener("click", likeToday);
   var wore = document.getElementById("today-wore");
-  if (wore) wore.addEventListener("click", woreToday);
+  /* "Wore this today" opens the selfie log — Me → What I'm
+     Wearing Today — where the outfit is confirmed, catalogued
+     and recorded as worn for the day. */
+  if (wore) wore.addEventListener("click", function () { switchTab("wearing"); });
   var hero = document.getElementById("today-hero");
   if (hero) {
     var sx = null, sy = null;
@@ -13488,7 +13867,7 @@ function renderWornLog() {
   if (!list) return;
   var entries = [], seen = {};
   wornLog.forEach(function (en) {
-    var k = en.date + "|" + en.title;
+    var k = en.id ? "id:" + en.id : en.date + "|" + en.title;
     if (!seen[k]) { seen[k] = 1; entries.push(en); }
   });
   savedLooks.forEach(function (l) {
@@ -13503,7 +13882,7 @@ function renderWornLog() {
     return;
   }
   list.innerHTML = entries.slice(0, 30).map(function (en) {
-    return '<div class="worn-row">' + (en.img ? '<img src="' + en.img + '" alt="" loading="lazy" data-popout="' + en.img + '" />' : "") +
+    return '<div class="worn-row' + (en.selfie ? " selfie" : "") + '">' + (en.img ? '<img src="' + en.img + '" alt="" loading="lazy" data-popout="' + en.img + '" />' : "") +
       '<span class="w-main"><span class="w-name">' + esc(en.title) + '</span>' +
       '<span class="w-sub">' + esc(fmtDateShort(en.date)) + (en.pieces && en.pieces.length ? " · " + esc(en.pieces.join(", ")) : "") + "</span></span></div>";
   }).join("");
@@ -14068,6 +14447,286 @@ if (studioTypeRow) studioTypeRow.addEventListener("click", function (e) {
   syncStudioSelectors();
 });
 syncStudioSelectors();
+    </script>
+    <script>
+"use strict";
+/* ================= What I'm Wearing Today + My Inspo =================
+   Two pages layered on the same store as everything else.
+
+   What I'm Wearing Today (Me) is the selfie log: take or upload a
+   photo of the outfit, set the date (today by default), confirm
+   the items in a quick sheet of rows — pick an existing Closet
+   piece (marked worn, never duplicated) or type a new one
+   (catalogued into the Closet on save, with the selfie as its
+   reference photo). Saving also records the outfit — selfie and
+   item list — in the worn log for that date, so it appears in
+   this page's history and in Calendar's What I wore with the
+   selfie itself as the entry's picture. The app cannot recognise
+   items from the photo, so the rows start empty on purpose.
+
+   My Inspo (Inspiration) is the gallery for the existing
+   inspoImages store: add uploads there, tap one to build looks
+   of him from it (buildImageLooks — first take is the upload,
+   the rest are engine builds), delete there. The Studio's old
+   upload door is gone; the engine is untouched. */
+
+/* ---------- What I'm Wearing Today ---------- */
+var wearingPhotoDataUrl = null;
+var WEARING_DEFAULT_CATS = ["Shirts", "Trousers", "Shoes"];
+function wearingCats() { return CATEGORIES.filter(function (c) { return c !== "All"; }); }
+function wearingPickOptions(cat, selectedId) {
+  var html = '<option value="">Pick from Closet — optional</option>';
+  wardrobeItems.filter(function (i) { return i.category === cat; }).forEach(function (i) {
+    html += '<option value="' + i.id + '"' + (i.id === selectedId ? " selected" : "") + ">" + esc(i.name) + (i.colourName ? " — " + esc(i.colourName.split("·")[0].trim()) : "") + "</option>";
+  });
+  return html;
+}
+function wearingRowHTML(cat) {
+  return '<div class="wearing-row">' +
+    '<div class="wr-top"><select class="wr-cat" aria-label="Category">' + wearingCats().map(function (c) { return "<option" + (c === cat ? " selected" : "") + ">" + esc(c) + "</option>"; }).join("") + "</select>" +
+    '<button type="button" class="btn-ghost wr-remove">Remove</button></div>' +
+    '<select class="wr-pick" aria-label="Pick an existing closet item">' + wearingPickOptions(cat, "") + "</select>" +
+    '<input type="text" class="wr-name" placeholder="Name — e.g. Navy linen shirt" autocomplete="off" />' +
+    '<div class="wr-colour-row"><input type="text" class="wr-colour-name" placeholder="Colour" autocomplete="off" /><input type="color" class="wr-colour" value="#232d3f" aria-label="Pick the colour" /></div>' +
+    "</div>";
+}
+function resetWearingRows() {
+  var box = document.getElementById("wearing-rows");
+  if (box) box.innerHTML = WEARING_DEFAULT_CATS.map(wearingRowHTML).join("");
+}
+function syncWearingRow(row) {
+  var pick = row.querySelector(".wr-pick");
+  var name = row.querySelector(".wr-name");
+  var cname = row.querySelector(".wr-colour-name");
+  var chex = row.querySelector(".wr-colour");
+  var it = pick.value ? closetItemById(pick.value) : null;
+  if (it) {
+    name.value = it.name;
+    cname.value = (it.colourName || "").split("·")[0].trim();
+    if (it.colourHex) chex.value = it.colourHex;
+  }
+  [name, cname, chex].forEach(function (el) { el.disabled = !!it; el.classList.toggle("wr-picked", !!it); });
+}
+function refreshWearingPicks() {
+  document.querySelectorAll("#wearing-rows .wearing-row").forEach(function (row) {
+    var cat = row.querySelector(".wr-cat").value;
+    var pick = row.querySelector(".wr-pick");
+    var cur = pick.value;
+    pick.innerHTML = wearingPickOptions(cat, cur);
+    pick.value = cur;
+    if (cur && pick.value !== cur) { pick.value = ""; syncWearingRow(row); }
+  });
+}
+function renderWearingHistory() {
+  var box = document.getElementById("wearing-history");
+  if (!box) return;
+  var entries = wornLog.filter(function (en) { return en.selfie; }).slice();
+  entries.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+  if (!entries.length) {
+    box.innerHTML = '<p class="meta">Nothing logged yet.</p>';
+    return;
+  }
+  box.innerHTML = entries.map(function (en) {
+    var items = (en.pieceDetails && en.pieceDetails.length) ? en.pieceDetails : (en.pieces || []).map(function (n) { return { name: n, category: "" }; });
+    return '<article class="card wearing-entry">' +
+      (en.img ? '<img src="' + en.img + '" alt="Outfit worn on ' + esc(fmtDateShort(en.date)) + '" loading="lazy" data-popout="' + en.img + '" />' : "") +
+      '<div class="we-main"><p class="we-date">' + esc(fmtDateShort(en.date)) + "</p>" +
+      '<ul class="we-items">' + items.map(function (p) { return "<li>" + (p.category ? '<span class="we-cat">' + esc(p.category) + "</span>" : "") + esc(p.name) + "</li>"; }).join("") + "</ul></div></article>";
+  }).join("");
+}
+["wearing-photo-camera", "wearing-photo-upload"].forEach(function (id) {
+  var input = document.getElementById(id);
+  if (!input) return;
+  input.addEventListener("change", function () {
+    var file = this.files && this.files[0];
+    if (!file) return;
+    processPhotoFile(file, function (url) {
+      wearingPhotoDataUrl = url;
+      var prev = document.getElementById("wearing-preview");
+      prev.src = url;
+      prev.alt = "Your outfit photo";
+      prev.hidden = false;
+    });
+  });
+});
+var wearingRowsBox = document.getElementById("wearing-rows");
+if (wearingRowsBox) {
+  wearingRowsBox.addEventListener("change", function (e) {
+    var row = e.target.closest ? e.target.closest(".wearing-row") : null;
+    if (!row) return;
+    if (e.target.classList.contains("wr-cat")) {
+      var pick = row.querySelector(".wr-pick");
+      pick.innerHTML = wearingPickOptions(e.target.value, "");
+      pick.value = "";
+      syncWearingRow(row);
+    } else if (e.target.classList.contains("wr-pick")) {
+      syncWearingRow(row);
+    }
+  });
+  wearingRowsBox.addEventListener("click", function (e) {
+    var rm = e.target.closest ? e.target.closest(".wr-remove") : null;
+    if (!rm) return;
+    var row = rm.closest(".wearing-row");
+    if (row) row.remove();
+  });
+}
+var wearingAddRowBtn = document.getElementById("wearing-add-row");
+if (wearingAddRowBtn) wearingAddRowBtn.addEventListener("click", function () {
+  wearingRowsBox.insertAdjacentHTML("beforeend", wearingRowHTML("Shirts"));
+});
+var wearingSaveBtn = document.getElementById("wearing-save");
+if (wearingSaveBtn) wearingSaveBtn.addEventListener("click", function () {
+  if (!wearingPhotoDataUrl) { toast("Add a photo first — take one or upload one."); return; }
+  var dateEl = document.getElementById("wearing-date");
+  var date = (dateEl && dateEl.value) || new Date().toISOString().slice(0, 10);
+  var used = [], newItems = [];
+  Array.prototype.slice.call(document.querySelectorAll("#wearing-rows .wearing-row")).forEach(function (row) {
+    var pickId = row.querySelector(".wr-pick").value;
+    if (pickId) {
+      var picked = closetItemById(pickId);
+      if (picked && used.indexOf(picked) === -1) used.push(picked);
+      return;
+    }
+    var name = row.querySelector(".wr-name").value.trim();
+    if (!name) return;
+    var colourName = row.querySelector(".wr-colour-name").value.trim();
+    var colourHex = row.querySelector(".wr-colour").value;
+    var wada = nearestWada(colourHex);
+    var ni = {
+      id: "item-" + Date.now() + "-" + Math.floor(Math.random() * 1e6),
+      name: name,
+      category: row.querySelector(".wr-cat").value,
+      colourName: colourName || wada.name,
+      colourHex: colourHex,
+      extraColours: colourName ? [{ name: "Nearest Wada: " + wada.name, hex: wada.hex }] : [],
+      notes: "",
+      price: null,
+      wearCount: 0,
+      lastWorn: null,
+      laundry: false,
+      photo: wearingPhotoDataUrl
+    };
+    newItems.push(ni);
+    used.push(ni);
+  });
+  if (!used.length) { toast("Confirm at least one item first."); return; }
+  newItems.forEach(function (ni) { wardrobeItems.unshift(ni); });
+  used.forEach(function (it) {
+    it.wearCount = (it.wearCount || 0) + 1;
+    it.lastWorn = date;
+    it.laundry = false;
+    if (newItems.indexOf(it) === -1) saveEntryEdit("items", it);
+  });
+  var kept = persistAll();
+  wornLog.unshift({
+    id: "selfie-" + Date.now(),
+    date: date,
+    title: "Logged outfit",
+    img: wearingPhotoDataUrl,
+    pieces: used.map(function (i) { return i.name; }),
+    pieceDetails: used.map(function (i) { return { name: i.name, category: i.category }; }),
+    selfie: true
+  });
+  wornLog = wornLog.slice(0, 90);
+  store.set("wornLog", wornLog);
+  renderWardrobe();
+  renderWornLog();
+  renderWearingHistory();
+  wearingPhotoDataUrl = null;
+  var prev = document.getElementById("wearing-preview");
+  prev.hidden = true;
+  prev.removeAttribute("src");
+  ["wearing-photo-camera", "wearing-photo-upload"].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ""; });
+  if (dateEl) dateEl.value = new Date().toISOString().slice(0, 10);
+  resetWearingRows();
+  toast(kept ? "Logged — in your Closet, and worn on " + fmtDateShort(date) + "." : "Logged — storage is full, so export a backup from Me.");
+});
+
+/* ---------- My Inspo ---------- */
+function renderMyInspo() {
+  var grid = document.getElementById("myinspo-grid");
+  var empty = document.getElementById("myinspo-empty");
+  if (!grid) return;
+  if (!inspoImages.length) {
+    grid.innerHTML = "";
+    if (empty) empty.innerHTML = '<div class="card empty">No inspiration saved yet — add a photo or screenshot above.</div>';
+    return;
+  }
+  if (empty) empty.innerHTML = "";
+  grid.innerHTML = inspoImages.map(function (en) {
+    return '<article class="card myinspo-card">' +
+      '<button type="button" class="myinspo-imgbtn" data-myinspo-style="' + en.id + '" aria-label="Style this look"><img src="' + en.img + '" alt="' + esc(en.desc || "Your uploaded inspiration") + '" loading="lazy" /></button>' +
+      '<div class="mi-body">' + (en.desc ? '<p class="mi-desc">' + esc(en.desc) + "</p>" : "") +
+      '<div class="look-actions"><button type="button" class="btn-ghost" data-myinspo-style="' + en.id + '">Style this look</button>' +
+      '<button type="button" class="btn-ghost" data-myinspo-delete="' + en.id + '">Delete</button></div></div></article>';
+  }).join("");
+}
+function styleFromMyInspo(id) {
+  var entry = inspoImageById(id);
+  if (!entry) return;
+  activeInspoId = entry.id;
+  var season = typeof weatherSeason === "function" ? weatherSeason() : "";
+  switchTab("studio");
+  renderOptions(buildImageLooks(entry, "", "", season || ""), { desc: entry.desc || "From your image", occasion: "", season: season || "", opts: { basis: studioBasis, source: "inspo", inspoImageId: entry.id } });
+  toast("Six takes built from your image.");
+}
+var myInspoPhoto = document.getElementById("myinspo-photo");
+if (myInspoPhoto) myInspoPhoto.addEventListener("change", function () {
+  var file = this.files && this.files[0];
+  if (!file) return;
+  var input = this;
+  processPhotoFile(file, function (url) {
+    var entry = {
+      id: "inspo-" + Date.now(),
+      img: url,
+      desc: document.getElementById("myinspo-desc").value.trim(),
+      ts: Date.now()
+    };
+    inspoImages.unshift(entry);
+    if (inspoImages.length > 24) inspoImages = inspoImages.slice(0, 24);
+    saveInspoImages();
+    renderMyInspo();
+    document.getElementById("myinspo-desc").value = "";
+    input.value = "";
+    toast("Saved to My Inspo.");
+  });
+});
+var myInspoPanel = document.getElementById("panel-myinspo");
+if (myInspoPanel) myInspoPanel.addEventListener("click", function (e) {
+  var del = e.target.closest ? e.target.closest("[data-myinspo-delete]") : null;
+  if (del) {
+    var delId = del.getAttribute("data-myinspo-delete");
+    inspoImages = inspoImages.filter(function (x) { return x.id !== delId; });
+    if (activeInspoId === delId) activeInspoId = null;
+    saveInspoImages();
+    renderMyInspo();
+    toast("Removed from My Inspo.");
+    return;
+  }
+  var st = e.target.closest ? e.target.closest("[data-myinspo-style]") : null;
+  if (st) styleFromMyInspo(st.getAttribute("data-myinspo-style"));
+});
+
+/* Entering either page re-reads the live stores, so Closet picks
+   and the inspo gallery never go stale. */
+(function wrapSwitchForNewPages() {
+  var orig = window.switchTab;
+  if (typeof orig !== "function") return;
+  window.switchTab = function (name, opts) {
+    orig(name, opts);
+    if (name === "wearing") refreshWearingPicks();
+    if (name === "myinspo") renderMyInspo();
+  };
+})();
+
+/* ---------- Init ---------- */
+(function initWearing() {
+  var d = document.getElementById("wearing-date");
+  if (d && !d.value) d.value = new Date().toISOString().slice(0, 10);
+  resetWearingRows();
+  renderWearingHistory();
+})();
+renderMyInspo();
     </script>
   </body>
 </html>
