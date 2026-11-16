@@ -11,8 +11,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-180.png" />
-    <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-180.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -1012,9 +1012,33 @@
       .shop-sub { display: block; font-size: 12px; color: var(--dim); }
       .shop-price { font-weight: 700; font-size: 14px; flex: none; }
       .shop-nomatch { margin: 0; font-size: 13px; color: var(--dim); font-style: italic; }
-      .shop-brands { display: flex; flex-wrap: wrap; gap: 6px; }
-      .shop-chip { border: 1px solid var(--border-strong); border-radius: 999px; padding: 5px 11px; min-height: 28px; font-size: 11.5px; font-weight: 600; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; }
+      /* Brand search is ONE slim closed selector row per piece —
+         the Studio sel-row pattern — opening a quiet list of the
+         tier's brands; no pill wall. The same opt-list serves the
+         free-form find's Category and Budget selectors. */
+      .shop-brand-dd { display: grid; }
+      .opt-list { border: 1px solid var(--border-strong); border-top: none; background: var(--surface); max-height: 264px; overflow-y: auto; }
+      .opt-list[hidden] { display: none; }
+      .opt-item { display: block; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid var(--border); padding: 8px 12px; min-height: 36px; font-size: 13.5px; font-weight: 500; color: var(--text); text-decoration: none; cursor: pointer; }
+      .opt-item:last-child { border-bottom: none; }
+      .opt-item[aria-current="true"] { font-weight: 700; }
+      .opt-item .opt-main { display: block; font-size: 13.5px; font-weight: 600; }
+      .opt-item .opt-sub { display: block; font-size: 12px; color: var(--dim); line-height: 1.4; margin-top: 1px; font-weight: 400; }
       .shop-ebay { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; padding: 2px 0; }
+
+      /* ---------- Find it — page cleanup (Mr Porter standard) ----------
+         One type scale and one compact button size across the page:
+         the saved-finds brief cards take the same tightened metrics
+         as the hero/detail buttons, and the free-form description
+         entry is a proper search bar, not a textarea in a cluster. */
+      #panel-find .find-card { padding: 12px 14px; gap: 6px; }
+      #panel-find .find-card h4 { font-size: 17px; }
+      #panel-find .find-card .meta { font-size: 12px; }
+      #panel-find .find-card .details { font-size: 13px; line-height: 1.45; }
+      #panel-find .find-card .look-actions { gap: 6px; margin-top: 4px; }
+      #panel-find .find-card .btn-accent, #panel-find .find-card .btn-ghost { min-height: 30px; padding: 4px 10px; font-size: 11px; }
+      #panel-find .find-searchbar { width: 100%; min-height: 42px; padding: 9px 14px; font-size: 15px; background: var(--surface); color: var(--text); border: 1px solid var(--border-strong); border-radius: 999px; }
+      #panel-find .add-form .sel-row { background: var(--surface); }
       .shop-look-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; border: 1px solid var(--border); background: var(--surface-alt); color: var(--text); border-radius: var(--radius); padding: 9px 12px; min-height: 38px; font-size: 13px; font-weight: 600; letter-spacing: .04em; margin-top: 8px; text-align: left; }
 
       /* ---------- Audit round — My Looks, menus, chips, undo ----------
@@ -1400,7 +1424,7 @@
           <div class="subnav-group" id="subnav-inspiration" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-icons" aria-selected="false" aria-controls="panel-icons" data-tab="icons">Icons <span class="count" id="icon-tab-count"></span></button>
             <button class="subtab" role="tab" id="tab-palettes" aria-selected="false" aria-controls="panel-palettes" data-tab="palettes">Palettes <span class="count">348</span></button>
-            <button class="subtab" role="tab" id="tab-brands" aria-selected="false" aria-controls="panel-brands" data-tab="brands">Brands <span class="count">14</span></button>
+            <button class="subtab" role="tab" id="tab-brands" aria-selected="false" aria-controls="panel-brands" data-tab="brands">Brands <span class="count">53</span></button>
             <button class="subtab" role="tab" id="tab-myinspo" aria-selected="false" aria-controls="panel-myinspo" data-tab="myinspo">My Inspo</button>
           </div>
           <div class="subnav-group" id="subnav-me" role="tablist" hidden>
@@ -1834,6 +1858,15 @@
           <a class="brand-row" href="https://www.johnsmedley.com/" target="_blank" rel="noopener" data-brand-search="john smedley derbyshire england sea island cotton merino knitwear">
             <span class="b-main"><span class="b-name">John Smedley</span><span class="b-meta">Derbyshire, England · est. 1784 — Sea Island cotton and extra-fine merino; the world's oldest knitwear maker.</span></span><span class="b-shop">Shop ↗</span>
           </a>
+          <a class="brand-row" href="https://www.fedelicashmere.com/" target="_blank" rel="noopener" data-brand-search="fedeli monza italy cashmere knitwear fine gauge">
+            <span class="b-main"><span class="b-name">Fedeli</span><span class="b-meta">Monza, Italy · est. 1934 — superfine cashmere and cotton knitwear, still family-run after ninety years.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.merzbschwanen.com/" target="_blank" rel="noopener" data-brand-search="merz b. schwanen berlin loopwheeled tee sweatshirt knitwear cotton">
+            <span class="b-main"><span class="b-name">Merz b. Schwanen</span><span class="b-meta">Berlin · est. 1911 — loopwheeled cotton tees, sweatshirts and knits, woven on vintage machines.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.sunspel.com/" target="_blank" rel="noopener" data-brand-search="sunspel england cotton riviera polo tee basics knitwear">
+            <span class="b-main"><span class="b-name">Sunspel</span><span class="b-meta">England · est. 1860 — fine cotton basics; the Riviera polo and the original luxury T-shirt.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
           <p class="brand-group-head">Quiet luxury &amp; tailoring</p>
           <a class="brand-row" href="https://www.atemporubato.com/" target="_blank" rel="noopener" data-brand-search="rubato stockholm sweden knitwear officers chino trousers ivy">
             <span class="b-main"><span class="b-name">Rubato</span><span class="b-meta">Stockholm · est. 2018 — cult lambswool knits and Japanese-made trousers; above all the Officer's Chino.</span></span><span class="b-shop">Shop ↗</span>
@@ -1856,12 +1889,122 @@
           <a class="brand-row" href="https://www.brunellocucinelli.com/" target="_blank" rel="noopener" data-brand-search="brunello cucinelli solomeo italy cashmere knitwear soft tailoring luxury">
             <span class="b-main"><span class="b-name">Brunello Cucinelli</span><span class="b-meta">Solomeo, Italy · est. 1978 — cashmere knitwear and soft tailoring, all made in Italy.</span></span><span class="b-shop">Shop ↗</span>
           </a>
+          <a class="brand-row" href="https://www.octobre-editions.com/" target="_blank" rel="noopener" data-brand-search="octobre editions sezane paris menswear knitwear shirts tailoring">
+            <span class="b-main"><span class="b-name">Octobre Éditions</span><span class="b-meta">Paris · est. 2016 — Sézane's menswear line: French knits, shirting and soft tailoring.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.aspesi.com/" target="_blank" rel="noopener" data-brand-search="aspesi milan italy jackets nylon shirts tailoring">
+            <span class="b-main"><span class="b-name">Aspesi</span><span class="b-meta">Milan · est. 1961 — featherweight nylon jackets and quiet, unstructured tailoring.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://marfastance.com/" target="_blank" rel="noopener" data-brand-search="marfa stance coats quilt reversible outerwear london">
+            <span class="b-main"><span class="b-name">Marfa Stance</span><span class="b-meta">London · est. 2019 — buildable, reversible coats and quilts, designed to be kept.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.kiton.com/" target="_blank" rel="noopener" data-brand-search="kiton naples italy tailoring suits handmade luxury">
+            <span class="b-main"><span class="b-name">Kiton</span><span class="b-meta">Naples · est. 1968 — the pinnacle of Neapolitan tailoring; cut and sewn by hand.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.isaia.it/" target="_blank" rel="noopener" data-brand-search="isaia naples italy tailoring suits knit polo coral">
+            <span class="b-main"><span class="b-name">Isaia</span><span class="b-meta">Naples · est. 1957 — Neapolitan tailoring with character; coral red is the house mark.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.thomsweeney.com/" target="_blank" rel="noopener" data-brand-search="thom sweeney london tailoring bespoke suits british">
+            <span class="b-main"><span class="b-name">Thom Sweeney</span><span class="b-meta">London · est. 2007 — contemporary British tailoring, bespoke and ready-to-wear.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.thombrowne.com/" target="_blank" rel="noopener" data-brand-search="thom browne new york tailoring grey suit four bar">
+            <span class="b-main"><span class="b-name">Thom Browne</span><span class="b-meta">New York · est. 2001 — shrunken grey tailoring and the four-bar stripe.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.zegna.com/" target="_blank" rel="noopener" data-brand-search="zegna ermenegildo italy tailoring suits fabrics leisurewear">
+            <span class="b-main"><span class="b-name">Zegna</span><span class="b-meta">Trivero, Italy · est. 1910 — its own mills, its own cloth; luxury tailoring and leisurewear.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.bottegaveneta.com/" target="_blank" rel="noopener" data-brand-search="bottega veneta italy intrecciato leather tailoring luxury">
+            <span class="b-main"><span class="b-name">Bottega Veneta</span><span class="b-meta">Vicenza, Italy · est. 1966 — intrecciato leather and logo-free luxury.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.armani.com/" target="_blank" rel="noopener" data-brand-search="giorgio armani milan suits soft tailoring greige">
+            <span class="b-main"><span class="b-name">Giorgio Armani</span><span class="b-meta">Milan · est. 1975 — the soft, deconstructed suit; greige is the house colour.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.dior.com/" target="_blank" rel="noopener" data-brand-search="christian dior paris dior men tailoring suits kim jones">
+            <span class="b-main"><span class="b-name">Christian Dior</span><span class="b-meta">Paris · est. 1946 — Dior Men: sharp, modern tailoring.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.ralphlauren.com/" target="_blank" rel="noopener" data-brand-search="ralph lauren new york polo purple label tailoring classics">
+            <span class="b-main"><span class="b-name">Ralph Lauren</span><span class="b-meta">New York · est. 1967 — Purple Label at the top; American classics throughout.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.tomford.com/" target="_blank" rel="noopener" data-brand-search="tom ford tailoring suits evening luxury menswear">
+            <span class="b-main"><span class="b-name">Tom Ford</span><span class="b-meta">New York · est. 2005 — razor-sharp evening tailoring and luxury staples.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.canali.com/" target="_blank" rel="noopener" data-brand-search="canali italy tailoring suits made in italy">
+            <span class="b-main"><span class="b-name">Canali</span><span class="b-meta">Sovico, Italy · est. 1934 — family-run tailoring, all made in Italy.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.eleventy.com/" target="_blank" rel="noopener" data-brand-search="eleventy milan italy smart luxury tailoring knitwear">
+            <span class="b-main"><span class="b-name">Eleventy</span><span class="b-meta">Milan · est. 2007 — smart luxury: soft tailoring and knits at a gentler price.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://altea.com/" target="_blank" rel="noopener" data-brand-search="altea milan italy knitwear scarves colour sartori">
+            <span class="b-main"><span class="b-name">Altea</span><span class="b-meta">Milan · est. 1892 — colour-led Italian knitwear and scarves, family-run.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.toddsnyder.com/" target="_blank" rel="noopener" data-brand-search="todd snyder new york menswear tailoring classics champion">
+            <span class="b-main"><span class="b-name">Todd Snyder</span><span class="b-meta">New York · est. 2011 — American classics reworked, from sweatshirts to sharp tailoring.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.moncler.com/" target="_blank" rel="noopener" data-brand-search="moncler down jackets outerwear luxury puffer">
+            <span class="b-main"><span class="b-name">Moncler</span><span class="b-meta">Milan · est. 1952 — the benchmark down jacket, born in the French Alps.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.greysonclothiers.com/" target="_blank" rel="noopener" data-brand-search="greyson clothiers golf polo performance menswear">
+            <span class="b-main"><span class="b-name">Greyson</span><span class="b-meta">Detroit · est. 2015 — golf-first performance polos and tailoring that crosses over.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.petermillar.com/" target="_blank" rel="noopener" data-brand-search="peter millar golf polo resort menswear crown sport">
+            <span class="b-main"><span class="b-name">Peter Millar</span><span class="b-meta">Raleigh, NC · est. 2001 — golf and resort polish; Crown Sport performance.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.frame-store.com/" target="_blank" rel="noopener" data-brand-search="frame los angeles denim jeans menswear premium">
+            <span class="b-main"><span class="b-name">FRAME</span><span class="b-meta">Los Angeles · est. 2012 — premium denim and clean, minimal tailoring.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <p class="brand-group-head">Shoes &amp; slippers</p>
+          <a class="brand-row" href="https://www.baudoinandlange.com/" target="_blank" rel="noopener" data-brand-search="baudoin lange london sagan loafers handmade shoes">
+            <span class="b-main"><span class="b-name">Baudoin &amp; Lange</span><span class="b-meta">London · est. 2016 — the Sagan loafer, handmade and unlined.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.stubbsandwootton.com/" target="_blank" rel="noopener" data-brand-search="stubbs wootton palm beach slippers needlepoint velvet shoes">
+            <span class="b-main"><span class="b-name">Stubbs &amp; Wootton</span><span class="b-meta">Palm Beach · est. 1993 — needlepoint and velvet slippers, made in Spain.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.belmianshoes.com/" target="_blank" rel="noopener" data-brand-search="belgian shoes new york loafers henri hand sewn">
+            <span class="b-main"><span class="b-name">Belgian Shoes</span><span class="b-meta">New York · est. 1955 — the hand-sewn Belgian loafer with its little bow.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.vibivenezia.it/" target="_blank" rel="noopener" data-brand-search="vibi venezia venice furlane velvet slippers friulane">
+            <span class="b-main"><span class="b-name">Vibi Venezia</span><span class="b-meta">Venice · est. 2015 — velvet furlane slippers, handmade in Friuli.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <p class="brand-group-head">Everyday &amp; value</p>
+          <a class="brand-row" href="https://www.levi.com/" target="_blank" rel="noopener" data-brand-search="levi's levis jeans 501 denim trucker jacket">
+            <span class="b-main"><span class="b-name">Levi's</span><span class="b-meta">San Francisco · est. 1853 — the original blue jean; 501s above all.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.vans.com/" target="_blank" rel="noopener" data-brand-search="vans sneakers authentic old skool canvas shoes">
+            <span class="b-main"><span class="b-name">Vans</span><span class="b-meta">California · est. 1966 — canvas classics: the Authentic and the Old Skool.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.alexmill.com/" target="_blank" rel="noopener" data-brand-search="alex mill new york staples chore coat tees menswear">
+            <span class="b-main"><span class="b-name">Alex Mill</span><span class="b-meta">New York · est. 2012 — easy staples done properly: chore coats, tees, washed knits.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.jcrew.com/" target="_blank" rel="noopener" data-brand-search="j.crew jcrew ludlow wallace barnes menswear prep">
+            <span class="b-main"><span class="b-name">J.Crew</span><span class="b-meta">New York · est. 1983 — American prep staples; Ludlow tailoring and Wallace &amp; Barnes.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.uniqlo.com/" target="_blank" rel="noopener" data-brand-search="uniqlo japan basics merino knit selvedge u line">
+            <span class="b-main"><span class="b-name">Uniqlo</span><span class="b-meta">Japan · est. 1949 — engineered basics: merino knits, selvedge and the U line.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.abercrombie.com/" target="_blank" rel="noopener" data-brand-search="abercrombie fitch menswear staples tailoring logo free">
+            <span class="b-main"><span class="b-name">Abercrombie &amp; Fitch</span><span class="b-meta">Ohio · est. 1892 — reinvented logo-free: clean staples and honest tailoring.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://propercloth.com/" target="_blank" rel="noopener" data-brand-search="proper cloth custom shirts made to measure new york">
+            <span class="b-main"><span class="b-name">Proper Cloth</span><span class="b-meta">New York · est. 2008 — custom shirts to your measurements, ordered online.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://www.asket.com/" target="_blank" rel="noopener" data-brand-search="asket stockholm essentials permanent collection menswear traceable">
+            <span class="b-main"><span class="b-name">ASKET</span><span class="b-meta">Stockholm · est. 2015 — one permanent collection of essentials, fully traceable.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://unboundmerino.com/" target="_blank" rel="noopener" data-brand-search="unbound merino travel merino tee wool toronto">
+            <span class="b-main"><span class="b-name">Unbound Merino</span><span class="b-meta">Toronto · est. 2016 — merino tees and travel staples that go weeks between washes.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
           <p class="brand-group-head">Stores</p>
           <a class="brand-row" href="https://www.mrporter.com/" target="_blank" rel="noopener" data-brand-search="mr porter mrporter london store multi brand designer menswear mr p watches shoes">
             <span class="b-main"><span class="b-name">Mr Porter</span><span class="b-meta">London — the multi-brand store: designer menswear, shoes and watches, plus its own Mr P. label.</span></span><span class="b-shop">Shop ↗</span>
           </a>
           <a class="brand-row" href="https://suitsupply.com/" target="_blank" rel="noopener" data-brand-search="suitsupply suit supply amsterdam tailoring suits custom italian fabrics">
             <span class="b-main"><span class="b-name">Suitsupply</span><span class="b-meta">Amsterdam · est. 2000 — sharp suits and tailoring in Italian fabrics, ready-to-wear and custom-made.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://poolhousenewyork.com/" target="_blank" rel="noopener" data-brand-search="pool house new york vintage menswear store ivy tailoring workwear">
+            <span class="b-main"><span class="b-name">Pool House New York</span><span class="b-meta">New York — vintage menswear, hand-picked: Ivy, tailoring and workwear.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
+          <a class="brand-row" href="https://humanassembly.com/" target="_blank" rel="noopener" data-brand-search="human assembly store menswear independent makers small batch">
+            <span class="b-main"><span class="b-name">Human Assembly</span><span class="b-meta">Online — small-batch menswear and goods from independent makers.</span></span><span class="b-shop">Shop ↗</span>
           </a>
         </div>
         <div class="card empty" id="brand-empty" hidden>No brand matches that search.</div>
@@ -2021,31 +2164,24 @@
             <h3 style="font-family:var(--font-display);font-size:24px;font-weight:600;margin:0">What are you looking for?</h3>
             <div>
               <label class="field" for="find-desc">Describe it</label>
-              <textarea id="find-desc" placeholder="e.g. Navy suede loafers, unlined, for summer" style="min-height:72px" required></textarea>
+              <input type="search" id="find-desc" class="find-searchbar" placeholder="e.g. Navy suede loafers, unlined, for summer" autocomplete="off" required />
             </div>
             <div class="form-row">
               <div>
-                <label class="field" for="find-cat">Category</label>
-                <select id="find-cat">
-                  <option>Shoes</option><option>Shirts</option><option>Tees</option><option>Polos</option>
-                  <option>Jeans</option><option>Shorts</option><option>Bathing suits</option><option>Trousers</option><option>Button downs</option>
-                  <option>Suits</option><option>Blazers</option><option>Scarves</option><option>Jackets</option>
-                  <option>Coats</option><option>Leather jackets</option><option>Hats</option><option>Sunglasses</option><option>Sweaters</option>
-                  <option>Socks</option><option>Belts</option><option>Gloves</option><option>Vests</option><option>Ties</option>
-                </select>
+                <label class="field" id="find-cat-label">Category</label>
+                <input type="hidden" id="find-cat" value="Shoes" />
+                <button type="button" class="sel-row" id="find-cat-toggle" aria-expanded="false" aria-controls="find-cat-opts" aria-labelledby="find-cat-label find-cat-val"><span class="sel-name">Category</span><span class="sel-val" id="find-cat-val">Shoes</span><span class="sel-chev" aria-hidden="true">▾</span></button>
+                <div class="opt-list" id="find-cat-opts" hidden></div>
               </div>
               <div>
                 <label class="field" for="find-size">Size — from your Profile</label>
                 <input type="text" id="find-size" autocomplete="off" />
               </div>
             </div>
-            <div class="formality" id="budget-find">
-              <div class="formality-head">
-                <label class="field" for="find-budget-range">Budget — how far to go</label>
-                <span class="formality-side"><span class="formality-name" id="find-budget-name"></span><button type="button" class="info-btn sm" id="find-budget-info" data-info-title="Budget" data-info-text="" aria-label="About this budget level">i</button></span>
-              </div>
-              <input type="range" id="find-budget-range" min="1" max="5" step="1" value="3" />
-              <div class="formality-scale" aria-hidden="true"><span>Price-conscious</span><span>No budget</span></div>
+            <div>
+              <label class="field" id="find-budget-label">Budget — how far to go</label>
+              <button type="button" class="sel-row" id="find-budget-toggle" aria-expanded="false" aria-controls="find-budget-opts" aria-labelledby="find-budget-label find-budget-sel-val"><span class="sel-name">Budget</span><span class="sel-val" id="find-budget-sel-val"></span><span class="sel-chev" aria-hidden="true">▾</span></button>
+              <div class="opt-list" id="find-budget-opts" hidden></div>
             </div>
             <div class="form-row">
               <div>
@@ -10427,6 +10563,256 @@ var wardrobeItems = [
     extraColours: [{ name: "Forest green", hex: "#2e4a34" }, { name: "Medium blue", hex: "#46608a" }, { name: "Brown", hex: "#7c4226" }],
     notes: "",
     photo: null
+  },
+  {
+    id: "seed-isaia-polo",
+    name: "Isaia Cream Knit Polo",
+    category: "Polos",
+    colourName: "Cream",
+    colourHex: "#ece1c9",
+    extraColours: [],
+    notes: "Short-sleeve, open-mesh textured knit, one-button open (Johnny) collar, ecru/cream.",
+    photo: "assets/photos/dd7aaaad2dd2.jpg"
+  },
+  {
+    id: "seed-octobre-tee",
+    name: "Octobre Éditions Navy Tipped Knit Tee",
+    category: "Tees",
+    colourName: "Navy · cream tipping",
+    colourHex: "#232a3d",
+    extraColours: [{ name: "Cream", hex: "#e8e0c8" }],
+    notes: "Short-sleeve crewneck knit tee, cream tipping at collar and cuffs.",
+    photo: "assets/photos/76a9c73e859f.jpg"
+  },
+  {
+    id: "seed-zegna-tee",
+    name: "Zegna Black 12milmil12 Knit Tee",
+    category: "Tees",
+    colourName: "Black",
+    colourHex: "#17171a",
+    extraColours: [],
+    notes: "Ermenegildo Zegna 12milmil12 — short-sleeve fine-knit crewneck tee.",
+    photo: "assets/photos/acf3630a0eb9.jpg"
+  },
+  {
+    id: "seed-whitesville-navy",
+    name: "Whitesville Navy Heavyweight Tee",
+    category: "Tees",
+    colourName: "Navy",
+    colourHex: "#252c3e",
+    extraColours: [],
+    notes: "Short-sleeve crewneck heavy-weight tee.",
+    photo: "assets/photos/97a7b0c81dfa.jpg"
+  },
+  {
+    id: "seed-orlebar-tee",
+    name: "Orlebar Brown Slate Blue Slub Pocket Tee",
+    category: "Tees",
+    colourName: "Slate blue",
+    colourHex: "#5a6b7d",
+    extraColours: [],
+    notes: "Linen-look marl tee with chest pocket, size M.",
+    photo: "assets/photos/f141fb533140.jpg"
+  },
+  {
+    id: "seed-theory-navy",
+    name: "Theory Navy Knit Tee",
+    category: "Tees",
+    colourName: "Navy",
+    colourHex: "#232838",
+    extraColours: [],
+    notes: "Short-sleeve crewneck knit tee.",
+    photo: "assets/photos/31901a21df8d.jpg"
+  },
+  {
+    id: "seed-sfc-knit",
+    name: "SFC Black Checkerboard Knit",
+    category: "Sweaters",
+    colourName: "Black",
+    colourHex: "#141416",
+    extraColours: [],
+    notes: "Textured basketweave/checkerboard crewneck knit.",
+    photo: "assets/photos/c30cda4d72c5.jpg"
+  },
+  {
+    id: "seed-corridor-tee",
+    name: "Corridor Charcoal Pocket Tee",
+    category: "Tees",
+    colourName: "Charcoal",
+    colourHex: "#3c3f45",
+    extraColours: [],
+    notes: "Washed/faded tee with chest pocket, size S.",
+    photo: "assets/photos/494c1f5ddf08.jpg"
+  },
+  {
+    id: "seed-theory-charcoal",
+    name: "Theory Charcoal Heather Knit Tee",
+    category: "Tees",
+    colourName: "Charcoal heather",
+    colourHex: "#4a4d52",
+    extraColours: [],
+    notes: "Short-sleeve knit tee, size S.",
+    photo: "assets/photos/2976e028e565.jpg"
+  },
+  {
+    id: "seed-cucinelli-grey",
+    name: "Brunello Cucinelli Grey Heather Tee",
+    category: "Tees",
+    colourName: "Grey heather",
+    colourHex: "#b9b7b2",
+    extraColours: [],
+    notes: "Slim-fit crewneck tee.",
+    photo: "assets/photos/1e66445efdf3.jpg"
+  },
+  {
+    id: "seed-buckmason-oatmeal",
+    name: "Buck Mason Oatmeal Heather Knit Crewneck",
+    category: "Sweaters",
+    colourName: "Oatmeal heather",
+    colourHex: "#ddd5c2",
+    extraColours: [],
+    notes: "Lightweight long-sleeve knit crewneck.",
+    photo: "assets/photos/84b2d50a150f.jpg"
+  },
+  {
+    id: "seed-buckmason-taupe",
+    name: "Buck Mason Taupe Heather Knit Crewneck",
+    category: "Sweaters",
+    colourName: "Taupe heather",
+    colourHex: "#8d8172",
+    extraColours: [],
+    notes: "Lightweight long-sleeve knit crewneck.",
+    photo: "assets/photos/63b227994d16.jpg"
+  },
+  {
+    id: "seed-frame-tee",
+    name: "FRAME Cream Ribbed Knit Tee",
+    category: "Tees",
+    colourName: "Cream",
+    colourHex: "#f0e8d8",
+    extraColours: [],
+    notes: "Short-sleeve fine horizontal-rib knit tee, size S.",
+    photo: "assets/photos/82225d95ed66.jpg"
+  },
+  {
+    id: "seed-unbound-tee",
+    name: "Unbound Merino Off-White Merino Tee",
+    category: "Tees",
+    colourName: "Off-white",
+    colourHex: "#f3eee1",
+    extraColours: [],
+    notes: "Short-sleeve crewneck merino tee.",
+    photo: "assets/photos/2400677fac5b.jpg"
+  },
+  {
+    id: "seed-acne-tee",
+    name: "Acne Studios White Face-Patch Tee",
+    category: "Tees",
+    colourName: "White",
+    colourHex: "#f7f5f0",
+    extraColours: [],
+    notes: "Short-sleeve tee with small chest face patch.",
+    photo: "assets/photos/dbea53fa8866.jpg"
+  },
+  {
+    id: "seed-altea-tee",
+    name: "Altea Sand Knit Tee",
+    category: "Tees",
+    colourName: "Sand",
+    colourHex: "#c8b294",
+    extraColours: [],
+    notes: "Short-sleeve fine-knit crewneck tee, size S.",
+    photo: "assets/photos/bb10ce0c1f00.jpg"
+  },
+  {
+    id: "seed-merz-olive",
+    name: "Merz b. Schwanen Olive Tee",
+    category: "Tees",
+    colourName: "Olive",
+    colourHex: "#6b6f57",
+    extraColours: [],
+    notes: "Short-sleeve tee, size 5/M.",
+    photo: "assets/photos/cae8d2089fe2.jpg"
+  },
+  {
+    id: "seed-cucinelli-stripe",
+    name: "Brunello Cucinelli Grey Heather Striped-Collar Tee",
+    category: "Tees",
+    colourName: "Grey heather · burgundy stripe collar",
+    colourHex: "#c0beb9",
+    extraColours: [{ name: "Burgundy", hex: "#5d2a33" }],
+    notes: "Short-sleeve tee with burgundy/grey stripe trim at the neck.",
+    photo: "assets/photos/174f8ca5a908.jpg"
+  },
+  {
+    id: "seed-whitesville-grey",
+    name: "Whitesville Grey Heather Heavyweight Tee",
+    category: "Tees",
+    colourName: "Grey heather",
+    colourHex: "#8f9092",
+    extraColours: [],
+    notes: "Short-sleeve heavy-weight tee, size M.",
+    photo: "assets/photos/06b66a39a143.jpg"
+  },
+  {
+    id: "seed-asket-tee",
+    name: "ASKET Cream Tee",
+    category: "Tees",
+    colourName: "Cream",
+    colourHex: "#efe7d6",
+    extraColours: [],
+    notes: "Short-sleeve crewneck tee.",
+    photo: "assets/photos/a38befa37834.jpg"
+  },
+  {
+    id: "seed-alexmill-tee",
+    name: "Alex Mill White Pocket Tee",
+    category: "Tees",
+    colourName: "White",
+    colourHex: "#f8f6f1",
+    extraColours: [],
+    notes: "Short-sleeve slub pocket tee.",
+    photo: "assets/photos/974ecd05ec1f.jpg"
+  },
+  {
+    id: "seed-massimo-white",
+    name: "Massimo Dutti White Pocket Tee",
+    category: "Tees",
+    colourName: "White",
+    colourHex: "#f8f6f1",
+    extraColours: [],
+    notes: "Short-sleeve pocket tee.",
+    photo: "assets/photos/be60f4c83eb8.jpg"
+  },
+  {
+    id: "seed-massimo-brown",
+    name: "Massimo Dutti Brown Linen Knit Crewneck",
+    category: "Sweaters",
+    colourName: "Brown",
+    colourHex: "#5d4a3a",
+    extraColours: [],
+    notes: "100% linen long-sleeve lightweight knit crewneck.",
+    photo: "assets/photos/f52ab8f3ef54.jpg"
+  },
+  {
+    id: "seed-toddsnyder-yellow",
+    name: "Todd Snyder Yellow Pocket Tee",
+    category: "Tees",
+    colourName: "Pale yellow",
+    colourHex: "#f2dd7e",
+    extraColours: [],
+    notes: "Short-sleeve pocket tee.",
+    photo: "assets/photos/adc9cc3c3b51.jpg"
+  },
+  {
+    id: "seed-zigzag-tee",
+    name: "Zigzag Stripe Tee",
+    category: "Tees",
+    colourName: "White · navy zigzag",
+    colourHex: "#f7f4ec",
+    extraColours: [{ name: "Navy", hex: "#26304d" }],
+    notes: "Short-sleeve white tee with navy chevron/zigzag stripes across the body, made in Italy. Brand unknown — label not legible.",
+    photo: "assets/photos/aef25662ac90.jpg"
   }
 ];
 wardrobeItems = applyEntryState(wardrobeItems.concat(store.get("items", [])));
@@ -12918,6 +13304,8 @@ function renderBudget() {
   if (range) range.value = budgetLevel;
   var nm = document.getElementById("find-budget-name");
   if (nm) nm.textContent = info.name;
+  var sv = document.getElementById("find-budget-sel-val");
+  if (sv) sv.textContent = info.name;
   var sRange = document.getElementById("shop-budget-range");
   if (sRange) sRange.value = budgetLevel;
   var sNm = document.getElementById("shop-budget-name");
@@ -13020,6 +13408,7 @@ document.getElementById("find-form").addEventListener("submit", function (e) {
   this.reset();
   syncFindSize();
   renderBudget();
+  if (typeof buildFindCatOpts === "function") buildFindCatOpts();
   var shopF = iconShopFor(f);
   if (shopF) {
     toast("On the hunt — searching " + shopF.brand + " first, in your size.");
@@ -13047,6 +13436,65 @@ document.getElementById("find-grid").addEventListener("click", function (e) {
     else toast(text);
   }
 });
+
+/* Free-form find — slim selector rows, the Studio pattern:
+   Category and Budget each collapse to one closed row showing
+   the current pick; the options open beneath as a quiet list
+   and the row closes again on a pick. The category value still
+   lives in #find-cat (a hidden input now), so the size sync and
+   the brief builder read it exactly as before. */
+var FIND_CATS = ["Shoes", "Shirts", "Tees", "Polos", "Jeans", "Shorts", "Bathing suits", "Trousers", "Button downs", "Suits", "Blazers", "Scarves", "Jackets", "Coats", "Leather jackets", "Hats", "Sunglasses", "Sweaters", "Socks", "Belts", "Gloves", "Vests", "Ties"];
+function buildFindCatOpts() {
+  var box = document.getElementById("find-cat-opts");
+  if (!box) return;
+  var cur = document.getElementById("find-cat").value;
+  box.innerHTML = FIND_CATS.map(function (c) {
+    return '<button type="button" class="opt-item" data-find-cat-opt="' + esc(c) + '"' + (c === cur ? ' aria-current="true"' : "") + ">" + esc(c) + "</button>";
+  }).join("");
+  var v = document.getElementById("find-cat-val");
+  if (v) v.textContent = cur;
+}
+function buildFindBudgetOpts() {
+  var box = document.getElementById("find-budget-opts");
+  if (!box) return;
+  box.innerHTML = BUDGET_LEVELS.map(function (b) {
+    return '<button type="button" class="opt-item" data-find-budget-opt="' + b.level + '"' + (b.level === budgetLevel ? ' aria-current="true"' : "") + '><span class="opt-main">' + esc(b.name) + '</span><span class="opt-sub">' + esc(b.desc) + "</span></button>";
+  }).join("");
+}
+function closeFindSels() {
+  ["find-cat-opts", "find-budget-opts"].forEach(function (id) { var x = document.getElementById(id); if (x) x.hidden = true; });
+  ["find-cat-toggle", "find-budget-toggle"].forEach(function (id) { var x = document.getElementById(id); if (x) x.setAttribute("aria-expanded", "false"); });
+}
+[["find-cat-toggle", "find-cat-opts"], ["find-budget-toggle", "find-budget-opts"]].forEach(function (pair) {
+  var t = document.getElementById(pair[0]), o = document.getElementById(pair[1]);
+  if (!t || !o) return;
+  t.addEventListener("click", function () {
+    var willOpen = o.hidden;
+    closeFindSels();
+    if (willOpen) { o.hidden = false; t.setAttribute("aria-expanded", "true"); }
+  });
+});
+var findCatOptsEl = document.getElementById("find-cat-opts");
+if (findCatOptsEl) findCatOptsEl.addEventListener("click", function (e) {
+  var b = e.target.closest ? e.target.closest("[data-find-cat-opt]") : null;
+  if (!b) return;
+  document.getElementById("find-cat").value = b.getAttribute("data-find-cat-opt");
+  closeFindSels();
+  buildFindCatOpts();
+  syncFindSize();
+});
+var findBudgetOptsEl = document.getElementById("find-budget-opts");
+if (findBudgetOptsEl) findBudgetOptsEl.addEventListener("click", function (e) {
+  var b = e.target.closest ? e.target.closest("[data-find-budget-opt]") : null;
+  if (!b) return;
+  budgetLevel = Math.min(5, Math.max(1, parseInt(b.getAttribute("data-find-budget-opt"), 10) || 3));
+  store.set("findBudget", budgetLevel);
+  renderBudget();
+  buildFindBudgetOpts();
+  closeFindSels();
+});
+buildFindCatOpts();
+buildFindBudgetOpts();
 
 /* ================= Brands — shops inside Inspiration =================
    The fourteen houses and stores from the Fashion Brands list,
@@ -13089,8 +13537,9 @@ document.getElementById("find-grid").addEventListener("click", function (e) {
    so their rows render without a thumbnail — never a
    placeholder photo. Entering Find it from a look (the Today
    hero, a look's detail page, a saved look) opens this page in
-   look mode with the look carried in; the tab on its own keeps
-   the free-form find exactly as before. */
+   look mode with the look carried in; the Find it tab itself
+   does the same with the current Today hero look, and the
+   free-form find sits behind "✕ Clear look". */
 var SHOP_CATALOGUE_CHECKED = "Nov 15, 2026";
 var SHOP_CATALOGUE = [
   {"brand": "Entire Studios", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262940M201005_1/entire-studios-navy-knit-cashmere-crewneck-sweater.jpg", "keys": ["navy", "crew-neck", "knit", "sweater", "cashmere"], "name": "Navy Knit Cashmere Crewneck Sweater", "price": 350, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/entire-studios/navy-knit-cashmere-crewneck-sweater/19608331"},
@@ -13143,14 +13592,15 @@ var SHOP_CATALOGUE = [
   {"brand": "Common Projects", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262133M223003_1/common-projects-black-leather-chelsea-boots.jpg", "keys": ["black", "leather", "chelsea boots", "boots"], "name": "Black Leather Chelsea Boots", "price": 780, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/common-projects/black-leather-chelsea-boots/19643041"},
   {"brand": "Hugo", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262084M223001_1/hugo-hugo-boss-black-leather-chelsea-boots.jpg", "keys": ["black", "leather", "chelsea boots", "boots"], "name": "Black Leather Chelsea Boots", "price": 200, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/hugo-hugo-boss/black-leather-chelsea-boots/19596861"}
 ];
-/* Which of the fourteen Brands-section houses belong to each
-   stop on the Find-me budget scale — keyed off the app's
-   existing brand names and the scale's existing level names. */
+/* Which of the fifty-three Brands-section houses belong to
+   each stop on the Find-me budget scale — keyed off the app's
+   brand names and the scale's existing level names. "No budget"
+   keeps its own curated set, as before. */
 var BRAND_TIERS = {
-  "Price-conscious": ["Suitsupply", "Saint James"],
-  "Value-minded": ["Suitsupply", "Saint James", "John Smedley", "S.N.S. Herning", "Mr Porter"],
-  "Quality first": ["Suitsupply", "John Smedley", "S.N.S. Herning", "William Lockie", "Gran Sasso", "Rubato", "Mr Porter"],
-  "Premium": ["William Lockie", "Gran Sasso", "Rubato", "Stoffa", "P. Johnson", "Saman Amel", "The Row", "Mr Porter"],
+  "Price-conscious": ["Suitsupply", "Saint James", "Levi's", "Vans"],
+  "Value-minded": ["Suitsupply", "Saint James", "John Smedley", "S.N.S. Herning", "Mr Porter", "Levi's", "Vans", "Alex Mill", "J.Crew", "Uniqlo", "Abercrombie & Fitch", "Proper Cloth", "ASKET", "Unbound Merino"],
+  "Quality first": ["Suitsupply", "John Smedley", "S.N.S. Herning", "William Lockie", "Gran Sasso", "Rubato", "Mr Porter", "Alex Mill", "J.Crew", "Uniqlo", "Abercrombie & Fitch", "Proper Cloth", "ASKET", "Unbound Merino", "Octobre Éditions"],
+  "Premium": ["William Lockie", "Gran Sasso", "Rubato", "Stoffa", "P. Johnson", "Saman Amel", "The Row", "Mr Porter", "Octobre Éditions", "Fedeli", "Aspesi", "Marfa Stance", "Kiton", "Isaia", "Baudoin & Lange", "Thom Sweeney", "Thom Browne", "Zegna", "Bottega Veneta", "Giorgio Armani", "Christian Dior", "Greyson", "Peter Millar", "Ralph Lauren", "Moncler", "Canali", "Stubbs & Wootton", "Belgian Shoes", "Eleventy", "Tom Ford", "FRAME", "Merz b. Schwanen", "Sunspel", "Pool House New York", "Human Assembly", "Vibi Venezia", "Todd Snyder", "Altea"],
   "No budget": ["Loro Piana", "Brunello Cucinelli", "The Row", "Saman Amel", "P. Johnson", "Stoffa", "Mr Porter"]
 };
 /* Each brand's store domain, from its Brands-section row — a
@@ -13162,7 +13612,21 @@ var BRAND_DOMAINS = {
   "Stoffa": "stoffa.co", "P. Johnson": "pjt.com",
   "Saman Amel": "samanamel.com", "The Row": "therow.com",
   "Loro Piana": "loropiana.com", "Brunello Cucinelli": "brunellocucinelli.com",
-  "Mr Porter": "mrporter.com", "Suitsupply": "suitsupply.com"
+  "Mr Porter": "mrporter.com", "Suitsupply": "suitsupply.com",
+  "Levi's": "levi.com", "Vans": "vans.com", "Alex Mill": "alexmill.com",
+  "J.Crew": "jcrew.com", "Uniqlo": "uniqlo.com", "Abercrombie & Fitch": "abercrombie.com",
+  "Proper Cloth": "propercloth.com", "ASKET": "asket.com", "Unbound Merino": "unboundmerino.com",
+  "Octobre Éditions": "octobre-editions.com", "Fedeli": "fedelicashmere.com",
+  "Aspesi": "aspesi.com", "Marfa Stance": "marfastance.com", "Kiton": "kiton.com",
+  "Isaia": "isaia.it", "Baudoin & Lange": "baudoinandlange.com", "Thom Sweeney": "thomsweeney.com",
+  "Thom Browne": "thombrowne.com", "Zegna": "zegna.com", "Bottega Veneta": "bottegaveneta.com",
+  "Giorgio Armani": "armani.com", "Christian Dior": "dior.com", "Greyson": "greysonclothiers.com",
+  "Peter Millar": "petermillar.com", "Ralph Lauren": "ralphlauren.com", "Moncler": "moncler.com",
+  "Canali": "canali.com", "Stubbs & Wootton": "stubbsandwootton.com", "Belgian Shoes": "belgianshoes.com",
+  "Eleventy": "eleventy.com", "Tom Ford": "tomford.com", "FRAME": "frame-store.com",
+  "Merz b. Schwanen": "merzbschwanen.com", "Sunspel": "sunspel.com",
+  "Pool House New York": "poolhousenewyork.com", "Human Assembly": "humanassembly.com",
+  "Vibi Venezia": "vibivenezia.it", "Todd Snyder": "toddsnyder.com", "Altea": "altea.com"
 };
 function brandSearchURL(brand, desc) {
   var d = BRAND_DOMAINS[brand];
@@ -13307,9 +13771,10 @@ function renderFindLookMode() {
     html += '<div class="shop-piece"><h4>' + esc(desc) + "</h4>";
     if (matches.length) matches.forEach(function (e) { html += shopRowHTML(e); });
     else html += '<p class="shop-nomatch">No exact match yet in the catalogue</p>';
-    html += '<div class="shop-brands">' + brands.map(function (b) {
-      return '<a class="shop-chip" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">Search at ' + esc(b) + "</a>";
-    }).join("") + "</div>";
+    html += '<div class="shop-brand-dd"><button type="button" class="sel-row shop-brand-toggle" aria-expanded="false"><span class="sel-name">Search brands</span><span class="sel-val">' + esc(tierName) + '</span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
+      '<div class="opt-list shop-brand-list" hidden>' + brands.map(function (b) {
+        return '<a class="opt-item shop-brand-item" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">' + esc(b) + "</a>";
+      }).join("") + "</div></div>";
     var eq = encodeURIComponent("men's " + desc + " vintage");
     html += '<a class="shop-ebay" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + eq + '">eBay — vintage <span aria-hidden="true">↗</span></a></div>';
   });
@@ -13319,7 +13784,25 @@ function renderFindLookMode() {
   var box = document.getElementById("find-look-mode");
   if (!box) return;
   box.addEventListener("click", function (e) {
-    if (e.target.closest && e.target.closest("#shop-clear-look")) clearFindLookMode();
+    if (e.target.closest && e.target.closest("#shop-clear-look")) { clearFindLookMode(); return; }
+    var tg = e.target.closest ? e.target.closest(".shop-brand-toggle") : null;
+    if (tg) {
+      var wrap = tg.closest(".shop-brand-dd");
+      var list = wrap ? wrap.querySelector(".shop-brand-list") : null;
+      var willOpen = !!(list && list.hidden);
+      box.querySelectorAll(".shop-brand-list").forEach(function (l) { l.hidden = true; });
+      box.querySelectorAll(".shop-brand-toggle").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+      if (list && willOpen) { list.hidden = false; tg.setAttribute("aria-expanded", "true"); }
+      return;
+    }
+    var item = e.target.closest ? e.target.closest(".shop-brand-item") : null;
+    if (item) {
+      var w2 = item.closest(".shop-brand-dd");
+      if (w2) {
+        var l2 = w2.querySelector(".shop-brand-list"); if (l2) l2.hidden = true;
+        var t2 = w2.querySelector(".shop-brand-toggle"); if (t2) t2.setAttribute("aria-expanded", "false");
+      }
+    }
   });
   box.addEventListener("input", function (e) {
     if (!e.target || e.target.id !== "shop-budget-range") return;
@@ -13407,10 +13890,14 @@ function switchTab(name, opts) {
 document.querySelector(".navstack").addEventListener("click", function (e) {
   var tab = e.target.closest("[data-tab]");
   if (tab) {
-    /* Tapping the Find it tab itself is a standalone entry — the
-       free-form find, with any carried look cleared. A look only
-       rides in when a look surface sends it (openFindLookMode). */
-    if (tab.getAttribute("data-tab") === "find") clearFindLookMode();
+    /* Tapping the Find it tab lands exactly where the Today
+       hero's Find it button lands: look mode carrying the hero
+       look as it stands at the moment of the tap. The free-form
+       find stays one tap away behind "✕ Clear look" there. */
+    if (tab.getAttribute("data-tab") === "find") {
+      if (typeof todayLook !== "undefined" && todayLook && shopPiecesForLook(todayLook).length) { openFindLookMode(todayLook); return; }
+      clearFindLookMode();
+    }
     switchTab(tab.getAttribute("data-tab")); return;
   }
   var secBtn = e.target.closest("[data-section]");
