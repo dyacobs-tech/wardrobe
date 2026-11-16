@@ -2125,6 +2125,47 @@
         font-size: 12.5px; font-weight: 600; white-space: nowrap;
       }
       .find-card .shop-cap { margin-top: 2px; }
+
+      /* ================= Watch row — hero, detail, choose sheet ====
+         The wrist call as one compact, tappable row: the watch's
+         own Watch Box photograph (a dial disc in its metal when the
+         piece has no photograph yet), its name, and whether it is
+         the engine's recommendation or his own pick. Tapping opens
+         the choose-watch bottom sheet. Swim/Pool looks carry no
+         row at all — no watch is forced on them. */
+      .watch-disc { flex: none; border-radius: 50%; border: 3px solid var(--wm, #c9c9ce); background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%), var(--wd, #8a8d8f); box-sizing: border-box; }
+      .watch-none-disc { flex: none; border-radius: 50%; border: 1px dashed rgba(247,241,229,.5); display: grid; place-items: center; font-size: 15px; }
+      .today-watch-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 460px; text-align: left; cursor: pointer; background: rgba(16,13,9,.48); border: 1px solid rgba(247,241,229,.45); border-radius: 10px; padding: 6px 12px 6px 6px; color: #f7f1e5; font: inherit; }
+      .today-watch-row[hidden] { display: none; }
+      .today-watch-row img.watch-thumb { position: static; width: 44px; height: 44px; flex: none; object-fit: cover; border-radius: 6px; border: 1px solid rgba(247,241,229,.4); display: block; }
+      .today-watch-row .watch-disc, .today-watch-row .watch-none-disc { width: 44px; height: 44px; }
+      .watch-row { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px 8px 8px; color: var(--text); font: inherit; margin: 0 0 14px; }
+      .watch-row img.watch-thumb { width: 52px; height: 52px; flex: none; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); display: block; }
+      .watch-row .watch-disc, .watch-row .watch-none-disc { width: 52px; height: 52px; }
+      .watch-row .watch-none-disc { border-color: var(--border-strong); color: var(--dim); }
+      .watch-row .wr-main, .today-watch-row .wr-main { flex: 1; min-width: 0; display: grid; gap: 1px; }
+      .watch-row .wr-label, .today-watch-row .wr-label { font-size: 9.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--brass); }
+      .today-watch-row .wr-label { color: #d9c9a3; }
+      .watch-row .wr-name { font-family: var(--font-display); font-size: 19px; font-weight: 600; line-height: 1.15; }
+      .today-watch-row .wr-name { font-family: var(--font-display); font-size: 16.5px; font-weight: 600; line-height: 1.15; }
+      .watch-row .wr-sub { font-size: 12px; color: var(--dim); }
+      .today-watch-row .wr-sub { font-size: 11px; color: rgba(247,241,229,.78); }
+      .watch-row .wr-change { flex: none; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 9px; }
+      .today-watch-row .wr-change { flex: none; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #efe3c8; border: 1px solid rgba(247,241,229,.55); border-radius: 999px; padding: 4px 9px; }
+      .fw-watch-row { margin: 10px 0 4px; }
+      /* Choose-watch sheet rows */
+      .watch-opt { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; cursor: pointer; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 12px 7px 7px; color: var(--text); font: inherit; margin: 0 0 7px; }
+      .watch-opt[aria-pressed="true"] { border-color: var(--brass); box-shadow: inset 0 0 0 1px var(--brass); }
+      .watch-opt img.watch-thumb { width: 48px; height: 48px; flex: none; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); display: block; }
+      .watch-opt .watch-disc, .watch-opt .watch-none-disc { width: 48px; height: 48px; }
+      .watch-opt .watch-none-disc { border-color: var(--border-strong); color: var(--dim); }
+      .watch-opt .wo-main { flex: 1; min-width: 0; display: grid; gap: 1px; }
+      .watch-opt .wo-name { font-weight: 600; font-size: 15px; line-height: 1.25; }
+      .watch-opt .wo-sub { font-size: 12px; color: var(--dim); }
+      .watch-opt .wo-badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 3px; }
+      .watch-opt .rec-badge { font-size: 9px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--brass); border: 1px solid var(--brass); border-radius: 2px; padding: 2px 6px; }
+      .watch-opt .on-badge { font-size: 9px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--dim); }
+      .watch-opt.none .wo-name { font-weight: 500; color: var(--dim); }
 </style>
   </head>
   <body>
@@ -2187,7 +2228,7 @@
             <p class="today-loc" id="today-loc"><strong id="today-loc-name">Palm Beach, Florida</strong><span id="today-loc-weather"></span></p>
             <div class="today-dots" id="today-dots" aria-hidden="true"></div>
             <p class="today-suggest" id="today-suggest" hidden></p>
-            <p class="today-watch" id="today-watch" hidden></p>
+            <button type="button" class="today-watch-row" id="today-watch" hidden aria-label="Watch for this look — tap to choose a watch"></button>
             <div class="today-actions">
               <button type="button" class="btn-today btn-today-line" id="today-like">I like it</button>
               <button type="button" class="btn-today btn-today-line" id="today-dislike">Don’t like it</button>
@@ -3150,6 +3191,16 @@
         </div>
         <p class="meta" id="find-sheet-sub" style="margin:0 0 12px"></p>
         <div id="find-sheet-pieces"></div>
+      </div>
+    </div>
+    <div class="info-pop-backdrop" id="watch-sheet" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="watch-sheet-title">
+        <div class="principles-head">
+          <h3 id="watch-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">On the wrist</h3>
+          <button type="button" class="info-pop-close" id="watch-sheet-close" aria-label="Close watch choices">&times;</button>
+        </div>
+        <p class="meta" id="watch-sheet-sub" style="margin:0 0 12px"></p>
+        <div id="watch-sheet-list"></div>
       </div>
     </div>
     <div class="popout" id="photo-popout" hidden>
@@ -10224,6 +10275,7 @@ function lookCardHTML(look, opts) {
     dropHTML("The reference", inspoHTML(look, true));
   return '<article class="card look-card">' + media + '<div class="look-body">' +
     head + stylingLine +
+    watchRowHTML(look) +
     feedbackHTML(look) +
     '<div class="look-actions">' +
     '<button type="button" class="btn-accent" data-find-open>Shop the look</button>' +
@@ -14016,7 +14068,10 @@ function toggleWorn(id) {
     queueLooks = queueLooks.filter(function (x) { return x.id !== id; });
     saveQueue();
     persistAll();
-    recordWorn({ date: look.wornDate, title: look.title, img: look.img || lookImg(look), pieces: [], lookId: id });
+    var mwEntry = { date: look.wornDate, title: look.title, img: look.img || lookImg(look), pieces: [], lookId: id };
+    var mwRes = (typeof resolveWatch === "function") ? resolveWatch(look) : { state: "none" };
+    if (mwRes.state === "watch" && mwRes.watch) { mwEntry.watch = mwRes.watch.name; mwEntry.watchId = mwRes.watch.id; }
+    recordWorn(mwEntry);
     renderWornLog();
     toast("Worn — catalogued in My Looks.");
   }
@@ -15444,23 +15499,38 @@ function sessionOpeningLook() {
     var raw = sessionStorage.getItem("wardrobe.todayOpening");
     if (!raw) return null;
     var look = JSON.parse(raw);
-    if (!look || !look.img || !look.swatches || !look.swatches.length) return null;
+    if (!look || !look.swatches || !look.swatches.length) return null;
+    /* A closet-built session look restores as itself — it has no
+       render-pool photograph, and its watch choice rides on it. */
+    if (look.fwPieces && look.fwPieces.length && look.source === "wardrobe") return look;
+    if (!look.img) return null;
     if (!RENDER_POOL.some(function (r) { return r.img === look.img; })) return null;
     if (typeof dislikedImgs !== "undefined" && dislikedImgs.indexOf(look.img) !== -1) return null;
     return look;
   } catch (e) { return null; }
 }
 function persistOpeningLook(look) {
-  if (!look || !look.img) return;
+  if (!look || (!look.img && !(look.fwPieces && look.fwPieces.length))) return;
   try {
     var copy = JSON.parse(JSON.stringify(look));
     copy._seedId = todaySeedId || look.id;
     sessionStorage.setItem("wardrobe.todayOpening", JSON.stringify(copy));
   } catch (e) {}
+  /* A closet-built opening look is also kept in the durable
+     store, dated today: the closet hero is steady within the
+     day (the weather deal's own rule), so a refresh — however
+     the device performs it — restores this exact outfit with
+     its watch choice on it, and only a new day deals fresh. */
+  if (look.fwPieces && look.fwPieces.length && look.source === "wardrobe") {
+    try { store.set("todayOpeningCloset", { date: localTodayISO(), look: JSON.parse(JSON.stringify(look)) }); } catch (e) {}
+  }
 }
 function openingLook() {
   var nav = navTypeToday();
   var sess = sessionOpeningLook();
+  /* A stored closet-built look only restores while Today is
+     still in Only-my-wardrobe mode; another mode deals its own. */
+  if (sess && sess.fwPieces && sess.fwPieces.length && !sess.img && studioSource !== "wardrobe") sess = null;
   /* In-session refresh: restore this session's opening look. When
      the navigation type cannot be read at all, a session look on
      record is treated the same way — staying put is the safe
@@ -15482,6 +15552,13 @@ function openingLook() {
   /* One source-mode setting: the live value, shared by every
      control — no second copy to disagree with. */
   var savedSrc = studioSource;
+  if (savedSrc === "wardrobe") {
+    var dur = store.get("todayOpeningCloset", null);
+    if (dur && dur.date === localTodayISO() && dur.look && dur.look.source === "wardrobe" && dur.look.fwPieces && dur.look.fwPieces.length && dur.look.swatches && dur.look.swatches.length) {
+      todaySeedId = dur.look.id;
+      return JSON.parse(JSON.stringify(dur.look));
+    }
+  }
   if (savedSrc === "wardrobe" && typeof buildClosetLooks === "function") {
     var clw = buildClosetLooks();
     if (clw && clw.length) {
@@ -15513,6 +15590,164 @@ function openingLook() {
   persistOpeningLook(clone);
   return clone;
 }
+/* ================= The watch row — recommend + choose =================
+   Every look carries a wrist call, shown as one compact row —
+   the watch's own Watch Box photograph and name — on the Today
+   hero (every hero type: closet-built, From wardrobe and pool,
+   in all three Build-from modes) and on outfit detail views.
+   The engine's pick (recommendWatch: metal colour against the
+   palette, strap against the shoes, formality against the look)
+   is the default and is labelled Recommended. Tapping the row
+   opens the choose-watch bottom sheet: all seven owned Watch
+   Box pieces with their photographs, the recommendation badged,
+   and a quiet No watch. A choice is written onto the look itself
+   (look.watchId, or "none"), so it rides with the look's own
+   state — the local store, the backup file, and the synced
+   looks / queue / worn collections — and it is the watch
+   recorded when the look is logged as worn. Swim/Pool looks
+   carry no row: no watch is forced on them. */
+function isSwimLook(look) {
+  if (!look) return false;
+  if ((look.fwPieces || []).some(function (p) { return p.category === "Bathing suits"; })) return true;
+  var t = ((look.title || "") + " " + (look.meta || "") + " " + (look.desc || "") + " " + (look.img || "")).toLowerCase();
+  if (/swim|pool|bathing/.test(t)) return true;
+  if ((look.flatlay || []).some(function (f) { return /swim|bathing/.test(f.label || ""); })) return true;
+  return false;
+}
+function watchMetalHex(w) {
+  var m = ((w && w.metal) || "").toLowerCase();
+  if (/pink gold|rose gold/.test(m)) return "#dfa08e";
+  if (/yellow gold/.test(m)) return "#d9b45b";
+  if (/platinum/.test(m)) return "#d7d9de";
+  if (/steel|white gold|titanium/.test(m)) return "#c3c7cc";
+  if (/bronze/.test(m)) return "#b08d57";
+  return "#c9c2b2";
+}
+function watchThumbHTML(w) {
+  if (w.photo) return '<img class="watch-thumb" src="' + w.photo + '" alt="" loading="lazy" decoding="async" />';
+  return '<span class="watch-disc" style="--wd:' + (w.dialHex || "#8a8d8f") + ";--wm:" + watchMetalHex(w) + '" aria-hidden="true"></span>';
+}
+function watchSubLine(w) {
+  return [w.metal, w.dialName ? w.dialName + " dial" : "", (w.strap && w.strap !== "Not recorded") ? w.strap : ""].filter(Boolean).join(" · ");
+}
+function engineWatchFor(look) {
+  if (!look) return null;
+  try {
+    var c = JSON.parse(JSON.stringify(look));
+    delete c.watchId;
+    var r = recommendWatch(c);
+    return (r && r.watch && !r.watch.sold) ? r.watch : null;
+  } catch (e) { return null; }
+}
+function resolveWatch(look) {
+  if (!look || isSwimLook(look)) return { state: "swim" };
+  if (look.watchId === "none") return { state: "none" };
+  var eng = engineWatchFor(look);
+  if (look.watchId) {
+    var picked = null;
+    watches.forEach(function (w) { if (w.id === look.watchId && !w.sold) picked = w; });
+    if (picked) return { state: "watch", watch: picked, recommended: !!(eng && eng.id === picked.id), yours: !(eng && eng.id === picked.id) };
+  }
+  if (typeof wristPickId !== "undefined" && wristPickId && typeof wristPickFor !== "undefined" && wristPickFor === look.id) {
+    var forced = watches.filter(function (w) { return w.id === wristPickId && !w.sold; })[0];
+    if (forced) return { state: "watch", watch: forced, recommended: !!(eng && eng.id === forced.id), yours: true };
+  }
+  if (eng) return { state: "watch", watch: eng, recommended: true, yours: false };
+  return { state: "none" };
+}
+function watchRowInnerHTML(look) {
+  var res = resolveWatch(look);
+  if (res.state === "watch") {
+    var w = res.watch;
+    return watchThumbHTML(w) +
+      '<span class="wr-main"><span class="wr-label">On the wrist' + (res.recommended ? " · Recommended" : " · Your pick") + '</span>' +
+      '<span class="wr-name">' + esc(w.name) + '</span>' +
+      '<span class="wr-sub">' + esc(watchSubLine(w)) + '</span></span>' +
+      '<span class="wr-change">Change</span>';
+  }
+  return '<span class="watch-none-disc" aria-hidden="true">—</span>' +
+    '<span class="wr-main"><span class="wr-label">On the wrist</span>' +
+    '<span class="wr-name">No watch</span>' +
+    '<span class="wr-sub">Tap to choose one from your Watch Box</span></span>' +
+    '<span class="wr-change">Choose</span>';
+}
+function watchRowHTML(look, extraCls) {
+  if (!look || isSwimLook(look)) return "";
+  return '<button type="button" class="watch-row ' + (extraCls || "") + '" data-watch-choose aria-label="Watch for this look — tap to choose a watch">' + watchRowInnerHTML(look) + "</button>";
+}
+var watchSheetCtx = null;
+function openWatchSheet(look, refresh) {
+  if (!look) return;
+  watchSheetCtx = { look: look, refresh: refresh || null };
+  var eng = engineWatchFor(look);
+  var res = resolveWatch(look);
+  var sub = document.getElementById("watch-sheet-sub");
+  if (sub) sub.textContent = "For “" + (look.title || "Untitled look") + "” — the engine's pick is badged; tap any watch to put it on this look.";
+  var owned = watches.filter(function (w) { return !w.sold; });
+  var html = owned.map(function (w) {
+    var on = res.state === "watch" && res.watch.id === w.id;
+    var badges = (eng && eng.id === w.id ? '<span class="rec-badge">Recommended</span>' : "") + (on ? '<span class="on-badge">On now</span>' : "");
+    return '<button type="button" class="watch-opt" data-watch-opt="' + w.id + '" aria-pressed="' + (on ? "true" : "false") + '">' +
+      watchThumbHTML(w) +
+      '<span class="wo-main"><span class="wo-name">' + esc(w.name) + '</span><span class="wo-sub">' + esc(watchSubLine(w)) + '</span>' +
+      (badges ? '<span class="wo-badges">' + badges + "</span>" : "") + "</span>" +
+      "</button>";
+  }).join("");
+  html += '<button type="button" class="watch-opt none" data-watch-opt="none" aria-pressed="' + (res.state === "none" ? "true" : "false") + '">' +
+    '<span class="watch-none-disc" aria-hidden="true">—</span>' +
+    '<span class="wo-main"><span class="wo-name">No watch</span><span class="wo-sub">Wear the look bare-wristed</span>' +
+    (res.state === "none" ? '<span class="wo-badges"><span class="on-badge">On now</span></span>' : "") + "</span>" + "</button>";
+  document.getElementById("watch-sheet-list").innerHTML = html;
+  var sheet = document.getElementById("watch-sheet");
+  sheet.hidden = false;
+  var c = document.getElementById("watch-sheet-close");
+  if (c) c.focus();
+}
+function closeWatchSheet() {
+  var sheet = document.getElementById("watch-sheet");
+  if (sheet) sheet.hidden = true;
+  watchSheetCtx = null;
+}
+function applyWatchChoice(look, choice) {
+  if (!look) return;
+  look.watchId = choice;
+  /* The same look may live in My Looks / the queue under this
+     id — the choice is the look's state, so every copy moves
+     and the collections are persisted with it. */
+  var found = false;
+  [savedLooks, queueLooks].forEach(function (arr) {
+    arr.forEach(function (l) { if (l.id === look.id) { l.watchId = choice; found = true; } });
+  });
+  if (found) { persistAll(); saveQueue(); }
+  if (typeof todayLook !== "undefined" && todayLook && todayLook.id === look.id) {
+    if (todayLook !== look) todayLook.watchId = choice;
+    todayTouched = true;
+    persistOpeningLook(todayLook);
+  }
+}
+document.getElementById("watch-sheet-close").addEventListener("click", closeWatchSheet);
+document.getElementById("watch-sheet").addEventListener("click", function (e) {
+  if (e.target === this) { closeWatchSheet(); return; }
+  var b = e.target.closest ? e.target.closest("[data-watch-opt]") : null;
+  if (!b || !watchSheetCtx) return;
+  var look = watchSheetCtx.look, refresh = watchSheetCtx.refresh;
+  applyWatchChoice(look, b.getAttribute("data-watch-opt"));
+  closeWatchSheet();
+  if (refresh) refresh();
+});
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeWatchSheet(); });
+document.addEventListener("click", function (e) {
+  var b = e.target.closest ? e.target.closest("[data-watch-choose]") : null;
+  if (!b) return;
+  if (typeof currentLook !== "undefined" && currentLook) {
+    openWatchSheet(currentLook, function () { renderLookInline(currentLook); });
+  }
+});
+document.getElementById("today-watch").addEventListener("click", function () {
+  if (!todayLook) return;
+  openWatchSheet(todayLook, function () { renderToday(); });
+});
+
 function renderToday() {
   if (!todayLook) return;
   var img = document.getElementById("today-img");
@@ -15554,15 +15789,14 @@ function renderToday() {
   document.getElementById("today-dots").innerHTML = todayLook.swatches.map(function (sp) {
     return '<span style="background:' + sp.hex + '"></span>';
   }).join("");
-  /* One quiet line on the cover: the watch the engine calls
-     for this look, from the Watch Box collection — the same
-     metal-colour matching as the look pages' wrist call. */
+  /* The watch row on the cover — the selected watch's own
+     photograph and name, for EVERY hero type (closet-built,
+     From wardrobe and pool) and every Build-from mode. Swim /
+     Pool carries no row. Tapping it opens the choose sheet. */
   var tw = document.getElementById("today-watch");
   if (tw) {
-    var wname = "";
-    try { var wrec = recommendWatch(todayLook); if (wrec && wrec.watch) wname = wrec.watch.name || ""; } catch (e) {}
-    if (wname) { tw.textContent = "On the wrist — " + wname; tw.hidden = false; }
-    else { tw.hidden = true; tw.textContent = ""; }
+    if (isSwimLook(todayLook) || (typeof formalityLevel !== "undefined" && formalityLevel === 1)) { tw.hidden = true; tw.innerHTML = ""; }
+    else { tw.innerHTML = watchRowInnerHTML(todayLook); tw.hidden = false; }
   }
   /* Shop the look follows the hero: every render of Today —
      fresh open, swipe, dislike, formality / source / location
@@ -15669,8 +15903,12 @@ function applyWeatherToToday() {
     var doyW = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
     var wl = buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: doyW });
     if (wl && wl.length && wl[0].title !== todayLook.title) {
+      /* A watch he chose for today stays chosen across the
+         weather refinement of the outfit. */
+      if (todayLook.watchId) wl[0].watchId = todayLook.watchId;
       todaySeedId = wl[0].id;
       todayLook = wl[0];
+      persistOpeningLook(todayLook);
       renderToday();
     }
     return;
@@ -15736,6 +15974,7 @@ function setCurrentLoc(loc, silent) {
   if (locCloset && locCloset.length) {
     todaySeedId = locCloset[0].id;
     todayLook = locCloset[0];
+    persistOpeningLook(todayLook);
   } else {
     todayLook = dailyLook();
     persistOpeningLook(todayLook);
@@ -15937,7 +16176,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "findLook", "shopPurchases", "shopWishlist"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset"];
 document.getElementById("data-export").addEventListener("click", function () {
   var data = {};
   DATA_KEYS.forEach(function (k) { var v = store.get(k, null); if (v !== null) data[k] = v; });
@@ -17756,6 +17995,8 @@ function recordWorn(entry) {
   if (entry.pieceDetails) e.pieceDetails = entry.pieceDetails;
   if (entry.selfie) e.selfie = true;
   if (entry.lookId) e.lookId = entry.lookId;
+  if (entry.watchId) e.watchId = entry.watchId;
+  if (entry.watch) e.watch = entry.watch;
   wornLog.unshift(e);
   store.set("wornLog", wornLog);
   if (entry.lookId) {
@@ -17807,7 +18048,12 @@ function woreToday() {
     var pid = p.itemId || p.id;
     if (pid && closetItemById(pid) && wornIds.indexOf(pid) === -1) { wornIds.push(pid); wornNames.push(closetItemById(pid).name); }
   });
-  var entry = recordWorn({ date: today, title: todayLook.title, img: lookImg(todayLook), pieces: wornNames, pieceIds: wornIds, lookId: todayLook.id });
+  /* The watch on the hero — his choice if he made one, the
+     recommendation otherwise — is the watch recorded as worn. */
+  var wres = (typeof resolveWatch === "function") ? resolveWatch(todayLook) : { state: "none" };
+  var wornEntry = { date: today, title: todayLook.title, img: lookImg(todayLook), pieces: wornNames, pieceIds: wornIds, lookId: todayLook.id };
+  if (wres.state === "watch" && wres.watch) { wornEntry.watch = wres.watch.name; wornEntry.watchId = wres.watch.id; }
+  var entry = recordWorn(wornEntry);
   queueLooks = queueLooks.filter(function (x) { return x.id !== todayLook.id; });
   saveQueue();
   persistAll();
@@ -17890,7 +18136,7 @@ function renderWornLog() {
     }
     html += '<div class="worn-row' + (en.selfie ? " selfie" : "") + '">' + (en.img ? '<img src="' + en.img + '" alt="" loading="lazy" data-popout="' + en.img + '" />' : "") +
       '<span class="w-main"><span class="w-name">' + esc(en.title) + '</span>' +
-      '<span class="w-sub">' + esc(fmtDateShort(en.date)) + (en.pieces && en.pieces.length ? " · " + esc(en.pieces.join(", ")) : "") + "</span></span></div>";
+      '<span class="w-sub">' + esc(fmtDateShort(en.date)) + (en.pieces && en.pieces.length ? " · " + esc(en.pieces.join(", ")) : "") + (en.watch ? " · Watch: " + esc(en.watch) : "") + "</span></span></div>";
   });
   list.innerHTML = html;
 }
@@ -18365,9 +18611,12 @@ if (dislikeBtn) dislikeBtn.addEventListener("click", function () {
    honours the pick instead of re-deriving one. */
 var _origRecommendWatch = recommendWatch;
 recommendWatch = function (look) {
+  if (look && look.watchId === "none") {
+    return { watch: null, metalAdvice: "", reasons: [] };
+  }
   if (look && look.watchId) {
     var picked = null;
-    watches.forEach(function (w) { if (w.id === look.watchId) picked = w; });
+    watches.forEach(function (w) { if (w.id === look.watchId && !w.sold) picked = w; });
     if (picked) return { watch: picked, metalAdvice: "", reasons: [{ k: "Your pick", t: "You chose this watch for this look." }] };
   }
   return _origRecommendWatch(look);
@@ -18780,7 +19029,7 @@ function openFwOutfit(idx) {
       '<figcaption><span class="fw-yours suggested">Suggested</span>' + esc(look.suggestedBottom.name) + ' — not in your closet yet</figcaption></figure>';
   }
   var fwWatch = "";
-  try { var rw = recommendWatch(look); if (rw && rw.watch) fwWatch = '<p class="fw-watch">On the wrist — ' + esc(rw.watch.name) + "</p>"; } catch (e) {}
+  try { if (typeof watchRowInnerHTML === "function" && !isSwimLook(look)) fwWatch = '<button type="button" class="watch-row fw-watch-row" data-fw-watch="' + idx + '" aria-label="Watch for this look — tap to choose a watch">' + watchRowInnerHTML(look) + "</button>"; } catch (e) {}
   box.innerHTML = '<article class="card fw-outfit">' +
     '<div class="fw-outfit-head"><span class="oc-label">From wardrobe</span><button type="button" class="btn-ghost" data-fw-close>Back</button></div>' +
     '<h3>' + esc(look.title) + '</h3>' +
@@ -18842,6 +19091,13 @@ function dealFromWardrobe() {
   });
   var fwDetail = document.getElementById("fw-detail");
   if (fwDetail) fwDetail.addEventListener("click", function (e) {
+    var fwWatchBtn = e.target.closest("[data-fw-watch]");
+    if (fwWatchBtn) {
+      var widx = parseInt(fwWatchBtn.getAttribute("data-fw-watch"), 10);
+      var wlook = fwLooks[widx];
+      if (wlook && typeof openWatchSheet === "function") openWatchSheet(wlook, function () { openFwOutfit(widx); });
+      return;
+    }
     if (e.target.closest("[data-fw-close]")) {
       fwDetail.hidden = true; fwDetail.innerHTML = "";
       if (fwLooksBackup) { fwLooks = fwLooksBackup; fwLooksBackup = null; }
