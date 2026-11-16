@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.18" />
+    <meta name="wardrobe-build" content="2026-11-16.19" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -1429,6 +1429,19 @@
       .wearing-row .wr-picked { opacity: .55; }
       .wearing-actions { display: flex; gap: 8px; }
       .wearing-actions .btn-accent { flex: 1; }
+      /* Upload a look — the two sheets reuse the selfie log's
+         photo buttons and confirm rows; only the spacing and the
+         preview are their own. */
+      #upload-preview { width: 100%; max-height: 300px; object-fit: cover; object-position: top center; border: 1px solid var(--border); display: block; }
+      #upload-preview[hidden] { display: none; }
+      #upload-sheet .photo-drop { min-height: 36px; padding: 8px 10px; gap: 3px; }
+      #upload-sheet .photo-drop .pd-title { font-size: 11px; letter-spacing: .08em; }
+      #upload-confirm-sheet .upload-sec { margin-top: 12px; }
+      #upload-confirm-sheet label.field { font-size: 11px; letter-spacing: .14em; margin-bottom: 3px; }
+      #upload-confirm-sheet input[type="text"], #upload-confirm-sheet select { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
+      #upload-confirm-sheet input[type="text"] { width: 100%; }
+      #upload-rows { display: grid; gap: 8px; }
+      #upload-confirm-sheet .wearing-actions { flex-wrap: wrap; }
       .wearing-entry { display: flex; gap: 12px; padding: 10px 12px; margin-bottom: 8px; align-items: flex-start; }
       .wearing-entry img { width: 84px; height: 112px; object-fit: cover; object-position: top center; border: 1px solid var(--border); flex: none; cursor: zoom-in; }
       .wearing-entry .we-main { flex: 1; min-width: 0; }
@@ -2555,6 +2568,7 @@
               <button type="button" class="btn-today-text" id="today-style">Style this look</button>
               <button type="button" class="btn-today-text" id="today-find">Shop the look</button>
               <button type="button" class="btn-today-text" id="today-share">Share</button>
+              <button type="button" class="btn-today-text" id="today-upload">Upload a look</button>
             </div>
           </div>
         </div>
@@ -3538,6 +3552,40 @@
         <div id="swap-sheet-list"></div>
       </div>
     </div>
+    <div class="info-pop-backdrop" id="upload-sheet" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="upload-sheet-title">
+        <div class="principles-head">
+          <h3 id="upload-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Upload a look</h3>
+          <button type="button" class="info-pop-close" id="upload-sheet-close" aria-label="Close upload">&times;</button>
+        </div>
+        <div class="wearing-photo-btns">
+          <label class="photo-drop" for="upload-photo-camera"><span class="pd-title">Take a photo</span><input type="file" id="upload-photo-camera" accept="image/*" capture="user" /></label>
+          <label class="photo-drop" for="upload-photo-upload"><span class="pd-title">Choose a photo</span><input type="file" id="upload-photo-upload" accept="image/*" /></label>
+        </div>
+      </div>
+    </div>
+    <div class="info-pop-backdrop" id="upload-confirm-sheet" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="upload-confirm-title">
+        <div class="principles-head">
+          <h3 id="upload-confirm-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Save this look</h3>
+          <button type="button" class="info-pop-close" id="upload-confirm-close" aria-label="Close save look">&times;</button>
+        </div>
+        <img id="upload-preview" alt="Your uploaded look" hidden />
+        <div class="upload-sec">
+          <label class="field" for="upload-name">Name</label>
+          <input type="text" id="upload-name" value="Uploaded look" autocomplete="off" />
+        </div>
+        <div class="upload-sec">
+          <label class="field">Tag the pieces — optional</label>
+          <div id="upload-rows"></div>
+        </div>
+        <div class="wearing-actions upload-sec">
+          <button type="button" class="btn-ghost" id="upload-add-row">Add row</button>
+          <button type="button" class="btn-ghost" id="upload-skip">Skip</button>
+          <button type="button" class="btn-accent" id="upload-save">Save look</button>
+        </div>
+      </div>
+    </div>
     <div class="popout" id="photo-popout" hidden>
       <img id="popout-img" alt="" />
       <button type="button" class="popout-close" id="popout-close" aria-label="Close full-size photo">&times;</button>
@@ -3878,7 +3926,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.18";
+var WARDROBE_BUILD = "2026-11-16.19";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -10466,6 +10514,9 @@ function lookImg(look) {
   if (look && look.fwPieces && look.fwPieces.length) {
     for (var fi = 0; fi < look.fwPieces.length; fi++) { if (look.fwPieces[fi].photo) return look.fwPieces[fi].photo; }
   }
+  /* An uploaded look's photograph is the look — never a palette
+     match or the taupe correction standing in for it. */
+  if (look && look.source === "uploaded" && look.img) return look.img;
   if (isTaupeLook(look)) return TAUPE_RENDER;
   if (look.img) return look.img;
   var near = nearestPhotoLook(look.swatches);
@@ -12052,14 +12103,23 @@ function swapFetch(url, opts, ms) {
 function swapSubmitJob(look, idsBySlot, watchId) {
   var key = swapSyncKey();
   if (!key) return;
-  var pieces = Object.keys(idsBySlot).map(function (s) {
-    var p = PIECE_BY_ID[idsBySlot[s]];
-    return { id: p.id, slot: s, name: p.name };
-  });
+  /* The worker's contract (wardrobe-sync, Render queue):
+     { comboId, combo: { pieces: [pieceId, ...], watchId, formality? } }
+     — pieces are the piece id STRINGS in slot order; the watcher
+     resolves them through the piece library, so names and slots
+     do not travel. The flat body of piece objects this used to
+     send has no combo object at all, so the worker rejected it
+     (400) and the catch below swallowed that — no user swap ever
+     reached the queue, and the poller then 404'd forever. */
+  var slotOrder = ["top", "bottom", "shoes", "layer"];
+  var pieces = slotOrder.filter(function (s) { return !!idsBySlot[s]; }).map(function (s) { return idsBySlot[s]; });
+  Object.keys(idsBySlot).forEach(function (s) { if (slotOrder.indexOf(s) === -1 && idsBySlot[s]) pieces.push(idsBySlot[s]); });
+  var combo = { pieces: pieces, watchId: watchId || null };
+  if (typeof look.formality === "string" && look.formality) combo.formality = look.formality;
   swapFetch(swapSyncBase() + "/render-queue", {
     method: "POST",
     headers: { "authorization": "Bearer " + key, "content-type": "application/json" },
-    body: JSON.stringify({ comboId: look.swapComboId, pieces: pieces, watchId: watchId || "" })
+    body: JSON.stringify({ comboId: look.swapComboId, combo: combo })
   }, 20000).catch(function () {});
 }
 /* Polling runs while the swapped look's pop-out is on screen;
@@ -12077,7 +12137,7 @@ function startSwapPoll(look) {
   stopSwapPoll();
   if (!look || !look.swapComboId || !swapSyncKey()) return;
   if (lazyRenders[look.swapComboId]) { swapSettleCombo(look.swapComboId, lazyRenders[look.swapComboId]); return; }
-  swapPoll = { comboId: look.swapComboId, imgFails: 0, ticks: 0, timer: setInterval(swapPollTick, 20000) };
+  swapPoll = { comboId: look.swapComboId, imgFails: 0, ticks: 0, resubmitted: false, timer: setInterval(swapPollTick, 20000) };
 }
 function stopSwapPoll() {
   if (swapPoll) { clearInterval(swapPoll.timer); swapPoll = null; }
@@ -12097,8 +12157,26 @@ function swapPollTick() {
   if (swapPoll.ticks > 90) { stopSwapPoll(); return; }
   swapFetch(swapSyncBase() + "/render-queue/" + comboId, {
     headers: { "authorization": "Bearer " + swapSyncKey() }
-  }, 20000).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-    if (!j || !swapPoll || swapPoll.comboId !== comboId) return;
+  }, 20000).then(function (r) {
+    if (r.status === 404) return { __missing: true };
+    return r.ok ? r.json() : null;
+  }).then(function (j) {
+    if (!swapPoll || swapPoll.comboId !== comboId) return;
+    if (j && j.__missing) {
+      /* The job isn't there: the original submission never
+         landed (its failure was silent). Resubmit ONCE, early in
+         the poll, from the look's own persisted swap map — the
+         resubmitted flag makes a loop impossible — then keep
+         polling as normal. */
+      if (swapPoll.ticks <= 2 && !swapPoll.resubmitted) {
+        swapPoll.resubmitted = true;
+        if (currentLook && currentLook.swapComboId === comboId && currentLook.swapPieces) {
+          swapSubmitJob(currentLook, currentLook.swapPieces, swapWatchIdFor(currentLook));
+        }
+      }
+      return;
+    }
+    if (!j) return;
     if (j.status === "done") {
       if (lazyRenders[comboId]) { stopSwapPoll(); swapSettleCombo(comboId, lazyRenders[comboId]); return; }
       swapTryLoadRender(comboId, swapPoll.imgFails + 1, function (url) {
@@ -12183,6 +12261,14 @@ function lookCardHTML(look, opts) {
     dropHTML("On the wrist", wristHTML(look, true)) +
     dropHTML("Sunglasses", shadesHTML(look, true)) +
     dropHTML("The reference", inspoHTML(look, true));
+  /* An uploaded look lists the Closet pieces it was tagged with —
+     named as his, exactly as tagged. */
+  var taggedBlock = "";
+  if (look.source === "uploaded" && look.taggedPieces && look.taggedPieces.length) {
+    taggedBlock = '<div class="find-pieces bare"><h4>Pieces</h4>' + look.taggedPieces.map(function (tp) {
+      return '<div class="piece-row"><span class="cdot" style="background:' + esc(tp.hex || "transparent") + '"></span><span class="p-main"><span class="p-name">' + esc(tp.name) + '</span><span class="p-sub">' + esc(tp.category || "") + " · Yours</span></span></div>";
+    }).join("") + "</div>";
+  }
   return '<article class="card look-card">' + media + '<div class="look-body">' +
     head + stylingLine +
     watchRowHTML(look) +
@@ -12192,6 +12278,7 @@ function lookCardHTML(look, opts) {
     (look.plate ? '<button type="button" class="btn-ghost" data-action="open-plate" data-plate="' + look.plate + '">Open Plate ' + look.plate + "</button>" : "") +
     '<button type="button" class="btn-ghost" data-action="share-look">Share as image</button>' +
     "</div>" +
+    taggedBlock +
     swapSectionHTML(look) +
     drops +
     "</div></article>";
@@ -15883,6 +15970,7 @@ function renderSaved() {
        render — in its watch variant now — never a palette-matched
        pool render standing in for it. */
     if (l.fwRender) { assigned[l.id] = fwRenderSrc(l); return; }
+    if (l.source === "uploaded" && l.img) { assigned[l.id] = l.img; return; }
     if (isTaupeLook(l)) { assigned[l.id] = TAUPE_RENDER; return; }
     assigned[l.id] = l.img || (rankedPhotoLooks(l.swatches)[0] || {}).img || "assets/photos/316150a1e65e.webp";
   });
@@ -21498,6 +21586,157 @@ if (myInspoPanel) myInspoPanel.addEventListener("click", function (e) {
     if (name === "myinspo") renderMyInspo();
   };
 })();
+
+/* ---------- Upload a look (Today) ----------
+   A standalone look from his own photo, saved from the Today
+   hero: no day attached, nothing written to the worn log, never
+   in Calendar's What I wore. The photo runs through the selfie
+   log's downscale path (processPhotoFile) and the look joins
+   savedLooks like any other, so the store's vault offload keeps
+   the photo in IndexedDB (never raw base64 in localStorage) and
+   cloud sync + backup carry it as part of savedLooks. The
+   confirm sheet reuses the selfie sheet's Closet picker
+   (wearingPickOptions rows): name and tags are optional — the
+   photo alone saves. Tagged pieces also become the look's
+   swatches and flatlay, so Shop the look reads them, and where
+   the piece library knows a tagged Closet item its id goes into
+   swapPieces, so Change a piece works through the usual mapper;
+   untagged or unmapped looks get the standard “No swappable
+   pieces in this look yet” line. The createdAt stamp is sort
+   order only — it is never shown as a date anywhere. */
+var uploadPhotoDataUrl = null;
+function uploadRowHTML(cat) {
+  return '<div class="wearing-row">' +
+    '<div class="wr-top"><select class="wr-cat" aria-label="Category">' + wearingCats().map(function (c) { return "<option" + (c === cat ? " selected" : "") + ">" + esc(c) + "</option>"; }).join("") + "</select>" +
+    '<button type="button" class="btn-ghost wr-remove">Remove</button></div>' +
+    '<select class="wr-pick" aria-label="Tag a piece from your Closet">' + wearingPickOptions(cat, "") + "</select>" +
+    "</div>";
+}
+function resetUploadRows() {
+  var box = document.getElementById("upload-rows");
+  if (box) box.innerHTML = WEARING_DEFAULT_CATS.map(uploadRowHTML).join("");
+}
+function openUploadSheet() {
+  var sheet = document.getElementById("upload-sheet");
+  if (sheet) sheet.hidden = false;
+}
+function closeUploadSheet() {
+  var sheet = document.getElementById("upload-sheet");
+  if (sheet) sheet.hidden = true;
+}
+function openUploadConfirm() {
+  var prev = document.getElementById("upload-preview");
+  if (prev && uploadPhotoDataUrl) { prev.src = uploadPhotoDataUrl; prev.hidden = false; }
+  var nameEl = document.getElementById("upload-name");
+  if (nameEl) nameEl.value = "Uploaded look";
+  resetUploadRows();
+  var sheet = document.getElementById("upload-confirm-sheet");
+  if (sheet) sheet.hidden = false;
+  var c = document.getElementById("upload-confirm-close");
+  if (c) c.focus();
+}
+function closeUploadConfirm() {
+  var sheet = document.getElementById("upload-confirm-sheet");
+  if (sheet) sheet.hidden = true;
+}
+var todayUploadBtn = document.getElementById("today-upload");
+if (todayUploadBtn) todayUploadBtn.addEventListener("click", openUploadSheet);
+var uploadSheetClose = document.getElementById("upload-sheet-close");
+if (uploadSheetClose) uploadSheetClose.addEventListener("click", closeUploadSheet);
+var uploadSheetEl = document.getElementById("upload-sheet");
+if (uploadSheetEl) uploadSheetEl.addEventListener("click", function (e) { if (e.target === this) closeUploadSheet(); });
+var uploadConfirmClose = document.getElementById("upload-confirm-close");
+if (uploadConfirmClose) uploadConfirmClose.addEventListener("click", closeUploadConfirm);
+var uploadConfirmEl = document.getElementById("upload-confirm-sheet");
+if (uploadConfirmEl) uploadConfirmEl.addEventListener("click", function (e) { if (e.target === this) closeUploadConfirm(); });
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeUploadSheet(); closeUploadConfirm(); } });
+["upload-photo-camera", "upload-photo-upload"].forEach(function (id) {
+  var input = document.getElementById(id);
+  if (!input) return;
+  input.addEventListener("change", function () {
+    var file = this.files && this.files[0];
+    if (!file) return;
+    var self = this;
+    processPhotoFile(file, function (url) {
+      uploadPhotoDataUrl = url;
+      self.value = "";
+      closeUploadSheet();
+      openUploadConfirm();
+    });
+  });
+});
+var uploadRowsBox = document.getElementById("upload-rows");
+if (uploadRowsBox) {
+  uploadRowsBox.addEventListener("change", function (e) {
+    var row = e.target.closest ? e.target.closest(".wearing-row") : null;
+    if (!row) return;
+    if (e.target.classList.contains("wr-cat")) {
+      var pick = row.querySelector(".wr-pick");
+      pick.innerHTML = wearingPickOptions(e.target.value, "");
+      pick.value = "";
+    }
+  });
+  uploadRowsBox.addEventListener("click", function (e) {
+    var rm = e.target.closest ? e.target.closest(".wr-remove") : null;
+    if (!rm) return;
+    var row = rm.closest(".wearing-row");
+    if (row) row.remove();
+  });
+}
+var uploadAddRowBtn = document.getElementById("upload-add-row");
+if (uploadAddRowBtn) uploadAddRowBtn.addEventListener("click", function () {
+  if (uploadRowsBox) uploadRowsBox.insertAdjacentHTML("beforeend", uploadRowHTML("Shirts"));
+});
+function saveUploadedLook(withTags) {
+  if (!uploadPhotoDataUrl) { closeUploadConfirm(); return; }
+  var nameEl = document.getElementById("upload-name");
+  var name = ((nameEl && nameEl.value) || "").trim() || "Uploaded look";
+  var tagged = [];
+  if (withTags) {
+    Array.prototype.slice.call(document.querySelectorAll("#upload-rows .wr-pick")).forEach(function (pick) {
+      if (!pick.value) return;
+      var it = closetItemById(pick.value);
+      if (it && tagged.indexOf(it) === -1) tagged.push(it);
+    });
+  }
+  var look = {
+    id: newLookId(),
+    title: name,
+    img: uploadPhotoDataUrl,
+    imgAlt: name,
+    source: "uploaded",
+    createdAt: Date.now(),
+    swatches: tagged.map(function (i) {
+      var cn = (i.colourName || "").split("·")[0].trim();
+      return { name: cn || nearestWada(i.colourHex || "#888888").name, hex: i.colourHex || "#888888", role: cap(CLOSET_GARMENT[i.category] || "Piece") };
+    }),
+    flatlay: tagged.map(function (i) {
+      return { hex: i.colourHex || "#888888", label: cap(CLOSET_GARMENT[i.category] || "Piece"), detail: (i.colourName || "").split("·")[0].trim().toLowerCase() };
+    }),
+    taggedPieces: tagged.map(function (i) {
+      return { id: i.id, name: i.name, category: i.category, hex: i.colourHex || "" };
+    }),
+    notes: []
+  };
+  var sp = {};
+  tagged.forEach(function (i) {
+    var p = PIECE_BY_CID[i.id];
+    if (p && p.slot && !sp[p.slot]) sp[p.slot] = p.id;
+  });
+  if (Object.keys(sp).length) look.swapPieces = sp;
+  savedLooks.unshift(look);
+  var kept = persistAll();
+  renderSaved();
+  uploadPhotoDataUrl = null;
+  var prev = document.getElementById("upload-preview");
+  if (prev) { prev.hidden = true; prev.removeAttribute("src"); }
+  closeUploadConfirm();
+  toast(kept ? "Look saved to My Looks." : "Saved on screen, but storage is full — export a backup from Me.");
+}
+var uploadSaveBtn = document.getElementById("upload-save");
+if (uploadSaveBtn) uploadSaveBtn.addEventListener("click", function () { saveUploadedLook(true); });
+var uploadSkipBtn = document.getElementById("upload-skip");
+if (uploadSkipBtn) uploadSkipBtn.addEventListener("click", function () { saveUploadedLook(false); });
 
 /* ---------- From wardrobe (Ideas) ----------
    A standing section inside Ideas, dealt from the closet alone:
