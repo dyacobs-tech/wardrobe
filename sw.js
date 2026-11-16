@@ -42,7 +42,7 @@ self.addEventListener('activate', (event) => {
 function networkFirst(event, cacheName) {
   const req = event.request;
   event.respondWith(
-    fetch(req).then((res) => {
+    fetch(req, { cache: 'no-cache' }).then((res) => {
       // Opaque (cross-origin) responses report status 0; keep those too.
       if (res && (res.status === 200 || res.type === 'opaque')) {
         const copy = res.clone();
@@ -108,7 +108,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.open(SHELL_CACHE).then((cache) => {
         const cached = cache.match(SHELL_KEY);
-        const network = fetch(req).then((res) => {
+        const network = fetch(req, { cache: 'no-cache' }).then((res) => {
           if (res && res.status === 200) cache.put(SHELL_KEY, res.clone());
           return res;
         });
