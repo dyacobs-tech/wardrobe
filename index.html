@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.19" />
+    <meta name="wardrobe-build" content="2026-11-16.20" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -1331,7 +1331,7 @@
       .popout { position: fixed; inset: 0; z-index: 120; background: #0c0a07; display: flex; align-items: center; justify-content: center; }
       .popout[hidden] { display: none; }
       .popout img { width: 100%; height: 100%; object-fit: contain; display: block; }
-      .popout-close { position: absolute; top: 10px; right: 12px; width: 40px; height: 40px; min-height: 40px; border-radius: 50%; background: rgba(20,17,13,.55); color: #f7f1e5; border: 1px solid rgba(247,241,229,.5); font-size: 22px; line-height: 1; padding: 0; cursor: pointer; }
+      .popout-close { position: absolute; top: 10px; right: 12px; width: 44px; height: 44px; min-height: 44px; border-radius: 50%; background: rgba(20,17,13,.55); color: #f7f1e5; border: 1px solid rgba(247,241,229,.5); font-size: 22px; line-height: 1; padding: 0; cursor: pointer; }
       img[data-popout] { cursor: zoom-in; }
       #today-hero { cursor: zoom-in; }
       #today-hero .today-caption, #today-hero .today-caption * { cursor: auto; }
@@ -3926,7 +3926,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.19";
+var WARDROBE_BUILD = "2026-11-16.20";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -21144,12 +21144,31 @@ renderWornLog();
 /* ---------- Item 1: one shared full-size photo pop-out ---------- */
 var popoutEl = document.getElementById("photo-popout");
 var popoutImg = document.getElementById("popout-img");
+var popoutCloseBtn = document.getElementById("popout-close");
+/* Anchor the close button to the displayed photo's own top-right corner
+   (the img is object-fit: contain, so the photo is letterboxed inside the
+   full-viewport img box). Its top is clamped so it never rises into the
+   Dynamic Island / status-bar zone: max(photo top + inset, safe-area + 8). */
+function placePopoutClose() {
+  if (!popoutCloseBtn || !popoutEl || popoutEl.hidden || !popoutImg.naturalWidth || !popoutImg.naturalHeight) return;
+  var vw = popoutEl.clientWidth, vh = popoutEl.clientHeight;
+  var scale = Math.min(vw / popoutImg.naturalWidth, vh / popoutImg.naturalHeight);
+  var dispW = popoutImg.naturalWidth * scale;
+  var dispH = popoutImg.naturalHeight * scale;
+  var photoTop = (vh - dispH) / 2;
+  var photoRightInset = (vw - dispW) / 2;
+  popoutCloseBtn.style.top = "max(" + (photoTop + 10).toFixed(1) + "px, calc(env(safe-area-inset-top, 0px) + 8px))";
+  popoutCloseBtn.style.right = (photoRightInset + 10).toFixed(1) + "px";
+}
+if (popoutImg) popoutImg.addEventListener("load", placePopoutClose);
+window.addEventListener("resize", placePopoutClose);
 function openPopout(src, alt) {
   if (!src || !popoutEl) return;
   popoutImg.src = src;
   popoutImg.alt = alt || "";
   popoutEl.hidden = false;
   document.body.style.overflow = "hidden";
+  placePopoutClose();
 }
 function closePopout() {
   if (!popoutEl) return;
