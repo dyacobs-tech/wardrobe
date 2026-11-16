@@ -10,6 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
+    <meta name="wardrobe-build" content="2026-11-15.1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -105,8 +106,8 @@
          Find it, Me. Studio, Inspiration and Me are sections: a
          second row beneath names their pages (Studio: Today — the
          cover page — Ideas; Inspiration: Icons, Palettes, Brands,
-         My Inspo; Me: Me, Closet, My Looks, Calendar, What I'm
-         Wearing Today) and shows only while one
+         My Inspo; Me: Me, Closet, My Looks, Calendar, Watches,
+         What I'm Wearing Today) and shows only while one
          of that section's pages is open. Both rows stick together. */
       .navstack {
         position: sticky; top: 0; z-index: 40;
@@ -114,14 +115,19 @@
         backdrop-filter: blur(10px);
         border-bottom: 1px solid var(--border);
         margin-top: 0;
-        /* No safe-area padding here: that padding sat IN FLOW between
-           the masthead's rule and the tabs, and on a phone it resolved
-           to a large empty band under the title. The masthead above
-           already carries the safe-area inset (above the title), so at
-           the top of the page the whole header sits below the notch
-           with the nav directly under the rule — one compact header. */
+        /* No safe-area padding here at rest: that padding sat IN FLOW
+           between the masthead's rule and the tabs, and on a phone it
+           resolved to a large empty band under the title. The masthead
+           above already carries the safe-area inset (above the title),
+           so at the top of the page the whole header sits below the
+           notch with the nav directly under the rule — one compact
+           header. Once the masthead has scrolled away and this bar is
+           stuck to the top on its own, the .is-stuck rule below gives
+           it the inset instead, so the tabs never slide under the
+           notch / Dynamic Island while scrolling. */
         padding-top: 0;
       }
+      .navstack.is-stuck { padding-top: env(safe-area-inset-top); }
       /* Four sections, four equal shares of the bar: a 4-column
          grid gives every tab exactly a quarter of the full width,
          each label centred in its share — no clustering, no
@@ -1144,11 +1150,13 @@
       #panel-profile #data-card { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
       #panel-profile #data-card .card-head-info { flex: none; }
       #panel-profile #data-card #data-status { flex-basis: 100%; }
-      #panel-profile #panel-watches .add-form { padding: 10px 12px; gap: 7px; }
-      #panel-profile #panel-watches label.field { font-size: 10.5px; letter-spacing: .14em; margin-bottom: 3px; }
-      #panel-profile #panel-watches input[type="text"], #panel-profile #panel-watches select, #panel-profile #panel-watches textarea { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
-      #panel-profile #panel-watches .item-card { padding: 9px 10px; gap: 5px; }
-      #panel-profile #panel-watches .item-card h4 { font-size: 16px; }
+      #panel-watches .add-form { padding: 10px 12px; gap: 7px; }
+      #panel-watches label.field { font-size: 10.5px; letter-spacing: .14em; margin-bottom: 3px; }
+      #panel-watches input[type="text"], #panel-watches select, #panel-watches textarea { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
+      #panel-watches .item-card { padding: 9px 10px; gap: 5px; }
+      #panel-watches .item-card h4 { font-size: 16px; }
+      #panel-watches .chip { min-height: 27px; padding: 3px 10px; font-size: 12px; }
+      #panel-watches .btn-ink, #panel-watches .btn-ghost, #panel-watches .btn-accent { min-height: 34px; padding: 6px 12px; font-size: 11.5px; }
 
       /* ---------- Audit round 2 — findings 12–19 + outline fix ----------
          Best-match card: NO coloured outline — identical thin neutral
@@ -1216,6 +1224,17 @@
       .pack-list li { display: flex; gap: 8px; align-items: baseline; font-size: 13.5px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
       .pack-list li .pk-cat { flex: none; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); min-width: 74px; }
       .capsule-note { font-size: 13px; color: var(--dim); margin: 8px 0 0; line-height: 1.45; }
+      .capsule-outfits { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 10px 0 4px; }
+      .capsule-outfit { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-alt); padding: 10px 12px; display: grid; gap: 4px; align-content: start; }
+      .capsule-outfit .oc-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; line-height: 1.2; }
+      .capsule-outfit .oc-meta { font-size: 12.5px; color: var(--dim); line-height: 1.4; }
+      .capsule-outfit .fw-photos { display: flex; gap: 2px; }
+      .capsule-outfit .fw-photos img { width: calc(50% - 1px); aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; margin: 0; flex: none; }
+      .capsule-outfit .fw-photos.one img { width: 100%; aspect-ratio: 3 / 2; }
+      .capsule-check-head { font-family: var(--font-display); font-size: 19px; font-weight: 600; margin: 14px 0 2px; }
+      .pack-item { display: flex; gap: 8px; align-items: center; width: 100%; background: none; border: none; padding: 2px 0; min-height: 32px; text-align: left; color: var(--text); font-size: 13.5px; }
+      .pack-item .pk-box { flex: none; width: 18px; height: 18px; border: 1px solid var(--border-strong); border-radius: 3px; display: grid; place-items: center; font-size: 12px; line-height: 1; color: var(--accent); }
+      .pack-item[aria-pressed="true"] > span:last-child { text-decoration: line-through; color: var(--dim); }
       .new-strip { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
       .new-strip .ns-label { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); }
       .new-badge { display: inline-block; border: 1px solid var(--brass); color: var(--brass); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 1px 5px; border-radius: 2px; margin-left: 6px; vertical-align: middle; }
@@ -1423,6 +1442,7 @@
       #panel-icons .icon-result .btn-accent, #panel-icons .icon-result .btn-ghost,
       .icon-result .btn-accent, .icon-result .btn-ghost,
       #panel-profile .btn-ink, #panel-profile .btn-ghost, #panel-profile .btn-accent,
+      #panel-watches .btn-ink, #panel-watches .btn-ghost, #panel-watches .btn-accent,
       #panel-studio .studio-nav .btn-ghost, #panel-studio .studio-nav .btn-ink,
       #panel-studio #style-btn,
       #panel-wardrobe .item-actions .btn-ghost,
@@ -1444,7 +1464,7 @@
       /* One chip — filters, feedback, formality, places, selectors */
       .chip, .fb-chips .chip, .fchip, .sel-opts .chip, .studio-type-row button,
       .dress-for .chip, .choice-chip,
-      #panel-studio .chip, #panel-wardrobe .chip, #panel-looks .chip, #panel-profile .chip,
+      #panel-studio .chip, #panel-wardrobe .chip, #panel-looks .chip, #panel-profile .chip, #panel-watches .chip,
       #panel-today .today-formality .fchip, .today-loc-chips .tlc {
         min-height: 30px; padding: 4px 12px; font-size: 12.5px; font-weight: 500;
         letter-spacing: .02em; border-radius: 999px;
@@ -1464,13 +1484,13 @@
       #panel-find .add-form input[type="text"], #panel-find .add-form select,
       #panel-wearing input[type="text"], #panel-wearing select, #panel-wearing input[type="date"],
       #panel-myinspo input[type="text"],
-      #panel-profile #panel-watches input[type="text"], #panel-profile #panel-watches select {
+      #panel-watches input[type="text"], #panel-watches select {
         min-height: 38px; padding: 8px 11px; font-size: 15px;
       }
       textarea,
       #panel-studio textarea, #panel-wardrobe textarea, #panel-profile textarea,
       #panel-icons textarea, #panel-palettes textarea,
-      #panel-profile #panel-watches textarea {
+      #panel-watches textarea {
         padding: 8px 11px; font-size: 15px;
       }
       #panel-find .find-searchbar { min-height: 38px; padding: 8px 14px; font-size: 15px; }
@@ -1479,14 +1499,14 @@
       #panel-studio label.field, #panel-wardrobe label.field, #panel-profile label.field,
       #panel-icons label.field, #panel-palettes label.field, #panel-find label.field,
       #panel-brands label.field, #panel-wearing label.field, #panel-myinspo label.field,
-      #panel-profile #panel-watches label.field {
+      #panel-watches label.field {
         font-size: 11px; letter-spacing: .16em; color: var(--brass); margin-bottom: 4px;
       }
       .sel-name { color: var(--brass); }
       /* One card-title style and size on every grid */
       .option-card .oc-title, .saved-card h4, .item-card h4, .plate-card .pc-names,
       .find-card h4, .custom-card h4, .shop-piece h4,
-      #panel-wardrobe .item-card h4, #panel-profile #panel-watches .item-card h4,
+      #panel-wardrobe .item-card h4, #panel-watches .item-card h4,
       #panel-find .find-card h4 {
         font-family: var(--font-ui); font-size: 15px; font-weight: 600;
         letter-spacing: .01em; line-height: 1.2;
@@ -1499,10 +1519,10 @@
       #panel-wardrobe .add-form, #panel-wardrobe .item-detail-card,
       #panel-palettes .add-form, #panel-icons .add-form, #panel-studio .studio-form,
       #panel-wearing .wearing-form, #panel-myinspo .myinspo-form,
-      #panel-profile #panel-watches .add-form {
+      #panel-watches .add-form {
         padding: 14px 16px;
       }
-      .item-card, #panel-wardrobe .item-card, #panel-profile #panel-watches .item-card { padding: 10px 12px; }
+      .item-card, #panel-wardrobe .item-card, #panel-watches .item-card { padding: 10px 12px; }
       .option-card .oc-body, .saved-card .sb, .plate-card .pc-body, .myinspo-card .mi-body { padding: 10px 12px; }
       /* One row — same border, radius and padding for list rows */
       .piece-row, .shop-row, .icon-result, .loc-result, .removed-row,
@@ -1513,8 +1533,8 @@
          never a full-width slab; the places chips and the home
          actions take the shared chip/button metrics above. */
       .loc-search-row { grid-template-columns: 1fr auto; align-items: center; }
-      /* Me subnav — one row, five equal shares, like every other
-         subnav; the long fifth label wraps inside its own share
+      /* Me subnav — one row, six equal shares, like every other
+         subnav; the long last label wraps inside its own share
          instead of dropping to a centred second row. */
       #subnav-me { flex-wrap: nowrap; }
       #subnav-me #tab-wearing { flex: 1 1 0; white-space: normal; line-height: 1.15; }
@@ -1568,6 +1588,7 @@
       #panel-icons .icon-result .btn-accent, #panel-icons .icon-result .btn-ghost,
       .icon-result .btn-accent, .icon-result .btn-ghost,
       #panel-profile .btn-ink, #panel-profile .btn-ghost, #panel-profile .btn-accent,
+      #panel-watches .btn-ink, #panel-watches .btn-ghost, #panel-watches .btn-accent,
       #panel-studio .studio-nav .btn-ghost, #panel-studio .studio-nav .btn-ink,
       #panel-studio #style-btn,
       #panel-wardrobe .item-actions .btn-ghost,
@@ -1587,7 +1608,7 @@
       /* One chip — even smaller */
       .chip, .fb-chips .chip, .fchip, .sel-opts .chip, .studio-type-row button,
       .dress-for .chip, .choice-chip,
-      #panel-studio .chip, #panel-wardrobe .chip, #panel-looks .chip, #panel-profile .chip,
+      #panel-studio .chip, #panel-wardrobe .chip, #panel-looks .chip, #panel-profile .chip, #panel-watches .chip,
       #panel-today .today-formality .fchip, .today-loc-chips .tlc {
         min-height: 23px; padding: 2px 8px; font-size: 11px;
       }
@@ -1646,7 +1667,7 @@
       #panel-find .add-form input[type="text"], #panel-find .add-form select,
       #panel-wearing input[type="text"], #panel-wearing select, #panel-wearing input[type="date"],
       #panel-myinspo input[type="text"],
-      #panel-profile #panel-watches input[type="text"], #panel-profile #panel-watches select {
+      #panel-watches input[type="text"], #panel-watches select {
         min-height: 34px; padding: 6px 10px; font-size: 14.5px;
       }
       #panel-find .find-searchbar { min-height: 34px; padding: 6px 12px; font-size: 14.5px; }
@@ -1691,6 +1712,7 @@
             <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
             <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks">My Looks</button>
             <button class="subtab" role="tab" id="tab-calendar" aria-selected="false" aria-controls="panel-calendar" data-tab="calendar">Calendar</button>
+            <button class="subtab" role="tab" id="tab-watches" aria-selected="false" aria-controls="panel-watches" data-tab="watches">Watches</button>
             <button class="subtab" role="tab" id="tab-wearing" aria-selected="false" aria-controls="panel-wearing" data-tab="wearing">What I'm Wearing Today</button>
           </div>
         </div>
@@ -2068,7 +2090,7 @@
         <div id="trips-wrap">
           <h3 class="fav-head">Trips — capsule &amp; packing</h3>
           <div class="fb-chips" role="group" aria-label="Trips">
-            <button type="button" class="chip" data-trip="aspen">Aspen</button>
+            <button type="button" class="chip" data-trip="aspen">Aspen · Mar 12 – 26, 2027</button>
             <button type="button" class="chip" data-trip="marbella">Marbella · Jun 21 – Jul 5, 2027</button>
           </div>
           <div id="capsule-out" style="margin-top:10px"></div>
@@ -2558,8 +2580,21 @@
           </div>
           <div><button type="submit" class="btn-ink">Save profile</button></div>
         </form>
+        <div class="card data-card" id="data-card">
+          <div class="card-head-info"><h3>Backup</h3><button type="button" class="info-btn sm" data-info-from="data-note" data-info-title="Backup" aria-label="About: backup and restore">i</button></div>
+          <p id="data-note" hidden>Everything Wardrobe keeps — closet, watches, looks, palettes, icons, finds, profile — lives on this device. Export a backup file and keep it somewhere safe; import it on a new phone and everything comes back exactly as it was.</p>
+          <div class="loc-actions">
+            <button type="button" class="btn-ink" id="data-export">Export backup</button>
+            <label class="btn-ghost" for="data-import-file" style="display:inline-grid;place-items:center;cursor:pointer">Import backup</label>
+            <input type="file" id="data-import-file" accept="application/json,.json" hidden />
+          </div>
+          <p id="data-status" style="margin:0"></p>
+        </div>
+      </section>
+
       <!-- ================= WATCHES ================= -->
-      <div id="panel-watches"><h3 style="font-family:var(--font-display);font-size:20px;font-weight:600;margin:18px 0 10px">Watches</h3>
+      <section id="panel-watches" role="tabpanel" aria-labelledby="tab-watches" hidden>
+        <h3 style="font-family:var(--font-display);font-size:20px;font-weight:600;margin:18px 0 10px">Watches</h3>
         <div class="filter-row" id="watch-subtabs" role="group" aria-label="Watch lists">
           <button type="button" class="chip" data-watch-list="collection" aria-pressed="true">Collection <span class="count" id="watch-count-collection"></span></button>
           <button type="button" class="chip" data-watch-list="sold" aria-pressed="false">Sold <span class="count" id="watch-count-sold"></span></button>
@@ -2620,18 +2655,6 @@
             <button type="submit" class="btn-ink" id="watch-submit">Add</button>
             <button type="button" class="btn-ghost" id="watch-cancel-edit" hidden>Cancel edit</button>
           </form>
-        </div>
-      </div>
-
-        <div class="card data-card" id="data-card">
-          <div class="card-head-info"><h3>Backup</h3><button type="button" class="info-btn sm" data-info-from="data-note" data-info-title="Backup" aria-label="About: backup and restore">i</button></div>
-          <p id="data-note" hidden>Everything Wardrobe keeps — closet, watches, looks, palettes, icons, finds, profile — lives on this device. Export a backup file and keep it somewhere safe; import it on a new phone and everything comes back exactly as it was.</p>
-          <div class="loc-actions">
-            <button type="button" class="btn-ink" id="data-export">Export backup</button>
-            <label class="btn-ghost" for="data-import-file" style="display:inline-grid;place-items:center;cursor:pointer">Import backup</label>
-            <input type="file" id="data-import-file" accept="application/json,.json" hidden />
-          </div>
-          <p id="data-status" style="margin:0"></p>
         </div>
       </section>
     </main>
@@ -2720,6 +2743,21 @@ var store = {
    load — deleting or editing a built-in piece or watch sticks. */
 var deletedIds = store.get("deletedIds", []);
 var entryOverrides = store.get("overrides", {});
+/* "Today" in the device's LOCAL timezone — never UTC. The UTC
+   version rolled over at 7pm Eastern, so Wearing Today showed
+   and logged tomorrow in the evening. Every date the app derives
+   (worn dates, the wearing log, backup filenames) goes through
+   here; existing stored entries are never rewritten. */
+function localTodayISO() {
+  var d = new Date();
+  var m = d.getMonth() + 1, day = d.getDate();
+  return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (day < 10 ? "0" : "") + day;
+}
+/* Build marker — bumped on every refresh of the standalone site;
+   the service worker's cache names key off the same value there.
+   Mirrored in the wardrobe-build meta tag in the head. */
+var WARDROBE_BUILD = "2026-11-15.1";
+window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
   if (!store.set("items", wardrobeItems.filter(function (i) { return i.id.indexOf("seed-") !== 0; }))) ok = false;
@@ -9915,7 +9953,51 @@ function selectOption(idx) {
    nearest photograph of you in that colour story — so the Studio
    deals outfits he can put on today, and the combinations grow
    with the closet: add ten pieces and the outfit count multiplies. */
-function buildClosetLooks() {
+/* Weather fit for closet pieces: temperature and conditions drive
+   weight and formality — light tees and espadrilles in heat, knits
+   and closed shoes in the cold, suede and open shoes down in rain.
+   Used only when a caller passes a temperature (Today, capsules);
+   the plain closet deal is untouched. */
+function weatherTopScore(item, temp, rainy) {
+  var n = ((item.name || "") + " " + (item.colourName || "")).toLowerCase();
+  var s = 0;
+  if (temp >= 80) {
+    if (item.category === "Tees" || item.category === "Polos") s += 3;
+    if (/linen|pique|piqué|slub|mesh/.test(n)) s += 2;
+    if (item.category === "Sweaters" || item.category === "Coats" || item.category === "Leather jackets") s -= 4;
+    if (item.category === "Blazers" || item.category === "Suits") s -= 1;
+  } else if (temp >= 65) {
+    if (item.category === "Polos" || item.category === "Tees" || item.category === "Shirts" || item.category === "Button downs") s += 2;
+    if (item.category === "Coats" || item.category === "Leather jackets") s -= 3;
+  } else if (temp >= 50) {
+    if (item.category === "Sweaters") s += 3;
+    if (item.category === "Polos") s += 1;
+    if (item.category === "Tees") s -= 1;
+    if (item.category === "Coats" || item.category === "Blazers") s += 1;
+  } else {
+    if (item.category === "Sweaters" || item.category === "Coats") s += 3;
+    if (item.category === "Leather jackets" || item.category === "Blazers") s += 1;
+    if (item.category === "Tees") s -= 3;
+    if (/linen/.test(n)) s -= 2;
+  }
+  return s;
+}
+function weatherShoeScore(item, temp, rainy) {
+  var n = (item.name || "").toLowerCase();
+  var s = 0;
+  if (temp >= 80) {
+    if (/espadrille|furlane|sneaker|slip-on|slip on/.test(n)) s += 2;
+    if (/loafer|slipper/.test(n)) s += 1;
+    if (/boot/.test(n)) s -= 2;
+  } else if (temp < 50) {
+    if (/loafer|boot|brogue|oxford|derby/.test(n)) s += 2;
+    if (/espadrille|furlane/.test(n)) s -= 2;
+  }
+  if (rainy && /suede|espadrille|furlane|velvet/.test(n)) s -= 2;
+  return s;
+}
+function buildClosetLooks(opts) {
+  var wx = (opts && typeof opts.temp === "number") ? { temp: opts.temp, rainy: !!opts.rainy } : null;
   var avail = wardrobeItems.filter(function (i) { return !i.laundry; });
   var tops = avail.filter(function (i) { return ["Coats", "Leather jackets", "Sweaters", "Polos", "Shirts", "Button downs", "Tees", "Blazers", "Jackets", "Suits"].indexOf(i.category) !== -1; });
   var bottoms = avail.filter(function (i) { return ["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(i.category) !== -1; });
@@ -9923,16 +10005,35 @@ function buildClosetLooks() {
   var shades = avail.filter(function (i) { return i.category === "Sunglasses"; });
   if (!tops.length) return null;
   if (!bottoms.length && !shoes.length) return null;
+  if (wx) {
+    /* Weather deal: best-fitting pieces first, rotated by a daily
+       salt so the pick is steady within the day and fresh across
+       days — never a random reshuffle on every open. */
+    var salt = (typeof opts.salt === "number") ? opts.salt : 0;
+    function byScore(list, scorer) {
+      return list.slice().sort(function (a, b) {
+        var d = scorer(b) - scorer(a);
+        return d !== 0 ? d : (a.name < b.name ? -1 : 1);
+      });
+    }
+    function rotate(list) {
+      if (list.length < 2) return list;
+      var r = ((salt % list.length) + list.length) % list.length;
+      return list.slice(r).concat(list.slice(0, r));
+    }
+    tops = rotate(byScore(tops, function (i) { return weatherTopScore(i, wx.temp, wx.rainy); }));
+    shoes = byScore(shoes, function (i) { return weatherShoeScore(i, wx.temp, wx.rainy); });
+  }
   var combos = [];
   if (bottoms.length) {
     /* His own bottoms are catalogued: build on them, as before. */
     tops.forEach(function (t) { bottoms.forEach(function (b) { combos.push([t, b]); }); });
-    shuffleArr(combos);
+    if (!wx) shuffleArr(combos);
   } else {
     /* Interim rule (his call): every outfit anchors on HIS top and
        HIS shoes; a suggested bottom completes it below. */
     var shuffledTops = tops.slice();
-    shuffleArr(shuffledTops);
+    if (!wx) shuffleArr(shuffledTops);
     shuffledTops.forEach(function (t, ti) { combos.push([t, shoes[ti % shoes.length]]); });
   }
   return combos.slice(0, 6).map(function (pair, i) {
@@ -9942,7 +10043,7 @@ function buildClosetLooks() {
     if (shoes.length && !hasShoe) { shoe = shoes[i % shoes.length]; pieces.push(shoe); }
     if (shades.length) pieces.push(shades[i % shades.length]);
     var hasBottom = pieces.some(function (p) { return ["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(p.category) !== -1; });
-    var suggested = hasBottom ? null : suggestBottomFor(pieces[0], shoe, i * 7 + pieces[0].name.length);
+    var suggested = hasBottom ? null : suggestBottomFor(pieces[0], shoe, i * 7 + pieces[0].name.length, wx);
     var swatches = [], seenHex = {};
     pieces.forEach(function (p) {
       if (p.colourHex && !seenHex[p.colourHex]) {
@@ -10011,7 +10112,7 @@ function topColourFamily(top) {
   if (/blue/.test(t)) return "blue";
   return "other";
 }
-function suggestBottomFor(top, shoes, salt) {
+function suggestBottomFor(top, shoes, salt, wx) {
   var fam = topColourFamily(top);
   var smart = ["Blazers", "Suits", "Button downs", "Shirts"].indexOf(top.category) !== -1 || /loafer|slipper|brogue|oxford|derby/i.test(shoes ? shoes.name : "");
   var table = smart ? {
@@ -10028,6 +10129,17 @@ function suggestBottomFor(top, shoes, salt) {
     other: ["indigo-jeans", "cream-linen", "khaki-chinos"]
   };
   var opts = table[fam] || table.other;
+  if (wx && typeof wx.temp === "number") {
+    /* Weather steers the suggestion too: shorts in real heat,
+       never shorts in the cold. */
+    if (wx.temp >= 80 && !smart) {
+      var shortsOnly = opts.filter(function (k) { return /shorts/.test(k); });
+      opts = shortsOnly.length ? shortsOnly : ["beige-shorts"];
+    } else if (wx.temp < 55) {
+      var noShorts = opts.filter(function (k) { return !/shorts/.test(k); });
+      if (noShorts.length) opts = noShorts;
+    }
+  }
   return SUGGESTED_BOTTOMS[opts[Math.abs(salt || 0) % opts.length]];
 }
 
@@ -10982,7 +11094,7 @@ var wardrobeItems = [
   },
   {
     id: "seed-sfc-knit",
-    name: "SFC Black Checkerboard Knit",
+    name: "Scott Fraser Collection Black Checkerboard Knit",
     category: "Sweaters",
     colourName: "Black",
     colourHex: "#141416",
@@ -11345,10 +11457,10 @@ var wardrobeItems = [
   },
   {
     id: "seed-zegna-polo",
-    name: "Zegna Black High Performance Polo",
+    name: "Zegna Dark Navy High Performance Polo",
     category: "Polos",
-    colourName: "Black",
-    colourHex: "#17171a",
+    colourName: "Dark navy",
+    colourHex: "#1e2637",
     extraColours: [],
     notes: "Technical knit polo, size S.",
     photo: "assets/photos/60068aa893f4.jpg",
@@ -11818,10 +11930,10 @@ var wardrobeItems = [
   },
   {
     id: "seed-hermes-navy-polo",
-    name: "Hermès Navy Piqué Polo",
+    name: "Hermès Black Piqué Polo",
     category: "Polos",
-    colourName: "Navy",
-    colourHex: "#232a3d",
+    colourName: "Black",
+    colourHex: "#17171a",
     extraColours: [],
     notes: "Piqué polo, chest pocket with H stitch, size S.",
     photo: "assets/photos/23a1b98a88b6.jpg",
@@ -12074,7 +12186,7 @@ document.getElementById("item-grid").addEventListener("click", function (e) {
     var it = closetItemById(wore.getAttribute("data-item-wore"));
     if (it) {
       it.wearCount = (it.wearCount || 0) + 1;
-      it.lastWorn = new Date().toISOString().slice(0, 10);
+      it.lastWorn = localTodayISO();
       it.laundry = false;
       saveEntryEdit("items", it);
       renderWardrobe();
@@ -12190,7 +12302,7 @@ document.getElementById("item-detail").addEventListener("click", function (e) {
   if (act === "close") { detailItemId = null; renderItemDetail(); return; }
   if (act === "wore") {
     it.wearCount = (it.wearCount || 0) + 1;
-    it.lastWorn = new Date().toISOString().slice(0, 10);
+    it.lastWorn = localTodayISO();
     it.laundry = false;
     saveEntryEdit("items", it);
     renderWardrobe(); renderItemDetail();
@@ -12656,7 +12768,7 @@ function toggleWorn(id) {
     toast("Marked as not worn.");
   } else {
     look.worn = true;
-    look.wornDate = new Date().toISOString().slice(0, 10);
+    look.wornDate = localTodayISO();
     if (!f.saved) {
       var copy = JSON.parse(JSON.stringify(look));
       if (gridImgById[id]) copy.img = gridImgById[id];
@@ -14172,19 +14284,20 @@ function openingLook() {
     delete restored._seedId;
     return restored;
   }
-  /* Fresh open: deal a new opening look, in the source mode the
-     Studio selector was left in — the three modes apply here too.
-     Only my wardrobe opens on a closet outfit (his pieces, shown
-     as their own photographs); the photograph modes exclude the
-     previous open's photograph outright, and undealt photographs
-     are dealt before any dealt one, as far as the pool allows. */
+  /* Fresh open: deal a new opening look. Today's own source is
+     the default that matters here, and its default is Only my
+     wardrobe: the outfit of the day is BUILT from his Closet
+     (his pieces, shown as their own photographs), then refined
+     by the day's weather when it lands. Only inspo / Combo —
+     chosen on the Today selector — still deal from the render
+     deck, under the no-repeat rules below. */
   var savedSrc = null;
-  try { var ss = store.get("studioSettings", null); if (ss && ss.source) savedSrc = ss.source; } catch (e) {}
+  try { savedSrc = store.get("todaySource", null); } catch (e) {}
+  if (savedSrc !== "inspo" && savedSrc !== "combo" && savedSrc !== "wardrobe") savedSrc = "wardrobe";
   if (savedSrc === "wardrobe" && typeof buildClosetLooks === "function") {
     var clw = buildClosetLooks();
     if (clw && clw.length) {
       todaySeedId = clw[0].id;
-      persistOpeningLook(clw[0]);
       return clw[0];
     }
     savedSrc = "combo";
@@ -14319,7 +14432,21 @@ function renderLoc() {
 }
 function applyWeatherToToday() {
   if (todayTouched || !currentWeather || !todayLook) return;
-  if (todayLook.source === "wardrobe" || todayLook.fwPieces) return;
+  if (todayLook.source === "wardrobe" || todayLook.fwPieces) {
+    /* The wardrobe hero is re-picked for the actual weather at
+       the current location: temperature and conditions choose
+       the weight and formality (knit + loafers when cool, tee +
+       espadrilles when hot, layers when cold). */
+    if (typeof buildClosetLooks !== "function") return;
+    var doyW = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
+    var wl = buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: doyW });
+    if (wl && wl.length && wl[0].title !== todayLook.title) {
+      todaySeedId = wl[0].id;
+      todayLook = wl[0];
+      renderToday();
+    }
+    return;
+  }
   var t = currentWeather.temp;
   var swapIds = t >= 88 ? ["seed-olive-cream", "seed-plate1", "seed-carmine-helvetia"]
     : t < 55 ? ["seed-charcoal-blazer", "seed-taupe", "seed-crimson"]
@@ -14372,8 +14499,20 @@ function setCurrentLoc(loc, silent) {
   saveLocs();
   currentWeather = null;
   todayTouched = false;
-  todayLook = dailyLook();
-  persistOpeningLook(todayLook);
+  /* A new location re-deals the day from the Closet (Today's
+     default source); the weather there then refines the pick.
+     The old date-seeded deck look is only the fallback for an
+     empty closet or an inspo/combo Today. */
+  var locSrc = null;
+  try { locSrc = store.get("todaySource", null); } catch (e) {}
+  var locCloset = (locSrc !== "inspo" && locSrc !== "combo" && typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
+  if (locCloset && locCloset.length) {
+    todaySeedId = locCloset[0].id;
+    todayLook = locCloset[0];
+  } else {
+    todayLook = dailyLook();
+    persistOpeningLook(todayLook);
+  }
   renderToday();
   renderLoc();
   document.getElementById("loc-weather").textContent = "Checking the weather there…";
@@ -14430,6 +14569,14 @@ function initToday() {
   todayLook = openingLook();
   recordDealt([todayLook.img]);
   renderToday();
+  /* The Today selector shows the mode the hero was actually
+     dealt in — on a default open that is Only my wardrobe. */
+  var dealtSrc = todayLook && todayLook.source;
+  if (dealtSrc) {
+    document.querySelectorAll("#today-source-row [data-source]").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.getAttribute("data-source") === dealtSrc ? "true" : "false");
+    });
+  }
   renderLoc();
   fetchWeather();
 }
@@ -14442,7 +14589,9 @@ function initToday() {
 function dealHeroForSource() {
   var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
   if (src === "wardrobe" && typeof buildClosetLooks === "function") {
-    var cl = buildClosetLooks();
+    var cl = currentWeather
+      ? buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5) })
+      : buildClosetLooks();
     if (cl && cl.length) {
       var curTitle = todayLook && todayLook.title;
       var pickW = null;
@@ -14485,6 +14634,9 @@ document.getElementById("today-source-row").addEventListener("click", function (
   if (!b) return;
   todayTouched = true;
   setSource(b.getAttribute("data-source"));
+  /* Today remembers its own source: the next open defaults to
+     the mode last chosen here (wardrobe until chosen otherwise). */
+  try { store.set("todaySource", b.getAttribute("data-source")); } catch (err) {}
   if (typeof saveStudioSettings === "function") saveStudioSettings();
   dealHeroForSource();
 });
@@ -14552,7 +14704,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked"];
 document.getElementById("data-export").addEventListener("click", function () {
   var data = {};
   DATA_KEYS.forEach(function (k) { var v = store.get(k, null); if (v !== null) data[k] = v; });
@@ -14560,7 +14712,7 @@ document.getElementById("data-export").addEventListener("click", function () {
   var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "wardrobe-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.download = "wardrobe-backup-" + localTodayISO() + ".json";
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -15137,7 +15289,7 @@ function renderFindLookMode() {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands", "find", "calendar", "profile", "wearing", "myinspo"];
+var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands", "find", "calendar", "profile", "watches", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -15145,14 +15297,15 @@ var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands
    there), Palettes, Brands and My Inspo (your uploaded
    inspiration images). Me holds the Profile page (as
    its first page, labelled Me), Closet, My Looks, Calendar (trip
-   capsules + What I wore) and What I'm Wearing Today (the selfie
+   capsules + What I wore), Watches (the Watch Box — Collection /
+   Sold / Wants) and What I'm Wearing Today (the selfie
    outfit log). Find it is a page of its own.
    A section tab reopens the page last visited in it. */
 var SECTIONS = {
   studio: ["today", "studio"],
   inspiration: ["icons", "palettes", "brands", "myinspo"],
   find: ["find"],
-  me: ["profile", "wardrobe", "looks", "calendar", "wearing"]
+  me: ["profile", "wardrobe", "looks", "calendar", "watches", "wearing"]
 };
 var sectionHome = { studio: "today", inspiration: "icons", find: "find", me: "profile" };
 function sectionOf(name) {
@@ -15174,10 +15327,9 @@ function persistTab() {
 }
 function switchTab(name, opts) {
   /* Consolidated destinations: the old Queue and Yours pages are
-     states and filters inside My Looks now, and watch management
-     lives in Profile — old links and stored tabs land there. */
+     states and filters inside My Looks now — old links and stored
+     tabs land there. */
   if (name === "queue" || name === "favourites") name = "looks";
-  if (name === "watches") name = "profile";
   if (TABS.indexOf(name) === -1) name = "today";
   currentTab = name;
   var sec = sectionOf(name);
@@ -15618,7 +15770,7 @@ function likeToday() {
 }
 function woreToday() {
   if (!todayLook) return;
-  var today = new Date().toISOString().slice(0, 10);
+  var today = localTodayISO();
   var saved = savedLooks.filter(function (l) { return l.id === todayLook.id; })[0];
   if (saved) { saved.worn = true; saved.wornDate = today; }
   else {
@@ -15724,7 +15876,7 @@ function renderWornLog() {
     orig(id);
     var f = findLookAnywhere(id);
     if (f && f.look.worn) {
-      addWornLog({ date: f.look.wornDate || new Date().toISOString().slice(0, 10), title: f.look.title, img: f.look.img || lookImg(f.look), pieces: [] });
+      addWornLog({ date: f.look.wornDate || localTodayISO(), title: f.look.title, img: f.look.img || lookImg(f.look), pieces: [] });
       renderWornLog();
     }
   };
@@ -15788,28 +15940,86 @@ document.addEventListener("click", function (e) {
 
 /* ---------- Trip capsules (23) ---------- */
 var TRIPS = {
-  marbella: { name: "Marbella", dates: "Jun 21 – Jul 5, 2027 · 14 nights", cats: ["Sweaters", "Polos", "Shirts", "Button downs", "Tees", "Trousers", "Jeans", "Shorts", "Bathing suits", "Shoes", "Sunglasses", "Blazers", "Jackets"],
-    note: "Marbella in late June: heat at midday, warm evenings. Light tailoring, linen, swim pieces and one smart layer for dinner — the pieces above are from your closet and mix across the fortnight." },
-  aspen: { name: "Aspen", dates: "Dates to set", cats: ["Sweaters", "Coats", "Jackets", "Leather jackets", "Blazers", "Shirts", "Button downs", "Trousers", "Jeans", "Shoes", "Scarves", "Gloves", "Hats", "Sunglasses"],
-    note: "Aspen: cold air, bright sun, dinners that dress up. Layers first — knits under blazers, a real coat, closed shoes — the pieces above are from your closet." }
+  marbella: { name: "Marbella", dates: "Jun 21 – Jul 5, 2027 · 14 nights", temp: 86,
+    weather: "Seasonal weather basis: Marbella in late June and early July is hot — roughly 80–90°F and sunny. Outfits are built light from your closet: polos, tees and linen up top, open or light shoes below.",
+    essentials: ["Swim trunks", "Sunscreen", "Sunglasses", "Passport", "A light layer for evenings", "Charger"],
+    note: "Marbella in late June: heat at midday, warm evenings. Light tailoring, linen, swim pieces and one smart layer for dinner — the outfits above are built from your closet and mix across the fortnight." },
+  aspen: { name: "Aspen", dates: "Mar 12 – 26, 2027 · 14 nights", temp: 30,
+    weather: "Seasonal weather basis: Aspen in March is ski cold — roughly 20–40°F with snow possible. Outfits are built for cold from your closet: knits and layers up top, closed shoes below.",
+    essentials: ["Ski jacket & pants", "Base layers", "Ski socks", "Sunscreen — altitude sun", "Lip balm", "Passport / ID", "Charger"],
+    note: "Aspen: cold air, bright sun, dinners that dress up. Layers first — knits under blazers, a real coat, closed shoes — the outfits above are built from your closet." }
 };
+var currentCapsule = null;
 function buildCapsule(key) {
   var trip = TRIPS[key];
   var out = document.getElementById("capsule-out");
   if (!trip || !out) return;
-  var items = wardrobeItems.filter(function (i) { return !i.laundry && trip.cats.indexOf(i.category) !== -1; });
+  currentCapsule = key;
+  var packedAll = store.get("capsulePacked", {});
+  var packed = packedAll[key] || {};
+  /* Outfits from his closet, matched to the trip's seasonal
+     weather — the same weather-aware closet deal as Today. */
+  var looks = (typeof buildClosetLooks === "function") ? buildClosetLooks({ temp: trip.temp, rainy: false, salt: 0 }) : null;
+  var outfits = looks ? looks.slice(0, 4) : [];
   var html = '<article class="card custom-card"><h4>' + trip.name + ' capsule</h4><p class="meta">' + trip.dates + "</p>";
-  if (!items.length) {
-    html += '<p class="capsule-note">Your closet has no pieces in the capsule categories yet — add pieces in the Closet and the packing list builds itself from them.</p>';
+  html += '<p class="capsule-note">' + trip.weather + "</p>";
+  if (!outfits.length) {
+    html += '<p class="capsule-note">Your closet has no pieces to build outfits from yet — add pieces in the Closet and the capsule builds itself from them.</p>';
   } else {
-    html += '<ul class="pack-list">' + items.map(function (i) {
-      return '<li><span class="pk-cat">' + esc(i.category) + "</span><span>" + esc(i.name) + (i.colourName ? " — " + esc(i.colourName.split("·")[0].trim()) : "") + "</span></li>";
+    html += '<div class="capsule-outfits">' + outfits.map(function (look) {
+      var pieces = look.fwPieces || [];
+      var shoe = null;
+      pieces.forEach(function (p) { if (p.category === "Shoes") shoe = p; });
+      var shown = [pieces[0], shoe].filter(function (p, ix, a) { return p && p.photo && a.indexOf(p) === ix; });
+      var photos = shown.length ? '<span class="fw-photos' + (shown.length === 1 ? " one" : "") + '">' + shown.map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async" />'; }).join("") + "</span>" : "";
+      var names = pieces.map(function (p) { return p.name; }).join(" · ");
+      return '<div class="capsule-outfit">' + photos + '<span class="oc-title">' + esc(look.title) + "</span>" +
+        (names ? '<span class="oc-meta">' + esc(names) + "</span>" : "") +
+        (look.suggestedBottom ? '<span class="oc-meta">Pair with: ' + esc(look.suggestedBottom.name) + " — suggested</span>" : "") + "</div>";
+    }).join("") + "</div>";
+  }
+  /* Packing checklist: the capsule outfits' own pieces first
+     (suggested bottoms named as suggestions), then the trip
+     essentials. Tap an item to check it off — the state is kept
+     on this device with the rest of the app. */
+  var checkItems = [], seenLabel = {};
+  outfits.forEach(function (look) {
+    (look.fwPieces || []).forEach(function (p) {
+      if (seenLabel[p.name]) return;
+      seenLabel[p.name] = 1;
+      checkItems.push({ cat: p.category, label: p.name });
+    });
+    if (look.suggestedBottom && !seenLabel[look.suggestedBottom.name]) {
+      seenLabel[look.suggestedBottom.name] = 1;
+      checkItems.push({ cat: "Suggested", label: look.suggestedBottom.name + " — suggested" });
+    }
+  });
+  trip.essentials.forEach(function (label) {
+    if (seenLabel[label]) return;
+    seenLabel[label] = 1;
+    checkItems.push({ cat: "Essential", label: label });
+  });
+  if (checkItems.length) {
+    html += '<h5 class="capsule-check-head">Packing checklist</h5><ul class="pack-list">' + checkItems.map(function (ci) {
+      var on = !!packed[ci.label];
+      return '<li><button type="button" class="pack-item" data-pack="' + esc(ci.label) + '" aria-pressed="' + (on ? "true" : "false") + '"><span class="pk-box" aria-hidden="true">' + (on ? "✓" : "") + '</span><span class="pk-cat">' + esc(ci.cat) + "</span><span>" + esc(ci.label) + "</span></button></li>";
     }).join("") + "</ul>";
   }
   html += '<p class="capsule-note">' + trip.note + "</p></article>";
   out.innerHTML = html;
 }
 document.getElementById("trips-wrap").addEventListener("click", function (e) {
+  var pk = e.target.closest("[data-pack]");
+  if (pk && currentCapsule) {
+    var all = store.get("capsulePacked", {});
+    var mine = all[currentCapsule] || {};
+    var label = pk.getAttribute("data-pack");
+    if (mine[label]) delete mine[label]; else mine[label] = true;
+    all[currentCapsule] = mine;
+    store.set("capsulePacked", all);
+    buildCapsule(currentCapsule);
+    return;
+  }
   var b = e.target.closest("[data-trip]");
   if (b) buildCapsule(b.getAttribute("data-trip"));
 });
@@ -16412,7 +16622,7 @@ var wearingSaveBtn = document.getElementById("wearing-save");
 if (wearingSaveBtn) wearingSaveBtn.addEventListener("click", function () {
   if (!wearingPhotoDataUrl) { toast("Add a photo first — take one or upload one."); return; }
   var dateEl = document.getElementById("wearing-date");
-  var date = (dateEl && dateEl.value) || new Date().toISOString().slice(0, 10);
+  var date = (dateEl && dateEl.value) || localTodayISO();
   var used = [], newItems = [];
   Array.prototype.slice.call(document.querySelectorAll("#wearing-rows .wearing-row")).forEach(function (row) {
     var pickId = row.querySelector(".wr-pick").value;
@@ -16471,7 +16681,7 @@ if (wearingSaveBtn) wearingSaveBtn.addEventListener("click", function () {
   prev.hidden = true;
   prev.removeAttribute("src");
   ["wearing-photo-camera", "wearing-photo-upload"].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ""; });
-  if (dateEl) dateEl.value = new Date().toISOString().slice(0, 10);
+  if (dateEl) dateEl.value = localTodayISO();
   resetWearingRows();
   toast(kept ? "Logged — in your Closet, and worn on " + fmtDateShort(date) + "." : "Logged — storage is full, so export a backup from Me.");
 });
@@ -16611,6 +16821,11 @@ function openFwOutfit(idx) {
     '<h3>' + esc(look.title) + '</h3>' +
     '<div class="fw-pieces">' + figs + '</div>' +
     '<p class="fw-outfit-note">' + esc((look.notes || []).join(" ")) + '</p>' +
+    '<div class="look-actions">' +
+    '<button type="button" class="btn-ghost" data-fw-like="' + idx + '">I like it</button>' +
+    '<button type="button" class="btn-ghost" data-fw-save="' + idx + '">Save</button>' +
+    '<button type="button" class="btn-ghost" data-fw-find="' + idx + '">Find it</button>' +
+    '</div>' +
     '</article>';
   box.hidden = false;
   box.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -16662,6 +16877,37 @@ function dealFromWardrobe() {
   var fwDetail = document.getElementById("fw-detail");
   if (fwDetail) fwDetail.addEventListener("click", function (e) {
     if (e.target.closest("[data-fw-close]")) { fwDetail.hidden = true; fwDetail.innerHTML = ""; return; }
+    var fwLike = e.target.closest("[data-fw-like]");
+    if (fwLike) {
+      var lk = fwLooks[parseInt(fwLike.getAttribute("data-fw-like"), 10)];
+      if (lk) {
+        /* Like, as on the hero: liked, saved and queued at the
+           top of My Looks. */
+        lk.verdict = "like";
+        var lkCopy = JSON.parse(JSON.stringify(lk));
+        savedLooks = savedLooks.filter(function (l) { return l.id !== lk.id; });
+        savedLooks.unshift(lkCopy);
+        queueLooks = queueLooks.filter(function (x) { return x.id !== lk.id; });
+        queueLooks.unshift(JSON.parse(JSON.stringify(lk)));
+        saveQueue();
+        persistAll();
+        renderSaved();
+        toast("Liked — saved and queued in My Looks.");
+      }
+      return;
+    }
+    var fwSave = e.target.closest("[data-fw-save]");
+    if (fwSave) {
+      var sv = fwLooks[parseInt(fwSave.getAttribute("data-fw-save"), 10)];
+      if (sv) saveLook(JSON.parse(JSON.stringify(sv)));
+      return;
+    }
+    var fwFind = e.target.closest("[data-fw-find]");
+    if (fwFind) {
+      var fd = fwLooks[parseInt(fwFind.getAttribute("data-fw-find"), 10)];
+      if (fd) openFindLookMode(JSON.parse(JSON.stringify(fd)));
+      return;
+    }
     var fig = e.target.closest("[data-fw-piece]");
     if (fig) {
       var pid = fig.getAttribute("data-fw-piece");
@@ -16684,11 +16930,38 @@ function dealFromWardrobe() {
 /* ---------- Init ---------- */
 (function initWearing() {
   var d = document.getElementById("wearing-date");
-  if (d && !d.value) d.value = new Date().toISOString().slice(0, 10);
+  if (d && !d.value) d.value = localTodayISO();
   resetWearingRows();
   renderWearingHistory();
 })();
 renderMyInspo();
+    </script>
+    <script>
+      /* Offline caching (app side): register the service worker
+         Luna ships alongside the site (app-shell precache +
+         cache-first for the content-hashed photo assets). Guarded
+         so it no-ops silently where service workers are
+         unavailable, blocked, or the file is absent. */
+      if ("serviceWorker" in navigator) {
+        try {
+          window.addEventListener("load", function () {
+            navigator.serviceWorker.register("sw.js").catch(function () {});
+          });
+        } catch (e) {}
+      }
+      /* Notch / Dynamic Island: at rest the masthead's own top inset
+         keeps the header below the notch; once it has scrolled away
+         and the nav is stuck on its own, flag the nav so its CSS
+         adds the safe-area inset and the tabs stay below the notch
+         in both the app and standalone contexts. */
+      (function notchGuard() {
+        var nav = document.querySelector(".navstack");
+        var mast = document.querySelector(".masthead");
+        if (!nav || !mast || !("IntersectionObserver" in window)) return;
+        new IntersectionObserver(function (entries) {
+          nav.classList.toggle("is-stuck", !entries[0].isIntersecting);
+        }).observe(mast);
+      })();
     </script>
   </body>
 </html>
