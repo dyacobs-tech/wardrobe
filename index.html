@@ -1524,7 +1524,38 @@
       #panel-wardrobe .sel-opts.filter-row { margin-bottom: 0; }
       /* Find it look mode — the honest line on the shared type scale */
       .shop-nomatch { font-size: 13px; }
-    </style>
+    
+      /* ---------- Cleaned photos · From wardrobe pieces · Today source ---------- */
+      .orig-row { margin-top: -2px; }
+      .orig-row .orig-btn { min-height: 32px; padding: 4px 10px; font-size: 11.5px; }
+      .option-card .fw-photos { display: flex; gap: 2px; flex: none; }
+      .option-card .fw-photos img { width: calc(50% - 1px); aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; margin: 0; flex: none; }
+      .option-card .fw-photos.one img { width: 100%; aspect-ratio: 3 / 2; }
+      .option-card .fw-pair { color: var(--brass); font-weight: 600; }
+      #fw-detail[hidden] { display: none; }
+      .fw-outfit { padding: 22px; margin-top: 18px; display: grid; gap: 12px; }
+      .fw-outfit-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .fw-outfit-head .oc-label { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); }
+      .fw-outfit h3 { font-family: var(--font-display); font-size: 26px; font-weight: 600; margin: 0; line-height: 1.15; }
+      .fw-pieces { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+      .fw-piece { margin: 0; display: grid; gap: 7px; align-content: start; }
+      .fw-piece img, .fw-piece .fw-nophoto { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; border: 1px solid var(--border); display: block; }
+      .fw-piece figcaption { font-size: 13.5px; line-height: 1.4; color: var(--text); }
+      .fw-piece .fw-yours { display: block; font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); margin-bottom: 2px; }
+      .fw-piece .fw-yours.suggested { color: var(--dim); }
+      .fw-piece[data-fw-piece] { cursor: pointer; }
+      .fw-outfit-note { margin: 0; font-size: 14.5px; color: var(--dim); line-height: 1.5; max-width: 62ch; }
+      .today-collage { position: absolute; inset: 0; display: flex; gap: 2px; background: #14110d; }
+      .today-collage[hidden] { display: none; }
+      .today-hero .today-collage img { position: static; flex: 1 1 0; min-width: 0; width: auto; height: 100%; object-fit: cover; object-position: top center; }
+      #today-img[hidden] { display: none; }
+      .today-suggest { margin: 8px 0 0; font-size: 13.5px; letter-spacing: .03em; color: #efe3c8; }
+      .today-suggest[hidden] { display: none; }
+      .today-source { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; }
+      .today-source .ts-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(247,241,229,.75); margin-right: 2px; }
+      .ts-btn { border: 1px solid rgba(247,241,229,.65); background: rgba(20,17,13,.25); color: #f7f1e5; border-radius: 999px; padding: 5px 11px; min-height: 30px; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+      .ts-btn[aria-pressed="true"] { background: #f7f1e5; color: #191612; }
+</style>
   </head>
   <body>
     <header class="masthead">
@@ -1572,12 +1603,14 @@
       <section id="panel-today" role="tabpanel" aria-labelledby="tab-today">
         <div class="today-hero" id="today-hero">
           <img id="today-img" src="assets/photos/9a543e585d8b.webp" alt="" />
+          <div class="today-collage" id="today-collage" hidden></div>
           <div class="today-shade" aria-hidden="true"></div>
           <div class="today-caption">
             <p class="today-kicker">Outfit of the day</p>
             <h2 id="today-name"></h2>
             <p class="today-loc" id="today-loc"><strong id="today-loc-name">Palm Beach, Florida</strong><span id="today-loc-weather"></span></p>
             <div class="today-dots" id="today-dots" aria-hidden="true"></div>
+            <p class="today-suggest" id="today-suggest" hidden></p>
             <div class="today-actions">
               <button type="button" class="btn-today btn-today-line" id="today-like">I like it</button>
               <button type="button" class="btn-today btn-today-line" id="today-dislike">Don’t like it</button>
@@ -1594,6 +1627,12 @@
               <button type="button" class="tlc" data-today-loc="greenwich">Greenwich</button>
             </div>
             <p class="today-swipe-hint" aria-hidden="true">Swipe left for another look · right to like it</p>
+            <div class="today-source" id="today-source-row" role="group" aria-label="Build from — Only my wardrobe, Only inspo, or Combo">
+              <span class="ts-label" aria-hidden="true">Build from</span>
+              <button type="button" class="ts-btn" data-source="wardrobe" aria-pressed="false">Only my wardrobe</button>
+              <button type="button" class="ts-btn" data-source="inspo" aria-pressed="false">Only inspo</button>
+              <button type="button" class="ts-btn" data-source="combo" aria-pressed="true">Combo</button>
+            </div>
             <div class="formality today-formality" id="formality-today">
               <div class="formality-head">
                 <label class="field" for="today-formality-range">Formality</label>
@@ -1722,10 +1761,10 @@
               </div>
               <div>
                 <div class="label-row"><label class="field">Build from — where the outfit comes from</label><button type="button" class="info-btn sm" id="source-info" data-info-title="Build from" data-info-text="Combo — the default: each look is anchored in something you already own, and the rest is inspo to buy that completes it. Pieces that are yours are named as yours; the rest carries a Find it button." aria-label="About: build from">i</button></div>
-                <div class="source-row" id="source-row" role="group" aria-label="Build from — My wardrobe, Inspo, or Combo">
-                  <button type="button" class="basis-btn" data-source="wardrobe" aria-pressed="false">My wardrobe<small>Only pieces you own</small></button>
-                  <button type="button" class="basis-btn" data-source="inspo" aria-pressed="false">Inspo<small>Outside your wardrobe</small></button>
-                  <button type="button" class="basis-btn" data-source="combo" aria-pressed="true">Combo<small>Yours + pieces to buy</small></button>
+                <div class="source-row" id="source-row" role="group" aria-label="Build from — Only my wardrobe, Only inspo, or Combo">
+                  <button type="button" class="basis-btn" data-source="wardrobe" aria-pressed="false">Only my wardrobe<small>Built only from your closet</small></button>
+                  <button type="button" class="basis-btn" data-source="inspo" aria-pressed="false">Only inspo<small>Nothing from your closet</small></button>
+                  <button type="button" class="basis-btn" data-source="combo" aria-pressed="true">Combo<small>The mix — yours + inspo</small></button>
                 </div>
               </div>
               <div class="formality" id="formality-studio">
@@ -1763,13 +1802,14 @@
               <div class="fw-head">
                 <div class="fw-head-text">
                   <h3>From wardrobe</h3>
-                  <p>Outfits built only from pieces you own — nothing to buy. <span id="fw-count"></span></p>
+                  <p>Your tops and your shoes, each completed with a bottom — a suggested pairing until your own bottoms are catalogued. <span id="fw-count"></span></p>
                 </div>
                 <button type="button" class="btn-ghost" id="fw-more">Six more</button>
               </div>
               <div class="options-grid" id="fw-grid" role="list"></div>
-              <p class="empty" id="fw-empty" hidden>Add a top and a bottom — or a pair of shoes — in Me → Closet, and outfits built from your own pieces will appear here.</p>
+              <p class="empty" id="fw-empty" hidden>Add a top and a pair of shoes in Me → Closet, and outfits built from your own pieces will appear here.</p>
             </section>
+            <div id="fw-detail" hidden></div>
 
             <div class="look-result" id="look-result" aria-live="polite"></div>
           </div>
@@ -8291,6 +8331,11 @@ function isTaupeLook(look) {
   return !!look && /taupe/i.test(((look.desc || "") + " " + (look.title || "")));
 }
 function lookImg(look) {
+  /* A wardrobe look's image is its first piece's own photograph —
+     never a pool render standing in for pieces it does not show. */
+  if (look && look.fwPieces && look.fwPieces.length) {
+    for (var fi = 0; fi < look.fwPieces.length; fi++) { if (look.fwPieces[fi].photo) return look.fwPieces[fi].photo; }
+  }
   if (isTaupeLook(look)) return TAUPE_RENDER;
   if (look.img) return look.img;
   var near = nearestPhotoLook(look.swatches);
@@ -9247,9 +9292,9 @@ function lookCardHTML(look, opts) {
   var dirLine = cardIcon ? '<p class="dir-line">In the direction of <strong>' + esc(cardIcon.name) + "</strong> — " + esc(cardIcon.lane) + (cardBlend ? ', blended with <strong>' + esc(cardBlend.name) + "</strong> — " + esc(cardBlend.lane) : "") + "</p>" : "";
   var metaLine = look.meta ? '<p class="meta">' + esc(look.meta) + "</p>" : "";
   var sourceLine = "";
-  if (look.source === "wardrobe") sourceLine = '<p class="source-line"><strong>My wardrobe</strong>' + (look.anchorNames && look.anchorNames.length ? '<span>Yours: <span class="own">' + esc(look.anchorNames.join(", ")) + "</span></span>" : "") + '<button type="button" class="info-btn sm" data-info-title="My wardrobe" data-info-text="Built only from pieces you own — nothing here needs buying." aria-label="About: my wardrobe looks">i</button></p>';
+  if (look.source === "wardrobe") sourceLine = '<p class="source-line"><strong>Only my wardrobe</strong>' + (look.anchorNames && look.anchorNames.length ? '<span>Yours: <span class="own">' + esc(look.anchorNames.join(", ")) + "</span></span>" : "") + '<button type="button" class="info-btn sm" data-info-title="Only my wardrobe" data-info-text="Built only from pieces you own — your top and your shoes, with a suggested bottom completing it until your own bottoms are catalogued." aria-label="About: only my wardrobe looks">i</button></p>';
   else if (look.source === "combo") sourceLine = '<p class="source-line"><strong>Combo</strong>' + (look.anchorNames && look.anchorNames.length ? '<span>Yours: <span class="own">' + esc(look.anchorNames.join(", ")) + "</span></span>" : "") + '<button type="button" class="info-btn sm" data-info-title="Combo" data-info-text="Anchored in pieces you own; the other pieces are inspo to buy to complete it — use Find it on any of them." aria-label="About: combo looks">i</button></p>';
-  else if (look.source === "inspo") sourceLine = '<p class="source-line"><strong>Inspo</strong><button type="button" class="info-btn sm" data-info-title="Inspo" data-info-text="Built outside your wardrobe — fresh inspo, nothing pulled from your closet." aria-label="About: inspo looks">i</button></p>';
+  else if (look.source === "inspo") sourceLine = '<p class="source-line"><strong>Only inspo</strong><button type="button" class="info-btn sm" data-info-title="Only inspo" data-info-text="Built entirely outside your wardrobe — fresh inspo, nothing pulled from your closet." aria-label="About: only inspo looks">i</button></p>';
   var head = "<h3>" + esc(look.title) + (look.version > 1 ? ' <span style="font-size:18px;color:var(--brass);font-style:italic">· take ' + look.version + "</span>" : "") + "</h3>" +
     metaLine + dirLine + sourceLine;
   var stylingLine = "";
@@ -9780,28 +9825,24 @@ function buildClosetLooks() {
   if (!bottoms.length && !shoes.length) return null;
   var combos = [];
   if (bottoms.length) {
+    /* His own bottoms are catalogued: build on them, as before. */
     tops.forEach(function (t) { bottoms.forEach(function (b) { combos.push([t, b]); }); });
+    shuffleArr(combos);
   } else {
-    /* No bottoms catalogued yet: the outfit is a top you own with
-       shoes you own — still built entirely from the closet. */
+    /* Interim rule (his call): every outfit anchors on HIS top and
+       HIS shoes; a suggested bottom completes it below. */
     var shuffledTops = tops.slice();
     shuffleArr(shuffledTops);
     shuffledTops.forEach(function (t, ti) { combos.push([t, shoes[ti % shoes.length]]); });
   }
-  shuffleArr(combos);
-  var usedImgs = {};
-  currentOptions.forEach(function (l) { if (l.img) usedImgs[l.img] = true; });
-  dealtImgHistory.forEach(function (img) { usedImgs[img] = true; });
-  dislikedImgs.forEach(function (img) { usedImgs[img] = true; });
-  /* Photographs already handed out in THIS deal — kept apart from
-     the preference set above: the history can cover the whole pool,
-     and a pick must never repeat inside the hand even then. */
-  var handImgs = {};
   return combos.slice(0, 6).map(function (pair, i) {
     var pieces = [pair[0], pair[1]];
     var hasShoe = pieces.some(function (p) { return p.category === "Shoes"; });
-    if (shoes.length && !hasShoe) pieces.push(shoes[i % shoes.length]);
+    var shoe = hasShoe ? pieces.filter(function (p) { return p.category === "Shoes"; })[0] : null;
+    if (shoes.length && !hasShoe) { shoe = shoes[i % shoes.length]; pieces.push(shoe); }
     if (shades.length) pieces.push(shades[i % shades.length]);
+    var hasBottom = pieces.some(function (p) { return ["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(p.category) !== -1; });
+    var suggested = hasBottom ? null : suggestBottomFor(pieces[0], shoe, i * 7 + pieces[0].name.length);
     var swatches = [], seenHex = {};
     pieces.forEach(function (p) {
       if (p.colourHex && !seenHex[p.colourHex]) {
@@ -9812,30 +9853,84 @@ function buildClosetLooks() {
         if (ec.hex && !seenHex[ec.hex]) { seenHex[ec.hex] = 1; swatches.push({ name: ec.name, hex: ec.hex, role: "Accent" }); }
       });
     });
-    var ranked = rankedPhotoLooks(swatches);
-    var pick = null;
-    for (var r = 0; r < ranked.length; r++) { if (!handImgs[ranked[r].img] && !usedImgs[ranked[r].img]) { pick = ranked[r]; break; } }
-    if (!pick) for (var r2 = 0; r2 < ranked.length; r2++) { if (!handImgs[ranked[r2].img]) { pick = ranked[r2]; break; } }
-    if (!pick) pick = ranked[0] || null;
-    if (pick) handImgs[pick.img] = true;
+    if (suggested && !seenHex[suggested.hex]) {
+      swatches.push({ name: suggested.colour, hex: suggested.hex, role: cap(suggested.garment) });
+    }
     var names = pieces.map(function (p) { return p.name; });
     var seasonNote = (typeof weatherSeason === "function" && weatherSeason()) ? " · dressed for " + weatherSeason().toLowerCase() + " where you are" : "";
     return {
       id: newLookId(),
       title: names[0] + " × " + names[1],
       meta: "From your closet" + seasonNote,
-      desc: names.join(" with "),
+      desc: names.join(" with ") + (suggested ? ", completed with " + suggested.name.toLowerCase() + " (suggested)" : ""),
       iconId: null, blendId: null, basis: "both", version: i + 1, plate: null, paletteName: null,
-      img: pick ? pick.img : "assets/photos/316150a1e65e.webp",
-      imgAlt: pick ? (pick.imgAlt || "") : "",
+      img: null,
+      imgAlt: "",
       swatches: swatches,
-      flatlay: pieces.map(function (p) { return { hex: p.colourHex, label: cap(CLOSET_GARMENT[p.category] || "Piece"), detail: (p.colourName || "").split("·")[0].trim().toLowerCase() }; }),
-      notes: ["Built entirely from pieces in your closet: " + names.join(", ") + ".", "Nothing here needs buying — it is already hanging in your wardrobe."],
+      flatlay: pieces.map(function (p) { return { hex: p.colourHex, label: cap(CLOSET_GARMENT[p.category] || "Piece"), detail: (p.colourName || "").split("·")[0].trim().toLowerCase() }; }).concat(suggested ? [{ hex: suggested.hex, label: cap(suggested.garment), detail: suggested.colour.toLowerCase() + " (suggested)" }] : []),
+      notes: suggested
+        ? ["Built from your closet: " + names.join(", ") + ".", "Complete it with " + suggested.name.toLowerCase() + " — a suggested pairing, not a piece from your closet."]
+        : ["Built entirely from pieces in your closet: " + names.join(", ") + ".", "Nothing here needs buying — it is already hanging in your wardrobe."],
       source: "wardrobe",
-      anchorNames: names.slice(0, 4)
+      anchorNames: names.slice(0, 4),
+      fwPieces: pieces.map(function (p) { return { id: p.id, name: p.name, photo: p.photo || null, colourHex: p.colourHex || null, category: p.category }; }),
+      suggestedBottom: suggested
     };
   });
 }
+
+/* Suggested bottoms: until his own trousers, jeans and shorts are
+   catalogued, a From wardrobe outfit is completed by a suggested
+   bottom, picked for the top's colour family and the formality the
+   shoes set — straight-leg where it is denim, per his fit rule.
+   It is always named as a suggestion, never as a piece he owns. */
+var SUGGESTED_BOTTOMS = {
+  "cream-linen": { name: "Cream linen trousers", colour: "Cream", hex: "#e7dcc0", garment: "Trousers" },
+  "stone": { name: "Stone cotton trousers", colour: "Stone", hex: "#c9bda6", garment: "Trousers" },
+  "white-jeans": { name: "White jeans", colour: "White", hex: "#f2eee3", garment: "Jeans" },
+  "indigo-jeans": { name: "Indigo straight-leg jeans", colour: "Indigo", hex: "#3d5a80", garment: "Jeans" },
+  "black-jeans": { name: "Washed black straight-leg jeans", colour: "Washed black", hex: "#33302c", garment: "Jeans" },
+  "navy-trousers": { name: "Navy tailored trousers", colour: "Navy", hex: "#232c44", garment: "Trousers" },
+  "charcoal-trousers": { name: "Charcoal tailored trousers", colour: "Charcoal", hex: "#3c3a38", garment: "Trousers" },
+  "olive-chinos": { name: "Olive chinos", colour: "Olive", hex: "#6f7350", garment: "Trousers" },
+  "khaki-chinos": { name: "Khaki chinos", colour: "Khaki", hex: "#b3a284", garment: "Trousers" },
+  "beige-shorts": { name: "Beige linen shorts", colour: "Beige", hex: "#d8c6a5", garment: "Shorts" },
+  "navy-shorts": { name: "Navy shorts", colour: "Navy", hex: "#26314e", garment: "Shorts" }
+};
+function topColourFamily(top) {
+  var t = ((top.colourName || "") + " " + (top.name || "")).toLowerCase();
+  if (/zigzag|stripe|breton|check|geometric/.test(t)) return "pattern";
+  if (/navy|indigo/.test(t)) return "navy";
+  if (/black/.test(t)) return "black";
+  if (/charcoal|grey|gray|slate|heather/.test(t)) return "grey";
+  if (/cream|ivory|ecru|white/.test(t)) return "cream";
+  if (/olive|sage/.test(t)) return "olive";
+  if (/burgundy|wine/.test(t)) return "burgundy";
+  if (/rust|terracotta/.test(t)) return "rust";
+  if (/beige|tan|sand|taupe|oatmeal|khaki|brown/.test(t)) return "earth";
+  if (/blue/.test(t)) return "blue";
+  return "other";
+}
+function suggestBottomFor(top, shoes, salt) {
+  var fam = topColourFamily(top);
+  var smart = ["Blazers", "Suits", "Button downs", "Shirts"].indexOf(top.category) !== -1 || /loafer|slipper|brogue|oxford|derby/i.test(shoes ? shoes.name : "");
+  var table = smart ? {
+    navy: ["cream-linen", "stone"], black: ["stone", "cream-linen"], grey: ["navy-trousers", "cream-linen"],
+    cream: ["navy-trousers", "charcoal-trousers"], earth: ["cream-linen", "navy-trousers"], olive: ["cream-linen", "stone"],
+    burgundy: ["charcoal-trousers", "cream-linen"], rust: ["cream-linen", "charcoal-trousers"], blue: ["cream-linen", "navy-trousers"],
+    pattern: ["stone", "navy-trousers"], other: ["stone", "cream-linen"]
+  } : {
+    navy: ["white-jeans", "khaki-chinos", "beige-shorts"], black: ["black-jeans", "stone", "indigo-jeans"],
+    grey: ["indigo-jeans", "white-jeans", "navy-shorts"], cream: ["indigo-jeans", "olive-chinos", "navy-shorts"],
+    earth: ["cream-linen", "indigo-jeans", "white-jeans"], olive: ["cream-linen", "black-jeans", "khaki-chinos"],
+    burgundy: ["indigo-jeans", "cream-linen", "black-jeans"], rust: ["cream-linen", "indigo-jeans"],
+    blue: ["white-jeans", "khaki-chinos", "indigo-jeans"], pattern: ["white-jeans", "stone", "indigo-jeans"],
+    other: ["indigo-jeans", "cream-linen", "khaki-chinos"]
+  };
+  var opts = table[fam] || table.other;
+  return SUGGESTED_BOTTOMS[opts[Math.abs(salt || 0) % opts.length]];
+}
+
 
 function buildLook(desc, occasion, season, opts) {
   opts = opts || {};
@@ -10258,7 +10353,7 @@ function doStyleFromForm() {
       return;
     }
     renderOptions(buildSixLooks(finalDesc, occasion, season, opts), { desc: finalDesc, occasion: occasion, season: season, opts: opts });
-    toast("Six takes created — " + (studioSource === "wardrobe" ? "all from your wardrobe." : studioSource === "inspo" ? "all inspo." : "combo: yours + pieces to buy."));
+    toast("Six takes created — " + (studioSource === "wardrobe" ? "only from your wardrobe." : studioSource === "inspo" ? "only inspo." : "combo: yours + pieces to buy."));
   } catch (err) {
     /* Create must never fail silently: deal six instead. */
     try {
@@ -10284,11 +10379,13 @@ document.getElementById("examples").addEventListener("click", function (e) {
   if (closetBtn) {
     var cl = buildClosetLooks();
     if (!cl || !cl.length) {
-      toast("Your closet needs a top and a bottom — or a pair of shoes — before it can build outfits — add pieces in the Closet and it builds from them.");
+      toast("Your closet needs a top and a pair of shoes before it can build outfits — add pieces in the Closet and it builds from them.");
       return;
     }
-    renderOptions(cl, { desc: "From my closet", occasion: "", season: "", opts: { basis: "both", source: "wardrobe" } });
-    toast(cl.length + (cl.length === 1 ? " outfit" : " outfits") + " built from your closet.");
+    dealFromWardrobe();
+    var fwSec = document.getElementById("from-wardrobe");
+    if (fwSec) fwSec.scrollIntoView({ behavior: "smooth", block: "start" });
+    toast(cl.length + (cl.length === 1 ? " outfit" : " outfits") + " from your wardrobe — in the From wardrobe section below.");
     return;
   }
   var btn = e.target.closest("[data-example]");
@@ -10725,7 +10822,8 @@ var wardrobeItems = [
     colourHex: "#ece1c9",
     extraColours: [],
     notes: "Short-sleeve, open-mesh textured knit, one-button open (Johnny) collar, ecru/cream.",
-    photo: "assets/photos/dd7aaaad2dd2.jpg"
+    photo: "assets/photos/289bfd3bc43e.jpg",
+    originalPhoto: "assets/photos/dd7aaaad2dd2.jpg"
   },
   {
     id: "seed-octobre-tee",
@@ -10735,7 +10833,8 @@ var wardrobeItems = [
     colourHex: "#232a3d",
     extraColours: [{ name: "Cream", hex: "#e8e0c8" }],
     notes: "Short-sleeve crewneck knit tee, cream tipping at collar and cuffs.",
-    photo: "assets/photos/76a9c73e859f.jpg"
+    photo: "assets/photos/cccd6ffc5d5b.jpg",
+    originalPhoto: "assets/photos/76a9c73e859f.jpg"
   },
   {
     id: "seed-zegna-tee",
@@ -10745,7 +10844,8 @@ var wardrobeItems = [
     colourHex: "#17171a",
     extraColours: [],
     notes: "Ermenegildo Zegna 12milmil12 — short-sleeve fine-knit crewneck tee.",
-    photo: "assets/photos/acf3630a0eb9.jpg"
+    photo: "assets/photos/d9094daf4f47.jpg",
+    originalPhoto: "assets/photos/acf3630a0eb9.jpg"
   },
   {
     id: "seed-whitesville-navy",
@@ -10755,7 +10855,8 @@ var wardrobeItems = [
     colourHex: "#252c3e",
     extraColours: [],
     notes: "Short-sleeve crewneck heavy-weight tee.",
-    photo: "assets/photos/97a7b0c81dfa.jpg"
+    photo: "assets/photos/331c5a7d52d7.jpg",
+    originalPhoto: "assets/photos/97a7b0c81dfa.jpg"
   },
   {
     id: "seed-orlebar-tee",
@@ -10765,7 +10866,8 @@ var wardrobeItems = [
     colourHex: "#5a6b7d",
     extraColours: [],
     notes: "Linen-look marl tee with chest pocket, size M.",
-    photo: "assets/photos/f141fb533140.jpg"
+    photo: "assets/photos/84f56ae82c62.jpg",
+    originalPhoto: "assets/photos/f141fb533140.jpg"
   },
   {
     id: "seed-theory-navy",
@@ -10775,7 +10877,8 @@ var wardrobeItems = [
     colourHex: "#232838",
     extraColours: [],
     notes: "Short-sleeve crewneck knit tee.",
-    photo: "assets/photos/31901a21df8d.jpg"
+    photo: "assets/photos/0d869738ee51.jpg",
+    originalPhoto: "assets/photos/31901a21df8d.jpg"
   },
   {
     id: "seed-sfc-knit",
@@ -10785,7 +10888,8 @@ var wardrobeItems = [
     colourHex: "#141416",
     extraColours: [],
     notes: "Textured basketweave/checkerboard crewneck knit.",
-    photo: "assets/photos/c30cda4d72c5.jpg"
+    photo: "assets/photos/f49d82de16e8.jpg",
+    originalPhoto: "assets/photos/c30cda4d72c5.jpg"
   },
   {
     id: "seed-corridor-tee",
@@ -10795,7 +10899,8 @@ var wardrobeItems = [
     colourHex: "#3c3f45",
     extraColours: [],
     notes: "Washed/faded tee with chest pocket, size S.",
-    photo: "assets/photos/494c1f5ddf08.jpg"
+    photo: "assets/photos/cc93a210e480.jpg",
+    originalPhoto: "assets/photos/494c1f5ddf08.jpg"
   },
   {
     id: "seed-theory-charcoal",
@@ -10805,7 +10910,8 @@ var wardrobeItems = [
     colourHex: "#4a4d52",
     extraColours: [],
     notes: "Short-sleeve knit tee, size S.",
-    photo: "assets/photos/2976e028e565.jpg"
+    photo: "assets/photos/1f1164448e7e.jpg",
+    originalPhoto: "assets/photos/2976e028e565.jpg"
   },
   {
     id: "seed-cucinelli-grey",
@@ -10815,7 +10921,8 @@ var wardrobeItems = [
     colourHex: "#b9b7b2",
     extraColours: [],
     notes: "Slim-fit crewneck tee.",
-    photo: "assets/photos/1e66445efdf3.jpg"
+    photo: "assets/photos/42afd412b88d.jpg",
+    originalPhoto: "assets/photos/1e66445efdf3.jpg"
   },
   {
     id: "seed-buckmason-oatmeal",
@@ -10825,7 +10932,8 @@ var wardrobeItems = [
     colourHex: "#ddd5c2",
     extraColours: [],
     notes: "Lightweight long-sleeve knit crewneck.",
-    photo: "assets/photos/84b2d50a150f.jpg"
+    photo: "assets/photos/48555cc64cd1.jpg",
+    originalPhoto: "assets/photos/84b2d50a150f.jpg"
   },
   {
     id: "seed-buckmason-taupe",
@@ -10835,7 +10943,8 @@ var wardrobeItems = [
     colourHex: "#8d8172",
     extraColours: [],
     notes: "Lightweight long-sleeve knit crewneck.",
-    photo: "assets/photos/63b227994d16.jpg"
+    photo: "assets/photos/ac6d5d214b00.jpg",
+    originalPhoto: "assets/photos/63b227994d16.jpg"
   },
   {
     id: "seed-frame-tee",
@@ -10845,7 +10954,8 @@ var wardrobeItems = [
     colourHex: "#f0e8d8",
     extraColours: [],
     notes: "Short-sleeve fine horizontal-rib knit tee, size S.",
-    photo: "assets/photos/82225d95ed66.jpg"
+    photo: "assets/photos/ce19b7f14fe2.jpg",
+    originalPhoto: "assets/photos/82225d95ed66.jpg"
   },
   {
     id: "seed-unbound-tee",
@@ -10855,7 +10965,8 @@ var wardrobeItems = [
     colourHex: "#f3eee1",
     extraColours: [],
     notes: "Short-sleeve crewneck merino tee.",
-    photo: "assets/photos/2400677fac5b.jpg"
+    photo: "assets/photos/87f8a0090530.jpg",
+    originalPhoto: "assets/photos/2400677fac5b.jpg"
   },
   {
     id: "seed-acne-tee",
@@ -10865,7 +10976,8 @@ var wardrobeItems = [
     colourHex: "#f7f5f0",
     extraColours: [],
     notes: "Short-sleeve tee with small chest face patch.",
-    photo: "assets/photos/dbea53fa8866.jpg"
+    photo: "assets/photos/635c36bb0c73.jpg",
+    originalPhoto: "assets/photos/dbea53fa8866.jpg"
   },
   {
     id: "seed-altea-tee",
@@ -10875,7 +10987,8 @@ var wardrobeItems = [
     colourHex: "#c8b294",
     extraColours: [],
     notes: "Short-sleeve fine-knit crewneck tee, size S.",
-    photo: "assets/photos/bb10ce0c1f00.jpg"
+    photo: "assets/photos/228f77ffd143.jpg",
+    originalPhoto: "assets/photos/bb10ce0c1f00.jpg"
   },
   {
     id: "seed-merz-olive",
@@ -10885,7 +10998,8 @@ var wardrobeItems = [
     colourHex: "#6b6f57",
     extraColours: [],
     notes: "Short-sleeve tee, size 5/M.",
-    photo: "assets/photos/cae8d2089fe2.jpg"
+    photo: "assets/photos/d56a8492d9d3.jpg",
+    originalPhoto: "assets/photos/cae8d2089fe2.jpg"
   },
   {
     id: "seed-cucinelli-stripe",
@@ -10895,7 +11009,8 @@ var wardrobeItems = [
     colourHex: "#c0beb9",
     extraColours: [{ name: "Burgundy", hex: "#5d2a33" }],
     notes: "Short-sleeve tee with burgundy/grey stripe trim at the neck.",
-    photo: "assets/photos/174f8ca5a908.jpg"
+    photo: "assets/photos/29eb36238f25.jpg",
+    originalPhoto: "assets/photos/174f8ca5a908.jpg"
   },
   {
     id: "seed-whitesville-grey",
@@ -10905,7 +11020,8 @@ var wardrobeItems = [
     colourHex: "#8f9092",
     extraColours: [],
     notes: "Short-sleeve heavy-weight tee, size M.",
-    photo: "assets/photos/06b66a39a143.jpg"
+    photo: "assets/photos/8bf1b37685ac.jpg",
+    originalPhoto: "assets/photos/06b66a39a143.jpg"
   },
   {
     id: "seed-asket-tee",
@@ -10915,7 +11031,8 @@ var wardrobeItems = [
     colourHex: "#efe7d6",
     extraColours: [],
     notes: "Short-sleeve crewneck tee.",
-    photo: "assets/photos/a38befa37834.jpg"
+    photo: "assets/photos/fc265d782068.jpg",
+    originalPhoto: "assets/photos/a38befa37834.jpg"
   },
   {
     id: "seed-alexmill-tee",
@@ -10925,7 +11042,8 @@ var wardrobeItems = [
     colourHex: "#f8f6f1",
     extraColours: [],
     notes: "Short-sleeve slub pocket tee.",
-    photo: "assets/photos/974ecd05ec1f.jpg"
+    photo: "assets/photos/3f4340d0f749.jpg",
+    originalPhoto: "assets/photos/974ecd05ec1f.jpg"
   },
   {
     id: "seed-massimo-white",
@@ -10935,7 +11053,8 @@ var wardrobeItems = [
     colourHex: "#f8f6f1",
     extraColours: [],
     notes: "Short-sleeve pocket tee.",
-    photo: "assets/photos/be60f4c83eb8.jpg"
+    photo: "assets/photos/38d7ac2121f2.jpg",
+    originalPhoto: "assets/photos/be60f4c83eb8.jpg"
   },
   {
     id: "seed-massimo-brown",
@@ -10945,7 +11064,8 @@ var wardrobeItems = [
     colourHex: "#5d4a3a",
     extraColours: [],
     notes: "100% linen long-sleeve lightweight knit crewneck.",
-    photo: "assets/photos/f52ab8f3ef54.jpg"
+    photo: "assets/photos/00bbee999215.jpg",
+    originalPhoto: "assets/photos/f52ab8f3ef54.jpg"
   },
   {
     id: "seed-toddsnyder-yellow",
@@ -10955,7 +11075,8 @@ var wardrobeItems = [
     colourHex: "#f2dd7e",
     extraColours: [],
     notes: "Short-sleeve pocket tee.",
-    photo: "assets/photos/adc9cc3c3b51.jpg"
+    photo: "assets/photos/ba439f3d0ec1.jpg",
+    originalPhoto: "assets/photos/adc9cc3c3b51.jpg"
   },
   {
     id: "seed-zigzag-tee",
@@ -10965,7 +11086,8 @@ var wardrobeItems = [
     colourHex: "#f7f4ec",
     extraColours: [{ name: "Navy", hex: "#26304d" }],
     notes: "Short-sleeve white tee with navy chevron/zigzag stripes across the body, made in Italy. Brand unknown — label not legible.",
-    photo: "assets/photos/aef25662ac90.jpg"
+    photo: "assets/photos/a0d510d4f4d0.jpg",
+    originalPhoto: "assets/photos/aef25662ac90.jpg"
   },
   {
     id: "seed-alexmill-polo",
@@ -10975,7 +11097,8 @@ var wardrobeItems = [
     colourHex: "#f6f3ec",
     extraColours: [],
     notes: "Short-sleeve knit polo, one-button placket, chest pocket, slub knit.",
-    photo: "assets/photos/93f1a6a3901d.jpg"
+    photo: "assets/photos/5714c4f3e8ac.jpg",
+    originalPhoto: "assets/photos/93f1a6a3901d.jpg"
   },
   {
     id: "seed-cucinelli-white-tee",
@@ -10985,7 +11108,8 @@ var wardrobeItems = [
     colourHex: "#f7f4ee",
     extraColours: [],
     notes: "Short-sleeve fine-knit crewneck tee, ribbed hem and cuffs.",
-    photo: "assets/photos/add5e0661464.jpg"
+    photo: "assets/photos/73e485c65932.jpg",
+    originalPhoto: "assets/photos/add5e0661464.jpg"
   },
   {
     id: "seed-loropiana-charcoal-polo",
@@ -10995,7 +11119,8 @@ var wardrobeItems = [
     colourHex: "#3a3a3c",
     extraColours: [],
     notes: "Short-sleeve knit polo, fine horizontal rib.",
-    photo: "assets/photos/fd784e4ae80a.jpg"
+    photo: "assets/photos/e776ee4f6b5f.jpg",
+    originalPhoto: "assets/photos/fd784e4ae80a.jpg"
   },
   {
     id: "seed-cucinelli-charcoal-polo",
@@ -11005,7 +11130,8 @@ var wardrobeItems = [
     colourHex: "#43413f",
     extraColours: [{ name: "White", hex: "#f7f4ee" }],
     notes: "Short-sleeve polo, white tipping on collar and cuffs.",
-    photo: "assets/photos/e4e6ffe093e7.jpg"
+    photo: "assets/photos/5140b394dcc5.jpg",
+    originalPhoto: "assets/photos/e4e6ffe093e7.jpg"
   },
   {
     id: "seed-sunspel-polo",
@@ -11015,7 +11141,8 @@ var wardrobeItems = [
     colourHex: "#8d8d90",
     extraColours: [],
     notes: "Short-sleeve piqué polo, chest pocket, size M.",
-    photo: "assets/photos/22ccb0e92e62.jpg"
+    photo: "assets/photos/eaf04e47deac.jpg",
+    originalPhoto: "assets/photos/22ccb0e92e62.jpg"
   },
   {
     id: "seed-cucinelli-breton-polo",
@@ -11025,7 +11152,8 @@ var wardrobeItems = [
     colourHex: "#26304d",
     extraColours: [{ name: "White", hex: "#f7f4ee" }],
     notes: "Slim fit, short-sleeve, chest pocket.",
-    photo: "assets/photos/debd8f96f495.jpg"
+    photo: "assets/photos/7b047b338c9f.jpg",
+    originalPhoto: "assets/photos/debd8f96f495.jpg"
   },
   {
     id: "seed-cucinelli-stripe-polo",
@@ -11035,7 +11163,8 @@ var wardrobeItems = [
     colourHex: "#a9a49c",
     extraColours: [{ name: "Navy", hex: "#26304d" }],
     notes: "Grey top with navy Breton stripes across the body, two-button.",
-    photo: "assets/photos/01b7bde9e8a2.jpg"
+    photo: "assets/photos/72526560b8b1.jpg",
+    originalPhoto: "assets/photos/01b7bde9e8a2.jpg"
   },
   {
     id: "seed-cucinelli-beige-polo",
@@ -11045,7 +11174,8 @@ var wardrobeItems = [
     colourHex: "#d8cbb2",
     extraColours: [],
     notes: "Fine horizontal pinstripes, short-sleeve.",
-    photo: "assets/photos/cb84c01aed4d.jpg"
+    photo: "assets/photos/4ce27e5e4be7.jpg",
+    originalPhoto: "assets/photos/cb84c01aed4d.jpg"
   },
   {
     id: "seed-cucinelli-cream-tipped-polo",
@@ -11055,7 +11185,8 @@ var wardrobeItems = [
     colourHex: "#f1e9d6",
     extraColours: [{ name: "Navy", hex: "#26304d" }, { name: "Taupe", hex: "#a08b6d" }],
     notes: "Piqué polo, navy and taupe stripes on the collar.",
-    photo: "assets/photos/953782dc00e1.jpg"
+    photo: "assets/photos/c4cf3a7c3fc0.jpg",
+    originalPhoto: "assets/photos/953782dc00e1.jpg"
   },
   {
     id: "seed-cucinelli-brown-stripe-polo",
@@ -11065,7 +11196,8 @@ var wardrobeItems = [
     colourHex: "#f5f1e8",
     extraColours: [{ name: "Brown", hex: "#7c5a3e" }],
     notes: "White with thin brown horizontal stripes.",
-    photo: "assets/photos/6a2d35338774.jpg"
+    photo: "assets/photos/c99f1a2ab659.jpg",
+    originalPhoto: "assets/photos/6a2d35338774.jpg"
   },
   {
     id: "seed-cucinelli-ribbed-polo",
@@ -11075,7 +11207,8 @@ var wardrobeItems = [
     colourHex: "#f2ecdc",
     extraColours: [],
     notes: "Vertical rib knit, horn buttons, chest pocket with grey trim, tipped collar edges, short-sleeve.",
-    photo: "assets/photos/5bef82b5636d.jpg"
+    photo: "assets/photos/66539c1530cc.jpg",
+    originalPhoto: "assets/photos/5bef82b5636d.jpg"
   },
   {
     id: "seed-missoni-navy-polo",
@@ -11085,7 +11218,8 @@ var wardrobeItems = [
     colourHex: "#232c44",
     extraColours: [],
     notes: "Signature wave/chevron knit, short-sleeve.",
-    photo: "assets/photos/e3b0634287b6.jpg"
+    photo: "assets/photos/01eaf8a9229c.jpg",
+    originalPhoto: "assets/photos/e3b0634287b6.jpg"
   },
   {
     id: "seed-cucinelli-navy-polo",
@@ -11095,7 +11229,8 @@ var wardrobeItems = [
     colourHex: "#232a3d",
     extraColours: [],
     notes: "Slim fit, tan and white striped cuff bands.",
-    photo: "assets/photos/a5815af40b66.jpg"
+    photo: "assets/photos/74bf9f021f1a.jpg",
+    originalPhoto: "assets/photos/a5815af40b66.jpg"
   },
   {
     id: "seed-loropiana-navy-polo",
@@ -11105,7 +11240,8 @@ var wardrobeItems = [
     colourHex: "#26304d",
     extraColours: [{ name: "Tan", hex: "#b99a6b" }],
     notes: "Tan trim on collar and placket.",
-    photo: "assets/photos/5d62b4847aff.jpg"
+    photo: "assets/photos/ad4eb917633c.jpg",
+    originalPhoto: "assets/photos/5d62b4847aff.jpg"
   },
   {
     id: "seed-zegna-polo",
@@ -11115,7 +11251,8 @@ var wardrobeItems = [
     colourHex: "#17171a",
     extraColours: [],
     notes: "Technical knit polo, size S.",
-    photo: "assets/photos/d2f36db7e820.jpg"
+    photo: "assets/photos/60068aa893f4.jpg",
+    originalPhoto: "assets/photos/d2f36db7e820.jpg"
   },
   {
     id: "seed-theory-polo",
@@ -11125,7 +11262,8 @@ var wardrobeItems = [
     colourHex: "#26304d",
     extraColours: [{ name: "Grey", hex: "#9a9a9c" }, { name: "White", hex: "#f7f4ee" }],
     notes: "Grey, white and navy striped collar, size S.",
-    photo: "assets/photos/0a428d80ad2e.jpg"
+    photo: "assets/photos/8ddda1b49cf7.jpg",
+    originalPhoto: "assets/photos/0a428d80ad2e.jpg"
   },
   {
     id: "seed-loropiana-sage-polo",
@@ -11135,7 +11273,8 @@ var wardrobeItems = [
     colourHex: "#a9bfa5",
     extraColours: [],
     notes: "Pale green linen polo, one-button, size XS.",
-    photo: "assets/photos/933281811b35.jpg"
+    photo: "assets/photos/73a67351e87c.jpg",
+    originalPhoto: "assets/photos/933281811b35.jpg"
   },
   {
     id: "seed-cucinelli-olive-polo",
@@ -11145,7 +11284,8 @@ var wardrobeItems = [
     colourHex: "#7a7a63",
     extraColours: [],
     notes: "Olive-taupe knit polo, one-button open collar.",
-    photo: "assets/photos/fcad4846c89d.jpg"
+    photo: "assets/photos/9c54fbef1ebe.jpg",
+    originalPhoto: "assets/photos/fcad4846c89d.jpg"
   },
   {
     id: "seed-skyblue-polo",
@@ -11155,7 +11295,8 @@ var wardrobeItems = [
     colourHex: "#a8ccd8",
     extraColours: [],
     notes: "One-button open collar, ribbed cuffs and hem. Brand unknown — label illegible.",
-    photo: "assets/photos/b6afe0f2c37e.jpg"
+    photo: "assets/photos/04a8dd523c74.jpg",
+    originalPhoto: "assets/photos/b6afe0f2c37e.jpg"
   },
   {
     id: "seed-cucinelli-dustyblue-polo",
@@ -11165,7 +11306,8 @@ var wardrobeItems = [
     colourHex: "#7d93a8",
     extraColours: [],
     notes: "Short-sleeve knit polo, two-button.",
-    photo: "assets/photos/0c8bfcf574c7.jpg"
+    photo: "assets/photos/bd8728361f98.jpg",
+    originalPhoto: "assets/photos/0c8bfcf574c7.jpg"
   },
   {
     id: "seed-loropiana-tipped-polo",
@@ -11175,7 +11317,8 @@ var wardrobeItems = [
     colourHex: "#26345c",
     extraColours: [{ name: "Teal", hex: "#2e7d74" }, { name: "White", hex: "#f7f4ee" }],
     notes: "Teal and white tipping on collar and placket, size 48.",
-    photo: "assets/photos/b0ce45edcd57.jpg"
+    photo: "assets/photos/9e2efb2eec15.jpg",
+    originalPhoto: "assets/photos/b0ce45edcd57.jpg"
   },
   {
     id: "seed-cucinelli-skyblue-polo",
@@ -11185,7 +11328,8 @@ var wardrobeItems = [
     colourHex: "#a9c6d8",
     extraColours: [{ name: "White", hex: "#f7f4ee" }, { name: "Grey", hex: "#9a9a9c" }],
     notes: "Slim fit, white and grey striped collar.",
-    photo: "assets/photos/66e22e794735.jpg"
+    photo: "assets/photos/6d23c4c269b2.jpg",
+    originalPhoto: "assets/photos/66e22e794735.jpg"
   },
   {
     id: "seed-cucinelli-terracotta-polo",
@@ -11195,7 +11339,8 @@ var wardrobeItems = [
     colourHex: "#b4664a",
     extraColours: [],
     notes: "Rust piqué polo, grey trim at cuffs and hem.",
-    photo: "assets/photos/0d863b3962ef.jpg"
+    photo: "assets/photos/9bdd2cb8017d.jpg",
+    originalPhoto: "assets/photos/0d863b3962ef.jpg"
   },
   {
     id: "seed-cucinelli-burgundy-polo",
@@ -11205,7 +11350,8 @@ var wardrobeItems = [
     colourHex: "#7e2f3a",
     extraColours: [],
     notes: "Lightweight sheer linen knit polo, grey cuff trim.",
-    photo: "assets/photos/b373e66c49ad.jpg"
+    photo: "assets/photos/61ea0badf1bd.jpg",
+    originalPhoto: "assets/photos/b373e66c49ad.jpg"
   },
   {
     id: "seed-isaia-burgundy-polo",
@@ -11215,7 +11361,8 @@ var wardrobeItems = [
     colourHex: "#7e2f3a",
     extraColours: [{ name: "Cream", hex: "#efe7d6" }],
     notes: "Cream striped collar, one-button.",
-    photo: "assets/photos/baa344dba7da.jpg"
+    photo: "assets/photos/d6baa9413174.jpg",
+    originalPhoto: "assets/photos/baa344dba7da.jpg"
   },
   {
     id: "seed-missoni-burgundy-polo",
@@ -11225,7 +11372,8 @@ var wardrobeItems = [
     colourHex: "#6e2438",
     extraColours: [{ name: "Navy", hex: "#26304d" }],
     notes: "Burgundy and navy wave knit, plum collar.",
-    photo: "assets/photos/00c0da282b35.jpg"
+    photo: "assets/photos/a56925871f3c.jpg",
+    originalPhoto: "assets/photos/00c0da282b35.jpg"
   },
   {
     id: "seed-cucinelli-slate-polo",
@@ -11235,7 +11383,8 @@ var wardrobeItems = [
     colourHex: "#5d6a72",
     extraColours: [{ name: "White", hex: "#f7f4ee" }],
     notes: "Slate grey with white pinstripes, slim fit.",
-    photo: "assets/photos/bdfac065d134.jpg"
+    photo: "assets/photos/58e36e6f3b1e.jpg",
+    originalPhoto: "assets/photos/bdfac065d134.jpg"
   },
   {
     id: "seed-loropiana-espadrilles",
@@ -11245,7 +11394,8 @@ var wardrobeItems = [
     colourHex: "#a9c6d4",
     extraColours: [],
     notes: "Slip-on knit espadrilles, jute sole, leather pull tab.",
-    photo: "assets/photos/01361316bcd9.jpg"
+    photo: "assets/photos/0eb3c06dd242.jpg",
+    originalPhoto: "assets/photos/01361316bcd9.jpg"
   },
   {
     id: "seed-vibi-mustard",
@@ -11255,7 +11405,8 @@ var wardrobeItems = [
     colourHex: "#c9973f",
     extraColours: [{ name: "Cream", hex: "#efe7d6" }],
     notes: "Woven mustard and cream check furlane slippers.",
-    photo: "assets/photos/52b9ffc3b4df.jpg"
+    photo: "assets/photos/84155e8fd479.jpg",
+    originalPhoto: "assets/photos/52b9ffc3b4df.jpg"
   },
   {
     id: "seed-vibi-navy",
@@ -11265,7 +11416,8 @@ var wardrobeItems = [
     colourHex: "#26304d",
     extraColours: [{ name: "Cream", hex: "#efe7d6" }],
     notes: "Navy and cream Breton stripe furlane slippers.",
-    photo: "assets/photos/7c3e2a5e81a8.jpg"
+    photo: "assets/photos/609536479732.jpg",
+    originalPhoto: "assets/photos/7c3e2a5e81a8.jpg"
   },
   {
     id: "seed-loropiana-grey-sneakers",
@@ -11275,7 +11427,8 @@ var wardrobeItems = [
     colourHex: "#7b7268",
     extraColours: [],
     notes: "Taupe-grey suede and mesh tennis sneakers.",
-    photo: "assets/photos/246315e14296.jpg"
+    photo: "assets/photos/6f8231b82235.jpg",
+    originalPhoto: "assets/photos/246315e14296.jpg"
   },
   {
     id: "seed-adidas-sneakers",
@@ -11285,7 +11438,8 @@ var wardrobeItems = [
     colourHex: "#efe7da",
     extraColours: [{ name: "Blush", hex: "#d9b8a6" }],
     notes: "White and cream leather sneakers, blush suede stripes, gum sole. Collaboration — partner name not legible.",
-    photo: "assets/photos/38a7a31c0265.jpg"
+    photo: "assets/photos/d0b35250559a.jpg",
+    originalPhoto: "assets/photos/38a7a31c0265.jpg"
   },
   {
     id: "seed-grey-court-sneakers",
@@ -11295,7 +11449,8 @@ var wardrobeItems = [
     colourHex: "#b9bcbe",
     extraColours: [{ name: "White", hex: "#f7f4ee" }],
     notes: "Leather court sneakers, perforated toe. Brand unknown — not legible.",
-    photo: "assets/photos/bc949f1f9e2b.jpg"
+    photo: "assets/photos/2beffd278ab4.jpg",
+    originalPhoto: "assets/photos/bc949f1f9e2b.jpg"
   },
   {
     id: "seed-stubbs-slippers",
@@ -11305,7 +11460,8 @@ var wardrobeItems = [
     colourHex: "#5d84a8",
     extraColours: [{ name: "Navy", hex: "#26304d" }, { name: "Cream", hex: "#efe7d6" }],
     notes: "Needlepoint slippers on a sneaker sole, tan leather trim.",
-    photo: "assets/photos/51d0bd772eb7.jpg"
+    photo: "assets/photos/41d3ce31e34d.jpg",
+    originalPhoto: "assets/photos/51d0bd772eb7.jpg"
   },
   {
     id: "seed-loropiana-white-sneakers",
@@ -11315,7 +11471,8 @@ var wardrobeItems = [
     colourHex: "#f4efe4",
     extraColours: [{ name: "Brown", hex: "#7c5a3e" }],
     notes: "Cream-white leather tennis sneakers, brown heel tab.",
-    photo: "assets/photos/e12c7c43452c.jpg"
+    photo: "assets/photos/41ba01b1c447.jpg",
+    originalPhoto: "assets/photos/e12c7c43452c.jpg"
   },
   {
     id: "seed-loropiana-runners",
@@ -11325,7 +11482,8 @@ var wardrobeItems = [
     colourHex: "#ddd5c2",
     extraColours: [{ name: "Teal", hex: "#2e7d74" }, { name: "Mustard", hex: "#c9973f" }, { name: "Grey", hex: "#8d8578" }],
     notes: "Runner sneakers — cream and grey with teal and mustard panels.",
-    photo: "assets/photos/8de3b5976a7c.jpg"
+    photo: "assets/photos/230604c83947.jpg",
+    originalPhoto: "assets/photos/8de3b5976a7c.jpg"
   },
   {
     id: "seed-loropiana-summer-walk",
@@ -11335,7 +11493,8 @@ var wardrobeItems = [
     colourHex: "#3d2b23",
     extraColours: [],
     notes: "Suede Summer Walk loafers.",
-    photo: "assets/photos/63ea6864c862.jpg"
+    photo: "assets/photos/c96390ec61c6.jpg",
+    originalPhoto: "assets/photos/63ea6864c862.jpg"
   },
   {
     id: "seed-vibi-black-velvet-furlane",
@@ -11345,7 +11504,8 @@ var wardrobeItems = [
     colourHex: "#17150f",
     extraColours: [{ name: "Tan", hex: "#b98d4f" }],
     notes: "Black velvet furlane with tan grosgrain trim.",
-    photo: "assets/photos/8bc42f565095.jpg"
+    photo: "assets/photos/db361533ae3a.jpg",
+    originalPhoto: "assets/photos/8bc42f565095.jpg"
   },
   {
     id: "seed-vibi-tan-velvet-furlane",
@@ -11355,7 +11515,8 @@ var wardrobeItems = [
     colourHex: "#c2a878",
     extraColours: [],
     notes: "Tan velvet furlane. Size 42.",
-    photo: "assets/photos/1008501155a9.jpg"
+    photo: "assets/photos/aa656e11aa5b.jpg",
+    originalPhoto: "assets/photos/1008501155a9.jpg"
   },
   {
     id: "seed-edwardgreen-darkbrown-loafers",
@@ -11365,7 +11526,8 @@ var wardrobeItems = [
     colourHex: "#4a3428",
     extraColours: [],
     notes: "Dark brown suede penny loafers.",
-    photo: "assets/photos/5c9700a790ab.jpg"
+    photo: "assets/photos/169bac2277c1.jpg",
+    originalPhoto: "assets/photos/5c9700a790ab.jpg"
   },
   {
     id: "seed-edwardgreen-tan-loafers",
@@ -11375,7 +11537,8 @@ var wardrobeItems = [
     colourHex: "#9c6b4a",
     extraColours: [],
     notes: "Tan suede penny loafers.",
-    photo: "assets/photos/4b75f919236b.jpg"
+    photo: "assets/photos/b95402cfe41d.jpg",
+    originalPhoto: "assets/photos/4b75f919236b.jpg"
   },
   {
     id: "seed-baudoin-rust-tassel-loafers",
@@ -11385,7 +11548,8 @@ var wardrobeItems = [
     colourHex: "#8a4a2a",
     extraColours: [],
     notes: "Rust suede tassel loafers.",
-    photo: "assets/photos/1becae8b6079.jpg"
+    photo: "assets/photos/ce716373b008.jpg",
+    originalPhoto: "assets/photos/1becae8b6079.jpg"
   },
   {
     id: "seed-gucci-green-eel-loafers",
@@ -11395,7 +11559,8 @@ var wardrobeItems = [
     colourHex: "#1e3a2c",
     extraColours: [{ name: "Gold", hex: "#b08d3f" }],
     notes: "Dark green eel-skin horsebit loafers, gold bit.",
-    photo: "assets/photos/8f45110e90ab.jpg"
+    photo: "assets/photos/8cb916c16897.jpg",
+    originalPhoto: "assets/photos/8f45110e90ab.jpg"
   },
   {
     id: "seed-balenciaga-black-loafers",
@@ -11405,7 +11570,8 @@ var wardrobeItems = [
     colourHex: "#141414",
     extraColours: [],
     notes: "Polished black leather penny loafers.",
-    photo: "assets/photos/7b2355d1c38f.jpg"
+    photo: "assets/photos/703b33087b1b.jpg",
+    originalPhoto: "assets/photos/7b2355d1c38f.jpg"
   },
   {
     id: "seed-vibi-red-velvet-furlane",
@@ -11415,7 +11581,8 @@ var wardrobeItems = [
     colourHex: "#9e1b30",
     extraColours: [],
     notes: "Red velvet furlane.",
-    photo: "assets/photos/1f9d99fa5c79.jpg"
+    photo: "assets/photos/d1802e9663e1.jpg",
+    originalPhoto: "assets/photos/1f9d99fa5c79.jpg"
   },
   {
     id: "seed-gucci-twotone-loafers",
@@ -11425,7 +11592,8 @@ var wardrobeItems = [
     colourHex: "#efe9dd",
     extraColours: [{ name: "Black", hex: "#141414" }, { name: "Gold", hex: "#b08d3f" }],
     notes: "Two-tone horsebit loafers — white vamp, black trim, gold bit.",
-    photo: "assets/photos/50d4f4ec468b.jpg"
+    photo: "assets/photos/3d2a4500ad9d.jpg",
+    originalPhoto: "assets/photos/50d4f4ec468b.jpg"
   },
   {
     id: "seed-fortela-concho-slippers",
@@ -11435,7 +11603,8 @@ var wardrobeItems = [
     colourHex: "#b08d5f",
     extraColours: [{ name: "Turquoise", hex: "#3fa7a0" }, { name: "Silver", hex: "#b9bcbe" }],
     notes: "Tan suede slippers with turquoise and silver concho studs. Size 41.",
-    photo: "assets/photos/a18976450cd3.jpg"
+    photo: "assets/photos/d5d147124f51.jpg",
+    originalPhoto: "assets/photos/a18976450cd3.jpg"
   },
   {
     id: "seed-vibi-rust-corduroy-furlane",
@@ -11445,7 +11614,8 @@ var wardrobeItems = [
     colourHex: "#9a4f24",
     extraColours: [{ name: "Dark brown", hex: "#3d2b23" }],
     notes: "Rust ribbed corduroy-velvet furlane, dark brown trim.",
-    photo: "assets/photos/15ecdb334ffb.jpg"
+    photo: "assets/photos/1686a0e5b87c.jpg",
+    originalPhoto: "assets/photos/15ecdb334ffb.jpg"
   },
   {
     id: "seed-armani-cream-loafers",
@@ -11455,7 +11625,8 @@ var wardrobeItems = [
     colourHex: "#e6ddcb",
     extraColours: [],
     notes: "Cream leather loafers with braided woven trim.",
-    photo: "assets/photos/5925d273afe2.jpg"
+    photo: "assets/photos/f3a8698d7824.jpg",
+    originalPhoto: "assets/photos/5925d273afe2.jpg"
   },
   {
     id: "seed-loropiana-flexy-sneakers",
@@ -11465,7 +11636,8 @@ var wardrobeItems = [
     colourHex: "#e8e0cd",
     extraColours: [{ name: "Grey", hex: "#a49a88" }],
     notes: "360 LP Flexy Walk knit sneakers, beige and grey two-tone.",
-    photo: "assets/photos/47960be4c93d.jpg"
+    photo: "assets/photos/426cfa6c8430.jpg",
+    originalPhoto: "assets/photos/47960be4c93d.jpg"
   },
   {
     id: "seed-stubbs-navy-slipons",
@@ -11475,7 +11647,8 @@ var wardrobeItems = [
     colourHex: "#232c3f",
     extraColours: [{ name: "White", hex: "#f7f4ee" }],
     notes: "Navy woven slip-on sneakers, white sole.",
-    photo: "assets/photos/5ddcc8953aed.jpg"
+    photo: "assets/photos/42883d4f592b.jpg",
+    originalPhoto: "assets/photos/5ddcc8953aed.jpg"
   },
   {
     id: "seed-belgian-brown-lizard-loafers",
@@ -11485,7 +11658,8 @@ var wardrobeItems = [
     colourHex: "#7a4a2c",
     extraColours: [{ name: "Black", hex: "#141414" }],
     notes: "Brown lizard loafers, black bow and trim.",
-    photo: "assets/photos/53b1012744f5.jpg"
+    photo: "assets/photos/fe7b6a8394f6.jpg",
+    originalPhoto: "assets/photos/53b1012744f5.jpg"
   },
   {
     id: "seed-belgian-olive-loafers",
@@ -11495,7 +11669,8 @@ var wardrobeItems = [
     colourHex: "#7d7a5f",
     extraColours: [{ name: "Burgundy", hex: "#5c2430" }],
     notes: "Olive suede loafers, burgundy bow and trim.",
-    photo: "assets/photos/da5bdbfc2840.jpg"
+    photo: "assets/photos/7b6f9998e799.jpg",
+    originalPhoto: "assets/photos/da5bdbfc2840.jpg"
   },
   {
     id: "seed-belgian-black-velvet-loafers",
@@ -11505,7 +11680,8 @@ var wardrobeItems = [
     colourHex: "#141414",
     extraColours: [],
     notes: "Black velvet loafers, patent bow.",
-    photo: "assets/photos/27578f316d10.jpg"
+    photo: "assets/photos/6330f011ed1f.jpg",
+    originalPhoto: "assets/photos/27578f316d10.jpg"
   },
   {
     id: "seed-baudoin-brown-leather-loafers",
@@ -11515,7 +11691,8 @@ var wardrobeItems = [
     colourHex: "#3a2320",
     extraColours: [],
     notes: "Dark brown leather tassel loafers.",
-    photo: "assets/photos/5f5431c0db0e.jpg"
+    photo: "assets/photos/209a89055f60.jpg",
+    originalPhoto: "assets/photos/5f5431c0db0e.jpg"
   },
   {
     id: "seed-belgian-camo-loafers",
@@ -11525,7 +11702,8 @@ var wardrobeItems = [
     colourHex: "#6d5b3f",
     extraColours: [{ name: "Olive", hex: "#7d7a5f" }, { name: "Black", hex: "#141414" }],
     notes: "Camo pony-hair loafers, black bow.",
-    photo: "assets/photos/486e9bbb809e.jpg"
+    photo: "assets/photos/6f77e1ad4356.jpg",
+    originalPhoto: "assets/photos/486e9bbb809e.jpg"
   },
   {
     id: "seed-belgian-darkbrown-lizard-loafers",
@@ -11535,7 +11713,8 @@ var wardrobeItems = [
     colourHex: "#3d241c",
     extraColours: [],
     notes: "Dark brown lizard loafers, dark brown bow. Second, darker lizard pair.",
-    photo: "assets/photos/7bff29bd056d.jpg"
+    photo: "assets/photos/8eaf8abc32ca.jpg",
+    originalPhoto: "assets/photos/7bff29bd056d.jpg"
   },
   {
     id: "seed-hermes-navy-polo",
@@ -11545,7 +11724,8 @@ var wardrobeItems = [
     colourHex: "#232a3d",
     extraColours: [],
     notes: "Piqué polo, chest pocket with H stitch, size S.",
-    photo: "assets/photos/2c08754e232c.jpg"
+    photo: "assets/photos/23a1b98a88b6.jpg",
+    originalPhoto: "assets/photos/2c08754e232c.jpg"
   },
   {
     id: "seed-hermes-black-polo",
@@ -11555,7 +11735,8 @@ var wardrobeItems = [
     colourHex: "#17171a",
     extraColours: [],
     notes: "Piqué polo, chest pocket with H stitch.",
-    photo: "assets/photos/fac08c9a779a.jpg"
+    photo: "assets/photos/33257e8acdb3.jpg",
+    originalPhoto: "assets/photos/fac08c9a779a.jpg"
   },
   {
     id: "seed-cucinelli-navy-pique-grey-polo",
@@ -11565,7 +11746,8 @@ var wardrobeItems = [
     colourHex: "#232a3d",
     extraColours: [{ name: "Grey", hex: "#9a9a9c" }],
     notes: "Slim fit, grey cuff trim. Second navy piqué polo — distinct from the striped-cuff one.",
-    photo: "assets/photos/a7cbac3f2af1.jpg"
+    photo: "assets/photos/eac793263454.jpg",
+    originalPhoto: "assets/photos/a7cbac3f2af1.jpg"
   },
   {
     id: "seed-kiton-navy-polo",
@@ -11575,7 +11757,8 @@ var wardrobeItems = [
     colourHex: "#2c3247",
     extraColours: [{ name: "Cream", hex: "#efe7d6" }],
     notes: "Linen knit polo, cream tipping on collar, cuffs and hem.",
-    photo: "assets/photos/976a390f99ee.jpg"
+    photo: "assets/photos/9dfc4caf0c37.jpg",
+    originalPhoto: "assets/photos/976a390f99ee.jpg"
   },
   {
     id: "seed-stefanoricci-red-tee",
@@ -11585,7 +11768,8 @@ var wardrobeItems = [
     colourHex: "#b02a28",
     extraColours: [{ name: "Orange", hex: "#d0602a" }],
     notes: "Red/orange diamond geometric pattern, crewneck.",
-    photo: "assets/photos/56b2c1d0f86a.jpg"
+    photo: "assets/photos/e799e1fc5df4.jpg",
+    originalPhoto: "assets/photos/56b2c1d0f86a.jpg"
   },
   {
     id: "seed-cucinelli-safari-shirt",
@@ -11595,7 +11779,8 @@ var wardrobeItems = [
     colourHex: "#6d6a52",
     extraColours: [],
     notes: "Short-sleeve, leisure fit, two flap chest pockets.",
-    photo: "assets/photos/46b477c10086.jpg"
+    photo: "assets/photos/27b26c012761.jpg",
+    originalPhoto: "assets/photos/46b477c10086.jpg"
   },
   {
     id: "seed-canali-charcoal-vest",
@@ -11605,7 +11790,8 @@ var wardrobeItems = [
     colourHex: "#3c3f45",
     extraColours: [],
     notes: "Button-front knit waistcoat, size 48.",
-    photo: "assets/photos/f87dbf80bc27.jpg"
+    photo: "assets/photos/911715b28f48.jpg",
+    originalPhoto: "assets/photos/f87dbf80bc27.jpg"
   },
   {
     id: "seed-zanone-navy-vest",
@@ -11615,7 +11801,8 @@ var wardrobeItems = [
     colourHex: "#232a3d",
     extraColours: [],
     notes: "Button-front knit waistcoat.",
-    photo: "assets/photos/fca903966603.jpg"
+    photo: "assets/photos/0c5f2f5596ea.jpg",
+    originalPhoto: "assets/photos/fca903966603.jpg"
   },
   {
     id: "seed-fortela-navy-polo",
@@ -11625,10 +11812,117 @@ var wardrobeItems = [
     colourHex: "#232a3d",
     extraColours: [{ name: "Cream", hex: "#efe7d6" }, { name: "Orange", hex: "#d0602a" }],
     notes: "Cream tipping on collar, pocket and hem, orange stitch detail at the hem.",
-    photo: "assets/photos/5a65a3612329.jpg"
+    photo: "assets/photos/e285e4ae173c.jpg",
+    originalPhoto: "assets/photos/5a65a3612329.jpg"
   }
 ];
+/* Cleaned product photos: the 91 seeded pieces browse by their
+   AI-cleaned photo; the original snapshot stays on the record as
+   originalPhoto. A stored edit made before the swap pinned the
+   old photo as an override — re-point those to the cleaned photo
+   (a photo the user uploaded themselves, a data URL, is left
+   exactly as they set it). */
+var SEED_CLEANED_PHOTOS = {
+  "seed-acne-tee": "assets/photos/635c36bb0c73.jpg",
+  "seed-adidas-sneakers": "assets/photos/d0b35250559a.jpg",
+  "seed-alexmill-polo": "assets/photos/5714c4f3e8ac.jpg",
+  "seed-alexmill-tee": "assets/photos/3f4340d0f749.jpg",
+  "seed-altea-tee": "assets/photos/228f77ffd143.jpg",
+  "seed-armani-cream-loafers": "assets/photos/f3a8698d7824.jpg",
+  "seed-asket-tee": "assets/photos/fc265d782068.jpg",
+  "seed-balenciaga-black-loafers": "assets/photos/703b33087b1b.jpg",
+  "seed-baudoin-brown-leather-loafers": "assets/photos/209a89055f60.jpg",
+  "seed-baudoin-rust-tassel-loafers": "assets/photos/ce716373b008.jpg",
+  "seed-belgian-black-velvet-loafers": "assets/photos/6330f011ed1f.jpg",
+  "seed-belgian-brown-lizard-loafers": "assets/photos/fe7b6a8394f6.jpg",
+  "seed-belgian-camo-loafers": "assets/photos/6f77e1ad4356.jpg",
+  "seed-belgian-darkbrown-lizard-loafers": "assets/photos/8eaf8abc32ca.jpg",
+  "seed-belgian-olive-loafers": "assets/photos/7b6f9998e799.jpg",
+  "seed-buckmason-oatmeal": "assets/photos/48555cc64cd1.jpg",
+  "seed-buckmason-taupe": "assets/photos/ac6d5d214b00.jpg",
+  "seed-canali-charcoal-vest": "assets/photos/911715b28f48.jpg",
+  "seed-corridor-tee": "assets/photos/cc93a210e480.jpg",
+  "seed-cucinelli-beige-polo": "assets/photos/4ce27e5e4be7.jpg",
+  "seed-cucinelli-breton-polo": "assets/photos/7b047b338c9f.jpg",
+  "seed-cucinelli-brown-stripe-polo": "assets/photos/c99f1a2ab659.jpg",
+  "seed-cucinelli-burgundy-polo": "assets/photos/61ea0badf1bd.jpg",
+  "seed-cucinelli-charcoal-polo": "assets/photos/5140b394dcc5.jpg",
+  "seed-cucinelli-cream-tipped-polo": "assets/photos/c4cf3a7c3fc0.jpg",
+  "seed-cucinelli-dustyblue-polo": "assets/photos/bd8728361f98.jpg",
+  "seed-cucinelli-grey": "assets/photos/42afd412b88d.jpg",
+  "seed-cucinelli-navy-pique-grey-polo": "assets/photos/eac793263454.jpg",
+  "seed-cucinelli-navy-polo": "assets/photos/74bf9f021f1a.jpg",
+  "seed-cucinelli-olive-polo": "assets/photos/9c54fbef1ebe.jpg",
+  "seed-cucinelli-ribbed-polo": "assets/photos/66539c1530cc.jpg",
+  "seed-cucinelli-safari-shirt": "assets/photos/27b26c012761.jpg",
+  "seed-cucinelli-skyblue-polo": "assets/photos/6d23c4c269b2.jpg",
+  "seed-cucinelli-slate-polo": "assets/photos/58e36e6f3b1e.jpg",
+  "seed-cucinelli-stripe": "assets/photos/29eb36238f25.jpg",
+  "seed-cucinelli-stripe-polo": "assets/photos/72526560b8b1.jpg",
+  "seed-cucinelli-terracotta-polo": "assets/photos/9bdd2cb8017d.jpg",
+  "seed-cucinelli-white-tee": "assets/photos/73e485c65932.jpg",
+  "seed-edwardgreen-darkbrown-loafers": "assets/photos/169bac2277c1.jpg",
+  "seed-edwardgreen-tan-loafers": "assets/photos/b95402cfe41d.jpg",
+  "seed-fortela-concho-slippers": "assets/photos/d5d147124f51.jpg",
+  "seed-fortela-navy-polo": "assets/photos/e285e4ae173c.jpg",
+  "seed-frame-tee": "assets/photos/ce19b7f14fe2.jpg",
+  "seed-grey-court-sneakers": "assets/photos/2beffd278ab4.jpg",
+  "seed-gucci-green-eel-loafers": "assets/photos/8cb916c16897.jpg",
+  "seed-gucci-twotone-loafers": "assets/photos/3d2a4500ad9d.jpg",
+  "seed-hermes-black-polo": "assets/photos/33257e8acdb3.jpg",
+  "seed-hermes-navy-polo": "assets/photos/23a1b98a88b6.jpg",
+  "seed-isaia-burgundy-polo": "assets/photos/d6baa9413174.jpg",
+  "seed-isaia-polo": "assets/photos/289bfd3bc43e.jpg",
+  "seed-kiton-navy-polo": "assets/photos/9dfc4caf0c37.jpg",
+  "seed-loropiana-charcoal-polo": "assets/photos/e776ee4f6b5f.jpg",
+  "seed-loropiana-espadrilles": "assets/photos/0eb3c06dd242.jpg",
+  "seed-loropiana-flexy-sneakers": "assets/photos/426cfa6c8430.jpg",
+  "seed-loropiana-grey-sneakers": "assets/photos/6f8231b82235.jpg",
+  "seed-loropiana-navy-polo": "assets/photos/ad4eb917633c.jpg",
+  "seed-loropiana-runners": "assets/photos/230604c83947.jpg",
+  "seed-loropiana-sage-polo": "assets/photos/73a67351e87c.jpg",
+  "seed-loropiana-summer-walk": "assets/photos/c96390ec61c6.jpg",
+  "seed-loropiana-tipped-polo": "assets/photos/9e2efb2eec15.jpg",
+  "seed-loropiana-white-sneakers": "assets/photos/41ba01b1c447.jpg",
+  "seed-massimo-brown": "assets/photos/00bbee999215.jpg",
+  "seed-massimo-white": "assets/photos/38d7ac2121f2.jpg",
+  "seed-merz-olive": "assets/photos/d56a8492d9d3.jpg",
+  "seed-missoni-burgundy-polo": "assets/photos/a56925871f3c.jpg",
+  "seed-missoni-navy-polo": "assets/photos/01eaf8a9229c.jpg",
+  "seed-octobre-tee": "assets/photos/cccd6ffc5d5b.jpg",
+  "seed-orlebar-tee": "assets/photos/84f56ae82c62.jpg",
+  "seed-sfc-knit": "assets/photos/f49d82de16e8.jpg",
+  "seed-skyblue-polo": "assets/photos/04a8dd523c74.jpg",
+  "seed-stefanoricci-red-tee": "assets/photos/e799e1fc5df4.jpg",
+  "seed-stubbs-navy-slipons": "assets/photos/42883d4f592b.jpg",
+  "seed-stubbs-slippers": "assets/photos/41d3ce31e34d.jpg",
+  "seed-sunspel-polo": "assets/photos/eaf04e47deac.jpg",
+  "seed-theory-charcoal": "assets/photos/1f1164448e7e.jpg",
+  "seed-theory-navy": "assets/photos/0d869738ee51.jpg",
+  "seed-theory-polo": "assets/photos/8ddda1b49cf7.jpg",
+  "seed-toddsnyder-yellow": "assets/photos/ba439f3d0ec1.jpg",
+  "seed-unbound-tee": "assets/photos/87f8a0090530.jpg",
+  "seed-vibi-black-velvet-furlane": "assets/photos/db361533ae3a.jpg",
+  "seed-vibi-mustard": "assets/photos/84155e8fd479.jpg",
+  "seed-vibi-navy": "assets/photos/609536479732.jpg",
+  "seed-vibi-red-velvet-furlane": "assets/photos/d1802e9663e1.jpg",
+  "seed-vibi-rust-corduroy-furlane": "assets/photos/1686a0e5b87c.jpg",
+  "seed-vibi-tan-velvet-furlane": "assets/photos/aa656e11aa5b.jpg",
+  "seed-whitesville-grey": "assets/photos/8bf1b37685ac.jpg",
+  "seed-whitesville-navy": "assets/photos/331c5a7d52d7.jpg",
+  "seed-zanone-navy-vest": "assets/photos/0c5f2f5596ea.jpg",
+  "seed-zegna-polo": "assets/photos/60068aa893f4.jpg",
+  "seed-zegna-tee": "assets/photos/d9094daf4f47.jpg",
+  "seed-zigzag-tee": "assets/photos/a0d510d4f4d0.jpg"
+};
 wardrobeItems = applyEntryState(wardrobeItems.concat(store.get("items", [])));
+wardrobeItems.forEach(function (i) {
+  var cleaned = SEED_CLEANED_PHOTOS[i.id];
+  if (cleaned && i.photo && i.photo.indexOf("data:") !== 0 && i.photo !== cleaned) {
+    if (!i.originalPhoto) i.originalPhoto = i.photo;
+    i.photo = cleaned;
+  }
+});
 wardrobeItems.forEach(function (i) {
   if (typeof i.wearCount !== "number") i.wearCount = 0;
   if (!("price" in i)) i.price = null;
@@ -11751,6 +12045,7 @@ function renderItemDetail() {
   var cpw = it.price && it.wearCount ? "$" + Math.round(it.price / it.wearCount) : "—";
   box.innerHTML = '<article class="card item-detail-card">' +
     (it.photo ? '<img class="photo" src="' + it.photo + '" alt="Photograph of ' + esc(it.name) + '" loading="lazy" decoding="async" />' : "") +
+    (it.originalPhoto && it.photo && it.originalPhoto !== it.photo ? '<div class="orig-row"><button type="button" class="btn-ghost orig-btn" data-item-act="orig" aria-pressed="false">Original photo</button></div>' : "") +
     '<div><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600">' + esc(it.category) + "</span>" +
     (it.laundry ? ' <span class="laundry-badge">In laundry</span>' : "") + "</div>" +
     "<h3>" + esc(it.name) + "</h3>" +
@@ -11780,6 +12075,18 @@ document.getElementById("item-detail").addEventListener("click", function (e) {
   var it = closetItemById(detailItemId);
   if (!it) return;
   var act = b.getAttribute("data-item-act");
+  if (act === "orig") {
+    var card = b.closest(".item-detail-card");
+    var im = card ? card.querySelector("img.photo") : null;
+    if (im && it.originalPhoto && it.photo) {
+      var showingOrig = b.getAttribute("aria-pressed") === "true";
+      im.src = showingOrig ? it.photo : it.originalPhoto;
+      im.alt = (showingOrig ? "Photograph of " : "Original photograph of ") + it.name;
+      b.setAttribute("aria-pressed", showingOrig ? "false" : "true");
+      b.textContent = showingOrig ? "Original photo" : "Cleaned photo";
+    }
+    return;
+  }
   if (act === "close") { detailItemId = null; renderItemDetail(); return; }
   if (act === "wore") {
     it.wearCount = (it.wearCount || 0) + 1;
@@ -13470,9 +13777,9 @@ function parseOccasionText(t) {
 var studioSource = "combo";
 var closetOnly = false;
 var SOURCE_NOTES = {
-  wardrobe: "My wardrobe: every look is built only from pieces in your Closet. Nothing to buy — where your closet has no piece for a slot, the book completes that one slot.",
-  inspo: "Inspo: built outside your wardrobe — icons, plates and your brief lead, and nothing is pulled from your Closet.",
-  combo: "Combo — the default: each look is anchored in something you already own, and the rest is inspo to buy that completes it. Pieces that are yours are named as yours; the rest carries a Find it button."
+  wardrobe: "Only my wardrobe: every look is built from pieces in your Closet. Until your own bottoms are catalogued, a look built on your top and your shoes may be completed by a suggested bottom — always named as a suggestion, never as yours.",
+  inspo: "Only inspo: built entirely outside your wardrobe — icons, plates and your brief lead, and nothing is pulled from your Closet.",
+  combo: "Combo — the default mix: each look is anchored in something you already own, and the rest is inspo to buy that completes it. Pieces that are yours are named as yours; the rest carries a Find it button."
 };
 function setSource(s) {
   if (["wardrobe", "inspo", "combo"].indexOf(s) === -1) s = "combo";
@@ -13652,7 +13959,7 @@ function shareLookImage(look) {
     '<button type="button" class="choice-chip" id="choice-direction">Direction <strong></strong></button>';
   form.insertBefore(bar, form.firstChild);
   var BASIS_LABEL = { icon: "Icon", palette: "Palette", both: "Both" };
-  var SOURCE_LABEL = { wardrobe: "My wardrobe", inspo: "Inspo", combo: "Combo" };
+  var SOURCE_LABEL = { wardrobe: "Only my wardrobe", inspo: "Only inspo", combo: "Combo" };
   function directionLabel() {
     var sel = document.getElementById("style-direction");
     if (!sel || sel.value === "auto") return "Auto";
@@ -13765,10 +14072,23 @@ function openingLook() {
     delete restored._seedId;
     return restored;
   }
-  /* Fresh open: deal a new opening look. The previous open's
-     photograph (long-term store first, then this tab's session
-     record) is excluded outright, and undealt photographs are
-     dealt before any dealt one, as far as the pool allows. */
+  /* Fresh open: deal a new opening look, in the source mode the
+     Studio selector was left in — the three modes apply here too.
+     Only my wardrobe opens on a closet outfit (his pieces, shown
+     as their own photographs); the photograph modes exclude the
+     previous open's photograph outright, and undealt photographs
+     are dealt before any dealt one, as far as the pool allows. */
+  var savedSrc = null;
+  try { var ss = store.get("studioSettings", null); if (ss && ss.source) savedSrc = ss.source; } catch (e) {}
+  if (savedSrc === "wardrobe" && typeof buildClosetLooks === "function") {
+    var clw = buildClosetLooks();
+    if (clw && clw.length) {
+      todaySeedId = clw[0].id;
+      persistOpeningLook(clw[0]);
+      return clw[0];
+    }
+    savedSrc = "combo";
+  }
   var prevImg = store.get("lastOpeningImg", null) || (sess && sess.img) || null;
   var pool = RENDER_POOL.map(renderAsLook);
   var candidates = pool.filter(function (l) { return l.img !== prevImg && dislikedImgs.indexOf(l.img) === -1; });
@@ -13782,6 +14102,12 @@ function openingLook() {
   todaySeedId = pick.id;
   var clone = JSON.parse(JSON.stringify(pick));
   clone.id = "look-" + Date.now();
+  if (savedSrc === "inspo") { clone.source = "inspo"; clone.anchorNames = []; clone.anchorHex = null; }
+  else if (savedSrc === "combo") {
+    clone.source = "combo";
+    var ca0 = closetAnchorItems()[0];
+    if (ca0) { clone.anchorNames = [ca0.name]; clone.anchorHex = ca0.colourHex || null; }
+  }
   store.set("lastOpeningImg", clone.img);
   persistOpeningLook(clone);
   return clone;
@@ -13789,15 +14115,35 @@ function openingLook() {
 function renderToday() {
   if (!todayLook) return;
   var img = document.getElementById("today-img");
-  img.src = lookImg(todayLook);
-  img.alt = todayLook.imgAlt || "";
-  img.setAttribute("data-popout", lookImg(todayLook));
-  img.setAttribute("data-popout-alt", todayLook.imgAlt || "");
+  var collage = document.getElementById("today-collage");
+  var heroPieces = (todayLook.fwPieces || []).filter(function (p) { return p.photo; });
+  if (heroPieces.length) {
+    /* A wardrobe hero is his actual pieces — their own photographs,
+       never a render of some other outfit wearing their names. */
+    img.hidden = true;
+    if (collage) {
+      collage.innerHTML = heroPieces.slice(0, 3).map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" />'; }).join("");
+      collage.hidden = false;
+    }
+  } else {
+    if (collage) { collage.hidden = true; collage.innerHTML = ""; }
+    img.hidden = false;
+    img.src = lookImg(todayLook);
+    img.alt = todayLook.imgAlt || "";
+    img.setAttribute("data-popout", lookImg(todayLook));
+    img.setAttribute("data-popout-alt", todayLook.imgAlt || "");
+  }
   document.getElementById("today-name").textContent = todayLook.title;
-  document.getElementById("today-dots").innerHTML = todayLook.swatches.map(function (s) {
-    return '<span style="background:' + s.hex + '"></span>';
+  var sug = document.getElementById("today-suggest");
+  if (sug) {
+    if (todayLook.suggestedBottom) { sug.textContent = "Pair with: " + todayLook.suggestedBottom.name + " — suggested"; sug.hidden = false; }
+    else { sug.hidden = true; sug.textContent = ""; }
+  }
+  document.getElementById("today-dots").innerHTML = todayLook.swatches.map(function (sp) {
+    return '<span style="background:' + sp.hex + '"></span>';
   }).join("");
 }
+
 /* ================= Location & weather =================
    Home is the default location (Palm Beach, Florida). Traveling
    swaps the current location — a searched city or one of your
@@ -13873,6 +14219,7 @@ function renderLoc() {
 }
 function applyWeatherToToday() {
   if (todayTouched || !currentWeather || !todayLook) return;
+  if (todayLook.source === "wardrobe" || todayLook.fwPieces) return;
   var t = currentWeather.temp;
   var swapIds = t >= 88 ? ["seed-olive-cream", "seed-plate1", "seed-carmine-helvetia"]
     : t < 55 ? ["seed-charcoal-blazer", "seed-taupe", "seed-crimson"]
@@ -13986,13 +14333,28 @@ function initToday() {
   renderLoc();
   fetchWeather();
 }
-document.getElementById("today-deal").addEventListener("click", function () {
-  todayTouched = true;
-  /* Deal from the whole photograph library at the meter's level —
-     never the outfit already showing, and never one dealt recently:
-     the dealt history persists, so repeated taps (and repeat
-     visits) keep landing on outfits not yet shown, and only cycle
-     back once the library at that level has been dealt through. */
+/* The hero deals in the same three source modes as Ideas:
+   Only my wardrobe deals a closet outfit (his top + his shoes,
+   shown as their own photographs, with a suggested bottom);
+   Only inspo deals a photograph with nothing pulled from the
+   closet; Combo (the default) anchors the photograph in a piece
+   he owns. */
+function dealHeroForSource() {
+  var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
+  if (src === "wardrobe" && typeof buildClosetLooks === "function") {
+    var cl = buildClosetLooks();
+    if (cl && cl.length) {
+      var curTitle = todayLook && todayLook.title;
+      var pickW = null;
+      for (var wi = 0; wi < cl.length; wi++) { if (cl[wi].title !== curTitle) { pickW = cl[wi]; break; } }
+      pickW = pickW || cl[0];
+      todaySeedId = pickW.id;
+      todayLook = pickW;
+      persistOpeningLook(todayLook);
+      renderToday();
+      return;
+    }
+  }
   var pool = RENDER_POOL.map(renderAsLook);
   var currentImg = todayLook && todayLook.img;
   var candidates = pool.filter(function (l) { return l.img !== currentImg && dislikedImgs.indexOf(l.img) === -1; });
@@ -14000,13 +14362,33 @@ document.getElementById("today-deal").addEventListener("click", function () {
   todaySeedId = pick.id;
   todayLook = JSON.parse(JSON.stringify(pick));
   todayLook.id = "look-" + Date.now();
+  todayLook.source = src === "wardrobe" ? "combo" : src;
+  if (todayLook.source === "inspo") { todayLook.anchorNames = []; todayLook.anchorHex = null; }
+  if (todayLook.source === "combo") {
+    var a0 = closetAnchorItems()[0];
+    todayLook.anchorNames = a0 ? [a0.name] : [];
+    todayLook.anchorHex = a0 ? (a0.colourHex || null) : null;
+  }
   recordDealt([todayLook.img]);
   /* The dealt look is now the session's hero: a refresh restores
      it, and the next fresh open never repeats it. */
   store.set("lastOpeningImg", todayLook.img);
   persistOpeningLook(todayLook);
   renderToday();
+}
+document.getElementById("today-deal").addEventListener("click", function () {
+  todayTouched = true;
+  dealHeroForSource();
 });
+document.getElementById("today-source-row").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-source]");
+  if (!b) return;
+  todayTouched = true;
+  setSource(b.getAttribute("data-source"));
+  if (typeof saveStudioSettings === "function") saveStudioSettings();
+  dealHeroForSource();
+});
+
 document.getElementById("today-style").addEventListener("click", function () {
   todayTouched = true;
   if (!todayLook) return;
@@ -14809,11 +15191,15 @@ initToday();
     for (var rk = 0; rk < 3; rk++) excl[RENDER_POOL[(doy0 + rk) % RENDER_POOL.length].img] = true;
     var histRev = dealtImgHistory.slice().reverse();
     for (var hk = 0; hk < histRev.length && Object.keys(excl).length < RENDER_POOL.length - 6; hk++) excl[histRev[hk]] = true;
-    var six = buildSixLooks(derived, "", "", { basis: "both", source: "combo", iconId: todayLook.iconId || null, excludeImgs: excl });
-    six[0] = todayLook;
-    six[0].source = "combo";
-    six[0].anchorNames = closetAnchorItems().slice(0, 1).map(function (a) { return a.name; });
-    renderOptions(six, { desc: derived, occasion: "", season: "", opts: { basis: "both", source: "combo", iconId: todayLook.iconId || null } });
+    var heroSrc = todayLook.source || "combo";
+    var six = buildSixLooks(derived, "", "", { basis: "both", source: heroSrc, iconId: todayLook.iconId || null, excludeImgs: excl });
+    if (!todayLook.fwPieces) {
+      six[0] = todayLook;
+      six[0].source = heroSrc;
+      if (heroSrc === "combo") six[0].anchorNames = closetAnchorItems().slice(0, 1).map(function (a) { return a.name; });
+      if (heroSrc === "inspo") six[0].anchorNames = [];
+    }
+    renderOptions(six, { desc: derived, occasion: "", season: "", opts: { basis: "both", source: heroSrc, iconId: todayLook.iconId || null } });
   } catch (e) {
     renderLook(todayLook);
   }
@@ -15565,7 +15951,10 @@ if (heroEl) {
     if (Date.now() - htEnd < 600 && htDist > 40) return;
     if (e.target.closest && e.target.closest(".today-caption")) return;
     if (e.target.closest && e.target.closest("[data-popout]")) return;
-    if (typeof todayLook !== "undefined" && todayLook) openPopout(lookImg(todayLook), todayLook.imgAlt || "");
+    if (typeof todayLook !== "undefined" && todayLook) {
+      var popSrc = (todayLook.fwPieces && todayLook.fwPieces.length && todayLook.fwPieces[0].photo) ? todayLook.fwPieces[0].photo : lookImg(todayLook);
+      openPopout(popSrc, todayLook.imgAlt || "");
+    }
   });
 }
 
@@ -15590,6 +15979,7 @@ if (dislikeBtn) dislikeBtn.addEventListener("click", function () {
 function paintHeroChange() {
   var box = document.getElementById("today-change");
   if (!box || typeof todayLook === "undefined" || !todayLook) return;
+  if (todayLook.fwPieces) { box.innerHTML = ""; return; }
   box.innerHTML = '<button type="button" class="change-toggle" data-change-toggle aria-expanded="false"><span>Change an item</span><span aria-hidden="true">\u25BE</span></button>' +
     '<div class="change-panel" data-change-ctx="today" hidden>' + changeCatsHTML(todayLook) + "</div>";
 }
@@ -16079,16 +16469,57 @@ function closetSig() {
   return wardrobeItems.map(function (i) { return i.id + (i.laundry ? "~" : ""); }).join("|");
 }
 function fwCardHTML(look, idx) {
-  var pieces = (look.anchorNames || []).join(" · ");
-  return '<button type="button" class="card option-card" data-fw-idx="' + idx + '" role="listitem">' +
-    '<img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy" data-popout="' + lookImg(look) + '" />' +
+  var pieces = look.fwPieces || [];
+  var shoe = null;
+  pieces.forEach(function (p) { if (p.category === "Shoes") shoe = p; });
+  var shown = [pieces[0], shoe].filter(function (p, ix, a) { return p && p.photo && a.indexOf(p) === ix; });
+  var photos = shown.length
+    ? '<span class="fw-photos' + (shown.length === 1 ? " one" : "") + '">' + shown.map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async" />'; }).join("") + "</span>"
+    : "";
+  var names = pieces.map(function (p) { return p.name; }).join(" · ");
+  return '<button type="button" class="card option-card fw-card" data-fw-idx="' + idx + '" role="listitem">' +
+    photos +
     '<span class="oc-body">' +
     '<span class="oc-label">From wardrobe</span>' +
     '<span class="oc-title">' + esc(look.title) + '</span>' +
-    (pieces ? '<span class="oc-meta">' + esc(pieces) + '</span>' : "") +
-    '<span class="mini-strip" style="display:flex;height:10px;border:1px solid var(--border);margin-top:8px">' + look.swatches.map(function (s) { return '<span style="flex:1;background:' + s.hex + '"></span>'; }).join("") + "</span></span></button>";
+    (names ? '<span class="oc-meta">' + esc(names) + '</span>' : "") +
+    (look.suggestedBottom ? '<span class="oc-meta fw-pair">Pair with: ' + esc(look.suggestedBottom.name) + ' — suggested</span>' : "") +
+    '<span class="mini-strip" style="display:flex;height:10px;border:1px solid var(--border);margin-top:8px">' + look.swatches.map(function (sw) { return '<span style="flex:1;background:' + sw.hex + '"></span>'; }).join("") + "</span></span></button>";
 }
+
+/* The outfit view for a From wardrobe card: his actual pieces —
+   their own photographs, named as his — plus the suggested bottom,
+   named as a suggestion. Never a pool render: the photograph of him
+   in some other outfit is not a picture of these pieces. */
+function openFwOutfit(idx) {
+  var look = fwLooks[idx];
+  var box = document.getElementById("fw-detail");
+  if (!look || !box) return;
+  var figs = (look.fwPieces || []).map(function (p) {
+    return '<figure class="fw-piece" data-fw-piece="' + esc(p.id) + '" role="button" tabindex="0" aria-label="Open ' + esc(p.name) + ' in the Closet">' +
+      (p.photo
+        ? '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async" />'
+        : '<span class="fw-nophoto" style="background:' + (p.colourHex || "#8a8d8f") + '"></span>') +
+      '<figcaption><span class="fw-yours">Yours</span>' + esc(p.name) + '</figcaption></figure>';
+  }).join("");
+  if (look.suggestedBottom) {
+    figs += '<figure class="fw-piece fw-suggested"><span class="fw-nophoto" style="background:' + look.suggestedBottom.hex + '"></span>' +
+      '<figcaption><span class="fw-yours suggested">Suggested</span>' + esc(look.suggestedBottom.name) + ' — not in your closet yet</figcaption></figure>';
+  }
+  box.innerHTML = '<article class="card fw-outfit">' +
+    '<div class="fw-outfit-head"><span class="oc-label">From wardrobe</span><button type="button" class="btn-ghost" data-fw-close>Back</button></div>' +
+    '<h3>' + esc(look.title) + '</h3>' +
+    '<div class="fw-pieces">' + figs + '</div>' +
+    '<p class="fw-outfit-note">' + esc((look.notes || []).join(" ")) + '</p>' +
+    '</article>';
+  box.hidden = false;
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+
 function dealFromWardrobe() {
+  var detail = document.getElementById("fw-detail");
+  if (detail) { detail.hidden = true; detail.innerHTML = ""; }
   var grid = document.getElementById("fw-grid");
   var empty = document.getElementById("fw-empty");
   var more = document.getElementById("fw-more");
@@ -16119,16 +16550,27 @@ function dealFromWardrobe() {
   var more = document.getElementById("fw-more");
   if (more) more.addEventListener("click", function () {
     dealFromWardrobe();
-    toast(fwLooks.length ? "Six more outfits from your wardrobe." : "Your closet needs a top and a bottom — or a pair of shoes — before it can build outfits.");
+    toast(fwLooks.length ? "Six more outfits from your wardrobe." : "Your closet needs a top and a pair of shoes before it can build outfits.");
   });
   grid.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-fw-idx]");
     if (!btn || !fwLooks.length) return;
     var idx = parseInt(btn.getAttribute("data-fw-idx"), 10);
     if (!fwLooks[idx]) return;
-    var req = { desc: "From wardrobe", occasion: "", season: "", opts: { basis: "both", source: "wardrobe" } };
-    renderOptions(fwLooks, req);
-    selectOption(idx);
+    openFwOutfit(idx);
+  });
+  var fwDetail = document.getElementById("fw-detail");
+  if (fwDetail) fwDetail.addEventListener("click", function (e) {
+    if (e.target.closest("[data-fw-close]")) { fwDetail.hidden = true; fwDetail.innerHTML = ""; return; }
+    var fig = e.target.closest("[data-fw-piece]");
+    if (fig) {
+      var pid = fig.getAttribute("data-fw-piece");
+      if (pid && typeof closetItemById === "function" && closetItemById(pid)) {
+        detailItemId = pid;
+        switchTab("wardrobe");
+        renderItemDetail();
+      }
+    }
   });
   var prevSwitch = window.switchTab;
   if (typeof prevSwitch === "function") {
