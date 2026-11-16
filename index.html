@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.12" />
+    <meta name="wardrobe-build" content="2026-11-16.13" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -2343,6 +2343,69 @@
         min-height: 36px; padding: 0 14px; font: inherit; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 12px;
       }
 </style>
+<style>
+      /* ================= Dead-space audit — build 2026-11-16.13 =================
+         Measured at 390×844, container rect vs content span, every
+         page. The rule: every box exactly as tall as its content.
+         The biggest offender was grid stretch — cards in a row all
+         took the tallest card's height and the difference sat as
+         empty space inside the border (Sale: up to 182px inside
+         one card; Plates: 38px; My Looks: 20px). Those grids now
+         start-align, so each card hugs its own content; the photo
+         tops still line up because every image in a grid shares
+         one aspect ratio. The six-takes grid is NOT here: its
+         caption body flexes to absorb the row height by design,
+         photo flush at the top. The bottom bar is untouched —
+         re-measured this build: 68px, bottom edge at the viewport
+         bottom, labels ending 10px above it. */
+      .sale-grid, .plate-grid, .saved-grid, .myinspo-grid,
+      .capsule-outfits, .item-grid, .find-grid, .custom-grid { align-items: start; }
+      /* Textareas are inline-block: the line-box strut left a
+         measured 6.8px dead band under every textarea in every
+         form (Closet, Watches, Shop the look, Profile, Palettes).
+         Block removes the strut; the field's own height is set by
+         its min-height and rows, unchanged. */
+      textarea { display: block; }
+      /* The (i) row is a single 24px button; its bottom margin halves. */
+      .page-info-row { margin-bottom: 4px; }
+      /* Palettes — the custom-palettes grid is empty until a
+         palette is saved, but its 10px + 16px margins still took
+         a measured 26px void between the New palette row and the
+         controls. Empty, it takes no space at all (the pattern
+         #loc-results:empty already uses); populated, its margins
+         tighten to the app rhythm. */
+      #panel-palettes .custom-grid:empty { display: none; }
+      #panel-palettes .custom-grid { margin: 8px 0 10px; }
+      /* Palettes — the colour index sat 24px under the plate grid. */
+      #panel-palettes .colour-index { margin-top: 12px; }
+      /* From-wardrobe outfit sheet — the last card still on the
+         old 22px padding and an 18px top margin; it joins the
+         shared card scale (14px 16px) and rhythm. */
+      .fw-outfit { padding: 14px 16px; margin-top: 12px; gap: 10px; }
+      /* Shop the look — each piece section stacked a 16px margin
+         on a 12px top padding above its rule: 28px of air per
+         piece, five pieces deep. Now 10 + 10. */
+      .shop-piece { margin-top: 10px; padding-top: 10px; }
+      .shop-purchased { margin-top: 12px; }
+      /* Profile — the location and data cards are grids with an
+         8px gap, and their action rows ALSO carried margin-top
+         8px: a measured 16px double separator. One separator. */
+      #panel-profile .loc-actions { margin-top: 0; }
+      /* Empty states — 16px of padding around a single line. */
+      .empty { padding: 12px 16px; }
+      /* Section furniture — letter, month and capsule heads
+         carried 14px top margins in an app that runs 8–12px. */
+      #panel-brands .brand-letter-head { margin-top: 10px; }
+      .brand-group-head { margin-top: 10px; }
+      .worn-month { margin-top: 10px; }
+      .capsule-day { margin-top: 10px; }
+      .capsule-check-head { margin-top: 10px; }
+      /* Look detail sheet — 24px of padding under the last row. */
+      .look-layer { padding-bottom: 16px; }
+      /* Ideas — the source dropdown's 12px bottom margin against
+         the home bar's own 6px: one rhythm. */
+      .ideas-source-cdd { margin-bottom: 8px; }
+</style>
   </head>
   <body>
     <header class="masthead">
@@ -3733,7 +3796,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.12";
+var WARDROBE_BUILD = "2026-11-16.13";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
