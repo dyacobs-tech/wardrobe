@@ -1226,8 +1226,6 @@
       .pack-item { display: flex; gap: 8px; align-items: center; width: 100%; background: none; border: none; padding: 2px 0; min-height: 32px; text-align: left; color: var(--text); font-size: 13.5px; }
       .pack-item .pk-box { flex: none; width: 18px; height: 18px; border: 1px solid var(--border-strong); border-radius: 3px; display: grid; place-items: center; font-size: 12px; line-height: 1; color: var(--accent); }
       .pack-item[aria-pressed="true"] > span:last-child { text-decoration: line-through; color: var(--dim); }
-      .new-strip { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
-      .new-strip .ns-label { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); }
       .new-badge { display: inline-block; border: 1px solid var(--brass); color: var(--brass); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 1px 5px; border-radius: 2px; margin-left: 6px; vertical-align: middle; }
 
       /* ---------- Today — full-screen hero, compact content ----------
@@ -1931,10 +1929,6 @@
         min-height: 36px; padding: 4px 0; letter-spacing: .01em;
       }
       #panel-icons .tools-toggle .tt-chev { font-size: 11px; }
-      .new-strip { gap: 5px; margin-bottom: 8px; }
-      .new-strip .chip { min-height: 25px; padding: 3px 9px; font-size: 11px; }
-      .new-strip .ns-label { font-size: 10px; }
-
       /* ---------- Look detail layer (Batch 1 · 6.1) ---------- */
       .look-layer {
         position: fixed; inset: 0; z-index: 90; background: var(--bg);
@@ -1983,6 +1977,123 @@
       }
       .ptr.show { animation: ptrspin .8s linear infinite; }
       @keyframes ptrspin { to { transform: translateX(-50%) translateY(0) rotate(360deg); } }
+</style>
+<style>
+      /* ================= Palettes — compact standard =================
+         The whole tab on the same scale as Today/Icons: slim 36px
+         inputs, the standard 32px buttons, small caps labels, a
+         shorter featured swatch band and tight plate cards. */
+      #panel-palettes .pal-drop { margin-bottom: 10px; }
+      #panel-palettes .drop-toggle {
+        font-family: var(--font-ui); font-size: 13.5px; font-weight: 600;
+        letter-spacing: .01em; min-height: 32px; padding: 4px 0;
+      }
+      #panel-palettes .drop-toggle .tt-chev { font-size: 11px; }
+      #panel-palettes .pal-controls { gap: 8px; margin-bottom: 12px; }
+      #panel-palettes label.field { margin-bottom: 3px; }
+      #panel-palettes input[type="text"], #panel-palettes input[type="search"],
+      #panel-palettes select {
+        min-height: 36px; padding: 6px 10px; font-size: 14px;
+      }
+      #panel-palettes textarea { padding: 6px 10px; font-size: 14px; }
+      #panel-palettes .btn-ink, #panel-palettes .btn-ghost, #panel-palettes .btn-accent {
+        min-height: 32px; padding: 0 14px; font-size: 11.5px; letter-spacing: .1em;
+      }
+      #panel-palettes #shuffle-btn { width: auto; justify-self: start; }
+      @media (min-width: 760px) { #panel-palettes #shuffle-btn { justify-self: end; } }
+      /* Featured plate — smaller title, shorter band, one-line legend */
+      #panel-palettes .featured { padding: 12px 14px; margin-bottom: 14px; }
+      #panel-palettes .featured h3 { font-size: 20px; line-height: 1.15; margin: 0 0 8px; }
+      #panel-palettes .featured .swatch-strip.lg > div { min-height: 40px; }
+      #panel-palettes .featured .legend { margin: 8px 0 0; gap: 4px 18px; }
+      #panel-palettes .featured .legend li { font-size: 13px; line-height: 1.3; gap: 7px; }
+      #panel-palettes .featured .legend .dot { width: 12px; height: 12px; }
+      #panel-palettes .featured .legend .hex { font-size: 10.5px; }
+      #panel-palettes .featured .look-actions {
+        display: flex; flex-wrap: nowrap; gap: 6px; margin-top: 10px;
+      }
+      #panel-palettes .featured .look-actions .btn-accent,
+      #panel-palettes .featured .look-actions .btn-ghost {
+        min-height: 32px; padding: 0 9px; font-size: 10.5px; letter-spacing: .07em;
+        white-space: nowrap; flex: 1 1 0; min-width: 0;
+      }
+      /* Plate grid — tighter cards on the standard card scale */
+      #panel-palettes #plate-count { font-size: 12.5px; margin: 0 0 8px; }
+      #panel-palettes .plate-grid { gap: 10px; }
+      #panel-palettes .plate-card .pc-strip { height: 44px; }
+      #panel-palettes .plate-card .pc-body { padding: 8px 10px 10px; }
+      #panel-palettes .plate-card .pc-num {
+        font-size: 9.5px; letter-spacing: .14em; line-height: 1.3;
+      }
+      #panel-palettes .plate-card .pc-names {
+        font-family: var(--font-ui); font-size: 15px; font-weight: 600;
+        line-height: 1.2; margin-top: 2px;
+      }
+      #panel-palettes .custom-grid { gap: 10px; margin: 10px 0 16px; }
+      #panel-palettes .colour-index { margin-top: 24px; }
+
+      /* ================= Brands — A–Z letter rail =================
+         54 rows earn an index: a slim fixed rail on the right
+         margin, letters only where brands exist. Rows keep clear
+         of it; letter heads carry scroll margin for the nav. */
+      #panel-brands #brand-list { padding-right: 20px; }
+      #panel-brands .brand-letter-head {
+        font-size: 13px; font-weight: 700; letter-spacing: .1em;
+        color: var(--brass); margin: 14px 0 0; padding-bottom: 2px;
+        border-bottom: 1px solid var(--border); scroll-margin-top: 118px;
+      }
+      #panel-brands .brand-letter-head[hidden] { display: none; }
+      .brand-rail {
+        position: fixed; right: 3px; top: 50%; transform: translateY(-50%);
+        z-index: 60; display: flex; flex-direction: column; align-items: center;
+        gap: 0; padding: 5px 0; border-radius: 999px;
+        background: color-mix(in srgb, var(--surface) 82%, transparent);
+      }
+      .brand-rail button {
+        width: 17px; min-height: 15px; padding: 0; border: none; background: none;
+        font-family: var(--font-ui); font-size: 9px; font-weight: 600;
+        letter-spacing: 0; line-height: 1.35; color: var(--dim);
+        cursor: pointer; text-align: center;
+      }
+      .brand-rail button:active { color: var(--accent); }
+
+      /* ================= Today — outfit type in the Location slot ====
+         Same hero pill treatment as the row it replaces; the
+         location/weather caption above it is untouched. */
+      #panel-today .today-type-row {
+        display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+      }
+      #panel-today .today-type-row .tlc-label {
+        flex: 0 0 76px; margin: 0; white-space: nowrap;
+        font-size: 9px; font-weight: 600; letter-spacing: .09em;
+        text-transform: uppercase; color: #d9c9a3;
+      }
+      #panel-today .today-type-row .tlc {
+        border: 1px solid rgba(247,241,229,.65); background: rgba(20,17,13,.25);
+        color: #f7f1e5; border-radius: 999px; min-height: 26px; padding: 0 8px;
+        font-size: 10px; font-weight: 600; letter-spacing: .02em;
+        white-space: nowrap; cursor: pointer;
+        display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+      }
+      #panel-today .today-type-row .tlc[aria-pressed="true"] { background: #f7f1e5; color: #191612; }
+
+      /* ================= Shop the look — per-piece budget sliders ====
+         One compact row per piece: label, slider, live cap.
+         Top of the scale reads "No limit". */
+      .shop-cap { display: flex; align-items: center; gap: 8px; }
+      .shop-cap-label {
+        flex: none; font-size: 10px; font-weight: 600;
+        letter-spacing: .14em; text-transform: uppercase; color: var(--brass);
+      }
+      .shop-cap input[type="range"] {
+        flex: 1; min-width: 0; min-height: 26px; margin: 0;
+        accent-color: var(--accent); cursor: pointer;
+      }
+      .shop-cap-val {
+        flex: none; min-width: 54px; text-align: right;
+        font-size: 12.5px; font-weight: 600; white-space: nowrap;
+      }
+      .find-card .shop-cap { margin-top: 2px; }
 </style>
   </head>
   <body>
@@ -2049,12 +2160,15 @@
               <button type="button" class="btn-today-text" id="today-style">Style this look</button>
               <button type="button" class="btn-today-text" id="today-find">Shop the look</button>
             </div>
-            <div id="today-change" class="change-item hero-change"></div>
-            <div class="today-loc-chips" id="today-loc-chips" role="group" aria-label="Location — recommendations follow the weather here">
-              <span class="tlc-label">Location</span>
-              <button type="button" class="tlc" data-today-loc="palm-beach">Palm Beach</button>
-              <button type="button" class="tlc" data-today-loc="new-york">New York</button>
-              <button type="button" class="tlc" data-today-loc="greenwich">Greenwich</button>
+            <div class="today-type-row" id="today-type-row" role="group" aria-label="Outfit type">
+              <span class="tlc-label">Outfit type</span>
+              <button type="button" class="tlc" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
+              <button type="button" class="tlc" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
+              <button type="button" class="tlc" data-studio-type="3" aria-pressed="false">Casual</button>
+              <button type="button" class="tlc" data-studio-type="4" aria-pressed="false">Smart Casual</button>
+              <button type="button" class="tlc" data-studio-type="5" aria-pressed="false">Business Casual</button>
+              <button type="button" class="tlc" data-studio-type="6" aria-pressed="false">Formal</button>
+              <button type="button" class="tlc" data-studio-type="7" aria-pressed="false">Black Tie</button>
             </div>
             <p class="today-swipe-hint" aria-hidden="true">Swipe left for another look · right to like it</p>
             <div class="today-source" id="today-source-row" role="group" aria-label="Build from — Only my wardrobe, Only inspo, or Combo">
@@ -2063,9 +2177,12 @@
               <button type="button" class="ts-btn" data-source="inspo" aria-pressed="false">Only inspo</button>
               <button type="button" class="ts-btn" data-source="combo" aria-pressed="true">Combo</button>
             </div>
-            <!-- Formality is ONE control app-wide: Ideas' Outfit
-                 type selector. The Dress-for macros set the same
-                 level; no second slider lives here. -->
+            <!-- Formality is ONE value app-wide: these pills and
+                 Ideas' Outfit type selector are two views of the
+                 same setFormality level — picking here re-deals
+                 Today at that type, strictly. Location is not a
+                 front-page control; it lives in Me and still
+                 drives the weather caption above. -->
           </div>
         </div>
 
@@ -2330,7 +2447,7 @@
           </div>
           <div>
             <label class="field" aria-hidden="true">&nbsp;</label>
-            <button type="button" class="btn-ink" id="shuffle-btn" style="width:100%">Shuffle a page</button>
+            <button type="button" class="btn-ink" id="shuffle-btn">Shuffle a page</button>
           </div>
         </div>
 
@@ -2766,19 +2883,15 @@
               </div>
             </div>
             <div>
-              <label class="field" id="find-budget-label">Budget — how far to go</label>
-              <button type="button" class="sel-row" id="find-budget-toggle" aria-expanded="false" aria-controls="find-budget-opts" aria-labelledby="find-budget-label find-budget-sel-val"><span class="sel-name">Budget</span><span class="sel-val" id="find-budget-sel-val"></span><span class="sel-chev" aria-hidden="true">▾</span></button>
-              <div class="opt-list" id="find-budget-opts" hidden></div>
+              <label class="field" for="find-cap-range">Budget cap</label>
+              <div class="shop-cap">
+                <input type="range" id="find-cap-range" min="50" max="2000" step="25" value="2000" aria-label="Budget cap for this brief" />
+                <span class="shop-cap-val" id="find-cap-val">No limit</span>
+              </div>
             </div>
-            <div class="form-row">
-              <div>
-                <label class="field" for="find-budget">Exact cap — optional ($)</label>
-                <input type="text" inputmode="numeric" id="find-budget" placeholder="e.g. 500" autocomplete="off" />
-              </div>
-              <div>
-                <label class="field" for="find-colour">Colour</label>
-                <input type="text" id="find-colour" placeholder="e.g. navy, tan, any" autocomplete="off" />
-              </div>
+            <div>
+              <label class="field" for="find-colour">Colour</label>
+              <input type="text" id="find-colour" placeholder="e.g. navy, tan, any" autocomplete="off" />
             </div>
             <div>
               <div class="label-row"><label class="field" for="find-icon">Inspo icon — optional</label><button type="button" class="info-btn sm" data-info-from="find-icon-note" data-info-title="Inspo icon" aria-label="About: inspo icon shops">i</button></div>
@@ -9614,7 +9727,7 @@ document.addEventListener("click", function (e) {
   t.classList.toggle("open", open);
 });
 
-/* ---------- Change an item — categories, alternatives, markup ---------- */
+/* ---------- Piece categories & pool combination maps (data) ---------- */
 function changeCatKey(pc) {
   var c = garmentCategory(pc.garment);
   if (c === "Shoes") return "shoes";
@@ -9701,16 +9814,10 @@ function changeAlts(look, catKey) {
   out.sort(function (a, b) { return a.desc < b.desc ? -1 : 1; });
   return out;
 }
-function changeCatsHTML(look) {
-  return changeCats(look).map(function (c) {
-    return '<button type="button" class="change-cat" data-change-cat="' + c.key + '"><span class="cdot" style="background:' + (c.hex || "transparent") + '"></span><span class="cc-name">' + esc(c.desc) + '</span><span class="cc-cat">' + c.label + "</span></button>" +
-      '<div class="change-opts" data-change-opts="' + c.key + '" hidden></div>';
-  }).join("");
-}
-function changeItemHTML(look) {
-  return '<div class="change-item" data-change-ctx="detail">' + changeCatsHTML(look) + "</div>";
-}
-window.changeItemHTML = changeItemHTML;
+/* The Change-an-item UI is removed (hero bar and look-detail
+   dropdown): the category maps and alternatives logic above stay
+   with the pool data, so the feature can return if the pool of
+   photographed combinations ever gets deep enough. */
 
 function lookCardHTML(look, opts) {
   opts = opts || {};
@@ -9743,7 +9850,6 @@ function lookCardHTML(look, opts) {
     dropHTML("Why it works", notes.length ? notesHTML(notes) : "") +
     dropHTML("On the wrist", wristHTML(look, true)) +
     dropHTML("Sunglasses", shadesHTML(look, true)) +
-    dropHTML("Change an item", changeItemHTML(look)) +
     dropHTML("The reference", inspoHTML(look, true));
   return '<article class="card look-card">' + media + '<div class="look-body">' +
     head + stylingLine +
@@ -15135,21 +15241,11 @@ function weatherSeason() {
   if (t >= 50) return "Fall";
   return "Winter";
 }
-/* ONE city list: both location chip rows — Today's picker and
-   Me's location card — are rendered from QUICK_LOCS, so the two
-   can never drift apart. */
+/* ONE city list: Me's location card renders its quick picks
+   from QUICK_LOCS. Location is not a front-page control — the
+   hero keeps only the location/weather caption line. */
 function renderQuickLocs() {
   var keys = Object.keys(QUICK_LOCS);
-  var tc = document.getElementById("today-loc-chips");
-  if (tc) {
-    tc.innerHTML = '<span class="tlc-label">Location</span>' + keys.map(function (k) {
-      return '<button type="button" class="tlc" data-today-loc="' + k + '">' + esc(QUICK_LOCS[k].name.split(",")[0]) + "</button>";
-    }).join("");
-    tc.querySelectorAll("[data-today-loc]").forEach(function (b) {
-      var loc = QUICK_LOCS[b.getAttribute("data-today-loc")];
-      b.setAttribute("aria-pressed", loc && currentLoc.name === loc.name ? "true" : "false");
-    });
-  }
   var lq = document.getElementById("loc-quick");
   if (lq) {
     lq.innerHTML = keys.map(function (k) {
@@ -15592,15 +15688,17 @@ function renderFinds() {
   grid.innerHTML = finds.map(function (f) {
     var q = encodeURIComponent(findQuery(f));
     var shop = iconShopFor(f);
-    /* Briefs read the LIVE budget tier at render — a brief made
-       at one tier searches at the tier in force now. Only the
-       exact-$ cap stays per-brief. */
-    var budgetMeta = [budgetInfo(budgetLevel).name, f.budget ? "up to $" + f.budget : ""].filter(Boolean).join(" · ");
+    /* The brief's budget is its own dollar cap, set on the
+       card's slider — no tier dropdown anywhere. */
+    var budgetMeta = f.budget ? "up to $" + Number(f.budget).toLocaleString("en-US") : "";
     var meta = [f.cat, f.size, budgetMeta, f.colour, shop ? "Inspo: " + shop.iconName : ""].filter(Boolean).join(" · ");
     return '<article class="card find-card">' +
       "<h4>" + esc(f.desc) + "</h4>" +
-      (meta ? '<p class="meta">' + esc(meta) + "</p>" : "") +
+      '<p class="meta" data-find-meta="' + f.id + '">' + esc(meta) + "</p>" +
       (f.details ? '<p class="details">' + esc(f.details) + "</p>" : "") +
+      '<div class="shop-cap"><span class="shop-cap-label">Budget</span>' +
+      '<input type="range" data-find-cap="' + f.id + '" min="50" max="2000" step="25" value="' + (f.budget ? f.budget : 2000) + '" aria-label="Budget cap for ' + esc(f.desc) + '" />' +
+      '<span class="shop-cap-val" data-find-cap-val="' + f.id + '">' + (f.budget ? "$" + Number(f.budget).toLocaleString("en-US") : "No limit") + "</span></div>" +
       '<div class="look-actions">' +
       (shop ? '<a class="btn-ghost" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="' + shop.href + '">' + esc(shop.brand) + "</a>" : "") +
       '<a class="btn-accent" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=shop&q=' + q + '">Google Shopping</a>' +
@@ -15628,7 +15726,7 @@ document.getElementById("find-form").addEventListener("submit", function (e) {
     desc: desc,
     cat: document.getElementById("find-cat").value,
     size: document.getElementById("find-size").value.trim(),
-    budget: document.getElementById("find-budget").value.trim().replace(/[^0-9.]/g, ""),
+    budget: (function () { var r = document.getElementById("find-cap-range"); var v = r ? parseInt(r.value, 10) : 2000; return (v && v < 2000) ? String(v) : ""; })(),
     budgetTier: budgetInfo(budgetLevel).name,
     budgetNote: budgetInfo(budgetLevel).desc,
     colour: document.getElementById("find-colour").value.trim(),
@@ -15652,6 +15750,30 @@ document.getElementById("find-form").addEventListener("submit", function (e) {
     window.open("https://www.google.com/search?tbm=shop&q=" + q, "_blank", "noopener");
   }
 });
+/* Each brief's own budget slider — dragging updates that
+   brief's cap and its meta line live, and persists. */
+document.getElementById("find-grid").addEventListener("input", function (e) {
+  var r = e.target.closest ? e.target.closest("[data-find-cap]") : null;
+  if (!r) return;
+  var f = finds.filter(function (x) { return x.id === r.getAttribute("data-find-cap"); })[0];
+  if (!f) return;
+  var v = parseInt(r.value, 10) || 2000;
+  f.budget = v >= 2000 ? "" : String(v);
+  store.set("finds", finds);
+  var val = document.querySelector('[data-find-cap-val="' + f.id + '"]');
+  if (val) val.textContent = v >= 2000 ? "No limit" : "$" + v.toLocaleString("en-US");
+  var mp = document.querySelector('[data-find-meta="' + f.id + '"]');
+  if (mp) {
+    var shop = iconShopFor(f);
+    mp.textContent = [f.cat, f.size, f.budget ? "up to $" + Number(f.budget).toLocaleString("en-US") : "", f.colour, shop ? "Inspo: " + shop.iconName : ""].filter(Boolean).join(" · ");
+  }
+});
+var findCapRangeEl = document.getElementById("find-cap-range");
+if (findCapRangeEl) findCapRangeEl.addEventListener("input", function () {
+  var v = parseInt(findCapRangeEl.value, 10) || 2000;
+  var val = document.getElementById("find-cap-val");
+  if (val) val.textContent = v >= 2000 ? "No limit" : "$" + v.toLocaleString("en-US");
+});
 document.getElementById("find-grid").addEventListener("click", function (e) {
   var del = e.target.closest("[data-delete-find]");
   if (del) {
@@ -15664,19 +15786,18 @@ document.getElementById("find-grid").addEventListener("click", function (e) {
   if (cp) {
     var f2 = finds.filter(function (x) { return x.id === cp.getAttribute("data-copy-find"); })[0];
     if (!f2) return;
-    var liveTier = budgetInfo(budgetLevel);
-    var text = "Shop the look: " + f2.desc + (f2.cat ? " (" + f2.cat + ")" : "") + (f2.size ? " — size " + f2.size : "") + " — budget: " + liveTier.name + " (" + liveTier.desc + ")" + (f2.budget ? " — up to $" + f2.budget : "") + (f2.colour ? " — " + f2.colour : "") + (f2.details ? ". " + f2.details : "");
+    var text = "Shop the look: " + f2.desc + (f2.cat ? " (" + f2.cat + ")" : "") + (f2.size ? " — size " + f2.size : "") + (f2.budget ? " — budget up to $" + Number(f2.budget).toLocaleString("en-US") : " — no set budget cap") + (f2.colour ? " — " + f2.colour : "") + (f2.details ? ". " + f2.details : "");
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast("Brief copied."); }, function () { toast(text); });
     else toast(text);
   }
 });
 
-/* Free-form find — slim selector rows, the Studio pattern:
-   Category and Budget each collapse to one closed row showing
-   the current pick; the options open beneath as a quiet list
-   and the row closes again on a pick. The category value still
-   lives in #find-cat (a hidden input now), so the size sync and
-   the brief builder read it exactly as before. */
+/* Free-form find — Category collapses to one closed selector
+   row, the Studio pattern; Budget is a dollar slider in the
+   form and one per brief card — no budget dropdown anywhere.
+   The category value still lives in #find-cat (a hidden input
+   now), so the size sync and the brief builder read it exactly
+   as before. */
 var FIND_CATS = ["Shoes", "Shirts", "Tees", "Polos", "Jeans", "Shorts", "Bathing suits", "Trousers", "Button downs", "Suits", "Blazers", "Scarves", "Jackets", "Coats", "Leather jackets", "Hats", "Sunglasses", "Sweaters", "Socks", "Belts", "Gloves", "Vests", "Ties"];
 function buildFindCatOpts() {
   var box = document.getElementById("find-cat-opts");
@@ -15688,18 +15809,11 @@ function buildFindCatOpts() {
   var v = document.getElementById("find-cat-val");
   if (v) v.textContent = cur;
 }
-function buildFindBudgetOpts() {
-  var box = document.getElementById("find-budget-opts");
-  if (!box) return;
-  box.innerHTML = BUDGET_LEVELS.map(function (b) {
-    return '<button type="button" class="opt-item" data-find-budget-opt="' + b.level + '"' + (b.level === budgetLevel ? ' aria-current="true"' : "") + '><span class="opt-main">' + esc(b.name) + '</span><span class="opt-sub">' + esc(b.desc) + "</span></button>";
-  }).join("");
-}
 function closeFindSels() {
-  ["find-cat-opts", "find-budget-opts"].forEach(function (id) { var x = document.getElementById(id); if (x) x.hidden = true; });
-  ["find-cat-toggle", "find-budget-toggle"].forEach(function (id) { var x = document.getElementById(id); if (x) x.setAttribute("aria-expanded", "false"); });
+  ["find-cat-opts"].forEach(function (id) { var x = document.getElementById(id); if (x) x.hidden = true; });
+  ["find-cat-toggle"].forEach(function (id) { var x = document.getElementById(id); if (x) x.setAttribute("aria-expanded", "false"); });
 }
-[["find-cat-toggle", "find-cat-opts"], ["find-budget-toggle", "find-budget-opts"]].forEach(function (pair) {
+[["find-cat-toggle", "find-cat-opts"]].forEach(function (pair) {
   var t = document.getElementById(pair[0]), o = document.getElementById(pair[1]);
   if (!t || !o) return;
   t.addEventListener("click", function () {
@@ -15717,18 +15831,7 @@ if (findCatOptsEl) findCatOptsEl.addEventListener("click", function (e) {
   buildFindCatOpts();
   syncFindSize();
 });
-var findBudgetOptsEl = document.getElementById("find-budget-opts");
-if (findBudgetOptsEl) findBudgetOptsEl.addEventListener("click", function (e) {
-  var b = e.target.closest ? e.target.closest("[data-find-budget-opt]") : null;
-  if (!b) return;
-  budgetLevel = Math.min(5, Math.max(1, parseInt(b.getAttribute("data-find-budget-opt"), 10) || 3));
-  store.set("findBudget", budgetLevel);
-  renderBudget();
-  buildFindBudgetOpts();
-  closeFindSels();
-});
 buildFindCatOpts();
-buildFindBudgetOpts();
 
 /* ================= Brands — shops inside Inspiration =================
    The fourteen houses and stores from the Fashion Brands list,
@@ -15745,6 +15848,49 @@ buildFindBudgetOpts();
   if (bc && list) bc.textContent = list.querySelectorAll(".brand-row").length;
   if (!input || !list) return;
   var rows = Array.prototype.slice.call(list.querySelectorAll(".brand-row"));
+  /* Alphabetize: the category groups give way to one A–Z list
+     with letter heads, plus a slim rail on the right margin for
+     jumping — 54 brands earn an index even though nine icons
+     don't. Sort key drops a leading "The" (The Row files at R). */
+  function brandKey(r) {
+    var nm = r.querySelector(".b-name");
+    return (nm ? nm.textContent : "").trim().replace(/^The\s+/i, "");
+  }
+  rows.sort(function (a, b) {
+    return brandKey(a).toLowerCase().localeCompare(brandKey(b).toLowerCase());
+  });
+  Array.prototype.slice.call(list.querySelectorAll(".brand-group-head")).forEach(function (h) {
+    h.parentNode.removeChild(h);
+  });
+  var letters = [];
+  var curLetter = "";
+  rows.forEach(function (r) {
+    var letter = brandKey(r).charAt(0).toUpperCase();
+    if (letter !== curLetter) {
+      curLetter = letter;
+      letters.push(letter);
+      var head = document.createElement("p");
+      head.className = "brand-group-head brand-letter-head";
+      head.id = "brand-letter-" + letter;
+      head.setAttribute("data-letter", letter);
+      head.textContent = letter;
+      list.appendChild(head);
+    }
+    list.appendChild(r);
+  });
+  var rail = document.createElement("nav");
+  rail.className = "brand-rail";
+  rail.setAttribute("aria-label", "Jump to a letter");
+  rail.innerHTML = letters.map(function (l) {
+    return '<button type="button" data-letter="' + l + '" aria-label="Jump to ' + l + '">' + l + "</button>";
+  }).join("");
+  document.getElementById("panel-brands").appendChild(rail);
+  rail.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-letter]");
+    if (!b) return;
+    var head = document.getElementById("brand-letter-" + b.getAttribute("data-letter"));
+    if (head && !head.hidden) head.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
   var heads = Array.prototype.slice.call(list.querySelectorAll(".brand-group-head"));
   var empty = document.getElementById("brand-empty");
   input.addEventListener("input", function () {
@@ -16227,6 +16373,24 @@ function clearFindLookMode() {
   store.set("findLook", null);
   renderFindLookMode();
 }
+/* Per-piece budget caps — one dollar slider per piece, top of
+   the scale = no limit. Caps persist per piece description. */
+var SHOP_CAP_MIN = 50, SHOP_CAP_MAX = 2000, SHOP_CAP_STEP = 25;
+var shopCaps = store.get("shopCaps", {});
+function shopCapFor(desc) {
+  var c = parseInt(shopCaps[desc], 10);
+  return (c >= SHOP_CAP_MIN && c <= SHOP_CAP_MAX) ? c : SHOP_CAP_MAX;
+}
+function shopCapText(cap) {
+  return cap >= SHOP_CAP_MAX ? "No limit" : "$" + Number(cap).toLocaleString("en-US");
+}
+function shopMatchesHTML(matches, cap) {
+  if (!matches.length) return '<p class="shop-nomatch">No exact match yet in the catalogue</p>';
+  var shown = matches.filter(function (e) { return cap >= SHOP_CAP_MAX || e.price <= cap; });
+  if (!shown.length) return '<p class="shop-nomatch">Nothing in the catalogue under ' + shopCapText(cap) + " — slide up to see all " + matches.length + ".</p>";
+  return shown.map(shopRowHTML).join("");
+}
+var shopModeData = [];
 function renderFindLookMode() {
   var box = document.getElementById("find-look-mode");
   if (!box) return;
@@ -16247,20 +16411,19 @@ function renderFindLookMode() {
   var img = lookImg(look);
   var html = '<div class="shop-look-head"><img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" />' +
     '<div class="shop-look-titlerow"><h3>' + esc(look.title || "Untitled") + '</h3><button type="button" class="btn-ghost shop-clear" id="shop-clear-look">✕ Clear look</button></div>' +
-    '<p class="shop-honest">Catalogue prices checked ' + SHOP_CATALOGUE_CHECKED + " — tap through for the live price.</p>" +
-    /* ONE budget component in both modes: the same sel-row
-       dropdown the free-form form uses — no second slider. */
-    '<div class="shop-budget"><span class="field">Budget — how far to go</span>' +
-    '<button type="button" class="sel-row" id="shop-budget-toggle" aria-expanded="false"><span class="sel-name">Budget</span><span class="sel-val">' + esc(tierName) + '</span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
-    '<div class="opt-list" id="shop-budget-opts" hidden>' + BUDGET_LEVELS.map(function (bl, bi) {
-      return '<button type="button" class="opt-item" data-shop-budget="' + (bi + 1) + '" aria-pressed="' + (budgetLevel === bi + 1 ? "true" : "false") + '">' + esc(bl.name) + " — " + esc(bl.desc) + "</button>";
-    }).join("") + "</div></div></div>";
-  shopPiecesForLook(look).forEach(function (pc) {
-    var desc = pieceDescription(pc);
-    var matches = catalogueMatches(pc);
+    '<p class="shop-honest">Catalogue prices checked ' + SHOP_CATALOGUE_CHECKED + " — tap through for the live price.</p></div>";
+  /* Budget is a slider PER PIECE now — no global tier dropdown.
+     Each piece's matches re-filter live as its slider moves. */
+  shopModeData = shopPiecesForLook(look).map(function (pc) {
+    return { pc: pc, desc: pieceDescription(pc), matches: catalogueMatches(pc) };
+  });
+  shopModeData.forEach(function (d, idx) {
+    var desc = d.desc, matches = d.matches, cap = shopCapFor(desc);
     html += '<div class="shop-piece"><h4>' + esc(desc) + "</h4>";
-    if (matches.length) matches.forEach(function (e) { html += shopRowHTML(e); });
-    else html += '<p class="shop-nomatch">No exact match yet in the catalogue</p>';
+    html += '<div class="shop-cap"><span class="shop-cap-label">Budget</span>' +
+      '<input type="range" class="shop-cap-range" data-cap-idx="' + idx + '" min="' + SHOP_CAP_MIN + '" max="' + SHOP_CAP_MAX + '" step="' + SHOP_CAP_STEP + '" value="' + cap + '" aria-label="Budget cap for ' + esc(desc) + '" />' +
+      '<span class="shop-cap-val" data-cap-val="' + idx + '">' + shopCapText(cap) + "</span></div>";
+    html += '<div class="shop-matches" data-matches="' + idx + '">' + shopMatchesHTML(matches, cap) + "</div>";
     html += '<div class="shop-brand-dd"><button type="button" class="sel-row shop-brand-toggle" aria-expanded="false"><span class="sel-name">Search brands</span><span class="sel-val">' + esc(tierName) + '</span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
       '<div class="opt-list shop-brand-list" hidden>' + brands.map(function (b) {
         return '<a class="opt-item shop-brand-item" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">' + esc(b) + "</a>";
@@ -16305,20 +16468,21 @@ function renderFindLookMode() {
       }
     }
   });
-  box.addEventListener("click", function (e) {
-    var tg = e.target.closest ? e.target.closest("#shop-budget-toggle") : null;
-    if (tg) {
-      var opts = document.getElementById("shop-budget-opts");
-      if (opts) { opts.hidden = !opts.hidden; tg.setAttribute("aria-expanded", opts.hidden ? "false" : "true"); }
-      return;
-    }
-    var ob = e.target.closest ? e.target.closest("[data-shop-budget]") : null;
-    if (ob) {
-      budgetLevel = Math.min(5, Math.max(1, parseInt(ob.getAttribute("data-shop-budget"), 10) || 3));
-      store.set("findBudget", budgetLevel);
-      renderBudget();
-      renderFindLookMode();
-    }
+  /* Per-piece budget sliders: dragging re-filters that piece's
+     matches in place — no re-render of the page, no popup. */
+  box.addEventListener("input", function (e) {
+    var r = e.target.closest ? e.target.closest(".shop-cap-range") : null;
+    if (!r) return;
+    var idx = parseInt(r.getAttribute("data-cap-idx"), 10);
+    var d = shopModeData[idx];
+    if (!d) return;
+    var cap = parseInt(r.value, 10) || SHOP_CAP_MAX;
+    if (cap >= SHOP_CAP_MAX) delete shopCaps[d.desc]; else shopCaps[d.desc] = cap;
+    store.set("shopCaps", shopCaps);
+    var val = box.querySelector('[data-cap-val="' + idx + '"]');
+    if (val) val.textContent = shopCapText(cap);
+    var mc = box.querySelector('[data-matches="' + idx + '"]');
+    if (mc) mc.innerHTML = shopMatchesHTML(d.matches, cap);
   });
 })();
 
@@ -16930,21 +17094,21 @@ function woreToday() {
       else likeToday();
     }, { passive: true });
   }
-  var chips = document.getElementById("today-loc-chips");
-  if (chips) {
-    function syncLocChips() {
-      chips.querySelectorAll("[data-today-loc]").forEach(function (b) {
-        var loc = QUICK_LOCS[b.getAttribute("data-today-loc")];
-        b.setAttribute("aria-pressed", loc && currentLoc.name === loc.name ? "true" : "false");
-      });
-    }
-    chips.addEventListener("click", function (e) {
-      var b = e.target.closest("[data-today-loc]");
+  /* Outfit type in the old Location slot: the pills carry
+     data-studio-type, so syncStudioType (hooked into
+     renderFormality) keeps their pressed state on the ONE
+     app-wide formality value; a pick sets that value and
+     re-deals Today at it, strictly. */
+  var typeRow = document.getElementById("today-type-row");
+  if (typeRow) {
+    typeRow.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-studio-type]");
       if (!b) return;
-      var loc = QUICK_LOCS[b.getAttribute("data-today-loc")];
-      if (loc) { setCurrentLoc(loc); syncLocChips(); }
+      var v = parseInt(b.getAttribute("data-studio-type"), 10);
+      var changed = v !== formalityLevel;
+      setFormality(v);
+      if (changed) dealAnotherToday();
     });
-    syncLocChips();
   }
 })();
 
@@ -17296,21 +17460,6 @@ document.getElementById("trips-wrap").addEventListener("click", function (e) {
       }
     });
   }
-  if (freshIds.length) {
-    var panel = document.getElementById("panel-icons");
-    var strip = document.createElement("div");
-    strip.className = "new-strip";
-    strip.innerHTML = '<span class="ns-label">New looks</span>' + freshIds.map(function (id) {
-      var ic = iconById(id);
-      return '<button type="button" class="chip" data-new-icon="' + id + '">New from ' + esc(ic ? ic.name : id) + "</button>";
-    }).join("");
-    var infoRow = panel.querySelector(".page-info-row");
-    panel.insertBefore(strip, infoRow ? infoRow.nextSibling : panel.firstChild);
-    strip.addEventListener("click", function (e) {
-      var b = e.target.closest("[data-new-icon]");
-      if (b) openIconDetail(b.getAttribute("data-new-icon"));
-    });
-  }
   badgeRows();
   document.getElementById("panel-icons").addEventListener("click", function (e) {
     var o = e.target.closest("[data-open-icon]");
@@ -17333,7 +17482,7 @@ renderWornLog();
     </script>
     <script>
 "use strict";
-/* ================= Narrow redo — pop-out, verdict, Change an item,
+/* ================= Narrow redo — pop-out, verdict,
    Studio outfit type ================= */
 
 /* ---------- Item 1: one shared full-size photo pop-out ---------- */
@@ -17407,105 +17556,6 @@ if (dislikeBtn) dislikeBtn.addEventListener("click", function () {
   if (typeof dealAnotherToday === "function") dealAnotherToday();
 });
 
-/* ---------- Item 4: Change an item — pick-list, photo-honest ---------- */
-function paintHeroChange() {
-  var box = document.getElementById("today-change");
-  if (!box || typeof todayLook === "undefined" || !todayLook) return;
-  if (todayLook.fwPieces) { box.innerHTML = ""; return; }
-  box.innerHTML = '<button type="button" class="change-toggle" data-change-toggle aria-expanded="false"><span>Change an item</span><span aria-hidden="true">\u25BE</span></button>' +
-    '<div class="change-panel" data-change-ctx="today" hidden>' + changeCatsHTML(todayLook) + "</div>";
-}
-var _origRenderToday = window.renderToday;
-if (typeof _origRenderToday === "function") {
-  window.renderToday = function () { _origRenderToday(); paintHeroChange(); };
-}
-function applyChange(ctx, catKey, alt) {
-  var look = ctx === "today" ? todayLook : currentLook;
-  if (!look) return;
-  var oldId = look.id;
-  function finish(nl) {
-    if (ctx === "today") { todayLook = nl; if (typeof persistOpeningLook === "function") persistOpeningLook(nl); renderToday(); }
-    else renderLookInline(nl);
-  }
-  /* One match standard for every category, watch included: the
-     target category map AND the target depicted watch must both
-     match a pool photograph exactly. The pick-lists are pre-filtered
-     to photographed combinations, so a selection always lands here
-     and the photo always swaps — there is no note fallback. */
-  var target = lookCatMap(look);
-  var targetWatch;
-  if (catKey === "watch") {
-    targetWatch = alt.watchId || null;
-  } else {
-    target[catKey] = alt.desc;
-    targetWatch = look.watchId || null;
-  }
-  var match = null;
-  RENDER_POOL.forEach(function (r) {
-    if (match) return;
-    if (dislikedImgs.indexOf(r.img) !== -1) return;
-    if ((r.watchId || null) !== targetWatch) return;
-    if (!catMapsEqual(renderCatMap(r), target)) return;
-    match = r;
-  });
-  if (!match) return;
-  var ml = renderAsLook(match);
-  ml.id = oldId;
-  ml.verdict = look.verdict || null;
-  ml.comment = look.comment || "";
-  if (look.source) ml.source = look.source;
-  if (look.anchorNames) ml.anchorNames = look.anchorNames;
-  ml.watchId = match.watchId || null;
-  ml.stylingNote = "";
-  if (ctx === "today") {
-    var seedMatch = null;
-    SEED_LOOKS.forEach(function (s) { if (s.img === match.img) seedMatch = s; });
-    if (seedMatch) todaySeedId = seedMatch.id;
-  }
-  finish(ml);
-}
-document.addEventListener("click", function (e) {
-  if (!e.target.closest) return;
-  var tg = e.target.closest("[data-change-toggle]");
-  if (tg) {
-    var panel = tg.parentNode.querySelector(".change-panel");
-    if (panel) {
-      var willOpen = panel.hidden;
-      panel.hidden = !willOpen;
-      tg.setAttribute("aria-expanded", willOpen ? "true" : "false");
-    }
-    return;
-  }
-  var catBtn = e.target.closest("[data-change-cat]");
-  if (catBtn) {
-    var wrap = catBtn.closest("[data-change-ctx]");
-    if (!wrap) return;
-    var ctx = wrap.getAttribute("data-change-ctx");
-    var look = ctx === "today" ? todayLook : currentLook;
-    if (!look) return;
-    var key = catBtn.getAttribute("data-change-cat");
-    var optsBox = wrap.querySelector('[data-change-opts="' + key + '"]');
-    if (!optsBox) return;
-    if (!optsBox.hidden) { optsBox.hidden = true; return; }
-    wrap.querySelectorAll(".change-opts").forEach(function (o) { o.hidden = true; });
-    var alts = changeAlts(look, key);
-    window._changeAlts = alts;
-    window._changeCtx = ctx;
-    window._changeCat = key;
-    optsBox.innerHTML = alts.length ? alts.map(function (a, i) {
-      return '<button type="button" class="change-opt" data-change-opt="' + i + '"><span class="cdot" style="background:' + (a.hex || "transparent") + '"></span><span>' + esc(a.desc) + "</span></button>";
-    }).join("") : '<p class="change-empty">No photographed alternatives for this piece.</p>';
-    optsBox.hidden = false;
-    return;
-  }
-  var optBtn = e.target.closest("[data-change-opt]");
-  if (optBtn) {
-    var alts2 = window._changeAlts || [];
-    var alt = alts2[parseInt(optBtn.getAttribute("data-change-opt"), 10)];
-    if (alt) applyChange(window._changeCtx || "detail", window._changeCat, alt);
-  }
-});
-
 /* A chosen watch is the watch the look wears: the wrist call
    honours the pick instead of re-deriving one. */
 var _origRecommendWatch = recommendWatch;
@@ -17535,7 +17585,6 @@ if (studioTypeRow) studioTypeRow.addEventListener("click", function (e) {
   setFormality(parseInt(b.getAttribute("data-studio-type"), 10));
 });
 syncStudioType();
-paintHeroChange();
 
 /* ---------- Studio Ideas — slim closed selectors ----------
    Dress-for and Outfit type live behind two slim rows under the
