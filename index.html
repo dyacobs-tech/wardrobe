@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.7" />
+    <meta name="wardrobe-build" content="2026-11-16.8" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -2261,6 +2261,11 @@
         #panel-wardrobe .item-grid .item-colors .cname { flex: 1 1 100%; overflow-wrap: anywhere; }
       }
       /* ---------- Bottom bar: the four sections, within thumb reach ---------- */
+      /* Bar geometry (build .8): the total height is pinned explicitly —
+         content height (--bb-h) + the home-indicator inset, with the inset
+         applied ONCE, as padding-bottom inside the bar (border-box). The
+         old content-driven height (button min-height + padding stack)
+         overshot on iPhone and left a tall dead band under the buttons. */
       :root { --bb-h: 56px; }
       body { padding-bottom: calc(var(--bb-h) + env(safe-area-inset-bottom)); }
       .bottombar {
@@ -2269,15 +2274,20 @@
         background: color-mix(in srgb, var(--bg) 94%, transparent);
         -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
         border-top: 1px solid var(--border);
-        padding: 2px max(8px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-left));
+        box-sizing: border-box;
+        height: calc(var(--bb-h) + env(safe-area-inset-bottom));
+        padding: 0 max(8px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-left));
       }
       .navbtn {
         -webkit-appearance: none; appearance: none; background: none; border: 0; margin: 0; cursor: pointer;
         color: var(--dim); font: inherit; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; line-height: 1;
         display: grid; justify-items: center; align-content: center; gap: 4px;
-        min-height: var(--bb-h); padding: 4px 2px; position: relative;
+        padding: 4px 2px; position: relative;
         -webkit-tap-highlight-color: transparent;
       }
+      /* Bar buttons fill the bar's content area (above the inset); their
+         icon+label stacks stay vertically centred via align-content above. */
+      .bottombar .navbtn { height: 100%; min-height: 0; }
       .navbtn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
       .navbtn[aria-current="page"] { color: var(--text); }
       .bottombar .navbtn[aria-current="page"]::after {
@@ -3711,7 +3721,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.7";
+var WARDROBE_BUILD = "2026-11-16.8";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
