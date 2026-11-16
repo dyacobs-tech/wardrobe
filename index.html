@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.17" />
+    <meta name="wardrobe-build" content="2026-11-16.18" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -3878,7 +3878,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.17";
+var WARDROBE_BUILD = "2026-11-16.18";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -10450,6 +10450,13 @@ function isTaupeLook(look) {
   return !!look && /taupe/i.test(((look.desc || "") + " " + (look.title || "")));
 }
 function lookImg(look) {
+  /* A swapped look shows its swap photograph everywhere — the
+     pop-out, the grid, My Looks — never a piece's own product
+     photo standing in for the combination. swapPhoto is the
+     display photo by definition (see swapDisplayPhoto): the
+     finished render once it lands, the source photo while it
+     renders. */
+  if (look && look.swapPhoto && (look.swapPieces || look.swapComboId)) return look.swapPhoto;
   /* A wardrobe look with a verified render shows that render —
      the photograph of him wearing exactly its own top + shoes
      pairing. Without one, its image is its first piece's own
@@ -11642,11 +11649,32 @@ function swapMapPoolPiece(pc) {
   if (!slot) return null;
   var wada = nearestWada(pc.hex).name;
   var fam = swapFamilyWord(pc.garment);
-  var cands = PIECE_LIBRARY.filter(function (p) {
-    return p.slot === slot && libCats.indexOf(p.cat) !== -1 && p.wn === wada &&
-      (!fam || p.name.toLowerCase().indexOf(fam) !== -1);
+  var inSlot = PIECE_LIBRARY.filter(function (p) {
+    return p.slot === slot && libCats.indexOf(p.cat) !== -1 && p.wn === wada;
   });
-  return cands.length === 1 ? cands[0] : null;
+  var cands = fam ? inSlot.filter(function (p) { return p.name.toLowerCase().indexOf(fam) !== -1; }) : inSlot;
+  if (cands.length === 1) return cands[0];
+  /* The family word matched nothing (or was absent): the whole
+     same-slot, same-category, same-Wada-colour set may still
+     hold exactly one piece — that match is just as exact. */
+  if (!cands.length && inSlot.length === 1) return inSlot[0];
+  /* Several pieces answer: the garment's own words decide, and
+     only a unique best word-overlap wins — a tie stays unmapped
+     rather than guessed. */
+  var pool = cands.length ? cands : inSlot;
+  if (pool.length > 1) {
+    var words = String(pc.garment || "").toLowerCase().split(/[^a-z]+/).filter(function (w) { return w.length > 2; });
+    var best = null, bestScore = 0, tied = false;
+    pool.forEach(function (p) {
+      var pn = " " + p.name.toLowerCase() + " ";
+      var sc = 0;
+      words.forEach(function (w) { if (pn.indexOf(w) !== -1) sc++; });
+      if (sc > bestScore) { bestScore = sc; best = p; tied = false; }
+      else if (sc === bestScore && sc > 0) tied = true;
+    });
+    if (best && !tied) return best;
+  }
+  return null;
 }
 function swapBottomByName(name) {
   var tries = [name, String(name || "").replace(/,\s*straight leg$/i, ""), String(name || "").replace(/\s+straight-leg\s+/gi, " ").replace(/straight-leg\s*/gi, "")];
@@ -11655,6 +11683,17 @@ function swapBottomByName(name) {
     if (!key) continue;
     var cands = PIECE_LIBRARY.filter(function (p) { return p.slot === "bottom" && p.name.toLowerCase() === key; });
     if (cands.length === 1) return cands[0];
+  }
+  /* Normalised pass: punctuation, spacing and fit words differ
+     between the suggested-bottom names and the library's, so
+     compare word sets — again only where exactly one answers. */
+  function norm(s) {
+    return String(s || "").toLowerCase().replace(/straight[-\s]?leg/g, " ").replace(/[^a-z0-9]+/g, " ").trim().split(/\s+/).filter(Boolean).sort().join(" ");
+  }
+  var nk = norm(name);
+  if (nk) {
+    var nc = PIECE_LIBRARY.filter(function (p) { return p.slot === "bottom" && norm(p.name) === nk; });
+    if (nc.length === 1) return nc[0];
   }
   return null;
 }
@@ -11731,25 +11770,29 @@ function swapCandidates(look, slotKey) {
   var cur = map[slotKey].piece;
   var others = Object.keys(map).filter(function (s) { return s !== slotKey; }).map(function (s) { return map[s].piece; });
   var scores = others.map(function (p) { return p.fs; });
-  var lo = scores.length ? Math.min.apply(null, scores) - 1 : null;
-  var hi = scores.length ? Math.max.apply(null, scores) + 1 : null;
   var otherNames = others.map(function (p) { return p.wn; });
-  var out = [];
-  PIECE_LIBRARY.forEach(function (cand) {
-    if (!cand.slot || cand.slot !== slotKey || cand.id === cur.id) return;
-    if (lo !== null && (cand.fs < lo || cand.fs > hi)) return;
-    var tier;
-    if (!others.length) tier = 1;
-    else {
-      var distinct = [];
-      otherNames.concat([cand.wn]).forEach(function (n) { if (distinct.indexOf(n) === -1) distinct.push(n); });
-      if (distinct.length >= 2 && distinct.length <= 4 && swapPlateCovers(distinct)) tier = 0;
-      else if (otherNames.every(function (n) { return swapPairHarmonious(cand.wn, n); })) tier = 1;
-      else if (otherNames.some(function (n) { return swapPairHarmonious(cand.wn, n); })) tier = 2;
-      else return;
-    }
-    out.push({ piece: cand, tier: tier });
-  });
+  function collect(window_) {
+    var lo = scores.length ? Math.min.apply(null, scores) - window_ : null;
+    var hi = scores.length ? Math.max.apply(null, scores) + window_ : null;
+    var out = [];
+    PIECE_LIBRARY.forEach(function (cand) {
+      if (!cand.slot || cand.slot !== slotKey || cand.id === cur.id) return;
+      if (lo !== null && (cand.fs < lo || cand.fs > hi)) return;
+      var tier;
+      if (!others.length) tier = 1;
+      else {
+        var distinct = [];
+        otherNames.concat([cand.wn]).forEach(function (n) { if (distinct.indexOf(n) === -1) distinct.push(n); });
+        if (distinct.length >= 2 && distinct.length <= 4 && swapPlateCovers(distinct)) tier = 0;
+        else if (otherNames.every(function (n) { return swapPairHarmonious(cand.wn, n); })) tier = 1;
+        else if (otherNames.some(function (n) { return swapPairHarmonious(cand.wn, n); })) tier = 2;
+        else return;
+      }
+      out.push({ piece: cand, tier: tier });
+    });
+    return out;
+  }
+  var out = collect(1);
   out.sort(function (a, b) {
     if (a.tier !== b.tier) return a.tier - b.tier;
     if (a.piece.owned !== b.piece.owned) return a.piece.owned ? -1 : 1;
@@ -11763,7 +11806,7 @@ function swapSectionHTML(look, fwIdx) {
   var map = swapMapForLook(look);
   if (!map) return "";
   var slots = ["top", "bottom", "shoes", "layer"].filter(function (s) { return map[s]; });
-  if (!slots.length) return "";
+  if (!slots.length) return '<div class="find-pieces swap-sec"><h4>Change a piece</h4><p class="swap-note" style="margin:0">No swappable pieces in this look yet.</p></div>';
   var fwAttr = typeof fwIdx === "number" ? ' data-swap-fw="' + fwIdx + '"' : "";
   var rows = slots.map(function (s) {
     var p = map[s].piece;
@@ -11892,6 +11935,54 @@ function swapFindExistingRender(pieceIds) {
   }
   return null;
 }
+/* Every live copy of a swapped look — the open pop-out, the
+   grid behind it, the From-wardrobe list, My Looks, the queue —
+   settles together when its render lands (or fails), so no
+   re-render from any of them can bring the old photo back. */
+function swapSettleCombo(comboId, url) {
+  if (!comboId) return;
+  var savedChanged = false, queueChanged = false;
+  function settle(l) {
+    if (!l || l.swapComboId !== comboId) return;
+    if (url) { l.img = url; l.swapPhoto = url; l.swapState = null; }
+    else if (l.swapState === "rendering") { l.swapState = null; l.img = l.swapFromPhoto || l.img; l.swapPhoto = l.img; }
+  }
+  settle(typeof currentLook !== "undefined" ? currentLook : null);
+  if (typeof lookLayerStash !== "undefined" && lookLayerStash) settle(lookLayerStash.look);
+  if (typeof currentOptions !== "undefined" && currentOptions) currentOptions.forEach(settle);
+  if (typeof fwLooks !== "undefined" && fwLooks) fwLooks.forEach(settle);
+  if (typeof savedLooks !== "undefined" && savedLooks) {
+    var before = JSON.stringify(savedLooks.filter(function (l) { return l.swapComboId === comboId; }));
+    savedLooks.forEach(settle);
+    if (JSON.stringify(savedLooks.filter(function (l) { return l.swapComboId === comboId; })) !== before) savedChanged = true;
+  }
+  if (typeof queueLooks !== "undefined" && queueLooks) {
+    var qBefore = JSON.stringify(queueLooks.filter(function (l) { return l.swapComboId === comboId; }));
+    queueLooks.forEach(settle);
+    if (JSON.stringify(queueLooks.filter(function (l) { return l.swapComboId === comboId; })) !== qBefore) queueChanged = true;
+  }
+  if (url) { lazyRenders[comboId] = url; saveLazyRenders(); }
+  if (savedChanged && typeof persistAll === "function") persistAll();
+  if (queueChanged) saveQueue();
+  if (typeof lookLayerOpen !== "undefined" && lookLayerOpen && typeof currentLook !== "undefined" && currentLook && currentLook.swapComboId === comboId) {
+    document.getElementById("look-layer-body").innerHTML = lookCardHTML(currentLook);
+  }
+  if (typeof currentOptions !== "undefined" && currentOptions && currentOptions.some(function (l) { return l.swapComboId === comboId; }) && typeof rerenderOptions === "function") rerenderOptions();
+}
+/* A swap is no longer a pop-out-only object: the swapped look
+   joins the queue (My Looks → Queued) the moment it is picked,
+   persisted and synced like any queued look. Closing the
+   pop-out, reloading, or the render landing late can no longer
+   make it disappear — and when the render finishes, the queued
+   copy is the one swapSettleCombo updates. */
+function swapPersistLook(look) {
+  if (!look || !look.id) return;
+  if (typeof savedLooks !== "undefined" && savedLooks.some(function (l) { return l.id === look.id; })) return;
+  if (typeof queueLooks === "undefined" || !queueLooks) return;
+  if (queueLooks.some(function (l) { return l.id === look.id; })) return;
+  queueLooks.unshift(JSON.parse(JSON.stringify(look)));
+  saveQueue();
+}
 function pickSwap(i) {
   var ctx = swapSheetCtx;
   if (!ctx) return;
@@ -11942,6 +12033,7 @@ function pickSwap(i) {
     swapSubmitJob(look, newIds, watchId);
     startSwapPoll(look);
   }
+  swapPersistLook(look);
   if (fwIdx !== null && typeof closeFwLayer === "function") { closeFwLayer(); openLookLayer(look); }
   else renderLookInline(look);
 }
@@ -11970,61 +12062,93 @@ function swapSubmitJob(look, idsBySlot, watchId) {
     body: JSON.stringify({ comboId: look.swapComboId, pieces: pieces, watchId: watchId || "" })
   }, 20000).catch(function () {});
 }
-/* Polling runs only while the swapped look's pop-out is on
-   screen: the tick itself checks, and stops the moment the
-   layer closes or another look takes its place. */
+/* Polling runs while the swapped look's pop-out is on screen;
+   the tick stops when the layer closes or another look takes
+   its place — but the swap itself is safe either way: the
+   swapped look is queued (swapPersistLook), and opening it
+   again, or the next launch, resumes the check
+   (swapResumePending). The queue marks a job done when the
+   watcher publishes, but the photo file can take minutes
+   longer to actually serve, so a "done" whose file still
+   404s is retried patiently with a cache-buster — never
+   given up on after a handful of tries. */
 var swapPoll = null;
 function startSwapPoll(look) {
   stopSwapPoll();
   if (!look || !look.swapComboId || !swapSyncKey()) return;
-  swapPoll = { comboId: look.swapComboId, imgFails: 0, timer: setInterval(swapPollTick, 20000) };
+  if (lazyRenders[look.swapComboId]) { swapSettleCombo(look.swapComboId, lazyRenders[look.swapComboId]); return; }
+  swapPoll = { comboId: look.swapComboId, imgFails: 0, ticks: 0, timer: setInterval(swapPollTick, 20000) };
 }
 function stopSwapPoll() {
   if (swapPoll) { clearInterval(swapPoll.timer); swapPoll = null; }
+}
+function swapTryLoadRender(comboId, bust, onOk, onFail) {
+  var img = new Image();
+  img.onload = function () { onOk(LAZY_RENDER_BASE + comboId + ".jpg"); };
+  img.onerror = onFail;
+  img.src = LAZY_RENDER_BASE + comboId + ".jpg" + (bust ? "?r=" + bust : "");
 }
 function swapPollTick() {
   if (!swapPoll) return;
   var layer = document.getElementById("look-layer");
   if (!lookLayerOpen || !layer || layer.hidden || !currentLook || currentLook.swapComboId !== swapPoll.comboId || currentLook.swapState !== "rendering") { stopSwapPoll(); return; }
   var comboId = swapPoll.comboId;
+  swapPoll.ticks++;
+  if (swapPoll.ticks > 90) { stopSwapPoll(); return; }
   swapFetch(swapSyncBase() + "/render-queue/" + comboId, {
     headers: { "authorization": "Bearer " + swapSyncKey() }
   }, 20000).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
     if (!j || !swapPoll || swapPoll.comboId !== comboId) return;
     if (j.status === "done") {
-      var url = LAZY_RENDER_BASE + comboId + ".jpg";
-      var img = new Image();
-      img.onload = function () {
+      if (lazyRenders[comboId]) { stopSwapPoll(); swapSettleCombo(comboId, lazyRenders[comboId]); return; }
+      swapTryLoadRender(comboId, swapPoll.imgFails + 1, function (url) {
         if (!swapPoll || swapPoll.comboId !== comboId) return;
         stopSwapPoll();
-        lazyRenders[comboId] = url;
-        saveLazyRenders();
-        if (currentLook && currentLook.swapComboId === comboId) {
-          currentLook.img = url;
-          currentLook.swapPhoto = url;
-          currentLook.swapState = null;
-          if (lookLayerOpen) document.getElementById("look-layer-body").innerHTML = lookCardHTML(currentLook);
-        }
+        swapSettleCombo(comboId, url);
         toast("Your combination is ready.");
-      };
-      img.onerror = function () {
+      }, function () {
         if (!swapPoll || swapPoll.comboId !== comboId) return;
         swapPoll.imgFails++;
-        if (swapPoll.imgFails >= 4) stopSwapPoll();
-      };
-      img.src = url;
+        /* The file lags the done flag while the site
+           republishes: keep the rendering state and try
+           again next tick. Only a long, unbroken run of
+           failures (about 15 minutes) settles back to the
+           original photo. */
+        if (swapPoll.imgFails >= 45) {
+          stopSwapPoll();
+          swapSettleCombo(comboId, null);
+          toast("That render didn't come through — showing the original photo.");
+        }
+      });
     } else if (j.status === "failed") {
       stopSwapPoll();
-      if (currentLook && currentLook.swapComboId === comboId) {
-        currentLook.swapState = null;
-        currentLook.img = currentLook.swapFromPhoto || currentLook.img;
-        currentLook.swapPhoto = currentLook.img;
-        if (lookLayerOpen) document.getElementById("look-layer-body").innerHTML = lookCardHTML(currentLook);
-      }
+      swapSettleCombo(comboId, null);
       toast("That render didn't come through — showing the original photo.");
     }
   }).catch(function () {});
 }
+/* One-shot check for swaps left rendering by an earlier
+   session — the queued/saved copies persist, so a render that
+   landed while the app was closed is picked up on launch. */
+function swapResumePending() {
+  if (!swapSyncKey()) return;
+  var pending = {};
+  [typeof queueLooks !== "undefined" ? queueLooks : [], typeof savedLooks !== "undefined" ? savedLooks : []].forEach(function (arr) {
+    (arr || []).forEach(function (l) { if (l && l.swapState === "rendering" && l.swapComboId) pending[l.swapComboId] = 1; });
+  });
+  Object.keys(pending).forEach(function (comboId) {
+    if (lazyRenders[comboId]) { swapSettleCombo(comboId, lazyRenders[comboId]); return; }
+    swapFetch(swapSyncBase() + "/render-queue/" + comboId, {
+      headers: { "authorization": "Bearer " + swapSyncKey() }
+    }, 20000).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j) return;
+      if (j.status === "done") {
+        swapTryLoadRender(comboId, 0, function (url) { swapSettleCombo(comboId, url); }, function () {});
+      } else if (j.status === "failed") swapSettleCombo(comboId, null);
+    }).catch(function () {});
+  });
+}
+setTimeout(swapResumePending, 4000);
 
 function lookCardHTML(look, opts) {
   opts = opts || {};
@@ -12084,6 +12208,10 @@ function openLookLayer(look) {
   if (!lookLayerOpen) lookLayerStash = { options: currentOptions, look: currentLook };
   lookLayerOpen = true;
   currentLook = look;
+  /* A swapped look still waiting on its render resumes its
+     poll whenever it is opened — closing the pop-out earlier
+     paused the check, never cancelled the swap. */
+  if (look && look.swapState === "rendering" && look.swapComboId && typeof startSwapPoll === "function") startSwapPoll(look);
   if (look && look.img) { recordDealt([look.img]); recordLookCombos([look]); }
   document.getElementById("look-layer-body").innerHTML = lookCardHTML(look);
   var layer = document.getElementById("look-layer");
