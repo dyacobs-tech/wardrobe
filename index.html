@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.15" />
+    <meta name="wardrobe-build" content="2026-11-16.16" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -2412,6 +2412,39 @@
       /* Ideas — the source dropdown's 12px bottom margin against
          the home bar's own 6px: one rhythm. */
       .ideas-source-cdd { margin-bottom: 8px; }
+      /* ================= Week planner — Calendar (build .16) =================
+         Seven flush day slots, Mon–Sun, on the same card scale as
+         everything else: day, date, the day's forecast where the
+         weather source covers it, and the planned look's own
+         photograph (or a dashed empty slot). Past days grey;
+         today carries the accent edge. */
+      #week-plan-wrap { margin-bottom: 16px; }
+      .wp-head { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+      .wp-head .fav-head { margin: 0; flex: none; }
+      .wp-range { flex: 1; min-width: 0; font-size: 12.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .wp-nav { display: flex; gap: 6px; flex: none; }
+      .wp-nav button { width: 32px; height: 32px; min-height: 32px; padding: 0; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface); color: var(--text); font-size: 16px; line-height: 1; display: grid; place-items: center; cursor: pointer; }
+      .wp-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+      .wp-day { border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-card); padding: 5px 3px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; min-width: 0; }
+      .wp-day.wp-today { border-color: var(--accent); }
+      .wp-day.wp-past { opacity: .55; }
+      .wp-dow { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); line-height: 1.2; }
+      .wp-date { font-size: 13px; font-weight: 600; line-height: 1.1; }
+      .wp-fc { font-size: 9.5px; color: var(--dim); line-height: 1.15; text-align: center; min-height: 11px; }
+      .wp-thumb { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; border: 1px solid var(--border); }
+      .wp-empty { width: 100%; aspect-ratio: 3 / 4; border: 1px dashed var(--border-strong); display: grid; place-items: center; color: var(--dim); font-size: 16px; line-height: 1; }
+      /* Plan sheet — the shared bottom-sheet card, planner rows */
+      .wp-current { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+      .wp-current img { width: 44px; height: 56px; flex: none; object-fit: cover; object-position: top center; border: 1px solid var(--border); cursor: zoom-in; }
+      .wp-current-main { flex: 1; min-width: 0; display: grid; gap: 1px; }
+      .wp-current-name { font-weight: 600; font-size: 14px; line-height: 1.25; }
+      .wp-current-sub { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+      .wp-current .btn-ghost { flex: none; }
+      .wp-deal { width: 100%; margin-bottom: 12px; }
+      .wp-pick-label { font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); margin: 0 0 8px; }
+      .wp-pick-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+      .wp-pick { padding: 0; min-height: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface-alt); cursor: pointer; }
+      .wp-pick img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; display: block; }
 </style>
   </head>
   <body>
@@ -2824,6 +2857,17 @@
       <!-- ================= CALENDAR ================= -->
       <section id="panel-calendar" role="tabpanel" aria-labelledby="tab-calendar" hidden>
         <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Calendar — Trips" data-info-text="Trip capsules built from your closet for each trip's weather, with a packing checklist that remembers what you've packed. What you wore lives on the Wearing Today page, beside the log." aria-label="About: Calendar — Trips">i</button></div>
+        <div id="week-plan-wrap">
+          <div class="wp-head">
+            <h3 class="fav-head">This week</h3>
+            <span class="wp-range" id="week-plan-range"></span>
+            <span class="wp-nav">
+              <button type="button" data-plan-nav="-1" aria-label="Previous week">‹</button>
+              <button type="button" data-plan-nav="1" aria-label="Next week">›</button>
+            </span>
+          </div>
+          <div class="wp-grid" id="week-plan-grid"></div>
+        </div>
         <div id="trips-wrap">
           <h3 class="fav-head">Trips — capsule &amp; packing</h3>
           <div class="fb-chips" role="group" aria-label="Trips">
@@ -3463,6 +3507,15 @@
         <div id="watch-sheet-list"></div>
       </div>
     </div>
+    <div class="info-pop-backdrop" id="plan-sheet" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="plan-sheet-title">
+        <div class="principles-head">
+          <h3 id="plan-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Plan</h3>
+          <button type="button" class="info-pop-close" id="plan-sheet-close" aria-label="Close planner">&times;</button>
+        </div>
+        <div id="plan-sheet-body"></div>
+      </div>
+    </div>
     <div class="popout" id="photo-popout" hidden>
       <img id="popout-img" alt="" />
       <button type="button" class="popout-close" id="popout-close" aria-label="Close full-size photo">&times;</button>
@@ -3803,7 +3856,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.15";
+var WARDROBE_BUILD = "2026-11-16.16";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -10914,6 +10967,67 @@ var queueLooks = store.get("queue", []) || [];
 var looksFilter = "all";
 function saveQueue() { store.set("queue", queueLooks); }
 
+/* ================= Week plan — one planned look per date =================
+   The Calendar planner's store: an array of entries
+   {id: ISO date, date, lookId, look} — the look snapshot rides
+   with the entry (the queue's pattern), so its thumbnail, its
+   pop-out and its FW render resolve exactly as they do
+   everywhere else. Resolution prefers the live look under the
+   same id — My Looks, then the queue, then the seed catalogue —
+   and falls back to the snapshot; when neither resolves, the
+   date simply has no plan and Today deals as usual. The plan
+   syncs as its own collection ("plan") and rides in backups
+   under the "weekPlan" key. */
+var weekPlan = store.get("weekPlan", []);
+if (!Array.isArray(weekPlan)) weekPlan = [];
+function saveWeekPlan() { store.set("weekPlan", weekPlan); }
+function planEntryFor(iso) {
+  for (var pi = 0; pi < weekPlan.length; pi++) { if (weekPlan[pi] && weekPlan[pi].date === iso) return weekPlan[pi]; }
+  return null;
+}
+function planLookValid(l) {
+  return !!l && typeof l === "object" && !!l.title && Array.isArray(l.swatches) &&
+    (!!l.img || !!l.fwRender || !!(l.fwPieces && l.fwPieces.length));
+}
+function planLookForDate(iso) {
+  var e = planEntryFor(iso);
+  if (!e) return null;
+  var snap = (e.look && planLookValid(e.look)) ? e.look : null;
+  var pools = [savedLooks, queueLooks, (typeof SEED_LOOKS !== "undefined" ? SEED_LOOKS : [])];
+  for (var pi = 0; pi < pools.length; pi++) {
+    for (var li = 0; li < pools[pi].length; li++) {
+      var l = pools[pi][li];
+      if (!l || l.id !== e.lookId || !planLookValid(l)) continue;
+      /* A live match must be the same look, not just the same
+         id: ids on the Today path are not unique per look (the
+         app keys dealt-look identity by photograph — graduated,
+         disliked and dealt history are all img-keyed), so the
+         photograph has to agree too, or the snapshot wins. */
+      if (!snap) return JSON.parse(JSON.stringify(l));
+      var samePhoto = (!snap.img && !snap.fwRender) ||
+        (!!snap.img && l.img === snap.img) ||
+        (!!snap.fwRender && l.fwRender === snap.fwRender);
+      if (samePhoto) return JSON.parse(JSON.stringify(l));
+    }
+  }
+  if (snap) return JSON.parse(JSON.stringify(snap));
+  return null;
+}
+function setPlanForDate(iso, look) {
+  if (!iso || !planLookValid(look)) return false;
+  var copy = JSON.parse(JSON.stringify(look));
+  weekPlan = weekPlan.filter(function (x) { return x && x.date !== iso; });
+  weekPlan.push({ id: iso, date: iso, lookId: copy.id, look: copy });
+  weekPlan.sort(function (a, b) { return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+  saveWeekPlan();
+  return true;
+}
+function clearPlanForDate(iso) {
+  var before = weekPlan.length;
+  weekPlan = weekPlan.filter(function (x) { return x && x.date !== iso; });
+  if (weekPlan.length !== before) saveWeekPlan();
+}
+
 /* A look carries its own feedback: a verdict (like / dislike)
    and a written comment, stored on the look itself. When the
    look has been saved, feedback is written through to the saved
@@ -16767,6 +16881,18 @@ function openingLook() {
     delete restored._seedId;
     return restored;
   }
+  /* THE PLAN DEFAULT: a look planned for today on the Calendar
+     opens as today's hero on a fresh open — a default, never a
+     lock: swiping deals past it exactly as usual, and every hero
+     control works on it. An in-session refresh restored the
+     session's look above, so a swipe already taken is never
+     undone by the plan. An unresolvable plan (its look deleted)
+     falls through to the normal deal, silently. */
+  var plannedToday = planLookForDate(localTodayISO());
+  if (plannedToday) {
+    todaySeedId = plannedToday.id;
+    return plannedToday;
+  }
   /* Fresh open: deal a new opening look in the saved source
      mode — one setting shared by the Today "Build from" selector
      and the Ideas source boxes, default Combo. Only my wardrobe
@@ -17197,6 +17323,12 @@ var QUICK_LOCS = {
 var homeLoc = store.get("homeLocation", null) || JSON.parse(JSON.stringify(HOME_DEFAULT));
 var currentLoc = store.get("currentLocation", null) || JSON.parse(JSON.stringify(homeLoc));
 var currentWeather = null;
+/* Per-date daily forecast from the same Open-Meteo read, keyed
+   by ISO date: {hi, lo, code, label, rain}. The Calendar planner
+   shows a day's forecast only where this map covers the date —
+   a week or two out, and the week just past — and nothing where
+   it does not. */
+var dailyForecast = {};
 function isTraveling() {
   return Math.abs(currentLoc.lat - homeLoc.lat) > 0.001 || Math.abs(currentLoc.lon - homeLoc.lon) > 0.001;
 }
@@ -17270,6 +17402,9 @@ function renderLoc() {
 }
 function applyWeatherToToday() {
   if (todayTouched || !currentWeather || !todayLook) return;
+  /* A planned day keeps its planned hero — the weather refines
+     unplanned days only. */
+  if (planEntryFor(localTodayISO())) return;
   if (todayLook.source === "wardrobe" || todayLook.fwPieces) {
     /* The wardrobe hero is re-picked for the actual weather at
        the current location: temperature and conditions choose
@@ -17313,22 +17448,40 @@ function applyWeatherToToday() {
 function fetchWeather(attempt) {
   if (!window.fetch) return;
   var url = "https://api.open-meteo.com/v1/forecast?latitude=" + currentLoc.lat + "&longitude=" + currentLoc.lon +
-    "&current=temperature_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&forecast_days=1&timezone=auto";
+    "&current=temperature_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&temperature_unit=fahrenheit&past_days=7&forecast_days=16&timezone=auto";
   var askedLat = currentLoc.lat, askedLon = currentLoc.lon;
   fetch(url).then(function (r) { return r.json(); }).then(function (data) {
     if (currentLoc.lat !== askedLat || currentLoc.lon !== askedLon) return;
     if (!data || !data.current || typeof data.current.temperature_2m !== "number") { weatherFailed(attempt); return; }
+    /* The daily arrays now span past + forecast days, so today
+       is found by its date string, not by position. */
+    var dTimes = (data.daily && data.daily.time) || [];
+    var todayStr = String(data.current.time || "").slice(0, 10);
+    var di = dTimes.indexOf(todayStr);
+    if (di < 0) di = Math.min(7, Math.max(0, dTimes.length - 1));
+    function dAt(arr) { return arr && typeof arr[di] === "number" ? arr[di] : null; }
     currentWeather = {
       temp: data.current.temperature_2m,
       feels: data.current.apparent_temperature,
       code: data.current.weather_code,
       label: weatherLabel(data.current.weather_code),
-      hi: data.daily && data.daily.temperature_2m_max ? data.daily.temperature_2m_max[0] : null,
-      lo: data.daily && data.daily.temperature_2m_min ? data.daily.temperature_2m_min[0] : null,
-      rain: data.daily && data.daily.precipitation_probability_max ? data.daily.precipitation_probability_max[0] : null
+      hi: dAt(data.daily && data.daily.temperature_2m_max),
+      lo: dAt(data.daily && data.daily.temperature_2m_min),
+      rain: dAt(data.daily && data.daily.precipitation_probability_max)
     };
+    dailyForecast = {};
+    dTimes.forEach(function (ds, ix) {
+      dailyForecast[ds] = {
+        hi: data.daily.temperature_2m_max ? data.daily.temperature_2m_max[ix] : null,
+        lo: data.daily.temperature_2m_min ? data.daily.temperature_2m_min[ix] : null,
+        code: data.daily.weather_code ? data.daily.weather_code[ix] : null,
+        label: weatherLabel(data.daily.weather_code ? data.daily.weather_code[ix] : null),
+        rain: data.daily.precipitation_probability_max ? data.daily.precipitation_probability_max[ix] : null
+      };
+    });
     renderLoc();
     applyWeatherToToday();
+    if (typeof renderWeekPlan === "function") renderWeekPlan();
   }).catch(function () { if (currentLoc.lat === askedLat && currentLoc.lon === askedLon) weatherFailed(attempt); });
 }
 /* One quiet retry before giving up — a single dropped request
@@ -17352,11 +17505,14 @@ function setCurrentLoc(loc, silent) {
   if (locCloset && locCloset.length) {
     todaySeedId = locCloset[0].id;
     todayLook = locCloset[0];
-    persistOpeningLook(todayLook);
   } else {
     todayLook = dailyLook();
-    persistOpeningLook(todayLook);
   }
+  /* A planned today survives a location change too — the plan
+     is the day's default wherever he is. */
+  var locPlan = planLookForDate(localTodayISO());
+  if (locPlan) { todayLook = locPlan; todaySeedId = locPlan.id; }
+  persistOpeningLook(todayLook);
   renderToday();
   renderLoc();
   document.getElementById("loc-weather").textContent = "Checking the weather there…";
@@ -17564,7 +17720,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan"];
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
@@ -17585,7 +17741,7 @@ document.getElementById("data-export").addEventListener("click", function () {
    that fails puts everything back. "Nothing was changed" is only
    ever said when it is true. */
 var BACKUP_VERSION = 1;
-var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "recentlyRemoved", "dealtImgs"];
+var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "recentlyRemoved", "dealtImgs", "weekPlan"];
 var BACKUP_OBJECT_KEYS = ["profile", "overrides"];
 function readBackupFile(text) {
   var payload = JSON.parse(text);
@@ -19851,6 +20007,209 @@ document.getElementById("trips-wrap").addEventListener("click", function (e) {
   }
 });
 
+/* ---------- Week planner — seven days on the Calendar ----------
+   Mon–Sun slots for the displayed week, with prev/next chevrons
+   so the coming week can be planned on a Sunday. A slot shows
+   the day, its date, the day's forecast where the weather read
+   covers that date (dailyForecast — past week through the
+   forecast horizon; nothing beyond it, never an invented one),
+   and the planned look's own photograph or an empty slot.
+   Tapping the slot opens the plan sheet (the shared bottom
+   sheet): pick a liked/queued look, deal a fresh one in, or
+   clear the day. Tapping the photograph itself opens the
+   standard photo pop-out — the global data-popout rule, which
+   stops the tap before it reaches the slot. Past days keep
+   their plan, greyed; nothing is auto-deleted. */
+var planWeekOffset = 0;
+var planSheetDate = null;
+function planISOOf(d) {
+  var m = d.getMonth() + 1, day = d.getDate();
+  return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (day < 10 ? "0" : "") + day;
+}
+function planDateOfISO(iso) {
+  var p = String(iso || "").split("-");
+  return new Date(parseInt(p[0], 10) || 2026, (parseInt(p[1], 10) || 1) - 1, parseInt(p[2], 10) || 1, 12);
+}
+function planMonday(offset) {
+  var now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7) + (offset || 0) * 7, 12);
+}
+function renderWeekPlan() {
+  var grid = document.getElementById("week-plan-grid");
+  if (!grid) return;
+  var mon = planMonday(planWeekOffset);
+  var sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6, 12);
+  var rangeEl = document.getElementById("week-plan-range");
+  if (rangeEl) rangeEl.textContent = mon.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + " – " + sun.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  var todayIso = localTodayISO();
+  var html = "";
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i, 12);
+    var iso = planISOOf(d);
+    var look = planLookForDate(iso);
+    var fc = (typeof dailyForecast !== "undefined" && dailyForecast) ? dailyForecast[iso] : null;
+    var fcTxt = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" + (fc.label ? " " + fc.label : "") : "";
+    var cls = "wp-day" + (iso === todayIso ? " wp-today" : "") + (iso < todayIso ? " wp-past" : "") + (look ? " wp-planned" : "");
+    var img = look ? lookImg(look) : "";
+    html += '<div class="' + cls + '" data-plan-day="' + iso + '" role="button" tabindex="0" aria-label="' +
+      esc(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) +
+      (look ? " — planned: " + esc(look.title) : " — tap to plan") + '">' +
+      '<span class="wp-dow">' + esc(d.toLocaleDateString(undefined, { weekday: "short" })) + '</span>' +
+      '<span class="wp-date">' + d.getDate() + '</span>' +
+      '<span class="wp-fc">' + esc(fcTxt) + '</span>' +
+      (look
+        ? '<img class="wp-thumb" src="' + esc(img) + '" alt="' + esc(look.title) + '" loading="lazy" decoding="async" data-popout="' + esc(img) + '" data-popout-alt="' + esc(look.imgAlt || look.title) + '" />'
+        : '<span class="wp-empty" aria-hidden="true">+</span>') +
+      "</div>";
+  }
+  grid.innerHTML = html;
+}
+/* The sheet's pick list: My Looks' liked and queued looks — the
+   savedLooks entries carrying a like (or queued) verdict, plus
+   the queue's own snapshots, one entry per look id. */
+function planCandidates() {
+  var out = [], seen = {};
+  function add(l) { if (l && l.id && !seen[l.id] && planLookValid(l)) { seen[l.id] = 1; out.push(l); } }
+  savedLooks.forEach(function (l) { if (l.verdict === "like" || l.verdict === "queued") add(l); });
+  queueLooks.forEach(add);
+  return out;
+}
+/* Deal a fresh one for a planned day: the hero's own machinery,
+   by source mode — Only my wardrobe builds from the Closet,
+   Inspo / Combo deal from the deck — with like-graduation
+   exclusions respected on every path (buildClosetLooks' fresh
+   filter here; dealFromDeck and dealerLook exclude graduated
+   photographs themselves). */
+function dealPlanLook() {
+  var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
+  if (src === "wardrobe" && typeof buildClosetLooks === "function") {
+    var cl = buildClosetLooks();
+    if (cl && cl.length) {
+      var fresh = cl.filter(function (l) { return !isGraduatedLook(l); });
+      var list = fresh.length ? fresh : cl;
+      return list[Math.floor(Math.random() * list.length)];
+    }
+  }
+  if (typeof dealFromDeck === "function") {
+    var dealt = dealFromDeck(1, {});
+    if (dealt && dealt.length) return dealt[0];
+  }
+  return (typeof dealerLook === "function") ? dealerLook({}) : null;
+}
+function openPlanSheet(iso) {
+  var sheet = document.getElementById("plan-sheet");
+  var body = document.getElementById("plan-sheet-body");
+  var title = document.getElementById("plan-sheet-title");
+  if (!sheet || !body) return;
+  planSheetDate = iso;
+  var d = planDateOfISO(iso);
+  if (title) title.textContent = d.toLocaleDateString(undefined, { weekday: "long" }) + " · " + d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  var planned = planLookForDate(iso);
+  var cands = planCandidates();
+  var html = "";
+  if (planned) {
+    var pimg = lookImg(planned);
+    html += '<div class="wp-current"><img src="' + esc(pimg) + '" alt="" data-popout="' + esc(pimg) + '" data-popout-alt="' + esc(planned.imgAlt || planned.title) + '" />' +
+      '<span class="wp-current-main"><span class="wp-current-name">' + esc(planned.title) + '</span><span class="wp-current-sub">Planned</span></span>' +
+      '<button type="button" class="btn-ghost" data-plan-clear>Remove</button></div>';
+  }
+  html += '<button type="button" class="btn-accent wp-deal" data-plan-deal>Deal a fresh one</button>';
+  if (cands.length) {
+    html += '<p class="wp-pick-label">Liked &amp; queued</p><div class="wp-pick-grid">' + cands.map(function (l) {
+      return '<button type="button" class="wp-pick" data-plan-pick="' + esc(l.id) + '" aria-label="Plan ' + esc(l.title) + '"><img src="' + esc(lookImg(l)) + '" alt="" loading="lazy" decoding="async" /></button>';
+    }).join("") + "</div>";
+  } else {
+    html += '<p class="wp-pick-label">No liked or queued looks yet</p>';
+  }
+  body.innerHTML = html;
+  sheet.hidden = false;
+  var c = document.getElementById("plan-sheet-close");
+  if (c) c.focus();
+}
+function closePlanSheet() {
+  var sheet = document.getElementById("plan-sheet");
+  if (sheet) sheet.hidden = true;
+  planSheetDate = null;
+}
+(function weekPlannerInit() {
+  var wrap = document.getElementById("week-plan-wrap");
+  if (wrap) {
+    wrap.addEventListener("click", function (e) {
+      var nav = e.target.closest ? e.target.closest("[data-plan-nav]") : null;
+      if (nav) { planWeekOffset += parseInt(nav.getAttribute("data-plan-nav"), 10) || 0; renderWeekPlan(); return; }
+      var day = e.target.closest ? e.target.closest("[data-plan-day]") : null;
+      if (day) openPlanSheet(day.getAttribute("data-plan-day"));
+    });
+    wrap.addEventListener("keydown", function (e) {
+      if ((e.key === "Enter" || e.key === " ") && e.target.hasAttribute && e.target.hasAttribute("data-plan-day")) {
+        e.preventDefault();
+        openPlanSheet(e.target.getAttribute("data-plan-day"));
+      }
+    });
+  }
+  var sheet = document.getElementById("plan-sheet");
+  if (sheet) {
+    document.getElementById("plan-sheet-close").addEventListener("click", closePlanSheet);
+    sheet.addEventListener("click", function (e) {
+      if (e.target === sheet) { closePlanSheet(); return; }
+      if (!planSheetDate) return;
+      var iso = planSheetDate;
+      if (e.target.closest("[data-plan-clear]")) {
+        clearPlanForDate(iso);
+        closePlanSheet();
+        renderWeekPlan();
+        toast("Plan cleared.");
+        return;
+      }
+      if (e.target.closest("[data-plan-deal]")) {
+        var fresh = dealPlanLook();
+        if (fresh && setPlanForDate(iso, fresh)) {
+          if (fresh.img) recordDealt([fresh.img]);
+          closePlanSheet();
+          renderWeekPlan();
+          toast("Planned — " + fresh.title + ".");
+        } else {
+          toast("Couldn't deal a look just now.");
+        }
+        return;
+      }
+      var pick = e.target.closest("[data-plan-pick]");
+      if (pick) {
+        var id = pick.getAttribute("data-plan-pick");
+        var look = planCandidates().filter(function (l) { return l.id === id; })[0];
+        if (look && setPlanForDate(iso, look)) {
+          closePlanSheet();
+          renderWeekPlan();
+          toast("Planned — " + look.title + ".");
+        }
+      }
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sheet.hidden) closePlanSheet(); });
+    /* Swipe down dismisses, like the other (i) sheets. */
+    var card = sheet.querySelector(".info-pop-card");
+    if (card) {
+      var psy = null;
+      card.addEventListener("touchstart", function (e) { psy = e.touches.length === 1 ? e.touches[0].clientY : null; }, { passive: true });
+      card.addEventListener("touchend", function (e) {
+        if (psy === null || !e.changedTouches.length) return;
+        var dy = e.changedTouches[0].clientY - psy;
+        psy = null;
+        if (dy > 70) closePlanSheet();
+      }, { passive: true });
+    }
+  }
+  renderWeekPlan();
+  /* Opening the Calendar re-reads the live plan and forecast —
+     both can move while other pages are in front. */
+  var prevSwitchPlan = window.switchTab;
+  if (typeof prevSwitchPlan === "function") {
+    window.switchTab = function (name, opts) {
+      prevSwitchPlan(name, opts);
+      if (name === "calendar") renderWeekPlan();
+    };
+  }
+})();
+
 /* ---------- My Looks extras refresh with the grid ---------- */
 (function wrapRenderSaved() {
   var orig = window.renderSaved;
@@ -20753,7 +21112,7 @@ renderMyInspo();
      one just because it dealt a look more recently. */
 var SYNC_URL = "https://wardrobe-sync.dyacobs.workers.dev";
 try { SYNC_URL = localStorage.getItem("wardrobe.syncurl") || SYNC_URL; } catch (e) {}
-var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons"];
+var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan"];
 function syBlank() {
   var o = { key: null, acct: null, last: 0, snap: {}, st: {}, tomb: {}, dirty: {}, status: "Not synced yet", lastOk: 0 };
   SY_COLLS.forEach(function (c) { o.snap[c] = {}; o.st[c] = {}; o.tomb[c] = {}; o.dirty[c] = {}; });
@@ -20816,6 +21175,7 @@ function syCollGet(c) {
     case "finds": return finds;
     case "palettes": return customPalettes;
     case "icons": return customIcons;
+    case "plan": return weekPlan;
   }
   return [];
 }
@@ -20843,7 +21203,7 @@ function syMetaOf() {
    vanished ids become tombstones. Runs on every tracked store
    write (hinted to the affected collection) and in full at boot
    and at the start of every sync, so no write path is missed. */
-var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons" };
+var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan" };
 var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, dealtImgs: 1, dealtTitles: 1, dealtCombos: 1, dealtCards: 1, findBudget: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
 function syTrackChanges(onlyColl) {
   var now = Date.now(), ch = false;
@@ -20917,6 +21277,7 @@ function syPutLocal(c, data) {
   }
   if (c === "looks") savedLooks = put(savedLooks);
   else if (c === "queue") queueLooks = put(queueLooks);
+  else if (c === "plan") weekPlan = put(weekPlan);
   else if (c === "worn") wornLog = put(wornLog);
   else if (c === "inspo") inspoImages = put(inspoImages);
   else if (c === "finds") finds = put(finds);
@@ -20941,6 +21302,7 @@ function syRemoveLocal(c, id) {
   function drop(arr) { return arr.filter(function (r) { return syRecId(c, r) !== id; }); }
   if (c === "looks") savedLooks = drop(savedLooks);
   else if (c === "queue") queueLooks = drop(queueLooks);
+  else if (c === "plan") weekPlan = drop(weekPlan);
   else if (c === "worn") wornLog = drop(wornLog);
   else if (c === "inspo") inspoImages = drop(inspoImages);
   else if (c === "finds") finds = drop(finds);
@@ -21016,10 +21378,11 @@ function sySortLooksByStamp() {
 function syRefresh() {
   try { persistAll(); } catch (e) {}
   try { saveQueue(); } catch (e) {}
+  try { saveWeekPlan(); } catch (e) {}
   try { store.set("wornLog", wornLog); } catch (e) {}
   try { store.set("inspoImages", inspoImages); } catch (e) {}
   try { store.set("finds", finds); } catch (e) {}
-  [renderSaved, renderWardrobe, renderWatches, renderWornLog, renderInspoImages, renderMyInspo, renderFinds, renderCustomPalettes, renderIcons, renderRecentlyRemoved, renderLoc, syncPaletteSelect, renderPurchased].forEach(function (f) {
+  [renderSaved, renderWardrobe, renderWatches, renderWornLog, renderInspoImages, renderMyInspo, renderFinds, renderCustomPalettes, renderIcons, renderRecentlyRemoved, renderLoc, syncPaletteSelect, renderPurchased, renderWeekPlan].forEach(function (f) {
     try { if (typeof f === "function") f(); } catch (e) {}
   });
   var se = document.getElementById("syncstat");
