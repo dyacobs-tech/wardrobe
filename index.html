@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.22" />
+    <meta name="wardrobe-build" content="2026-11-16.23" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -380,6 +380,8 @@
       .saved-card h4 { font-family: var(--font-display); font-size: 15px; font-weight: 600; margin: 0 0 6px; line-height: 1.2; }
       .saved-card .meta { color: var(--dim); font-style: italic; font-family: var(--font-display); font-size: 13px; margin: 0 0 6px; }
       .saved-card .swatch-strip.sm > div { min-height: 14px; }
+      .saved-card .swatch-dots { display: flex; gap: 5px; margin-top: 1px; }
+      .saved-card .swatch-dots .cdot { width: 14px; height: 14px; flex: none; border: 1px solid var(--border); border-radius: 50%; }
       .saved-card .legend { display: none; }
       .saved-card .look-actions { margin-top: 8px; }
       .saved-card .look-actions .btn-ghost { min-height: 36px; padding: 6px 10px; font-size: 11px; width: 100%; }
@@ -2374,6 +2376,24 @@
         border: 1px solid currentColor; background: transparent; color: inherit; border-radius: 999px;
         min-height: 36px; padding: 0 14px; font: inherit; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 12px;
       }
+      /* The slim sync note — same floating pill as the update
+         bar, stacked above it. Sync state otherwise lives only
+         on the Profile page, so a failed upload sat invisible
+         while the user stood on My Looks. */
+      .sync-note {
+        position: fixed; left: 50%; bottom: 144px; transform: translateX(-50%);
+        z-index: 60; display: flex; align-items: center; gap: 12px;
+        background: var(--ink-btn); color: var(--accent-ink); border-radius: 26px;
+        padding: 8px 8px 8px 18px; font-size: 13px; box-shadow: 0 6px 24px rgba(0,0,0,.28);
+        width: min(430px, calc(100vw - 32px)); box-sizing: border-box;
+      }
+      .sync-note > span { flex: 1 1 auto; }
+      .sync-note[hidden] { display: none; }
+      .sync-note button {
+        border: 1px solid currentColor; background: transparent; color: inherit; border-radius: 999px;
+        min-height: 36px; padding: 0 14px; font: inherit; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 12px;
+      }
+      .sync-note .sync-note-x { border: none; min-height: 36px; padding: 0 8px; font-size: 17px; font-weight: 400; letter-spacing: 0; text-transform: none; }
 </style>
 <style>
       /* ================= Dead-space audit — build 2026-11-16.13 =================
@@ -3562,6 +3582,7 @@
           <label class="photo-drop" for="upload-photo-camera"><span class="pd-title">Take a photo</span><input type="file" id="upload-photo-camera" accept="image/*" capture="user" /></label>
           <label class="photo-drop" for="upload-photo-upload"><span class="pd-title">Choose a photo</span><input type="file" id="upload-photo-upload" accept="image/*" /></label>
         </div>
+        <p class="meta" id="upload-status" role="status" hidden style="margin:10px 0 0"></p>
       </div>
     </div>
     <div class="info-pop-backdrop" id="upload-confirm-sheet" hidden>
@@ -3599,6 +3620,7 @@
       <div class="fw-layer-body" id="fw-layer-body"></div>
     </div>
     <div class="update-bar" id="update-bar" role="status" hidden><span>A newer Wardrobe is ready.</span><button type="button" id="update-btn">Refresh</button></div>
+    <div class="sync-note" id="sync-note" role="status" hidden><span id="sync-note-text"></span><button type="button" id="sync-note-retry">Retry</button><button type="button" class="sync-note-x" id="sync-note-dismiss" aria-label="Dismiss sync note">&times;</button></div>
     <div class="toast" id="toast" role="status"></div>
     <div class="undo-toast" id="undo-toast" role="status" hidden><span id="undo-msg"></span><button type="button" id="undo-btn">Undo</button></div>
 
@@ -3926,7 +3948,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.22";
+var WARDROBE_BUILD = "2026-11-16.23";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -5488,6 +5510,7 @@ if (inspoPhotoInput) inspoPhotoInput.addEventListener("change", function () {
   if (!file) return;
   var input = this;
   processPhotoFile(file, function (url) {
+    if (!url) { input.value = ""; toast("That photo couldn't be read — try a different photo."); return; }
     var entry = {
       id: "inspo-" + Date.now(),
       img: url,
@@ -9962,6 +9985,26 @@ var EXTRA_RENDERS = [
       { name: "Black", hex: "#0f0f12", role: "Black Tuxedo" }
     ]
   },
+  {
+    /* Tonight's real outfit (Nov 16, 2026), re-rendered onto the
+       mirror template from his uploaded photo and gate-verified
+       — see wardrobe-renders/tonight-2026-11-16/MANIFEST.md.
+       Swatch colours are the piece library's own Wada values
+       for the mapped pieces, as with the batch-14 entries, so
+       the swap mapper keys on them: the blazer maps to his
+       owned Loro Piana piece, the jeans and loafers to theirs. */
+    img: "assets/photos/7494aeb7863b.webp",
+    title: "Oatmeal Melange Blazer & Indigo Jeans",
+    imgAlt: "You wearing Loro Piana Oatmeal Melange Blazer open over a Cream Crew-Neck Tee, Dark Indigo Jeans, Belgian Shoes Camo Pony-Hair Loafers and a Rust Patterned Silk Pocket Square",
+    watchId: "seed-vc-saltarello-43040",
+    swatches: [
+      { name: "Olive Green", hex: "#6b7140", role: "Belgian Shoes Camo Pony-Hair Loafers" },
+      { name: "Sulpher Yellow", hex: "#f5ecc2", role: "Cream Crew-Neck Tee" },
+      { name: "Slate Color", hex: "#34454c", role: "Dark Indigo Jeans" },
+      { name: "Ecru", hex: "#c2ae93", role: "Loro Piana Oatmeal Melange Blazer" },
+      { name: "Rust", hex: "#a85f38", role: "Rust Patterned Silk Pocket Square" }
+    ]
+  },
 ];
 var RENDER_POOL = SEED_LOOKS.concat(EXTRA_RENDERS);
 
@@ -10390,7 +10433,8 @@ var RENDER_FORMALITY = {
   "assets/photos/e5d9ac5a5acf.webp": 6,
   "assets/photos/5a521672c11e.webp": 6,
   "assets/photos/ca9acab9a39b.webp": 7,
-  "assets/photos/d7ea7c441ca0.webp": 7
+  "assets/photos/d7ea7c441ca0.webp": 7,
+  "assets/photos/7494aeb7863b.webp": 4
 };
 var formalityLevel = store.get("formality", 4);
 if (!(formalityLevel >= 1 && formalityLevel <= 7)) formalityLevel = 4;
@@ -11012,6 +11056,10 @@ function dealFromDeck(need, opts) {
 
 /* ================= Rendering helpers ================= */
 function stripHTML(colors, size) {
+  /* No colours, no strip: an empty bordered bar is not a
+     palette, and on a card it reads as something else entirely
+     (see savedCardPaletteHTML). */
+  if (!colors || !colors.length) return "";
   return '<div class="swatch-strip ' + (size || "") + '" role="img" aria-label="' +
     esc(colors.map(function (c) { return c.name; }).join(", ")) + '">' +
     colors.map(function (c) { return '<div style="background:' + c.hex + '" title="' + esc(c.name + " " + c.hex) + '"></div>'; }).join("") + "</div>";
@@ -13212,8 +13260,24 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
    uses, span-based so it can live inside a <button> card. The
    inline-styled mini-strip is retired. */
 function cardStripHTML(colors) {
+  if (!colors || !colors.length) return "";
   return '<span class="swatch-strip card" role="img" aria-label="' + esc(colors.map(function (c) { return c.name; }).join(", ")) + '">' +
     colors.map(function (c) { return '<span style="background:' + c.hex + '"></span>'; }).join("") + "</span>";
+}
+/* An uploaded look's colours on a saved card: small round dots,
+   never the full-width strip. An uploaded look's palette is
+   only its tagged pieces — often one or two — and a bordered
+   bar part-filled with a pale colour reads as an upload
+   progress bar stuck halfway, which is how a look that had
+   saved perfectly came to look permanently mid-upload. No
+   tagged pieces, no colours shown at all. */
+function cardDotsHTML(colors) {
+  return '<span class="swatch-dots" role="img" aria-label="' + esc(colors.map(function (c) { return c.name; }).join(", ")) + '">' +
+    colors.map(function (c) { return '<span class="cdot" style="background:' + c.hex + '" title="' + esc(c.name) + '"></span>'; }).join("") + "</span>";
+}
+function savedCardPaletteHTML(look) {
+  if (look && look.source === "uploaded") return (look.swatches && look.swatches.length) ? cardDotsHTML(look.swatches) : "";
+  return stripHTML(look ? look.swatches : null, "sm");
 }
 function optionCardHTML(look, idx) {
   var label = OPTION_LABELS[idx] || ("Take " + (idx + 1));
@@ -16039,33 +16103,75 @@ document.getElementById("item-colour").addEventListener("input", function () {
    imageOrientation "from-image" applies the tag before the
    draw; the FileReader path stays as the fallback for browsers
    without it. Photos are also kept smaller (800px, q0.8) so a
-   closet full of them fits the on-device store. */
+   closet full of them fits the on-device store.
+   The callback now fires exactly once, always: with the data
+   URL on success, or null when the photograph cannot be read
+   at all. The old version had paths that never answered — an
+   image that failed to decode (an HEIC picked from the Files
+   app on a browser with no HEIC decoder is the standing case)
+   hit an <img> with no error handler, so picking the photo
+   simply never responded and the sheet sat there looking
+   stuck. A rejected bitmap decode gets one plain retry before
+   the FileReader path (some engines refuse the options object,
+   not the photograph), and a watchdog answers for decoders
+   that stall rather than fail. The stored size is bounded,
+   not just the pixel size: quality (then dimensions) step
+   down until the data URL fits the ceiling, because that data
+   URL is what the vault stores and every sync batch carries. */
 function processPhotoFile(file, done) {
+  var finished = false;
+  var watchdog = setTimeout(function () { finish(null); }, 30000);
+  function finish(url) {
+    if (finished) return;
+    finished = true;
+    clearTimeout(watchdog);
+    done(url);
+  }
   function draw(source, w, h) {
-    var max = 800, scale = Math.min(1, max / Math.max(w, h));
-    var canvas = document.createElement("canvas");
-    canvas.width = Math.round(w * scale);
-    canvas.height = Math.round(h * scale);
-    canvas.getContext("2d").drawImage(source, 0, 0, canvas.width, canvas.height);
-    done(canvas.toDataURL("image/jpeg", 0.8));
+    var CEIL = 340000;
+    function encode(max, q) {
+      var scale = Math.min(1, max / Math.max(w, h));
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(w * scale));
+      canvas.height = Math.max(1, Math.round(h * scale));
+      canvas.getContext("2d").drawImage(source, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL("image/jpeg", q);
+    }
+    try {
+      var url = encode(800, 0.8);
+      if (url.length > CEIL) url = encode(800, 0.62);
+      if (url.length > CEIL) url = encode(700, 0.55);
+      if (url.length > CEIL) url = encode(600, 0.5);
+      finish(url);
+    } catch (e) { finish(null); }
   }
   function legacy() {
     var reader = new FileReader();
     reader.onload = function () {
       var img = new Image();
       img.onload = function () { draw(img, img.width, img.height); };
+      img.onerror = function () { finish(null); };
       img.src = reader.result;
     };
-    reader.readAsDataURL(file);
+    reader.onerror = function () { finish(null); };
+    try { reader.readAsDataURL(file); } catch (e) { finish(null); }
   }
-  if (window.createImageBitmap) {
-    createImageBitmap(file, { imageOrientation: "from-image" }).then(function (bmp) { draw(bmp, bmp.width, bmp.height); }, legacy);
-  } else legacy();
+  function bitmap(withOpts) {
+    var p;
+    try {
+      p = withOpts ? createImageBitmap(file, { imageOrientation: "from-image" }) : createImageBitmap(file);
+    } catch (e) { if (withOpts) bitmap(false); else legacy(); return; }
+    p.then(function (bmp) { draw(bmp, bmp.width, bmp.height); }, function () {
+      if (withOpts) bitmap(false); else legacy();
+    });
+  }
+  if (window.createImageBitmap) bitmap(true); else legacy();
 }
 document.getElementById("item-photo").addEventListener("change", function () {
   var file = this.files && this.files[0];
   if (!file) return;
   processPhotoFile(file, function (url) {
+    if (!url) { toast("That photo couldn't be read — try a different photo."); return; }
     photoDataUrl = url;
     var prev = document.getElementById("photo-preview");
     prev.src = url;
@@ -16421,7 +16527,7 @@ function renderSaved() {
       (queueIds[l.id] ? '<span class="queued-badge">Queued</span>' : "") +
       (l.verdict === "like" ? '<span class="your-badge">Liked</span>' : l.verdict === "dislike" ? '<span class="sold-badge">Not for me</span>' : "") +
       (l.comment ? '<p class="meta">' + esc(l.comment) + "</p>" : "") +
-      stripHTML(l.swatches, "sm") +
+      savedCardPaletteHTML(l) +
       "</div></article>";
   }).join("");
 }
@@ -16530,7 +16636,7 @@ function lookGridCard(l, actionsHTML) {
     '<img src="' + (l.img || "assets/photos/316150a1e65e.webp") + '" alt="' + esc(l.imgAlt || "") + '" loading="lazy" ' + (l.refLook ? 'data-fav-open="' + l.id + '"' : 'data-popout="' + (l.img || "assets/photos/316150a1e65e.webp") + '"') + ' />' +
     '<div class="sb"><h4 data-fav-open="' + l.id + '">' + esc(l.title) + "</h4>" +
     (l.worn ? '<span class="your-badge">Worn' + (l.wornDate ? " · " + esc(fmtDateShort(l.wornDate)) : "") + "</span>" : "") +
-    stripHTML(l.swatches, "sm") +
+    savedCardPaletteHTML(l) +
     "</div></article>";
 }
 
@@ -17026,6 +17132,7 @@ document.getElementById("watch-photo").addEventListener("change", function () {
   var file = this.files && this.files[0];
   if (!file) return;
   processPhotoFile(file, function (url) {
+    if (!url) { toast("That photo couldn't be read — try a different photo."); return; }
     watchPhotoDataUrl = url;
     var prev = document.getElementById("watch-photo-preview");
     prev.src = url;
@@ -21845,6 +21952,7 @@ function refreshWearingPicks() {
     var file = this.files && this.files[0];
     if (!file) return;
     processPhotoFile(file, function (url) {
+      if (!url) { toast("That photo couldn't be read — try a different photo."); return; }
       wearingPhotoDataUrl = url;
       var prev = document.getElementById("wearing-preview");
       prev.src = url;
@@ -21978,6 +22086,7 @@ if (myInspoPhoto) myInspoPhoto.addEventListener("change", function () {
   if (!file) return;
   var input = this;
   processPhotoFile(file, function (url) {
+    if (!url) { input.value = ""; toast("That photo couldn't be read — try a different photo."); return; }
     var entry = {
       id: "inspo-" + Date.now(),
       img: url,
@@ -22098,9 +22207,18 @@ document.addEventListener("keydown", function (e) { if (e.key === "Escape") { cl
     var file = this.files && this.files[0];
     if (!file) return;
     var self = this;
+    /* Say what is happening while the photo is prepared: a big
+       phone photo can take a moment to downscale, and silence
+       here read as the app being stuck. A photo that cannot be
+       read at all gets a plain answer and the sheet stays open
+       so another can be picked straight away. */
+    var status = document.getElementById("upload-status");
+    if (status) { status.hidden = false; status.textContent = "Preparing your photo…"; }
     processPhotoFile(file, function (url) {
-      uploadPhotoDataUrl = url;
       self.value = "";
+      if (status) { status.hidden = true; status.textContent = ""; }
+      if (!url) { toast("That photo couldn't be read — try a different photo."); return; }
+      uploadPhotoDataUrl = url;
       closeUploadSheet();
       openUploadConfirm();
     });
@@ -22603,6 +22721,36 @@ function setSyncStatus(t) {
   var kf = document.getElementById("sync-key");
   if (kf) kf.value = SY.key || "(created on first sync)";
   syShowRejected();
+  syNoteRender();
+}
+/* The slim sync note. Sync state otherwise lives only in
+   Profile, so a failed upload sat invisible while the user
+   stood on My Looks — the look was saved, nothing said the
+   sync hadn't landed, and the wait read as "stuck". A failure
+   (or a rejected key) with changes still waiting on this
+   device raises this note with a working Retry; a successful
+   sync puts it away. It is a slim note, never a popup, and
+   dismissing it holds only until the next failure. A failed
+   sync also retries itself once after 30 seconds, so a brief
+   connection drop heals without the user doing anything. */
+var _syFailed = false, _syRetryT = null, _syNoteOff = false;
+function syPendingCount() {
+  var n = SY.dirty.m ? 1 : 0;
+  SY_COLLS.forEach(function (c) { n += Object.keys(SY.dirty[c]).length; });
+  return n;
+}
+function syNoteRender() {
+  var el = document.getElementById("sync-note");
+  if (!el) return;
+  var pending = syPendingCount();
+  var show = !_syNoteOff && (!!SY.rej || (_syFailed && pending > 0));
+  el.hidden = !show;
+  if (show) {
+    var tx = document.getElementById("sync-note-text");
+    if (tx) tx.textContent = SY.rej
+      ? "Sync paused — this device's key wasn't accepted. Your looks are safe on this device."
+      : "Couldn't sync — " + pending + (pending === 1 ? " change is" : " changes are") + " still on this device.";
+  }
 }
 /* fetch with a deadline: a request that never answers used to
    leave sync "busy" until the page was reloaded. */
@@ -22897,11 +23045,16 @@ function syncNow(isRetry, force) {
       if (lastNow !== null) SY.last = lastNow;
       SY.lastOk = Date.now();
       SY.rej = 0;
+      _syFailed = false; _syNoteOff = false;
+      clearTimeout(_syRetryT);
       saveSY();
       setSyncStatus("Synced ✓ " + sent + " up · " + down + " down" + (held ? " · " + held + " held (photo not on this device)" : ""));
       if (changedAny) syRefresh();
     } catch (e) {
       _syApplying = false;
+      _syFailed = true; _syNoteOff = false;
+      clearTimeout(_syRetryT);
+      _syRetryT = setTimeout(function () { if (document.visibilityState === "visible" && !SY.rej) syncNow(); }, 30000);
       setSyncStatus("Sync failed: " + (e && e.message ? e.message : "network error") + " — will retry");
     } finally {
       _syBusy = false;
@@ -22966,6 +23119,11 @@ function linkSyncKey() {
   if (kf) kf.value = SY.key || "(created on first sync)";
   var nb = document.getElementById("sync-now-btn");
   if (nb) nb.addEventListener("click", function () { syncNow(false, true); });
+  var snr = document.getElementById("sync-note-retry");
+  if (snr) snr.addEventListener("click", function () { _syNoteOff = false; syncNow(false, true); });
+  var snd = document.getElementById("sync-note-dismiss");
+  if (snd) snd.addEventListener("click", function () { _syNoteOff = true; syNoteRender(); });
+  syNoteRender();
   var lb = document.getElementById("sync-link-btn");
   if (lb) lb.addEventListener("click", linkSyncKey);
   var na = document.getElementById("sync-new-acct");
