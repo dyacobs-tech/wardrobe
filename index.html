@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.11" />
+    <meta name="wardrobe-build" content="2026-11-16.12" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -83,7 +83,7 @@
       .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
 
       /* ---------- Masthead ---------- */
-      .masthead { padding: env(safe-area-inset-top) 0 0; margin: 0; text-align: center; }
+      .masthead { padding: 0; margin: 0; text-align: center; }
       .masthead .brand {
         font-family: var(--font-display);
         font-weight: 600;
@@ -115,19 +115,16 @@
         backdrop-filter: blur(10px);
         border-bottom: 1px solid var(--border);
         margin-top: 0;
-        /* No safe-area padding here at rest: that padding sat IN FLOW
-           between the masthead's rule and the tabs, and on a phone it
-           resolved to a large empty band under the title. The masthead
-           above already carries the safe-area inset (above the title),
-           so at the top of the page the whole header sits below the
-           notch with the nav directly under the rule — one compact
-           header. Once the masthead has scrolled away and this bar is
-           stuck to the top on its own, the .is-stuck rule below gives
-           it the inset instead, so the tabs never slide under the
-           notch / Dynamic Island while scrolling. */
+        /* No inset padding here: that padding sat IN FLOW between the
+           masthead's rule and the tabs, and on a phone it resolved to
+           a large empty band under the title. Since build .12 no
+           vertical geometry in the page reads the device insets at
+           all (see the bottom bar note) — the header is one compact
+           stack: masthead, rule, then the nav directly under it, at
+           rest and once stuck alike. */
         padding-top: 0;
       }
-      .navstack.is-stuck { padding-top: env(safe-area-inset-top); }
+      .navstack.is-stuck { padding-top: 0; }
       /* Four sections, four equal shares of the bar: a 4-column
          grid gives every tab exactly a quarter of the full width,
          each label centred in its share — no clustering, no
@@ -454,7 +451,7 @@
       .info-btn[aria-expanded="true"] { background: var(--ink-btn); color: var(--ink-btn-text); }
       .info-pop-backdrop {
         position: fixed; inset: 0; z-index: 80; background: rgba(20,17,13,.55);
-        display: grid; place-items: end center; padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+        display: grid; place-items: end center; padding: 14px 14px 14px;
       }
       @media (min-width: 640px) { .info-pop-backdrop { place-items: center; padding: 24px; } }
       .info-pop-backdrop[hidden] { display: none; }
@@ -608,7 +605,7 @@
       @media (min-width: 760px) { .today-hero { height: 52dvh; max-height: 480px; } }
       .today-hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
       .today-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(16,13,9,.86) 0%, rgba(16,13,9,.38) 34%, rgba(16,13,9,0) 58%); }
-      .today-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px clamp(18px, 5vw, 44px) calc(24px + env(safe-area-inset-bottom)); color: #f7f1e5; }
+      .today-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px clamp(18px, 5vw, 44px) 24px; color: #f7f1e5; }
       .today-kicker { margin: 0 0 6px; font-size: 11px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: #d9c9a3; }
       .today-caption h2 { font-family: var(--font-display); font-weight: 600; font-size: clamp(34px, 7.5vw, 54px); line-height: 1.04; margin: 0 0 12px; }
       .today-dots { display: flex; gap: 8px; margin: 0 0 20px; }
@@ -714,14 +711,14 @@
 
       /* footer styles deleted — there is no footer element. */
       .toast {
-        position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(16px);
+        position: fixed; left: 50%; bottom: calc(68px + 20px); transform: translateX(-50%) translateY(16px);
         background: var(--ink-btn); color: var(--ink-btn-text); padding: 12px 20px; border-radius: var(--radius);
         font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 200ms ease, transform 200ms ease; z-index: 60;
         max-width: min(92vw, 480px); text-align: center; box-shadow: var(--shadow-lift);
       }
       .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
       .ptr {
-        position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top)); transform: translateX(-50%) translateY(-8px);
+        position: fixed; left: 50%; top: 10px; transform: translateX(-50%) translateY(-8px);
         background: var(--ink-btn); color: var(--ink-btn-text); padding: 9px 18px; border-radius: 999px;
         font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
         opacity: 0; pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; z-index: 60;
@@ -809,7 +806,7 @@
       .direction-preview .dp-name { font-size: 20px; }
       .deal-progress { padding: 10px 12px 12px; }
       .formality-side { display: inline-flex; align-items: center; gap: 8px; }
-      .today-caption { padding: 16px clamp(18px, 5vw, 44px) calc(18px + env(safe-area-inset-bottom)); }
+      .today-caption { padding: 16px clamp(18px, 5vw, 44px) 18px; }
       .today-caption h2 { font-size: clamp(28px, 6vw, 44px); margin-bottom: 8px; }
       .today-dots { margin-bottom: 14px; }
       /* Look card — verdict first, all detail in dropdowns */
@@ -1137,7 +1134,7 @@
 
       /* Undo toast */
       .undo-toast {
-        position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+        position: fixed; left: 50%; bottom: calc(68px + 20px); transform: translateX(-50%);
         background: var(--ink-btn); color: var(--ink-btn-text); padding: 9px 10px 9px 16px; border-radius: var(--radius);
         font-size: 13.5px; font-weight: 500; z-index: 70; display: flex; align-items: center; gap: 12px;
         max-width: min(92vw, 480px); box-shadow: var(--shadow-lift);
@@ -1275,7 +1272,7 @@
         box-shadow: none;
       }
       #panel-today .today-shade { background: linear-gradient(to top, rgba(16,13,9,.88) 0%, rgba(16,13,9,.46) 46%, rgba(16,13,9,0) 74%); }
-      #panel-today .today-caption { padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); }
+      #panel-today .today-caption { padding: 12px 14px 12px; }
       #panel-today .today-kicker { font-size: 11px; letter-spacing: .22em; margin: 0 0 3px; }
       #panel-today .today-caption h2 { font-size: clamp(21px, 4.5vw, 28px); line-height: 1.05; margin: 0 0 4px; }
       #panel-today .today-loc { margin: 0 0 6px; font-size: 12px; gap: 4px 8px; }
@@ -1322,7 +1319,7 @@
       .popout { position: fixed; inset: 0; z-index: 120; background: #0c0a07; display: flex; align-items: center; justify-content: center; }
       .popout[hidden] { display: none; }
       .popout img { width: 100%; height: 100%; object-fit: contain; display: block; }
-      .popout-close { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: 12px; width: 40px; height: 40px; min-height: 40px; border-radius: 50%; background: rgba(20,17,13,.55); color: #f7f1e5; border: 1px solid rgba(247,241,229,.5); font-size: 22px; line-height: 1; padding: 0; cursor: pointer; }
+      .popout-close { position: absolute; top: 10px; right: 12px; width: 40px; height: 40px; min-height: 40px; border-radius: 50%; background: rgba(20,17,13,.55); color: #f7f1e5; border: 1px solid rgba(247,241,229,.5); font-size: 22px; line-height: 1; padding: 0; cursor: pointer; }
       img[data-popout] { cursor: zoom-in; }
       #today-hero { cursor: zoom-in; }
       #today-hero .today-caption, #today-hero .today-caption * { cursor: auto; }
@@ -1724,7 +1721,7 @@
       }
 
       /* ---------- 1 · Masthead — one slim line ---------- */
-      .masthead { padding-top: env(safe-area-inset-top); }
+      .masthead { padding-top: 0; }
       .masthead .wrap { padding-top: 10px; padding-bottom: 9px; }
       .masthead .brand,
       body:has(> main > #panel-today:not([hidden])) .masthead .brand {
@@ -1799,7 +1796,7 @@
       /* ---------- 4 · Today hero stack — one vertical rhythm ---------- */
       #panel-today .today-caption {
         display: flex; flex-direction: column; gap: 10px;
-        padding: 16px 16px calc(14px + env(safe-area-inset-bottom));
+        padding: 16px 16px 14px;
       }
       #panel-today .today-kicker {
         margin: 0; font-size: var(--fs-label); font-weight: 600;
@@ -1921,7 +1918,7 @@
       .masthead .wrap { padding-top: 8px; padding-bottom: 7px; }
 
       /* ---------- Today hero — one compact primary row + text actions ---------- */
-      #panel-today .today-caption { gap: 8px; padding: 14px 14px calc(12px + env(safe-area-inset-bottom)); }
+      #panel-today .today-caption { gap: 8px; padding: 14px 14px 12px; }
       #panel-today .today-caption h2 { font-size: clamp(21px, 5.4vw, 27px); }
       #panel-today .today-kicker { letter-spacing: .2em; }
       #panel-today .today-actions { gap: 6px; }
@@ -1955,7 +1952,7 @@
 
       /* ---------- Toast — a slim bottom bar, never a slab ---------- */
       .toast {
-        bottom: calc(14px + env(safe-area-inset-bottom));
+        bottom: calc(68px + 14px);
         padding: 8px 16px; border-radius: 999px;
         font-size: 12.5px; font-weight: 500; line-height: 1.25;
         max-width: min(92vw, 430px); z-index: 130;
@@ -1973,7 +1970,7 @@
       .look-layer {
         position: fixed; inset: 0; z-index: 90; background: var(--bg);
         overflow-y: auto; -webkit-overflow-scrolling: touch;
-        padding: calc(8px + env(safe-area-inset-top)) 14px calc(24px + env(safe-area-inset-bottom));
+        padding: 8px 14px 24px;
       }
       .look-layer[hidden] { display: none; }
       .look-layer-bar { display: flex; align-items: center; margin-bottom: 10px; }
@@ -2261,29 +2258,27 @@
         #panel-wardrobe .item-grid .item-colors .cname { flex: 1 1 100%; overflow-wrap: anywhere; }
       }
       /* ---------- Bottom bar: the four sections, within thumb reach ---------- */
-      /* Bar geometry (build .11): the total height is pinned explicitly —
-         content height (--bb-h) + the home-indicator inset, with the inset
-         applied ONCE, as padding-bottom inside the bar (border-box).
-         Build .8 trusted env(safe-area-inset-bottom) raw, and on the
-         phone the host webview reports ~96pt there, not the 34pt home-
-         indicator inset — the bar rendered 56 + 96 = 152pt tall with the
-         labels floating at the top of a dead black band. So the inset
-         the bar uses is capped at 34pt, the largest real home-indicator
-         inset: --bb-inset is the ONLY inset the bar, the body clearance
-         and the toast lift read. The buttons' icon+label stacks are
-         anchored to the BOTTOM of the content area, so below the labels
-         there is the inset and nothing else. */
-      :root { --bb-h: 56px; --bb-inset: min(env(safe-area-inset-bottom, 0px), 34px); }
-      body { padding-bottom: calc(var(--bb-h) + var(--bb-inset)); }
+      /* Bar geometry (build .12): NO env() anywhere in the bar's geometry.
+         Builds .8 (raw inset) and .11 (inset capped at 34px) both failed
+         on the user's iPhone — the host webview reports a ~96pt bottom
+         inset there, so any env()-derived height turned the bar into a
+         tall black band with the labels floating at its top. The bar is
+         now a fixed 68px tall, padding 0, and each button's icon+label
+         stack fills the bar's full height, bottom-anchored with a fixed
+         10px below the label: the same geometry on every device,
+         whatever env() would have resolved to. The body clearance and
+         the toast lift use the same fixed 68px. */
+      :root { --bb-h: 68px; }
+      body { padding-bottom: 68px; }
       .bottombar {
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
-        display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+        display: flex;
         background: color-mix(in srgb, var(--bg) 94%, transparent);
         -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
         border-top: 1px solid var(--border);
         box-sizing: border-box;
-        height: calc(var(--bb-h) + var(--bb-inset));
-        padding: 0 max(8px, env(safe-area-inset-right)) var(--bb-inset) max(8px, env(safe-area-inset-left));
+        height: 68px;
+        padding: 0;
       }
       .navbtn {
         -webkit-appearance: none; appearance: none; background: none; border: 0; margin: 0; cursor: pointer;
@@ -2292,10 +2287,16 @@
         padding: 4px 2px; position: relative;
         -webkit-tap-highlight-color: transparent;
       }
-      /* Bar buttons fill the bar's content area (above the inset); their
-         icon+label stacks sit at the bottom of it, so the label's bottom
-         edge is exactly the inset above the screen's bottom edge. */
-      .bottombar .navbtn { height: 100%; min-height: 0; align-content: end; padding: 0 2px; }
+      /* The four bar buttons share the full width equally (flex: 1 1 0),
+         so their centres are exactly equidistant. Each stack fills the
+         bar's height and is anchored to its bottom: icon above label,
+         the label's bottom edge exactly 10px above the bar's bottom
+         edge — flush, no dead space under the labels. */
+      .bottombar .navbtn {
+        flex: 1 1 0; height: 100%; min-height: 0; box-sizing: border-box;
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: flex-end; gap: 4px; padding: 0 0 10px;
+      }
       .navbtn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
       .navbtn[aria-current="page"] { color: var(--text); }
       .bottombar .navbtn[aria-current="page"]::after {
@@ -2314,8 +2315,9 @@
       #subnav-closet { grid-template-columns: repeat(5, minmax(0, 1fr)); }
       #subnav-ideas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       #subnav-closet #tab-wearing { white-space: normal; line-height: 1.15; padding: 4px 2px; }
-      /* Anything pinned to the bottom edge sits above the bar. */
-      .toast, .undo-toast, .update-bar { bottom: calc(var(--bb-h) + 28px + var(--bb-inset)); }
+      /* Anything pinned to the bottom edge sits above the bar:
+         the fixed 68px bar height + the 28px gap these always had. */
+      .toast, .undo-toast, .update-bar { bottom: 96px; }
       /* Wide screens: a centred, floating bar. */
       @media (min-width: 900px) {
         .bottombar {
@@ -2324,12 +2326,12 @@
           box-shadow: 0 8px 28px rgba(0,0,0,.18);
         }
         /* The floating pill keeps its centred stacks. */
-        .bottombar .navbtn { align-content: center; padding: 4px 2px; }
-        body { padding-bottom: calc(var(--bb-h) + 32px); }
+        .bottombar .navbtn { justify-content: center; padding: 4px 2px; }
+        body { padding-bottom: 100px; }
       }
       /* "A newer build is ready" bar. */
       .update-bar {
-        position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+        position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%);
         z-index: 60; display: flex; align-items: center; gap: 12px;
         background: var(--ink-btn); color: var(--accent-ink); border-radius: 999px;
         padding: 8px 8px 8px 18px; font-size: 13px; box-shadow: 0 6px 24px rgba(0,0,0,.28);
@@ -3731,7 +3733,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.11";
+var WARDROBE_BUILD = "2026-11-16.12";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -15286,11 +15288,11 @@ var watches = [
     name: "Vacheron Constantin Saltarello Jump Hour — 43040",
     metal: "Yellow gold",
     style: "Dress",
-    strap: "Brown leather strap",
+    strap: "Navy saffiano strap",
     dialName: "Cream",
     dialHex: "#e6dcc2",
     notes: "",
-    photo: "assets/photos/1d4a42fb7030.jpg"
+    photo: "assets/photos/1e9d49c42615.jpg"
   },
   {
     id: "seed-sold-ap-clover-25681pt",
@@ -21264,7 +21266,7 @@ function linkSyncKey() {
       /* Notch / Dynamic Island: at rest the masthead's own top inset
          keeps the header below the notch; once it has scrolled away
          and the nav is stuck on its own, flag the nav so its CSS
-         adds the safe-area inset and the tabs stay below the notch
+         adds the top inset and the tabs stay below the notch
          in both the app and standalone contexts. */
       (function notchGuard() {
         var nav = document.querySelector(".navstack");

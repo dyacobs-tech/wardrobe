@@ -9,7 +9,7 @@
 //  · Everything else on this origin (icons, the wardrobe-look renders, the
 //    manifest) and the web fonts: serve the cached copy at once, refresh it
 //    in the background. These files keep their names when they change.
-const SHELL_CACHE = 'wardrobe-shell-2';
+const SHELL_CACHE = 'wardrobe-shell-3';
 const PHOTO_CACHE = 'wardrobe-photos-1';
 const ASSET_CACHE = 'wardrobe-assets-1';
 const SHELL_KEY = './index.html';
