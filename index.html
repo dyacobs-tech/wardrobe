@@ -1011,13 +1011,36 @@
       .shop-budget { margin-top: 14px; }
       .shop-piece { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 12px; display: grid; gap: 8px; }
       .shop-piece h4 { font-family: var(--font-display); font-size: 19px; font-weight: 600; margin: 0; line-height: 1.2; }
-      .shop-row { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); background: var(--surface-alt); border-radius: var(--radius); padding: 7px 10px; text-decoration: none; color: var(--text); }
+      .shop-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; border: 1px solid var(--border); background: var(--surface-alt); border-radius: var(--radius); padding: 7px 10px; text-decoration: none; color: var(--text); }
       .shop-thumb { width: 52px; height: 52px; object-fit: cover; flex: none; border: 1px solid var(--border); }
       .shop-main { flex: 1; min-width: 0; }
       .shop-name { display: block; font-size: 14px; font-weight: 600; line-height: 1.25; }
       .shop-sub { display: block; font-size: 12px; color: var(--dim); }
       .shop-price { font-weight: 700; font-size: 14px; flex: none; }
       .shop-nomatch { margin: 0; font-size: 13px; color: var(--dim); font-style: italic; }
+      /* Purchased flow: the match row is a link plus a compact
+         Mark purchased toggle beside it (never a button inside
+         the link), and bought pieces collect in their own
+         section under the look. */
+      .shop-row-main { display: flex; align-items: center; gap: 10px; flex: 1 1 180px; min-width: 0; text-decoration: none; color: var(--text); }
+      .shop-buy { flex: none; min-height: 28px; padding: 3px 9px; font-size: 11px; white-space: nowrap; }
+      .shop-buy[aria-pressed="true"] { border-color: var(--brass); color: var(--brass); }
+      .shop-purchased { border-top: 1px solid var(--border); margin-top: 18px; padding-top: 12px; display: grid; gap: 8px; }
+      .shop-purchased h3 { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin: 0; line-height: 1.15; }
+      .shop-bought-badge { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); white-space: nowrap; }
+      .sale-tools { display: flex; align-items: end; gap: 12px; margin: 4px 0 12px; }
+      .sale-tools select { min-height: 34px; padding: 6px 9px; font-size: 14.5px; }
+      .sale-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .sale-card { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--card); display: flex; flex-direction: column; }
+      .sale-card img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block; background: var(--paper2, #eee); }
+      .sale-body { padding: 8px 10px 10px; display: grid; gap: 3px; }
+      .sale-name { font-size: 13.5px; line-height: 1.3; }
+      .sale-retail { font-size: 11.5px; color: var(--dim); letter-spacing: .04em; }
+      .sale-prices { font-size: 13.5px; display: flex; gap: 7px; align-items: baseline; flex-wrap: wrap; }
+      .sale-was { text-decoration: line-through; color: var(--dim); font-size: 12.5px; }
+      .sale-off { color: var(--brass); font-weight: 600; font-size: 12.5px; }
+      .sale-actions { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+      .wish-list { display: grid; gap: 8px; }
       /* Brand search is ONE slim closed selector row per piece —
          the Studio sel-row pattern — opening a quiet list of the
          tier's brands; no pill wall. The same opt-list serves the
@@ -1216,6 +1239,10 @@
       .pack-list li .pk-cat { flex: none; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); min-width: 74px; }
       .capsule-note { font-size: 13px; color: var(--dim); margin: 8px 0 0; line-height: 1.45; }
       .capsule-outfits { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 10px 0 4px; }
+      .capsule-day { margin: 14px 0 4px; }
+      .capsule-day-head { margin: 0 0 6px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+      .capsule-slot { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+      .capsule-slot-label { font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
       .capsule-outfit { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-alt); padding: 10px 12px; display: grid; gap: 4px; align-content: start; }
       .capsule-outfit .oc-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; line-height: 1.2; }
       .capsule-outfit .oc-meta { font-size: 12.5px; color: var(--dim); line-height: 1.4; }
@@ -1568,6 +1595,9 @@
       #today-img[hidden] { display: none; }
       .today-suggest { margin: 8px 0 0; font-size: 13.5px; letter-spacing: .03em; color: #efe3c8; }
       .today-suggest[hidden] { display: none; }
+      .today-watch { margin: 6px 0 0; font-size: 13px; letter-spacing: .03em; color: #d9c9a3; }
+      .today-watch[hidden] { display: none; }
+      .fw-watch { margin: 8px 0 0; font-size: 13.5px; color: var(--dim); }
       .today-source { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; }
       .today-source .ts-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(247,241,229,.75); margin-right: 2px; }
       .ts-btn { border: 1px solid rgba(247,241,229,.65); background: rgba(20,17,13,.25); color: #f7f1e5; border-radius: 999px; padding: 5px 11px; min-height: 30px; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; }
@@ -1724,7 +1754,8 @@
       .subnav .wrap { display: block; padding: 6px 12px; }
       .subnav-group:not([hidden]) { display: grid; gap: 6px; width: 100%; }
       #subnav-studio { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      #subnav-inspiration { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      #subnav-inspiration { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      #subnav-find { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       #subnav-me { grid-template-columns: repeat(3, minmax(0, 1fr)); flex-wrap: nowrap; }
       .subtab {
         margin: 0; width: 100%; min-height: 32px; padding: 0 4px;
@@ -2109,7 +2140,7 @@
         <div class="wrap" role="tablist">
           <button class="tab" role="tab" id="section-studio" aria-selected="true" data-section="studio">Studio</button>
           <button class="tab" role="tab" id="section-inspiration" aria-selected="false" data-section="inspiration">Inspiration</button>
-          <button class="tab" role="tab" id="tab-find" aria-selected="false" aria-controls="panel-find" data-tab="find">Shop the look</button>
+          <button class="tab" role="tab" id="tab-find" aria-selected="false" aria-controls="panel-find" data-tab="find" data-section="find">Shop</button>
           <button class="tab" role="tab" id="section-me" aria-selected="false" data-section="me">Me</button>
         </div>
       </nav>
@@ -2122,8 +2153,13 @@
           <div class="subnav-group" id="subnav-inspiration" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-icons" aria-selected="false" aria-controls="panel-icons" data-tab="icons">Icons <span class="count" id="icon-tab-count"></span></button>
             <button class="subtab" role="tab" id="tab-palettes" aria-selected="false" aria-controls="panel-palettes" data-tab="palettes">Palettes <span class="count" id="palette-count">348</span></button>
-            <button class="subtab" role="tab" id="tab-brands" aria-selected="false" aria-controls="panel-brands" data-tab="brands">Brands <span class="count" id="brand-count">53</span></button>
             <button class="subtab" role="tab" id="tab-myinspo" aria-selected="false" aria-controls="panel-myinspo" data-tab="myinspo">My Inspo</button>
+          </div>
+          <div class="subnav-group" id="subnav-find" role="tablist" hidden>
+            <button class="subtab" role="tab" id="tab-shopmain" aria-selected="false" aria-controls="panel-find" data-tab="find">Shop the look</button>
+            <button class="subtab" role="tab" id="tab-brands" aria-selected="false" aria-controls="panel-brands" data-tab="brands">Brands <span class="count" id="brand-count">53</span></button>
+            <button class="subtab" role="tab" id="tab-sale" aria-selected="false" aria-controls="panel-sale" data-tab="sale">Sale items</button>
+            <button class="subtab" role="tab" id="tab-shopwish" aria-selected="false" aria-controls="panel-shopwish" data-tab="shopwish">Wishlist</button>
           </div>
           <div class="subnav-group" id="subnav-me" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-profile" aria-selected="false" aria-controls="panel-profile" data-tab="profile">Profile</button>
@@ -2151,6 +2187,7 @@
             <p class="today-loc" id="today-loc"><strong id="today-loc-name">Palm Beach, Florida</strong><span id="today-loc-weather"></span></p>
             <div class="today-dots" id="today-dots" aria-hidden="true"></div>
             <p class="today-suggest" id="today-suggest" hidden></p>
+            <p class="today-watch" id="today-watch" hidden></p>
             <div class="today-actions">
               <button type="button" class="btn-today btn-today-line" id="today-like">I like it</button>
               <button type="button" class="btn-today btn-today-line" id="today-dislike">Don’t like it</button>
@@ -2159,6 +2196,7 @@
               <button type="button" class="btn-today-text" id="today-wore">Wore this today</button>
               <button type="button" class="btn-today-text" id="today-style">Style this look</button>
               <button type="button" class="btn-today-text" id="today-find">Shop the look</button>
+              <button type="button" class="btn-today-text" id="today-share">Share</button>
             </div>
             <div class="today-type-row" id="today-type-row" role="group" aria-label="Outfit type">
               <span class="tlc-label">Outfit type</span>
@@ -2392,6 +2430,10 @@
             <button type="submit" class="btn-ink" id="item-submit">Add</button>
             <button type="button" class="btn-ghost" id="item-cancel-edit" hidden>Cancel edit</button>
           </form>
+        </div>
+        <div id="gap-wrap" hidden>
+          <h3 class="fav-head">Closet gaps — pieces your looks are missing</h3>
+          <div id="gap-list"></div>
         </div>
       </section>
 
@@ -2665,6 +2707,9 @@
           <a class="brand-row" href="https://www.belmianshoes.com/" target="_blank" rel="noopener" data-brand-search="belgian shoes new york loafers henri hand sewn">
             <span class="b-main"><span class="b-name">Belgian Shoes</span><span class="b-meta">New York · est. 1955 — the hand-sewn Belgian loafer with its little bow.</span></span><span class="b-shop">Shop ↗</span>
           </a>
+          <a class="brand-row" href="https://www.velasca.com" target="_blank" rel="noopener" data-brand-search="velasca milan italy handmade shoes menswear loafers tailoring marche">
+            <span class="b-main"><span class="b-name">Velasca</span><span class="b-meta">Milan · est. 2013 — handmade Italian shoes and menswear, made in Marche.</span></span><span class="b-shop">Shop ↗</span>
+          </a>
           <a class="brand-row" href="https://www.vibivenezia.it/" target="_blank" rel="noopener" data-brand-search="vibi venezia venice furlane velvet slippers friulane">
             <span class="b-main"><span class="b-name">Vibi Venezia</span><span class="b-meta">Venice · est. 2015 — velvet furlane slippers, handmade in Friuli.</span></span><span class="b-shop">Shop ↗</span>
           </a>
@@ -2860,6 +2905,7 @@
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
         <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Shop the look" data-info-text="Describe what you're after, set the budget on the scale — price-conscious at one end, no budget at the other — and your size comes from your Profile. Then search for it, or keep the brief here." aria-label="About Shop the look">i</button></div>
         <div id="find-look-mode" hidden></div>
+        <div id="shop-purchased" hidden></div>
         <div class="ward-grid">
           <div>
             <div class="find-grid" id="find-grid"></div>
@@ -2908,6 +2954,23 @@
             <p class="form-note" id="find-note" hidden>Each brief gets live search links in your size. Nothing is bought — you review and buy yourself.</p>
           </form>
         </div>
+      </section>
+
+      <!-- ================= SALE ITEMS ================= -->
+      <section id="panel-sale" role="tabpanel" aria-labelledby="tab-sale" hidden>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Sale items" data-info-text="Current sale picks from your brands and the stores you shop — gathered by sweep, with the was-price alongside. Tap through to the retailer to buy; add anything to the Wishlist to keep it here." aria-label="About Sale items">i</button></div>
+        <div class="sale-tools">
+          <label class="field" for="sale-cat">Category</label>
+          <select id="sale-cat"></select>
+          <span class="meta" id="sale-count"></span>
+        </div>
+        <div id="sale-list"></div>
+      </section>
+
+      <!-- ================= SHOP WISHLIST — PRODUCTS TO BUY ================= -->
+      <section id="panel-shopwish" role="tabpanel" aria-labelledby="tab-shopwish" hidden>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Wishlist" data-info-text="Products you've saved from Shop the look matches and Sale items. Mark one purchased and it moves to Purchased and is catalogued into your Closet automatically." aria-label="About Wishlist">i</button></div>
+        <div id="shopwish-list"></div>
       </section>
 
       <!-- ================= PROFILE ================= -->
@@ -7990,13 +8053,18 @@ var EXTRA_RENDERS = [
       { name: "Brown", hex: "#7c4226", role: "Leather loafers" }
     ]
   },
-  /* Batch 8 — six photographs of you from the same body
-     template, each a single-piece variant of an existing outfit
-     so Change an item has a photograph for more swaps. (The other
+  /* Batch 8 — photographs of you from the same body template,
+     each a single-piece variant of an existing outfit so Change
+     an item has a photograph for more swaps. (The other
      thirty-four batch-8 renders were taken out of the pool: an
-     identity check found they showed a different man.) */
+     identity check found they showed a different man. Three
+     batch-8 entries were pulled on Nov 16, 2026 after a full
+     re-audit confirmed the originals were studio-path fakes;
+     the three entries below carry their verified mirror-edit
+     replacements, regenerated the same day — same filenames,
+     his real photograph this time.) */
   {
-    img: "assets/photos/1e8708e5365d.webp",
+    img: "assets/photos/1446635a1883.webp",
     title: "White Shirt & Indigo Jeans",
     imgAlt: "You wearing a white shirt, indigo jeans and brown suede loafers",
     swatches: [
@@ -8007,7 +8075,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/bc25f491ce0b.webp",
+    img: "assets/photos/df32798af0fc.webp",
     title: "Grey Suit & Green Tie — Suede Loafers",
     imgAlt: "You wearing a mid-grey suit, white shirt and forest green knitted tie, with brown suede loafers",
     swatches: [
@@ -8018,7 +8086,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/797d5345f164.webp",
+    img: "assets/photos/01d62c427338.webp",
     title: "Black Suit, Open Collar — Suede Loafers",
     imgAlt: "You wearing a black suit with a white shirt open at the collar and no tie, with brown suede loafers",
     swatches: [
@@ -8418,6 +8486,279 @@ var EXTRA_RENDERS = [
       { name: "Sky Blue", hex: "#8fb6d9", role: "Tie" },
       { name: "Black", hex: "#1c1a17", role: "Oxford shoes" }
     ]
+  },
+  /* Batch 11 — eight new outfits (Nov 16, 2026, daily-looks
+     production batch 1), mirror-edit renders verified against
+     every gate. Casual ×3, Smart Casual ×3, Business Casual,
+     Formal. */
+  {
+    img: "assets/photos/d2dccec0f6a9.webp",
+    title: "Navy Chore Jacket & Striped Tee",
+    imgAlt: "You wearing a navy chore jacket open over a white Breton striped tee, with stone chinos and clean white sneakers",
+    swatches: [
+      { name: "Navy", hex: "#1f2a44", role: "Chore jacket" },
+      { name: "White", hex: "#f7f5ef", role: "Striped tee" },
+      { name: "Stone", hex: "#c9b896", role: "Chinos" },
+      { name: "White", hex: "#f7f5ef", role: "Sneakers" }
+    ]
+  },
+  {
+    img: "assets/photos/87ceaed6b8dc.webp",
+    title: "Tan Harrington & Navy Tee",
+    imgAlt: "You wearing a tan Harrington jacket over a navy tee, with ecru chinos and clean white sneakers",
+    swatches: [
+      { name: "Tan", hex: "#c8a97a", role: "Harrington jacket" },
+      { name: "Navy", hex: "#1f2a44", role: "Tee" },
+      { name: "Ecru", hex: "#d8c9a8", role: "Chinos" },
+      { name: "White", hex: "#f7f5ef", role: "Sneakers" }
+    ]
+  },
+  {
+    img: "assets/photos/bdbf36dd2750.webp",
+    title: "Navy Overshirt & Cream Tee",
+    imgAlt: "You wearing a navy overshirt open over a cream tee, with khaki chinos and dark brown suede desert boots",
+    swatches: [
+      { name: "Navy", hex: "#1f2a44", role: "Overshirt" },
+      { name: "Cream", hex: "#f1e7cf", role: "Tee" },
+      { name: "Khaki", hex: "#b8a888", role: "Chinos" },
+      { name: "Brown", hex: "#7c4226", role: "Desert boots" }
+    ]
+  },
+  {
+    img: "assets/photos/6ca5d4ab3170.webp",
+    title: "Burgundy Roll-Neck & Charcoal Trousers",
+    imgAlt: "You wearing a burgundy roll-neck knit tucked into charcoal wool trousers, with a black belt and black leather loafers",
+    swatches: [
+      { name: "Burgundy", hex: "#71182b", role: "Roll-neck knit" },
+      { name: "Charcoal", hex: "#3a3a3c", role: "Wool trousers" },
+      { name: "Black", hex: "#1c1a17", role: "Leather belt" },
+      { name: "Black", hex: "#1c1a17", role: "Leather loafers" }
+    ]
+  },
+  {
+    img: "assets/photos/02d2d81ec6d9.webp",
+    title: "Navy Cable Knit & Stone Chinos",
+    imgAlt: "You wearing a navy cable-knit crew-neck sweater, stone chinos and dark brown suede loafers",
+    swatches: [
+      { name: "Navy", hex: "#1f2a44", role: "Cable knit" },
+      { name: "Stone", hex: "#c9b896", role: "Chinos" },
+      { name: "Brown", hex: "#7c4226", role: "Suede loafers" }
+    ]
+  },
+  {
+    img: "assets/photos/e442fc2ad477.webp",
+    title: "Chocolate Suede Bomber & Cream Knit",
+    imgAlt: "You wearing a chocolate brown suede bomber jacket over a cream fine knit, with navy chinos and dark brown suede loafers",
+    swatches: [
+      { name: "Chocolate", hex: "#4a3220", role: "Suede bomber" },
+      { name: "Cream", hex: "#f1e7cf", role: "Fine knit" },
+      { name: "Navy", hex: "#1f2a44", role: "Chinos" },
+      { name: "Brown", hex: "#7c4226", role: "Suede loafers" }
+    ]
+  },
+  {
+    img: "assets/photos/8750a7e98c17.webp",
+    title: "Forest Suit & Cream Shirt",
+    imgAlt: "You wearing a deep forest green suit with a cream shirt open at the collar and no tie, with dark brown suede loafers",
+    swatches: [
+      { name: "Forest", hex: "#1d5c43", role: "Suit" },
+      { name: "Cream", hex: "#f1e7cf", role: "Shirt" },
+      { name: "Brown", hex: "#7c4226", role: "Suede loafers" }
+    ]
+  },
+  {
+    img: "assets/photos/878eb831fce0.webp",
+    title: "Slate Suit & Burgundy Tie",
+    imgAlt: "You wearing a slate blue-grey suit with a white shirt and burgundy knitted tie, with a black belt and black leather loafers",
+    swatches: [
+      { name: "Slate", hex: "#5b6b7c", role: "Suit" },
+      { name: "White", hex: "#f7f5ef", role: "Shirt" },
+      { name: "Pompeian Red", hex: "#71182b", role: "Knitted tie" },
+      { name: "Black", hex: "#1c1a17", role: "Leather belt" },
+      { name: "Black", hex: "#1c1a17", role: "Leather loafers" }
+    ]
+  },
+  /* Batch 12 — eight new outfits (Nov 16, 2026, daily-looks
+     production batch 2): the warm, casual end of the meter —
+     Swim/Pool ×2, Shorts & Tee ×3, Casual ×3. Mirror-edit
+     renders verified against every gate. */
+  {
+    img: "assets/photos/e71cb5283aeb.webp",
+    title: "Navy Swim & Sand Linen",
+    imgAlt: "You wearing navy swim shorts with a sand linen camp shirt worn open over your chest and dark brown leather sandals",
+    swatches: [
+      { name: "Navy", hex: "#1f2a44", role: "Swim shorts" },
+      { name: "Sand", hex: "#d9c39a", role: "Linen camp shirt" },
+      { name: "Brown", hex: "#7c4226", role: "Leather sandals" }
+    ]
+  },
+  {
+    img: "assets/photos/0dd18b7fafef.webp",
+    title: "Sky Swim & White Linen",
+    imgAlt: "You wearing sky blue swim shorts with a white linen camp shirt worn open over your chest and dark brown leather sandals",
+    swatches: [
+      { name: "Sky", hex: "#a8c4dd", role: "Swim shorts" },
+      { name: "White", hex: "#f7f5ef", role: "Linen camp shirt" },
+      { name: "Brown", hex: "#7c4226", role: "Leather sandals" }
+    ]
+  },
+  {
+    img: "assets/photos/ad645c115013.webp",
+    title: "Grey Tee & Navy Shorts",
+    imgAlt: "You wearing a heather grey tee with navy tailored shorts and clean white sneakers",
+    swatches: [
+      { name: "Grey", hex: "#8e8e93", role: "Tee" },
+      { name: "Navy", hex: "#1f2a44", role: "Shorts" },
+      { name: "White", hex: "#f7f5ef", role: "Sneakers" }
+    ]
+  },
+  {
+    img: "assets/photos/7f00ea50a3a6.webp",
+    title: "White Tee & Khaki Shorts",
+    imgAlt: "You wearing a plain white tee with khaki chino shorts and dark brown leather sandals",
+    swatches: [
+      { name: "White", hex: "#f7f5ef", role: "Tee" },
+      { name: "Khaki", hex: "#b8a888", role: "Shorts" },
+      { name: "Brown", hex: "#7c4226", role: "Leather sandals" }
+    ]
+  },
+  {
+    img: "assets/photos/ccd381d3b38a.webp",
+    title: "Sage Camp Shirt & White Shorts",
+    imgAlt: "You wearing a sage green linen camp shirt untucked with white tailored shorts and dark brown leather sandals",
+    swatches: [
+      { name: "Sage", hex: "#a8b09a", role: "Camp shirt" },
+      { name: "White", hex: "#f7f5ef", role: "Shorts" },
+      { name: "Brown", hex: "#7c4226", role: "Leather sandals" }
+    ]
+  },
+  {
+    img: "assets/photos/256d5e298167.webp",
+    title: "Sky Linen Shirt & Stone Chinos",
+    imgAlt: "You wearing a sky blue linen shirt untucked with stone straight-leg chinos and dark brown suede loafers",
+    swatches: [
+      { name: "Sky", hex: "#a8c4dd", role: "Linen shirt" },
+      { name: "Stone", hex: "#c9b896", role: "Chinos" },
+      { name: "Brown", hex: "#7c4226", role: "Suede loafers" }
+    ]
+  },
+  {
+    img: "assets/photos/acfa968e9309.webp",
+    title: "Olive Pocket Tee & Ecru Chinos",
+    imgAlt: "You wearing an olive slub pocket tee untucked with ecru chinos and clean white sneakers",
+    swatches: [
+      { name: "Olive", hex: "#6b6a3f", role: "Pocket tee" },
+      { name: "Ecru", hex: "#d8c9a8", role: "Chinos" },
+      { name: "White", hex: "#f7f5ef", role: "Sneakers" }
+    ]
+  },
+  {
+    img: "assets/photos/46dfc31d36ff.webp",
+    title: "White Knit Polo & Olive Chinos",
+    imgAlt: "You wearing a white knitted polo shirt untucked with olive chinos and dark brown suede loafers",
+    swatches: [
+      { name: "White", hex: "#f7f5ef", role: "Knit polo" },
+      { name: "Olive", hex: "#6b6a3f", role: "Chinos" },
+      { name: "Brown", hex: "#7c4226", role: "Suede loafers" }
+    ]
+  },
+  /* Batch 13 — eight new outfits (Nov 16, 2026, daily-looks
+     production batch 3): the dressed end of the meter —
+     Black Tie ×3, Formal ×4, Business Casual ×1. Mirror-edit
+     renders verified against every gate. */
+  {
+    img: "assets/photos/d77300b3eee8.webp",
+    title: "Black Tuxedo & Bow Tie",
+    imgAlt: "You wearing a classic black tuxedo with satin peak lapels, a white dress shirt, black bow tie and black patent leather shoes",
+    swatches: [
+      { name: "Black", hex: "#1c1a17", role: "Tuxedo" },
+      { name: "White", hex: "#f7f5ef", role: "Dress shirt" },
+      { name: "Black", hex: "#1c1a17", role: "Bow tie" },
+      { name: "Black", hex: "#1c1a17", role: "Patent shoes" }
+    ]
+  },
+  {
+    img: "assets/photos/8294fc511f2c.webp",
+    title: "Black Evening Overcoat & Tuxedo",
+    imgAlt: "You wearing a long black evening overcoat open over a black tuxedo, with a white dress shirt, black bow tie and black patent leather shoes",
+    swatches: [
+      { name: "Black", hex: "#1c1a17", role: "Evening overcoat" },
+      { name: "Black", hex: "#1c1a17", role: "Tuxedo trousers" },
+      { name: "White", hex: "#f7f5ef", role: "Dress shirt" },
+      { name: "Black", hex: "#1c1a17", role: "Bow tie" },
+      { name: "Black", hex: "#1c1a17", role: "Patent shoes" }
+    ]
+  },
+  {
+    img: "assets/photos/b26c23072638.webp",
+    title: "Camel Overcoat & Charcoal Suit",
+    imgAlt: "You wearing a camel overcoat open over a charcoal suit, with a white shirt, black knitted tie and black Oxford shoes",
+    swatches: [
+      { name: "Camel", hex: "#c8a97a", role: "Overcoat" },
+      { name: "Charcoal", hex: "#3a3a3c", role: "Suit" },
+      { name: "White", hex: "#f7f5ef", role: "Shirt" },
+      { name: "Black", hex: "#1c1a17", role: "Knitted tie" },
+      { name: "Black", hex: "#1c1a17", role: "Oxford shoes" }
+    ]
+  },
+  {
+    img: "assets/photos/135d35771385.webp",
+    title: "Glen Check Suit & Burgundy Tie",
+    imgAlt: "You wearing a grey Prince of Wales glen-check suit with a burgundy overcheck, a white shirt, burgundy tie and black Oxford shoes",
+    swatches: [
+      { name: "Grey", hex: "#8a8d8f", role: "Glen check suit" },
+      { name: "White", hex: "#f7f5ef", role: "Shirt" },
+      { name: "Burgundy", hex: "#71182b", role: "Tie" },
+      { name: "Black", hex: "#1c1a17", role: "Oxford shoes" }
+    ]
+  },
+  {
+    img: "assets/photos/dbf919299a7a.webp",
+    title: "Monochrome Black Suit & Tie",
+    imgAlt: "You wearing an all-black monochrome suit with a black shirt, black tie and black Oxford shoes",
+    swatches: [
+      { name: "Black", hex: "#1c1a17", role: "Suit" },
+      { name: "Black", hex: "#1c1a17", role: "Shirt" },
+      { name: "Black", hex: "#1c1a17", role: "Tie" },
+      { name: "Black", hex: "#1c1a17", role: "Oxford shoes" }
+    ]
+  },
+  {
+    img: "assets/photos/d97ffa7d67ad.webp",
+    title: "Navy Overcoat & Midnight Suit",
+    imgAlt: "You wearing a navy overcoat open over a midnight-blue suit, with a white shirt, silver-grey tie and black Oxford shoes",
+    swatches: [
+      { name: "Navy", hex: "#1f2a44", role: "Overcoat" },
+      { name: "Midnight", hex: "#191930", role: "Suit" },
+      { name: "White", hex: "#f7f5ef", role: "Shirt" },
+      { name: "Light Grey", hex: "#a3a5a2", role: "Tie" },
+      { name: "Black", hex: "#1c1a17", role: "Oxford shoes" }
+    ]
+  },
+  {
+    img: "assets/photos/68c2726462d5.webp",
+    title: "Black Watch Dinner Jacket & Bow Tie",
+    imgAlt: "You wearing a Black Watch tartan dinner jacket with black satin shawl lapels, black tuxedo trousers, a white dress shirt, black bow tie and black patent leather shoes",
+    swatches: [
+      { name: "Navy", hex: "#1f2a44", role: "Black Watch tartan dinner jacket" },
+      { name: "Black", hex: "#1c1a17", role: "Tuxedo trousers" },
+      { name: "White", hex: "#f7f5ef", role: "Dress shirt" },
+      { name: "Black", hex: "#1c1a17", role: "Bow tie" },
+      { name: "Black", hex: "#1c1a17", role: "Patent shoes" }
+    ]
+  },
+  {
+    img: "assets/photos/81480a517870.webp",
+    title: "Charcoal Blazer & Striped Tie",
+    imgAlt: "You wearing a charcoal blazer with a light blue Oxford shirt and navy-and-burgundy striped repp tie, grey flannel trousers, a brown leather belt and brown leather penny loafers",
+    swatches: [
+      { name: "Charcoal", hex: "#3a3a3c", role: "Blazer" },
+      { name: "Light Blue", hex: "#a8c3d1", role: "Oxford shirt" },
+      { name: "Navy", hex: "#1f2a44", role: "Striped repp tie" },
+      { name: "Grey", hex: "#8a8d8f", role: "Flannel trousers" },
+      { name: "Brown leather", hex: "#7c4226", role: "Leather belt" },
+      { name: "Brown leather", hex: "#7c4226", role: "Penny loafers" }
+    ]
   }
 ];
 var RENDER_POOL = SEED_LOOKS.concat(EXTRA_RENDERS);
@@ -8744,9 +9085,33 @@ var RENDER_FORMALITY = {
   "assets/photos/9f50d658cf0e.webp": 5,
   "assets/photos/83e8627579d0.webp": 6,
   "assets/photos/0d1919c8533a.webp": 5,
-  "assets/photos/1e8708e5365d.webp": 4,
-  "assets/photos/bc25f491ce0b.webp": 6,
-  "assets/photos/797d5345f164.webp": 5,
+  "assets/photos/1446635a1883.webp": 4,
+  "assets/photos/df32798af0fc.webp": 6,
+  "assets/photos/01d62c427338.webp": 5,
+  "assets/photos/d2dccec0f6a9.webp": 3,
+  "assets/photos/87ceaed6b8dc.webp": 3,
+  "assets/photos/bdbf36dd2750.webp": 3,
+  "assets/photos/6ca5d4ab3170.webp": 4,
+  "assets/photos/02d2d81ec6d9.webp": 4,
+  "assets/photos/e442fc2ad477.webp": 4,
+  "assets/photos/8750a7e98c17.webp": 5,
+  "assets/photos/878eb831fce0.webp": 6,
+  "assets/photos/e71cb5283aeb.webp": 1,
+  "assets/photos/0dd18b7fafef.webp": 1,
+  "assets/photos/ad645c115013.webp": 2,
+  "assets/photos/7f00ea50a3a6.webp": 2,
+  "assets/photos/ccd381d3b38a.webp": 2,
+  "assets/photos/256d5e298167.webp": 3,
+  "assets/photos/acfa968e9309.webp": 3,
+  "assets/photos/46dfc31d36ff.webp": 3,
+  "assets/photos/d77300b3eee8.webp": 7,
+  "assets/photos/8294fc511f2c.webp": 7,
+  "assets/photos/b26c23072638.webp": 6,
+  "assets/photos/135d35771385.webp": 6,
+  "assets/photos/dbf919299a7a.webp": 6,
+  "assets/photos/d97ffa7d67ad.webp": 6,
+  "assets/photos/68c2726462d5.webp": 7,
+  "assets/photos/81480a517870.webp": 5,
   "assets/photos/f01becdca3c7.webp": 6,
   "assets/photos/e6e52e121be0.webp": 6,
   "assets/photos/ade5f062423d.webp": 6,
@@ -8936,8 +9301,14 @@ function renderByImg(img) {
    Only the best-scoring group is drawn from, at random. */
 function pickDealt(candidates) {
   var best = null, bestKey = null;
+  var rainy = (typeof isRainy === "function") && isRainy();
   candidates.forEach(function (l) {
     var key = formalityBandCost(formalityOf(l.img)) * 100 + (dealtImgHistory.indexOf(l.img) === -1 ? 0 : 1);
+    if (rainy) {
+      var txt = ((l.imgAlt || "") + " " + (l.title || "")).toLowerCase();
+      if (/suede/.test(txt)) key += 50;
+      if (/\b(blazer|coat|jacket|overshirt|overcoat|bomber|harrington)\b/.test(txt)) key -= 25;
+    }
     if (bestKey === null || key < bestKey) { bestKey = key; best = [l]; }
     else if (key === bestKey) best.push(l);
   });
@@ -13041,7 +13412,7 @@ function renderWardrobe() {
     var colours = [{ name: i.colourName, hex: i.colourHex }].concat(i.extraColours || []);
     return '<article class="card item-card' + (i.laundry ? " laundry" : "") + '">' +
       (i.photo ? '<img class="photo" src="' + i.photo + '" alt="Photograph of ' + esc(i.name) + '" loading="lazy" decoding="async" />' : "") +
-      '<span class="cat">' + esc(i.category) + "</span>" +
+      '<span class="cat">' + esc(i.category) + "</span>" + (i.shopBought ? ' <span class="shop-bought-badge">Bought via Shop the look</span>' : "") +
       "<h4>" + esc(i.name) + "</h4>" +
       '<div class="item-colors">' + colours.map(function (c) {
         return '<span class="cdot" style="background:' + c.hex + '" title="' + esc(c.name) + '"></span>';
@@ -13073,6 +13444,7 @@ function renderItemDetail() {
     (it.photo ? '<img class="photo" src="' + it.photo + '" alt="Photograph of ' + esc(it.name) + '" loading="lazy" decoding="async" />' : "") +
     (it.originalPhoto && it.photo && it.originalPhoto !== it.photo ? '<div class="orig-row"><button type="button" class="btn-ghost orig-btn" data-item-act="orig" aria-pressed="false">Original photo</button></div>' : "") +
     '<div><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600">' + esc(it.category) + "</span>" +
+    (it.shopBought ? ' <span class="shop-bought-badge">Bought via Shop the look</span>' : "") +
     (it.laundry ? ' <span class="laundry-badge">In laundry</span>' : "") + "</div>" +
     "<h3>" + esc(it.name) + "</h3>" +
     '<div class="item-colors">' + colours.map(function (c) {
@@ -15182,6 +15554,22 @@ function renderToday() {
   document.getElementById("today-dots").innerHTML = todayLook.swatches.map(function (sp) {
     return '<span style="background:' + sp.hex + '"></span>';
   }).join("");
+  /* One quiet line on the cover: the watch the engine calls
+     for this look, from the Watch Box collection — the same
+     metal-colour matching as the look pages' wrist call. */
+  var tw = document.getElementById("today-watch");
+  if (tw) {
+    var wname = "";
+    try { var wrec = recommendWatch(todayLook); if (wrec && wrec.watch) wname = wrec.watch.name || ""; } catch (e) {}
+    if (wname) { tw.textContent = "On the wrist — " + wname; tw.hidden = false; }
+    else { tw.hidden = true; tw.textContent = ""; }
+  }
+  /* Shop the look follows the hero: every render of Today —
+     fresh open, swipe, dislike, formality / source / location
+     change, weather swap — re-points the carried look at the
+     look now on screen, so the Shop tab never opens on a stale
+     photograph from an earlier deal. */
+  if (typeof syncShopLookToToday === "function") syncShopLookToToday();
 }
 
 /* ================= Location & weather =================
@@ -15360,6 +15748,9 @@ function setCurrentLoc(loc, silent) {
 }
 document.getElementById("today-find").addEventListener("click", function () {
   if (todayLook) openFindLookMode(todayLook);
+});
+document.getElementById("today-share").addEventListener("click", function () {
+  if (todayLook) shareLookImage(todayLook);
 });
 var locResultsCache = [];
 function searchLocation() {
@@ -15546,7 +15937,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "findLook"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "findLook", "shopPurchases", "shopWishlist"];
 document.getElementById("data-export").addEventListener("click", function () {
   var data = {};
   DATA_KEYS.forEach(function (k) { var v = store.get(k, null); if (v !== null) data[k] = v; });
@@ -15850,7 +16241,7 @@ buildFindCatOpts();
   var rows = Array.prototype.slice.call(list.querySelectorAll(".brand-row"));
   /* Alphabetize: the category groups give way to one A–Z list
      with letter heads, plus a slim rail on the right margin for
-     jumping — 54 brands earn an index even though nine icons
+     jumping — 55 brands earn an index even though nine icons
      don't. Sort key drops a leading "The" (The Row files at R). */
   function brandKey(r) {
     var nm = r.querySelector(".b-name");
@@ -16207,15 +16598,15 @@ var SHOP_CATALOGUE = [
   {"brand": "Sunspel", "cat": "top", "img": "", "keys": ["white", "tee", "t-shirt"], "name": "Men's Sea Island Cotton T-shirt in White", "price": 200, "retailer": "Sunspel US", "tier": "premium", "url": "https://us.sunspel.com/products/mens-sea-island-cotton-tshirt-white-mtsh0063"},
   {"brand": "Tom Ford", "cat": "blazer", "img": "", "keys": ["navy", "midnight", "blazer", "velvet", "dinner jacket", "shawl"], "name": "Shelton velvet blazer", "price": 3955, "retailer": "Mytheresa", "tier": "premium", "url": "https://www.mytheresa.com/us/en/men/tom-ford-shelton-velvet-blazer-blue-p00738054?dplink=true&utm_source=paid-social-upperfunnel&utm_medium=facebook&utm_campaign={{campaign.name}}&chn=paid_social_upperfunnel&src=facebook&cmp={{campaign.name}}&ag={{adset.name}}&ad={{ad.name}}&tarea=us&tar=MENSWEAR&feed_num=P00738054"}
 ];
-/* Which of the fifty-four Brands-section houses belong to
+/* Which of the fifty-five Brands-section houses belong to
    each stop on the Find-me budget scale — keyed off the app's
    brand names and the scale's existing level names. "No budget"
    keeps its own curated set, as before. */
 var BRAND_TIERS = {
   "Price-conscious": ["Suitsupply", "Saint James", "Levi's", "Vans"],
   "Value-minded": ["Suitsupply", "Saint James", "John Smedley", "S.N.S. Herning", "Mr Porter", "Levi's", "Vans", "Alex Mill", "J.Crew", "Uniqlo", "Abercrombie & Fitch", "Proper Cloth", "ASKET", "Unbound Merino"],
-  "Quality first": ["Suitsupply", "John Smedley", "S.N.S. Herning", "William Lockie", "Gran Sasso", "Rubato", "Mr Porter", "Alex Mill", "J.Crew", "Uniqlo", "Abercrombie & Fitch", "Proper Cloth", "ASKET", "Unbound Merino", "Octobre Éditions"],
-  "Premium": ["William Lockie", "Gran Sasso", "Rubato", "Stoffa", "P. Johnson", "Saman Amel", "The Row", "Mr Porter", "Octobre Éditions", "Fedeli", "Aspesi", "Marfa Stance", "Kiton", "Isaia", "Baudoin & Lange", "Thom Sweeney", "Thom Browne", "Zegna", "Bottega Veneta", "Giorgio Armani", "Christian Dior", "Greyson", "Peter Millar", "Ralph Lauren", "Moncler", "Canali", "Stubbs & Wootton", "Belgian Shoes", "Eleventy", "Tom Ford", "FRAME", "Merz b. Schwanen", "Sunspel", "Pool House New York", "Human Assembly", "Vibi Venezia", "Todd Snyder", "Altea", "Ogier"],
+  "Quality first": ["Suitsupply", "John Smedley", "S.N.S. Herning", "William Lockie", "Gran Sasso", "Rubato", "Mr Porter", "Alex Mill", "J.Crew", "Uniqlo", "Abercrombie & Fitch", "Proper Cloth", "ASKET", "Unbound Merino", "Octobre Éditions", "Velasca"],
+  "Premium": ["William Lockie", "Gran Sasso", "Rubato", "Stoffa", "P. Johnson", "Saman Amel", "The Row", "Mr Porter", "Octobre Éditions", "Fedeli", "Aspesi", "Marfa Stance", "Kiton", "Isaia", "Baudoin & Lange", "Thom Sweeney", "Thom Browne", "Zegna", "Bottega Veneta", "Giorgio Armani", "Christian Dior", "Greyson", "Peter Millar", "Ralph Lauren", "Moncler", "Canali", "Stubbs & Wootton", "Belgian Shoes", "Eleventy", "Tom Ford", "FRAME", "Merz b. Schwanen", "Sunspel", "Pool House New York", "Human Assembly", "Vibi Venezia", "Velasca", "Todd Snyder", "Altea", "Ogier"],
   "No budget": ["Loro Piana", "Brunello Cucinelli", "The Row", "Saman Amel", "P. Johnson", "Stoffa", "Mr Porter"]
 };
 /* Each brand's store domain, from its Brands-section row — a
@@ -16241,7 +16632,7 @@ var BRAND_DOMAINS = {
   "Eleventy": "eleventy.com", "Tom Ford": "tomford.com", "FRAME": "frame-store.com",
   "Merz b. Schwanen": "merzbschwanen.com", "Sunspel": "sunspel.com",
   "Pool House New York": "poolhousenewyork.com", "Human Assembly": "humanassembly.com",
-  "Vibi Venezia": "vibivenezia.it", "Todd Snyder": "toddsnyder.com", "Altea": "altea.com",
+  "Vibi Venezia": "vibivenezia.it", "Velasca": "velasca.com", "Todd Snyder": "toddsnyder.com", "Altea": "altea.com",
   "Ogier": "ogier-og.com"
 };
 function brandSearchURL(brand, desc) {
@@ -16346,11 +16737,16 @@ function catalogueMatches(pc) {
   });
   return scored.slice(0, 4).map(function (s) { return s.e; });
 }
-function shopRowHTML(e) {
+function shopRowHTML(e, pc) {
   var thumb = e.img ? '<img class="shop-thumb" src="' + esc(e.img) + '" alt="" loading="lazy" />' : "";
-  return '<a class="shop-row" target="_blank" rel="noopener" href="' + esc(e.url) + '">' + thumb +
+  var bought = isShopPurchased(e);
+  var wished = (typeof isWishlisted === "function") && isWishlisted(e);
+  return '<div class="shop-row">' +
+    '<a class="shop-row-main" target="_blank" rel="noopener" href="' + esc(e.url) + '">' + thumb +
     '<span class="shop-main"><span class="shop-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="shop-sub">' + esc(e.retailer) + "</span></span>" +
-    '<span class="shop-price">$' + Number(e.price).toLocaleString("en-US") + "</span></a>";
+    '<span class="shop-price">$' + Number(e.price).toLocaleString("en-US") + "</span></a>" +
+    '<button type="button" class="btn-ghost shop-buy" data-mark-purchase="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (bought ? "true" : "false") + '">' + (bought ? "Purchased — un-mark" : "Mark purchased") + "</button>" +
+    '<button type="button" class="btn-ghost shop-buy" data-wish-toggle="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (wished ? "true" : "false") + '">' + (wished ? "In wishlist — remove" : "Add to wishlist") + "</button></div>";
 }
 var findLookMode = null;
 function shopPiecesForLook(look) {
@@ -16373,6 +16769,326 @@ function clearFindLookMode() {
   store.set("findLook", null);
   renderFindLookMode();
 }
+/* The carried look is the look CURRENTLY on Today. Every hero
+   render calls this, so a fresh deal, a swipe, the Like /
+   Don't-like flow, an Outfit type or source change, a location
+   change or a weather swap all move the carried look with the
+   hero — and the persisted copy moves too, so a refresh falls
+   back to the LATEST carried look, never an older one. A look
+   carried in explicitly from elsewhere (a saved look, a look
+   card) stands until the hero next changes. */
+function syncShopLookToToday() {
+  if (typeof todayLook === "undefined" || !todayLook) return;
+  if (!shopPiecesForLook(todayLook).length) return;
+  if (findLookMode && findLookMode.id === todayLook.id && findLookMode.title === todayLook.title && lookImg(findLookMode) === lookImg(todayLook)) return;
+  findLookMode = JSON.parse(JSON.stringify(todayLook));
+  store.set("findLook", findLookMode);
+  renderFindLookMode();
+}
+
+/* ================= Purchased — bought from Shop the look =================
+   Marking a catalogue match as purchased does two things at
+   once: the purchase is recorded here (product, brand, price
+   paid, retailer, date marked), and the piece is catalogued
+   into the Closet automatically — a normal wardrobe item built
+   from the catalogue data, flagged shopBought so it reads
+   honestly, counted and dealt like any other piece. Un-marking
+   removes both records together. Purchases persist on-device
+   and ride the backup export (the "shopPurchases" key); the
+   auto-added Closet items are ordinary items, so they also
+   ride the items cloud-sync collection as-is. The purchases
+   list itself stays local + backup only — the deployed sync
+   worker's collection contract is fixed, and adding a new
+   collection to it is not attempted from the page. */
+var shopPurchases = store.get("shopPurchases", []);
+function shopEntryKey(e) { return (e.brand || "") + "|" + (e.name || "") + "|" + (e.url || ""); }
+function shopHash(str) {
+  var h = 5381;
+  for (var i = 0; i < str.length; i++) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0;
+  return h.toString(36) + str.length;
+}
+function shopPurchaseFor(key) {
+  return shopPurchases.filter(function (p) { return p.key === key; })[0] || null;
+}
+function isShopPurchased(e) { return !!shopPurchaseFor(shopEntryKey(e)); }
+function closetCategoryForShop(e, pc) {
+  if (pc && pc.garment) return garmentCategory(pc.garment);
+  var g = ((e.name || "") + " " + (e.keys || []).join(" ")).toLowerCase();
+  switch (e.cat) {
+    case "shoes": return "Shoes";
+    case "knitwear": return /polo/.test(g) ? "Polos" : "Sweaters";
+    case "top": return /polo/.test(g) ? "Polos" : (/shirt/.test(g) ? "Shirts" : "Tees");
+    case "shirt": return "Button downs";
+    case "blazer": return "Blazers";
+    case "suit": return "Suits";
+    case "trousers": return "Trousers";
+    case "jeans": return "Jeans";
+    case "shorts": return "Shorts";
+    case "swim": return "Bathing suits";
+    case "outerwear": return /overcoat|coat/.test(g) ? "Coats" : "Jackets";
+    case "tie": return "Ties";
+    default: return "Sweaters";
+  }
+}
+function shopColourFor(e, pc) {
+  if (pc && pc.hex) return { hex: pc.hex, name: pc.colourName || "" };
+  var keys = e.keys || [];
+  for (var i = 0; i < keys.length; i++) {
+    var k = String(keys[i]).toLowerCase();
+    for (var j = 0; j < COLOUR_WORDS.length; j++) {
+      if (COLOUR_WORDS[j][0] === k) return { hex: COLOUR_WORDS[j][1], name: keys[i] };
+    }
+  }
+  return { hex: "#8a8d8f", name: "" };
+}
+function saveShopPurchases() { store.set("shopPurchases", shopPurchases); }
+function refreshShopBuyButtons() {
+  document.querySelectorAll("[data-mark-purchase]").forEach(function (b) {
+    var bought = !!shopPurchaseFor(b.getAttribute("data-mark-purchase"));
+    b.setAttribute("aria-pressed", bought ? "true" : "false");
+    b.textContent = bought ? "Purchased — un-mark" : "Mark purchased";
+  });
+}
+function renderPurchased() {
+  var box = document.getElementById("shop-purchased");
+  if (!box) return;
+  if (!shopPurchases.length) { box.hidden = true; box.innerHTML = ""; return; }
+  box.hidden = false;
+  box.className = "shop-purchased";
+  var html = "<h3>Purchased</h3>";
+  html += shopPurchases.map(function (p) {
+    var thumb = p.img ? '<img class="shop-thumb" src="' + esc(p.img) + '" alt="" loading="lazy" />' : "";
+    return '<div class="shop-row">' + thumb +
+      '<span class="shop-main"><span class="shop-name">' + esc(p.brand) + " — " + esc(p.name) + '</span>' +
+      '<span class="shop-sub">' + esc(p.retailer || "") + (p.dateMarked ? " · Marked " + esc(fmtDateShort(p.dateMarked)) : "") + " · In your Closet</span></span>" +
+      '<span class="shop-price">$' + Number(p.price).toLocaleString("en-US") + "</span>" +
+      '<button type="button" class="btn-ghost shop-buy" data-unmark-purchase="' + esc(p.key) + '">Un-mark purchase</button></div>';
+  }).join("");
+  box.innerHTML = html;
+}
+function toggleShopPurchase(e, pc) {
+  var key = shopEntryKey(e);
+  if (shopPurchaseFor(key)) { unmarkShopPurchased(key); return; }
+  var cat = closetCategoryForShop(e, pc);
+  var col = shopColourFor(e, pc);
+  var itemId = "shopbuy-" + shopHash(key);
+  var date = localTodayISO();
+  var displayName = e.name.toLowerCase().indexOf(e.brand.toLowerCase()) === 0 ? e.name : e.brand + " " + e.name;
+  if (!closetItemById(itemId)) {
+    wardrobeItems.unshift({
+      id: itemId,
+      name: displayName,
+      brand: e.brand,
+      category: cat,
+      colourName: col.name || "",
+      colourHex: col.hex,
+      extraColours: [],
+      notes: "Bought via Shop the look — " + e.brand + ", from " + e.retailer + ".",
+      price: typeof e.price === "number" ? e.price : null,
+      retailer: e.retailer,
+      url: e.url,
+      shopBought: true,
+      shopKey: key,
+      wearCount: 0,
+      lastWorn: null,
+      laundry: false,
+      photo: e.img || null
+    });
+  }
+  shopPurchases.unshift({
+    key: key, brand: e.brand, name: e.name,
+    price: e.price, retailer: e.retailer, url: e.url, img: e.img || "",
+    cat: e.cat, category: cat, piece: pc ? pieceDescription(pc) : "",
+    dateMarked: date, closetItemId: itemId
+  });
+  saveShopPurchases();
+  persistAll();
+  renderPurchased();
+  renderWardrobe();
+  refreshShopBuyButtons();
+}
+function unmarkShopPurchased(key) {
+  var p = shopPurchaseFor(key);
+  if (!p) return;
+  shopPurchases = shopPurchases.filter(function (x) { return x.key !== key; });
+  if (p.closetItemId) {
+    wardrobeItems = wardrobeItems.filter(function (i) { return i.id !== p.closetItemId; });
+    if (typeof detailItemId !== "undefined" && detailItemId === p.closetItemId) detailItemId = null;
+  }
+  saveShopPurchases();
+  persistAll();
+  renderPurchased();
+  renderWardrobe();
+  if (typeof renderItemDetail === "function") renderItemDetail();
+  refreshShopBuyButtons();
+}
+(function wirePurchased() {
+  var pbox = document.getElementById("shop-purchased");
+  if (pbox) pbox.addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("[data-unmark-purchase]") : null;
+    if (b) unmarkShopPurchased(b.getAttribute("data-unmark-purchase"));
+  });
+  renderPurchased();
+})();
+
+/* ================= Shop — Sale items & product Wishlist =================
+   Sale items are a swept catalogue baked in at build time from
+   sale-catalogue.json (retailer, brand, name, sale price, was
+   price, % off, link, image, category) — refreshed by re-sweep
+   and rebuild, never fetched live. The product Wishlist holds
+   things to buy, saved from Shop the look match cards and Sale
+   cards; marking one purchased runs the same Purchased flow
+   (auto-catalogues into the Closet) and takes it off the list.
+   Like the purchases list, the wishlist persists locally and
+   rides the backup export; it does not join the deployed sync
+   worker's fixed collection contract. (The looks wishlist in
+   My Looks is a different thing and is untouched.) */
+var SALE_ITEMS = [{"brand": "Mr P.", "name": "Ribbed Cashmere Polo Shirt", "retailer": "Mr Porter", "price": 263, "wasPrice": 525, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/ribbed-cashmere-polo-shirt/1647597343168605", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Cashmere Polo Sweater", "retailer": "Mr Porter", "price": 278, "wasPrice": 555, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/cashmere-polo-sweater/46376663162890176", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Curtis Cashmere Sweater", "retailer": "Mr Porter", "price": 200, "wasPrice": 500, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/curtis-cashmere-sweater/46376663162887731", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Geo Intarsia-Knit Wool and Cashmere-Blend Sweater", "retailer": "Mr Porter", "price": 235, "wasPrice": 470, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/geo-intarsia-knit-wool-and-cashmere-blend-sweater/46376663162890197", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Rib-Detailed Merino Wool Sweater", "retailer": "Mr Porter", "price": 114, "wasPrice": 285, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/rib-detailed-merino-wool-sweater/46376663162890225", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Clyde Cashmere Rollneck Sweater", "retailer": "Mr Porter", "price": 258, "wasPrice": 515, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/rollnecks/clyde-cashmere-rollneck-sweater/1647597344408062", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Cable-Knit Wool Cardigan", "retailer": "Mr Porter", "price": 193, "wasPrice": 385, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/cardigans/cable-knit-wool-cardigan/46376663162914495", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Ribbed-Knit Cardigan", "retailer": "Mr Porter", "price": 170, "wasPrice": 425, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/cardigans/ribbed-knit-cardigan/46376663162890221", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Cashmere Sweater", "retailer": "Mr Porter", "price": 256, "wasPrice": 640, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/cashmere-sweater/46376663162890193", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Open-Knit Wool Polo Shirt", "retailer": "Mr Porter", "price": 142, "wasPrice": 355, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/open-knit-wool-polo-shirt/46376663162890222", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Edward Straight-Leg Garment-Dyed Linen Drawstring Trousers", "retailer": "Mr Porter", "price": 84, "wasPrice": 210, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/edward-straight-leg-garment-dyed-linen-drawstring-trousers/1647597356993805", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Tapered Wool-Twill Drawstring Trousers", "retailer": "Mr Porter", "price": 77, "wasPrice": 255, "off": 70, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/suit-trousers/tapered-wool-twill-drawstring-trousers/1647597318722059", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Camp-Collar Organic Cotton-Terry Jacquard Shirt", "retailer": "Mr Porter", "price": 84, "wasPrice": 210, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/printed-shirts/camp-collar-organic-cotton-terry-jacquard-shirt/1647597358473428", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "Mr P.", "name": "Adam Straight-Leg Cotton-Blend Twill Chinos", "retailer": "Mr Porter", "price": 84, "wasPrice": 210, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/adam-straight-leg-cotton-blend-twill-chinos/1647597332778393", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Straight-Leg Mid-Length Striped Seersucker Swim Shorts", "retailer": "Mr Porter", "price": 75, "wasPrice": 125, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/plain-swim-shorts/straight-leg-mid-length-striped-seersucker-swim-shorts/1647597358469746", "img": "", "category": "Swim", "cat": "swim"}, {"brand": "Mr P.", "name": "Waffle-Knit Organic Cotton-Jersey Polo Shirt", "retailer": "Mr Porter", "price": 78, "wasPrice": 195, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/waffle-knit-organic-cotton-jersey-polo-shirt/46376663162890131", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Samuel Straight-Leg Garment-Dyed Cotton and Linen-Blend Twill Cargo Trousers", "retailer": "Mr Porter", "price": 72, "wasPrice": 240, "off": 70, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/samuel-straight-leg-garment-dyed-cotton-and-linen-blend-twill-cargo-trousers/1647597334943049", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Straight-Leg Stretch-Cotton Twill Chinos", "retailer": "Mr Porter", "price": 63, "wasPrice": 210, "off": 70, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/straight-leg-stretch-cotton-twill-chinos/1647597318609216", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Ribbed Merino Wool Polo Shirt", "retailer": "Mr Porter", "price": 178, "wasPrice": 355, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/ribbed-merino-wool-polo-shirt/46376663162890205", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Merino Wool Mock-Neck Sweater", "retailer": "Mr Porter", "price": 143, "wasPrice": 285, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/rollnecks/merino-wool-mock-neck-sweater/1647597344086856", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Wool and Cashmere-Blend Polo Shirt", "retailer": "Mr Porter", "price": 178, "wasPrice": 355, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/wool-and-cashmere-blend-polo-shirt/46376663162890183", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Wool and Cashmere-Blend Sweater Vest", "retailer": "Mr Porter", "price": 130, "wasPrice": 325, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/knitted-vests/wool-and-cashmere-blend-sweater-vest/46376663162890168", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Richard Merino Wool Zip-Up Cardigan", "retailer": "Mr Porter", "price": 130, "wasPrice": 325, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/cardigans/richard-merino-wool-zip-up-cardigan/1647597320209299", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Relaxed-Fit Organic and Recycled Cotton-Jersey T-Shirt", "retailer": "Mr Porter", "price": 63, "wasPrice": 105, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/plain-t-shirts/relaxed-fit-organic-and-recycled-cotton-jersey-t-shirt/46376663162890136", "img": "", "category": "Tees", "cat": "top"}, {"brand": "Mr P.", "name": "Scott Leather Loafers", "retailer": "Mr Porter", "price": 240, "wasPrice": 400, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/shoes/loafers/scott-leather-loafers/46376663162923996", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Brunello Cucinelli", "name": "Ribbed Cashmere Rollneck Sweater", "retailer": "Mr Porter", "price": 2050, "wasPrice": 4100, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/rollnecks/ribbed-cashmere-rollneck-sweater/46376663162997752", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Brunello Cucinelli", "name": "Tapered Pleated Stretch Cotton and Cashmere-Blend Corduroy Trousers", "retailer": "Mr Porter", "price": 1000, "wasPrice": 2000, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/suit-trousers/tapered-pleated-stretch-cotton-and-cashmere-blend-corduroy-trousers/46376663162997740", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Brunello Cucinelli", "name": "Ribbed Cotton Sweater", "retailer": "Mr Porter", "price": 825, "wasPrice": 1650, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/crew-necks/ribbed-cotton-sweater/46376663163000376", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Tom Ford", "name": "Cashmere Sweater", "retailer": "Mr Porter", "price": 1470, "wasPrice": 2450, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/crew-necks/cashmere-sweater/46376663162880792", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Canali", "name": "Puppytooth Wool Suit Jacket", "retailer": "Mr Porter", "price": 1230, "wasPrice": 2050, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/suit-jackets/puppytooth-wool-suit-jacket/46376663163003750", "img": "", "category": "Suits", "cat": "suit"}, {"brand": "Brunello Cucinelli", "name": "Tapered Pleated Cotton-Corduroy Trousers", "retailer": "Mr Porter", "price": 810, "wasPrice": 1350, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/casual-trousers/tapered-pleated-cotton-corduroy-trousers/46376663162997750", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Tom Ford", "name": "Cotton and Silk-Blend Shirt", "retailer": "Mr Porter", "price": 690, "wasPrice": 1150, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/plain-shirts/cotton-and-silk-blend-shirt/46376663163003392", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "Tom Ford", "name": "Cotton Sweater", "retailer": "Mr Porter", "price": 495, "wasPrice": 990, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/crew-necks/cotton-sweater/46376663163003286", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "FRAME", "name": "Wool Blazer", "retailer": "Mr Porter", "price": 600, "wasPrice": 1000, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/frame/clothing/suit-jackets/wool-blazer/46376663162864156", "img": "", "category": "Blazers", "cat": "blazer"}, {"brand": "Brunello Cucinelli", "name": "Slim-Fit Pleated Cotton-Twill Suit Trousers", "retailer": "Mr Porter", "price": 900, "wasPrice": 1500, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/suit-trousers/slim-fit-pleated-cotton-twill-suit-trousers/1647597352899726", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Thom Sweeney", "name": "Suede Bomber Jacket", "retailer": "Mr Porter", "price": 2259, "wasPrice": 3765, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/thom-sweeney/clothing/bomber-jackets/suede-bomber-jacket/46376663162899535", "img": "", "category": "Coats", "cat": "outerwear"}, {"brand": "Thom Sweeney", "name": "Double-Breasted Wool and Cashmere-Blend Felt Overcoat", "retailer": "Mr Porter", "price": 2247, "wasPrice": 3745, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/thom-sweeney/clothing/winter-coats/double-breasted-wool-and-cashmere-blend-felt-overcoat/1647597345219215", "img": "", "category": "Coats", "cat": "outerwear"}, {"brand": "Tom Ford", "name": "Double-Breasted Pinstriped Wool Suit Jacket", "retailer": "Mr Porter", "price": 2196, "wasPrice": 5490, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/suit-jackets/double-breasted-pinstriped-wool-suit-jacket/46376663163003117", "img": "", "category": "Suits", "cat": "suit"}, {"brand": "Brunello Cucinelli", "name": "Suede Penny Loafers", "retailer": "Mr Porter", "price": 780, "wasPrice": 1300, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/shoes/loafers/suede-penny-loafers/46376663163010014", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Tom Ford", "name": "Rod Suede Loafers", "retailer": "Mr Porter", "price": 492, "wasPrice": 820, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/shoes/driving-shoes/rod-suede-loafers/46376663162965125", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Brunello Cucinelli", "name": "Suede Penny Loafers (lightweight EVA sole)", "retailer": "Mr Porter", "price": 810, "wasPrice": 1350, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/shoes/loafers/suede-penny-loafers/46376663163009974", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Tod's", "name": "Gommino Suede Loafers", "retailer": "Mr Porter", "price": 555, "wasPrice": 925, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tod-s/shoes/loafers/gommino-suede-loafers/46376663163009923", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Tom Ford", "name": "Dyllan Straight-Leg Cotton-Satin Trousers", "retailer": "Mr Porter", "price": 960, "wasPrice": 1920, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/casual-trousers/dyllan-straight-leg-cotton-satin-trousers/46376663162880772", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Canali", "name": "Camp-Collar Wool-Blend Felt Overshirt", "retailer": "Mr Porter", "price": 1158, "wasPrice": 2895, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/overshirts/camp-collar-wool-blend-felt-overshirt/46376663162941405", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "Saman Amel", "name": "Unstructured Linen Suit Jacket", "retailer": "Mr Porter", "price": 1587, "wasPrice": 2645, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/saman-amel/clothing/suit-jackets/unstructured-linen-suit-jacket/46376663162903925", "img": "", "category": "Suits", "cat": "suit"}, {"brand": "Ralph Lauren Purple Label", "name": "Cable-Knit Crew-Neck Sweater", "retailer": "Farfetch", "price": 1317, "wasPrice": 1882, "off": 30, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-cable-knit-crew-neck-sweater-item-31950530.aspx", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Ralph Lauren Purple Label", "name": "Alonzo Velvet Loafers", "retailer": "Farfetch", "price": 738, "wasPrice": 1666, "off": 56, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-alonzo-velvet-loafers-item-36161655.aspx", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Ralph Lauren Purple Label", "name": "Cashmere Polo Sweater", "retailer": "Farfetch", "price": 1468, "wasPrice": 1803, "off": 19, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-cashmere-polo-sweater-item-38508298.aspx", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Ralph Lauren Purple Label", "name": "Cotton Wool Blend Parka", "retailer": "Farfetch", "price": 1780, "wasPrice": 3938, "off": 55, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-cotton-wool-blend-parka-item-18626588.aspx", "img": "", "category": "Coats", "cat": "outerwear"}, {"brand": "Ralph Lauren Purple Label", "name": "Wool Blazer", "retailer": "Farfetch", "price": 2917, "wasPrice": 4154, "off": 30, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-wool-blazer-item-15752125.aspx", "img": "", "category": "Blazers", "cat": "blazer"}, {"brand": "Ralph Lauren Purple Label", "name": "Pointed-Collar Button-Up Cotton Blend Shirt", "retailer": "Farfetch", "price": 602, "wasPrice": 1008, "off": 40, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-pointed-collar-button-up-cotton-blend-shirt-item-20508702.aspx", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "A.P.C.", "name": "Beige Suede Loafers", "retailer": "SSENSE", "price": 332, "wasPrice": 510, "off": 35, "url": "https://www.ssense.com/en-us/men/product/apc/beige-suede-loafers/18862741", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261252M231007_1/apc-beige-suede-loafers.jpg", "category": "Shoes", "cat": "shoes"}, {"brand": "A.P.C.", "name": "Black Moc Loafers", "retailer": "SSENSE", "price": 388, "wasPrice": 485, "off": 20, "url": "https://www.ssense.com/en-us/men/product/apc/black-moc-loafers/18671261", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "A.P.C.", "name": "Black Cotton Sweater", "retailer": "SSENSE", "price": 198, "wasPrice": 300, "off": 34, "url": "https://www.ssense.com/en-us/men/product/apc/black-cotton-sweater/18677391", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261252M201006_1/apc-black-cotton-sweater.jpg", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Todd Snyder", "name": "Monte Sweater Polo in Baja Dunes Stripe", "retailer": "Todd Snyder", "price": 124, "wasPrice": 298, "off": 58, "url": "https://www.toddsnyder.com/collections/sale-tops/products/monte-polobaja-dunes?option-0=M&variant=42328341446727", "img": "https://www.toddsnyder.com/cdn/shop/files/APR26_SW1110049_BAJA_DUNES_F1_R.jpg?v=1774011041&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Vista Sweater Polo in Heather Taupe", "retailer": "Todd Snyder", "price": 139, "wasPrice": 198, "off": 30, "url": "https://www.toddsnyder.com/collections/sale-tops/products/ls-vista-poloheather-taupe?option-0=M&variant=42356228620359", "img": "https://www.toddsnyder.com/cdn/shop/files/APR26_SW5810004_HEATHER_TAUPE_FL1_R.jpg?v=1774010364&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Miles Sweater Polo in Baja Dunes", "retailer": "Todd Snyder", "price": 94, "wasPrice": 268, "off": 65, "url": "https://www.toddsnyder.com/collections/sale/products/relaxed-silk-cotton-polobaja-dunes", "img": "https://www.toddsnyder.com/cdn/shop/files/MAR26_SW1200093_BAJA_DUNES_FL1_R.jpg?v=1771965677&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Clemente Sweater Polo in Blue Ridge Stripe", "retailer": "Todd Snyder", "price": 114, "wasPrice": 298, "off": 62, "url": "https://www.toddsnyder.com/collections/sale/products/stripe-linen-poloblue-ridge?option-0=M", "img": "https://www.toddsnyder.com/cdn/shop/files/MAY26_SW26309200_BLUE_RIDGET_F1_R.jpg?v=1777038966&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Mojave Sweater Polo in Baja Dunes", "retailer": "Todd Snyder", "price": 174, "wasPrice": 248, "off": 30, "url": "https://www.toddsnyder.com/collections/sale/products/mojave-polobaja-dunes?variant=42221523107911", "img": "https://www.toddsnyder.com/cdn/shop/files/MAR26_SW1289200_BAJA_DUNES_FL1_R.jpg?v=1771965682&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Casanova Sweater Polo in Steel Blue", "retailer": "Todd Snyder", "price": 134, "wasPrice": 248, "off": 46, "url": "https://www.toddsnyder.com/collections/best-of-sale/products/casanova-polosteel-blue?variant=42230501015623", "img": "https://www.toddsnyder.com/cdn/shop/files/MAR26_SW1131019_STEEL_BLUE_FL1_R.jpg?v=1771965681&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Charters Sweater Polo in Craspedia Chevron", "retailer": "Todd Snyder", "price": 254, "wasPrice": 348, "off": 27, "url": "https://www.toddsnyder.com/collections/sale/products/cotton-silk-chevron-polocraspedia", "img": "https://www.toddsnyder.com/cdn/shop/files/APR26_SW2760049_BERGAMOTRIND_FL1_R.jpg?v=1774010361&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Mikasa Sweater Polo in Sand Geo", "retailer": "Todd Snyder", "price": 224, "wasPrice": 298, "off": 25, "url": "https://www.toddsnyder.com/collections/sale/products/mikasa-polosand?option-0=M&variant=42080004669511", "img": "https://www.toddsnyder.com/cdn/shop/files/FEB26_SW1949200_SAND_FL1_R.jpg?v=1769110069&width=120", "category": "Polos", "cat": "top"}];
+var shopWishlist = store.get("shopWishlist", []);
+function saveShopWishlist() { store.set("shopWishlist", shopWishlist); }
+function wishlistFor(key) {
+  return shopWishlist.filter(function (w) { return w.key === key; })[0] || null;
+}
+function isWishlisted(e) { return !!wishlistFor(shopEntryKey(e)); }
+function refreshWishButtons() {
+  document.querySelectorAll("[data-wish-toggle]").forEach(function (b) {
+    var on = !!wishlistFor(b.getAttribute("data-wish-toggle"));
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.textContent = on ? "In wishlist — remove" : "Add to wishlist";
+  });
+  document.querySelectorAll("[data-sale-wish]").forEach(function (b) {
+    var it = SALE_ITEMS[parseInt(b.getAttribute("data-sale-wish"), 10)];
+    var on = it && !!wishlistFor(shopEntryKey(it));
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.textContent = on ? "In wishlist — remove" : "Add to wishlist";
+  });
+}
+function toggleWishlistItem(e, pc) {
+  var key = shopEntryKey(e);
+  if (wishlistFor(key)) {
+    shopWishlist = shopWishlist.filter(function (w) { return w.key !== key; });
+  } else {
+    shopWishlist.unshift({
+      key: key, brand: e.brand || "", name: e.name || "",
+      price: e.price, wasPrice: (typeof e.wasPrice === "number" ? e.wasPrice : null),
+      retailer: e.retailer || "", url: e.url || "", img: e.img || "",
+      cat: e.cat || "", category: e.category || "",
+      pieceDesc: pc ? pieceDescription(pc) : "",
+      garment: pc ? (pc.garment || "") : "",
+      hex: pc ? (pc.hex || "") : "", colourName: pc ? (pc.colourName || "") : "",
+      addedISO: localTodayISO()
+    });
+  }
+  saveShopWishlist();
+  refreshWishButtons();
+  renderShopWishlist();
+}
+function removeWishlistItem(key) {
+  shopWishlist = shopWishlist.filter(function (w) { return w.key !== key; });
+  saveShopWishlist();
+  refreshWishButtons();
+  renderShopWishlist();
+}
+function buyWishlistItem(key) {
+  var w = wishlistFor(key);
+  if (!w) return;
+  var entry = { brand: w.brand, name: w.name, price: w.price, retailer: w.retailer, url: w.url, img: w.img, cat: w.cat, keys: [] };
+  var pc = w.garment ? { desc: w.pieceDesc, garment: w.garment, hex: w.hex || null, colourName: w.colourName || "" } : null;
+  if (!isShopPurchased(entry)) toggleShopPurchase(entry, pc);
+  removeWishlistItem(key);
+}
+function renderShopWishlist() {
+  var box = document.getElementById("shopwish-list");
+  if (!box) return;
+  if (!shopWishlist.length) {
+    box.innerHTML = '<p class="meta">Nothing saved yet — add products from Shop the look matches or Sale items and they wait here.</p>';
+    return;
+  }
+  box.innerHTML = '<div class="wish-list">' + shopWishlist.map(function (w) {
+    var thumb = w.img ? '<img class="shop-thumb" src="' + esc(w.img) + '" alt="" loading="lazy" />' : "";
+    var price = "$" + Number(w.price).toLocaleString("en-US") +
+      (w.wasPrice ? ' <span class="sale-was">$' + Number(w.wasPrice).toLocaleString("en-US") + "</span>" : "");
+    return '<div class="shop-row">' +
+      '<a class="shop-row-main" target="_blank" rel="noopener" href="' + esc(w.url) + '">' + thumb +
+      '<span class="shop-main"><span class="shop-name">' + esc(w.brand) + " — " + esc(w.name) + '</span>' +
+      '<span class="shop-sub">' + esc(w.retailer) + (w.addedISO ? " · Saved " + esc(fmtDateShort(w.addedISO)) : "") + '</span></span>' +
+      '<span class="shop-price">' + price + "</span></a>" +
+      '<button type="button" class="btn-ghost shop-buy" data-wish-buy="' + esc(w.key) + '">Mark purchased</button>' +
+      '<button type="button" class="btn-ghost shop-buy" data-wish-remove="' + esc(w.key) + '">Remove</button></div>';
+  }).join("") + "</div>";
+}
+var saleCatFilter = "All";
+function saleCategories() {
+  var seen = {}, out = [];
+  SALE_ITEMS.forEach(function (it) {
+    var c = it.category || "Other";
+    if (!seen[c]) { seen[c] = 1; out.push(c); }
+  });
+  return out.sort();
+}
+function renderSaleItems() {
+  var list = document.getElementById("sale-list");
+  var sel = document.getElementById("sale-cat");
+  var count = document.getElementById("sale-count");
+  if (!list) return;
+  if (sel) {
+    var cats = ["All"].concat(saleCategories());
+    if (cats.indexOf(saleCatFilter) === -1) saleCatFilter = "All";
+    sel.innerHTML = cats.map(function (c) {
+      return '<option value="' + esc(c) + '"' + (c === saleCatFilter ? " selected" : "") + ">" + esc(c) + "</option>";
+    }).join("");
+  }
+  if (!SALE_ITEMS.length) {
+    list.innerHTML = '<p class="meta">Sale items are being gathered — the first sweep lands here soon.</p>';
+    if (count) count.textContent = "";
+    return;
+  }
+  var items = SALE_ITEMS.map(function (it, i) { return { it: it, i: i }; }).filter(function (x) {
+    return saleCatFilter === "All" || (x.it.category || "Other") === saleCatFilter;
+  });
+  if (count) count.textContent = items.length + (items.length === 1 ? " item" : " items");
+  if (!items.length) {
+    list.innerHTML = '<p class="meta">Nothing on sale in this category right now.</p>';
+    return;
+  }
+  list.innerHTML = '<div class="sale-grid">' + items.map(function (x) {
+    var it = x.it;
+    var off = (typeof it.off === "number" && it.off > 0) ? '<span class="sale-off">' + it.off + "% off</span>" : "";
+    var was = (typeof it.wasPrice === "number" && it.wasPrice > it.price) ? '<span class="sale-was">$' + Number(it.wasPrice).toLocaleString("en-US") + "</span>" : "";
+    var wished = !!wishlistFor(shopEntryKey(it));
+    return '<article class="sale-card">' +
+      (it.img ? '<img src="' + esc(it.img) + '" alt="' + esc(it.brand + " " + it.name) + '" loading="lazy" />' : "") +
+      '<div class="sale-body">' +
+      '<span class="sale-name">' + esc(it.brand) + " — " + esc(it.name) + "</span>" +
+      '<span class="sale-retail">' + esc(it.retailer) + "</span>" +
+      '<span class="sale-prices"><span>$' + Number(it.price).toLocaleString("en-US") + "</span>" + was + off + "</span>" +
+      '<span class="sale-actions">' +
+      '<a class="btn-ghost shop-buy" target="_blank" rel="noopener" href="' + esc(it.url) + '">View</a>' +
+      '<button type="button" class="btn-ghost shop-buy" data-sale-wish="' + x.i + '" aria-pressed="' + (wished ? "true" : "false") + '">' + (wished ? "In wishlist — remove" : "Add to wishlist") + "</button>" +
+      "</span></div></article>";
+  }).join("") + "</div>";
+}
+(function wireShopPages() {
+  var salePanel = document.getElementById("panel-sale");
+  if (salePanel) {
+    var sel = document.getElementById("sale-cat");
+    if (sel) sel.addEventListener("change", function () { saleCatFilter = sel.value; renderSaleItems(); });
+    salePanel.addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-sale-wish]") : null;
+      if (!b) return;
+      var it = SALE_ITEMS[parseInt(b.getAttribute("data-sale-wish"), 10)];
+      if (it) toggleWishlistItem(it, null);
+    });
+  }
+  var wishPanel = document.getElementById("panel-shopwish");
+  if (wishPanel) wishPanel.addEventListener("click", function (e) {
+    var buy = e.target.closest ? e.target.closest("[data-wish-buy]") : null;
+    if (buy) { buyWishlistItem(buy.getAttribute("data-wish-buy")); return; }
+    var rm = e.target.closest ? e.target.closest("[data-wish-remove]") : null;
+    if (rm) removeWishlistItem(rm.getAttribute("data-wish-remove"));
+  });
+  renderShopWishlist();
+})();
 /* Per-piece budget caps — one dollar slider per piece, top of
    the scale = no limit. Caps persist per piece description. */
 var SHOP_CAP_MIN = 50, SHOP_CAP_MAX = 2000, SHOP_CAP_STEP = 25;
@@ -16384,11 +17100,11 @@ function shopCapFor(desc) {
 function shopCapText(cap) {
   return cap >= SHOP_CAP_MAX ? "No limit" : "$" + Number(cap).toLocaleString("en-US");
 }
-function shopMatchesHTML(matches, cap) {
+function shopMatchesHTML(matches, cap, pc) {
   if (!matches.length) return '<p class="shop-nomatch">No exact match yet in the catalogue</p>';
   var shown = matches.filter(function (e) { return cap >= SHOP_CAP_MAX || e.price <= cap; });
   if (!shown.length) return '<p class="shop-nomatch">Nothing in the catalogue under ' + shopCapText(cap) + " — slide up to see all " + matches.length + ".</p>";
-  return shown.map(shopRowHTML).join("");
+  return shown.map(function (e) { return shopRowHTML(e, pc); }).join("");
 }
 var shopModeData = [];
 function renderFindLookMode() {
@@ -16423,7 +17139,7 @@ function renderFindLookMode() {
     html += '<div class="shop-cap"><span class="shop-cap-label">Budget</span>' +
       '<input type="range" class="shop-cap-range" data-cap-idx="' + idx + '" min="' + SHOP_CAP_MIN + '" max="' + SHOP_CAP_MAX + '" step="' + SHOP_CAP_STEP + '" value="' + cap + '" aria-label="Budget cap for ' + esc(desc) + '" />' +
       '<span class="shop-cap-val" data-cap-val="' + idx + '">' + shopCapText(cap) + "</span></div>";
-    html += '<div class="shop-matches" data-matches="' + idx + '">' + shopMatchesHTML(matches, cap) + "</div>";
+    html += '<div class="shop-matches" data-matches="' + idx + '">' + shopMatchesHTML(matches, cap, d.pc) + "</div>";
     html += '<div class="shop-brand-dd"><button type="button" class="sel-row shop-brand-toggle" aria-expanded="false"><span class="sel-name">Search brands</span><span class="sel-val">' + esc(tierName) + '</span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
       '<div class="opt-list shop-brand-list" hidden>' + brands.map(function (b) {
         return '<a class="opt-item shop-brand-item" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">' + esc(b) + "</a>";
@@ -16449,6 +17165,30 @@ function renderFindLookMode() {
   if (!box) return;
   box.addEventListener("click", function (e) {
     if (e.target.closest && e.target.closest("#shop-clear-look")) { clearFindLookMode(); return; }
+    var mb = e.target.closest ? e.target.closest("[data-mark-purchase]") : null;
+    if (mb) {
+      var mkey = mb.getAttribute("data-mark-purchase");
+      var mc2 = mb.closest("[data-matches]");
+      var pIdx = mc2 ? parseInt(mc2.getAttribute("data-matches"), 10) : -1;
+      var d2 = shopModeData[pIdx];
+      var entry = null;
+      if (d2) d2.matches.forEach(function (m) { if (shopEntryKey(m) === mkey) entry = m; });
+      if (!entry) SHOP_CATALOGUE.forEach(function (m) { if (shopEntryKey(m) === mkey) entry = m; });
+      if (entry) toggleShopPurchase(entry, d2 ? d2.pc : null);
+      return;
+    }
+    var wb = e.target.closest ? e.target.closest("[data-wish-toggle]") : null;
+    if (wb) {
+      var wkey = wb.getAttribute("data-wish-toggle");
+      var wc2 = wb.closest("[data-matches]");
+      var wpIdx = wc2 ? parseInt(wc2.getAttribute("data-matches"), 10) : -1;
+      var wd = shopModeData[wpIdx];
+      var wentry = null;
+      if (wd) wd.matches.forEach(function (m) { if (shopEntryKey(m) === wkey) wentry = m; });
+      if (!wentry) SHOP_CATALOGUE.forEach(function (m) { if (shopEntryKey(m) === wkey) wentry = m; });
+      if (wentry && typeof toggleWishlistItem === "function") toggleWishlistItem(wentry, wd ? wd.pc : null);
+      return;
+    }
     var tg = e.target.closest ? e.target.closest(".shop-brand-toggle") : null;
     if (tg) {
       var wrap = tg.closest(".shop-brand-dd");
@@ -16482,7 +17222,7 @@ function renderFindLookMode() {
     var val = box.querySelector('[data-cap-val="' + idx + '"]');
     if (val) val.textContent = shopCapText(cap);
     var mc = box.querySelector('[data-matches="' + idx + '"]');
-    if (mc) mc.innerHTML = shopMatchesHTML(d.matches, cap);
+    if (mc) mc.innerHTML = shopMatchesHTML(d.matches, cap, d.pc);
   });
 })();
 
@@ -16493,22 +17233,24 @@ function renderFindLookMode() {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands", "find", "calendar", "profile", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands", "find", "sale", "shopwish", "calendar", "profile", "watches", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
    Inspiration holds Icons (its first page — the section opens
-   there), Palettes, Brands and My Inspo (your uploaded
+   there), Palettes and My Inspo (your uploaded
    inspiration images). Me holds the Profile page (as
    its first page, labelled Me), Closet, My Looks, Calendar (trip
    capsules + What I wore), Watches (the Watch Box — Collection /
    Sold / Wants) and What I'm Wearing Today (the selfie
-   outfit log). Shop the look is a page of its own.
+   outfit log). Shop holds Shop the look (its first page),
+   Brands (the A–Z list, moved from Inspiration), Sale items
+   and the product Wishlist.
    A section tab reopens the page last visited in it. */
 var SECTIONS = {
   studio: ["today", "studio"],
-  inspiration: ["icons", "palettes", "brands", "myinspo"],
-  find: ["find"],
+  inspiration: ["icons", "palettes", "myinspo"],
+  find: ["find", "brands", "sale", "shopwish"],
   me: ["profile", "wardrobe", "looks", "calendar", "watches", "wearing"]
 };
 var sectionHome = { studio: "today", inspiration: "icons", find: "find", me: "profile" };
@@ -16572,15 +17314,19 @@ function switchTab(name, opts) {
     if (back) window.scrollTo(0, back);
     else window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  if (name === "sale" && typeof renderSaleItems === "function") renderSaleItems();
+  if (name === "shopwish" && typeof renderShopWishlist === "function") renderShopWishlist();
   persistTab();
 }
 document.querySelector(".navstack").addEventListener("click", function (e) {
   var tab = e.target.closest("[data-tab]");
   if (tab) {
-    /* The Shop the look tab reopens the page exactly as it was
-       left — the carried look persists across refreshes now, and
-       only the hero's own button and look cards enter look mode
-       with a (new) look. */
+    /* Opening Shop the look from the top nav always renders the
+       look currently shown on Today — the carried look tracks
+       the hero (see syncShopLookToToday), never a stale look
+       from an earlier deal. Persistence is only the refresh
+       fallback, and it holds that same latest look. */
+    if (tab.getAttribute("data-tab") === "find" && typeof syncShopLookToToday === "function") syncShopLookToToday();
     switchTab(tab.getAttribute("data-tab")); return;
   }
   var secBtn = e.target.closest("[data-section]");
@@ -17177,12 +17923,31 @@ function renderWishlist() {
   lastWishlist = order.map(function (k) { return agg[k]; }).sort(function (a, b) { return b.count - a.count; }).slice(0, 12);
   if (!lastWishlist.length) {
     list.innerHTML = '<p class="meta">Nothing missing — every piece in your looks is covered by your closet.</p>';
+    renderGapList();
     return;
   }
   list.innerHTML = lastWishlist.map(function (w, i) {
     return '<div class="wish-row"><span class="cdot" style="background:' + (w.hex || "transparent") + '"></span>' +
       '<span class="w-main"><span class="w-name">' + esc(w.desc) + '</span>' +
       '<span class="w-sub">' + esc(w.cat) + " · needed by " + w.count + (w.count === 1 ? " look: " : " looks: ") + esc(w.titles.slice(0, 2).join(", ")) + "</span></span>" +
+      '<button type="button" class="btn-ghost" data-wish-find="' + i + '">Shop the look</button></div>';
+  }).join("");
+  renderGapList();
+}
+/* The same missing-pieces ranking, kept quietly at the foot of
+   the Closet: each gap row leads into Shop the look for that
+   piece (the shared data-wish-find path). Ranked by how many
+   outfits the piece would complete. */
+function renderGapList() {
+  var wrap = document.getElementById("gap-wrap");
+  var list = document.getElementById("gap-list");
+  if (!wrap || !list) return;
+  if (!lastWishlist.length) { wrap.hidden = true; list.innerHTML = ""; return; }
+  wrap.hidden = false;
+  list.innerHTML = lastWishlist.slice(0, 8).map(function (w, i) {
+    return '<div class="wish-row"><span class="cdot" style="background:' + (w.hex || "transparent") + '"></span>' +
+      '<span class="w-main"><span class="w-name">' + esc(w.desc) + '</span>' +
+      '<span class="w-sub">' + esc(w.cat) + " · completes " + w.count + (w.count === 1 ? " outfit" : " outfits") + "</span></span>" +
       '<button type="button" class="btn-ghost" data-wish-find="' + i + '">Shop the look</button></div>';
   }).join("");
 }
@@ -17206,11 +17971,11 @@ document.addEventListener("click", function (e) {
 
 /* ---------- Trip capsules (23) ---------- */
 var TRIPS = {
-  marbella: { name: "Marbella", dates: "Jun 21 – Jul 5, 2027 · 14 nights", temp: 86,
+  marbella: { name: "Marbella", dates: "Jun 21 – Jul 5, 2027 · 14 nights", temp: 86, nightTemp: 78, days: 14, slots: ["Day", "Pool", "Night"],
     weather: "Seasonal weather basis: Marbella in late June and early July is hot — roughly 80–90°F and sunny. Outfits are built light from your closet: polos, tees and linen up top, open or light shoes below.",
     essentials: ["Swim trunks", "Sunscreen", "Sunglasses", "Passport", "A light layer for evenings", "Charger"],
     note: "Marbella in late June: heat at midday, warm evenings. Light tailoring, linen, swim pieces and one smart layer for dinner — the outfits above are built from your closet and mix across the fortnight." },
-  aspen: { name: "Aspen", dates: "Mar 12 – 26, 2027 · 14 nights", temp: 30,
+  aspen: { name: "Aspen", dates: "Mar 12 – 26, 2027 · 14 nights", temp: 30, nightTemp: 24, days: 14, slots: ["Day", "Après"],
     weather: "Seasonal weather basis: Aspen in March is ski cold — roughly 20–40°F with snow possible. Outfits are built for cold from your closet: knits and layers up top, closed shoes below.",
     essentials: ["Ski jacket & pants", "Base layers", "Ski socks", "Sunscreen — altitude sun", "Lip balm", "Passport / ID", "Charger"],
     note: "Aspen: cold air, bright sun, dinners that dress up. Layers first — knits under blazers, a real coat, closed shoes — the outfits above are built from your closet." }
@@ -17218,6 +17983,34 @@ var TRIPS = {
 var currentCapsule = null;
 var capsuleLooks = [];
 var fwLooksBackup = null;
+/* The Pool slot's outfit, from the closet's own swim pieces —
+   paired with a light top and open shoes when they're there. */
+function capsulePoolLook(d) {
+  var swim = wardrobeItems.filter(function (i) { return i.category === "Bathing suits" && i.photo; });
+  if (!swim.length) return null;
+  var s = swim[d % swim.length];
+  var top = wardrobeItems.filter(function (i) { return (i.category === "Tees" || i.category === "Shirts") && i.photo && i.id !== s.id; })[0] || null;
+  var pieces = [s]; if (top) pieces.push(top);
+  return { fwPieces: pieces, swatches: [], suggestedBottom: null, fwRender: null,
+    title: s.name + (top ? " × " + top.name : ""),
+    imgAlt: pieces.map(function (p) { return p.name; }).join(" with ") };
+}
+function capsuleOutfitHTML(look, gi) {
+  var pieces = look.fwPieces || [];
+  var shoe = null;
+  pieces.forEach(function (p) { if (p.category === "Shoes") shoe = p; });
+  var shown = [pieces[0], shoe].filter(function (p, ix, a) { return p && p.photo && a.indexOf(p) === ix; });
+  /* The verified render of him wearing it leads when the pairing
+     has one — the same picture From wardrobe shows — and the
+     whole card taps through to the outfit view. */
+  var photos = look.fwRender
+    ? '<span class="fw-render"><img src="' + look.fwRender + '" alt="' + esc(look.title || "") + '" loading="lazy" decoding="async" /></span>'
+    : (shown.length ? '<span class="fw-photos' + (shown.length === 1 ? " one" : "") + '">' + shown.map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async" />'; }).join("") + "</span>" : "");
+  var names = pieces.map(function (p) { return p.name; }).join(" · ");
+  return '<button type="button" class="capsule-outfit" data-capsule-look="' + gi + '">' + photos + '<span class="oc-title">' + esc(look.title) + "</span>" +
+    (names ? '<span class="oc-meta">' + esc(names) + "</span>" : "") +
+    (look.suggestedBottom ? '<span class="oc-meta">Pair with: ' + esc(look.suggestedBottom.name) + " — suggested</span>" : "") + "</button>";
+}
 function buildCapsule(key) {
   var trip = TRIPS[key];
   var out = document.getElementById("capsule-out");
@@ -17225,32 +18018,40 @@ function buildCapsule(key) {
   currentCapsule = key;
   var packedAll = store.get("capsulePacked", {});
   var packed = packedAll[key] || {};
-  /* Outfits from his closet, matched to the trip's seasonal
-     weather — the same weather-aware closet deal as Today. */
-  var looks = (typeof buildClosetLooks === "function") ? buildClosetLooks({ temp: trip.temp, rainy: false, salt: 0 }) : null;
-  var outfits = looks ? looks.slice(0, 4) : [];
+  /* Outfits from his closet, organized BY DAY: each day carries
+     its slots (Day / Pool / Night on a beach trip; Day / Après
+     in the cold), each slot built from his closet pieces at the
+     slot's temperature — the same closet engine as Today. */
+  var days = trip.days || 14;
+  var daySet = (typeof buildClosetLooks === "function") ? buildClosetLooks({ temp: trip.temp, rainy: false, salt: 0 }) : null;
+  var nightSet = (typeof buildClosetLooks === "function") ? buildClosetLooks({ temp: (trip.nightTemp != null ? trip.nightTemp : trip.temp), rainy: false, salt: 77 }) : null;
+  var outfits = [];
+  capsuleLooks = outfits;
   var html = '<article class="card custom-card"><h4>' + trip.name + ' capsule</h4><p class="meta">' + trip.dates + "</p>";
   html += '<p class="capsule-note">' + trip.weather + "</p>";
-  if (!outfits.length) {
+  if (!daySet || !daySet.length) {
     html += '<p class="capsule-note">Your closet has no pieces to build outfits from yet — add pieces in the Closet and the capsule builds itself from them.</p>';
   } else {
-    capsuleLooks = outfits;
-    html += '<div class="capsule-outfits">' + outfits.map(function (look, oi) {
-      var pieces = look.fwPieces || [];
-      var shoe = null;
-      pieces.forEach(function (p) { if (p.category === "Shoes") shoe = p; });
-      var shown = [pieces[0], shoe].filter(function (p, ix, a) { return p && p.photo && a.indexOf(p) === ix; });
-      /* The verified render of him wearing it leads when the
-         pairing has one — the same picture From wardrobe shows —
-         and the whole card taps through to the outfit view. */
-      var photos = look.fwRender
-        ? '<span class="fw-render"><img src="' + look.fwRender + '" alt="' + esc(look.title || "") + '" loading="lazy" decoding="async" /></span>'
-        : (shown.length ? '<span class="fw-photos' + (shown.length === 1 ? " one" : "") + '">' + shown.map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async" />'; }).join("") + "</span>" : "");
-      var names = pieces.map(function (p) { return p.name; }).join(" · ");
-      return '<button type="button" class="capsule-outfit" data-capsule-look="' + oi + '">' + photos + '<span class="oc-title">' + esc(look.title) + "</span>" +
-        (names ? '<span class="oc-meta">' + esc(names) + "</span>" : "") +
-        (look.suggestedBottom ? '<span class="oc-meta">Pair with: ' + esc(look.suggestedBottom.name) + " — suggested</span>" : "") + "</button>";
-    }).join("") + "</div>";
+    var hasSwim = wardrobeItems.some(function (i) { return i.category === "Bathing suits" && i.photo; });
+    for (var d = 0; d < days; d++) {
+      html += '<div class="capsule-day"><h5 class="capsule-day-head">Day ' + (d + 1) + '</h5><div class="capsule-outfits">';
+      trip.slots.forEach(function (slot) {
+        var look = null;
+        if (slot === "Pool") {
+          look = capsulePoolLook(d);
+        } else {
+          var set = (slot === "Day") ? daySet : nightSet;
+          if (set && set.length) look = set[(d + (slot === "Day" ? 0 : Math.floor(days / 2))) % set.length];
+        }
+        if (look) {
+          var gi = outfits.length; outfits.push(look);
+          html += '<div class="capsule-slot"><span class="capsule-slot-label">' + slot + "</span>" + capsuleOutfitHTML(look, gi) + "</div>";
+        } else if (slot === "Pool" && !hasSwim) {
+          html += '<div class="capsule-slot"><span class="capsule-slot-label">Pool</span><p class="capsule-note">No swim piece in your closet yet — swim trunks are on the essentials list below.</p></div>';
+        }
+      });
+      html += "</div></div>";
+    }
   }
   /* Packing checklist: the capsule outfits' own pieces first
      (suggested bottoms named as suggestions), then the trip
@@ -17534,7 +18335,11 @@ if (heroEl) {
     if (e.target.closest && e.target.closest(".today-caption")) return;
     if (e.target.closest && e.target.closest("[data-popout]")) return;
     if (typeof todayLook !== "undefined" && todayLook) {
-      var popSrc = (todayLook.fwPieces && todayLook.fwPieces.length && todayLook.fwPieces[0].photo) ? todayLook.fwPieces[0].photo : lookImg(todayLook);
+      /* The pop-out is the look's OWN image — the render of him
+         wearing the outfit that the hero is displaying (lookImg
+         resolves fwRender first). Never a piece photograph:
+         piece photos live on Closet / item pages only. */
+      var popSrc = lookImg(todayLook);
       openPopout(popSrc, todayLook.imgAlt || "");
     }
   });
@@ -17974,10 +18779,12 @@ function openFwOutfit(idx) {
     figs += '<figure class="fw-piece fw-suggested"><span class="fw-nophoto" style="background:' + look.suggestedBottom.hex + '"></span>' +
       '<figcaption><span class="fw-yours suggested">Suggested</span>' + esc(look.suggestedBottom.name) + ' — not in your closet yet</figcaption></figure>';
   }
+  var fwWatch = "";
+  try { var rw = recommendWatch(look); if (rw && rw.watch) fwWatch = '<p class="fw-watch">On the wrist — ' + esc(rw.watch.name) + "</p>"; } catch (e) {}
   box.innerHTML = '<article class="card fw-outfit">' +
     '<div class="fw-outfit-head"><span class="oc-label">From wardrobe</span><button type="button" class="btn-ghost" data-fw-close>Back</button></div>' +
     '<h3>' + esc(look.title) + '</h3>' +
-    hero +
+    hero + fwWatch +
     '<div class="fw-pieces">' + figs + '</div>' +
     '<p class="fw-outfit-note">' + esc((look.notes || []).join(" ")) + '</p>' +
     '<div class="look-actions">' +
@@ -18385,7 +19192,7 @@ function syRefresh() {
   try { store.set("wornLog", wornLog); } catch (e) {}
   try { store.set("inspoImages", inspoImages); } catch (e) {}
   try { store.set("finds", finds); } catch (e) {}
-  [renderSaved, renderWardrobe, renderWatches, renderWornLog, renderInspoImages, renderMyInspo, renderFinds, renderCustomPalettes, renderIcons, renderRecentlyRemoved, renderLoc, syncPaletteSelect].forEach(function (f) {
+  [renderSaved, renderWardrobe, renderWatches, renderWornLog, renderInspoImages, renderMyInspo, renderFinds, renderCustomPalettes, renderIcons, renderRecentlyRemoved, renderLoc, syncPaletteSelect, renderPurchased].forEach(function (f) {
     try { if (typeof f === "function") f(); } catch (e) {}
   });
   var se = document.getElementById("syncstat");
