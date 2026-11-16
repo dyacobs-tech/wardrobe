@@ -7,8 +7,11 @@
 //  · Photos under assets/photos/ are content-hashed and immutable:
 //    cache-first, kept once seen.
 //  · Everything else on this origin (icons, the wardrobe-look renders, the
-//    manifest) and the web fonts: serve the cached copy at once, refresh it
-//    in the background. These files keep their names when they change.
+//    manifest): network-first. These files keep their names when they
+//    change, so a cached copy must never win over a fresh one — the
+//    network copy is served (and re-cached) whenever it answers, and
+//    the cache is only the offline fallback. Web fonts keep
+//    stale-while-revalidate: their URLs are versioned by the provider.
 const SHELL_CACHE = 'wardrobe-shell-3';
 const PHOTO_CACHE = 'wardrobe-photos-1';
 const ASSET_CACHE = 'wardrobe-assets-1';
@@ -35,6 +38,25 @@ self.addEventListener('activate', (event) => {
     )).then(() => self.clients.claim())
   );
 });
+
+function networkFirst(event, cacheName) {
+  const req = event.request;
+  event.respondWith(
+    fetch(req).then((res) => {
+      // Opaque (cross-origin) responses report status 0; keep those too.
+      if (res && (res.status === 200 || res.type === 'opaque')) {
+        const copy = res.clone();
+        event.waitUntil(caches.open(cacheName).then((cache) => cache.put(req, copy)));
+      }
+      return res;
+    }).catch(() =>
+      caches.open(cacheName).then((cache) => cache.match(req)).then((hit) => {
+        if (hit) return hit;
+        throw new Error('offline and not cached: ' + req.url);
+      })
+    )
+  );
+}
 
 function staleWhileRevalidate(event, cacheName) {
   const req = event.request;
@@ -103,5 +125,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  staleWhileRevalidate(event, ASSET_CACHE);
+  // Same-name assets (the wardrobe-look renders, lazy renders, icons,
+  // the manifest): network-first, so a corrected file under an
+  // unchanged name is what the next view actually shows.
+  networkFirst(event, ASSET_CACHE);
 });

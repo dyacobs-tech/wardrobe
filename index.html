@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.21" />
+    <meta name="wardrobe-build" content="2026-11-16.22" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -2717,7 +2717,7 @@
                 <button type="button" class="btn-ghost" id="fw-more">Six more ideas</button>
               </div>
               <div class="options-grid" id="fw-grid" role="list"></div>
-              <p class="empty" id="fw-empty" hidden>Add a top and a pair of shoes in Me → Closet, and outfits built from your own pieces will appear here.</p>
+              <p class="empty" id="fw-empty" hidden>Add a top and a pair of shoes in Closet, and outfits built from your own pieces will appear here.</p>
             </section>
             <div class="look-result" id="look-result" aria-live="polite"></div>
           </div>
@@ -3767,7 +3767,7 @@ function storeNoteFailure() {
   var now = Date.now();
   if (now - _storeFailAt < 15000) return;
   _storeFailAt = now;
-  try { toast("Storage is full on this device — that change couldn't be saved. Export a backup from Me → Profile."); } catch (e) {}
+  try { toast("Storage is full on this device — that change couldn't be saved. Export a backup from Profile."); } catch (e) {}
 }
 /* Reads that cannot be parsed are never silently treated as
    "empty": the raw text is copied aside first (IndexedDB, and
@@ -3926,7 +3926,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.21";
+var WARDROBE_BUILD = "2026-11-16.22";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -11066,7 +11066,7 @@ function planEntryFor(iso) {
   return null;
 }
 function planLookValid(l) {
-  return !!l && typeof l === "object" && !!l.title && Array.isArray(l.swatches) &&
+  return !!l && typeof l === "object" && !!l.title && Array.isArray(l.swatches) && !l.refLook &&
     (!!l.img || !!l.fwRender || !!(l.fwPieces && l.fwPieces.length));
 }
 function planLookForDate(iso) {
@@ -11122,7 +11122,17 @@ function persistLookFeedback(look) {
     saved.comment = look.comment || "";
     persistAll();
     renderSaved();
+    return;
   }
+  /* No saved copy: a "like" must still land — insert through the
+     hero's own likeLook path (saved copy at the top of My Looks
+     with the verdict and comment carried over, queued copy,
+     persistAll, renderSaved), so the look graduates out of
+     rotation via graduatedImgs() exactly as a hero Like does.
+     A dislike already records itself via recordDislike in the
+     verdict handler, and a cleared verdict (the dislike-undo
+     path) must create nothing — both insert nothing here. */
+  if (look.verdict === "like") likeLook(look);
 }
 
 function feedbackHTML(look) {
@@ -11242,7 +11252,15 @@ function garmentCategory(label) {
 }
 function pieceDescription(p) {
   var garment = p.garment.toLowerCase();
-  var desc = (p.colourName ? p.colourName + " " : "") + garment;
+  /* Never double the colour word: when the garment string
+     already opens with the colour name ("black leather belt"
+     under colourName "Black", "dark navy trousers" under
+     "Dark navy"), the colour is not prepended again. */
+  var colourLc = (p.colourName || "").toLowerCase();
+  var desc = garment;
+  if (p.colourName && garment !== colourLc && garment.indexOf(colourLc + " ") !== 0) {
+    desc = p.colourName + " " + garment;
+  }
   var d = (p.detail || "").trim();
   if (d && d.toLowerCase() !== "fresh pair" && desc.toLowerCase().indexOf(d.toLowerCase()) === -1 && (p.colourName || "").toLowerCase().indexOf(d.toLowerCase()) === -1) {
     desc += " — " + d;
@@ -11800,6 +11818,35 @@ function swapWatchIdFor(look) {
   if (look.fwRender && typeof fwWatchPickFor === "function") return fwWatchPickFor(look) || "";
   return "";
 }
+/* The closet pieces a look GENUINELY maps to — the only honest
+   basis for wear credit and for the pop-out's "Yours:" line.
+   Two sources, both from the look's real piece mapping (the
+   same mapping the swap feature uses): (a) the look's fwPieces
+   item ids that resolve to a closet item, and (b) the swap
+   map's slots whose library piece carries a cid that resolves
+   to a closet item. Anchor names and palette colours are NOT
+   evidence — matching on them credited garments that were
+   never in the outfit. Returns [{id, name}], de-duplicated. */
+function mappedClosetPieces(look) {
+  var out = [], seen = {};
+  function credit(pid) {
+    if (!pid || seen[pid]) return;
+    var it = (typeof closetItemById === "function") ? closetItemById(pid) : null;
+    if (!it) return;
+    seen[pid] = 1;
+    out.push({ id: it.id, name: it.name });
+  }
+  if (!look) return out;
+  (look.fwPieces || []).forEach(function (p) { credit(p.itemId || p.id); });
+  var map = (typeof swapMapForLook === "function") ? swapMapForLook(look) : null;
+  if (map) {
+    Object.keys(map).forEach(function (slot) {
+      var piece = map[slot] && map[slot].piece;
+      if (piece && piece.cid) credit(piece.cid);
+    });
+  }
+  return out;
+}
 function swapDisplayPhoto(look) {
   if (!look) return "";
   if (look.swapPhoto) return look.swapPhoto;
@@ -12031,6 +12078,12 @@ function swapPersistLook(look) {
   if (typeof savedLooks !== "undefined" && savedLooks.some(function (l) { return l.id === look.id; })) return;
   if (typeof queueLooks === "undefined" || !queueLooks) return;
   if (queueLooks.some(function (l) { return l.id === look.id; })) return;
+  /* A fresh user pick of this combination is a NEW swap: clear
+     any resume-resubmit flag carried over from an earlier copy
+     of the combination, so the launch resume (swapResumePending)
+     is never blocked from resubmitting this one if its job
+     turns out to be missing. */
+  if (look.swapResubmitDone) delete look.swapResubmitDone;
   queueLooks.unshift(JSON.parse(JSON.stringify(look)));
   saveQueue();
 }
@@ -12081,7 +12134,7 @@ function pickSwap(i) {
     look.swapPhoto = look.swapFromPhoto;
     look.swapState = "rendering";
     look.fwRender = null;
-    swapSubmitJob(look, newIds, watchId);
+    swapSubmitJob(look, newIds, watchId, { fromUser: true });
     startSwapPoll(look);
   }
   swapPersistLook(look);
@@ -12100,7 +12153,7 @@ function swapFetch(url, opts, ms) {
   if (typeof syFetch === "function") return syFetch(url, opts, ms || 20000);
   return fetch(url, opts);
 }
-function swapSubmitJob(look, idsBySlot, watchId) {
+function swapSubmitJob(look, idsBySlot, watchId, opts) {
   var key = swapSyncKey();
   if (!key) return;
   /* The worker's contract (wardrobe-sync, Render queue):
@@ -12120,7 +12173,21 @@ function swapSubmitJob(look, idsBySlot, watchId) {
     method: "POST",
     headers: { "authorization": "Bearer " + key, "content-type": "application/json" },
     body: JSON.stringify({ comboId: look.swapComboId, combo: combo })
-  }, 20000).catch(function () {});
+  }, 20000).then(function (r) {
+    /* An HTTP rejection (400/500) RESOLVES the fetch — without
+       this check it would sail past the catch below and stay
+       just as invisible as a network drop. That silent-400 mode
+       is exactly what killed swaps in builds .17/.18. */
+    if (r && typeof r.ok === "boolean" && !r.ok) throw new Error("swap submit " + r.status);
+    return r;
+  }).catch(function () {
+    /* A user-initiated submit that fails is no longer invisible:
+       the pick handler flags its call {fromUser: true} and hears
+       about the failure. Background resubmits (the poller's
+       self-heal, the launch resume) pass no flag and stay
+       silent — they retry on their own either way. */
+    if (opts && opts.fromUser && typeof toast === "function") toast("That swap couldn't be sent — it will retry on its own.");
+  });
 }
 /* Polling runs while the swapped look's pop-out is on screen;
    the tick stops when the layer closes or another look takes
@@ -12218,8 +12285,41 @@ function swapResumePending() {
     if (lazyRenders[comboId]) { swapSettleCombo(comboId, lazyRenders[comboId]); return; }
     swapFetch(swapSyncBase() + "/render-queue/" + comboId, {
       headers: { "authorization": "Bearer " + swapSyncKey() }
-    }, 20000).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    }, 20000).then(function (r) {
+      if (r.status === 404) return { __missing: true };
+      return r.ok ? r.json() : null;
+    }).then(function (j) {
       if (!j) return;
+      if (j.__missing) {
+        /* The job isn't on the server — the original submit
+           never landed and its failure was silent. Mirror the
+           poller: resubmit ONCE from the persisted swap map.
+           "Once" holds across launches via swapResubmitDone,
+           stamped on every persisted copy of the combination
+           when the resubmit fires; a fresh user pick clears it
+           again in swapPersistLook. */
+        var srcLook = null;
+        [typeof savedLooks !== "undefined" ? savedLooks : [], typeof queueLooks !== "undefined" ? queueLooks : []].forEach(function (arr) {
+          (arr || []).forEach(function (l) {
+            if (!srcLook && l && l.swapComboId === comboId && l.swapState === "rendering" && l.swapPieces && !l.swapResubmitDone) srcLook = l;
+          });
+        });
+        if (srcLook) {
+          var savedTouched = false, queueTouched = false;
+          [typeof savedLooks !== "undefined" ? savedLooks : [], typeof queueLooks !== "undefined" ? queueLooks : []].forEach(function (arr, ai) {
+            (arr || []).forEach(function (l) {
+              if (l && l.swapComboId === comboId && !l.swapResubmitDone) {
+                l.swapResubmitDone = true;
+                if (ai === 0) savedTouched = true; else queueTouched = true;
+              }
+            });
+          });
+          if (savedTouched && typeof persistAll === "function") persistAll();
+          if (queueTouched && typeof saveQueue === "function") saveQueue();
+          swapSubmitJob(srcLook, srcLook.swapPieces, swapWatchIdFor(srcLook));
+        }
+        return;
+      }
       if (j.status === "done") {
         swapTryLoadRender(comboId, 0, function (url) { swapSettleCombo(comboId, url); }, function () {});
       } else if (j.status === "failed") swapSettleCombo(comboId, null);
@@ -12227,6 +12327,308 @@ function swapResumePending() {
   });
 }
 setTimeout(swapResumePending, 4000);
+
+/* ================= Style this piece =================
+   From a Closet item's detail card: deal complete outfit
+   renders anchored on that piece — every result a full outfit
+   render of him wearing the whole look, the anchor in every
+   outfit, never an item card or a piece pairing (the absolute
+   outfits-only rule). Sources, in order: (1) existing renders
+   that include the item — its FW render pairs, built the way
+   buildClosetLooks builds them, plus saved/queued looks whose
+   swap map or fwPieces include it; (2) new anchored
+   combinations assembled from the piece library with the
+   anchor fixed in its slot and the remaining slots filled
+   under the swap engine's own validity (formality within one
+   step, Wada harmony, owned pieces preferred). A combination
+   whose render already exists shows instantly; a new one is
+   persisted and submitted through the Change-a-piece render
+   machinery exactly as a swap is (swapPersistLook,
+   swapSubmitJob, the .19 contract, poll/resume settling) and
+   its card shows the rendering state — title, swatches and
+   the slim rendering line — never piece photographs. */
+function styleItemLabel(it) {
+  var nouns = { "Blazers": "this blazer", "Suits": "this blazer", "Shirts": "this shirt", "Button downs": "this shirt", "Polos": "this polo", "Tees": "this tee", "Sweaters": "this sweater", "Shoes": "these shoes", "Jackets": "this jacket", "Coats": "this coat", "Leather jackets": "this leather jacket", "Vests": "this vest", "Trousers": "these trousers", "Jeans": "these jeans", "Shorts": "these shorts", "Bathing suits": "these swim trunks", "Belts": "this belt", "Scarves": "this scarf", "Hats": "this hat", "Gloves": "these gloves", "Ties": "this tie", "Sunglasses": "these sunglasses", "Socks": "these socks" };
+  return "Style " + (nouns[it.category] || "this piece");
+}
+/* One FW render pair as a look, built the way buildClosetLooks
+   builds it: the pair's own top + shoes, the render, and the
+   render's recorded bottom as the suggested completion. */
+function styleFwPairLook(topItem, shoeItem, entry) {
+  var pieces = [topItem, shoeItem];
+  var suggested = manifestBottom(entry.bottom);
+  var swatches = [], seenHex = {};
+  pieces.forEach(function (p) {
+    if (p.colourHex && !seenHex[p.colourHex]) {
+      seenHex[p.colourHex] = 1;
+      swatches.push({ name: (p.colourName || "").split("·")[0].trim() || nearestWada(p.colourHex).name, hex: p.colourHex, role: cap(CLOSET_GARMENT[p.category] || "Piece") });
+    }
+  });
+  if (suggested && !seenHex[suggested.hex]) swatches.push({ name: suggested.colour, hex: suggested.hex, role: cap(suggested.garment) });
+  var names = pieces.map(function (p) { return p.name; });
+  return {
+    id: newLookId(),
+    title: names[0] + " × " + names[1],
+    meta: "From your closet",
+    desc: names.join(" with ") + ", completed with " + suggested.name.toLowerCase() + " (suggested)",
+    iconId: null, blendId: null, basis: "both", version: 1, plate: null, paletteName: null,
+    img: null,
+    fwRender: entry.img,
+    imgAlt: "You wearing " + names[0] + " with " + names[1] + ", and " + suggested.name.toLowerCase(),
+    swatches: swatches,
+    flatlay: pieces.map(function (p) { return { hex: p.colourHex, label: cap(CLOSET_GARMENT[p.category] || "Piece"), detail: (p.colourName || "").split("·")[0].trim().toLowerCase() }; }).concat([{ hex: suggested.hex, label: cap(suggested.garment), detail: suggested.colour.toLowerCase() + " (suggested)" }]),
+    notes: ["Built from your closet: " + names.join(", ") + ".", "Complete it with " + suggested.name.toLowerCase() + " — a suggested pairing, not a piece from your closet."],
+    source: "wardrobe",
+    anchorNames: names.slice(),
+    fwPieces: pieces.map(function (p) { return { id: p.id, name: p.name, photo: p.photo || null, colourHex: p.colourHex || null, category: p.category }; }),
+    suggestedBottom: suggested
+  };
+}
+/* Engine validity for one more piece against the pieces chosen
+   so far — the swapCandidates rule, unchanged: formality
+   within one step of the chosen set's span, and Wada harmony
+   (a whole-plate set, harmony with every chosen piece, or
+   harmony with at least one); harmony with none excludes. */
+function stylePieceValid(cand, chosenList) {
+  if (!chosenList.length) return true;
+  var fsList = chosenList.map(function (p) { return p.fs; });
+  if (cand.fs < Math.min.apply(null, fsList) - 1 || cand.fs > Math.max.apply(null, fsList) + 1) return false;
+  var names = chosenList.map(function (p) { return p.wn; });
+  var distinct = [];
+  names.concat([cand.wn]).forEach(function (n) { if (distinct.indexOf(n) === -1) distinct.push(n); });
+  if (distinct.length >= 2 && distinct.length <= 4 && swapPlateCovers(distinct)) return true;
+  if (names.every(function (n) { return swapPairHarmonious(cand.wn, n); })) return true;
+  if (names.some(function (n) { return swapPairHarmonious(cand.wn, n); })) return true;
+  return false;
+}
+/* Assemble anchored combinations: the anchor fixed in its
+   slot, top + bottom + shoes always present (the layer slot
+   is filled only when the anchor IS the layer), filled by a
+   depth-first walk in swapCandidates' ranking (owned first,
+   then name) so the best combinations deal first. Returns
+   [{idsBySlot, comboId}], skipping comboIds in `exclude`
+   (already shown or already tracked) and stamping them into
+   it. Bounded so a big library can never hang the tap. */
+function styleAssembleCombos(anchor, exclude, limit) {
+  var fillSlots = ["top", "bottom", "shoes"].filter(function (s) { return s !== anchor.slot; });
+  var chosen = {};
+  chosen[anchor.slot] = anchor;
+  var results = [], visits = 0;
+  function dfs(i) {
+    if (results.length >= limit || visits > 6000) return;
+    if (i === fillSlots.length) {
+      var idsBySlot = {};
+      Object.keys(chosen).forEach(function (s) { idsBySlot[s] = chosen[s].id; });
+      var idList = ["top", "bottom", "shoes", "layer"].filter(function (s) { return idsBySlot[s]; }).map(function (s) { return idsBySlot[s]; });
+      var comboId = swapComboId(idList, "");
+      if (!exclude[comboId]) { exclude[comboId] = 1; results.push({ idsBySlot: idsBySlot, comboId: comboId }); }
+      return;
+    }
+    var slot = fillSlots[i];
+    var cands = PIECE_LIBRARY.filter(function (p) { return p.slot === slot; });
+    cands.sort(function (a, b) {
+      if (a.owned !== b.owned) return a.owned ? -1 : 1;
+      return a.name < b.name ? -1 : 1;
+    });
+    for (var k = 0; k < cands.length; k++) {
+      if (results.length >= limit || visits > 6000) return;
+      visits++;
+      var cand = cands[k];
+      var chosenList = Object.keys(chosen).map(function (s) { return chosen[s]; });
+      if (!stylePieceValid(cand, chosenList)) continue;
+      chosen[slot] = cand;
+      dfs(i + 1);
+      delete chosen[slot];
+    }
+  }
+  dfs(0);
+  return results;
+}
+/* A look for one assembled combination, through the swap
+   machinery's own states: a landed lazy render or an existing
+   look with the identical piece set shows instantly; a
+   combination already tracked by a persisted look reuses that
+   look (no duplicate persist, no duplicate submit); a new one
+   is created, submitted to the render queue and persisted as
+   a queued rendering look, exactly like a swap. */
+function styleComboLook(idsBySlot, comboId, anchorItem) {
+  var order = ["top", "bottom", "shoes", "layer"];
+  var idList = order.filter(function (s) { return idsBySlot[s]; }).map(function (s) { return idsBySlot[s]; });
+  var pieces = order.filter(function (s) { return idsBySlot[s]; }).map(function (s) { return PIECE_BY_ID[idsBySlot[s]]; }).filter(Boolean);
+  function baseLook() {
+    return {
+      id: newLookId(),
+      title: pieces.map(function (p) { return p.name; }).join(" × "),
+      meta: "Styled around your " + anchorItem.name,
+      desc: pieces.map(function (p) { return p.name; }).join(" with "),
+      iconId: null, blendId: null, basis: "both", version: 1, plate: null, paletteName: null,
+      img: "", imgAlt: "",
+      swatches: pieces.map(function (p) { return { name: p.wn, hex: p.wh, role: cap(p.cat || "Piece") }; }),
+      flatlay: pieces.map(function (p) { return { hex: p.wh, label: cap(p.cat || "Piece"), detail: "" }; }),
+      notes: ["Anchored on your " + anchorItem.name + " — every other piece completes it."],
+      source: "combo",
+      anchorNames: pieces.filter(function (p) { return p.cid; }).map(function (p) { var ci = closetItemById(p.cid); return ci ? ci.name : p.name; }),
+      swapPieces: idsBySlot,
+      swapComboId: comboId,
+      swapFromPhoto: ""
+    };
+  }
+  if (lazyRenders[comboId]) {
+    var done = baseLook();
+    done.img = lazyRenders[comboId];
+    done.swapPhoto = lazyRenders[comboId];
+    done.swapState = null;
+    return done;
+  }
+  var existing = swapFindExistingRender(idList);
+  if (existing) {
+    var ex = baseLook();
+    ex.img = swapDisplayPhoto(existing);
+    ex.swapPhoto = ex.img;
+    ex.swapState = null;
+    return ex;
+  }
+  var tracked = (typeof queueLooks !== "undefined" ? queueLooks : []).concat(typeof savedLooks !== "undefined" ? savedLooks : [])
+    .filter(function (l) { return l && l.swapComboId === comboId; })[0];
+  if (tracked) return JSON.parse(JSON.stringify(tracked));
+  var look = baseLook();
+  look.swapState = "rendering";
+  look.swapPhoto = "";
+  swapSubmitJob(look, idsBySlot, "");
+  swapPersistLook(look);
+  return look;
+}
+var styleItemCtx = null, styleResults = [];
+/* Deal up to `limit` anchored results for the item, in source
+   order, skipping anything already shown this session and any
+   graduated (liked) look. Shown keys: FW pair keys, look ids
+   and comboIds share one set. */
+function styleDeal(it, limit) {
+  var ctx = styleItemCtx;
+  var out = [];
+  function grad(img) { return !!img && !!graduatedImgs()[img]; }
+  /* (1a) FW render pairs including the item. */
+  var availById = {};
+  wardrobeItems.forEach(function (x) { availById[x.id] = x; });
+  Object.keys(WARDROBE_RENDER_PAIRS).forEach(function (key) {
+    if (out.length >= limit) return;
+    var ids = key.split("|");
+    if (ids[0] !== it.id && ids[1] !== it.id) return;
+    var keyTag = "pair:" + key;
+    if (ctx.shown[keyTag]) return;
+    var top = availById[ids[0]], shoe = availById[ids[1]];
+    if (!top || !shoe || top.laundry || shoe.laundry) return;
+    var look = styleFwPairLook(top, shoe, WARDROBE_RENDER_PAIRS[key]);
+    if (isGraduatedLook(look)) return;
+    ctx.shown[keyTag] = 1;
+    out.push(look);
+  });
+  /* (1b) Saved / queued looks whose mapping includes the item. */
+  var anchorPiece = (typeof PIECE_BY_CID !== "undefined") ? PIECE_BY_CID[it.id] : null;
+  (typeof savedLooks !== "undefined" ? savedLooks : []).concat(typeof queueLooks !== "undefined" ? queueLooks : []).forEach(function (l) {
+    if (out.length >= limit || !l || !l.id) return;
+    if (ctx.shown["look:" + l.id]) return;
+    var has = (l.fwPieces || []).some(function (p) { return p.id === it.id; }) ||
+      (anchorPiece && l.swapPieces && Object.keys(l.swapPieces).some(function (s) { return l.swapPieces[s] === anchorPiece.id; }));
+    if (!has) return;
+    if (grad(l.img) || grad(l.swapPhoto) || (l.fwRender && grad(fwRenderSrc(l)))) return;
+    ctx.shown["look:" + l.id] = 1;
+    if (l.swapComboId) ctx.shown[l.swapComboId] = 1;
+    out.push(JSON.parse(JSON.stringify(l)));
+  });
+  /* (2) New anchored combinations from the piece library. */
+  if (out.length < limit && anchorPiece && anchorPiece.slot) {
+    var combos = styleAssembleCombos(anchorPiece, ctx.shown, limit - out.length + 6);
+    for (var ci = 0; ci < combos.length && out.length < limit; ci++) {
+      var look2 = styleComboLook(combos[ci].idsBySlot, combos[ci].comboId, it);
+      if (look2.swapState !== "rendering" && grad(look2.img)) continue;
+      out.push(look2);
+    }
+  }
+  return out;
+}
+function styleCardHTML(look, idx) {
+  if (look.swapState === "rendering") {
+    /* The rendering state, never piece photographs: the look's
+       title and swatches with the slim rendering line. */
+    return '<button type="button" class="card option-card" data-style-idx="' + idx + '" role="listitem">' +
+      '<span class="pane swap-rendering" style="position:relative;display:block;aspect-ratio:3/4">' +
+      '<span class="swap-render-line">Rendering this combination\u2026</span></span>' +
+      '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
+      cardStripHTML(look.swatches) + "</span></button>";
+  }
+  var src = look.fwRender ? fwRenderSrc(look) : lookImg(look);
+  return '<button type="button" class="card option-card" data-style-idx="' + idx + '" role="listitem">' +
+    '<img src="' + src + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy" />' +
+    '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
+    cardStripHTML(look.swatches) + "</span></button>";
+}
+function renderStyleResults(it, keepScroll) {
+  var el = document.getElementById("look-result");
+  if (!el) return;
+  el.innerHTML = '<div class="options-head"><span class="oc-label">' + esc(it.name) + '</span>' +
+    '<button type="button" class="btn-ghost" data-style-more>Six more ideas</button></div>' +
+    '<div class="options-grid" role="list">' + styleResults.map(function (look, idx) { return styleCardHTML(look, idx); }).join("") + "</div>";
+  if (!keepScroll) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  startStyleRenderWatch();
+}
+/* While the style view is open with renders pending, keep it
+   settling: the resume sweep picks up landed renders (the same
+   path a reopened swap takes), and landed cards swap their
+   rendering state for the real render in place. */
+var styleWatchTimer = null;
+function stopStyleRenderWatch() { if (styleWatchTimer) { clearInterval(styleWatchTimer); styleWatchTimer = null; } }
+function startStyleRenderWatch() {
+  stopStyleRenderWatch();
+  if (!styleResults.some(function (l) { return l.swapState === "rendering"; })) return;
+  styleWatchTimer = setInterval(function () {
+    if (!styleItemCtx) { stopStyleRenderWatch(); return; }
+    if (typeof swapResumePending === "function") swapResumePending();
+    var changed = false;
+    styleResults.forEach(function (l) {
+      if (l.swapState === "rendering" && l.swapComboId && lazyRenders[l.swapComboId]) {
+        l.img = lazyRenders[l.swapComboId];
+        l.swapPhoto = lazyRenders[l.swapComboId];
+        l.swapState = null;
+        changed = true;
+      }
+    });
+    if (changed) {
+      var it = closetItemById(styleItemCtx.itemId);
+      if (it) renderStyleResults(it, true);
+    }
+    if (!styleResults.some(function (l) { return l.swapState === "rendering"; })) stopStyleRenderWatch();
+  }, 20000);
+}
+function styleThisItem(it) {
+  if (!it) return;
+  styleItemCtx = { itemId: it.id, shown: {} };
+  styleResults = styleDeal(it, 6);
+  if (!styleResults.length) {
+    toast("No outfits with the " + it.name + " yet — it pairs as more pieces are photographed.");
+    return;
+  }
+  if (typeof switchTab === "function") switchTab("studio");
+  renderStyleResults(it);
+}
+document.addEventListener("click", function (e) {
+  var more = e.target.closest ? e.target.closest("[data-style-more]") : null;
+  if (more) {
+    if (!styleItemCtx) return;
+    var it = closetItemById(styleItemCtx.itemId);
+    if (!it) return;
+    var next = styleDeal(it, 6);
+    if (!next.length) { toast("No more outfits with the " + it.name + "."); return; }
+    styleResults = next;
+    renderStyleResults(it);
+    return;
+  }
+  var card = e.target.closest ? e.target.closest("[data-style-idx]") : null;
+  if (card) {
+    var look = styleResults[parseInt(card.getAttribute("data-style-idx"), 10)];
+    if (look) openLookLayer(look);
+  }
+});
 
 function lookCardHTML(look, opts) {
   opts = opts || {};
@@ -12239,8 +12641,15 @@ function lookCardHTML(look, opts) {
   var dirLine = cardIcon ? '<p class="dir-line">In the direction of <strong>' + esc(cardIcon.name) + "</strong> — " + esc(cardIcon.lane) + (cardBlend ? ', blended with <strong>' + esc(cardBlend.name) + "</strong> — " + esc(cardBlend.lane) : "") + "</p>" : "";
   var metaLine = look.meta ? '<p class="meta">' + esc(look.meta) + "</p>" : "";
   var sourceLine = "";
-  if (look.source === "wardrobe") sourceLine = '<p class="source-line"><strong>Only my wardrobe</strong>' + (look.anchorNames && look.anchorNames.length ? '<span>Yours: <span class="own">' + esc(look.anchorNames.join(", ")) + "</span></span>" : "") + '<button type="button" class="info-btn sm" data-info-title="Only my wardrobe" data-info-text="Built only from pieces you own — your top and your shoes, with a suggested bottom completing it until your own bottoms are catalogued." aria-label="About: only my wardrobe looks">i</button></p>';
-  else if (look.source === "combo") sourceLine = '<p class="source-line"><strong>Combo</strong>' + (look.anchorNames && look.anchorNames.length ? '<span>Yours: <span class="own">' + esc(look.anchorNames.join(", ")) + "</span></span>" : "") + '<button type="button" class="info-btn sm" data-info-title="Combo" data-info-text="Anchored in pieces you own; the other pieces are inspo to buy to complete it — use Shop the look on any of them." aria-label="About: combo looks">i</button></p>';
+  /* "Yours:" names only anchor pieces genuinely mapped to this
+     look's pieces (mappedClosetPieces) — anchor names alone are
+     engine seed metadata and named garments not in the outfit.
+     No genuine mapping, no "Yours:" segment. */
+  var mappedNames = mappedClosetPieces(look).map(function (m) { return m.name; });
+  var yoursNames = (look.anchorNames || []).filter(function (n) { return mappedNames.indexOf(n) !== -1; });
+  var yoursSeg = yoursNames.length ? '<span>Yours: <span class="own">' + esc(yoursNames.join(", ")) + "</span></span>" : "";
+  if (look.source === "wardrobe") sourceLine = '<p class="source-line"><strong>Only my wardrobe</strong>' + yoursSeg + '<button type="button" class="info-btn sm" data-info-title="Only my wardrobe" data-info-text="Built only from pieces you own — your top and your shoes, with a suggested bottom completing it until your own bottoms are catalogued." aria-label="About: only my wardrobe looks">i</button></p>';
+  else if (look.source === "combo") sourceLine = '<p class="source-line"><strong>Combo</strong>' + yoursSeg + '<button type="button" class="info-btn sm" data-info-title="Combo" data-info-text="Anchored in pieces you own; the other pieces are inspo to buy to complete it — use Shop the look on any of them." aria-label="About: combo looks">i</button></p>';
   else if (look.source === "inspo") sourceLine = '<p class="source-line"><strong>Only inspo</strong><button type="button" class="info-btn sm" data-info-title="Only inspo" data-info-text="Built entirely outside your wardrobe — fresh inspo, nothing pulled from your closet." aria-label="About: only inspo looks">i</button></p>';
   /* The direction line lives in the Customize form's live
      preview; the card doesn't repeat it. */
@@ -13194,52 +13603,50 @@ function buildClosetLooks(opts) {
     tops = rotate(byScore(tops, function (i) { return weatherTopScore(i, wx.temp, wx.rainy); }));
     shoes = byScore(shoes, function (i) { return weatherShoeScore(i, wx.temp, wx.rainy); });
   }
-  var combos = [];
-  if (bottoms.length) {
-    /* His own bottoms are catalogued: build on them, as before.
-       No render is attached in this branch — a verified render
-       shows its own suggested bottom, never one of his own. */
-    tops.forEach(function (t) { bottoms.forEach(function (b) { combos.push([t, b, null]); }); });
-    if (!wx) shuffleArr(combos);
-  } else {
-    /* Interim rule (his call): every outfit anchors on HIS top and
-       HIS shoes; a suggested bottom completes it below. Pairings
-       come first from the verified render pool: a render exists
-       for exactly one top + shoes pairing per top, and a look may
-       only ever carry the render recorded for its own pairing.
-       Tops with no render keep the rotation pairing and deal
-       without a photograph of him, as before. */
-    var byId = {};
-    avail.forEach(function (it) { byId[it.id] = it; });
-    var renderCombos = [], coveredTops = {};
-    Object.keys(WARDROBE_RENDER_PAIRS).forEach(function (key) {
-      var ids = key.split("|");
-      var rt = byId[ids[0]], rs = byId[ids[1]];
-      if (rt && rs) { renderCombos.push([rt, rs, WARDROBE_RENDER_PAIRS[key]]); coveredTops[rt.id] = 1; }
+  /* ONLY verified outfit renders are ever dealt (his absolute
+     rule: always outfits, not individual items). Every combo
+     below is a render pair — HIS top + HIS shoes with the
+     verified full-outfit render recorded for exactly that
+     pairing in WARDROBE_RENDER_PAIRS, completed by the render's
+     own recorded suggested bottom. Combinations without a
+     render are simply not emitted: no tops × bottoms grid from
+     his catalogued bottoms, no renderless rotation pairings —
+     a dealt look with fwRender null is impossible from here.
+     His own bottoms create dealt cards only once a render
+     exists for the pairing. No render pairs available (e.g.
+     every paired piece is in laundry) → null, exactly like the
+     no-tops case, and consumers fall back as they already do. */
+  var byId = {};
+  avail.forEach(function (it) { byId[it.id] = it; });
+  var renderCombos = [];
+  Object.keys(WARDROBE_RENDER_PAIRS).forEach(function (key) {
+    var ids = key.split("|");
+    var rt = byId[ids[0]], rs = byId[ids[1]];
+    if (rt && rs) renderCombos.push([rt, rs, WARDROBE_RENDER_PAIRS[key]]);
+  });
+  if (!renderCombos.length) return null;
+  if (wx) {
+    renderCombos.sort(function (a, b) {
+      var d = (weatherTopScore(b[0], wx.temp, wx.rainy) + weatherShoeScore(b[1], wx.temp, wx.rainy)) - (weatherTopScore(a[0], wx.temp, wx.rainy) + weatherShoeScore(a[1], wx.temp, wx.rainy));
+      return d !== 0 ? d : (a[0].name < b[0].name ? -1 : 1);
     });
-    if (wx) {
-      renderCombos.sort(function (a, b) {
-        var d = (weatherTopScore(b[0], wx.temp, wx.rainy) + weatherShoeScore(b[1], wx.temp, wx.rainy)) - (weatherTopScore(a[0], wx.temp, wx.rainy) + weatherShoeScore(a[1], wx.temp, wx.rainy));
-        return d !== 0 ? d : (a[0].name < b[0].name ? -1 : 1);
-      });
-      if (renderCombos.length > 1) {
-        var rr = ((salt % renderCombos.length) + renderCombos.length) % renderCombos.length;
-        renderCombos = renderCombos.slice(rr).concat(renderCombos.slice(0, rr));
-      }
-    } else {
-      shuffleArr(renderCombos);
+    if (renderCombos.length > 1) {
+      var rr = ((salt % renderCombos.length) + renderCombos.length) % renderCombos.length;
+      renderCombos = renderCombos.slice(rr).concat(renderCombos.slice(0, rr));
     }
-    combos = renderCombos;
-    var restTops = tops.filter(function (t) { return !coveredTops[t.id]; });
-    if (!wx) shuffleArr(restTops);
-    restTops.forEach(function (t, ti) { if (shoes.length) combos.push([t, shoes[ti % shoes.length], null]); });
+  } else {
+    shuffleArr(renderCombos);
   }
+  var combos = renderCombos;
   return combos.slice(0, 6).map(function (pair, i) {
     var pieces = [pair[0], pair[1]];
     var renderEntry = pair[2] || null;
     var hasShoe = pieces.some(function (p) { return p.category === "Shoes"; });
     var shoe = hasShoe ? pieces.filter(function (p) { return p.category === "Shoes"; })[0] : null;
-    if (shoes.length && !hasShoe) { shoe = shoes[i % shoes.length]; pieces.push(shoe); if (renderEntry && (!shoe || shoe.id !== pieces[1].id)) renderEntry = null; }
+    if (shoes.length && !hasShoe) { shoe = shoes[i % shoes.length]; pieces.push(shoe); }
+    /* The render pair is never nulled out after pairing: combos
+       here are render pairs (the render's own top + shoes), so
+       hasShoe always holds and the render stays attached. */
     if (shades.length) pieces.push(shades[i % shades.length]);
     var hasBottom = pieces.some(function (p) { return ["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(p.category) !== -1; });
     var suggested = hasBottom ? null : (renderEntry ? manifestBottom(renderEntry.bottom) : suggestBottomFor(pieces[0], shoe, i * 7 + pieces[0].name.length, wx));
@@ -13919,7 +14326,7 @@ function onLookResultClick(e) {
     } else {
       queueLooks.unshift(JSON.parse(JSON.stringify(currentLook)));
       saveQueue();
-      toast("Queued — find it in Me → My Looks.");
+      toast("Queued — find it in Closet → My Looks.");
     }
     return;
   }
@@ -15542,7 +15949,7 @@ function renderItemDetail() {
     "</dl>" +
     '<div class="item-actions">' +
     '<button type="button" class="btn-ghost" data-item-act="wore">Mark worn</button>' +
-    '<button type="button" class="btn-ghost" data-item-act="outfits">See outfits</button>' +
+    '<button type="button" class="btn-ghost" data-item-act="style">' + esc(styleItemLabel(it)) + '</button>' +
     '<button type="button" class="btn-ghost" data-item-act="find">Shop the look</button>' +
     '<button type="button" class="btn-ghost" data-item-act="laundry">' + (it.laundry ? "Back from laundry" : "Send to laundry") + "</button>" +
     '<button type="button" class="btn-ghost" data-item-act="edit">Edit</button>' +
@@ -15577,18 +15984,12 @@ document.getElementById("item-detail").addEventListener("click", function (e) {
     toast("Marked worn — " + it.name + ".");
     return;
   }
-  if (act === "outfits") {
-    /* Out to the outfits this piece appears in — the From
-       wardrobe grid, filtered to this piece. */
-    var looks = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
-    var mine = (looks || []).filter(function (l) { return (l.fwPieces || []).some(function (p) { return p.id === it.id; }); });
-    if (!mine.length) { toast("No outfit with the " + it.name + " yet — it pairs as more pieces are photographed."); return; }
-    fwLooks = mine;
-    var grid = document.getElementById("fw-grid");
-    if (grid) grid.innerHTML = mine.map(function (look, idx) { return fwCardHTML(look, idx); }).join("");
-    switchTab("studio");
-    var sec = document.getElementById("from-wardrobe");
-    if (sec) { sec.hidden = false; sec.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  if (act === "style") {
+    /* Style this piece: a results view of complete outfit
+       renders anchored on this item — existing renders first,
+       then engine-assembled anchored combinations queued
+       through the swap render machinery. Never item cards. */
+    styleThisItem(it);
     return;
   }
   if (act === "find") {
@@ -15926,7 +16327,7 @@ function saveLook(look) {
   savedLooks.unshift(look);
   renderSaved();
   var keptLook = persistAll();
-  toast(keptLook ? "Saved — find it in Me → My Looks." : "Saved on screen, but storage is full — it won't survive a reload. Export a backup from Profile.");
+  toast(keptLook ? "Saved — find it in Closet → My Looks." : "Saved on screen, but storage is full — it won't survive a reload. Export a backup from Profile.");
 }
 /* The render each grid card is actually showing, by look id — kept so
    opening a card shows the same outfit the tile showed. */
@@ -16088,7 +16489,7 @@ function addToQueue(id) {
   if (gridImgById[id]) copy.img = gridImgById[id];
   queueLooks.unshift(copy);
   saveQueue();
-  toast("Queued — find it in Me → My Looks.");
+  toast("Queued — find it in Closet → My Looks.");
 }
 function toggleWorn(id) {
   var f = findLookAnywhere(id);
@@ -20454,19 +20855,16 @@ function woreToday() {
   if (!savedLooks.some(function (l) { return l.id === todayLook.id; })) {
     savedLooks.unshift(JSON.parse(JSON.stringify(todayLook)));
   }
-  var names = todayLook.anchorNames || [];
-  var wornIds = [], wornNames = [];
-  wardrobeItems.forEach(function (it) {
-    var match = names.indexOf(it.name) !== -1;
-    if (!match && it.colourHex) {
-      match = (todayLook.swatches || []).some(function (s) { return s.hex.toLowerCase() === it.colourHex.toLowerCase(); });
-    }
-    if (match && !it.laundry) { wornIds.push(it.id); wornNames.push(it.name); }
-  });
-  (todayLook.fwPieces || []).forEach(function (p) {
-    var pid = p.itemId || p.id;
-    if (pid && closetItemById(pid) && wornIds.indexOf(pid) === -1) { wornIds.push(pid); wornNames.push(closetItemById(pid).name); }
-  });
+  /* Wear credit comes ONLY from the look's real piece mapping
+     (mappedClosetPieces: fwPieces ids + the swap map's closet
+     pieces). The old anchor-name match and palette colour-hex
+     fallback credited garments that were never in the outfit —
+     a navy suit logged a wear for the Cream Cricket Sweater.
+     Nothing mapped → the entry records pieces: [] and no
+     garment's wearCount/lastWorn/laundry changes. */
+  var mappedWorn = mappedClosetPieces(todayLook);
+  var wornIds = mappedWorn.map(function (m) { return m.id; });
+  var wornNames = mappedWorn.map(function (m) { return m.name; });
   /* The watch on the hero — his choice if he made one, the
      recommendation otherwise — is the watch recorded as worn. */
   var wres = (typeof resolveWatch === "function") ? resolveWatch(todayLook) : { state: "none" };
@@ -20859,11 +21257,23 @@ function dealPlanLook() {
       return list[Math.floor(Math.random() * list.length)];
     }
   }
-  if (typeof dealFromDeck === "function") {
-    var dealt = dealFromDeck(1, {});
-    if (dealt && dealt.length) return dealt[0];
+  /* The deck path can deal an icon reference look (refLook — a
+     photograph of someone else). A planned look becomes Today's
+     hero, so a reference photograph must never be dealt here:
+     deal again, up to 12 attempts, and take the first
+     non-reference look; if every attempt is a reference, there
+     is no plan look (the sheet's no-look handling applies). */
+  for (var attempt = 0; attempt < 12; attempt++) {
+    var cand = null;
+    if (typeof dealFromDeck === "function") {
+      var dealt = dealFromDeck(1, {});
+      if (dealt && dealt.length) cand = dealt[0];
+    }
+    if (!cand && typeof dealerLook === "function") cand = dealerLook({});
+    if (!cand) return null;
+    if (!cand.refLook) return cand;
   }
-  return (typeof dealerLook === "function") ? dealerLook({}) : null;
+  return null;
 }
 function openPlanSheet(iso) {
   var sheet = document.getElementById("plan-sheet");
@@ -21527,7 +21937,7 @@ if (wearingSaveBtn) wearingSaveBtn.addEventListener("click", function () {
   ["wearing-photo-camera", "wearing-photo-upload"].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ""; });
   if (dateEl) dateEl.value = localTodayISO();
   resetWearingRows();
-  toast(kept ? "Logged — in your Closet, and worn on " + fmtDateShort(date) + "." : "Logged — storage is full, so export a backup from Me.");
+  toast(kept ? "Logged — in your Closet, and worn on " + fmtDateShort(date) + "." : "Logged — storage is full, so export a backup from Profile.");
 });
 
 /* ---------- My Inspo ---------- */
@@ -21762,7 +22172,7 @@ function saveUploadedLook(withTags) {
   var prev = document.getElementById("upload-preview");
   if (prev) { prev.hidden = true; prev.removeAttribute("src"); }
   closeUploadConfirm();
-  toast(kept ? "Look saved to My Looks." : "Saved on screen, but storage is full — export a backup from Me.");
+  toast(kept ? "Look saved to My Looks." : "Saved on screen, but storage is full — export a backup from Profile.");
 }
 var uploadSaveBtn = document.getElementById("upload-save");
 if (uploadSaveBtn) uploadSaveBtn.addEventListener("click", function () { saveUploadedLook(true); });
@@ -22367,16 +22777,28 @@ function syncNow(isRetry, force) {
         if (!r0.ok) throw new Error("register " + r0.status);
         var j0 = await r0.json();
         if (!j0 || !j0.key) throw new Error("register failed");
-        SY.key = j0.key; SY.acct = j0.acct; SY.last = 0; SY.rej = 0;
-        /* First upload: everything local is dirty, stamped by
-           the track (or now) — uploads happen in this same pass,
-           before any download is applied. */
-        syTrackChanges();
-        SY_COLLS.forEach(function (c) {
-          syCollGet(c).forEach(function (r) { var id = syRecId(c, r); if (id) { SY.dirty[c][id] = 1; if (!SY.st[c][id]) SY.st[c][id] = Date.now(); } });
-        });
-        SY.dirty.m = 1; if (!SY.st.m) SY.st.m = Date.now();
-        saveSY();
+        /* Adopt the auto-created account ONLY if no key has
+           appeared while the register request was in flight.
+           After a wipe the boot pass registers automatically; if
+           the user confirmed Link in the meantime, SY.key is the
+           linked key now — discarding the registration result
+           entirely (no overwrite of key/acct/last/rej, no
+           first-upload re-stamp for the auto account) and
+           letting this pass continue as a normal sync under the
+           linked key is the only correct outcome. The link's own
+           forced syncNow already queued a re-run via _syAgain. */
+        if (!SY.key) {
+          SY.key = j0.key; SY.acct = j0.acct; SY.last = 0; SY.rej = 0;
+          /* First upload: everything local is dirty, stamped by
+             the track (or now) — uploads happen in this same pass,
+             before any download is applied. */
+          syTrackChanges();
+          SY_COLLS.forEach(function (c) {
+            syCollGet(c).forEach(function (r) { var id = syRecId(c, r); if (id) { SY.dirty[c][id] = 1; if (!SY.st[c][id]) SY.st[c][id] = Date.now(); } });
+          });
+          SY.dirty.m = 1; if (!SY.st.m) SY.st.m = Date.now();
+          saveSY();
+        }
       }
       syTrackChanges();
       setSyncStatus("Syncing…");
@@ -22531,6 +22953,10 @@ function linkSyncKey() {
   });
   SY.dirty.m = 1;
   saveSY();
+  /* Say so immediately: without this the status line kept
+     showing whatever the boot pass last wrote (often the
+     auto-created account) and the link looked like it failed. */
+  setSyncStatus("Linking to account…");
   syncNow(false, true);
 }
 (function initSync() {
