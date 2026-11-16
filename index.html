@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.10" />
+    <meta name="wardrobe-build" content="2026-11-16.11" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -2209,7 +2209,7 @@
       .cdd-opt .watch-none-disc { width: 28px; height: 28px; font-size: 13px; border-color: var(--border-strong); color: var(--dim); }
       .cdd-opt .rec-badge { font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--brass); border: 1px solid var(--brass); border-radius: 2px; padding: 2px 6px; flex: none; }
       /* The hero's one quiet control row, under Like / Don't like */
-      #panel-today .hero-controls { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; justify-content: flex-end; }
+      #panel-today .hero-controls { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; justify-content: flex-start; }
       #panel-today .hero-controls .cdd { min-width: 0; }
       #today-watch-dd { flex: 0 0 auto; }
       .watch-cdd { margin: 0 0 14px; }
@@ -2261,13 +2261,20 @@
         #panel-wardrobe .item-grid .item-colors .cname { flex: 1 1 100%; overflow-wrap: anywhere; }
       }
       /* ---------- Bottom bar: the four sections, within thumb reach ---------- */
-      /* Bar geometry (build .8): the total height is pinned explicitly —
+      /* Bar geometry (build .11): the total height is pinned explicitly —
          content height (--bb-h) + the home-indicator inset, with the inset
-         applied ONCE, as padding-bottom inside the bar (border-box). The
-         old content-driven height (button min-height + padding stack)
-         overshot on iPhone and left a tall dead band under the buttons. */
-      :root { --bb-h: 56px; }
-      body { padding-bottom: calc(var(--bb-h) + env(safe-area-inset-bottom)); }
+         applied ONCE, as padding-bottom inside the bar (border-box).
+         Build .8 trusted env(safe-area-inset-bottom) raw, and on the
+         phone the host webview reports ~96pt there, not the 34pt home-
+         indicator inset — the bar rendered 56 + 96 = 152pt tall with the
+         labels floating at the top of a dead black band. So the inset
+         the bar uses is capped at 34pt, the largest real home-indicator
+         inset: --bb-inset is the ONLY inset the bar, the body clearance
+         and the toast lift read. The buttons' icon+label stacks are
+         anchored to the BOTTOM of the content area, so below the labels
+         there is the inset and nothing else. */
+      :root { --bb-h: 56px; --bb-inset: min(env(safe-area-inset-bottom, 0px), 34px); }
+      body { padding-bottom: calc(var(--bb-h) + var(--bb-inset)); }
       .bottombar {
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
         display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2275,8 +2282,8 @@
         -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
         border-top: 1px solid var(--border);
         box-sizing: border-box;
-        height: calc(var(--bb-h) + env(safe-area-inset-bottom));
-        padding: 0 max(8px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-left));
+        height: calc(var(--bb-h) + var(--bb-inset));
+        padding: 0 max(8px, env(safe-area-inset-right)) var(--bb-inset) max(8px, env(safe-area-inset-left));
       }
       .navbtn {
         -webkit-appearance: none; appearance: none; background: none; border: 0; margin: 0; cursor: pointer;
@@ -2286,8 +2293,9 @@
         -webkit-tap-highlight-color: transparent;
       }
       /* Bar buttons fill the bar's content area (above the inset); their
-         icon+label stacks stay vertically centred via align-content above. */
-      .bottombar .navbtn { height: 100%; min-height: 0; }
+         icon+label stacks sit at the bottom of it, so the label's bottom
+         edge is exactly the inset above the screen's bottom edge. */
+      .bottombar .navbtn { height: 100%; min-height: 0; align-content: end; padding: 0 2px; }
       .navbtn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
       .navbtn[aria-current="page"] { color: var(--text); }
       .bottombar .navbtn[aria-current="page"]::after {
@@ -2307,7 +2315,7 @@
       #subnav-ideas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       #subnav-closet #tab-wearing { white-space: normal; line-height: 1.15; padding: 4px 2px; }
       /* Anything pinned to the bottom edge sits above the bar. */
-      .toast, .undo-toast, .update-bar { bottom: calc(var(--bb-h) + 28px + env(safe-area-inset-bottom)); }
+      .toast, .undo-toast, .update-bar { bottom: calc(var(--bb-h) + 28px + var(--bb-inset)); }
       /* Wide screens: a centred, floating bar. */
       @media (min-width: 900px) {
         .bottombar {
@@ -2315,6 +2323,8 @@
           border: 1px solid var(--border); border-radius: 999px; padding: 0 12px;
           box-shadow: 0 8px 28px rgba(0,0,0,.18);
         }
+        /* The floating pill keeps its centred stacks. */
+        .bottombar .navbtn { align-content: center; padding: 4px 2px; }
         body { padding-bottom: calc(var(--bb-h) + 32px); }
       }
       /* "A newer build is ready" bar. */
@@ -3721,7 +3731,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.10";
+var WARDROBE_BUILD = "2026-11-16.11";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
