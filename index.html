@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.13" />
+    <meta name="wardrobe-build" content="2026-11-16.14" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -1721,7 +1721,14 @@
       }
 
       /* ---------- 1 · Masthead — one slim line ---------- */
-      .masthead { padding-top: 0; }
+      /* Build .14: the masthead also clears the phone's top safe
+         area — its top padding is the capped top inset, added on
+         top of the wrap's own 10px/8px below, so the wordmark sits
+         fully under the status bar / Dynamic Island. The cap (59px)
+         keeps an inflated webview inset from pushing it too far,
+         and where the inset is 0 (desktop) this resolves to 0, so
+         the header is pixel-identical to build .13 there. */
+      .masthead { padding-top: min(env(safe-area-inset-top, 0px), 59px); }
       .masthead .wrap { padding-top: 10px; padding-bottom: 9px; }
       .masthead .brand,
       body:has(> main > #panel-today:not([hidden])) .masthead .brand {
@@ -3796,7 +3803,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.13";
+var WARDROBE_BUILD = "2026-11-16.14";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
