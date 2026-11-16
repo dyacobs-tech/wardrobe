@@ -1555,6 +1555,106 @@
       .today-source .ts-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(247,241,229,.75); margin-right: 2px; }
       .ts-btn { border: 1px solid rgba(247,241,229,.65); background: rgba(20,17,13,.25); color: #f7f1e5; border-radius: 999px; padding: 5px 11px; min-height: 30px; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; }
       .ts-btn[aria-pressed="true"] { background: #f7f1e5; color: #191612; }
+
+      /* ---------- Even smaller controls — app-wide ----------
+         One step down again from the consistency pass: every
+         button, chip and pill runs shorter, tighter and a touch
+         smaller in type, on one shared scale, so the photographs
+         get the room. Hero controls sit smallest of all. Labels
+         stay fully readable — nothing wraps or clips. */
+      .btn-accent, .btn-ink, .btn-ghost, .verdict-btn,
+      #panel-palettes .btn-ink, #panel-palettes .btn-ghost,
+      #panel-icons .btn-accent, #panel-icons .btn-ghost, #panel-icons .btn-ink,
+      #panel-icons .icon-result .btn-accent, #panel-icons .icon-result .btn-ghost,
+      .icon-result .btn-accent, .icon-result .btn-ghost,
+      #panel-profile .btn-ink, #panel-profile .btn-ghost, #panel-profile .btn-accent,
+      #panel-studio .studio-nav .btn-ghost, #panel-studio .studio-nav .btn-ink,
+      #panel-studio #style-btn,
+      #panel-wardrobe .item-actions .btn-ghost,
+      #panel-wardrobe .add-form .btn-accent, #panel-wardrobe .add-form .btn-ink, #panel-wardrobe .add-form .btn-ghost,
+      #panel-find .find-card .btn-accent, #panel-find .find-card .btn-ghost,
+      .piece-row .btn-accent, .iconic figcaption .btn-ghost,
+      .saved-card .look-actions .btn-ghost, .inspo-active .btn-ghost,
+      #panel-wearing .wr-top .btn-ghost, .myinspo-card .btn-ghost,
+      .removed-row .btn-ghost, .wish-row .btn-ghost, .worn-row .btn-ghost,
+      .plate-card .pc-use, .draft-list button, .btn-ghost.shop-clear, .shop-clear {
+        min-height: 28px; padding: 4px 10px; font-size: 10.5px; letter-spacing: .1em;
+      }
+      .saved-card .look-actions .btn-ghost { min-height: 22px; padding: 2px 6px; font-size: 9px; letter-spacing: .05em; }
+      .btn-today, #panel-today .btn-today {
+        min-height: 26px; padding: 3px 8px; font-size: 9.5px; letter-spacing: .08em;
+      }
+      /* One chip — even smaller */
+      .chip, .fb-chips .chip, .fchip, .sel-opts .chip, .studio-type-row button,
+      .dress-for .chip, .choice-chip,
+      #panel-studio .chip, #panel-wardrobe .chip, #panel-looks .chip, #panel-profile .chip,
+      #panel-today .today-formality .fchip, .today-loc-chips .tlc {
+        min-height: 23px; padding: 2px 8px; font-size: 11px;
+      }
+      .choice-chip { font-size: 10px; letter-spacing: .09em; }
+      .choice-chip strong { font-size: 11px; }
+      .studio-type-row button { min-height: 23px; padding: 2px 8px; font-size: 10.5px; }
+      .today-loc-chips .tlc, #panel-today .today-loc-chips .tlc { min-height: 22px; padding: 2px 8px; font-size: 10.5px; }
+      .ts-btn { min-height: 23px; padding: 2px 8px; font-size: 11px; }
+      #panel-today .today-formality .fchip, .fchip { min-height: 23px; padding: 2px 8px; font-size: 10.5px; }
+      /* Change an item — slimmer bar and rows */
+      .change-item { margin-top: 6px; }
+      .change-toggle { min-height: 24px; padding: 3px 9px; font-size: 9.5px; letter-spacing: .08em; }
+      .change-panel { margin-top: 4px; padding: 3px 5px; }
+      .change-cat { min-height: 30px; padding: 5px 4px; font-size: 12.5px; }
+      .change-opt { min-height: 30px; padding: 5px 7px; font-size: 12.5px; }
+      /* Nav tabs — a touch smaller too, same pill treatment */
+      .tab, .subtab { min-height: 26px; margin: 2px 1px; padding: 3px 2px; }
+      .tab { font-size: clamp(10px, 3vw, 12px); }
+      .subtab { font-size: 11px; }
+      /* Selector rows, basis and dropdown toggles */
+      .sel-row { min-height: 30px; padding: 4px 10px; }
+      .sel-name { font-size: 9.5px; letter-spacing: .12em; }
+      .sel-val { font-size: 12px; }
+      .sel-stack { gap: 5px; margin-bottom: 8px; }
+      .basis-btn { min-height: 32px; padding: 4px 4px; font-size: 11px; letter-spacing: .07em; }
+      .basis-btn small { font-size: 9px; margin-top: 1px; }
+      .drop-toggle { min-height: 30px; padding: 4px 0; font-size: 15px; }
+      .info-btn.sm, #panel-today .today-formality .info-btn.sm, #panel-icons .info-btn.sm { width: 18px; height: 18px; min-height: 18px; font-size: 11px; }
+      .page-info-row .info-btn { width: 24px; height: 24px; min-height: 24px; font-size: 14px; }
+      /* Tighter spacing between control rows */
+      #panel-today .today-actions { gap: 4px; }
+      #panel-today .today-loc-chips { margin-top: 5px; gap: 4px; }
+      #panel-today .today-loc-chips .tlc-label { font-size: 8.5px; }
+      #panel-today .today-formality { margin-top: 6px; }
+      #panel-today .formality-chips { gap: 3px; padding: 1px 0 1px; }
+      #panel-today .today-swipe-hint { margin: 4px 0 0; font-size: 9.5px; }
+      .today-source { margin-top: 8px; gap: 4px; }
+      .today-source .ts-label { font-size: 10px; }
+      .verdict-btn { min-height: 30px; padding: 4px 8px; font-size: 11px; }
+      .verdict-row { gap: 6px; margin-bottom: 8px; }
+      .look-actions { gap: 5px; margin-top: 8px; }
+      .fb-chips { gap: 5px; margin-bottom: 8px; }
+      .filter-row, .examples, .inspo-pick, .loc-quick, .choice-bar { gap: 5px; }
+      .loc-actions { gap: 6px; }
+      .studio-home-bar { gap: 5px; margin-bottom: 6px; }
+      .formality-chips { gap: 4px; padding: 1px 0 3px; }
+      .today-loc-chips { gap: 4px; }
+      /* Inputs follow the smaller scale */
+      input[type="text"], input[type="search"], select,
+      #panel-studio input[type="text"], #panel-studio input[type="search"], #panel-studio select,
+      #panel-wardrobe input[type="text"], #panel-wardrobe input[type="search"], #panel-wardrobe select,
+      #panel-profile input[type="text"], #panel-profile input[type="search"], #panel-profile select,
+      #panel-icons input[type="text"], #panel-icons input[type="search"], #panel-icons select,
+      #panel-palettes input[type="text"], #panel-palettes input[type="search"], #panel-palettes select,
+      #panel-brands input[type="search"], #panel-looks input[type="search"],
+      #panel-find .add-form input[type="text"], #panel-find .add-form select,
+      #panel-wearing input[type="text"], #panel-wearing select, #panel-wearing input[type="date"],
+      #panel-myinspo input[type="text"],
+      #panel-profile #panel-watches input[type="text"], #panel-profile #panel-watches select {
+        min-height: 34px; padding: 6px 10px; font-size: 14.5px;
+      }
+      #panel-find .find-searchbar { min-height: 34px; padding: 6px 12px; font-size: 14.5px; }
+      .opt-item { min-height: 30px; padding: 6px 10px; font-size: 12.5px; }
+      .shop-look-row { min-height: 32px; padding: 6px 10px; font-size: 12px; }
+      .card-menu-btn { width: 26px; height: 26px; min-height: 26px; font-size: 13px; }
+      .card-menu button { min-height: 28px; padding: 5px 8px; font-size: 12px; }
+      .undo-toast button { min-height: 26px; padding: 4px 10px; font-size: 11px; }
 </style>
   </head>
   <body>
