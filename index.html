@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.9" />
+    <meta name="wardrobe-build" content="2026-11-16.10" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -3721,7 +3721,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.9";
+var WARDROBE_BUILD = "2026-11-16.10";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -10361,6 +10361,10 @@ function dealerLook(opts) {
   var pool = opts.pool && opts.pool.length ? opts.pool : DEAL_POOL;
   function notExcluded(l) { return !(opts.excludeImgs && opts.excludeImgs[l.img]); }
   var usable = pool.filter(notExcluded);
+  /* Free dealer's-choice deals (no caller pool) also drop
+     graduated (liked) photographs; a caller-passed pool is dealt
+     as chosen. The usable→pool fallback below stays as the valve. */
+  if (!opts.pool) { var gradSet = graduatedImgs(); usable = usable.filter(function (l) { return !gradSet[l.img]; }); }
   /* Every photograph dealt before? Create a new combination
      instead of reshuffling — the deal stays new. */
   if (!opts.pool && usable.length && usable.every(function (l) { return dealtImgHistory.indexOf(l.img) !== -1; })) {
@@ -10618,6 +10622,54 @@ function recordDislike(img) {
   dislikedImgs.push(img);
   store.set("dislikedImgs", dislikedImgs);
 }
+/* Like-graduation (build 2026-11-16.10): a look the user has
+   tapped "I like it" on graduates — it is never dealt again on
+   the opening surfaces (Today hero, Ideas six takes, From
+   wardrobe) until it is un-liked or removed from My Looks.
+   Graduation is derived live at deal time from the EXISTING
+   liked state — the same savedLooks collection My Looks reads:
+   an entry counts exactly when its verdict === "like" (the
+   My Looks "Liked" filter's predicate). There is no separate
+   graduation list, so un-liking or removing a look restores its
+   eligibility automatically. Dealt looks carry fresh ids, so a
+   saved liked copy joins back to future deals by photograph —
+   entry.img and, for closet-built looks, entry.fwRender — and
+   closet-built looks also join by their fwPieces piece-id
+   signature. These helpers read the live savedLooks global at
+   call time, since sync can replace it. */
+function graduatedImgs() {
+  var set = {};
+  (typeof savedLooks !== "undefined" ? savedLooks : []).forEach(function (entry) {
+    if (!entry || entry.verdict !== "like") return;
+    if (entry.img) set[entry.img] = true;
+    if (entry.fwRender) set[entry.fwRender] = true;
+  });
+  return set;
+}
+function fwPiecesKey(fwPieces) {
+  if (!fwPieces || !fwPieces.length) return null;
+  var ids = fwPieces.map(function (p) { return (p && typeof p === "object") ? p.id : p; }).filter(function (id) { return id != null; });
+  if (!ids.length) return null;
+  return ids.sort().join("|");
+}
+function graduatedFwKeys() {
+  var set = {};
+  (typeof savedLooks !== "undefined" ? savedLooks : []).forEach(function (entry) {
+    if (!entry || entry.verdict !== "like") return;
+    var key = fwPiecesKey(entry.fwPieces);
+    if (key) set[key] = true;
+  });
+  return set;
+}
+function isGraduatedLook(look) {
+  if (!look) return false;
+  var gImgs = graduatedImgs();
+  if (look.img && gImgs[look.img]) return true;
+  if (look.fwRender && gImgs[look.fwRender]) return true;
+  var key = fwPiecesKey(look.fwPieces);
+  if (key && graduatedFwKeys()[key]) return true;
+  return false;
+}
 function ideaFormality(idea) {
   var t = ((idea.caption || "") + " " + (idea.desc || "")).toLowerCase();
   if (/tuxedo|black tie|dinner jacket|bow tie/.test(t)) return 7;
@@ -10671,6 +10723,9 @@ function dealFromDeck(need, opts) {
   if (opts.excludeImgs) Object.keys(opts.excludeImgs).forEach(function (k) { exclude[k] = true; });
   if (opts.excludeCards) Object.keys(opts.excludeCards).forEach(function (k) { exclude[k] = true; });
   dislikedImgs.forEach(function (img) { exclude[img] = true; });
+  /* Graduated (liked) photographs leave the deck too — a liked
+     look is never dealt again until it is un-liked. */
+  Object.keys(graduatedImgs()).forEach(function (img) { exclude[img] = true; });
   var cards = [];
   RENDER_POOL.forEach(function (r) {
     if (!exclude[r.img]) cards.push({ img: r.img, level: formalityOf(r.img), render: r });
@@ -11634,10 +11689,11 @@ function strictFormalityPass(looks, baseOpts) {
   if (baseOpts && baseOpts.excludeImgs) Object.keys(baseOpts.excludeImgs).forEach(function (k) { excl[k] = true; });
   return looks.map(function (l, i) {
     if (matches(l)) return l;
+    var gradImgs = graduatedImgs();
     var cands = RENDER_POOL.filter(function (r) {
-      return formalityOf(r.img) === lvl && !used[r.img] && !excl[r.img] && dislikedImgs.indexOf(r.img) === -1 && !usedTitles[titleForRender(r)];
+      return formalityOf(r.img) === lvl && !used[r.img] && !excl[r.img] && dislikedImgs.indexOf(r.img) === -1 && !gradImgs[r.img] && !usedTitles[titleForRender(r)];
     });
-    if (!cands.length) cands = RENDER_POOL.filter(function (r) { return formalityOf(r.img) === lvl && !used[r.img] && dislikedImgs.indexOf(r.img) === -1; });
+    if (!cands.length) cands = RENDER_POOL.filter(function (r) { return formalityOf(r.img) === lvl && !used[r.img] && dislikedImgs.indexOf(r.img) === -1 && !gradImgs[r.img]; });
     if (!cands.length) return l;
     cands.sort(function (a, b) { return dealtBucket(a.img) - dealtBucket(b.img); });
     var nl = renderAsLook(cands[0]);
@@ -11656,6 +11712,9 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
   if (baseOpts.excludePlates) baseOpts.excludePlates.forEach(function (p) { if (excludePlates.indexOf(p) === -1) excludePlates.push(p); });
   var excludeImgs = {};
   if (baseOpts.excludeImgs) Object.keys(baseOpts.excludeImgs).forEach(function (k) { excludeImgs[k] = true; });
+  /* Graduated (liked) photographs are excluded from every
+     six-takes deal, in every source mode. */
+  Object.keys(graduatedImgs()).forEach(function (img) { excludeImgs[img] = true; });
   var isDealer = /dealer|surprise/i.test(desc || "") && !baseOpts.palette && !baseOpts.plate;
   if (isDealer) {
     /* Dealer's choice deals from the WHOLE deck — your renders and
@@ -16545,8 +16604,10 @@ function dailyLook() {
   var doy = dayOfYear(d);
   var weekend = d.getDay() === 0 || d.getDay() === 6;
   var casual = ["squarzi", "mcqueen", "lauren"];
+  var gradDaily = graduatedImgs();
   var pool = SEED_LOOKS.filter(function (l) {
     if (dislikedImgs.indexOf(l.img) !== -1) return false;
+    if (gradDaily[l.img]) return false;
     return weekend ? casual.indexOf(l.iconId) !== -1 : casual.indexOf(l.iconId) === -1;
   });
   if (!pool.length) pool = SEED_LOOKS.filter(function (l) { return dislikedImgs.indexOf(l.img) === -1; });
@@ -16645,15 +16706,21 @@ function openingLook() {
   if (savedSrc === "wardrobe" && typeof buildClosetLooks === "function") {
     var clw = buildClosetLooks();
     if (clw && clw.length) {
-      todaySeedId = clw[0].id;
-      return clw[0];
+      /* Graduated (liked) closet looks are not dealt on a fresh
+         open; the unfiltered list is the fallback so the hero
+         never comes up blank. */
+      var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l); });
+      var clwDeal = clwFresh.length ? clwFresh : clw;
+      todaySeedId = clwDeal[0].id;
+      return clwDeal[0];
     }
     savedSrc = "combo";
   }
   var prevImg = store.get("lastOpeningImg", null) || (sess && sess.img) || null;
   var pool = RENDER_POOL.map(renderAsLook);
-  var candidates = pool.filter(function (l) { return l.img !== prevImg && dislikedImgs.indexOf(l.img) === -1; });
-  if (!candidates.length) candidates = pool.filter(function (l) { return dislikedImgs.indexOf(l.img) === -1; });
+  var gradOpen = graduatedImgs();
+  var candidates = pool.filter(function (l) { return l.img !== prevImg && dislikedImgs.indexOf(l.img) === -1 && !gradOpen[l.img]; });
+  if (!candidates.length) candidates = pool.filter(function (l) { return dislikedImgs.indexOf(l.img) === -1 && !gradOpen[l.img]; });
   if (!candidates.length) candidates = pool.filter(function (l) { return l.img !== prevImg; });
   if (!candidates.length) candidates = pool;
   var undealt = candidates.filter(function (l) { return dealtImgHistory.indexOf(l.img) === -1; });
@@ -17298,10 +17365,15 @@ function dealHeroForSource() {
       ? buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() + window._heroDealN })
       : buildClosetLooks();
     if (cl && cl.length) {
+      /* Graduated (liked) closet looks are not dealt again; if
+         every closet look has graduated, deal from the full list
+         rather than leave the hero blank. */
+      var clFresh = cl.filter(function (l) { return !isGraduatedLook(l); });
+      var dealList = clFresh.length ? clFresh : cl;
       var curTitle = todayLook && todayLook.title;
       var pickW = null;
-      for (var wi = 0; wi < cl.length; wi++) { if (cl[wi].title !== curTitle) { pickW = cl[wi]; break; } }
-      pickW = pickW || cl[0];
+      for (var wi = 0; wi < dealList.length; wi++) { if (dealList[wi].title !== curTitle) { pickW = dealList[wi]; break; } }
+      pickW = pickW || dealList[0];
       todaySeedId = pickW.id;
       todayLook = pickW;
       persistOpeningLook(todayLook);
@@ -17311,7 +17383,8 @@ function dealHeroForSource() {
   }
   var pool = RENDER_POOL.map(renderAsLook);
   var currentImg = todayLook && todayLook.img;
-  var candidates = pool.filter(function (l) { return l.img !== currentImg && dislikedImgs.indexOf(l.img) === -1; });
+  var gradHero = graduatedImgs();
+  var candidates = pool.filter(function (l) { return l.img !== currentImg && dislikedImgs.indexOf(l.img) === -1 && !gradHero[l.img]; });
   var pick = pickDealt(candidates.length ? candidates : pool);
   todaySeedId = pick.id;
   todayLook = JSON.parse(JSON.stringify(pick));
@@ -20425,7 +20498,11 @@ function dealFromWardrobe() {
     if (more) more.hidden = true;
     return;
   }
-  fwLooks = looks;
+  /* Graduated (liked) closet looks leave the From wardrobe
+     rotation; if every look has graduated, show the full list —
+     graduation never blanks the section. */
+  var fwFresh = looks.filter(function (l) { return !isGraduatedLook(l); });
+  fwLooks = fwFresh.length ? fwFresh : looks;
   if (empty) empty.hidden = true;
   if (more) more.hidden = false;
   grid.innerHTML = fwLooks.map(function (look, idx) { return fwCardHTML(look, idx); }).join("");
@@ -20534,7 +20611,10 @@ function dealFromWardrobe() {
     if (studioSource === "wardrobe") {
       var cl = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
       if (cl && cl.length) {
-        renderOptions(cl, { desc: "From your wardrobe", occasion: "", season: "", opts: { basis: (typeof studioBasis !== "undefined" ? studioBasis : "both"), source: "wardrobe" } });
+        /* Graduated (liked) closet looks are filtered out; the
+           unfiltered list renders if filtering empties it. */
+        var clFresh = cl.filter(function (l) { return !isGraduatedLook(l); });
+        renderOptions(clFresh.length ? clFresh : cl, { desc: "From your wardrobe", occasion: "", season: "", opts: { basis: (typeof studioBasis !== "undefined" ? studioBasis : "both"), source: "wardrobe" } });
         return;
       }
     }
