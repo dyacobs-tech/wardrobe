@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.16" />
+    <meta name="wardrobe-build" content="2026-11-16.17" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -656,6 +656,18 @@
       .piece-row .p-name { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.2; display: block; }
       .piece-row .p-sub { font-size: 12px; color: var(--dim); display: block; }
       .piece-row .btn-accent { flex: none; min-height: 40px; padding: 8px 14px; }
+      /* ---------- Lazy swap rendering ---------- */
+      #swap-sheet { z-index: 110; }
+      .swap-note { margin: 2px 0 0; font-size: 13px; color: var(--dim); }
+      .look-media .pane.swap-rendering img { opacity: .45; }
+      .swap-render-line { position: absolute; left: 10px; bottom: 10px; background: rgba(20,17,13,.75); color: #f7f1e5; font-size: 13px; line-height: 1; padding: 7px 11px; border-radius: 999px; }
+      .swap-pick { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; cursor: pointer; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 12px 7px 7px; color: var(--text); font: inherit; margin: 0 0 7px; }
+      .swap-pick img { width: 44px; height: 44px; flex: none; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); display: block; }
+      .swap-pick .cdot { width: 44px; height: 44px; flex: none; border: 1px solid var(--border); border-radius: 6px; }
+      .swap-pick .sp-main { flex: 1; min-width: 0; display: grid; gap: 1px; }
+      .swap-pick .sp-name { font-family: var(--font-display); font-size: 17px; font-weight: 600; line-height: 1.2; }
+      .swap-pick .sp-sub { font-size: 12px; color: var(--dim); }
+      .swap-owned { flex: none; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
       .profile-grid { display: grid; gap: 14px; }
       @media (min-width: 640px) { .profile-grid { grid-template-columns: 1fr 1fr; } }
       @media (min-width: 960px) { .profile-grid { grid-template-columns: 1fr 1fr 1fr; } }
@@ -3516,6 +3528,16 @@
         <div id="plan-sheet-body"></div>
       </div>
     </div>
+    <div class="info-pop-backdrop" id="swap-sheet" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="swap-sheet-title">
+        <div class="principles-head">
+          <h3 id="swap-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Change a piece</h3>
+          <button type="button" class="info-pop-close" id="swap-sheet-close" aria-label="Close piece choices">&times;</button>
+        </div>
+        <p class="meta" id="swap-sheet-sub" style="margin:0 0 12px"></p>
+        <div id="swap-sheet-list"></div>
+      </div>
+    </div>
     <div class="popout" id="photo-popout" hidden>
       <img id="popout-img" alt="" />
       <button type="button" class="popout-close" id="popout-close" aria-label="Close full-size photo">&times;</button>
@@ -3856,7 +3878,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.16";
+var WARDROBE_BUILD = "2026-11-16.17";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -11489,11 +11511,527 @@ function changeAlts(look, catKey) {
    with the pool data, so the feature can return if the pool of
    photographed combinations ever gets deep enough. */
 
+var PIECE_LIBRARY_RAW = [["top-white-crew-tee","top","tops","White Crew-Neck Tee","Sulpher Yellow","#f5ecc2",2,55,95,0,"",""],["top-cream-crew-tee","top","tops","Cream Crew-Neck Tee","Sulpher Yellow","#f5ecc2",2,55,95,0,"",""],["top-navy-crew-tee","top","tops","Navy Crew-Neck Tee","Dark Tyrian Blue","#12354e",2,55,95,0,"",""],["top-black-crew-tee","top","tops","Black Crew-Neck Tee","Black","#111314",2,55,95,0,"",""],["top-charcoal-pocket-tee","top","tops","Charcoal Pocket Tee","Slate Color","#34454c",2,55,95,0,"",""],["top-grey-heather-tee","top","tops","Grey Heather Tee","Warm Gray","#a1a39a",2,55,95,0,"",""],["top-olive-tee","top","tops","Olive Tee","Deep Grayish Olive","#635a3a",2,55,95,0,"",""],["top-sand-knit-tee","top","tops","Sand Knit Tee","Olive Buff","#c1c494",3,55,90,0,"",""],["top-slate-slub-pocket-tee","top","tops","Slate Blue Slub Pocket Tee","Artemesia Green","#709390",2,60,95,0,"",""],["top-mustard-pocket-tee","top","tops","Mustard Yellow Pocket Tee","Olive Ocher","#d6b43e",2,55,95,0,"",""],["top-breton-stripe-tee","top","tops","Navy Breton Stripe Tee","Dark Tyrian Blue","#12354e",3,55,95,0,"",""],["top-white-pique-polo","top","tops","White Piqué Polo","Sulpher Yellow","#f5ecc2",3,60,95,0,"",""],["top-navy-pique-polo","top","tops","Navy Piqué Polo","Dark Tyrian Blue","#12354e",3,60,95,0,"",""],["top-black-pique-polo","top","tops","Black Piqué Polo","Black","#111314",3,60,95,0,"",""],["top-sky-pique-polo","top","tops","Sky Blue Piqué Polo","Light Glaucous Blue","#a5c8d1",3,60,95,0,"",""],["top-terracotta-pique-polo","top","tops","Terracotta Piqué Polo","Cinnamon Rufous","#c27544",3,60,95,0,"",""],["top-sage-linen-polo","top","tops","Sage Linen Polo","Mineral Gray","#a2b0ad",3,68,95,0,"",""],["top-cream-knit-polo","top","tops","Cream Open-Collar Knit Polo","Sulpher Yellow","#f5ecc2",3,55,90,0,"",""],["knit-navy-cable-crew","top","knitwear","Navy Cable-Knit Crew","Dark Tyrian Blue","#12354e",3,30,58,0,"",""],["knit-cream-cable-crew","top","knitwear","Cream Cable-Knit Crew","Sulpher Yellow","#f5ecc2",3,30,58,0,"",""],["knit-charcoal-crew","top","knitwear","Charcoal Crew-Neck Sweater","Slate Color","#34454c",3,35,62,0,"",""],["knit-oatmeal-crew","top","knitwear","Oatmeal Heather Crew","Ivory Buff","#ebd3a2",3,30,58,0,"",""],["knit-taupe-crew","top","knitwear","Taupe Heather Crew","Buffy Citrine","#96874d",3,30,58,0,"",""],["knit-burgundy-roll-neck","top","knitwear","Burgundy Roll-Neck Sweater","Dusky Madder Violet","#4e1d4c",4,35,62,0,"",""],["knit-navy-roll-neck","top","knitwear","Navy Roll-Neck Sweater","Dark Tyrian Blue","#12354e",4,35,62,0,"",""],["knit-black-roll-neck","top","knitwear","Black Roll-Neck Sweater","Black","#111314",4,35,62,0,"",""],["knit-forest-crew","top","knitwear","Forest Green Crew-Neck Sweater","Slate Color","#34454c",3,30,58,0,"",""],["knit-chocolate-crew","top","knitwear","Chocolate Crew-Neck Sweater","Vandyke Brown","#4b3317",3,30,58,0,"",""],["knit-grey-v-neck","top","knitwear","Grey V-Neck Sweater","Artemesia Green","#709390",4,35,62,0,"",""],["knit-dusty-blue-knit-polo","top","knitwear","Dusty Blue Knit Polo","Artemesia Green","#709390",3,55,88,0,"",""],["knit-olive-knit-polo","top","knitwear","Olive Knit Polo","Deep Grayish Olive","#635a3a",3,55,88,0,"",""],["knit-navy-breton-polo","top","knitwear","Navy Breton Stripe Knit Polo","Dark Tyrian Blue","#12354e",3,55,88,0,"",""],["knit-black-checkerboard-knit","top","knitwear","Black Checkerboard Short-Sleeve Knit","Black","#111314",3,55,88,0,"",""],["knit-brown-linen-crew","top","knitwear","Brown Linen Knit Crew","Pale Raw Umber","#71502f",3,58,85,0,"",""],["shirt-white-oxford","top","shirts","White Oxford Button-Down Shirt","Sulpher Yellow","#f5ecc2",4,45,80,0,"",""],["shirt-blue-oxford","top","shirts","Light Blue Oxford Button-Down Shirt","Pale King's Blue","#a7d4e4",4,45,80,0,"",""],["shirt-white-poplin","top","shirts","White Poplin Dress Shirt","White","#ffffff",5,50,85,0,"",""],["shirt-pale-blue-poplin","top","shirts","Pale Blue Poplin Dress Shirt","Nile Blue","#bce4e5",4,50,85,0,"",""],["shirt-pink-oxford","top","shirts","Pale Pink Oxford Shirt","Hermosa Pink","#f9c1ce",4,45,80,0,"",""],["shirt-navy-gingham","top","shirts","Navy Gingham Check Shirt","Dark Tyrian Blue","#12354e",3,55,85,0,"",""],["shirt-white-linen","top","shirts","White Linen Shirt","Sulpher Yellow","#f5ecc2",3,68,95,0,"",""],["shirt-sand-linen","top","shirts","Sand Linen Shirt","Ivory Buff","#ebd3a2",3,68,95,0,"",""],["shirt-sky-linen","top","shirts","Sky Blue Linen Shirt","Light Glaucous Blue","#a5c8d1",3,68,95,0,"",""],["shirt-olive-safari","top","shirts","Olive Short-Sleeve Safari Shirt","Deep Grayish Olive","#635a3a",3,60,90,0,"",""],["shirt-white-camp","top","shirts","White Linen Camp Shirt","Sulpher Yellow","#f5ecc2",2,70,98,0,"",""],["shirt-sage-camp","top","shirts","Sage Linen Camp Shirt","Mineral Gray","#a2b0ad",2,70,98,0,"",""],["shirt-navy-camp","top","shirts","Navy Camp Shirt","Dark Tyrian Blue","#12354e",2,70,98,0,"",""],["shirt-cream-camp","top","shirts","Cream Camp Shirt","Sulpher Yellow","#f5ecc2",2,70,98,0,"",""],["shirt-terracotta-camp","top","shirts","Terracotta Camp Shirt","Cinnamon Rufous","#c27544",2,70,98,0,"",""],["shirt-chambray","top","shirts","Light Blue Chambray Shirt","Salvia Blue","#97acc8",3,55,85,0,"",""],["shirt-indigo-denim","top","shirts","Indigo Denim Shirt","Slate Color","#34454c",3,45,75,0,"",""],["navy-wool-trousers","bottom","trousers","Navy Wool Trousers","Deep Slate Olive","#253122",4,40,70,0,"",""],["charcoal-wool-trousers","bottom","trousers","Charcoal Wool Trousers","Slate Color","#34454c",4,40,70,0,"",""],["mid-grey-wool-trousers","bottom","trousers","Mid Grey Wool Trousers","Andover Green","#6d7e77",4,40,70,0,"",""],["light-grey-wool-trousers","bottom","trousers","Light Grey Wool Trousers","Neutral Gray","#b6bfc1",4,40,70,0,"",""],["black-wool-trousers","bottom","trousers","Black Wool Trousers","Black","#111314",5,40,70,0,"",""],["midnight-wool-trousers","bottom","trousers","Midnight Wool Trousers","Black","#111314",5,40,70,0,"",""],["grey-flannel-trousers","bottom","trousers","Grey Flannel Trousers","Light Grayish Olive","#848061",4,30,58,0,"",""],["cream-wool-trousers","bottom","trousers","Cream Wool Trousers","Sulpher Yellow","#f5ecc2",4,40,70,0,"",""],["white-linen-trousers","bottom","trousers","White Linen Trousers","Sulpher Yellow","#f5ecc2",3,68,95,0,"",""],["olive-taupe-linen-trousers","bottom","trousers","Olive Taupe Linen Trousers","Dark Citrine","#8b835b",3,68,95,0,"",""],["stone-linen-trousers","bottom","trousers","Stone Linen Trousers","Ecru","#c2ae93",3,68,95,0,"",""],["navy-linen-trousers","bottom","trousers","Navy Linen Trousers","Dark Tyrian Blue","#12354e",3,68,95,0,"",""],["sand-linen-trousers","bottom","trousers","Sand Linen Trousers","Olive Buff","#c1c494",3,68,95,0,"",""],["ecru-cotton-trousers","bottom","trousers","Ecru Cotton Trousers","Ivory Buff","#ebd3a2",3,55,88,0,"",""],["white-cotton-trousers","bottom","trousers","White Cotton Trousers","White","#ffffff",3,55,88,0,"",""],["olive-cotton-trousers","bottom","trousers","Olive Cotton Trousers","Olive Green","#6b7140",3,55,88,0,"",""],["stone-chinos","bottom","trousers","Stone Chinos","Ecru","#c2ae93",3,55,90,0,"",""],["navy-chinos","bottom","trousers","Navy Chinos","Dark Tyrian Blue","#12354e",3,55,90,0,"",""],["ecru-chinos","bottom","trousers","Ecru Chinos","Ivory Buff","#ebd3a2",3,55,90,0,"",""],["khaki-chinos","bottom","trousers","Khaki Chinos","Maple","#c59f6b",3,55,90,0,"",""],["olive-chinos","bottom","trousers","Olive Chinos","Olive Green","#6b7140",3,55,90,0,"",""],["white-chinos","bottom","trousers","White Chinos","White","#ffffff",3,55,90,0,"",""],["cream-chinos","bottom","trousers","Cream Chinos","Sulpher Yellow","#f5ecc2",3,55,90,0,"",""],["grey-chinos","bottom","trousers","Grey Chinos","Artemesia Green","#709390",3,55,90,0,"",""],["indigo-jeans","bottom","jeans","Indigo Jeans","Slate Color","#34454c",3,35,85,0,"",""],["indigo-bootcut-jeans","bottom","jeans","Indigo Bootcut Jeans","Violet Blue","#40456a",2,35,85,0,"",""],["white-jeans","bottom","jeans","White Jeans","Sulpher Yellow","#f5ecc2",3,35,85,0,"",""],["ecru-jeans","bottom","jeans","Ecru Jeans","Ivory Buff","#ebd3a2",3,35,85,0,"",""],["black-jeans","bottom","jeans","Black Jeans","Black","#111314",3,35,85,0,"",""],["washed-indigo-jeans","bottom","jeans","Washed Indigo Jeans","Artemesia Green","#709390",2,35,85,0,"",""],["charcoal-jeans","bottom","jeans","Charcoal Jeans","Slate Color","#34454c",3,35,85,0,"",""],["stone-jeans","bottom","jeans","Stone Jeans","Ecru","#c2ae93",2,35,85,0,"",""],["stone-tailored-shorts","bottom","shorts","Stone Tailored Shorts","Ecru","#c2ae93",2,70,98,0,"",""],["navy-tailored-shorts","bottom","shorts","Navy Tailored Shorts","Dark Tyrian Blue","#12354e",2,70,98,0,"",""],["white-tailored-shorts","bottom","shorts","White Tailored Shorts","White","#ffffff",2,70,98,0,"",""],["khaki-chino-shorts","bottom","shorts","Khaki Chino Shorts","Maple","#c59f6b",2,70,98,0,"",""],["olive-linen-shorts","bottom","shorts","Olive Linen Shorts","Olive Green","#6b7140",2,72,98,0,"",""],["navy-swim-shorts","bottom","swim","Navy Swim Shorts","Dark Tyrian Blue","#12354e",1,75,100,0,"",""],["sky-swim-shorts","bottom","swim","Sky Swim Shorts","Salvia Blue","#97acc8",1,75,100,0,"",""],["white-swim-shorts","bottom","swim","White Swim Shorts","Sulpher Yellow","#f5ecc2",1,75,100,0,"",""],["penny-loafer-dark-brown-leather","shoes","shoes","Dark Brown Leather Penny Loafer","Vandyke Brown","#4b3317",4,40,85,0,"",""],["penny-loafer-black-leather","shoes","shoes","Black Leather Penny Loafer","Black","#111314",4,40,85,0,"",""],["penny-loafer-burgundy-leather","shoes","shoes","Burgundy Leather Penny Loafer","Dusky Madder Violet","#4e1d4c",4,40,85,0,"",""],["penny-loafer-dark-brown-suede","shoes","shoes","Dark Brown Suede Penny Loafer","Vandyke Brown","#4b3317",3,45,80,0,"",""],["penny-loafer-chocolate-suede","shoes","shoes","Chocolate Suede Penny Loafer","Deep Slate Olive","#253122",3,45,80,0,"",""],["penny-loafer-navy-suede","shoes","shoes","Navy Suede Penny Loafer","Deep Slate Olive","#253122",3,45,80,0,"",""],["penny-loafer-stone-suede","shoes","shoes","Stone Suede Penny Loafer","Ecru","#c2ae93",3,45,80,0,"",""],["tassel-loafer-dark-brown-leather","shoes","shoes","Dark Brown Leather Tassel Loafer","Vandyke Brown","#4b3317",4,40,85,0,"",""],["tassel-loafer-black-leather","shoes","shoes","Black Leather Tassel Loafer","Black","#111314",4,40,85,0,"",""],["tassel-loafer-burgundy-suede","shoes","shoes","Burgundy Suede Tassel Loafer","Dusky Madder Violet","#4e1d4c",3,45,80,0,"",""],["bit-loafer-dark-brown-suede","shoes","shoes","Dark Brown Suede Bit Loafer","Vandyke Brown","#4b3317",3,45,80,0,"",""],["bit-loafer-black-leather","shoes","shoes","Black Leather Bit Loafer","Black","#111314",4,40,85,0,"",""],["belgian-loafer-black-leather","shoes","shoes","Black Leather Belgian Loafer","Black","#111314",3,40,85,0,"",""],["belgian-loafer-dark-brown-suede","shoes","shoes","Dark Brown Suede Belgian Loafer","Vandyke Brown","#4b3317",3,45,80,0,"",""],["belgian-loafer-navy-suede","shoes","shoes","Navy Suede Belgian Loafer","Deep Slate Olive","#253122",3,45,80,0,"",""],["white-leather-sneaker","shoes","shoes","White Leather Sneaker","Sulpher Yellow","#f5ecc2",2,35,90,0,"",""],["white-canvas-sneaker","shoes","shoes","White Canvas Sneaker","Sulpher Yellow","#f5ecc2",2,35,90,0,"",""],["cream-knit-trainer","shoes","shoes","Cream Knit Trainer","Ivory Buff","#ebd3a2",2,45,85,0,"",""],["grey-suede-sneaker","shoes","shoes","Grey Suede Sneaker","Krongbergs Green","#84875e",2,35,90,0,"",""],["navy-knit-trainer","shoes","shoes","Navy Knit Trainer","Dark Tyrian Blue","#12354e",2,45,85,0,"",""],["brown-leather-sneaker","shoes","shoes","Brown Leather Sneaker","Mars Brown Tobacco","#653514",3,35,90,0,"",""],["espadrille-navy-canvas","shoes","shoes","Navy Canvas Espadrille","Dark Tyrian Blue","#12354e",2,70,98,0,"",""],["espadrille-natural-canvas","shoes","shoes","Natural Canvas Espadrille","Ivory Buff","#ebd3a2",2,70,98,0,"",""],["espadrille-olive-canvas","shoes","shoes","Olive Canvas Espadrille","Deep Grayish Olive","#635a3a",2,70,98,0,"",""],["oxford-black-leather","shoes","shoes","Black Leather Cap-Toe Oxford","Black","#111314",5,30,78,0,"",""],["oxford-dark-brown-leather","shoes","shoes","Dark Brown Leather Oxford","Vandyke Brown","#4b3317",4,30,78,0,"",""],["oxford-burgundy-leather","shoes","shoes","Burgundy Leather Oxford","Cotinga Purple","#501345",4,30,78,0,"",""],["oxford-tan-leather","shoes","shoes","Tan Leather Oxford","Sudan Brown","#a36752",4,30,78,0,"",""],["patent-oxford-black","shoes","shoes","Black Patent Leather Dress Oxford","Black","#111314",5,35,80,0,"",""],["patent-loafer-black","shoes","shoes","Black Patent Leather Loafer","Black","#111314",5,35,80,0,"",""],["desert-boot-dark-brown-suede","shoes","shoes","Dark Brown Suede Desert Boot","Vandyke Brown","#4b3317",3,25,62,0,"",""],["desert-boot-sand-suede","shoes","shoes","Sand Suede Desert Boot","Isabella Color","#c5a56e",3,25,62,0,"",""],["chelsea-boot-black-leather","shoes","shoes","Black Leather Chelsea Boot","Black","#111314",4,25,62,0,"",""],["chelsea-boot-dark-brown-suede","shoes","shoes","Dark Brown Suede Chelsea Boot","Vandyke Brown","#4b3317",3,25,62,0,"",""],["sandal-dark-brown-leather","shoes","shoes","Dark Brown Leather Sandal","Vandyke Brown","#4b3317",2,72,100,0,"",""],["sandal-black-leather","shoes","shoes","Black Leather Sandal","Black","#111314",2,72,100,0,"",""],["suit-navy","layer","suit","Navy Suit","Dark Tyrian Blue","#12354e",4,40,72,0,"",""],["suit-charcoal","layer","suit","Charcoal Suit","Slate Color","#34454c",4,40,72,0,"",""],["suit-black","layer","suit","Black Suit","Black","#111314",4,40,72,0,"",""],["suit-grey","layer","suit","Mid Grey Suit","Andover Green","#6d7e77",4,40,72,0,"",""],["suit-forest","layer","suit","Forest Green Suit","Deep Slate Olive","#253122",4,40,72,0,"",""],["suit-slate","layer","suit","Slate Blue Suit","Dark Medici Blue","#547076",4,40,72,0,"",""],["suit-glen-check","layer","suit","Glen Check Suit","Deep Violet / Plumbeous","#70727c",4,40,72,0,"",""],["suit-tuxedo","layer","suit","Black Tuxedo","Black","#111314",5,40,72,0,"",""],["suit-olive","layer","suit","Olive Suit","Lincoln Green","#555832",4,40,72,0,"",""],["suit-tan","layer","suit","Tan Suit","Light Brown Drab","#b59392",4,60,88,0,"",""],["blazer-navy","layer","blazer","Navy Blazer","Dark Tyrian Blue","#12354e",4,42,72,0,"",""],["blazer-charcoal","layer","blazer","Charcoal Blazer","Slate Color","#34454c",4,42,72,0,"",""],["blazer-camel","layer","blazer","Camel Blazer","Maple","#c59f6b",4,42,72,0,"",""],["blazer-cream","layer","blazer","Cream Blazer","Sulpher Yellow","#f5ecc2",4,58,85,0,"",""],["blazer-grey","layer","blazer","Grey Blazer","Artemesia Green","#709390",4,42,72,0,"",""],["blazer-brown","layer","blazer","Brown Blazer","Sepia","#644b1e",4,42,72,0,"",""],["blazer-burgundy","layer","blazer","Burgundy Blazer","Dusky Madder Violet","#4e1d4c",4,42,72,0,"",""],["blazer-forest","layer","blazer","Forest Green Blazer","Deep Slate Olive","#253122",4,42,72,0,"",""],["overcoat-camel","layer","overcoat","Camel Overcoat","Maple","#c59f6b",4,20,50,0,"",""],["overcoat-navy","layer","overcoat","Navy Overcoat","Deep Slate Green","#112f2c",4,20,50,0,"",""],["overcoat-black","layer","overcoat","Black Overcoat","Black","#111314",4,20,50,0,"",""],["overcoat-charcoal","layer","overcoat","Charcoal Overcoat","Slate Color","#34454c",4,20,50,0,"",""],["jacket-chore-navy","layer","jacket","Navy Chore Jacket","Dark Tyrian Blue","#12354e",3,48,75,0,"",""],["jacket-chore-sand","layer","jacket","Sand Chore Jacket","Ecru","#c2ae93",3,48,75,0,"",""],["jacket-harrington-tan","layer","jacket","Tan Harrington Jacket","Maple","#c59f6b",3,50,78,0,"",""],["jacket-harrington-navy","layer","jacket","Navy Harrington Jacket","Dark Tyrian Blue","#12354e",3,50,78,0,"",""],["jacket-bomber-suede-chocolate","layer","jacket","Chocolate Suede Bomber Jacket","Vandyke Brown","#4b3317",3,45,68,0,"",""],["jacket-overshirt-navy","layer","jacket","Navy Wool Overshirt","Dark Tyrian Blue","#12354e",3,35,62,0,"",""],["tie-knit-burgundy","","tie","Burgundy Knitted Tie","Dusky Madder Violet","#4e1d4c",4,30,85,0,"",""],["tie-knit-navy","","tie","Navy Knitted Tie","Dark Tyrian Blue","#12354e",4,30,85,0,"",""],["tie-knit-forest","","tie","Forest Green Knitted Tie","Deep Slate Olive","#253122",4,30,85,0,"",""],["tie-knit-black","","tie","Black Knitted Tie","Black","#111314",4,30,85,0,"",""],["tie-silk-burgundy","","tie","Burgundy Silk Tie","Pale Burnt Lake","#802626",4,30,85,0,"",""],["tie-silk-navy-dot","","tie","Navy Polka Dot Silk Tie","Dark Tyrian Blue","#12354e",4,30,85,0,"",""],["tie-silk-striped","","tie","Navy & Burgundy Striped Silk Tie","Slate Color","#34454c",4,30,85,0,"",""],["tie-silk-grey","","tie","Grey Silk Tie","Artemesia Green","#709390",4,30,85,0,"",""],["bowtie-black-silk","","tie","Black Silk Bow Tie","Black","#111314",5,30,85,0,"",""],["bowtie-burgundy-silk","","tie","Burgundy Silk Bow Tie","Dusky Madder Violet","#4e1d4c",5,30,85,0,"",""],["belt-black-leather","","belt","Black Leather Belt","Black","#111314",4,30,85,0,"",""],["belt-brown-leather","","belt","Brown Leather Belt","Sepia","#644b1e",3,30,85,0,"",""],["belt-brown-suede","","belt","Brown Suede Belt","Pale Raw Umber","#71502f",3,30,85,0,"",""],["belt-black-suede","","belt","Black Suede Belt","Black","#111314",4,30,85,0,"",""],["pocket-square-white-linen","","pocket-square","White Linen Pocket Square","Sulpher Yellow","#f5ecc2",4,30,85,0,"",""],["pocket-square-cream-silk","","pocket-square","Cream Silk Pocket Square","Sulpher Yellow","#f5ecc2",5,30,85,0,"",""],["pocket-square-burgundy-silk","","pocket-square","Burgundy Silk Pocket Square","Dusky Madder Violet","#4e1d4c",5,30,85,0,"",""],["owned-isaia-polo","top","tops","Isaia Cream Knit Polo","Sulpher Yellow","#f5ecc2",3,55,90,1,"seed-isaia-polo","assets/photos/b88d4e8b011d.jpg"],["owned-octobre-tee","top","tops","Octobre Éditions Navy Tipped Knit Tee","Dark Tyrian Blue","#12354e",2,55,90,1,"seed-octobre-tee","assets/photos/cccd6ffc5d5b.jpg"],["owned-zegna-tee","top","tops","Zegna Navy 12milmil12 Knit Tee","Deep Slate Green","#112f2c",2,55,90,1,"seed-zegna-tee","assets/photos/d9094daf4f47.jpg"],["owned-whitesville-navy","top","tops","Whitesville Navy Heavyweight Tee","Dark Tyrian Blue","#12354e",2,45,82,1,"seed-whitesville-navy","assets/photos/331c5a7d52d7.jpg"],["owned-orlebar-tee","top","tops","Orlebar Brown Slate Blue Slub Pocket Tee","Artemesia Green","#709390",2,60,95,1,"seed-orlebar-tee","assets/photos/84f56ae82c62.jpg"],["owned-theory-navy","top","tops","Theory Navy Knit Tee","Dark Tyrian Blue","#12354e",2,55,90,1,"seed-theory-navy","assets/photos/0d869738ee51.jpg"],["owned-sfc-knit","top","knitwear","Scott Fraser Collection Black Checkerboard Short-Sleeve Sweater","Black","#111314",3,55,88,1,"seed-sfc-knit","assets/photos/bdeb6a13bfc1.jpg"],["owned-corridor-tee","top","tops","Corridor Charcoal Pocket Tee","Slate Color","#34454c",2,55,95,1,"seed-corridor-tee","assets/photos/cc93a210e480.jpg"],["owned-theory-charcoal","top","tops","Theory Charcoal Heather Knit Tee","Blackish Olive","#42533e",2,55,90,1,"seed-theory-charcoal","assets/photos/1f1164448e7e.jpg"],["owned-cucinelli-grey","top","tops","Brunello Cucinelli Grey Heather Tee","Warm Gray","#a1a39a",2,55,95,1,"seed-cucinelli-grey","assets/photos/42afd412b88d.jpg"],["owned-buckmason-oatmeal","top","knitwear","Buck Mason Oatmeal Heather Knit Crewneck","Ivory Buff","#ebd3a2",3,40,65,1,"seed-buckmason-oatmeal","assets/photos/48555cc64cd1.jpg"],["owned-buckmason-taupe","top","knitwear","Buck Mason Taupe Heather Knit Crewneck","Buffy Citrine","#96874d",3,40,65,1,"seed-buckmason-taupe","assets/photos/ac6d5d214b00.jpg"],["owned-frame-tee","top","tops","FRAME Cream Ribbed Knit Tee","Sulpher Yellow","#f5ecc2",2,55,90,1,"seed-frame-tee","assets/photos/1d8ddc47bf0e.jpg"],["owned-unbound-tee","top","tops","Unbound Merino Off-White Merino Tee","Sulpher Yellow","#f5ecc2",2,45,85,1,"seed-unbound-tee","assets/photos/87f8a0090530.jpg"],["owned-acne-tee","top","tops","Acne Studios White Face-Patch Tee","White","#ffffff",2,55,95,1,"seed-acne-tee","assets/photos/635c36bb0c73.jpg"],["owned-altea-tee","top","tops","Altea Sand Knit Tee","Olive Buff","#c1c494",2,55,90,1,"seed-altea-tee","assets/photos/228f77ffd143.jpg"],["owned-merz-olive","top","tops","Merz b. Schwanen Olive Tee","Olive Green","#6b7140",2,50,90,1,"seed-merz-olive","assets/photos/d56a8492d9d3.jpg"],["owned-cucinelli-stripe","top","tops","Brunello Cucinelli Grey Heather Striped-Collar Tee","Warm Gray","#a1a39a",2,55,95,1,"seed-cucinelli-stripe","assets/photos/29eb36238f25.jpg"],["owned-whitesville-grey","top","tops","Whitesville Grey Heather Heavyweight Tee","Warm Gray","#a1a39a",2,45,82,1,"seed-whitesville-grey","assets/photos/8bf1b37685ac.jpg"],["owned-asket-tee","top","tops","ASKET Cream Tee","Sulpher Yellow","#f5ecc2",2,55,95,1,"seed-asket-tee","assets/photos/fc265d782068.jpg"],["owned-alexmill-tee","top","tops","Alex Mill White Pocket Tee","White","#ffffff",2,55,95,1,"seed-alexmill-tee","assets/photos/3f4340d0f749.jpg"],["owned-massimo-white","top","tops","Massimo Dutti White Pocket Tee","White","#ffffff",2,55,95,1,"seed-massimo-white","assets/photos/38d7ac2121f2.jpg"],["owned-massimo-brown","top","knitwear","Massimo Dutti Brown Linen Knit Crewneck","Pale Raw Umber","#71502f",3,58,85,1,"seed-massimo-brown","assets/photos/00bbee999215.jpg"],["owned-toddsnyder-yellow","top","tops","Todd Snyder Yellow Pocket Tee","Cream Yellow","#fdbf68",2,55,95,1,"seed-toddsnyder-yellow","assets/photos/b854403c0b9d.jpg"],["owned-zigzag-tee","top","tops","Zigzag Stripe Tee","Sulpher Yellow","#f5ecc2",2,55,95,1,"seed-zigzag-tee","assets/photos/a0d510d4f4d0.jpg"],["owned-alexmill-polo","top","tops","Alex Mill White Knit Polo","White","#ffffff",3,55,90,1,"seed-alexmill-polo","assets/photos/f61a7752869e.jpg"],["owned-cucinelli-white-tee","top","tops","Brunello Cucinelli White Knit Tee","White","#ffffff",2,55,90,1,"seed-cucinelli-white-tee","assets/photos/73e485c65932.jpg"],["owned-loropiana-charcoal-polo","top","tops","Loro Piana Charcoal Ribbed Knit Polo","Slate Color","#34454c",3,55,90,1,"seed-loropiana-charcoal-polo","assets/photos/0a9875a534be.jpg"],["owned-cucinelli-charcoal-polo","top","tops","Brunello Cucinelli Charcoal Tipped Polo","Slate Color","#34454c",3,60,95,1,"seed-cucinelli-charcoal-polo","assets/photos/5140b394dcc5.jpg"],["owned-sunspel-polo","top","tops","Sunspel Grey Piqué Polo","Rainette Green","#8fa071",3,60,95,1,"seed-sunspel-polo","assets/photos/eaf04e47deac.jpg"],["owned-cucinelli-breton-polo","top","tops","Brunello Cucinelli Navy Breton Stripe Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-cucinelli-breton-polo","assets/photos/b913f08eb2b0.jpg"],["owned-cucinelli-stripe-polo","top","tops","Brunello Cucinelli Grey Navy Stripe Knit Polo","Deep Violet / Plumbeous","#70727c",3,55,90,1,"seed-cucinelli-stripe-polo","assets/photos/72526560b8b1.jpg"],["owned-cucinelli-beige-polo","top","tops","Brunello Cucinelli Beige Pinstripe Knit Polo","Olive Buff","#c1c494",3,55,90,1,"seed-cucinelli-beige-polo","assets/photos/4ce27e5e4be7.jpg"],["owned-cucinelli-cream-tipped-polo","top","tops","Brunello Cucinelli Cream Tipped Polo","Sulpher Yellow","#f5ecc2",3,60,95,1,"seed-cucinelli-cream-tipped-polo","assets/photos/c4cf3a7c3fc0.jpg"],["owned-cucinelli-brown-stripe-polo","top","tops","Brunello Cucinelli White Brown Stripe Polo","Sulpher Yellow","#f5ecc2",3,60,95,1,"seed-cucinelli-brown-stripe-polo","assets/photos/c99f1a2ab659.jpg"],["owned-cucinelli-ribbed-polo","top","tops","Brunello Cucinelli Cream Ribbed Knit Polo","Sulpher Yellow","#f5ecc2",3,55,90,1,"seed-cucinelli-ribbed-polo","assets/photos/66539c1530cc.jpg"],["owned-missoni-navy-polo","top","tops","Missoni Navy Zigzag Knit Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-missoni-navy-polo","assets/photos/01eaf8a9229c.jpg"],["owned-cucinelli-navy-polo","top","tops","Brunello Cucinelli Navy Piqué Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-cucinelli-navy-polo","assets/photos/74bf9f021f1a.jpg"],["owned-loropiana-navy-polo","top","tops","Loro Piana Navy Tipped Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-loropiana-navy-polo","assets/photos/ad4eb917633c.jpg"],["owned-zegna-polo","top","tops","Zegna Dark Navy High Performance Polo","Deep Slate Green","#112f2c",3,55,90,1,"seed-zegna-polo","assets/photos/60068aa893f4.jpg"],["owned-theory-polo","top","tops","Theory Navy Striped-Collar Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-theory-polo","assets/photos/8ddda1b49cf7.jpg"],["owned-loropiana-sage-polo","top","tops","Loro Piana Sage Linen Polo","Mineral Gray","#a2b0ad",3,68,95,1,"seed-loropiana-sage-polo","assets/photos/73a67351e87c.jpg"],["owned-cucinelli-olive-polo","top","tops","Brunello Cucinelli Olive Knit Polo","Olive Green","#6b7140",3,55,90,1,"seed-cucinelli-olive-polo","assets/photos/9c54fbef1ebe.jpg"],["owned-skyblue-polo","top","tops","Sky Blue Knit Polo","Light Glaucous Blue","#a5c8d1",3,55,90,1,"seed-skyblue-polo","assets/photos/81280b13f5ee.jpg"],["owned-cucinelli-dustyblue-polo","top","tops","Brunello Cucinelli Dusty Blue Knit Polo","Artemesia Green","#709390",3,55,90,1,"seed-cucinelli-dustyblue-polo","assets/photos/bd8728361f98.jpg"],["owned-loropiana-tipped-polo","top","tops","Loro Piana Navy Tipped Knit Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-loropiana-tipped-polo","assets/photos/9e2efb2eec15.jpg"],["owned-cucinelli-skyblue-polo","top","tops","Brunello Cucinelli Sky Blue Piqué Polo","Light Glaucous Blue","#a5c8d1",3,60,95,1,"seed-cucinelli-skyblue-polo","assets/photos/6d23c4c269b2.jpg"],["owned-cucinelli-terracotta-polo","top","tops","Brunello Cucinelli Terracotta Piqué Polo","Cinnamon Rufous","#c27544",3,60,95,1,"seed-cucinelli-terracotta-polo","assets/photos/9bdd2cb8017d.jpg"],["owned-cucinelli-burgundy-polo","top","tops","Brunello Cucinelli Burgundy Linen Polo","Pale Burnt Lake","#802626",3,68,95,1,"seed-cucinelli-burgundy-polo","assets/photos/61ea0badf1bd.jpg"],["owned-isaia-burgundy-polo","top","tops","Isaia Burgundy Knit Polo","Pale Burnt Lake","#802626",3,55,90,1,"seed-isaia-burgundy-polo","assets/photos/d6baa9413174.jpg"],["owned-missoni-burgundy-polo","top","tops","Missoni Burgundy Zigzag Knit Polo","Pale Burnt Lake","#802626",3,55,90,1,"seed-missoni-burgundy-polo","assets/photos/9d574fa86a11.jpg"],["owned-cucinelli-slate-polo","top","tops","Brunello Cucinelli Slate Stripe Polo","Artemesia Green","#709390",3,60,95,1,"seed-cucinelli-slate-polo","assets/photos/58e36e6f3b1e.jpg"],["owned-loropiana-espadrilles","shoes","shoes","Loro Piana Light Blue Knit Espadrilles","Light Glaucous Blue","#a5c8d1",2,70,98,1,"seed-loropiana-espadrilles","assets/photos/0eb3c06dd242.jpg"],["owned-vibi-mustard","shoes","shoes","Vibi Venezia Mustard Check Furlane Slippers","Olive Ocher","#d6b43e",3,55,90,1,"seed-vibi-mustard","assets/photos/84155e8fd479.jpg"],["owned-vibi-navy","shoes","shoes","Vibi Venezia Navy Stripe Furlane Slippers","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-vibi-navy","assets/photos/609536479732.jpg"],["owned-loropiana-grey-sneakers","shoes","shoes","Loro Piana Grey Suede Tennis Sneakers","Rainette Green","#8fa071",3,45,80,1,"seed-loropiana-grey-sneakers","assets/photos/6f8231b82235.jpg"],["owned-adidas-sneakers","shoes","shoes","Adidas Cream Sneakers","Sulpher Yellow","#f5ecc2",2,40,85,1,"seed-adidas-sneakers","assets/photos/d0b35250559a.jpg"],["owned-grey-court-sneakers","shoes","shoes","Grey White Leather Court Sneakers","Glaucous Green","#b4cdc2",2,40,85,1,"seed-grey-court-sneakers","assets/photos/2beffd278ab4.jpg"],["owned-stubbs-slippers","shoes","shoes","Stubbs & Wootton Blue Camo Needlepoint Slippers","Violet Blue","#40456a",3,55,90,1,"seed-stubbs-slippers","assets/photos/41d3ce31e34d.jpg"],["owned-loropiana-white-sneakers","shoes","shoes","Loro Piana White Leather Tennis Sneakers","White","#ffffff",3,40,85,1,"seed-loropiana-white-sneakers","assets/photos/41ba01b1c447.jpg"],["owned-loropiana-runners","shoes","shoes","Loro Piana Multicolour Runner Sneakers","Light Brownish Olive","#806e4b",2,45,85,1,"seed-loropiana-runners","assets/photos/230604c83947.jpg"],["owned-loropiana-summer-walk","shoes","shoes","Loro Piana Dark Brown Suede Summer Walk Loafers","Vandyke Brown","#4b3317",3,45,80,1,"seed-loropiana-summer-walk","assets/photos/c96390ec61c6.jpg"],["owned-vibi-black-velvet-furlane","shoes","shoes","Vibi Venezia Black Velvet Furlane Slippers","Black","#111314",3,55,90,1,"seed-vibi-black-velvet-furlane","assets/photos/db361533ae3a.jpg"],["owned-vibi-tan-velvet-furlane","shoes","shoes","Vibi Venezia Tan Velvet Furlane Slippers","Isabella Color","#c5a56e",3,55,90,1,"seed-vibi-tan-velvet-furlane","assets/photos/aa656e11aa5b.jpg"],["owned-edwardgreen-darkbrown-loafers","shoes","shoes","Edward Green Dark Brown Suede Penny Loafers","Vandyke Brown","#4b3317",4,45,80,1,"seed-edwardgreen-darkbrown-loafers","assets/photos/169bac2277c1.jpg"],["owned-edwardgreen-tan-loafers","shoes","shoes","Edward Green Greige Suede Penny Loafers","Warm Gray","#a1a39a",3,45,80,1,"seed-edwardgreen-tan-loafers","assets/photos/b95402cfe41d.jpg"],["owned-baudoin-rust-tassel-loafers","shoes","shoes","Baudoin & Lange Rust Suede Tassel Loafers","Sudan Brown","#a36752",3,45,80,1,"seed-baudoin-rust-tassel-loafers","assets/photos/ce716373b008.jpg"],["owned-gucci-green-eel-loafers","shoes","shoes","Gucci Dark Green Eel Horsebit Loafers","Slate Color","#34454c",4,40,85,1,"seed-gucci-green-eel-loafers","assets/photos/8cb916c16897.jpg"],["owned-balenciaga-black-loafers","shoes","shoes","Balenciaga Black Leather Penny Loafers","Black","#111314",4,40,85,1,"seed-balenciaga-black-loafers","assets/photos/703b33087b1b.jpg"],["owned-vibi-red-velvet-furlane","shoes","shoes","Vibi Venezia Red Velvet Furlane Slippers","Pale Burnt Lake","#802626",3,55,90,1,"seed-vibi-red-velvet-furlane","assets/photos/d1802e9663e1.jpg"],["owned-gucci-twotone-loafers","shoes","shoes","Gucci Black White Horsebit Loafers","Deep Slate Olive","#253122",4,40,85,1,"seed-gucci-twotone-loafers","assets/photos/3d2a4500ad9d.jpg"],["owned-fortela-concho-slippers","shoes","shoes","Fortela Tan Suede Concho Slippers","Isabella Color","#c5a56e",3,45,80,1,"seed-fortela-concho-slippers","assets/photos/d5d147124f51.jpg"],["owned-vibi-rust-corduroy-furlane","shoes","shoes","Vibi Venezia Rust Corduroy Furlane Slippers","Sudan Brown","#a36752",3,55,90,1,"seed-vibi-rust-corduroy-furlane","assets/photos/1686a0e5b87c.jpg"],["owned-armani-cream-loafers","shoes","shoes","Giorgio Armani Cream Woven Leather Loafers","Sulpher Yellow","#f5ecc2",3,55,88,1,"seed-armani-cream-loafers","assets/photos/f3a8698d7824.jpg"],["owned-loropiana-flexy-sneakers","shoes","shoes","Loro Piana Cream Knit 360 Flexy Walk Sneakers","Sulpher Yellow","#f5ecc2",3,45,85,1,"seed-loropiana-flexy-sneakers","assets/photos/426cfa6c8430.jpg"],["owned-stubbs-navy-slipons","shoes","shoes","Stubbs & Wootton Navy Woven Slip-On Sneakers","Dark Tyrian Blue","#12354e",2,55,90,1,"seed-stubbs-navy-slipons","assets/photos/42883d4f592b.jpg"],["owned-belgian-brown-lizard-loafers","shoes","shoes","Belgian Shoes Brown Lizard Loafers","Pale Raw Umber","#71502f",4,40,85,1,"seed-belgian-brown-lizard-loafers","assets/photos/fe7b6a8394f6.jpg"],["owned-belgian-olive-loafers","shoes","shoes","Belgian Shoes Olive Suede Loafers","Olive Green","#6b7140",3,45,80,1,"seed-belgian-olive-loafers","assets/photos/7b6f9998e799.jpg"],["owned-belgian-black-velvet-loafers","shoes","shoes","Belgian Shoes Black Velvet Loafers","Black","#111314",4,55,90,1,"seed-belgian-black-velvet-loafers","assets/photos/6330f011ed1f.jpg"],["owned-baudoin-brown-leather-loafers","shoes","shoes","Baudoin & Lange Dark Brown Leather Tassel Loafers","Vandyke Brown","#4b3317",4,40,85,1,"seed-baudoin-brown-leather-loafers","assets/photos/209a89055f60.jpg"],["owned-belgian-camo-loafers","shoes","shoes","Belgian Shoes Camo Pony-Hair Loafers","Olive Green","#6b7140",3,55,90,1,"seed-belgian-camo-loafers","assets/photos/6f77e1ad4356.jpg"],["owned-belgian-darkbrown-lizard-loafers","shoes","shoes","Belgian Shoes Dark Brown Lizard Loafers","Vandyke Brown","#4b3317",4,40,85,1,"seed-belgian-darkbrown-lizard-loafers","assets/photos/8eaf8abc32ca.jpg"],["owned-hermes-navy-polo","top","tops","Hermès Navy Piqué Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-hermes-navy-polo","assets/photos/23a1b98a88b6.jpg"],["owned-hermes-black-polo","top","tops","Hermès Black Piqué Polo","Black","#111314",3,60,95,1,"seed-hermes-black-polo","assets/photos/33257e8acdb3.jpg"],["owned-cucinelli-navy-pique-grey-polo","top","tops","Brunello Cucinelli Navy Piqué Polo, Grey Cuffs","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-cucinelli-navy-pique-grey-polo","assets/photos/eac793263454.jpg"],["owned-kiton-navy-polo","top","tops","Kiton Navy Heather Knit Polo","Slate Color","#34454c",3,55,90,1,"seed-kiton-navy-polo","assets/photos/9dfc4caf0c37.jpg"],["owned-stefanoricci-red-tee","top","tops","Stefano Ricci Red Geometric Knit Tee","Carmine Red","#a62c37",2,55,90,1,"seed-stefanoricci-red-tee","assets/photos/e799e1fc5df4.jpg"],["owned-cucinelli-safari-shirt","top","shirts","Brunello Cucinelli Olive Safari Shirt","Olive Green","#6b7140",3,58,90,1,"seed-cucinelli-safari-shirt","assets/photos/27b26c012761.jpg"],["owned-canali-charcoal-vest","layer","vest","Canali Charcoal Knit Vest","Slate Color","#34454c",4,40,68,1,"seed-canali-charcoal-vest","assets/photos/911715b28f48.jpg"],["owned-zanone-navy-vest","layer","vest","Zanone Navy Knit Vest","Dark Tyrian Blue","#12354e",4,40,68,1,"seed-zanone-navy-vest","assets/photos/0c5f2f5596ea.jpg"],["owned-fortela-navy-polo","top","tops","Fortela Navy Knit Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-fortela-navy-polo","assets/photos/e285e4ae173c.jpg"],["owned-hermes-white-polo","top","tops","Hermès White Piqué Polo","White","#ffffff",3,60,95,1,"seed-hermes-white-polo","assets/photos/ebe6c57e2778.jpg"],["owned-cricket","top","knitwear","Cream Cricket Sweater","Sulpher Yellow","#f5ecc2",3,38,62,1,"seed-cricket",""]];
+/* ================= Lazy swap rendering =================
+   Change a piece in any look. The piece library (265 pieces,
+   baked from the render pipeline's library) maps a look's pieces
+   to library ids: From-wardrobe looks through closet item ids,
+   pool looks by exact piece-name match where the name is
+   unambiguous — a slot with no honest match simply isn't
+   swappable. A swap computes the combination's comboId; a known
+   render (the lazy registry, or an existing look with the
+   identical mapped piece set) shows at once, otherwise the
+   combination is queued with the sync service's render queue
+   and the pop-out shows a rendering state until the render
+   lands at its deterministic URL. The original look is never
+   mutated: a swap builds a new look. Watches are not part of
+   the queue — the look's watch selection stays exactly as it
+   was and only feeds the comboId, per the worker contract. */
+var PIECE_LIBRARY = PIECE_LIBRARY_RAW.map(function (r) {
+  return { id: r[0], slot: r[1] || null, cat: r[2], name: r[3], wn: r[4], wh: r[5], fs: r[6], temp: [r[7], r[8]], owned: !!r[9], cid: r[10] || null, img: r[11] || null };
+});
+var PIECE_BY_ID = {}, PIECE_BY_CID = {};
+PIECE_LIBRARY.forEach(function (p) { PIECE_BY_ID[p.id] = p; if (p.cid) PIECE_BY_CID[p.cid] = p; });
+var SWAP_SLOT_LABELS = { top: "Top", bottom: "Bottom", shoes: "Shoes", layer: "Layer" };
+var LAZY_RENDER_BASE = "https://dyacobs-tech.github.io/wardrobe/assets/lazy/";
+/* comboId -> lazy render URL, once a render has landed. Kept in
+   the app's store, so it survives reloads and rides the backup
+   (the "lazyRenders" store key) like every other collection. */
+var lazyRenders = (function () { var v = store.get("lazyRenders", {}); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; })();
+function saveLazyRenders() { store.set("lazyRenders", lazyRenders); }
+
+/* SHA-256 (hex), synchronous and dependency-free — the comboId
+   must come out identical on every device, so it cannot wait on
+   an async crypto call or a subtle-crypto availability check. */
+function sha256Hex(msg) {
+  function rr(v, a) { return (v >>> a) | (v << (32 - a)); }
+  var K = [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2];
+  var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+  var bytes = [];
+  var utf8 = unescape(encodeURIComponent(msg));
+  for (var i = 0; i < utf8.length; i++) bytes.push(utf8.charCodeAt(i));
+  var bitLen = bytes.length * 8;
+  bytes.push(0x80);
+  while (bytes.length % 64 !== 56) bytes.push(0);
+  for (var b = 7; b >= 0; b--) bytes.push(Math.floor(bitLen / Math.pow(2, 8 * b)) % 256);
+  var w = new Array(64);
+  for (var chunk = 0; chunk < bytes.length; chunk += 64) {
+    for (var t = 0; t < 16; t++) w[t] = (bytes[chunk + t * 4] << 24) | (bytes[chunk + t * 4 + 1] << 16) | (bytes[chunk + t * 4 + 2] << 8) | bytes[chunk + t * 4 + 3];
+    for (t = 16; t < 64; t++) {
+      var s0 = rr(w[t - 15], 7) ^ rr(w[t - 15], 18) ^ (w[t - 15] >>> 3);
+      var s1 = rr(w[t - 2], 17) ^ rr(w[t - 2], 19) ^ (w[t - 2] >>> 10);
+      w[t] = (w[t - 16] + s0 + w[t - 7] + s1) | 0;
+    }
+    var a = H[0], b1 = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+    for (t = 0; t < 64; t++) {
+      var S1 = rr(e, 6) ^ rr(e, 11) ^ rr(e, 25);
+      var ch = (e & f) ^ (~e & g);
+      var t1 = (h + S1 + ch + K[t] + w[t]) | 0;
+      var S0 = rr(a, 2) ^ rr(a, 13) ^ rr(a, 22);
+      var mj = (a & b1) ^ (a & c) ^ (b1 & c);
+      var t2 = (S0 + mj) | 0;
+      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b1; b1 = a; a = (t1 + t2) | 0;
+    }
+    H[0] = (H[0] + a) | 0; H[1] = (H[1] + b1) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+    H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+  }
+  return H.map(function (x) { return ("0000000" + (x >>> 0).toString(16)).slice(-8); }).join("");
+}
+function swapComboId(pieceIds, watchId) {
+  /* Canonicalisation matches the render-queue worker contract:
+     the resulting look's library piece ids sorted
+     lexicographically, joined by "+", then "|" + the look's
+     selected watch id ("" when none); the comboId is the first
+     16 hex chars of the SHA-256 hex digest of that string. */
+  var canon = pieceIds.slice().sort().join("+") + "|" + (watchId || "");
+  return sha256Hex(canon).slice(0, 16);
+}
+
+/* ---------- Wada harmony, the engine's way ----------
+   pair_harmonious: two colours pair if they are the same colour
+   or co-occur in at least one of the book's plates; a set is a
+   real Wada pair/trio/quad when one plate contains it whole. */
+var _swapPlateSets = null, _swapPairSet = null;
+function swapWadaIndex() {
+  if (_swapPlateSets) return;
+  _swapPlateSets = PLATES.map(function (p) { return p.colors.map(function (c) { return c.name; }); });
+  _swapPairSet = {};
+  _swapPlateSets.forEach(function (names) {
+    for (var i = 0; i < names.length; i++) for (var j = i + 1; j < names.length; j++) {
+      _swapPairSet[names[i] < names[j] ? names[i] + "\u0001" + names[j] : names[j] + "\u0001" + names[i]] = 1;
+    }
+  });
+}
+function swapPairHarmonious(a, b) {
+  if (a === b) return true;
+  swapWadaIndex();
+  return !!_swapPairSet[a < b ? a + "\u0001" + b : b + "\u0001" + a];
+}
+function swapPlateCovers(names) {
+  swapWadaIndex();
+  return _swapPlateSets.some(function (set) {
+    return names.every(function (n) { return set.indexOf(n) !== -1; });
+  });
+}
+
+/* ---------- Look -> library piece mapping ---------- */
+var SWAP_LIBCATS = { "Shoes": ["shoes"], "Trousers": ["trousers"], "Jeans": ["jeans"], "Shorts": ["shorts"], "Bathing suits": ["swim"], "Blazers": ["blazer"], "Jackets": ["jacket"], "Coats": ["overcoat"], "Leather jackets": ["jacket"], "Suits": ["suit"], "Vests": ["vest"], "Polos": ["tops", "knitwear"], "Tees": ["tops"], "Sweaters": ["knitwear"], "Shirts": ["shirts", "tops"], "Button downs": ["shirts"] };
+function swapSlotForClosetCat(cat) {
+  if (cat === "Shoes") return "shoes";
+  if (["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(cat) !== -1) return "bottom";
+  if (["Blazers", "Jackets", "Coats", "Leather jackets", "Suits", "Vests"].indexOf(cat) !== -1) return "layer";
+  if (["Polos", "Shirts", "Button downs", "Tees", "Sweaters"].indexOf(cat) !== -1) return "top";
+  return null;
+}
+function swapFamilyWord(role) {
+  var r = " " + String(role || "").toLowerCase() + " ";
+  var words = ["loafer", "sneaker", "trainer", "espadrille", "oxford", "desert boot", "chelsea", "sandal", "slipper", "boot", "shoe", "trousers", "chinos", "jeans", "shorts", "swim", "polo", "tee", "shirt", "crew", "knit", "sweater", "roll-neck", "henley", "vest", "blazer", "suit", "overcoat", "jacket", "overshirt", "tuxedo", "coat"];
+  for (var i = 0; i < words.length; i++) if (r.indexOf(words[i]) !== -1) return words[i];
+  return null;
+}
+/* A pool look's piece, matched to the library by exact piece
+   name: same slot, same garment family, and the piece's Wada
+   colour name (the app's own nearest-Wada naming of its hex)
+   exactly the library piece's — and only where exactly one
+   library piece answers, so the match is never a guess. */
+function swapMapPoolPiece(pc) {
+  var cat = garmentCategory(pc.garment);
+  var libCats = SWAP_LIBCATS[cat];
+  if (!libCats) return null;
+  var slot = swapSlotForClosetCat(cat) || (cat === "Shoes" ? "shoes" : null);
+  if (!slot) return null;
+  var wada = nearestWada(pc.hex).name;
+  var fam = swapFamilyWord(pc.garment);
+  var cands = PIECE_LIBRARY.filter(function (p) {
+    return p.slot === slot && libCats.indexOf(p.cat) !== -1 && p.wn === wada &&
+      (!fam || p.name.toLowerCase().indexOf(fam) !== -1);
+  });
+  return cands.length === 1 ? cands[0] : null;
+}
+function swapBottomByName(name) {
+  var tries = [name, String(name || "").replace(/,\s*straight leg$/i, ""), String(name || "").replace(/\s+straight-leg\s+/gi, " ").replace(/straight-leg\s*/gi, "")];
+  for (var i = 0; i < tries.length; i++) {
+    var key = tries[i].trim().toLowerCase();
+    if (!key) continue;
+    var cands = PIECE_LIBRARY.filter(function (p) { return p.slot === "bottom" && p.name.toLowerCase() === key; });
+    if (cands.length === 1) return cands[0];
+  }
+  return null;
+}
+function swapMapForLook(look) {
+  if (!look || look.refLook) return null;
+  var out = {};
+  if (look.swapPieces) {
+    Object.keys(look.swapPieces).forEach(function (slot) {
+      var p = PIECE_BY_ID[look.swapPieces[slot]];
+      if (p && !out[slot]) out[slot] = { piece: p };
+    });
+    return out;
+  }
+  if (look.fwPieces && look.fwPieces.length) {
+    look.fwPieces.forEach(function (fp, i) {
+      var slot = swapSlotForClosetCat(fp.category);
+      if (!slot || out[slot]) return;
+      var p = PIECE_BY_CID[fp.id];
+      if (p) out[slot] = { piece: p, fwIndex: i };
+    });
+    if (!out.bottom && look.suggestedBottom && look.suggestedBottom.name) {
+      var bp = swapBottomByName(look.suggestedBottom.name);
+      if (bp) out.bottom = { piece: bp, suggested: true };
+    }
+    return out;
+  }
+  var fillFrom = function (pcs) {
+    pcs.forEach(function (pc) {
+      var slot = swapSlotForClosetCat(garmentCategory(pc.garment));
+      if (!slot || out[slot]) return;
+      var p = swapMapPoolPiece(pc);
+      if (p) out[slot] = { piece: p, garment: pc.garment, hex: pc.hex };
+    });
+  };
+  fillFrom(lookPieces(look));
+  /* A dealt take carries the brief's swatches, but its identity
+     is its photograph: the pool render behind that photograph
+     carries the outfit's curated pieces. Slots the take's own
+     swatches could not map are filled from the render's pieces —
+     the same exact-name rule, applied to the pool look the take
+     actually is. */
+  if (look.img && typeof RENDER_POOL !== "undefined") {
+    for (var ti = 0; ti < RENDER_POOL.length; ti++) {
+      if (RENDER_POOL[ti].img === look.img && RENDER_POOL[ti] !== look) { fillFrom(lookPieces(RENDER_POOL[ti])); break; }
+    }
+  }
+  return out;
+}
+function swapWatchIdFor(look) {
+  if (!look) return "";
+  if (typeof isSwimLook === "function" && isSwimLook(look)) return "";
+  if (look.watchId) return look.watchId === "none" ? "" : look.watchId;
+  if (look.fwRender && typeof fwWatchPickFor === "function") return fwWatchPickFor(look) || "";
+  return "";
+}
+function swapDisplayPhoto(look) {
+  if (!look) return "";
+  if (look.swapPhoto) return look.swapPhoto;
+  if (look.fwRender && typeof fwRenderSrc === "function") return fwRenderSrc(look);
+  return lookImg(look);
+}
+
+/* ---------- Compatible replacements for a slot ----------
+   Same slot; the candidate's formality score within one step
+   of the look's other pieces' scores (the assembly engine's
+   coherence rule); Wada harmony ranked — a whole-plate
+   pair/trio/quad first, then pieces harmonious with every
+   remaining piece, then with some; a candidate harmonious with
+   none of the remaining pieces breaks the look and is not
+   offered. Owned pieces rank first within a tier. */
+function swapCandidates(look, slotKey) {
+  var map = swapMapForLook(look);
+  if (!map || !map[slotKey]) return [];
+  var cur = map[slotKey].piece;
+  var others = Object.keys(map).filter(function (s) { return s !== slotKey; }).map(function (s) { return map[s].piece; });
+  var scores = others.map(function (p) { return p.fs; });
+  var lo = scores.length ? Math.min.apply(null, scores) - 1 : null;
+  var hi = scores.length ? Math.max.apply(null, scores) + 1 : null;
+  var otherNames = others.map(function (p) { return p.wn; });
+  var out = [];
+  PIECE_LIBRARY.forEach(function (cand) {
+    if (!cand.slot || cand.slot !== slotKey || cand.id === cur.id) return;
+    if (lo !== null && (cand.fs < lo || cand.fs > hi)) return;
+    var tier;
+    if (!others.length) tier = 1;
+    else {
+      var distinct = [];
+      otherNames.concat([cand.wn]).forEach(function (n) { if (distinct.indexOf(n) === -1) distinct.push(n); });
+      if (distinct.length >= 2 && distinct.length <= 4 && swapPlateCovers(distinct)) tier = 0;
+      else if (otherNames.every(function (n) { return swapPairHarmonious(cand.wn, n); })) tier = 1;
+      else if (otherNames.some(function (n) { return swapPairHarmonious(cand.wn, n); })) tier = 2;
+      else return;
+    }
+    out.push({ piece: cand, tier: tier });
+  });
+  out.sort(function (a, b) {
+    if (a.tier !== b.tier) return a.tier - b.tier;
+    if (a.piece.owned !== b.piece.owned) return a.piece.owned ? -1 : 1;
+    return a.piece.name < b.piece.name ? -1 : 1;
+  });
+  return out;
+}
+
+/* ---------- The Change-a-piece rows (pop-out) ---------- */
+function swapSectionHTML(look, fwIdx) {
+  var map = swapMapForLook(look);
+  if (!map) return "";
+  var slots = ["top", "bottom", "shoes", "layer"].filter(function (s) { return map[s]; });
+  if (!slots.length) return "";
+  var fwAttr = typeof fwIdx === "number" ? ' data-swap-fw="' + fwIdx + '"' : "";
+  var rows = slots.map(function (s) {
+    var p = map[s].piece;
+    return '<div class="piece-row">' +
+      '<span class="cdot" style="background:' + esc(p.wh) + '"></span>' +
+      '<span class="p-main"><span class="p-name">' + esc(p.name) + '</span>' +
+      '<span class="p-sub">' + SWAP_SLOT_LABELS[s] + (p.owned ? " · Yours" : "") + '</span></span>' +
+      '<button type="button" class="btn-ghost" data-swap-slot="' + s + '"' + fwAttr + ">Change</button></div>";
+  }).join("");
+  var note = (look.swapState === "rendering" && !swapSyncKey())
+    ? '<p class="swap-note">Cloud sync must be on for swap rendering.</p>' : "";
+  return '<div class="find-pieces swap-sec"><h4>Change a piece</h4>' + rows + note + "</div>";
+}
+
+/* ---------- The piece picker sheet ---------- */
+var swapSheetCtx = null, swapSheetCands = [];
+function openSwapSheet(look, slotKey, opts) {
+  var map = swapMapForLook(look);
+  if (!map || !map[slotKey]) return;
+  var cands = swapCandidates(look, slotKey);
+  swapSheetCtx = { look: look, slot: slotKey, fw: opts && typeof opts.fw === "number" ? opts.fw : null };
+  swapSheetCands = cands;
+  document.getElementById("swap-sheet-title").textContent = "Change the " + SWAP_SLOT_LABELS[slotKey].toLowerCase();
+  document.getElementById("swap-sheet-sub").textContent = "Replacing: " + map[slotKey].piece.name;
+  document.getElementById("swap-sheet-list").innerHTML = cands.length ? cands.map(function (c, i) {
+    var p = c.piece;
+    var media = p.img ? '<img src="' + esc(p.img) + '" alt="" loading="lazy" />' : '<span class="cdot" style="background:' + esc(p.wh) + '"></span>';
+    return '<button type="button" class="swap-pick" data-swap-pick="' + i + '">' + media +
+      '<span class="sp-main"><span class="sp-name">' + esc(p.name) + '</span>' +
+      '<span class="sp-sub">' + esc(p.wn) + '</span></span>' +
+      (p.owned ? '<span class="swap-owned">Yours</span>' : "") + "</button>";
+  }).join("") : '<p class="meta" style="margin:0">No compatible pieces for this slot.</p>';
+  var sheet = document.getElementById("swap-sheet");
+  sheet.hidden = false;
+  var c = document.getElementById("swap-sheet-close");
+  if (c) c.focus();
+}
+function closeSwapSheet() {
+  var sheet = document.getElementById("swap-sheet");
+  if (sheet) sheet.hidden = true;
+  swapSheetCtx = null;
+  swapSheetCands = [];
+}
+document.getElementById("swap-sheet-close").addEventListener("click", closeSwapSheet);
+document.getElementById("swap-sheet").addEventListener("click", function (e) {
+  if (e.target === this) { closeSwapSheet(); return; }
+  var b = e.target.closest ? e.target.closest("[data-swap-pick]") : null;
+  if (!b) return;
+  pickSwap(parseInt(b.getAttribute("data-swap-pick"), 10));
+});
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSwapSheet(); });
+document.addEventListener("click", function (e) {
+  var b = e.target.closest ? e.target.closest("[data-swap-slot]") : null;
+  if (!b) return;
+  var slot = b.getAttribute("data-swap-slot");
+  var fwIdx = b.getAttribute("data-swap-fw");
+  if (fwIdx !== null && typeof fwLooks !== "undefined" && fwLooks) {
+    var lk = fwLooks[parseInt(fwIdx, 10)];
+    if (lk) openSwapSheet(lk, slot, { fw: parseInt(fwIdx, 10) });
+    return;
+  }
+  if (typeof currentLook !== "undefined" && currentLook) openSwapSheet(currentLook, slot, {});
+});
+
+/* ---------- Picking a replacement ---------- */
+function swapApplyPieceToLook(look, slotKey, piece, srcInfo, srcLook) {
+  var old = srcInfo ? srcInfo.piece : null;
+  /* Palette: the swatch that carried the old piece takes the
+     new piece's Wada colour. Pool pieces are found by their
+     garment role; wardrobe pieces by their closet colour. */
+  var done = false;
+  (look.swatches || []).forEach(function (s) {
+    if (done) return;
+    if (srcInfo && srcInfo.garment && s.role === srcInfo.garment) { s.name = piece.wn; s.hex = piece.wh; done = true; }
+  });
+  if (!done && srcInfo && typeof srcInfo.fwIndex === "number" && srcLook.fwPieces && srcLook.fwPieces[srcInfo.fwIndex]) {
+    var targetHex = srcLook.fwPieces[srcInfo.fwIndex].colourHex;
+    (look.swatches || []).forEach(function (s) { if (!done && s.hex === targetHex) { s.name = piece.wn; s.hex = piece.wh; done = true; } });
+  }
+  if (!done && srcInfo && srcInfo.suggested && srcLook.suggestedBottom) {
+    (look.swatches || []).forEach(function (s) { if (!done && s.hex === srcLook.suggestedBottom.hex) { s.name = piece.wn; s.hex = piece.wh; done = true; } });
+  }
+  if (!done && old) {
+    (look.swatches || []).forEach(function (s) { if (!done && s.name === old.wn) { s.name = piece.wn; s.hex = piece.wh; done = true; } });
+  }
+  if (look.flatlay) {
+    var fdone = false;
+    look.flatlay.forEach(function (f) {
+      if (fdone) return;
+      if (srcInfo && srcInfo.garment && f.label === srcInfo.garment) { f.hex = piece.wh; fdone = true; }
+    });
+  }
+  /* Wardrobe piece lists move with the swap, so a saved swapped
+     look reopens with the pieces it actually shows. */
+  if (look.fwPieces && look.fwPieces.length) {
+    var appCat = { top: "Polos", bottom: "Trousers", shoes: "Shoes", layer: "Blazers" }[slotKey];
+    var closetItem = piece.cid && typeof closetItemById === "function" ? closetItemById(piece.cid) : null;
+    var replaced = false;
+    look.fwPieces.forEach(function (fp, i) {
+      if (replaced) return;
+      if (swapSlotForClosetCat(fp.category) === slotKey) {
+        look.fwPieces[i] = { id: piece.cid || piece.id, name: piece.name, photo: piece.img || (closetItem ? closetItem.photo || null : null), colourHex: piece.wh, category: closetItem ? closetItem.category : appCat };
+        replaced = true;
+      }
+    });
+    if (!replaced && slotKey === "bottom" && look.suggestedBottom) {
+      look.suggestedBottom = { name: piece.name, colour: piece.wn, hex: piece.wh, garment: { trousers: "Trousers", jeans: "Jeans", shorts: "Shorts", swim: "Shorts" }[piece.cat] || "Trousers" };
+    }
+  } else if (slotKey === "bottom" && look.suggestedBottom) {
+    look.suggestedBottom = { name: piece.name, colour: piece.wn, hex: piece.wh, garment: { trousers: "Trousers", jeans: "Jeans", shorts: "Shorts", swim: "Shorts" }[piece.cat] || "Trousers" };
+  }
+}
+function swapFindExistingRender(pieceIds) {
+  var key = pieceIds.slice().sort().join("+");
+  var pools = [];
+  if (typeof RENDER_POOL !== "undefined") pools = pools.concat(RENDER_POOL);
+  if (typeof fwLooks !== "undefined" && fwLooks) pools = pools.concat(fwLooks);
+  if (typeof savedLooks !== "undefined") pools = pools.concat(savedLooks);
+  for (var i = 0; i < pools.length; i++) {
+    var l = pools[i];
+    if (!l || l.swapState === "rendering") continue;
+    var m = swapMapForLook(l);
+    if (!m) continue;
+    var ids = Object.keys(m).map(function (s) { return m[s].piece.id; });
+    if (ids.slice().sort().join("+") === key) return l;
+  }
+  return null;
+}
+function pickSwap(i) {
+  var ctx = swapSheetCtx;
+  if (!ctx) return;
+  var cand = swapSheetCands[i];
+  if (!cand) return;
+  var src = ctx.look, slotKey = ctx.slot, fwIdx = ctx.fw;
+  var map = swapMapForLook(src);
+  if (!map || !map[slotKey]) { closeSwapSheet(); return; }
+  var newIds = {};
+  Object.keys(map).forEach(function (s) { newIds[s] = map[s].piece.id; });
+  newIds[slotKey] = cand.piece.id;
+  var watchId = swapWatchIdFor(src);
+  var idList = Object.keys(newIds).map(function (s) { return newIds[s]; });
+  var comboId = swapComboId(idList, watchId);
+  var look = JSON.parse(JSON.stringify(src));
+  look.id = newLookId();
+  look.version = (src.version || 1) + 1;
+  look.swapPieces = newIds;
+  look.swapComboId = comboId;
+  look.swapFromPhoto = swapDisplayPhoto(src);
+  look.imgAlt = "";
+  swapApplyPieceToLook(look, slotKey, cand.piece, map[slotKey], src);
+  /* Names that spelled out the old piece — a From-wardrobe
+     title is its pieces joined — name the new one instead. */
+  var oldPiece = map[slotKey].piece;
+  if (oldPiece && cand.piece.name !== oldPiece.name) {
+    if (look.title && look.title.indexOf(oldPiece.name) !== -1) look.title = look.title.replace(oldPiece.name, cand.piece.name);
+    if (look.desc && look.desc.indexOf(oldPiece.name) !== -1) look.desc = look.desc.replace(oldPiece.name, cand.piece.name);
+    if (look.anchorNames) look.anchorNames = look.anchorNames.map(function (n) { return n === oldPiece.name ? cand.piece.name : n; });
+  }
+  look.notes = ["Swapped the " + SWAP_SLOT_LABELS[slotKey].toLowerCase() + " — " + cand.piece.name + "."].concat(look.notes || []);
+  var readyUrl = lazyRenders[comboId] || null;
+  if (!readyUrl) {
+    var existing = swapFindExistingRender(idList);
+    if (existing && existing !== src) readyUrl = swapDisplayPhoto(existing);
+  }
+  closeSwapSheet();
+  if (readyUrl) {
+    look.img = readyUrl;
+    look.swapPhoto = readyUrl;
+    look.swapState = null;
+    look.fwRender = null;
+  } else {
+    look.img = look.swapFromPhoto;
+    look.swapPhoto = look.swapFromPhoto;
+    look.swapState = "rendering";
+    look.fwRender = null;
+    swapSubmitJob(look, newIds, watchId);
+    startSwapPoll(look);
+  }
+  if (fwIdx !== null && typeof closeFwLayer === "function") { closeFwLayer(); openLookLayer(look); }
+  else renderLookInline(look);
+}
+
+/* ---------- The render queue ---------- */
+function swapSyncKey() {
+  try { return (typeof SY !== "undefined" && SY && SY.key) ? SY.key : null; } catch (e) { return null; }
+}
+function swapSyncBase() {
+  try { return (typeof SYNC_URL !== "undefined" && SYNC_URL) ? SYNC_URL : "https://wardrobe-sync.dyacobs.workers.dev"; } catch (e) { return "https://wardrobe-sync.dyacobs.workers.dev"; }
+}
+function swapFetch(url, opts, ms) {
+  if (typeof syFetch === "function") return syFetch(url, opts, ms || 20000);
+  return fetch(url, opts);
+}
+function swapSubmitJob(look, idsBySlot, watchId) {
+  var key = swapSyncKey();
+  if (!key) return;
+  var pieces = Object.keys(idsBySlot).map(function (s) {
+    var p = PIECE_BY_ID[idsBySlot[s]];
+    return { id: p.id, slot: s, name: p.name };
+  });
+  swapFetch(swapSyncBase() + "/render-queue", {
+    method: "POST",
+    headers: { "authorization": "Bearer " + key, "content-type": "application/json" },
+    body: JSON.stringify({ comboId: look.swapComboId, pieces: pieces, watchId: watchId || "" })
+  }, 20000).catch(function () {});
+}
+/* Polling runs only while the swapped look's pop-out is on
+   screen: the tick itself checks, and stops the moment the
+   layer closes or another look takes its place. */
+var swapPoll = null;
+function startSwapPoll(look) {
+  stopSwapPoll();
+  if (!look || !look.swapComboId || !swapSyncKey()) return;
+  swapPoll = { comboId: look.swapComboId, imgFails: 0, timer: setInterval(swapPollTick, 20000) };
+}
+function stopSwapPoll() {
+  if (swapPoll) { clearInterval(swapPoll.timer); swapPoll = null; }
+}
+function swapPollTick() {
+  if (!swapPoll) return;
+  var layer = document.getElementById("look-layer");
+  if (!lookLayerOpen || !layer || layer.hidden || !currentLook || currentLook.swapComboId !== swapPoll.comboId || currentLook.swapState !== "rendering") { stopSwapPoll(); return; }
+  var comboId = swapPoll.comboId;
+  swapFetch(swapSyncBase() + "/render-queue/" + comboId, {
+    headers: { "authorization": "Bearer " + swapSyncKey() }
+  }, 20000).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    if (!j || !swapPoll || swapPoll.comboId !== comboId) return;
+    if (j.status === "done") {
+      var url = LAZY_RENDER_BASE + comboId + ".jpg";
+      var img = new Image();
+      img.onload = function () {
+        if (!swapPoll || swapPoll.comboId !== comboId) return;
+        stopSwapPoll();
+        lazyRenders[comboId] = url;
+        saveLazyRenders();
+        if (currentLook && currentLook.swapComboId === comboId) {
+          currentLook.img = url;
+          currentLook.swapPhoto = url;
+          currentLook.swapState = null;
+          if (lookLayerOpen) document.getElementById("look-layer-body").innerHTML = lookCardHTML(currentLook);
+        }
+        toast("Your combination is ready.");
+      };
+      img.onerror = function () {
+        if (!swapPoll || swapPoll.comboId !== comboId) return;
+        swapPoll.imgFails++;
+        if (swapPoll.imgFails >= 4) stopSwapPoll();
+      };
+      img.src = url;
+    } else if (j.status === "failed") {
+      stopSwapPoll();
+      if (currentLook && currentLook.swapComboId === comboId) {
+        currentLook.swapState = null;
+        currentLook.img = currentLook.swapFromPhoto || currentLook.img;
+        currentLook.swapPhoto = currentLook.img;
+        if (lookLayerOpen) document.getElementById("look-layer-body").innerHTML = lookCardHTML(currentLook);
+      }
+      toast("That render didn't come through — showing the original photo.");
+    }
+  }).catch(function () {});
+}
+
 function lookCardHTML(look, opts) {
   opts = opts || {};
   var refTag = look.refLook ? '<span class="pane-tag">Reference — ' + esc(look.imgInspo ? "your image" : ((look.iconId ? (iconById(look.iconId) || {}).name : "") || "icon")) + "</span>" : "";
-  var mediaPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + lookImg(look) + '"';
-  var media = '<div class="look-media single"><div class="pane"><img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '"' + mediaPop + ' />' + refTag + "</div></div>";
+  var cardImg = look.swapPhoto || lookImg(look);
+  var mediaPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + cardImg + '"';
+  var media = '<div class="look-media single"><div class="pane' + (look.swapState === "rendering" ? " swap-rendering" : "") + '"><img src="' + cardImg + '" alt="' + esc(look.imgAlt || "") + '"' + mediaPop + ' />' + refTag + (look.swapState === "rendering" ? '<div class="swap-render-line">Rendering this combination\u2026</div>' : "") + "</div></div>";
   var cardIcon = look.iconId ? iconById(look.iconId) : null;
   var cardBlend = look.blendId ? iconById(look.blendId) : null;
   var dirLine = cardIcon ? '<p class="dir-line">In the direction of <strong>' + esc(cardIcon.name) + "</strong> — " + esc(cardIcon.lane) + (cardBlend ? ', blended with <strong>' + esc(cardBlend.name) + "</strong> — " + esc(cardBlend.lane) : "") + "</p>" : "";
@@ -11530,6 +12068,7 @@ function lookCardHTML(look, opts) {
     (look.plate ? '<button type="button" class="btn-ghost" data-action="open-plate" data-plate="' + look.plate + '">Open Plate ' + look.plate + "</button>" : "") +
     '<button type="button" class="btn-ghost" data-action="share-look">Share as image</button>' +
     "</div>" +
+    swapSectionHTML(look) +
     drops +
     "</div></article>";
 }
@@ -11541,6 +12080,7 @@ function lookCardHTML(look, opts) {
 var lookLayerOpen = false;
 var lookLayerStash = null;
 function openLookLayer(look) {
+  if (typeof swapPoll !== "undefined" && swapPoll && (!look || look.swapComboId !== swapPoll.comboId)) stopSwapPoll();
   if (!lookLayerOpen) lookLayerStash = { options: currentOptions, look: currentLook };
   lookLayerOpen = true;
   currentLook = look;
@@ -11551,6 +12091,7 @@ function openLookLayer(look) {
   layer.scrollTop = 0;
 }
 function closeLookLayer() {
+  if (typeof stopSwapPoll === "function") stopSwapPoll();
   if (!lookLayerOpen) return;
   lookLayerOpen = false;
   var layer = document.getElementById("look-layer");
@@ -17720,7 +18261,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders"];
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
@@ -17742,7 +18283,7 @@ document.getElementById("data-export").addEventListener("click", function () {
    ever said when it is true. */
 var BACKUP_VERSION = 1;
 var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "recentlyRemoved", "dealtImgs", "weekPlan"];
-var BACKUP_OBJECT_KEYS = ["profile", "overrides"];
+var BACKUP_OBJECT_KEYS = ["profile", "overrides", "lazyRenders"];
 function readBackupFile(text) {
   var payload = JSON.parse(text);
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new Error("not-backup");
@@ -20899,6 +21440,7 @@ function openFwOutfit(idx) {
     hero + fwWatch +
     '<div class="fw-pieces">' + figs + '</div>' +
     '<p class="fw-outfit-note">' + esc((look.notes || []).join(" ")) + '</p>' +
+    swapSectionHTML(look, idx) +
     '<div class="look-actions">' +
     '<button type="button" class="btn-ghost" data-fw-like="' + idx + '">I like it</button>' +
     '<button type="button" class="btn-ghost" data-fw-save="' + idx + '">Save</button>' +
