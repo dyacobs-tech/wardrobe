@@ -1551,6 +1551,14 @@
       .option-card .fw-photos { display: flex; gap: 2px; flex: none; }
       .option-card .fw-photos img { width: calc(50% - 1px); aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; margin: 0; flex: none; }
       .option-card .fw-photos.one img { width: 100%; aspect-ratio: 3 / 2; }
+      .option-card .fw-render { display: block; flex: none; }
+      .option-card .fw-render img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; margin: 0; display: block; }
+      .fw-outfit .fw-hero { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; display: block; border: 1px solid var(--border); cursor: zoom-in; }
+      /* Ideas source selector — three boxes at the top of Ideas */
+      .src-seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+      .src-seg-btn { min-height: 36px; padding: 5px 4px; font-size: 11.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; line-height: 1.25; }
+      .src-seg-btn[aria-pressed="true"] { background: color-mix(in srgb, var(--brass) 24%, var(--surface)); border-color: var(--brass); color: var(--text); }
+      .from-wardrobe[hidden] { display: none; }
       .option-card .fw-pair { color: var(--brass); font-weight: 600; }
       #fw-detail[hidden] { display: none; }
       .fw-outfit { padding: 22px; margin-top: 18px; display: grid; gap: 12px; }
@@ -1772,6 +1780,11 @@
       <section id="panel-studio" role="tabpanel" aria-labelledby="tab-studio" hidden>
         <div class="studio-grid">
           <div>
+            <div class="src-seg" id="ideas-source-seg" role="group" aria-label="Ideas source — From wardrobe only, From inspo only, or Combo">
+              <button type="button" class="src-seg-btn" data-source="wardrobe" aria-pressed="false">From wardrobe only</button>
+              <button type="button" class="src-seg-btn" data-source="inspo" aria-pressed="false">From inspo only</button>
+              <button type="button" class="src-seg-btn" data-source="combo" aria-pressed="true">Combo</button>
+            </div>
             <div class="studio-home-bar">
               <button type="button" class="btn-accent" id="studio-deal">Give me ideas</button>
               <button type="button" class="btn-ghost" id="studio-customize" aria-expanded="false" aria-controls="studio-form">Customize</button>
@@ -2148,7 +2161,7 @@
         </div>
         <div id="brand-list">
           <p class="brand-group-head">Heritage knitwear</p>
-          <a class="brand-row" href="https://www.saint-james.com/" target="_blank" rel="noopener" data-brand-search="saint james normandy france breton mariniere sailor jumper knitwear wool">
+          <a class="brand-row" href="https://us.saint-james.com/" target="_blank" rel="noopener" data-brand-search="saint james normandy france breton mariniere sailor jumper knitwear wool">
             <span class="b-main"><span class="b-name">Saint James</span><span class="b-meta">Normandy, France · est. 1889 — the Breton sailor jumper and marinière, pure new wool, knitted near Mont Saint-Michel.</span></span><span class="b-shop">Shop ↗</span>
           </a>
           <a class="brand-row" href="https://www.sns-herning.com/" target="_blank" rel="noopener" data-brand-search="s.n.s. herning sns denmark fisherman sweater bubble knit knitwear">
@@ -8472,8 +8485,12 @@ function isTaupeLook(look) {
   return !!look && /taupe/i.test(((look.desc || "") + " " + (look.title || "")));
 }
 function lookImg(look) {
-  /* A wardrobe look's image is its first piece's own photograph —
-     never a pool render standing in for pieces it does not show. */
+  /* A wardrobe look with a verified render shows that render —
+     the photograph of him wearing exactly its own top + shoes
+     pairing. Without one, its image is its first piece's own
+     photograph — never a pool render standing in for pieces it
+     does not show. */
+  if (look && look.fwRender) return look.fwRender;
   if (look && look.fwPieces && look.fwPieces.length) {
     for (var fi = 0; fi < look.fwPieces.length; fi++) { if (look.fwPieces[fi].photo) return look.fwPieces[fi].photo; }
   }
@@ -9999,6 +10016,281 @@ function weatherShoeScore(item, temp, rainy) {
   if (rainy && /suede|espadrille|furlane|velvet/.test(n)) s -= 2;
   return s;
 }
+/* ---------- Verified wardrobe renders — him, in his own pieces ----------
+   One verified mirror-edit render per closet top: the photograph
+   of him wearing exactly that top with exactly those shoes and
+   the suggested bottom named in the entry. Keyed by the pairing
+   — top seed id + shoe seed id — because a render may only ever
+   be shown for the exact pairing it was verified for, never
+   substituted for another pairing. Files are JPEGs at the same
+   standard as the app's other photographs of him. */
+var WARDROBE_RENDER_PAIRS = {
+ "seed-isaia-polo|seed-loropiana-white-sneakers": {
+  "img": "assets/photos/84c14449aa3d.jpg",
+  "bottom": "Stone linen trousers, straight leg"
+ },
+ "seed-alexmill-polo|seed-armani-cream-loafers": {
+  "img": "assets/photos/bf9b66758123.jpg",
+  "bottom": "Sand linen trousers, straight leg"
+ },
+ "seed-loropiana-charcoal-polo|seed-balenciaga-black-loafers": {
+  "img": "assets/photos/05b65567e9c3.jpg",
+  "bottom": "Charcoal-grey straight-leg trousers with a black belt"
+ },
+ "seed-cucinelli-charcoal-polo|seed-grey-court-sneakers": {
+  "img": "assets/photos/0d998cfee234.jpg",
+  "bottom": "Dark indigo straight-leg jeans"
+ },
+ "seed-sunspel-polo|seed-loropiana-grey-sneakers": {
+  "img": "assets/photos/5afea7d494a4.jpg",
+  "bottom": "Navy straight-leg chinos"
+ },
+ "seed-cucinelli-breton-polo|seed-vibi-navy": {
+  "img": "assets/photos/1d715ea89aeb.jpg",
+  "bottom": "White tailored shorts"
+ },
+ "seed-cucinelli-stripe-polo|seed-stubbs-navy-slipons": {
+  "img": "assets/photos/5e673c20500a.jpg",
+  "bottom": "Stone straight-leg chinos"
+ },
+ "seed-cucinelli-beige-polo|seed-edwardgreen-tan-loafers": {
+  "img": "assets/photos/573e48ce12b7.jpg",
+  "bottom": "Cream straight-leg trousers"
+ },
+ "seed-cucinelli-cream-tipped-polo|seed-loropiana-summer-walk": {
+  "img": "assets/photos/0e318618283b.jpg",
+  "bottom": "Khaki straight-leg chinos"
+ },
+ "seed-cucinelli-brown-stripe-polo|seed-baudoin-rust-tassel-loafers": {
+  "img": "assets/photos/250ab78998c0.jpg",
+  "bottom": "Cream linen trousers, straight leg"
+ },
+ "seed-cucinelli-ribbed-polo|seed-edwardgreen-tan-loafers": {
+  "img": "assets/photos/fb122f01d41e.jpg",
+  "bottom": "White straight-leg jeans"
+ },
+ "seed-missoni-navy-polo|seed-loropiana-white-sneakers": {
+  "img": "assets/photos/a25b8bf1b12c.jpg",
+  "bottom": "White straight-leg jeans"
+ },
+ "seed-cucinelli-navy-polo|seed-loropiana-summer-walk": {
+  "img": "assets/photos/1223075c2c5e.jpg",
+  "bottom": "Stone straight-leg chinos"
+ },
+ "seed-loropiana-navy-polo|seed-belgian-darkbrown-lizard-loafers": {
+  "img": "assets/photos/b1b830a12991.jpg",
+  "bottom": "Cream straight-leg trousers"
+ },
+ "seed-zegna-polo|seed-adidas-sneakers": {
+  "img": "assets/photos/db005b056d21.jpg",
+  "bottom": "Charcoal-grey straight-leg trousers"
+ },
+ "seed-theory-polo|seed-grey-court-sneakers": {
+  "img": "assets/photos/2ccf278f70dd.jpg",
+  "bottom": "Light-wash straight-leg jeans"
+ },
+ "seed-loropiana-sage-polo|seed-loropiana-espadrilles": {
+  "img": "assets/photos/1a1178291b82.jpg",
+  "bottom": "White tailored shorts"
+ },
+ "seed-cucinelli-olive-polo|seed-belgian-olive-loafers": {
+  "img": "assets/photos/463657bbf046.jpg",
+  "bottom": "Stone straight-leg chinos"
+ },
+ "seed-skyblue-polo|seed-loropiana-espadrilles": {
+  "img": "assets/photos/a7eb2f532dfd.jpg",
+  "bottom": "White linen shorts"
+ },
+ "seed-cucinelli-dustyblue-polo|seed-loropiana-flexy-sneakers": {
+  "img": "assets/photos/0fb2de64db01.jpg",
+  "bottom": "White straight-leg jeans"
+ },
+ "seed-loropiana-tipped-polo|seed-stubbs-slippers": {
+  "img": "assets/photos/ae1cfaeba973.jpg",
+  "bottom": "White straight-leg chinos"
+ },
+ "seed-cucinelli-skyblue-polo|seed-loropiana-white-sneakers": {
+  "img": "assets/photos/64d7069e876e.jpg",
+  "bottom": "Navy tailored shorts"
+ },
+ "seed-cucinelli-terracotta-polo|seed-vibi-rust-corduroy-furlane": {
+  "img": "assets/photos/f956dfe4f256.jpg",
+  "bottom": "Cream tailored shorts"
+ },
+ "seed-cucinelli-burgundy-polo|seed-baudoin-brown-leather-loafers": {
+  "img": "assets/photos/8d19b7bee0a7.jpg",
+  "bottom": "Stone straight-leg trousers"
+ },
+ "seed-isaia-burgundy-polo|seed-belgian-black-velvet-loafers": {
+  "img": "assets/photos/4392594ee6c0.jpg",
+  "bottom": "Charcoal straight-leg trousers"
+ },
+ "seed-missoni-burgundy-polo|seed-edwardgreen-darkbrown-loafers": {
+  "img": "assets/photos/8152074ed17e.jpg",
+  "bottom": "Dark indigo straight-leg jeans"
+ },
+ "seed-cucinelli-slate-polo|seed-loropiana-grey-sneakers": {
+  "img": "assets/photos/2b8ea1f27191.jpg",
+  "bottom": "Navy straight-leg chinos"
+ },
+ "seed-hermes-navy-polo|seed-gucci-twotone-loafers": {
+  "img": "assets/photos/5170837573f5.jpg",
+  "bottom": "White straight-leg trousers"
+ },
+ "seed-hermes-black-polo|seed-gucci-green-eel-loafers": {
+  "img": "assets/photos/debb9bce9867.jpg",
+  "bottom": "Grey straight-leg trousers"
+ },
+ "seed-cucinelli-navy-pique-grey-polo|seed-grey-court-sneakers": {
+  "img": "assets/photos/abe7452adc4c.jpg",
+  "bottom": "Light-wash straight-leg jeans"
+ },
+ "seed-kiton-navy-polo|seed-fortela-concho-slippers": {
+  "img": "assets/photos/1589e8e9192d.jpg",
+  "bottom": "Cream straight-leg chinos"
+ },
+ "seed-fortela-navy-polo|seed-vibi-tan-velvet-furlane": {
+  "img": "assets/photos/ccb06fbe1ae1.jpg",
+  "bottom": "Khaki tailored shorts"
+ },
+ "seed-octobre-tee|seed-stubbs-navy-slipons": {
+  "img": "assets/photos/489e303c526c.jpg",
+  "bottom": "White straight-leg jeans"
+ },
+ "seed-zegna-tee|seed-loropiana-summer-walk": {
+  "img": "assets/photos/d36a84c34073.jpg",
+  "bottom": "White straight-leg jeans"
+ },
+ "seed-whitesville-navy|seed-loropiana-white-sneakers": {
+  "img": "assets/photos/94931bd9219b.jpg",
+  "bottom": "Khaki tailored shorts"
+ },
+ "seed-orlebar-tee|seed-loropiana-espadrilles": {
+  "img": "assets/photos/0eb5afe5d6b3.jpg",
+  "bottom": "Navy tailored shorts"
+ },
+ "seed-theory-navy|seed-grey-court-sneakers": {
+  "img": "assets/photos/3e599f81ceb5.jpg",
+  "bottom": "Stone straight-leg chinos"
+ },
+ "seed-corridor-tee|seed-adidas-sneakers": {
+  "img": "assets/photos/2f67d0358723.jpg",
+  "bottom": "Olive straight-leg chinos"
+ },
+ "seed-theory-charcoal|seed-loropiana-grey-sneakers": {
+  "img": "assets/photos/f9a2eb11335d.jpg",
+  "bottom": "Black straight-leg jeans"
+ },
+ "seed-cucinelli-grey|seed-loropiana-flexy-sneakers": {
+  "img": "assets/photos/16233c36a9bc.jpg",
+  "bottom": "Light-wash straight-leg jeans"
+ },
+ "seed-frame-tee|seed-edwardgreen-tan-loafers": {
+  "img": "assets/photos/8dd4328f2e11.jpg",
+  "bottom": "White straight-leg jeans"
+ },
+ "seed-unbound-tee|seed-vibi-mustard": {
+  "img": "assets/photos/8af6ad740bb6.jpg",
+  "bottom": "Olive tailored shorts"
+ },
+ "seed-acne-tee|seed-loropiana-runners": {
+  "img": "assets/photos/d26811272054.jpg",
+  "bottom": "Light-wash straight-leg jeans"
+ },
+ "seed-altea-tee|seed-loropiana-summer-walk": {
+  "img": "assets/photos/bf6c6c07c55d.jpg",
+  "bottom": "White tailored shorts"
+ },
+ "seed-merz-olive|seed-belgian-camo-loafers": {
+  "img": "assets/photos/d11a58eb1564.jpg",
+  "bottom": "Khaki straight-leg chinos"
+ },
+ "seed-cucinelli-stripe|seed-stubbs-slippers": {
+  "img": "assets/photos/4300f775016a.jpg",
+  "bottom": "Navy tailored shorts"
+ },
+ "seed-whitesville-grey|seed-loropiana-white-sneakers": {
+  "img": "assets/photos/9bc6f3746db1.jpg",
+  "bottom": "Dark indigo straight-leg jeans"
+ },
+ "seed-asket-tee|seed-belgian-olive-loafers": {
+  "img": "assets/photos/84ec24221103.jpg",
+  "bottom": "Khaki tailored shorts"
+ },
+ "seed-alexmill-tee|seed-edwardgreen-tan-loafers": {
+  "img": "assets/photos/7dbe87308c95.jpg",
+  "bottom": "Light-wash straight-leg jeans"
+ },
+ "seed-massimo-white|seed-loropiana-summer-walk": {
+  "img": "assets/photos/055872334400.jpg",
+  "bottom": "Stone tailored shorts"
+ },
+ "seed-toddsnyder-yellow|seed-loropiana-white-sneakers": {
+  "img": "assets/photos/16a6d42c9ada.jpg",
+  "bottom": "Navy tailored shorts"
+ },
+ "seed-zigzag-tee|seed-vibi-red-velvet-furlane": {
+  "img": "assets/photos/ada428083ea5.jpg",
+  "bottom": "Navy straight-leg chinos"
+ },
+ "seed-cucinelli-white-tee|seed-belgian-brown-lizard-loafers": {
+  "img": "assets/photos/2896d57f59df.jpg",
+  "bottom": "Cream straight-leg trousers"
+ },
+ "seed-stefanoricci-red-tee|seed-belgian-black-velvet-loafers": {
+  "img": "assets/photos/145701d3499d.jpg",
+  "bottom": "Black straight-leg trousers"
+ },
+ "seed-sfc-knit|seed-balenciaga-black-loafers": {
+  "img": "assets/photos/c336db95606d.jpg",
+  "bottom": "Charcoal straight-leg trousers"
+ },
+ "seed-buckmason-oatmeal|seed-loropiana-summer-walk": {
+  "img": "assets/photos/d2750c032417.jpg",
+  "bottom": "Dark indigo straight-leg jeans"
+ },
+ "seed-buckmason-taupe|seed-edwardgreen-darkbrown-loafers": {
+  "img": "assets/photos/43df118b9c8f.jpg",
+  "bottom": "Cream straight-leg trousers"
+ },
+ "seed-massimo-brown|seed-baudoin-rust-tassel-loafers": {
+  "img": "assets/photos/28c8648007e4.jpg",
+  "bottom": "Stone straight-leg chinos"
+ },
+ "seed-canali-charcoal-vest|seed-adidas-sneakers": {
+  "img": "assets/photos/3e894fa41071.jpg",
+  "bottom": "Black straight-leg jeans"
+ },
+ "seed-zanone-navy-vest|seed-belgian-brown-lizard-loafers": {
+  "img": "assets/photos/7417cab6256c.jpg",
+  "bottom": "Stone straight-leg chinos"
+ },
+ "seed-cucinelli-safari-shirt|seed-edwardgreen-darkbrown-loafers": {
+  "img": "assets/photos/c9311ec8b22e.jpg",
+  "bottom": "Khaki straight-leg chinos with a brown belt"
+ },
+ "seed-hermes-white-polo|seed-loropiana-summer-walk": {
+  "img": "assets/photos/72982780172a.jpg",
+  "bottom": "Navy tailored trousers, straight leg"
+ }
+};
+function wardrobeRenderFor(topId, shoeId) {
+  if (!topId || !shoeId) return null;
+  return WARDROBE_RENDER_PAIRS[topId + "|" + shoeId] || null;
+}
+/* A manifest bottom description ("Stone linen trousers, straight
+   leg") as a suggested-bottom object in the shape the closet
+   engine already deals in. */
+function manifestBottom(desc) {
+  var d = (desc || "").trim();
+  var t = d.toLowerCase();
+  var garment = /jean/.test(t) ? "Jeans" : /short/.test(t) ? "Shorts" : "Trousers";
+  var colour = "Stone", hex = "#c9bda6";
+  var table = [["dark indigo", "Indigo", "#3d5a80"], ["light-wash", "Light wash", "#7d94b5"], ["light wash", "Light wash", "#7d94b5"], ["washed black", "Washed black", "#33302c"], ["charcoal", "Charcoal", "#3c3a38"], ["black", "Black", "#26241f"], ["white", "White", "#f2eee3"], ["cream", "Cream", "#e7dcc0"], ["navy", "Navy", "#232c44"], ["khaki", "Khaki", "#b3a284"], ["olive", "Olive", "#6f7350"], ["sand", "Sand", "#d8c6a5"], ["stone", "Stone", "#c9bda6"], ["grey", "Grey", "#8a8d8f"], ["gray", "Grey", "#8a8d8f"], ["indigo", "Indigo", "#3d5a80"]];
+  for (var ci = 0; ci < table.length; ci++) { if (t.indexOf(table[ci][0]) !== -1) { colour = table[ci][1]; hex = table[ci][2]; break; } }
+  return { name: d.charAt(0).toUpperCase() + d.slice(1), colour: colour, hex: hex, garment: garment };
+}
+
 function buildClosetLooks(opts) {
   var wx = (opts && typeof opts.temp === "number") ? { temp: opts.temp, rainy: !!opts.rainy } : null;
   var avail = wardrobeItems.filter(function (i) { return !i.laundry; });
@@ -10029,24 +10321,53 @@ function buildClosetLooks(opts) {
   }
   var combos = [];
   if (bottoms.length) {
-    /* His own bottoms are catalogued: build on them, as before. */
-    tops.forEach(function (t) { bottoms.forEach(function (b) { combos.push([t, b]); }); });
+    /* His own bottoms are catalogued: build on them, as before.
+       No render is attached in this branch — a verified render
+       shows its own suggested bottom, never one of his own. */
+    tops.forEach(function (t) { bottoms.forEach(function (b) { combos.push([t, b, null]); }); });
     if (!wx) shuffleArr(combos);
   } else {
     /* Interim rule (his call): every outfit anchors on HIS top and
-       HIS shoes; a suggested bottom completes it below. */
-    var shuffledTops = tops.slice();
-    if (!wx) shuffleArr(shuffledTops);
-    shuffledTops.forEach(function (t, ti) { combos.push([t, shoes[ti % shoes.length]]); });
+       HIS shoes; a suggested bottom completes it below. Pairings
+       come first from the verified render pool: a render exists
+       for exactly one top + shoes pairing per top, and a look may
+       only ever carry the render recorded for its own pairing.
+       Tops with no render keep the rotation pairing and deal
+       without a photograph of him, as before. */
+    var byId = {};
+    avail.forEach(function (it) { byId[it.id] = it; });
+    var renderCombos = [], coveredTops = {};
+    Object.keys(WARDROBE_RENDER_PAIRS).forEach(function (key) {
+      var ids = key.split("|");
+      var rt = byId[ids[0]], rs = byId[ids[1]];
+      if (rt && rs) { renderCombos.push([rt, rs, WARDROBE_RENDER_PAIRS[key]]); coveredTops[rt.id] = 1; }
+    });
+    if (wx) {
+      renderCombos.sort(function (a, b) {
+        var d = (weatherTopScore(b[0], wx.temp, wx.rainy) + weatherShoeScore(b[1], wx.temp, wx.rainy)) - (weatherTopScore(a[0], wx.temp, wx.rainy) + weatherShoeScore(a[1], wx.temp, wx.rainy));
+        return d !== 0 ? d : (a[0].name < b[0].name ? -1 : 1);
+      });
+      if (renderCombos.length > 1) {
+        var rr = ((salt % renderCombos.length) + renderCombos.length) % renderCombos.length;
+        renderCombos = renderCombos.slice(rr).concat(renderCombos.slice(0, rr));
+      }
+    } else {
+      shuffleArr(renderCombos);
+    }
+    combos = renderCombos;
+    var restTops = tops.filter(function (t) { return !coveredTops[t.id]; });
+    if (!wx) shuffleArr(restTops);
+    restTops.forEach(function (t, ti) { if (shoes.length) combos.push([t, shoes[ti % shoes.length], null]); });
   }
   return combos.slice(0, 6).map(function (pair, i) {
     var pieces = [pair[0], pair[1]];
+    var renderEntry = pair[2] || null;
     var hasShoe = pieces.some(function (p) { return p.category === "Shoes"; });
     var shoe = hasShoe ? pieces.filter(function (p) { return p.category === "Shoes"; })[0] : null;
-    if (shoes.length && !hasShoe) { shoe = shoes[i % shoes.length]; pieces.push(shoe); }
+    if (shoes.length && !hasShoe) { shoe = shoes[i % shoes.length]; pieces.push(shoe); if (renderEntry && (!shoe || shoe.id !== pieces[1].id)) renderEntry = null; }
     if (shades.length) pieces.push(shades[i % shades.length]);
     var hasBottom = pieces.some(function (p) { return ["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(p.category) !== -1; });
-    var suggested = hasBottom ? null : suggestBottomFor(pieces[0], shoe, i * 7 + pieces[0].name.length, wx);
+    var suggested = hasBottom ? null : (renderEntry ? manifestBottom(renderEntry.bottom) : suggestBottomFor(pieces[0], shoe, i * 7 + pieces[0].name.length, wx));
     var swatches = [], seenHex = {};
     pieces.forEach(function (p) {
       if (p.colourHex && !seenHex[p.colourHex]) {
@@ -10069,7 +10390,8 @@ function buildClosetLooks(opts) {
       desc: names.join(" with ") + (suggested ? ", completed with " + suggested.name.toLowerCase() + " (suggested)" : ""),
       iconId: null, blendId: null, basis: "both", version: i + 1, plate: null, paletteName: null,
       img: null,
-      imgAlt: "",
+      fwRender: renderEntry ? renderEntry.img : null,
+      imgAlt: renderEntry ? ("You wearing " + pieces[0].name + (shoe ? " with " + shoe.name : "") + (suggested ? ", and " + suggested.name.toLowerCase() : "")) : "",
       swatches: swatches,
       flatlay: pieces.map(function (p) { return { hex: p.colourHex, label: cap(CLOSET_GARMENT[p.category] || "Piece"), detail: (p.colourName || "").split("·")[0].trim().toLowerCase() }; }).concat(suggested ? [{ hex: suggested.hex, label: cap(suggested.garment), detail: suggested.colour.toLowerCase() + " (suggested)" }] : []),
       notes: suggested
@@ -10531,7 +10853,12 @@ function runDealProgress(done) {
   /* Backstop: whatever happens above, this deal lands and frees the button. */
   setTimeout(function () { if (dealing && runDealProgress.seq === dealSeq) finish(); }, duration + 2500);
 }
+/* Set by the Ideas source selector: a source tap re-deals
+   silently — no toast, no popup; the dealt ideas are the only
+   feedback. Reset on every deal. */
+var dealSilent = false;
 function doStyleFromForm() {
+  var silent = dealSilent; dealSilent = false;
   try {
     var desc = document.getElementById("desc").value.trim();
     var occasion = document.getElementById("occasion").value;
@@ -10564,16 +10891,16 @@ function doStyleFromForm() {
     if (imgEntry) {
       var imgLooks = buildImageLooks(imgEntry, userDesc, occasion, season);
       renderOptions(imgLooks, { desc: userDesc || imgEntry.desc || "From your image", occasion: occasion, season: season, opts: { basis: studioBasis, source: "inspo", inspoImageId: imgEntry.id } });
-      toast("Six takes built from your image.");
+      if (!silent) toast("Six takes built from your image.");
       return;
     }
     renderOptions(buildSixLooks(finalDesc, occasion, season, opts), { desc: finalDesc, occasion: occasion, season: season, opts: opts });
-    toast("Six takes created — " + (studioSource === "wardrobe" ? "only from your wardrobe." : studioSource === "inspo" ? "only inspo." : "combo: yours + pieces to buy."));
+    if (!silent) toast("Six takes created — " + (studioSource === "wardrobe" ? "only from your wardrobe." : studioSource === "inspo" ? "only inspo." : "combo: yours + pieces to buy."));
   } catch (err) {
     /* Create must never fail silently: deal six instead. */
     try {
       renderOptions(buildSixLooks("A surprise pick from the book", "", "", { basis: studioBasis, source: studioSource }), { desc: "A surprise pick from the book", occasion: "", season: "", opts: { basis: studioBasis, source: studioSource } });
-      toast("Six takes created.");
+      if (!silent) toast("Six takes created.");
     } catch (e2) {
       toast("That didn't take — tap Create look again.");
     }
@@ -10684,6 +11011,12 @@ document.getElementById("look-result").addEventListener("click", function (e) {
          card — render or reference — that is on screen right now. */
       ropts.excludeCards = prevImgs;
       if (typeof studioSource !== "undefined" && !ropts.source) ropts.source = studioSource;
+      if (ropts.source === "wardrobe") {
+        /* A wardrobe hand re-deals from the closet itself — the
+           verified render looks — never from the inspo engine. */
+        var wcl = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
+        if (wcl && wcl.length) { renderOptions(wcl, lastSixRequest); toast("Six more ideas."); return; }
+      }
       renderOptions(buildSixLooks(lastSixRequest.desc, lastSixRequest.occasion, lastSixRequest.season, ropts), lastSixRequest);
       toast("Six more ideas.");
     }
@@ -14299,16 +14632,20 @@ function openingLook() {
     delete restored._seedId;
     return restored;
   }
-  /* Fresh open: deal a new opening look. Today's own source is
-     the default that matters here, and its default is Only my
-     wardrobe: the outfit of the day is BUILT from his Closet
-     (his pieces, shown as their own photographs), then refined
-     by the day's weather when it lands. Only inspo / Combo —
-     chosen on the Today selector — still deal from the render
-     deck, under the no-repeat rules below. */
+  /* Fresh open: deal a new opening look in the saved source
+     mode — one setting shared by the Today "Build from" selector
+     and the Ideas source boxes, default Combo. Only my wardrobe
+     BUILDS the outfit of the day from his Closet (the verified
+     render of him in the dealt pairing, when it has one), then
+     refines it by the day's weather when it lands. Only inspo /
+     Combo deal from the render deck, under the no-repeat rules
+     below. */
   var savedSrc = null;
   try { savedSrc = store.get("todaySource", null); } catch (e) {}
-  if (savedSrc !== "inspo" && savedSrc !== "combo" && savedSrc !== "wardrobe") savedSrc = "wardrobe";
+  if (savedSrc !== "inspo" && savedSrc !== "combo" && savedSrc !== "wardrobe") {
+    try { var ss0 = store.get("studioSettings", null); savedSrc = ss0 && ss0.source; } catch (e) {}
+  }
+  if (savedSrc !== "inspo" && savedSrc !== "combo" && savedSrc !== "wardrobe") savedSrc = "combo";
   if (savedSrc === "wardrobe" && typeof buildClosetLooks === "function") {
     var clw = buildClosetLooks();
     if (clw && clw.length) {
@@ -14345,9 +14682,20 @@ function renderToday() {
   var img = document.getElementById("today-img");
   var collage = document.getElementById("today-collage");
   var heroPieces = (todayLook.fwPieces || []).filter(function (p) { return p.photo; });
-  if (heroPieces.length) {
-    /* A wardrobe hero is his actual pieces — their own photographs,
-       never a render of some other outfit wearing their names. */
+  if (todayLook.fwRender) {
+    /* The dealt top has a verified render: the hero is him wearing
+       this exact outfit — his top, his shoes, the suggested
+       bottom — tappable to full size like every photo of him. */
+    if (collage) { collage.hidden = true; collage.innerHTML = ""; }
+    img.hidden = false;
+    img.src = todayLook.fwRender;
+    img.alt = todayLook.imgAlt || "";
+    img.setAttribute("data-popout", todayLook.fwRender);
+    img.setAttribute("data-popout-alt", todayLook.imgAlt || "");
+  } else if (heroPieces.length) {
+    /* No render for this pairing: his actual pieces — their own
+       photographs, never a render of some other outfit wearing
+       their names. */
     img.hidden = true;
     if (collage) {
       collage.innerHTML = heroPieces.slice(0, 3).map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" />'; }).join("");
@@ -14520,7 +14868,11 @@ function setCurrentLoc(loc, silent) {
      empty closet or an inspo/combo Today. */
   var locSrc = null;
   try { locSrc = store.get("todaySource", null); } catch (e) {}
-  var locCloset = (locSrc !== "inspo" && locSrc !== "combo" && typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
+  if (locSrc !== "inspo" && locSrc !== "combo" && locSrc !== "wardrobe") {
+    try { var ss1 = store.get("studioSettings", null); locSrc = ss1 && ss1.source; } catch (e) {}
+  }
+  if (locSrc !== "inspo" && locSrc !== "combo" && locSrc !== "wardrobe") locSrc = "combo";
+  var locCloset = (locSrc === "wardrobe" && typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
   if (locCloset && locCloset.length) {
     todaySeedId = locCloset[0].id;
     todayLook = locCloset[0];
@@ -14585,7 +14937,7 @@ function initToday() {
   recordDealt([todayLook.img]);
   renderToday();
   /* The Today selector shows the mode the hero was actually
-     dealt in — on a default open that is Only my wardrobe. */
+     dealt in — the shared saved source mode, Combo by default. */
   var dealtSrc = todayLook && todayLook.source;
   if (dealtSrc) {
     document.querySelectorAll("#today-source-row [data-source]").forEach(function (b) {
@@ -14596,11 +14948,12 @@ function initToday() {
   fetchWeather();
 }
 /* The hero deals in the same three source modes as Ideas:
-   Only my wardrobe deals a closet outfit (his top + his shoes,
-   shown as their own photographs, with a suggested bottom);
-   Only inspo deals a photograph with nothing pulled from the
-   closet; Combo (the default) anchors the photograph in a piece
-   he owns. */
+   Only my wardrobe deals a closet outfit (his top + his shoes —
+   the verified render of him wearing them when the pairing has
+   one, their own photographs when it does not — with a suggested
+   bottom); Only inspo deals a photograph with nothing pulled
+   from the closet; Combo (the default) anchors the photograph
+   in a piece he owns. */
 function dealHeroForSource() {
   var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
   if (src === "wardrobe" && typeof buildClosetLooks === "function") {
@@ -15017,14 +15370,14 @@ buildFindBudgetOpts();
    The researched product catalogue, embedded as data: matching
    reads only SHOP_CATALOGUE, so adding a SKU later is a data
    edit. Prices were checked on the retailers' live pages on
-   the checked date; two Mr Porter entries expose no image URL,
-   so their rows render without a thumbnail — never a
+   the checked date; entries whose retailer exposes no image
+   URL render as text-only rows without a thumbnail — never a
    placeholder photo. Entering Find it from a look (the Today
    hero, a look's detail page, a saved look) opens this page in
    look mode with the look carried in; the Find it tab itself
    does the same with the current Today hero look, and the
    free-form find sits behind "✕ Clear look". */
-var SHOP_CATALOGUE_CHECKED = "Nov 15, 2026";
+var SHOP_CATALOGUE_CHECKED = "Nov 16, 2026";
 var SHOP_CATALOGUE = [
   {"brand": "Entire Studios", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262940M201005_1/entire-studios-navy-knit-cashmere-crewneck-sweater.jpg", "keys": ["navy", "crew-neck", "knit", "sweater", "cashmere"], "name": "Navy Knit Cashmere Crewneck Sweater", "price": 350, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/entire-studios/navy-knit-cashmere-crewneck-sweater/19608331"},
   {"brand": "Suitsupply", "cat": "knitwear", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-default-mobile/f_auto,q_auto,w_1290/products/knitwear/default/winter/kcv10007n01_1", "keys": ["navy", "crew-neck", "knit", "sweater", "wool"], "name": "Navy Crewneck in Pure Wool", "price": 159, "retailer": "Suitsupply", "tier": "value", "url": "https://suitsupply.com/en-us/men/knitwear/navy-crewneck/KCV10007N01.html"},
@@ -15037,7 +15390,7 @@ var SHOP_CATALOGUE = [
   {"brand": "We11done", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262327M202038_1/we11done-navy-chunky-embroidered-quarter-zip-sweater.jpg", "keys": ["navy", "quarter-zip", "zip-neck", "knit", "sweater"], "name": "Navy Chunky Embroidered Quarter-Zip Sweater", "price": 600, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/we11done/navy-chunky-embroidered-quarter-zip-sweater/19773341"},
   {"brand": "RRL", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262435M200009_1/rrl-navy-wool-shawl-cardigan.jpg", "keys": ["navy", "cardigan", "shawl", "knit"], "name": "Navy Wool Shawl Cardigan", "price": 1200, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/rrl/navy-wool-shawl-cardigan/19146601"},
   {"brand": "RRL", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262435M200007_1/rrl-navy-shawl-cotton-cardigan.jpg", "keys": ["navy", "cardigan", "shawl", "knit"], "name": "Navy Shawl Cotton Cardigan", "price": 495, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/rrl/navy-shawl-cotton-cardigan/19146581"},
-  {"brand": "LEMAIRE", "cat": "top", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262646M211001_1/lemaire-off-white-long-sleeve-henley-t-shirt.jpg", "keys": ["cream", "off-white", "henley", "long-sleeve"], "name": "Off-White Long Sleeve Henley T-shirt", "price": 395, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/lemaire/off-white-long-sleeve-henley-t-shirt/19441311"},
+  {"brand": "Lemaire", "cat": "top", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262646M211001_1/lemaire-off-white-long-sleeve-henley-t-shirt.jpg", "keys": ["cream", "off-white", "henley", "long-sleeve"], "name": "Off-White Long Sleeve Henley T-shirt", "price": 395, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/lemaire/off-white-long-sleeve-henley-t-shirt/19441311"},
   {"brand": "Polo Ralph Lauren", "cat": "shirt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261213M192068_1/polo-ralph-lauren-white-the-iconic-oxford-shirt.jpg", "keys": ["white", "oxford", "shirt", "button-down"], "name": "White 'The Iconic Oxford' Shirt", "price": 113, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/polo-ralph-lauren/white-the-iconic-oxford-shirt/18686271"},
   {"brand": "Drake's", "cat": "shirt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262488M192000_1/drakes-blue-cotton-oxford-cloth-button-down-shirt.jpg", "keys": ["light blue", "blue", "oxford", "shirt", "button-down"], "name": "Blue Cotton Oxford Cloth Button-Down Shirt", "price": 300, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/drakes/blue-cotton-oxford-cloth-button-down-shirt/9009445"},
   {"brand": "Thom Browne", "cat": "shirt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262381M192001_1/thom-browne-white-linen-4-bar-shirt.jpg", "keys": ["white", "linen", "shirt"], "name": "White Linen 4-Bar Shirt", "price": 790, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/thom-browne/white-linen-4-bar-shirt/19296781"},
@@ -15057,7 +15410,7 @@ var SHOP_CATALOGUE = [
   {"brand": "Suitsupply", "cat": "trousers", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-trousers-desktop/f_auto,q_auto,w_1290/products/trousers/default/winter/b17060_1", "keys": ["navy", "chinos", "trousers"], "name": "Navy Slim Leg Chinos in Stretch Cotton", "price": 129, "retailer": "Suitsupply", "tier": "value", "url": "https://suitsupply.com/en-us/men/trousers/navy-slim-leg-straight-chinos/B17060.html"},
   {"brand": "Suitsupply", "cat": "trousers", "img": "https://cdn.suitsupply.com/image/upload/t_pdp-hero-trousers-desktop/f_auto,q_auto,w_1290/products/trousers/default/winter/b17059_1", "keys": ["ecru", "cream", "off-white", "chinos", "trousers"], "name": "Off-White Slim Leg Chinos in Stretch Cotton", "price": 129, "retailer": "Suitsupply", "tier": "value", "url": "https://suitsupply.com/en-us/men/trousers/off-white-slim-leg-chinos/B17059.html"},
   {"brand": "A.P.C.", "cat": "jeans", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262252M186004_1/apc-navy-new-standard-jeans.jpg", "keys": ["indigo", "navy", "jeans", "denim"], "name": "Navy New Standard Jeans", "price": 340, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/apc/navy-new-standard-jeans/19293501"},
-  {"brand": "OUR LEGACY", "cat": "jeans", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262803M186018_1/our-legacy-indigo-third-cut-jeans.jpg", "keys": ["indigo", "jeans", "denim", "selvedge"], "name": "Indigo Third Cut Jeans", "price": 460, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/our-legacy/indigo-third-cut-jeans/19429051"},
+  {"brand": "Our Legacy", "cat": "jeans", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262803M186018_1/our-legacy-indigo-third-cut-jeans.jpg", "keys": ["indigo", "jeans", "denim", "selvedge"], "name": "Indigo Third Cut Jeans", "price": 460, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/our-legacy/indigo-third-cut-jeans/19429051"},
   {"brand": "Todd Snyder", "cat": "jeans", "img": "https://www.toddsnyder.com/cdn/shop/files/JE217660_WHITE_FEB_1807_R.jpg?v=1744822346&width=120", "keys": ["white", "jeans", "denim", "selvedge"], "name": "Straight Fit Japanese Selvedge Stretch Jean in White", "price": 348, "retailer": "Todd Snyder", "tier": "premium", "url": "https://www.toddsnyder.com/products/new-straight-fit-japanese-white-wash-jeanwhite?refSrc=7148291489863&nosto=productpage-nosto-8"},
   {"brand": "AGOLDE", "cat": "jeans", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261214M186004_1/agolde-off-white-90s-jeans.jpg", "keys": ["white", "off-white", "jeans", "denim"], "name": "Off-White 90's Jeans", "price": 194, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/agolde/off-white-90s-jeans/19194811"},
   {"brand": "Todd Snyder", "cat": "shorts", "img": "https://www.toddsnyder.com/cdn/shop/files/May26_PA1920426_NAVY_F1_R.jpg?v=1777038779&width=120", "keys": ["navy", "shorts", "tailored", "linen"], "name": "8\" Mylos Short in Navy", "price": 119, "retailer": "Todd Snyder", "tier": "value", "url": "https://www.toddsnyder.com/products/8-mylos-shortnavy"},
@@ -15074,7 +15427,238 @@ var SHOP_CATALOGUE = [
   {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Connaught220106A-C01C16_1400x.png?v=1736298218", "keys": ["black", "oxford", "shoes", "leather", "formal", "patent"], "name": "Connaught 2 Black Calf Oxford Shoes", "price": 930, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/collections/all-mens-styles/products/connaught-2-black-calf"},
   {"brand": "Clarks Originals", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262094M224008_1/clarks-originals-tan-suede-desert-boots.jpg", "keys": ["tan", "brown", "suede", "desert boots", "boots"], "name": "Tan Suede Desert Boots", "price": 195, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/clarks-originals/tan-suede-desert-boots/19396511"},
   {"brand": "Common Projects", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262133M223003_1/common-projects-black-leather-chelsea-boots.jpg", "keys": ["black", "leather", "chelsea boots", "boots"], "name": "Black Leather Chelsea Boots", "price": 780, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/common-projects/black-leather-chelsea-boots/19643041"},
-  {"brand": "Hugo", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262084M223001_1/hugo-hugo-boss-black-leather-chelsea-boots.jpg", "keys": ["black", "leather", "chelsea boots", "boots"], "name": "Black Leather Chelsea Boots", "price": 200, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/hugo-hugo-boss/black-leather-chelsea-boots/19596861"}
+  {"brand": "Hugo", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262084M223001_1/hugo-hugo-boss-black-leather-chelsea-boots.jpg", "keys": ["black", "leather", "chelsea boots", "boots"], "name": "Black Leather Chelsea Boots", "price": 200, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/hugo-hugo-boss/black-leather-chelsea-boots/19596861"},
+  {"brand": "Ralph Lauren Purple Label", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262261M201005_1/ralph-lauren-purple-label-navy-textured-cashmere-sweater.jpg", "keys": ["navy", "crew-neck", "knit", "sweater", "cashmere"], "name": "Navy Textured Cashmere Sweater", "price": 1295, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/ralph-lauren-purple-label/navy-textured-cashmere-sweater/19264411"},
+  {"brand": "Ralph Lauren Purple Label", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262261M201002_1/ralph-lauren-purple-label-gray-cashmere-crewneck-sweater.jpg", "keys": ["grey", "gray", "crew-neck", "knit", "sweater", "cashmere"], "name": "Gray Cashmere Crewneck Sweater", "price": 995, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/ralph-lauren-purple-label/gray-cashmere-crewneck-sweater/19264321"},
+  {"brand": "Jil Sander", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262249M201016_1/jil-sander-navy-cashmere-blend-crew-neck-sweater.jpg", "keys": ["navy", "crew-neck", "knit", "sweater", "cashmere"], "name": "Navy Cashmere Blend Crew-Neck Sweater", "price": 1850, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/jil-sander/navy-cashmere-blend-crew-neck-sweater/19690241"},
+  {"brand": "Tom Ford", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262076M201004_1/tom-ford-black-cashmere-crew-neck-sweater.jpg", "keys": ["black", "crew-neck", "knit", "sweater", "cashmere"], "name": "Black Cashmere Crew Neck Sweater", "price": 2690, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/tom-ford/black-cashmere-crew-neck-sweater/19757211"},
+  {"brand": "Entire Studios", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262940M201002_1/entire-studios-gray-knit-cashmere-crewneck-sweater.jpg", "keys": ["grey", "gray", "crew-neck", "knit", "sweater", "cashmere"], "name": "Gray Knit Cashmere Crewneck Sweater", "price": 350, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/entire-studios/gray-knit-cashmere-crewneck-sweater/19608301"},
+  {"brand": "AMI Paris", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262482M201000_1/ami-alexandre-mattiussi-beige-crewneck-cashmere-ami-de-coeur-sweater.jpg", "keys": ["camel", "beige", "brown", "crew-neck", "knit", "sweater", "cashmere"], "name": "Beige Crewneck Cashmere Ami de Coeur Sweater", "price": 650, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/ami-alexandre-mattiussi/beige-crewneck-cashmere-ami-de-coeur-sweater/19512691"},
+  {"brand": "AMI Paris", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261482M201009_1/ami-alexandre-mattiussi-off-white-wool-contrasted-ami-de-coeur-crewneck-sweater.jpg", "keys": ["white", "off-white", "cream", "crew-neck", "knit", "sweater", "wool"], "name": "Off-White Wool Contrasted Ami de Coeur Crewneck Sweater", "price": 495, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/ami-alexandre-mattiussi/off-white-wool-contrasted-ami-de-coeur-crewneck-sweater/19027881"},
+  {"brand": "Drake's", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262488M201000_1/drakes-burgundy-brushed-shetland-crew-neck-sweater.jpg", "keys": ["burgundy", "crew-neck", "knit", "sweater", "shetland", "wool"], "name": "Burgundy Brushed Shetland Crew Neck Sweater", "price": 300, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/drakes/burgundy-brushed-shetland-crew-neck-sweater/856976243"},
+  {"brand": "Drake's", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262488M201003_1/drakes-pink-brushed-shetland-crewneck-sweater.jpg", "keys": ["pink", "crew-neck", "knit", "sweater", "shetland", "wool"], "name": "Pink Brushed Shetland Crewneck Sweater", "price": 300, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/drakes/pink-brushed-shetland-crewneck-sweater/255985146"},
+  {"brand": "Lemaire", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262646M201002_1/lemaire-purple-crew-neck-alpaca-wool-blend-sweater.jpg", "keys": ["purple", "plum", "crew-neck", "knit", "sweater", "alpaca"], "name": "Purple Crew-Neck Alpaca Wool Blend Sweater", "price": 690, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/lemaire/purple-crew-neck-alpaca-wool-blend-sweater/19441241"},
+  {"brand": "Lemaire", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262646M201003_1/lemaire-brown-crew-neck-alpaca-wool-blend-sweater.jpg", "keys": ["brown", "crew-neck", "knit", "sweater", "alpaca"], "name": "Brown Crew-Neck Alpaca Wool Blend Sweater", "price": 690, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/lemaire/brown-crew-neck-alpaca-wool-blend-sweater/19441251"},
+  {"brand": "Our Legacy", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262803M201001_1/our-legacy-gray-true-sweater.jpg", "keys": ["charcoal", "grey", "gray", "crew-neck", "knit", "sweater", "alpaca", "merino"], "name": "Gray True Sweater", "price": 550, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/our-legacy/gray-true-sweater/19426291"},
+  {"brand": "Fedeli", "cat": "knitwear", "img": "", "keys": ["green", "moss", "olive", "crew-neck", "knit", "sweater", "cashmere"], "name": "Cashmere Sweater", "price": 780, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/fedeli/clothing/crew-necks/cashmere-sweater/46376663163102745"},
+  {"brand": "Zegna", "cat": "knitwear", "img": "", "keys": ["green", "moss", "olive", "crew-neck", "knit", "sweater", "wool"], "name": "Wool Sweater", "price": 1290, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/zegna/clothing/crew-necks/wool-sweater/46376663163115229"},
+  {"brand": "John Smedley", "cat": "knitwear", "img": "", "keys": ["green", "olive", "moss", "crew-neck", "knit", "sweater", "merino"], "name": "Lundy Sweater", "price": 390, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/john-smedley-lundy-sweater-item-40311742.aspx?lang=en-US&&size=21"},
+  {"brand": "Brunello Cucinelli", "cat": "knitwear", "img": "", "keys": ["cream", "crew-neck", "knit", "sweater", "cashmere"], "name": "Cashmere Sweater", "price": 4200, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/crew-necks/cashmere-sweater/46376663163186352"},
+  {"brand": "Fedeli", "cat": "knitwear", "img": "", "keys": ["brown", "crew-neck", "knit", "sweater", "cashmere"], "name": "Cashmere Sweater", "price": 780, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/fedeli/clothing/crew-necks/cashmere-sweater/46376663163102756"},
+  {"brand": "Zegna", "cat": "knitwear", "img": "", "keys": ["blue", "sky blue", "light blue", "crew-neck", "knit", "sweater", "cashmere"], "name": "Cashmere-Blend Sweater", "price": 1950, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/zegna/clothing/crew-necks/cashmere-blend-sweater/46376663162903543"},
+  {"brand": "Zegna", "cat": "knitwear", "img": "", "keys": ["blue", "slate blue", "slate", "crew-neck", "knit", "sweater", "cashmere"], "name": "Oasi Knitted Cashmere Sweater", "price": 3250, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/zegna/clothing/crew-necks/oasi-knitted-cashmere-sweater/46376663163115192"},
+  {"brand": "Brunello Cucinelli", "cat": "knitwear", "img": "", "keys": ["blue", "navy", "crew-neck", "knit", "sweater", "cashmere"], "name": "Cashmere Sweater", "price": 1350, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/brunello-cucinelli-cashmere-sweater-item-36509865.aspx?lang=en-US&&size=8"},
+  {"brand": "Brunello Cucinelli", "cat": "knitwear", "img": "", "keys": ["charcoal", "grey", "gray", "dark grey", "crew-neck", "knit", "sweater", "cashmere"], "name": "Cashmere crew-neck Sweater", "price": 1350, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/brunello-cucinelli-cashmere-crew-neck-sweater-item-36606940.aspx?lang=en-US&&size=8"},
+  {"brand": "Zegna", "cat": "knitwear", "img": "", "keys": ["grey", "gray", "crew-neck", "knit", "sweater", "wool"], "name": "Wool-Blend Sweater", "price": 1350, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/zegna/clothing/crew-necks/wool-blend-sweater/46376663163115144"},
+  {"brand": "Stone Island", "cat": "knitwear", "img": "", "keys": ["orange", "rust", "crew-neck", "knit", "sweater", "cotton", "ribbed"], "name": "Orange 5100154 Ribbed Soft Organic Cotton Sweater", "price": 550, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/stone-island/orange-5100154-ribbed-soft-organic-cotton-sweater/19363481"},
+  {"brand": "Sunspel", "cat": "knitwear", "img": "", "keys": ["grey", "gray", "crew-neck", "knit", "sweater", "lambswool"], "name": "Men's Lambswool Crew Neck Jumper in Mid Grey Melange", "price": 375, "retailer": "Sunspel US", "tier": "value", "url": "https://us.sunspel.com/products/mens-lambswool-crew-neck-jumper-grey-melange-mjum8066-gyak?variant=40594356535348&utm_source=https%3A%2F%2Fterra.coupons"},
+  {"brand": "Tom Ford", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262076M205004_1/tom-ford-black-wool-cashmere-mohair-roll-neck-sweater.jpg", "keys": ["black", "roll-neck", "turtleneck", "knit", "sweater", "cashmere", "wool"], "name": "Black Wool Cashmere Mohair Roll Neck Sweater", "price": 2690, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/tom-ford/black-wool-cashmere-mohair-roll-neck-sweater/19757041"},
+  {"brand": "Ralph Lauren Purple Label", "cat": "knitwear", "img": "", "keys": ["navy", "roll-neck", "turtleneck", "cable", "cable-knit", "knit", "sweater", "cashmere"], "name": "Cable-Knit Cashmere Rollneck Sweater", "price": 1895, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/ralph-lauren-purple-label/clothing/rollnecks/cable-knit-cashmere-rollneck-sweater/46376663163170938"},
+  {"brand": "Tom Ford", "cat": "knitwear", "img": "", "keys": ["charcoal", "grey", "gray", "roll-neck", "turtleneck", "knit", "sweater", "wool"], "name": "Gray Fine Gauge Pure Wool Turtleneck", "price": 1320, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/tom-ford/gray-fine-gauge-pure-wool-turtleneck/19299051"},
+  {"brand": "Dunhill", "cat": "knitwear", "img": "", "keys": ["grey", "gray", "roll-neck", "turtleneck", "knit", "sweater", "cashmere"], "name": "Cashmere Rollneck Sweater", "price": 950, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/dunhill/clothing/rollnecks/cashmere-rollneck-sweater/46376663163123414"},
+  {"brand": "Zegna", "cat": "knitwear", "img": "", "keys": ["grey", "gray", "quarter-zip", "half-zip", "zip-neck", "knit", "sweater", "cashmere"], "name": "Oasi Cashmere Half-Zip Sweater", "price": 3250, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/zegna/clothing/knitted-zip-throughs/oasi-cashmere-half-zip-sweater/46376663163115267"},
+  {"brand": "BOTTEGA VENETA", "cat": "knitwear", "img": "", "keys": ["cream", "quarter-zip", "half-zip", "zip-neck", "knit", "sweater", "cashmere", "ribbed"], "name": "Ribbed-Knit Cashmere and Wool-Blend Half-Zip Sweater", "price": 3000, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/bottega-veneta/clothing/knitted-zip-throughs/ribbed-knit-cashmere-and-wool-blend-half-zip-sweater/46376663163101263"},
+  {"brand": "Begg & Co", "cat": "knitwear", "img": "", "keys": ["black", "charcoal", "quarter-zip", "half-zip", "zip-neck", "knit", "sweater", "cashmere"], "name": "Heriot Half-Zip Cashmere Sweater", "price": 1025, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/begg-co/clothing/knitted-zip-throughs/heriot-half-zip-cashmere-sweater/46376663163154429"},
+  {"brand": "Inis Meáin", "cat": "knitwear", "img": "", "keys": ["grey", "gray", "quarter-zip", "half-zip", "zip-neck", "knit", "sweater", "wool", "linen"], "name": "Wool and Linen-Blend Half-Zip Sweater", "price": 625, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/inis-meain/clothing/knitted-zip-throughs/wool-and-linen-blend-half-zip-sweater/46376663163110888"},
+  {"brand": "RRL", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262435M200004_1/rrl-gray-waffle-knit-cashmere-shawl-cardigan.jpg", "keys": ["grey", "gray", "cardigan", "shawl", "shawl-collar", "knit", "cashmere"], "name": "Gray Waffle-Knit Cashmere Shawl Cardigan", "price": 795, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/rrl/gray-waffle-knit-cashmere-shawl-cardigan/19146531"},
+  {"brand": "RRL", "cat": "knitwear", "img": "", "keys": ["black", "cardigan", "shawl", "shawl-collar", "knit", "cashmere"], "name": "Black Cashmere Shawl-Collar Cardigan", "price": 795, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/rrl/black-cashmere-shawl-collar-cardigan/19146541"},
+  {"brand": "Drake's", "cat": "knitwear", "img": "", "keys": ["navy", "cardigan", "shawl", "shawl-collar", "knit", "lambswool"], "name": "Navy Lambswool Shawl Collar Cardigan", "price": 755, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/collections/festive-dressing/products/navy-lambswool-shawl-collar-cardigan-1"},
+  {"brand": "Dries Van Noten", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262358M200005_1/dries-van-noten-orange-alpaca-cardigan.jpg", "keys": ["rust", "orange", "cardigan", "knit", "alpaca"], "name": "Orange Alpaca Cardigan", "price": 1180, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/dries-van-noten/orange-alpaca-cardigan/19448951"},
+  {"brand": "Polo Ralph Lauren", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262213M201008_1/polo-ralph-lauren-off-white-cable-knit-cotton-sweater.jpg", "keys": ["cream", "off-white", "cable", "cable-knit", "crew-neck", "knit", "sweater", "cotton"], "name": "Off-White Cable-Knit Cotton Sweater", "price": 145, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/polo-ralph-lauren/off-white-cable-knit-cotton-sweater/19377361"},
+  {"brand": "Drake's", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262488M201002_1/drakes-off-white-brushed-shetland-cable-knit-sweater.jpg", "keys": ["cream", "off-white", "cable", "cable-knit", "crew-neck", "knit", "sweater", "shetland", "wool"], "name": "Off-White Brushed Shetland Cable Knit Sweater", "price": 325, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/drakes/off-white-brushed-shetland-cable-knit-sweater/590597088"},
+  {"brand": "Lacoste", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262268M201000_1/lacoste-navy-cable-knit-cotton-sweater.jpg", "keys": ["navy", "cable", "cable-knit", "crew-neck", "knit", "sweater", "cotton"], "name": "Navy Cable Knit Cotton Sweater", "price": 150, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/lacoste/navy-cable-knit-cotton-sweater/19281791"},
+  {"brand": "Thom Browne", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262381M201003_1/thom-browne-gray-donegal-4-bar-aran-cable-pullover-sweater.jpg", "keys": ["grey", "gray", "cable", "aran", "chunky", "crew-neck", "knit", "sweater", "wool"], "name": "Gray Donegal 4-Bar Aran Cable Pullover Sweater", "price": 790, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/thom-browne/gray-donegal-4-bar-aran-cable-pullover-sweater/19423381"},
+  {"brand": "Thom Browne", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262381M201004_1/thom-browne-burgundy-donegal-4-bar-aran-cable-sweater.jpg", "keys": ["burgundy", "cable", "aran", "chunky", "crew-neck", "knit", "sweater", "wool"], "name": "Burgundy Donegal 4-Bar Aran Cable Sweater", "price": 790, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/thom-browne/burgundy-donegal-4-bar-aran-cable-sweater/19423401"},
+  {"brand": "Inis Meáin", "cat": "knitwear", "img": "", "keys": ["cream", "beige", "fisherman", "chunky", "aran", "crew-neck", "knit", "sweater", "wool"], "name": "Ridges Aran Textured-Wool Sweater", "price": 725, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/inis-meain/clothing/crew-necks/ridges-aran-textured-wool-sweater/46376663163110869"},
+  {"brand": "Merz b. Schwanen", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261328M212000_1/merz-b-schwanen-navy-cotton-short-sleeve-polo.jpg", "keys": ["navy", "knit polo", "polo", "cotton"], "name": "Navy Cotton Short Sleeve Polo", "price": 60, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/merz-b-schwanen/navy-cotton-short-sleeve-polo/19190161"},
+  {"brand": "Fedeli", "cat": "knitwear", "img": "", "keys": ["navy", "knit polo", "polo", "wool"], "name": "Fine-Knit Polo Shirt", "price": 575, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/fedeli-fine-knit-polo-shirt-item-25125843.aspx?lang=en-US&&size=21"},
+  {"brand": "John Smedley", "cat": "knitwear", "img": "", "keys": ["navy", "knit polo", "polo", "merino", "wool"], "name": "Macloud Knitted Merino Wool Polo Shirt", "price": 335, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/john-smedley/clothing/short-sleeve-polo-shirts/macloud-knitted-merino-wool-polo-shirt/46376663163073004"},
+  {"brand": "Orlebar Brown", "cat": "knitwear", "img": "", "keys": ["navy", "knit polo", "polo", "waffle"], "name": "Roddy Waffle-Knit Polo Shirt", "price": 495, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/orlebar-brown/clothing/short-sleeve-polo-shirts/roddy-waffle-knit-polo-shirt/1647597351349290"},
+  {"brand": "Wales Bonner", "cat": "knitwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262752M212003_1/wales-bonner-navy-john-smedley-edition-beam-polo.jpg", "keys": ["navy", "knit polo", "polo", "merino", "wool"], "name": "Navy John Smedley Edition Beam Polo", "price": 795, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/wales-bonner/navy-john-smedley-edition-beam-polo/19385261"},
+  {"brand": "Zegna", "cat": "knitwear", "img": "https://productimage.zegna.com/is/image/zegna/UGA00A2-VELPOL-K09-F?wid=2250&hei=3000", "keys": ["black", "knit polo", "polo", "wool"], "name": "Black Vellus Aureum Polo Shirt", "price": 2950, "retailer": "Zegna", "tier": "premium", "url": "https://www.zegna.com/us-en/ready-to-wear/polo-shirts/product.black-vellus-aureum-polo-shirt.35595966/"},
+  {"brand": "Orlebar Brown", "cat": "knitwear", "img": "", "keys": ["white", "knit polo", "polo", "cotton", "crochet"], "name": "Swift crochet striped cotton polo shirt", "price": 632, "retailer": "Mytheresa", "tier": "premium", "url": "https://www.mytheresa.com/us/en/men/orlebar-brown-swift-crochet-striped-cotton-polo-shirt-white-p01133929"},
+  {"brand": "Zegna", "cat": "knitwear", "img": "", "keys": ["cream", "knit polo", "polo", "wool"], "name": "Cream White Vellus Aureum Polo Shirt", "price": 3750, "retailer": "Zegna", "tier": "premium", "url": "https://www.zegna.com/us-en/product/product.cream-white-vellus-aureum-polo-shirt.39323610/"},
+  {"brand": "Zegna", "cat": "knitwear", "img": "", "keys": ["green", "forest green", "knit polo", "polo", "wool"], "name": "Pine Green Vellus Aureum Polo Shirt", "price": 2890, "retailer": "Zegna", "tier": "premium", "url": "https://www.zegna.com/us-en/ready-to-wear/polo-shirts/product.pine-green-vellus-aureum-polo-shirt.37126229/"},
+  {"brand": "Fedeli", "cat": "knitwear", "img": "", "keys": ["burgundy", "knit polo", "polo", "wool"], "name": "Fine-Knit Polo Shirt", "price": 597, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/fedeli-fine-knit-polo-shirt-item-25535811.aspx?lang=en-US&&size=25"},
+  {"brand": "Fedeli", "cat": "knitwear", "img": "", "keys": ["grey", "gray", "charcoal", "knit polo", "polo", "wool"], "name": "Fine-Knit Polo Shirt", "price": 758, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/fedeli-fine-knit-polo-shirt-item-25125907.aspx?lang=en-US&&size=25"},
+  {"brand": "Zegna", "cat": "knitwear", "img": "", "keys": ["olive", "knit polo", "polo", "wool"], "name": "Dark Olive Green Trofeo 15milmil15 Wool Polo Shirt", "price": 1450, "retailer": "Zegna", "tier": "premium", "url": "https://www.zegna.com/us-en/mens-gifts-selection/product.dark-olive-green-trofeo-15milmil15-wool-polo-shirt.39383286/"},
+  {"brand": "Zegna", "cat": "knitwear", "img": "", "keys": ["blue", "sky blue", "light blue", "knit polo", "polo", "wool"], "name": "Light Blue Trofeo 15milmil15 Wool Polo Shirt", "price": 1290, "retailer": "Zegna", "tier": "premium", "url": "https://www.zegna.com/us-en/product/product.light-blue-trofeo-15milmil15-wool-polo-shirt.39389397/"},
+  {"brand": "Polo Ralph Lauren", "cat": "top", "img": "https://www.thedoublef.com/cdn/shop/files/710680790001CO_T_POLOR-WHT.a.jpg?format=webp&quality=85&v=1793076248&width=48", "keys": ["white", "polo", "pique", "cotton"], "name": "White cotton polo Custom Slim-Fit", "price": 175, "retailer": "TheDoubleF", "tier": "value", "url": "https://www.thedoublef.com/en-us/products/white-cotton-polo-custom-slim-fit-polo-ralph-lauren-710680790001co-t-polor-wht?variant=44005935120462&currency=USD"},
+  {"brand": "Sunspel", "cat": "top", "img": "", "keys": ["white", "polo", "pique", "cotton", "mesh"], "name": "Men's Riviera Polo Shirt in White", "price": 155, "retailer": "Sunspel US", "tier": "premium", "url": "https://us.sunspel.com/products/mens-cotton-riviera-polo-shirt-white-mpol1026"},
+  {"brand": "Polo Ralph Lauren", "cat": "top", "img": "https://www.thedoublef.com/cdn/shop/files/710680790046CO_T_POLOR-NN.a.jpg?format=webp&quality=85&v=1793076255&width=48", "keys": ["navy", "polo", "pique", "cotton"], "name": "Blue cotton polo Custom Slim-Fit", "price": 175, "retailer": "TheDoubleF", "tier": "value", "url": "https://www.thedoublef.com/en-us/products/blue-cotton-polo-custom-slim-fit-polo-ralph-lauren-710680790046co-t-polor-nn?variant=44005935284302&currency=USD"},
+  {"brand": "Todd Shelton", "cat": "top", "img": "", "keys": ["black", "polo", "pique", "cotton"], "name": "Pique Polo Black Men's Polo Shirt", "price": 220, "retailer": "Todd Shelton", "tier": "value", "url": "https://toddshelton.com/t-shirts/pique-polo-black"},
+  {"brand": "Brunello Cucinelli", "cat": "top", "img": "", "keys": ["grey", "gray", "polo", "pique", "cotton"], "name": "Cotton piqué polo shirt", "price": 870, "retailer": "Mytheresa", "tier": "premium", "url": "https://www.mytheresa.com/us/en/men/brunello-cucinelli-cotton-pique-polo-shirt-grey-p01208971"},
+  {"brand": "James Perse", "cat": "top", "img": "", "keys": ["white", "tee", "t-shirt", "cotton"], "name": "Cotton Slub Short Sleeve Tee", "price": 150, "retailer": "James Perse", "tier": "premium", "url": "https://www.jamesperse.com/products/cotton-slub-short-sleeve-tee-white-misj3891?variant=54632893612404&utm_medium=feed&utm_campaign=meta_catalog&utm_content=product_card"},
+  {"brand": "Buck Mason", "cat": "top", "img": "https://cdn.shopify.com/s/files/1/0123/5065/2473/files/BM11007.101WHT-PIMACURVEDHEMTEE.jpg?v=1695312380&format=webp&width=300&height=300", "keys": ["white", "tee", "t-shirt", "pima", "cotton"], "name": "White Pima Curved Hem Tee", "price": 48, "retailer": "Buck Mason", "tier": "value", "url": "https://www.buckmason.com/products/white-pima-curved-hem-tee"},
+  {"brand": "Merz b. Schwanen", "cat": "top", "img": "", "keys": ["navy", "tee", "t-shirt", "cotton"], "name": "Navy 1950s Loopwheeled Classic Fit Lightweight T-shirt", "price": 110, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/merz-b-schwanen/navy-1950s-loopwheeled-classic-fit-lightweight-t-shirt/19189881"},
+  {"brand": "Buck Mason", "cat": "top", "img": "https://cdn.shopify.com/s/files/1/0123/5065/2473/files/BM11001.102COLVW-slub-curved-hem-tee-1.jpg?v=1695306200&format=webp&width=300&height=300", "keys": ["grey", "gray", "marl", "charcoal", "tee", "t-shirt", "cotton"], "name": "Coal Venice Wash Slub Curved Hem Tee", "price": 48, "retailer": "Buck Mason", "tier": "value", "url": "https://www.buckmason.com/products/coal-venice-wash-slub-curved-hem-tee"},
+  {"brand": "Todd Snyder", "cat": "top", "img": "https://www.toddsnyder.com/cdn/shop/files/NOV26_KN6512116_BISQUE_F1_R.jpg?v=1793134387&width=120", "keys": ["cream", "tee", "t-shirt", "waffle"], "name": "Heavyweight Waffle Tee in Bisque", "price": 158, "retailer": "Todd Snyder", "tier": "premium", "url": "https://www.toddsnyder.com/products/ls-classic-waffle-crewbisque?variant=42929735336007"},
+  {"brand": "Todd Snyder", "cat": "top", "img": "https://www.toddsnyder.com/cdn/shop/files/NOV26_KN6512116_SNYDER_OLIVE_F1_R.jpg?v=1793134428&width=120", "keys": ["olive", "tee", "t-shirt", "waffle"], "name": "Heavyweight Waffle Tee in Snyder Olive", "price": 158, "retailer": "Todd Snyder", "tier": "premium", "url": "https://www.toddsnyder.com/products/ls-classic-waffle-crewsnyder-olive?variant=42929735172167"},
+  {"brand": "Polo Ralph Lauren", "cat": "top", "img": "https://www.thedoublef.com/cdn/shop/files/710680785001CO_T_POLOR-RB.a.jpg?format=webp&quality=85&v=1792636501&width=48", "keys": ["black", "tee", "t-shirt", "cotton"], "name": "Black cotton T-shirt", "price": 110, "retailer": "TheDoubleF", "tier": "value", "url": "https://www.thedoublef.com/en-us/products/black-cotton-t-shirt-polo-ralph-lauren-710680785001co-t-polor-rb?variant=44394560258126&currency=USD"},
+  {"brand": "Buck Mason", "cat": "top", "img": "", "keys": ["white", "henley", "pima", "cotton", "long sleeve"], "name": "White Pima L/S Classic Henley", "price": 88, "retailer": "Buck Mason", "tier": "value", "url": "https://www.buckmason.com/products/white-pima-ls-classic-henley"},
+  {"brand": "Buck Mason", "cat": "top", "img": "", "keys": ["navy", "henley", "pima", "cotton", "long sleeve"], "name": "Dress Navy Pima L/S Classic Henley", "price": 88, "retailer": "Buck Mason", "tier": "value", "url": "https://www.buckmason.com/products/dress-navy-pima-ls-classic-henley"},
+  {"brand": "Buck Mason", "cat": "top", "img": "", "keys": ["olive", "henley", "pima", "cotton", "long sleeve"], "name": "Dark Olive Pima L/S Classic Henley", "price": 88, "retailer": "Buck Mason", "tier": "value", "url": "https://www.buckmason.com/products/dark-olive-pima-ls-classic-henley"},
+  {"brand": "Todd Snyder", "cat": "top", "img": "https://www.toddsnyder.com/cdn/shop/files/NOV26_KN6779436_RAISIN_F1_R.jpg?v=1793134426&width=120", "keys": ["burgundy", "henley", "waffle", "long sleeve"], "name": "Lightweight Mini Waffle Henley in Raisin", "price": 148, "retailer": "Todd Snyder", "tier": "premium", "url": "https://www.toddsnyder.com/products/ls-mini-waffle-henleyraisin?variant=43062135193671"},
+  {"brand": "Polo Ralph Lauren", "cat": "shirt", "img": "https://www.thedoublef.com/cdn/shop/files/710792041001CO_T_POLOR-WHT.a.jpg?format=webp&quality=85&v=1793076387&width=48", "keys": ["white", "oxford", "shirt", "cotton"], "name": "White Oxford Custom-Fit shirt", "price": 190, "retailer": "TheDoubleF", "tier": "value", "url": "https://www.thedoublef.com/en-us/products/white-oxford-custom-fit-shirt-polo-ralph-lauren-710792041001co-t-polor-wht?variant=43731074646094&currency=USD"},
+  {"brand": "Drake's", "cat": "shirt", "img": "https://cld.accentuate.io/64966033653/1709824084065/DR2A4A-21843-05-200-2_LR.jpg?v=1709824084066&options=&transform=resize=30", "keys": ["blue", "light blue", "oxford", "shirt", "cotton"], "name": "Ice Blue Cotton Oxford Cloth Button-Down Shirt", "price": 345, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/products/ice-blue-cotton-oxford-cloth-button-down-shirt-1"},
+  {"brand": "Drake's", "cat": "shirt", "img": "https://cld.accentuate.io/64966033653/1709823799547/DR2A4A-21843-06-990-2.jpg?v=1709823799547&options=&transform=resize=30", "keys": ["pink", "oxford", "shirt", "cotton"], "name": "Bright Pink Cotton Oxford Cloth Button-Down Shirt", "price": 345, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/products/bright-pink-cotton-oxford-cloth-button-down-shirt"},
+  {"brand": "Polo Ralph Lauren", "cat": "shirt", "img": "https://www.thedoublef.com/cdn/shop/files/710953704501CO_T_POLOR-NW.a.jpg?format=webp&quality=85&v=1793076458&width=48", "keys": ["blue", "white", "striped", "stripe", "oxford", "shirt", "cotton"], "name": "Light blue/white striped Oxford Custom-Fit shirt", "price": 200, "retailer": "TheDoubleF", "tier": "value", "url": "https://www.thedoublef.com/en-us/products/light-blue-white-striped-oxford-custom-fit-shirt-polo-ralph-lauren-710953704501co-t-polor-nw?variant=43731075268686&currency=USD"},
+  {"brand": "Drake's", "cat": "shirt", "img": "https://cld.accentuate.io/64966033653/1709823883528/DR2A4A-21843-14-050-2_LR.jpg?v=1709823883528&options=&transform=resize=30", "keys": ["cream", "oxford", "shirt", "cotton"], "name": "Cream Cotton Oxford Cloth Button-Down Shirt", "price": 345, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/products/cream-cotton-oxford-cloth-button-down-shirt-1?variant=43238140051701&utm_medium=feed&utm_campaign=meta_catalog&utm_content=product_card"},
+  {"brand": "Drake's", "cat": "shirt", "img": "", "keys": ["white", "linen", "shirt", "mandarin collar"], "name": "White Linen Mandarin Collar Shirt", "price": 425, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/products/dr2a4n-26067-01-000?variant=47491213590773&utm_medium=feed&utm_campaign=meta_catalog&utm_content=product_card"},
+  {"brand": "Drake's", "cat": "shirt", "img": "https://cld.accentuate.io/64966033653/1711040037366/DR2A4E-21915-10-250-2.jpg?v=1711040037366&options=&transform=resize=30", "keys": ["navy", "linen", "shirt"], "name": "Bright Navy Linen Spread Collar", "price": 345, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/products/bright-navy-linen-spread-collar?variant=43238040371445"},
+  {"brand": "Luca Faloni", "cat": "shirt", "img": "https://lucafaloni.com/_next/image?url=https%3A%2F%2Flucafaloni.centracdn.net%2Fclient%2Fdynamic%2Fimages%2F361_63232bfdcf-luca-faloni-forte-made-in-italy-sand_133321-r-full.jpg&w=3840&q=75", "keys": ["sand", "ecru", "cream", "linen", "shirt"], "name": "Forte Shirt - Sand", "price": 225, "retailer": "Luca Faloni", "tier": "premium", "url": "https://lucafaloni.com/en/us/shop/sand-forte-linen-shirt"},
+  {"brand": "Luca Faloni", "cat": "shirt", "img": "https://lucafaloni.com/_next/image?url=https%3A%2F%2Flucafaloni.centracdn.net%2Fclient%2Fdynamic%2Fimages%2F371_3eb465c129-luca-faloni_ravello-linen-shirt-paynes-grey_made-in-italy_1702-full.jpg&w=3840&q=75", "keys": ["slate", "grey", "gray", "blue", "linen", "shirt"], "name": "Ravello Shirt - Payne's Grey", "price": 245, "retailer": "Luca Faloni", "tier": "premium", "url": "https://lucafaloni.com/en/us/shop/paynes-grey-ravello-linen-shirt"},
+  {"brand": "Drake's", "cat": "shirt", "img": "https://cld.accentuate.io/64966033653/1709829318707/DR2A4E-21915-09-200-2.jpg?v=1711040420487&options=&transform=resize=30", "keys": ["blue", "light blue", "sky blue", "linen", "shirt"], "name": "Light Blue Linen Spread Collar Shirt", "price": 345, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/products/light-blue-linen-spread-collar-shirt"},
+  {"brand": "Drake's", "cat": "shirt", "img": "", "keys": ["navy", "camp", "camp collar", "shirt", "denim"], "name": "Navy Cotton-Hemp Denim Camp Collar Work Shirt", "price": 425, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/products/navy-cotton-hemp-denim-camp-collar-work-shirt?variant=47491207561461&utm_medium=feed&utm_campaign=meta_catalog&utm_content=product_card"},
+  {"brand": "Finamore", "cat": "shirt", "img": "", "keys": ["white", "dress shirt", "shirt", "cotton"], "name": "Finamore Napoli White Shirt - Extra Slim", "price": 139, "retailer": "ShopTheFinest", "tier": "premium", "url": "https://www.shopthefinest.com/products/finamore-napoli-white-shirt-extra-slim-6"},
+  {"brand": "Finamore", "cat": "shirt", "img": "", "keys": ["white", "dress shirt", "shirt", "cotton"], "name": "Finamore Napoli White Shirt - Slim", "price": 199, "retailer": "ShopTheFinest", "tier": "premium", "url": "https://www.shopthefinest.com/products/finamore-napoli-white-shirt-slim-8"},
+  {"brand": "Polo Ralph Lauren", "cat": "shirt", "img": "https://www.thedoublef.com/cdn/shop/files/710792043001CO_T_POLOR-DE.a.jpg?format=webp&quality=85&v=1793076401&width=48", "keys": ["blue", "indigo", "denim", "shirt"], "name": "Blue denim Custom-Fit shirt", "price": 200, "retailer": "TheDoubleF", "tier": "value", "url": "https://www.thedoublef.com/en-us/products/blue-denim-custom-fit-shirt-polo-ralph-lauren-710792043001co-t-polor-de?variant=43731075104846&currency=USD"},
+  {"brand": "Drake's", "cat": "shirt", "img": "", "keys": ["blue", "chambray", "shirt", "cotton"], "name": "Stone Wash Cotton Chambray Button-Down Collar Popover Shirt", "price": 425, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/products/stone-wash-cotton-chambray-button-down-collar-popover-shirt?utm_content=Facebook_UA&utm_source=facebook&variant=47491206119669"},
+  {"brand": "PT Torino", "cat": "trousers", "img": "", "keys": ["navy", "flannel", "trousers", "wool"], "name": "Soft Trousers", "price": 525, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/pt-torino-soft-trousers-item-25611820.aspx?lang=en-US&&size=5"},
+  {"brand": "Incotex", "cat": "trousers", "img": "", "keys": ["grey", "trousers", "wool"], "name": "Pleated Wool Trousers", "price": 435, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/incotex-pleated-wool-trousers-item-38589878.aspx?lang=en-US&&size=3"},
+  {"brand": "PT Torino", "cat": "trousers", "img": "", "keys": ["brown", "flannel", "trousers", "wool"], "name": "Master Super 110'S Trousers", "price": 313, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/pt-torino-master-super-110s-trousers-item-38068982.aspx?lang=en-US&&size=8"},
+  {"brand": "Canali", "cat": "trousers", "img": "", "keys": ["navy", "flannel", "trousers", "wool"], "name": "Straight-Leg Wool-Flannel Trousers", "price": 750, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/casual-trousers/straight-leg-wool-flannel-trousers/46376663163067487"},
+  {"brand": "Canali", "cat": "trousers", "img": "", "keys": ["grey", "flannel", "trousers", "wool"], "name": "Tapered Wool-Flannel Suit Trousers", "price": 690, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/suit-trousers/tapered-wool-flannel-suit-trousers/46376663163067465"},
+  {"brand": "Canali", "cat": "trousers", "img": "", "keys": ["navy", "trousers", "wool"], "name": "Tapered Pleated Wool-Twill Trousers", "price": 625, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/casual-trousers/tapered-pleated-wool-twill-trousers/46376663163116580"},
+  {"brand": "PT Torino", "cat": "trousers", "img": "", "keys": ["charcoal", "grey", "flannel", "trousers", "wool"], "name": "Rebel Trousers", "price": 311, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/pt-torino-rebel-trousers-item-24822915.aspx?lang=en-US&&size=8"},
+  {"brand": "Kiton", "cat": "trousers", "img": "", "keys": ["cream", "off-white", "trousers"], "name": "Kiton Off White Pants", "price": 499, "retailer": "ShopTheFinest", "tier": "premium", "url": "https://www.shopthefinest.com/products/kiton-off-white-pants"},
+  {"brand": "Brunello Cucinelli", "cat": "trousers", "img": "", "keys": ["olive", "brown", "trousers", "wool"], "name": "TROPICAL LUXURY WOOL UTILITY TROUSERS", "price": 1463.9, "retailer": "Lord & Taylor", "tier": "premium", "url": "https://lordandtaylor.com/products/tropical-luxury-wool-utility-trousers-0269?srsltid=AfmBOoq-59M0iQ3Ez_Z9vPdiCVQ30jrsmLRXqRSpqkKkplT9w4-UKB2o"},
+  {"brand": "Brunello Cucinelli", "cat": "trousers", "img": "", "keys": ["sand", "beige", "trousers"], "name": "TAILORED TROUSERS IN COTTON AND LINEN WITH PLEATS", "price": 1145.9, "retailer": "Lord & Taylor", "tier": "premium", "url": "https://lordandtaylor.com/products/tailored-trousers-in-cotton-and-linen-with-pleats-7036"},
+  {"brand": "Brunello Cucinelli", "cat": "trousers", "img": "", "keys": ["brown", "black", "flannel", "trousers", "wool"], "name": "Virgin Wool Flannel Trousers in Twisted Cotton Gabardine", "price": 2000, "retailer": "Saks Fifth Avenue", "tier": "premium", "url": "https://www.saksfifthavenue.com/product/brunello-cucinelli-virgin-wool-flannel-trousers-in-twisted-cotton-gabardine-0400027028327.html?dwvar_0400027028327_color=LIGNITE"},
+  {"brand": "Brunello Cucinelli", "cat": "trousers", "img": "", "keys": ["grey", "flannel", "trousers", "wool"], "name": "Virgin Wool Flannel Trousers with Drawstring and Double Pleats", "price": 1650, "retailer": "Saks Fifth Avenue", "tier": "premium", "url": "https://www.saksfifthavenue.com/product/brunello-cucinelli-virgin-wool-flannel-trousers-with-drawstring-and-double-pleats-0400027018549.html?dwvar_0400027018549_color=PEARL+GREY"},
+  {"brand": "Incotex", "cat": "trousers", "img": "", "keys": ["black", "chinos", "trousers"], "name": "slim-leg chinos", "price": 410, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/incotex-slim-leg-chinos-item-24437245.aspx?lang=en-US&&size=3"},
+  {"brand": "Brunello Cucinelli", "cat": "trousers", "img": "", "keys": ["stone", "beige", "chinos", "trousers"], "name": "buttoned chino trousers", "price": 800, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/brunello-cucinelli-buttoned-chino-trousers-item-17454579.aspx?lang=en-US&&size=4"},
+  {"brand": "Studio Nicholson", "cat": "trousers", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262608M191004_1/studio-nicholson-navy-shire-cotton-pleated-trousers.jpg", "keys": ["navy", "chinos", "trousers"], "name": "Navy Shire Cotton Pleated Trousers", "price": 740, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/studio-nicholson/navy-shire-cotton-pleated-trousers/19569471"},
+  {"brand": "Jacob Cohën", "cat": "trousers", "img": "", "keys": ["olive", "chinos", "trousers"], "name": "OLIVE STRETCH BOBBY CHINO TROUSERS", "price": 598.9, "retailer": "Lord & Taylor", "tier": "premium", "url": "https://lordandtaylor.com/products/olive-stretch-bobby-chino-trousers-9080"},
+  {"brand": "Incotex", "cat": "trousers", "img": "", "keys": ["brown", "khaki", "chinos", "trousers"], "name": "CHINO SLIM FIT TROUSERS", "price": 326.9, "retailer": "Lord & Taylor", "tier": "premium", "url": "https://lordandtaylor.com/products/chino-slim-fit-trousers-6616"},
+  {"brand": "Todd Snyder", "cat": "trousers", "img": "https://www.toddsnyder.com/cdn/shop/files/NOV26_PA060873_PEPPER_F1_R.jpg?v=1793134632&width=720", "keys": ["grey", "chinos", "trousers", "wool"], "name": "Straight Fit Donegal Chino in Pepper", "price": 198, "retailer": "Todd Snyder", "tier": "value", "url": "https://www.toddsnyder.com/products/straight-donegal-chinopepper?variant=43039244156999"},
+  {"brand": "Jacob Cohën", "cat": "jeans", "img": "", "keys": ["indigo", "blue", "jeans"], "name": "Bard Jeans", "price": 563, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/jacob-cohen-bard-jeans-item-28436796.aspx?lang=en-US&&size=22"},
+  {"brand": "Jacob Cohën", "cat": "jeans", "img": "", "keys": ["indigo", "blue", "jeans"], "name": "logo-patch jeans", "price": 316, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/jacob-cohen-logo-patch-jeans-item-37679544.aspx?lang=en-US&&size=28"},
+  {"brand": "Kiton", "cat": "jeans", "img": "", "keys": ["indigo", "blue", "jeans"], "name": "Kiton Blue Jeans - Slim", "price": 399, "retailer": "ShopTheFinest", "tier": "premium", "url": "https://www.ShopTheFinest.com/products/kiton-blue-jeans-slim-2"},
+  {"brand": "Jacob Cohën", "cat": "jeans", "img": "", "keys": ["black", "jeans"], "name": "logo-patch straight-leg jeans", "price": 565, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/jacob-cohen-logo-patch-straight-leg-jeans-item-20154430.aspx?lang=en-US&&size=17"},
+  {"brand": "Jacob Cohën", "cat": "jeans", "img": "", "keys": ["white", "jeans"], "name": "Jacob Cohën White Jeans - Slim", "price": 239, "retailer": "ShopTheFinest", "tier": "premium", "url": "https://www.ShopTheFinest.com/products/jacob-cohen-white-jeans-slim-1"},
+  {"brand": "Brunello Cucinelli", "cat": "jeans", "img": "", "keys": ["white", "jeans"], "name": "FIVE-POCKET TRADITIONAL FIT TROUSERS IN LIGHT COMFORT-DYED DENIM", "price": 743.9, "retailer": "Lord & Taylor", "tier": "premium", "url": "https://lordandtaylor.com/products/fivepocket-traditional-fit-trousers-in-light-comfortdyed-denim-7699?srsltid=AfmBOooRH00dPw7GWw1CyysBHXUSfxWnmS4_FAhuGpet1BPGooPi1viI"},
+  {"brand": "Todd Snyder", "cat": "jeans", "img": "https://www.toddsnyder.com/cdn/shop/files/Aug26_JE4111223_WASHED_BLUE_FL1_R.jpg?v=1783604588&width=600", "keys": ["blue", "jeans", "washed"], "name": "Straight Fit Jean in Washed Blue", "price": 198, "retailer": "Todd Snyder", "tier": "value", "url": "https://www.toddsnyder.com/products/straight-fit-washed-blue-jeanwashed-blue"},
+  {"brand": "Brunello Cucinelli", "cat": "shorts", "img": "", "keys": ["khaki", "shorts", "linen"], "name": "BERMUDA SHORTS IN LIGHT DéLAVé LINEN CANVAS", "price": 901.9, "retailer": "Lord & Taylor", "tier": "premium", "url": "https://lordandtaylor.com/products/bermuda-shorts-in-light-dlav-linen-canvas-0615?srsltid=AfmBOopYY8xQ4BY94OBEexHRm1kcseBCC5CwdWgpe4y1kZsiwoAGNICu"},
+  {"brand": "Brunello Cucinelli", "cat": "shorts", "img": "", "keys": ["white", "shorts"], "name": "BERMUDA SHORTS IN GARMENT-DYED COTTON GABARDINE WITH DRAWSTRING AND DOUBLE DARTS", "price": 816.9, "retailer": "Lord & Taylor", "tier": "premium", "url": "https://lordandtaylor.com/products/bermuda-shorts-in-garmentdyed-cotton-gabardine-with-drawstring-and-double-darts-5178"},
+  {"brand": "Brunello Cucinelli", "cat": "shorts", "img": "", "keys": ["stone", "beige", "shorts"], "name": "COTTON AND LINEN PANAMA BERMUDA SHORTS", "price": 970.9, "retailer": "Lord & Taylor", "tier": "premium", "url": "https://lordandtaylor.com/products/cotton-and-linen-panama-bermuda-shorts-9311"},
+  {"brand": "Brunello Cucinelli", "cat": "shorts", "img": "", "keys": ["ecru", "cream", "shorts"], "name": "BAGGY SHORTS IN FLUID VISCOSE AND LINEN TWILL", "price": 816.9, "retailer": "Lord & Taylor", "tier": "premium", "url": "https://lordandtaylor.com/products/baggy-shorts-in-fluid-viscose-and-linen-twill-7860"},
+  {"brand": "Brunello Cucinelli", "cat": "shorts", "img": "", "keys": ["navy", "blue", "shorts"], "name": "TECHNO COTTON FLEECE BERMUDA SHORTS", "price": 699.9, "retailer": "Lord & Taylor", "tier": "premium", "url": "https://lordandtaylor.com/products/techno-cotton-fleece-bermuda-shorts-9141"},
+  {"brand": "Orlebar Brown", "cat": "swim", "img": "https://orlebarbrown.com/cdn/shop/files/ORLEBAR-BROWN-BULLDOG-II-NAVY_250030_FRONT_OB.jpg?v=1711359041&width=1946", "keys": ["navy", "swim"], "name": "Bulldog Swim Shorts — Navy", "price": 345, "retailer": "Orlebar Brown", "tier": "premium", "url": "https://orlebarbrown.com/en-us/products/bulldog-navy-swimwear-250030"},
+  {"brand": "Orlebar Brown", "cat": "swim", "img": "https://orlebarbrown.com/cdn/shop/files/ORLEBAR-BROWN-BULLDOG-II-RIVIERA-II_269763_FRONT_OB.jpg?v=1711433677&width=1946", "keys": ["sky blue", "blue", "swim"], "name": "Bulldog - Riviera Mid-Length Swim Shorts", "price": 345, "retailer": "Orlebar Brown", "tier": "premium", "url": "https://orlebarbrown.com/en-us/products/bulldog-light-blue-swimwear-269763"},
+  {"brand": "Orlebar Brown", "cat": "swim", "img": "https://orlebarbrown.com/cdn/shop/files/ORLEBAR-BROWN-BULLDOG-FINE-PIPING-WHITE-SAND_281532_FRONT_OB_39e28a52-736a-4d24-bf78-72e025bea043.jpg?v=1760016952&width=1946", "keys": ["white", "swim"], "name": "Mid-Length Swim Shorts With Contrast Seam Piping In White Sand", "price": 375, "retailer": "Orlebar Brown", "tier": "premium", "url": "https://orlebarbrown.com/en-us/products/bulldog-white-swimwear-281532"},
+  {"brand": "Orlebar Brown", "cat": "swim", "img": "https://orlebarbrown.com/cdn/shop/files/ORLEBAR-BROWN-SETTER-PETTOLA-DARK-RUBY_281764_FRONT_OB_f377484d-eb43-4f23-834d-49478b0b3b9e.jpg?v=1769428551&width=1946", "keys": ["burgundy", "red", "swim"], "name": "Mens Red Adjustable Waist Tailored Swim Shorts", "price": 445, "retailer": "Orlebar Brown", "tier": "premium", "url": "https://orlebarbrown.com/en-us/products/setter-burgundy-swimwear-281764"},
+  {"brand": "Vilebrequin", "cat": "swim", "img": "https://www.vilebrequin.com/dw/image/v2/BLGH_PRD/on/demandware.static/-/Sites-vilebrequin-catalog-master/default/dw73f99780/images/MANH9E00-415/MANH9E00-415-frontworn-3240x4050.jpg", "keys": ["sage", "green", "swim"], "name": "Men Swim Trunks Solid - Wormwood", "price": 210, "retailer": "Vilebrequin", "tier": "premium", "url": "https://www.vilebrequin.com/us/en/product/MANH9E00-415"},
+  {"brand": "Vilebrequin", "cat": "swim", "img": "https://www.vilebrequin.com/dw/image/v2/BLGH_PRD/on/demandware.static/-/Sites-vilebrequin-catalog-master/default/dw32e30cfb/images/MPAEA636-990/MPAEA636-990-frontworn-3240x4050.jpg", "keys": ["black", "swim"], "name": "Men Swim Trunks Ronde des Tortues Jacquard Broché", "price": 445, "retailer": "Vilebrequin", "tier": "premium", "url": "https://www.vilebrequin.com/us/en/product/MPAEA636-990"},
+  {"brand": "Vilebrequin", "cat": "swim", "img": "https://www.vilebrequin.com/dw/image/v2/BLGH_PRD/on/demandware.static/-/Sites-vilebrequin-catalog-master/default/dw20c07692/images/MAHEI100-490/MAHEI100-490-frontworn-3240x4050.jpg", "keys": ["olive", "khaki", "swim"], "name": "Men Micro-Perforated Ultra-Light and Packable Swim Trunks Solid", "price": 315, "retailer": "Vilebrequin", "tier": "premium", "url": "https://www.vilebrequin.com/us/en/product/MAHEI100-490"},
+  {"brand": "Vilebrequin", "cat": "swim", "img": "https://www.vilebrequin.com/dw/image/v2/BLGH_PRD/on/demandware.static/-/Sites-vilebrequin-catalog-master/default/dwf7483d75/images/MANH9E00-442/MANH9E00-442-frontworn-3240x4050.jpg", "keys": ["teal", "green", "swim"], "name": "Men Swim Trunks Solid - Tropical", "price": 210, "retailer": "Vilebrequin", "tier": "premium", "url": "https://www.vilebrequin.com/us/en/product/MANH9E00-442"},
+  {"brand": "Orlebar Brown", "cat": "swim", "img": "https://orlebarbrown.com/cdn/shop/files/ORLEBAR-BROWN-SETTER-SEERSUCKER-FINE-STRIPE-LATTE_282742_FRONT_OB.jpg?v=1781793916&width=1946", "keys": ["sand", "beige", "swim"], "name": "Mens Latte Seersucker Stripe Swim Shorts", "price": 445, "retailer": "Orlebar Brown", "tier": "premium", "url": "https://orlebarbrown.com/en-us/products/setter-seersucker-sand-swimwear-282742"},
+  {"brand": "Orlebar Brown", "cat": "swim", "img": "", "keys": ["burgundy", "red", "swim"], "name": "Bulldog drawcord swim shorts", "price": 395, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/orlebar-brown-bulldog-drawcord-swim-shorts-item-37739410.aspx?lang=en-US&&size=21"},
+  {"brand": "Edward Green", "cat": "shoes", "img": "", "keys": ["dark brown", "suede", "loafers", "penny loafers"], "name": "Pimlico Suede Penny Loafers", "price": 1750, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/edward-green/shoes/loafers/pimlico-suede-penny-loafers/46376663163014725"},
+  {"brand": "Edward Green", "cat": "shoes", "img": "", "keys": ["olive", "suede", "loafers", "penny loafers"], "name": "Polperro Leather-Trimmed Suede Penny Loafers", "price": 915, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/edward-green/shoes/loafers/polperro-leather-trimmed-suede-penny-loafers/46376663163014718"},
+  {"brand": "Brunello Cucinelli", "cat": "shoes", "img": "", "keys": ["brown", "suede", "loafers", "penny loafers"], "name": "Suede penny loafers", "price": 1300, "retailer": "Mytheresa", "tier": "premium", "url": "https://www.mytheresa.com/us/en/men/brunello-cucinelli-suede-penny-loafers-brown-p01208820"},
+  {"brand": "Zegna", "cat": "shoes", "img": "", "keys": ["white", "leather", "sneakers"], "name": "White Leather Triple Stitch™ Sneakers", "price": 1390, "retailer": "Zegna", "tier": "premium", "url": "https://www.zegna.com/us-en/shoes/sneakers/product.white-leather-triple-stitch-sneakers.39357771/"},
+  {"brand": "Castañer", "cat": "shoes", "img": "", "keys": ["grey", "canvas", "espadrilles"], "name": "Pablo Canvas Espadrilles", "price": 165, "retailer": "Mr Porter", "tier": "value", "url": "https://mrporter.com/en-us/mens/product/castaner/shoes/espadrilles/pablo-canvas-espadrilles/46376663162869387"},
+  {"brand": "Castañer", "cat": "shoes", "img": "", "keys": ["beige", "canvas", "espadrilles"], "name": "Nac Canvas Espadrilles", "price": 260, "retailer": "Mr Porter", "tier": "value", "url": "https://www.mrporter.com/en-us/mens/product/castaner/shoes/espadrilles/nac-canvas-espadrilles/46376663163016876"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Chelsea529542A-S52D26_1400x.png?v=1755682999", "keys": ["dark brown", "suede", "chelsea boots"], "name": "Chelsea 5 Dark Brown Rough-Out Suede (G Fitting)", "price": 830, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/chelsea-5-dark-brown-rough-out-suede-g"},
+  {"brand": "Dr. Martens", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262399M231015_1/dr-martens-brown-delapre-penny-loafers.jpg", "keys": ["brown", "suede", "loafers", "penny loafers"], "name": "Brown Delapre Penny Loafers", "price": 260, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/dr-martens/brown-delapre-penny-loafers/19279101"},
+  {"brand": "BOSS", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261085M239009_1/boss-hugo-boss-brown-penny-trim-suede-loafers.jpg", "keys": ["dark brown", "suede", "loafers", "penny loafers"], "name": "Brown Penny Trim Suede Loafers", "price": 156, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/boss-hugo-boss/brown-penny-trim-suede-loafers/19086791"},
+  {"brand": "Common Projects", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262133M237049_1/common-projects-white-premium-runner-sneakers.jpg", "keys": ["white", "leather", "sneakers"], "name": "White Premium Runner Sneakers", "price": 660, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/common-projects/white-premium-runner-sneakers/469069873"},
+  {"brand": "Common Projects", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262133M237028_1/common-projects-white-and-gray-bball-duo-sneakers.jpg", "keys": ["white", "leather", "suede", "sneakers"], "name": "White & Gray BBALL Duo Sneakers", "price": 610, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/common-projects/white-and-gray-bball-duo-sneakers/19643081"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Hallam25057A-C01L16_1400x.png?v=1729151524", "keys": ["black", "leather", "oxfords"], "name": "Hallam Black Calf", "price": 930, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/collections/all-mens-styles/products/hallam-black-calf"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Boston28363A-D13L16_dbd9bd00-724c-4ccc-92be-3221aada8b65_1400x.png?v=1729064862", "keys": ["burgundy", "leather", "loafers", "penny loafers"], "name": "Boston Burgundy Cavalry Calf", "price": 840, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/boston-burgundy-cavalry-calf"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Boston28363A-D11L16_1400x.png?v=1736298291", "keys": ["black", "leather", "loafers", "penny loafers"], "name": "Boston Black Cavalry Calf", "price": 840, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/boston-black-cavalry-calf"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Sydney25351A-B02C26_1400x.png?v=1729065540", "keys": ["dark brown", "leather", "loafers", "penny loafers"], "name": "Sydney Dark Brown Burnished Calf (City Sole)", "price": 930, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/sydney-darkbrown-calf-city"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Teign25444A-S02L16_1400x.png?v=1729241542", "keys": ["dark brown", "suede", "loafers"], "name": "Teign Dark Brown Suede", "price": 770, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/teign-darkbrown-suede"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Cannes20305A-J02L76_1400x.png?v=1729064909", "keys": ["dark brown", "suede", "loafers"], "name": "Cannes Dark Brown Calf Suede", "price": 870, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/cannes-dark-brown-calf-suede"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Nice20206A-J03L76_1400x.png?v=1719485370", "keys": ["tan", "suede", "loafers", "penny loafers"], "name": "Nice Tobacco Calf Suede", "price": 830, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/nice-tobacco-calf-suede"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Boston28363A-G12C26_1400x.png?v=1744364496", "keys": ["dark brown", "leather", "loafers", "penny loafers"], "name": "Boston Dark Brown Country Calf Grain", "price": 890, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/boston-darkbrown-country-calf-city"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Molton25940A-S52D26_d9235d59-5d1d-4456-8b7c-d632d2ab5f3c_1400x.png?v=1729149707", "keys": ["dark brown", "suede", "chukka boots", "boots"], "name": "Molton Dark Brown Rough-Out Suede", "price": 810, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/molton-darkbrown-roughout"},
+  {"brand": "Baudoin & Lange", "cat": "shoes", "img": "https://the-armoury-shopify.imgix.net/1/1583/4911/files/kfu7lkfvjhdkuh76xypp.jpg?w=2048&q=75&auto=format,compress", "keys": ["dark brown", "suede", "loafers", "tassel", "belgian loafers"], "name": "Sagan Tassel Loafer", "price": 575, "retailer": "The Armoury", "tier": "premium", "url": "https://www.thearmoury.com/collections/footwear/baudoin-lange-sagan-tassel-loafer?variant=15884398002247"},
+  {"brand": "Baudoin & Lange", "cat": "shoes", "img": "https://the-armoury-shopify.imgix.net/1/1583/4911/files/a6jdqkenxwq82qhzqfnl_8016f5d3-7480-4413-96cc-365613592aab.jpg?w=2048&q=75&auto=format,compress", "keys": ["black", "suede", "loafers", "belgian loafers"], "name": "Sagan Classic Loafer", "price": 620, "retailer": "The Armoury", "tier": "premium", "url": "https://www.thearmoury.com/collections/baudoin-and-lange/baudoin-lange-sagan-classic-loafer?variant=39696535027783"},
+  {"brand": "Vans", "cat": "shoes", "img": "https://images.journeys.com/images/products/1_65711_FS.JPG", "keys": ["white", "canvas", "sneakers"], "name": "Vans Authentic Skate Shoe - True White", "price": 59.99, "retailer": "Journeys", "tier": "value", "url": "https://www.journeys.com/kidz/product/vans-authentic-skate-shoe-true-white-499367?c=0"},
+  {"brand": "Diemme", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262396M225013_1/diemme-brown-clarks-originals-edition-suede-desert-boots.jpg", "keys": ["brown", "suede", "desert boots"], "name": "Brown Clarks Originals Edition Suede Desert Boots", "price": 620, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/diemme/brown-clarks-originals-edition-suede-desert-boots/19626101"},
+  {"brand": "Axel Arigato", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262307M237044_1/axel-arigato-white-clean-90-sneakers.jpg", "keys": ["white", "leather", "sneakers"], "name": "White Clean 90 Sneakers", "price": 330, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/axel-arigato/white-clean-90-sneakers/94299808"},
+  {"brand": "Axel Arigato", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262307M237029_1/axel-arigato-gray-clean-90-suede-sneakers.jpg", "keys": ["grey", "suede", "sneakers"], "name": "Gray Clean 90 Suede Sneakers", "price": 330, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/axel-arigato/gray-clean-90-suede-sneakers/874030501"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Overton25461A-P01L16_5a4d7c27-0a4e-4791-99e9-7ce956190ad8_1400x.png?v=1729238014", "keys": ["black", "patent", "leather", "dress shoes", "oxfords"], "name": "Overton Black Patent", "price": 810, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/overton-black-patent"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Connaught220106A-S29C26_72810a4a-b04e-45cb-8a29-f9747faaf144_1400x.png?v=1729281362", "keys": ["dark brown", "suede", "oxfords"], "name": "Connaught 2 Dark Oak Suede (City Sole)", "price": 770, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/connaught-2-darkoak-suede"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Alex25119A-B02L16_1400x.png?v=1729236764", "keys": ["dark brown", "leather", "oxfords"], "name": "Alex Dark Brown Burnished Calf", "price": 930, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/alex-darkbrown-calf"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Cavendish29376A-H04L16_1400x.png?v=1729064931", "keys": ["burgundy", "cordovan", "leather", "loafers", "tassel"], "name": "Cavendish Burgundy Cordovan", "price": 1290, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/cavendish-burgundy-cordovan"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/products/Yale20296A-H04L16_1400x.png?v=1700144217", "keys": ["burgundy", "cordovan", "leather", "loafers", "penny loafers"], "name": "Yale Burgundy Cordovan", "price": 1290, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/yale-burgundy-cordovan"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Chelsea529542A-S57D26_1400x.png?v=1732925215", "keys": ["tan", "suede", "chelsea boots"], "name": "Chelsea 5 Natural Rough-Out Suede", "price": 830, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/collections/chelsea-5/products/chelsea-5-natural-rough-out-suede"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/Chelsea825887A-S02C26_0a50c8c0-95ef-41e8-b78c-2c7bc2e16f80_1400x.png?v=1729236786", "keys": ["dark brown", "suede", "chelsea boots"], "name": "Chelsea 8 Dark Brown Suede", "price": 830, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/chelsea-8-darkbrown-suede-city"},
+  {"brand": "Crockett & Jones", "cat": "shoes", "img": "https://us.crockettandjones.com/cdn/shop/files/James20206A-C01L36_1400x.png?v=1734566585", "keys": ["black", "leather", "oxfords"], "name": "James Black Calf", "price": 1495, "retailer": "Crockett & Jones US", "tier": "premium", "url": "https://us.crockettandjones.com/products/james-black-calf"},
+  {"brand": "Clarks Originals", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262094M224001_1/clarks-originals-taupe-suede-desert-boots.jpg", "keys": ["taupe", "sand", "suede", "desert boots"], "name": "Taupe Suede Desert Boots", "price": 145, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/clarks-originals/taupe-suede-desert-boots/19395781"},
+  {"brand": "Clarks Originals", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262094M255007_1/clarks-originals-tan-desert-2456-rock-boots.jpg", "keys": ["tan", "suede", "desert boots"], "name": "Tan Desert 2456 Rock Boots", "price": 165, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/clarks-originals/tan-desert-2456-rock-boots/19396411"},
+  {"brand": "Wooyoungmi", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262704M225000_1/wooyoungmi-black-leather-derbys.jpg", "keys": ["black", "leather", "derbys", "dress shoes"], "name": "Black Leather Derbys", "price": 730, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/wooyoungmi/black-leather-derbys/19564931"},
+  {"brand": "Tom Ford", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262076M237005_1/tom-ford-brown-suede-dean-sneakers.jpg", "keys": ["brown", "suede", "sneakers"], "name": "Brown Suede Dean Sneakers", "price": 990, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/tom-ford/brown-suede-dean-sneakers/19298451"},
+  {"brand": "Birkenstock", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262513M231003_1/birkenstock-brown-naples-wrapped-raffia-1774-loafers.jpg", "keys": ["brown", "raffia", "woven", "loafers"], "name": "Brown Naples Wrapped Raffia 1774 Loafers", "price": 490, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/birkenstock/brown-naples-wrapped-raffia-1774-loafers/19040841"},
+  {"brand": "Tom Ford", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262076M237008_1/tom-ford-burgundy-suede-aston-sneakers.jpg", "keys": ["burgundy", "suede", "sneakers"], "name": "Burgundy Suede Aston Sneakers", "price": 990, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/tom-ford/burgundy-suede-aston-sneakers/19756991"},
+  {"brand": "Thom Browne", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/271381M231002_1/thom-browne-black-pebble-grain-leather-penny-loafers.jpg", "keys": ["black", "leather", "loafers", "penny loafers"], "name": "Black Pebble Grain Leather Penny Loafers", "price": 1095, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/thom-browne/black-pebble-grain-leather-penny-loafers/739987068"},
+  {"brand": "Dries Van Noten", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262358M225010_1/dries-van-noten-black-calfskin-oxfords.jpg", "keys": ["black", "leather", "oxfords"], "name": "Black Calfskin Oxfords", "price": 1270, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/dries-van-noten/black-calfskin-oxfords/701940921"},
+  {"brand": "Givenchy", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262278M234003_1/givenchy-black-givenchy-puffy-sandals.jpg", "keys": ["black", "leather", "sandals"], "name": "Black 'Givenchy Puffy' Sandals", "price": 880, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/givenchy/black-givenchy-puffy-sandals/19302361"},
+  {"brand": "Drake's", "cat": "shoes", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262488M231000_1/drakes-brown-suede-henri-summer-loafers.jpg", "keys": ["brown", "suede", "loafers"], "name": "Brown Suede Henri Summer Loafers", "price": 500, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/drakes/brown-suede-henri-summer-loafers/689383829"},
+  {"brand": "Boglioli", "cat": "blazer", "img": "", "keys": ["navy", "blazer", "hopsack", "wool"], "name": "Double-Breasted Virgin Wool-Hopsack Blazer", "price": 1775, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/boglioli/clothing/double-breasted-blazers/double-breasted-virgin-wool-hopsack-blazer/46376663163067676"},
+  {"brand": "Boglioli", "cat": "blazer", "img": "", "keys": ["navy", "blazer", "wool"], "name": "Wool-Blend Blazer", "price": 1675, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/boglioli/clothing/single-breasted-blazers/wool-blend-blazer/46376663163067655"},
+  {"brand": "Canali", "cat": "blazer", "img": "", "keys": ["navy", "blazer", "wool"], "name": "Kei Wool-Blend Blazer", "price": 2150, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/single-breasted-blazers/kei-wool-blend-blazer/46376663163144572"},
+  {"brand": "Ralph Lauren Purple Label", "cat": "blazer", "img": "", "keys": ["navy", "blazer", "herringbone", "linen"], "name": "Herringbone Cotton, Silk and Linen-Blend Blazer", "price": 2695, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/ralph-lauren-purple-label/clothing/single-breasted-blazers/herringbone-cotton-silk-and-linen-blend-blazer/46376663163123917"},
+  {"brand": "Dries Van Noten", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262358M195007_1/dries-van-noten-tan-wool-blazer.jpg", "keys": ["camel", "tan", "blazer", "wool"], "name": "Tan Wool Blazer", "price": 1850, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/dries-van-noten/tan-wool-blazer/19449271"},
+  {"brand": "Dries Van Noten", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262358M195006_1/dries-van-noten-burgundy-wool-blazer.jpg", "keys": ["burgundy", "blazer", "wool"], "name": "Burgundy Wool Blazer", "price": 1850, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/dries-van-noten/burgundy-wool-blazer/19449261"},
+  {"brand": "Ralph Lauren Purple Label", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/251261M195013_1/ralph-lauren-purple-label-navy-terry-single-breasted-sportcoat-blazer.jpg", "keys": ["navy", "blazer", "unstructured"], "name": "Navy Terry Single-Breasted Sportcoat Blazer", "price": 1995, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/ralph-lauren-purple-label/navy-terry-single-breasted-sportcoat-blazer/17286251"},
+  {"brand": "Ralph Lauren Purple Label", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/241261M195001_1/ralph-lauren-purple-label-white-sportcoat-blazer.jpg", "keys": ["white", "blazer", "linen"], "name": "White Sportcoat Blazer", "price": 998, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/ralph-lauren-purple-label/white-sportcoat-blazer/15143591"},
+  {"brand": "Drake's", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262488M195000_1/drakes-gray-tropical-wool-tailored-blazer.jpg", "keys": ["grey", "blazer", "wool"], "name": "Gray Tropical Wool Tailored Blazer", "price": 1710, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/drakes/gray-tropical-wool-tailored-blazer/972104456"},
+  {"brand": "Drake's", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262488M195001_1/drakes-brown-cotton-corduroy-games-mk-i-blazer.jpg", "keys": ["brown", "blazer", "corduroy", "cotton"], "name": "Brown Cotton Corduroy Games Mk. I Blazer", "price": 1060, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/drakes/brown-cotton-corduroy-games-mk-i-blazer/382217078"},
+  {"brand": "Magliano", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262516M195001_1/magliano-green-corduroy-blazer.jpg", "keys": ["green", "forest", "blazer", "corduroy"], "name": "Green Corduroy Blazer", "price": 1285, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/magliano/green-corduroy-blazer/19615021"},
+  {"brand": "Dries Van Noten", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262358M195012_1/dries-van-noten-green-oversized-wool-blazer.jpg", "keys": ["olive", "green", "blazer", "wool"], "name": "Green Oversized Wool Blazer", "price": 2140, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/dries-van-noten/green-oversized-wool-blazer/19449321"},
+  {"brand": "Wooyoungmi", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262704M195000_1/wooyoungmi-brown-harris-tweed-single-blazer.jpg", "keys": ["brown", "blazer", "tweed"], "name": "Brown Harris Tweed Single Blazer", "price": 1460, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/wooyoungmi/brown-harris-tweed-single-blazer/19565731"},
+  {"brand": "Drake's", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262488M195002_1/drakes-gray-herringbone-tweed-mk-vii-games-blazer.jpg", "keys": ["grey", "blazer", "tweed", "herringbone"], "name": "Gray Herringbone Tweed Mk. VII Games Blazer", "price": 1185, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/drakes/gray-herringbone-tweed-mk-vii-games-blazer/748734177"},
+  {"brand": "Comme des Garçons Homme Deux", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262058M195010_1/comme-des-garcons-homme-deux-navy-wool-cashmere-pinstripe-blazer.jpg", "keys": ["navy", "blazer", "pinstripe", "wool", "cashmere", "check"], "name": "Navy Wool Cashmere Pinstripe Blazer", "price": 1330, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/comme-des-garcons-homme-deux/navy-wool-cashmere-pinstripe-blazer/19598881"},
+  {"brand": "Hed Mayner", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262897M180003_1/hed-mayner-navy-shawl-blazer.jpg", "keys": ["navy", "midnight", "blazer", "dinner jacket", "tuxedo", "shawl"], "name": "Navy Shawl Blazer", "price": 880, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/hed-mayner/navy-shawl-blazer/19548561"},
+  {"brand": "Ernest W. Baker", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262600M195001_1/ernest-w-baker-black-six-button-double-breasted-blazer.jpg", "keys": ["black", "blazer", "dinner jacket", "tuxedo"], "name": "Black Six Button Double Breasted Blazer", "price": 1050, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/ernest-w-baker/black-six-button-double-breasted-blazer/19596131"},
+  {"brand": "Y-3", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261138M198001_1/y-3-taupe-chapea-tailored-waistcoat.jpg", "keys": ["cream", "taupe", "blazer", "waistcoat"], "name": "Taupe Chapea Tailored Waistcoat", "price": 216, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/y-3/taupe-chapea-tailored-waistcoat/19066641"},
+  {"brand": "Soshiotsuki", "cat": "blazer", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262061M185002_1/soshiotsuki-gray-last-button-vest.jpg", "keys": ["grey", "charcoal", "blazer", "waistcoat"], "name": "Gray Last Button Vest", "price": 440, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/soshiotsuki/gray-last-button-vest/19622221"},
+  {"brand": "Canali", "cat": "suit", "img": "", "keys": ["charcoal", "grey", "suit", "pinstripe"], "name": "pinstripe-pattern single-breasted suit", "price": 2002, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/canali-pinstripe-pattern-single-breasted-suit-item-37274199.aspx?lang=en-US&&size=22"},
+  {"brand": "BOSS", "cat": "suit", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262085M196003_1/boss-hugo-boss-navy-two-piece-slim-fit-stretch-virgin-wool-suit.jpg", "keys": ["navy", "suit", "wool"], "name": "Navy Two-Piece Slim-Fit Stretch Virgin Wool Suit", "price": 800, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/boss-hugo-boss/navy-two-piece-slim-fit-stretch-virgin-wool-suit/19263791"},
+  {"brand": "BOSS", "cat": "suit", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262085M196006_1/boss-hugo-boss-brown-single-breasted-suit.jpg", "keys": ["brown", "suit"], "name": "Brown Single-Breasted Suit", "price": 800, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/boss-hugo-boss/brown-single-breasted-suit/19600821"},
+  {"brand": "BOSS", "cat": "suit", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262085M196008_1/boss-hugo-boss-gray-single-breasted-suit.jpg", "keys": ["grey", "suit"], "name": "Gray Single-Breasted Suit", "price": 1000, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/boss-hugo-boss/gray-single-breasted-suit/19601251"},
+  {"brand": "Paul Smith", "cat": "suit", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262260M196002_1/paul-smith-gray-the-soho-tailored-fit-pinstripe-wool-suit.jpg", "keys": ["grey", "suit", "pinstripe", "wool"], "name": "Gray 'The Soho' Tailored-Fit Pinstripe Wool Suit", "price": 1925, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/paul-smith/gray-the-soho-tailored-fit-pinstripe-wool-suit/19276201"},
+  {"brand": "Dolce&Gabbana", "cat": "suit", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/241003M196000_1/dolce-and-gabbana-black-pinstripe-wool-suit.jpg", "keys": ["black", "suit", "pinstripe", "wool"], "name": "Black Pinstripe Wool Suit", "price": 1275, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/dolce-and-gabbana/black-pinstripe-wool-suit/14568131"},
+  {"brand": "Brunello Cucinelli", "cat": "tie", "img": "", "keys": ["navy", "tie", "knitted tie", "silk"], "name": "6cm Knitted Silk Tie", "price": 370, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/accessories/knitted-ties/6cm-knitted-silk-tie/46376663162997957"},
+  {"brand": "Brunello Cucinelli", "cat": "tie", "img": "", "keys": ["burgundy", "tie", "knitted tie", "silk"], "name": "6cm Knitted Silk Tie", "price": 370, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/accessories/knitted-ties/6cm-knitted-silk-tie/46376663162997979"},
+  {"brand": "Charvet", "cat": "tie", "img": "", "keys": ["burgundy", "tie", "knitted tie", "silk"], "name": "5cm Knitted Silk Tie", "price": 275, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/charvet/accessories/knitted-ties/5cm-knitted-silk-tie/1473020371578436"},
+  {"brand": "Thom Browne", "cat": "tie", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/271381M158004_1/thom-browne-navy-classic-silk-tie.jpg", "keys": ["navy", "tie", "silk"], "name": "Navy Classic Silk Tie", "price": 370, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/thom-browne/navy-classic-silk-tie/655469351"},
+  {"brand": "Tom Ford", "cat": "tie", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/252076M157001_1/tom-ford-black-silk-bow-tie.jpg", "keys": ["black", "tie", "bow tie", "silk"], "name": "Black Silk Bow Tie", "price": 285, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/tom-ford/black-silk-bow-tie/17895261"},
+  {"brand": "Vivienne Westwood", "cat": "tie", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262314M158012_1/vivienne-westwood-burgundy-7cm-tie.jpg", "keys": ["burgundy", "tie"], "name": "Burgundy 7cm Tie", "price": 145, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/vivienne-westwood/burgundy-7cm-tie/19473321"},
+  {"brand": "Vivienne Westwood", "cat": "tie", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262314M158011_1/vivienne-westwood-green-7cm-tie.jpg", "keys": ["green", "forest", "tie"], "name": "Green 7cm Tie", "price": 145, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/vivienne-westwood/green-7cm-tie/19473301"},
+  {"brand": "Vivienne Westwood", "cat": "tie", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262314M158014_1/vivienne-westwood-gray-7cm-tie.jpg", "keys": ["grey", "silver", "tie"], "name": "Gray 7cm Tie", "price": 145, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/vivienne-westwood/gray-7cm-tie/19473701"},
+  {"brand": "Sunflower", "cat": "tie", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262468M158001_1/sunflower-beige-silk-tie.jpg", "keys": ["cream", "beige", "tie", "silk"], "name": "Beige Silk Tie", "price": 145, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/sunflower/beige-silk-tie/19552451"},
+  {"brand": "Valentino Garavani", "cat": "tie", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262807M158001_1/valentino-garavani-orange-and-navy-valentie-silk-jacquard-tie.jpg", "keys": ["rust", "orange", "tie", "silk"], "name": "Orange & Navy Valentie Silk Jacquard Tie", "price": 350, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/valentino-garavani/orange-and-navy-valentie-silk-jacquard-tie/19279671"},
+  {"brand": "Todd Snyder", "cat": "outerwear", "img": "https://www.toddsnyder.com/cdn/shop/files/NOV26_KN1400568_SNYDER_OLIVE_FL1_R.jpg?v=1793134367&width=120", "keys": ["olive", "outerwear", "overshirt", "shirt jacket"], "name": "Military Shirt Jacket in Snyder Olive Pattern", "price": 348, "retailer": "Todd Snyder", "tier": "value", "url": "https://www.toddsnyder.com/products/knit-military-shirtsnyder-olive?variant=43039240749127"},
+  {"brand": "Carhartt Work In Progress", "cat": "outerwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261111M180029_1/carhartt-work-in-progress-beige-prescott-overshirt.jpg", "keys": ["stone", "beige", "outerwear", "overshirt"], "name": "Beige Prescott Overshirt", "price": 127, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/carhartt-work-in-progress/beige-prescott-overshirt/18849591"},
+  {"brand": "BOSS", "cat": "outerwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262085M192030_1/boss-hugo-boss-off-white-cotton-corduroy-overshirt.jpg", "keys": ["ecru", "off-white", "outerwear", "overshirt", "corduroy"], "name": "Off-White Cotton Corduroy Overshirt", "price": 400, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/boss-hugo-boss/off-white-cotton-corduroy-overshirt/19601061"},
+  {"brand": "Paul Smith", "cat": "outerwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262260M181001_1/paul-smith-tan-suede-bomber-jacket.jpg", "keys": ["tan", "outerwear", "bomber", "suede"], "name": "Tan Suede Bomber Jacket", "price": 2745, "retailer": "SSENSE", "tier": "premium", "url": "https://www.ssense.com/en-us/men/product/paul-smith/tan-suede-bomber-jacket/19275301"},
+  {"brand": "Ernest W. Baker", "cat": "outerwear", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262600M180011_1/ernest-w-baker-black-western-harrington-jacket.jpg", "keys": ["black", "outerwear", "harrington"], "name": "Black Western Harrington Jacket", "price": 940, "retailer": "SSENSE", "tier": "value", "url": "https://www.ssense.com/en-us/men/product/ernest-w-baker/black-western-harrington-jacket/19595951"},
+  {"brand": "Drake's", "cat": "shoes", "img": "https://cld.accentuate.io/64966033653/1710173040913/DR2A1B-23634-03-300-2.jpg?v=1710173040914&options=&transform=resize=900", "keys": ["tobacco", "brown", "suede", "desert boots", "boots"], "name": "Clifford Desert Boot Tobacco Suede", "price": 395, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/products/clifford-desert-boot-tobacco-suede"},
+  {"brand": "De Petrillo", "cat": "blazer", "img": "", "keys": ["navy", "blazer", "hopsack", "wool"], "name": "Wool-Hopsack Blazer", "price": 1695, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/de-petrillo/clothing/single-breasted-blazers/wool-hopsack-blazer/46376663163094097"},
+  {"brand": "J. Mueser", "cat": "blazer", "img": "", "keys": ["grey", "gray", "blazer", "herringbone", "wool"], "name": "Waverly Herringbone Wool Blazer", "price": 1550, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/j-mueser/clothing/single-breasted-blazers/waverly-herringbone-wool-blazer/46376663163000755"},
+  {"brand": "CELINE", "cat": "blazer", "img": "", "keys": ["cream", "ecru", "off-white", "blazer", "pinstripe", "wool"], "name": "Slim-Fit Pinstriped Wool-Twill Blazer", "price": 3400, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/celine/clothing/single-breasted-blazers/slim-fit-pinstriped-wool-twill-blazer/1647597327244653"},
+  {"brand": "Canali", "cat": "suit", "img": "", "keys": ["grey", "gray", "suit", "wool"], "name": "Wool-Blend Suit", "price": 2695, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/suit-jackets/wool-blend-suit/46376663163144556"},
+  {"brand": "Todd Snyder", "cat": "blazer", "img": "", "keys": ["black", "dinner jacket", "tuxedo"], "name": "Slim Italian Wool Peak Lapel Tuxedo", "price": 1396, "retailer": "Todd Snyder", "tier": "premium", "url": "https://www.toddsnyder.com/collections/todd-snyder/products/made-in-italy-peak-lapel-tuxedo-in-black"},
+  {"brand": "John Lobb", "cat": "shoes", "img": "", "keys": ["dark brown", "brown", "leather", "loafers", "penny loafers"], "name": "Lopez Leather Penny Loafers", "price": 1980, "retailer": "Mr Porter", "tier": "premium", "url": "https://mrporter.com/en-us/mens/product/john-lobb/shoes/loafers/lopez-leather-penny-loafers/1647597327562592"},
+  {"brand": "MORJAS", "cat": "shoes", "img": "", "keys": ["dark brown", "brown", "leather", "loafers", "penny loafers"], "name": "Full-Grain Leather Penny Loafers", "price": 400, "retailer": "Mr Porter", "tier": "value", "url": "https://www.mrporter.com/en-us/mens/product/morjas/shoes/loafers/full-grain-leather-penny-loafers/46376663162945000"},
+  {"brand": "MORJAS", "cat": "shoes", "img": "", "keys": ["brown", "leather", "loafers"], "name": "The Venetian Full-Grain Leather Loafers", "price": 380, "retailer": "Mr Porter", "tier": "value", "url": "https://www.mrporter.com/en-us/mens/product/morjas/shoes/loafers/the-venetian-full-grain-leather-loafers/46376663163112545"},
+  {"brand": "John Lobb", "cat": "shoes", "img": "", "keys": ["black", "oxford", "shoes", "leather", "formal"], "name": "City II Leather Oxford Shoes", "price": 2130, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/john-lobb/shoes/oxford-shoes/city-ii-leather-oxford-shoes/24062987016570059"},
+  {"brand": "Saint Laurent", "cat": "shoes", "img": "", "keys": ["black", "leather", "chelsea boots", "boots"], "name": "Vadim Polished-Leather Chelsea Boots", "price": 1500, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/saint-laurent/shoes/chelsea-boots/vadim-polished-leather-chelsea-boots/1647597346068761"},
+  {"brand": "Mr P.", "cat": "shoes", "img": "", "keys": ["brown", "leather", "sandals"], "name": "Leather Sandals", "price": 285, "retailer": "Mr Porter", "tier": "value", "url": "https://www.mrporter.com/en-us/mens/product/mr-p/shoes/summer-shoes/leather-sandals/46376663163066069"},
+  {"brand": "Birkenstock", "cat": "shoes", "img": "", "keys": ["brown", "leather", "sandals"], "name": "Arizona Soft Footbed Oiled Leather (Habana)", "price": 155, "retailer": "Fleet Feet", "tier": "value", "url": "https://www.fleetfeet.com/products/birkenstock-arizona-soft-footbed-oiled-leather"},
+  {"brand": "Canali", "cat": "knitwear", "img": "", "keys": ["navy", "crew-neck", "knit", "sweater", "cashmere"], "name": "Cashmere Sweater", "price": 1195, "retailer": "Mr Porter", "tier": "premium", "url": "https://mrporter.com/en-us/mens/product/canali/clothing/crew-necks/cashmere-sweater/46376663163067439"},
+  {"brand": "Inis Meáin", "cat": "knitwear", "img": "", "keys": ["blue", "navy", "roll-neck", "turtleneck", "knit", "sweater", "cashmere"], "name": "Boatbuilder Ribbed Cashmere Sweater", "price": 1695, "retailer": "Mr Porter", "tier": "premium", "url": "https://www.mrporter.com/en-us/mens/product/inis-meain/clothing/rollnecks/boatbuilder-ribbed-cashmere-sweater/46376663163110917"},
+  {"brand": "Polo Ralph Lauren", "cat": "knitwear", "img": "", "keys": ["navy", "quarter-zip", "zip-neck", "knit", "sweater"], "name": "Navy Wool-Cashmere Quarter-Zip Sweater", "price": 350, "retailer": "Harrods US", "tier": "value", "url": "https://www.harrods.com/en-us/p/polo-ralph-lauren-wool-cashmere-quarter-zip-sweater-000000000000300291"},
+  {"brand": "Gran Sasso", "cat": "knitwear", "img": "", "keys": ["navy", "knit polo", "polo", "long-sleeve"], "name": "Long-Sleeve Polo Sweater", "price": 382, "retailer": "Farfetch", "tier": "premium", "url": "https://www.farfetch.com/shopping/men/gran-sasso-long-sleeve-polo-sweater-item-39672229.aspx"},
+  {"brand": "Drake's", "cat": "shirt", "img": "", "keys": ["white", "linen", "shirt"], "name": "White Linen Spread Collar Shirt", "price": 345, "retailer": "Drake's US", "tier": "premium", "url": "https://us.drakes.com/products/white-linen-spread-collar-shirt"},
+  {"brand": "Sunspel", "cat": "shirt", "img": "", "keys": ["white", "linen", "shirt"], "name": "Men's Linen Shirt in White", "price": 255, "retailer": "Sunspel US", "tier": "premium", "url": "https://us.sunspel.com/products/mens-linen-shirt-in-white-msht2106-whaa"},
+  {"brand": "Sunspel", "cat": "top", "img": "", "keys": ["white", "tee", "t-shirt"], "name": "Men's Sea Island Cotton T-shirt in White", "price": 200, "retailer": "Sunspel US", "tier": "premium", "url": "https://us.sunspel.com/products/mens-sea-island-cotton-tshirt-white-mtsh0063"},
+  {"brand": "Tom Ford", "cat": "blazer", "img": "", "keys": ["navy", "midnight", "blazer", "velvet", "dinner jacket", "shawl"], "name": "Shelton velvet blazer", "price": 3955, "retailer": "Mytheresa", "tier": "premium", "url": "https://www.mytheresa.com/us/en/men/tom-ford-shelton-velvet-blazer-blue-p00738054?dplink=true&utm_source=paid-social-upperfunnel&utm_medium=facebook&utm_campaign={{campaign.name}}&chn=paid_social_upperfunnel&src=facebook&cmp={{campaign.name}}&ag={{adset.name}}&ad={{ad.name}}&tarea=us&tar=MENSWEAR&feed_num=P00738054"}
 ];
 /* Which of the fifty-four Brands-section houses belong to
    each stop on the Find-me budget scale — keyed off the app's
@@ -15090,7 +15674,7 @@ var BRAND_TIERS = {
 /* Each brand's store domain, from its Brands-section row — a
    brand option searches within that store for this piece. */
 var BRAND_DOMAINS = {
-  "Saint James": "saint-james.com", "S.N.S. Herning": "sns-herning.com",
+  "Saint James": "us.saint-james.com", "S.N.S. Herning": "sns-herning.com",
   "William Lockie": "williamlockie.com", "Gran Sasso": "gransasso.it",
   "John Smedley": "johnsmedley.com", "Rubato": "atemporubato.com",
   "Stoffa": "stoffa.co", "P. Johnson": "pjt.com",
@@ -15173,10 +15757,14 @@ function catalogueCatForPiece(pc) {
   if (/trouser|chino|pant|flannel/.test(g)) return "trousers";
   return null;
 }
-/* Top two catalogue matches for a piece: same garment
+/* Top catalogue matches for a piece (up to four): same garment
    category, colour family as a gate, then keyword overlap
    between the piece description and the entry's keys — at
-   least two keys, one of them a garment or material key. */
+   least two keys, one of them a garment or material key.
+   Equal-scoring matches are ordered by the price point in
+   force: at Premium and No budget the premium matches lead,
+   ahead of value matches; at the lower price points the
+   value matches lead, as before. */
 function catalogueMatches(pc) {
   var cat = catalogueCatForPiece(pc);
   if (!cat) return [];
@@ -15202,8 +15790,14 @@ function catalogueMatches(pc) {
     var score = matched + ((colourOK && !colourLiteral) ? 1 : 0);
     if (score >= 2 && garmentMatched >= 1) scored.push({ e: e, score: score });
   });
-  scored.sort(function (a, b) { return b.score - a.score; });
-  return scored.slice(0, 2).map(function (s) { return s.e; });
+  var premiumFirst = (typeof budgetLevel !== "undefined" && budgetLevel >= 4);
+  scored.sort(function (a, b) {
+    if (b.score !== a.score) return b.score - a.score;
+    var aRank = (a.e.tier === "premium") === premiumFirst ? 0 : 1;
+    var bRank = (b.e.tier === "premium") === premiumFirst ? 0 : 1;
+    return aRank - bRank;
+  });
+  return scored.slice(0, 4).map(function (s) { return s.e; });
 }
 function shopRowHTML(e) {
   var thumb = e.img ? '<img class="shop-thumb" src="' + esc(e.img) + '" alt="" loading="lazy" />' : "";
@@ -16799,9 +17393,11 @@ function fwCardHTML(look, idx) {
   var shoe = null;
   pieces.forEach(function (p) { if (p.category === "Shoes") shoe = p; });
   var shown = [pieces[0], shoe].filter(function (p, ix, a) { return p && p.photo && a.indexOf(p) === ix; });
-  var photos = shown.length
-    ? '<span class="fw-photos' + (shown.length === 1 ? " one" : "") + '">' + shown.map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async" />'; }).join("") + "</span>"
-    : "";
+  var photos = look.fwRender
+    ? '<span class="fw-render"><img src="' + look.fwRender + '" alt="' + esc(look.imgAlt || look.title || "") + '" loading="lazy" decoding="async" /></span>'
+    : (shown.length
+      ? '<span class="fw-photos' + (shown.length === 1 ? " one" : "") + '">' + shown.map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async" />'; }).join("") + "</span>"
+      : "");
   var names = pieces.map(function (p) { return p.name; }).join(" · ");
   return '<button type="button" class="card option-card fw-card" data-fw-idx="' + idx + '" role="listitem">' +
     photos +
@@ -16813,14 +17409,17 @@ function fwCardHTML(look, idx) {
     '<span class="mini-strip" style="display:flex;height:10px;border:1px solid var(--border);margin-top:8px">' + look.swatches.map(function (sw) { return '<span style="flex:1;background:' + sw.hex + '"></span>'; }).join("") + "</span></span></button>";
 }
 
-/* The outfit view for a From wardrobe card: his actual pieces —
-   their own photographs, named as his — plus the suggested bottom,
-   named as a suggestion. Never a pool render: the photograph of him
-   in some other outfit is not a picture of these pieces. */
+/* The outfit view for a From wardrobe card: the verified render
+   of him wearing this exact outfit full-width at the top when the
+   pairing has one (tappable to full size), then his actual pieces
+   listed below — their own photographs, named as his — plus the
+   suggested bottom, named as a suggestion. A render is only ever
+   shown for the exact top + shoes pairing it was verified for. */
 function openFwOutfit(idx) {
   var look = fwLooks[idx];
   var box = document.getElementById("fw-detail");
   if (!look || !box) return;
+  var hero = look.fwRender ? '<img class="fw-hero" src="' + look.fwRender + '" alt="' + esc(look.imgAlt || look.title || "") + '" data-popout="' + look.fwRender + '" data-popout-alt="' + esc(look.imgAlt || "") + '" loading="lazy" decoding="async" />' : "";
   var figs = (look.fwPieces || []).map(function (p) {
     return '<figure class="fw-piece" data-fw-piece="' + esc(p.id) + '" role="button" tabindex="0" aria-label="Open ' + esc(p.name) + ' in the Closet">' +
       (p.photo
@@ -16835,6 +17434,7 @@ function openFwOutfit(idx) {
   box.innerHTML = '<article class="card fw-outfit">' +
     '<div class="fw-outfit-head"><span class="oc-label">From wardrobe</span><button type="button" class="btn-ghost" data-fw-close>Back</button></div>' +
     '<h3>' + esc(look.title) + '</h3>' +
+    hero +
     '<div class="fw-pieces">' + figs + '</div>' +
     '<p class="fw-outfit-note">' + esc((look.notes || []).join(" ")) + '</p>' +
     '<div class="look-actions">' +
@@ -16941,6 +17541,59 @@ function dealFromWardrobe() {
       if (name === "studio" && closetSig() !== fwClosetSig) dealFromWardrobe();
     };
   }
+
+  /* ---------- Ideas source selector — the three boxes at the top
+     of Ideas. One shared source setting with Today's "Build from"
+     selector: setSource already moves every [data-source] control
+     together (these boxes, Today's row, the Customize form row);
+     this wrapper also keeps the Today store key in step, so the
+     saved mode persists on-device and fresh opens honour it in
+     both places. Default Combo. A tap applies silently — no
+     popup, no toast — and re-deals the Ideas below at once:
+     wardrobe only deals his closet render looks, inspo only
+     deals the inspo deck (the From wardrobe section steps
+     aside), Combo is the usual mix of inspo deals plus the
+     From wardrobe section. ---------- */
+  var prevSetSource = window.setSource;
+  if (typeof prevSetSource === "function") {
+    window.setSource = function (s) {
+      prevSetSource(s);
+      try { store.set("todaySource", studioSource); } catch (e) {}
+    };
+  }
+  function syncFwSectionVisibility() {
+    var sec = document.getElementById("from-wardrobe");
+    var det = document.getElementById("fw-detail");
+    if (studioSource === "inspo") {
+      if (sec) sec.hidden = true;
+      if (det) { det.hidden = true; det.innerHTML = ""; }
+    } else if (sec) {
+      sec.hidden = false;
+    }
+  }
+  function dealIdeasForSource() {
+    syncFwSectionVisibility();
+    if (studioSource !== "inspo") dealFromWardrobe();
+    if (studioSource === "wardrobe") {
+      var cl = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
+      if (cl && cl.length) {
+        renderOptions(cl, { desc: "From your wardrobe", occasion: "", season: "", opts: { basis: (typeof studioBasis !== "undefined" ? studioBasis : "both"), source: "wardrobe" } });
+        return;
+      }
+    }
+    dealSilent = true;
+    doStyleFromForm();
+  }
+  var seg = document.getElementById("ideas-source-seg");
+  if (seg) seg.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-source]");
+    if (!b) return;
+    var s = b.getAttribute("data-source");
+    if (s === studioSource) { syncFwSectionVisibility(); return; }
+    setSource(s);
+    dealIdeasForSource();
+  });
+  syncFwSectionVisibility();
 })();
 
 /* ---------- Init ---------- */
