@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.3" />
+    <meta name="wardrobe-build" content="2026-11-16.5" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -1576,7 +1576,8 @@
       .src-seg-btn[aria-pressed="true"] { background: color-mix(in srgb, var(--brass) 24%, var(--surface)); border-color: var(--brass); color: var(--text); }
       .from-wardrobe[hidden] { display: none; }
       .option-card .fw-pair { color: var(--brass); font-weight: 600; }
-      #fw-detail[hidden] { display: none; }
+      #fw-layer[hidden] { display: none; }
+      .fw-layer .fw-outfit { margin-top: 0; }
       .fw-outfit { padding: 22px; margin-top: 18px; display: grid; gap: 12px; }
       .fw-outfit-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
       .fw-outfit-head .oc-label { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); }
@@ -2166,6 +2167,46 @@
       .watch-opt .rec-badge { font-size: 9px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--brass); border: 1px solid var(--brass); border-radius: 2px; padding: 2px 6px; }
       .watch-opt .on-badge { font-size: 9px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--dim); }
       .watch-opt.none .wo-name { font-weight: 500; color: var(--dim); }
+
+      /* ================= Compact dropdowns — one quiet control ====
+         The hero's watch, outfit type and build-from are each ONE
+         small single-line control; tapping opens a small anchored
+         panel (content height, never a sheet) and a pick applies
+         silently and closes it. The same control replaces the
+         watch row in outfit detail views and the three source
+         boxes on Ideas. One size everywhere: 34px pill, 12px text,
+         ~26px watch thumbnail. Hero menus open upward over the
+         photograph; page menus open downward. */
+      .cdd { position: relative; }
+      .cdd[hidden] { display: none !important; }
+      .cdd-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; min-height: 34px; padding: 0 11px; border-radius: 999px; font-family: inherit; font-size: 12px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; cursor: pointer; max-width: 100%; }
+      .cdd-btn .cdd-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .cdd-btn .cdd-chev { font-size: 9px; opacity: .7; flex: none; }
+      .cdd-btn img.watch-thumb { position: static; width: 26px; height: 26px; flex: none; object-fit: cover; border-radius: 6px; border: 1px solid rgba(127,127,127,.35); display: block; }
+      .cdd-btn .watch-disc { width: 26px; height: 26px; border-width: 2px; }
+      .cdd-btn .watch-none-disc { width: 26px; height: 26px; font-size: 12px; }
+      .hero-cdd-btn { background: rgba(16,13,9,.42); border: 1px solid rgba(247,241,229,.45); color: #f7f1e5; }
+      .hero-cdd-btn .watch-none-disc { border-color: rgba(247,241,229,.5); color: #f7f1e5; }
+      .watch-cdd-btn, .ideas-source-btn { background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); }
+      .cdd-cap { font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); flex: none; }
+      .cdd-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 80; min-width: 176px; max-width: min(78vw, 280px); background: var(--surface); color: var(--text); border: 1px solid var(--border-strong); border-radius: 12px; box-shadow: var(--shadow-lift); padding: 5px; display: grid; gap: 1px; }
+      .cdd-menu[hidden] { display: none !important; }
+      .cdd-up .cdd-menu { top: auto; bottom: calc(100% + 6px); }
+      .cdd-menu-r { left: auto; right: 0; }
+      .cdd-opt { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; background: none; border: none; border-radius: 8px; padding: 7px 9px; font: inherit; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; white-space: nowrap; }
+      .cdd-opt[aria-pressed="true"] { background: color-mix(in srgb, var(--brass) 16%, transparent); font-weight: 600; }
+      .cdd-opt .cdd-opt-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+      .cdd-opt img.watch-thumb { position: static; inset: auto; width: 28px; height: 28px; flex: none; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); display: block; }
+      .cdd-opt .watch-disc { width: 28px; height: 28px; border-width: 2px; }
+      .cdd-opt .watch-none-disc { width: 28px; height: 28px; font-size: 13px; border-color: var(--border-strong); color: var(--dim); }
+      .cdd-opt .rec-badge { font-size: 9px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--brass); border: 1px solid var(--brass); border-radius: 2px; padding: 2px 6px; flex: none; }
+      /* The hero's one quiet control row, under Like / Don't like */
+      .hero-controls { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+      .hero-controls .cdd { min-width: 0; }
+      #today-watch-dd { flex: 1 1 auto; }
+      .watch-cdd { margin: 0 0 14px; }
+      .fw-watch-cdd { margin: 10px 0 4px; }
+      .ideas-source-cdd { margin-bottom: 12px; }
 </style>
   </head>
   <body>
@@ -2228,10 +2269,44 @@
             <p class="today-loc" id="today-loc"><strong id="today-loc-name">Palm Beach, Florida</strong><span id="today-loc-weather"></span></p>
             <div class="today-dots" id="today-dots" aria-hidden="true"></div>
             <p class="today-suggest" id="today-suggest" hidden></p>
-            <button type="button" class="today-watch-row" id="today-watch" hidden aria-label="Watch for this look — tap to choose a watch"></button>
             <div class="today-actions">
               <button type="button" class="btn-today btn-today-line" id="today-like">I like it</button>
               <button type="button" class="btn-today btn-today-line" id="today-dislike">Don’t like it</button>
+            </div>
+            <!-- One quiet row of three compact dropdowns: watch,
+                 outfit type, build from. Each shows only its current
+                 value; a tap opens a small anchored menu and a pick
+                 applies silently. Formality stays ONE app-wide value
+                 (setFormality) and build-from ONE shared setting
+                 (setSource) — the menus below keep the ids and data
+                 attributes the existing handlers key off. Location
+                 is not a front-page control; it lives in Me and
+                 still drives the weather caption above. -->
+            <div class="hero-controls">
+              <div class="cdd cdd-up" id="today-watch-dd" hidden>
+                <button type="button" class="cdd-btn hero-cdd-btn" id="today-watch" data-cdd-manual hidden aria-haspopup="true" aria-expanded="false" aria-label="Watch for this look — tap to choose a watch"></button>
+                <div class="cdd-menu watch-menu" id="today-watch-menu" hidden role="menu" aria-label="Choose a watch"></div>
+              </div>
+              <div class="cdd cdd-up">
+                <button type="button" class="cdd-btn hero-cdd-btn" id="today-type-btn" data-cdd-manual aria-haspopup="true" aria-expanded="false" aria-label="Outfit type"><span class="cdd-label" id="today-type-label">Casual</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
+                <div class="cdd-menu" id="today-type-row" hidden role="menu" aria-label="Outfit type">
+                  <button type="button" class="cdd-opt" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
+                  <button type="button" class="cdd-opt" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
+                  <button type="button" class="cdd-opt" data-studio-type="3" aria-pressed="false">Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="4" aria-pressed="false">Smart Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="5" aria-pressed="false">Business Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="6" aria-pressed="false">Formal</button>
+                  <button type="button" class="cdd-opt" data-studio-type="7" aria-pressed="false">Black Tie</button>
+                </div>
+              </div>
+              <div class="cdd cdd-up">
+                <button type="button" class="cdd-btn hero-cdd-btn" id="today-source-btn" data-cdd-manual aria-haspopup="true" aria-expanded="false" aria-label="Build from"><span class="cdd-label" id="today-source-label">Combo</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
+                <div class="cdd-menu cdd-menu-r" id="today-source-row" hidden role="menu" aria-label="Build from — Only my wardrobe, Only inspo, or Combo">
+                  <button type="button" class="cdd-opt" data-source="wardrobe" aria-pressed="false">Only my wardrobe</button>
+                  <button type="button" class="cdd-opt" data-source="inspo" aria-pressed="false">Only inspo</button>
+                  <button type="button" class="cdd-opt" data-source="combo" aria-pressed="true">Combo</button>
+                </div>
+              </div>
             </div>
             <div class="today-actions-secondary">
               <button type="button" class="btn-today-text" id="today-wore">Wore this today</button>
@@ -2239,29 +2314,6 @@
               <button type="button" class="btn-today-text" id="today-find">Shop the look</button>
               <button type="button" class="btn-today-text" id="today-share">Share</button>
             </div>
-            <div class="today-type-row" id="today-type-row" role="group" aria-label="Outfit type">
-              <span class="tlc-label">Outfit type</span>
-              <button type="button" class="tlc" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
-              <button type="button" class="tlc" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
-              <button type="button" class="tlc" data-studio-type="3" aria-pressed="false">Casual</button>
-              <button type="button" class="tlc" data-studio-type="4" aria-pressed="false">Smart Casual</button>
-              <button type="button" class="tlc" data-studio-type="5" aria-pressed="false">Business Casual</button>
-              <button type="button" class="tlc" data-studio-type="6" aria-pressed="false">Formal</button>
-              <button type="button" class="tlc" data-studio-type="7" aria-pressed="false">Black Tie</button>
-            </div>
-            <p class="today-swipe-hint" aria-hidden="true">Swipe left for another look · right to like it</p>
-            <div class="today-source" id="today-source-row" role="group" aria-label="Build from — Only my wardrobe, Only inspo, or Combo">
-              <span class="ts-label" aria-hidden="true">Build from</span>
-              <button type="button" class="ts-btn" data-source="wardrobe" aria-pressed="false">Only my wardrobe</button>
-              <button type="button" class="ts-btn" data-source="inspo" aria-pressed="false">Only inspo</button>
-              <button type="button" class="ts-btn" data-source="combo" aria-pressed="true">Combo</button>
-            </div>
-            <!-- Formality is ONE value app-wide: these pills and
-                 Ideas' Outfit type selector are two views of the
-                 same setFormality level — picking here re-deals
-                 Today at that type, strictly. Location is not a
-                 front-page control; it lives in Me and still
-                 drives the weather caption above. -->
           </div>
         </div>
 
@@ -2272,10 +2324,13 @@
         <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Ideas" data-info-text="Six takes at a time, dealt from the source you pick — Only my wardrobe, Only inspo, or the Combo mix. From wardrobe (below the six, in Combo) pairs your tops and your shoes, each completed with a bottom — a suggested pairing until your own bottoms are catalogued. Nothing repeats: every photograph dealt is remembered and never dealt again." aria-label="About: Ideas">i</button></div>
         <div class="studio-grid">
           <div>
-            <div class="src-seg" id="ideas-source-seg" role="group" aria-label="Build from — Only my wardrobe, Only inspo, or Combo">
-              <button type="button" class="src-seg-btn" data-source="wardrobe" aria-pressed="false">Only my wardrobe</button>
-              <button type="button" class="src-seg-btn" data-source="inspo" aria-pressed="false">Only inspo</button>
-              <button type="button" class="src-seg-btn" data-source="combo" aria-pressed="true">Combo</button>
+            <div class="cdd ideas-source-cdd" id="ideas-source-seg">
+              <button type="button" class="cdd-btn ideas-source-btn" id="ideas-source-btn" data-cdd-manual aria-haspopup="true" aria-expanded="false" aria-label="Build from"><span class="cdd-cap">Build from</span><span class="cdd-label" id="ideas-source-label">Combo</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
+              <div class="cdd-menu" id="ideas-source-menu" hidden role="menu" aria-label="Build from — Only my wardrobe, Only inspo, or Combo">
+                <button type="button" class="cdd-opt" data-source="wardrobe" aria-pressed="false">Only my wardrobe</button>
+                <button type="button" class="cdd-opt" data-source="inspo" aria-pressed="false">Only inspo</button>
+                <button type="button" class="cdd-opt" data-source="combo" aria-pressed="true">Combo</button>
+              </div>
             </div>
             <div class="studio-home-bar">
               <button type="button" class="btn-accent" id="studio-deal">Give me ideas</button>
@@ -2408,8 +2463,6 @@
               <div class="options-grid" id="fw-grid" role="list"></div>
               <p class="empty" id="fw-empty" hidden>Add a top and a pair of shoes in Me → Closet, and outfits built from your own pieces will appear here.</p>
             </section>
-            <div id="fw-detail" hidden></div>
-
             <div class="look-result" id="look-result" aria-live="polite"></div>
           </div>
         </div>
@@ -3211,6 +3264,10 @@
       <div class="look-layer-bar"><button type="button" class="btn-ghost" id="look-layer-close">← Back</button></div>
       <div class="look-layer-body" id="look-layer-body"></div>
     </div>
+    <div class="look-layer fw-layer" id="fw-layer" hidden>
+      <div class="look-layer-bar"><button type="button" class="btn-ghost" data-fw-close>← Back</button></div>
+      <div class="fw-layer-body" id="fw-layer-body"></div>
+    </div>
     <div class="toast" id="toast" role="status"></div>
     <div class="undo-toast" id="undo-toast" role="status" hidden><span id="undo-msg"></span><button type="button" id="undo-btn">Undo</button></div>
 
@@ -3292,7 +3349,7 @@ function localTodayISO() {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.3";
+var WARDROBE_BUILD = "2026-11-16.5";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -10832,34 +10889,36 @@ function closeLookLayer() {
 }
 function renderLook(look) { openLookLayer(look); }
 /* Re-render the detail already on screen (a piece swap, a
-   feedback refresh, a Change-an-item pick) in place — in the
-   layer if it is open, otherwise in the six grid's detail slot,
-   replacing that take so grid and detail stay in step. */
+   feedback refresh, a watch pick) — always through the pop-out
+   layer: re-render the layer body if it is open, otherwise open
+   the layer. The matching take in the six grid is swapped in
+   the bookkeeping too, so grid and detail stay in step when
+   the layer closes. */
 function renderLookInline(look) {
   var prev = currentLook;
   currentLook = look;
   if (look && look.img) { recordDealt([look.img]); recordLookCombos([look]); }
+  if (prev && currentOptions.length) {
+    var ix = currentOptions.indexOf(prev);
+    if (ix >= 0) currentOptions[ix] = look;
+  }
   if (lookLayerOpen) {
     document.getElementById("look-layer-body").innerHTML = lookCardHTML(look);
-    return;
-  }
-  var detail = document.getElementById("option-detail");
-  if (detail && currentOptions.length) {
-    var ix = prev ? currentOptions.indexOf(prev) : -1;
-    if (ix < 0) ix = 0;
-    currentOptions[ix] = look;
-    rerenderOptions();
+    if (lookLayerStash) {
+      if (lookLayerStash.look === prev) lookLayerStash.look = look;
+      if (currentOptions.length) rerenderOptions();
+    }
     return;
   }
   openLookLayer(look);
 }
-/* Rebuild the six grid + detail from the takes already dealt —
-   same state, no new deal, nothing recorded again. */
+/* Rebuild the six grid from the takes already dealt —
+   same state, no new deal, nothing recorded again. Tapping a
+   take opens it in the pop-out layer — no detail under the grid. */
 function rerenderOptions() {
   if (!currentOptions.length) return;
   var html = '<div class="options-head"><button type="button" class="btn-ghost" data-action="redeal-six">Six more ideas</button></div>' +
-    '<div class="options-grid" role="list">' + currentOptions.map(function (look, idx) { return optionCardHTML(look, idx); }).join("") + "</div>" +
-    '<div id="option-detail">' + lookCardHTML(currentLook || currentOptions[0]) + "</div>";
+    '<div class="options-grid" role="list">' + currentOptions.map(function (look, idx) { return optionCardHTML(look, idx); }).join("") + "</div>";
   document.getElementById("look-result").innerHTML = html;
 }
 function activeFbText() {
@@ -11331,8 +11390,7 @@ function renderOptions(looks, request) {
   recordLookCombos(currentOptions);
   recordTitles(currentOptions);
   var html = '<div class="options-head"><button type="button" class="btn-ghost" data-action="redeal-six">Six more ideas</button></div>' +
-    '<div class="options-grid" role="list">' + currentOptions.map(function (look, idx) { return optionCardHTML(look, idx); }).join("") + "</div>" +
-    '<div id="option-detail">' + lookCardHTML(currentOptions[0]) + "</div>";
+    '<div class="options-grid" role="list">' + currentOptions.map(function (look, idx) { return optionCardHTML(look, idx); }).join("") + "</div>";
   document.getElementById("look-result").innerHTML = html;
   document.getElementById("look-result").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -11344,13 +11402,7 @@ function selectOption(idx) {
     b.classList.toggle("selected", on);
     b.setAttribute("aria-pressed", on ? "true" : "false");
   });
-  var detail = document.getElementById("option-detail");
-  if (detail) {
-    detail.innerHTML = lookCardHTML(currentLook);
-    var newFb = detail.querySelector("#fb-text");
-    if (newFb) newFb.value = currentLook.comment || "";
-    detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }
+  openLookLayer(currentLook);
 }
 
 /* ================= From my closet — outfits built from real pieces =================
@@ -12462,7 +12514,7 @@ function onLookResultClick(e) {
         if (lookLayerStash.look && lookLayerStash.look.id === victim.id) lookLayerStash.look = lookLayerStash.options[0] || null;
       }
       closeLookLayer();
-      if (document.getElementById("option-detail")) rerenderOptions();
+      rerenderOptions();
     } else {
       var remaining = currentOptions.filter(function (l) { return l.id !== victim.id; });
       currentOptions = remaining;
@@ -13481,12 +13533,12 @@ var wardrobeItems = [
   },
   {
     id: "seed-edwardgreen-tan-loafers",
-    name: "Edward Green Tan Suede Penny Loafers",
+    name: "Edward Green Greige Suede Penny Loafers",
     category: "Shoes",
-    colourName: "Tan",
-    colourHex: "#9c6b4a",
+    colourName: "Greige",
+    colourHex: "#b0a491",
     extraColours: [],
-    notes: "Tan suede penny loafers.",
+    notes: "Greige suede penny loafers.",
     photo: "assets/photos/b95402cfe41d.jpg",
     originalPhoto: "assets/photos/4b75f919236b.jpg"
   },
@@ -14534,7 +14586,6 @@ document.getElementById("saved-grid").addEventListener("click", function (e) {
   if (look) {
     var copy = JSON.parse(JSON.stringify(look));
     if (gridImgById[id]) copy.img = gridImgById[id];
-    switchTab("studio");
     renderLook(copy);
   }
 });
@@ -14628,7 +14679,6 @@ document.addEventListener("click", function (e) {
     if (f) {
       var copy = JSON.parse(JSON.stringify(f.look));
       if (gridImgById[f.look.id]) copy.img = gridImgById[f.look.id];
-      switchTab("studio");
       renderLook(copy);
     }
   }
@@ -16234,7 +16284,7 @@ function watchRowInnerHTML(look) {
 }
 function watchRowHTML(look, extraCls) {
   if (!look || isSwimLook(look)) return "";
-  return '<button type="button" class="watch-row ' + (extraCls || "") + '" data-watch-choose aria-label="Watch for this look — tap to choose a watch">' + watchRowInnerHTML(look) + "</button>";
+  return '<div class="cdd watch-cdd ' + (extraCls || "") + '"><button type="button" class="cdd-btn watch-cdd-btn" aria-haspopup="true" aria-expanded="false" aria-label="Watch for this look — tap to choose a watch">' + compactWatchBtnHTML(look) + '</button><div class="cdd-menu watch-menu" hidden role="menu" aria-label="Choose a watch"></div></div>';
 }
 var watchSheetCtx = null;
 function openWatchSheet(look, refresh) {
@@ -16306,8 +16356,151 @@ document.addEventListener("click", function (e) {
 });
 document.getElementById("today-watch").addEventListener("click", function () {
   if (!todayLook) return;
-  openWatchSheet(todayLook, function () { renderToday(); });
+  toggleCdd(this);
 });
+
+/* ================= Compact dropdowns =================
+   The watch / outfit type / build-from controls are compact
+   dropdowns now: a small single-line button (tiny watch photo +
+   SHORT name for the watch) and a small anchored menu. A pick
+   applies silently — the same state writers as before
+   (applyWatchChoice per look, setFormality, setSource) — and
+   the menu closes. The full watch name / metal / dial detail
+   stays on the Watches page and in the "On the wrist" section. */
+var WATCH_SHORT_NAMES = {
+  "seed-grey-ghost": "Grey Ghost",
+  "seed-ap-25594ba": "Royal Oak",
+  "seed-breguet-3050": "Classique",
+  "seed-cartier-gouvernail": "Gouvernail",
+  "seed-patek-5110r": "World Time",
+  "seed-vc-overseas-42040": "Overseas",
+  "seed-vc-saltarello-43040": "Saltarello"
+};
+function watchShortName(w) {
+  if (!w) return "";
+  if (WATCH_SHORT_NAMES[w.id]) return WATCH_SHORT_NAMES[w.id];
+  var n = String(w.name || "");
+  var q = n.match(/[“"]([^”"]+)[”"]/);
+  if (q) return q[1];
+  n = n.split("—")[0].trim().replace(/^(Audemars Piguet|Vacheron Constantin|Patek Philippe|A\. Lange & Söhne|Rolex|Breguet|Cartier)\s+/i, "");
+  var words = n.split(/\s+/).filter(Boolean);
+  return words.slice(0, 2).join(" ") || String(w.name || "");
+}
+function compactWatchBtnHTML(look) {
+  var res = resolveWatch(look);
+  if (res.state === "watch") {
+    return watchThumbHTML(res.watch) + '<span class="cdd-label">' + esc(watchShortName(res.watch)) + '</span><span class="cdd-chev" aria-hidden="true">▾</span>';
+  }
+  return '<span class="watch-none-disc" aria-hidden="true">—</span><span class="cdd-label">No watch</span><span class="cdd-chev" aria-hidden="true">▾</span>';
+}
+function fillWatchMenu(menu, look) {
+  if (!menu) return;
+  if (!look) { menu.innerHTML = ""; return; }
+  var eng = engineWatchFor(look);
+  var res = resolveWatch(look);
+  var html = watches.filter(function (w) { return !w.sold; }).map(function (w) {
+    var on = res.state === "watch" && res.watch.id === w.id;
+    return '<button type="button" class="cdd-opt" role="menuitem" data-watch-pick="' + w.id + '" aria-pressed="' + (on ? "true" : "false") + '">' +
+      watchThumbHTML(w) +
+      '<span class="cdd-opt-name">' + esc(watchShortName(w)) + "</span>" +
+      (eng && eng.id === w.id ? '<span class="rec-badge">Recommended</span>' : "") +
+      "</button>";
+  }).join("");
+  html += '<button type="button" class="cdd-opt" role="menuitem" data-watch-pick="none" aria-pressed="' + (res.state === "none" ? "true" : "false") + '">' +
+    '<span class="watch-none-disc" aria-hidden="true">—</span><span class="cdd-opt-name">No watch</span></button>';
+  menu.innerHTML = html;
+}
+function closeAllCdd() {
+  document.querySelectorAll(".cdd-menu").forEach(function (m) { m.hidden = true; });
+  document.querySelectorAll(".cdd-btn[aria-expanded]").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+}
+function cddLookFor(wrap) {
+  if (!wrap) return null;
+  if (wrap.id === "today-watch-dd") return (typeof todayLook !== "undefined") ? todayLook : null;
+  var fw = wrap.getAttribute("data-fw-watch");
+  if (fw !== null && typeof fwLooks !== "undefined" && fwLooks) return fwLooks[parseInt(fw, 10)] || null;
+  return (typeof currentLook !== "undefined") ? currentLook : null;
+}
+function toggleCdd(btn) {
+  var wrap = btn && btn.closest ? btn.closest(".cdd") : null;
+  if (!wrap) return;
+  var menu = wrap.querySelector(".cdd-menu");
+  if (!menu) return;
+  var willOpen = menu.hidden;
+  closeAllCdd();
+  if (willOpen) {
+    if (menu.classList.contains("watch-menu")) fillWatchMenu(menu, cddLookFor(wrap));
+    menu.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+  }
+}
+/* Hero + Ideas toggle buttons (marked data-cdd-manual so the
+   generic delegation below leaves them to these listeners). */
+[["today-type-btn"], ["today-source-btn"], ["ideas-source-btn"]].forEach(function (pair) {
+  var b = document.getElementById(pair[0]);
+  if (b) b.addEventListener("click", function () { toggleCdd(this); });
+});
+/* A pick in any hero / Ideas menu closes it — the functional
+   handlers (the #today-type-row and #today-source-row listeners,
+   the #ideas-source-seg handler) apply the choice itself. */
+["today-watch-menu", "today-type-row", "today-source-row", "ideas-source-menu"].forEach(function (id) {
+  var m = document.getElementById(id);
+  if (m) m.addEventListener("click", function () { closeAllCdd(); });
+});
+/* The hero watch menu's own pick path: same per-look choice the
+   sheet wrote, then the hero re-renders with the new wrist. */
+var heroWatchMenu = document.getElementById("today-watch-menu");
+if (heroWatchMenu) heroWatchMenu.addEventListener("click", function (e) {
+  var b = e.target.closest ? e.target.closest("[data-watch-pick]") : null;
+  if (!b || !todayLook) return;
+  applyWatchChoice(todayLook, b.getAttribute("data-watch-pick"));
+  renderToday();
+});
+/* Detail-view dropdowns: generic toggle + pick handling. The
+   From wardrobe detail handles its own picks (its looks are not
+   currentLook); the hero menu is wired above. */
+document.addEventListener("click", function (e) {
+  if (!e.target.closest) return;
+  var pick = e.target.closest("[data-watch-pick]");
+  if (pick) {
+    if (pick.closest("#today-watch-dd") || pick.closest("[data-fw-watch]")) return;
+    if (typeof currentLook !== "undefined" && currentLook) {
+      applyWatchChoice(currentLook, pick.getAttribute("data-watch-pick"));
+      closeAllCdd();
+      renderLookInline(currentLook);
+    }
+    return;
+  }
+  var btn = e.target.closest(".cdd-btn");
+  if (btn) {
+    if (!btn.hasAttribute("data-cdd-manual")) toggleCdd(btn);
+    return;
+  }
+  if (!e.target.closest(".cdd")) closeAllCdd();
+});
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAllCdd(); });
+/* Button labels track the one shared settings: outfit type from
+   formalityLevel, build-from from studioSource. */
+var HERO_TYPE_LABELS = ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"];
+var SOURCE_SHORT_LABELS = { wardrobe: "Wardrobe", inspo: "Inspo", combo: "Combo" };
+function syncHeroControls() {
+  var tl = document.getElementById("today-type-label");
+  if (tl) tl.textContent = HERO_TYPE_LABELS[formalityLevel - 1] || "Casual";
+  var short = SOURCE_SHORT_LABELS[studioSource] || "Combo";
+  var sl = document.getElementById("today-source-label");
+  if (sl) sl.textContent = short;
+  var il = document.getElementById("ideas-source-label");
+  if (il) il.textContent = short;
+}
+var _renderFormalityCdd = window.renderFormality;
+if (typeof _renderFormalityCdd === "function") {
+  window.renderFormality = function () { _renderFormalityCdd(); syncHeroControls(); };
+}
+var _setSourceCdd = window.setSource;
+if (typeof _setSourceCdd === "function") {
+  window.setSource = function (s) { _setSourceCdd(s); syncHeroControls(); };
+}
+syncHeroControls();
 
 function renderToday() {
   if (!todayLook) return;
@@ -16355,9 +16548,10 @@ function renderToday() {
      From wardrobe and pool) and every Build-from mode. Swim /
      Pool carries no row. Tapping it opens the choose sheet. */
   var tw = document.getElementById("today-watch");
+  var twDd = document.getElementById("today-watch-dd");
   if (tw) {
-    if (isSwimLook(todayLook) || (typeof formalityLevel !== "undefined" && formalityLevel === 1)) { tw.hidden = true; tw.innerHTML = ""; }
-    else { tw.innerHTML = watchRowInnerHTML(todayLook); tw.hidden = false; }
+    if (isSwimLook(todayLook) || (typeof formalityLevel !== "undefined" && formalityLevel === 1)) { tw.hidden = true; tw.innerHTML = ""; if (twDd) twDd.hidden = true; }
+    else { tw.innerHTML = compactWatchBtnHTML(todayLook); tw.hidden = false; if (twDd) twDd.hidden = false; }
   }
   /* Shop the look follows the hero: every render of Today —
      fresh open, swipe, dislike, formality / source / location
@@ -16680,7 +16874,6 @@ document.getElementById("today-style").addEventListener("click", function () {
   /* Style this look opens THIS look's own detail page — never
      the Studio thumbnail grid. */
   var copy = JSON.parse(JSON.stringify(todayLook));
-  switchTab("studio");
   renderLook(copy);
 });
 
@@ -18913,7 +19106,6 @@ document.getElementById("trips-wrap").addEventListener("click", function (e) {
     if (capsuleLooks[oi]) {
       if (!fwLooksBackup) fwLooksBackup = fwLooks;
       fwLooks = capsuleLooks;
-      switchTab("studio");
       openFwOutfit(oi);
     }
   }
@@ -19575,8 +19767,9 @@ function fwCardHTML(look, idx) {
    shown for the exact top + shoes pairing it was verified for. */
 function openFwOutfit(idx) {
   var look = fwLooks[idx];
-  var box = document.getElementById("fw-detail");
-  if (!look || !box) return;
+  var layer = document.getElementById("fw-layer");
+  var box = document.getElementById("fw-layer-body");
+  if (!look || !layer || !box) return;
   var hero = look.fwRender ? '<img class="fw-hero" src="' + fwRenderSrc(look) + '" alt="' + esc(look.imgAlt || look.title || "") + '" data-popout="' + fwRenderSrc(look) + '" data-popout-alt="' + esc(look.imgAlt || "") + '" loading="lazy" decoding="async" />' : "";
   var figs = (look.fwPieces || []).map(function (p) {
     return '<figure class="fw-piece" data-fw-piece="' + esc(p.id) + '" role="button" tabindex="0" aria-label="Open ' + esc(p.name) + ' in the Closet">' +
@@ -19590,7 +19783,7 @@ function openFwOutfit(idx) {
       '<figcaption><span class="fw-yours suggested">Suggested</span>' + esc(look.suggestedBottom.name) + ' — not in your closet yet</figcaption></figure>';
   }
   var fwWatch = "";
-  try { if (typeof watchRowInnerHTML === "function" && !isSwimLook(look)) fwWatch = '<button type="button" class="watch-row fw-watch-row" data-fw-watch="' + idx + '" aria-label="Watch for this look — tap to choose a watch">' + watchRowInnerHTML(look) + "</button>"; } catch (e) {}
+  try { if (typeof compactWatchBtnHTML === "function" && !isSwimLook(look)) fwWatch = '<div class="cdd watch-cdd fw-watch-cdd" data-fw-watch="' + idx + '"><button type="button" class="cdd-btn watch-cdd-btn" aria-haspopup="true" aria-expanded="false" aria-label="Watch for this look — tap to choose a watch">' + compactWatchBtnHTML(look) + '</button><div class="cdd-menu watch-menu" hidden role="menu" aria-label="Choose a watch"></div></div>'; } catch (e) {}
   box.innerHTML = '<article class="card fw-outfit">' +
     '<div class="fw-outfit-head"><span class="oc-label">From wardrobe</span><button type="button" class="btn-ghost" data-fw-close>Back</button></div>' +
     '<h3>' + esc(look.title) + '</h3>' +
@@ -19603,14 +19796,22 @@ function openFwOutfit(idx) {
     '<button type="button" class="btn-ghost" data-fw-find="' + idx + '">Shop the look</button>' +
     '</div>' +
     '</article>';
-  box.hidden = false;
-  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  layer.hidden = false;
+  layer.scrollTop = 0;
+}
+/* Close the From wardrobe pop-out: hide and empty the layer,
+   and restore the dealt FW array a capsule visit swapped in. */
+function closeFwLayer() {
+  var layer = document.getElementById("fw-layer");
+  var box = document.getElementById("fw-layer-body");
+  if (layer) layer.hidden = true;
+  if (box) box.innerHTML = "";
+  if (fwLooksBackup) { fwLooks = fwLooksBackup; fwLooksBackup = null; }
 }
 
 
 function dealFromWardrobe() {
-  var detail = document.getElementById("fw-detail");
-  if (detail) { detail.hidden = true; detail.innerHTML = ""; }
+  closeFwLayer();
   var grid = document.getElementById("fw-grid");
   var empty = document.getElementById("fw-empty");
   var more = document.getElementById("fw-more");
@@ -19650,18 +19851,19 @@ function dealFromWardrobe() {
     if (!fwLooks[idx]) return;
     openFwOutfit(idx);
   });
-  var fwDetail = document.getElementById("fw-detail");
+  var fwDetail = document.getElementById("fw-layer");
   if (fwDetail) fwDetail.addEventListener("click", function (e) {
-    var fwWatchBtn = e.target.closest("[data-fw-watch]");
-    if (fwWatchBtn) {
-      var widx = parseInt(fwWatchBtn.getAttribute("data-fw-watch"), 10);
+    var fwPick = e.target.closest("[data-watch-pick]");
+    var fwWrap = e.target.closest("[data-fw-watch]");
+    if (fwPick && fwWrap) {
+      var widx = parseInt(fwWrap.getAttribute("data-fw-watch"), 10);
       var wlook = fwLooks[widx];
-      if (wlook && typeof openWatchSheet === "function") openWatchSheet(wlook, function () { openFwOutfit(widx); });
+      if (wlook && typeof applyWatchChoice === "function") { applyWatchChoice(wlook, fwPick.getAttribute("data-watch-pick")); if (typeof closeAllCdd === "function") closeAllCdd(); openFwOutfit(widx); }
       return;
     }
+    if (fwWrap) return; /* the compact dropdown's own toggle handles the tap */
     if (e.target.closest("[data-fw-close]")) {
-      fwDetail.hidden = true; fwDetail.innerHTML = "";
-      if (fwLooksBackup) { fwLooks = fwLooksBackup; fwLooksBackup = null; }
+      closeFwLayer();
       return;
     }
     var fwLike = e.target.closest("[data-fw-like]");
@@ -19689,6 +19891,7 @@ function dealFromWardrobe() {
     if (fig) {
       var pid = fig.getAttribute("data-fw-piece");
       if (pid && typeof closetItemById === "function" && closetItemById(pid)) {
+        closeFwLayer();
         detailItemId = pid;
         switchTab("wardrobe");
         renderItemDetail();
@@ -19719,14 +19922,13 @@ function dealFromWardrobe() {
      no wrapper needed to keep the controls in step. */
   function syncFwSectionVisibility() {
     var sec = document.getElementById("from-wardrobe");
-    var det = document.getElementById("fw-detail");
     /* The From wardrobe section shows only in Combo. In inspo-only
        it steps aside (nothing of his is dealt); in wardrobe-only
        the main grid IS From wardrobe, so the section would deal
        the same closet outfits twice on one page. */
     if (studioSource !== "combo") {
       if (sec) sec.hidden = true;
-      if (det) { det.hidden = true; det.innerHTML = ""; }
+      closeFwLayer();
     } else if (sec) {
       sec.hidden = false;
     }
