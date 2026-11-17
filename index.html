@@ -19816,7 +19816,15 @@ wardrobeItems.forEach(function (i) {
   }
 });
 wardrobeItems.forEach(function (i) {
-  if (typeof i.wearCount !== "number") i.wearCount = 0;
+  /* Build .53 fix round 2: the wear count is alias-aware. Receipt
+     imports spell the field wornCount; defaulting wearCount to 0
+     without consulting the alias zeroed every such entry's history
+     before the repair merge could sum it. The effective count is
+     wearCount when numeric, else wornCount when numeric, else 0 —
+     and an entry carrying the alias is mirrored to the same value. */
+  var effWear = (typeof i.wearCount === "number") ? i.wearCount : ((typeof i.wornCount === "number") ? i.wornCount : 0);
+  i.wearCount = effWear;
+  if ("wornCount" in i) i.wornCount = effWear;
   if (!("price" in i)) i.price = null;
   if (!("laundry" in i)) i.laundry = false;
   if (!("lastWorn" in i)) i.lastWorn = null;
@@ -29932,6 +29940,14 @@ function syPutLocal(c, data) {
     var seeds = wardrobeItems.filter(function (i) { return i.id.indexOf("seed-") === 0; });
     var users = put(wardrobeItems.filter(function (i) { return i.id.indexOf("seed-") !== 0; }));
     wardrobeItems = applyEntryState(seeds.concat(users));
+    /* Build .53 fix round 2: same alias-aware wear-count rule as
+       the boot loop — a sync download carrying wornCount-only
+       entries must not reintroduce zeroed or unset counts. */
+    wardrobeItems.forEach(function (i) {
+      var effWear = (typeof i.wearCount === "number") ? i.wearCount : ((typeof i.wornCount === "number") ? i.wornCount : 0);
+      i.wearCount = effWear;
+      if ("wornCount" in i) i.wornCount = effWear;
+    });
   } else if (c === "watches") {
     var wseeds = watches.filter(function (w) { return w.id.indexOf("seed-") === 0; });
     var wusers = put(watches.filter(function (w) { return w.id.indexOf("seed-") !== 0; }));
