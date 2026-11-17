@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.47" />
+    <meta name="wardrobe-build" content="2026-11-17.48" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2425,8 +2425,9 @@
          tall black band with the labels floating at its top. The bar is
          now a fixed 68px tall, padding 0, and each button's icon+label
          stack fills the bar's full height, bottom-anchored with a fixed
-         2px below the label (build .47 lowered it from 10px at the
-         user's request): the same geometry on every device,
+         6px below the label (build .48 set it to the middle of the
+         original 10px and build .47's 2px): the same geometry on
+         every device,
          whatever env() would have resolved to. The body clearance and
          the toast lift use the same fixed 68px. */
       :root { --bb-h: 68px; }
@@ -2451,13 +2452,13 @@
       /* The five bar buttons share the full width equally (flex: 1 1 0),
          so their centres are exactly equidistant. Each stack fills the
          bar's height and is anchored to its bottom: icon above label,
-         the label's bottom edge exactly 2px above the bar's bottom
-         edge (build .47 lowered it from 10px at the user's request)
-         — flush, no dead space under the labels. */
+         the label's bottom edge exactly 6px above the bar's bottom
+         edge (build .48 set it to the middle of the original 10px
+         and build .47's 2px, which sat clipped at the very edge). */
       .bottombar .navbtn {
         flex: 1 1 0; height: 100%; min-height: 0; box-sizing: border-box;
         display: flex; flex-direction: column; align-items: center;
-        justify-content: flex-end; gap: 4px; padding: 0 0 2px;
+        justify-content: flex-end; gap: 4px; padding: 0 0 6px;
       }
       .navbtn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
       .navbtn[aria-current="page"] { color: var(--text); }
@@ -4759,7 +4760,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.47";
+var WARDROBE_BUILD = "2026-11-17.48";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
