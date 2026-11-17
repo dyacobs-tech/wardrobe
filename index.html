@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-17.32" />
+    <meta name="wardrobe-build" content="2026-11-17.33" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -2629,10 +2629,18 @@
          row sits left-aligned, and flex stretch keeps all three
          the same height. A long category name may widen its box;
          the row wraps rather than ever forcing equal thirds. */
-      .closet-top3 { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+      .closet-top3 { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; align-items: center; }
       .closet-top3 .sel-row { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; min-height: 34px; padding: 5px 18px 5px 9px; position: relative; width: auto; flex: none; text-align: left; }
       .closet-top3 .sel-val { flex: none; width: auto; }
       .closet-top3 .sel-chev { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); }
+      /* Build .33: the Category chip becomes three group dropdowns
+         (Clothing / Accessories / Shoes) on the hero cdd pattern —
+         surface pills in this same row, each with its own anchored
+         menu of that group's sub-categories. */
+      .closet-top3 .cdd { flex: none; }
+      .closet-cat-btn { background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); }
+      .cdd-opt .cat-count { flex: none; font-size: 11px; font-weight: 600; color: var(--dim); }
+      .cdd-opt-none { color: var(--dim); cursor: default; }
       /* The Closet + Sale rails match the Brands rail (.brand-rail)
          EXACTLY (user, Nov 17): the same compact pill — fixed,
          right margin, vertically centered, letters at natural
@@ -2937,11 +2945,21 @@
               <input type="search" id="ward-search" placeholder="Name, colour, category, notes…" autocomplete="off" />
             </div>
             <div class="closet-top3">
-              <button type="button" class="sel-row top3-box" id="ward-cat-toggle" aria-expanded="false" aria-controls="ward-filters"><span class="sel-name">Category</span><span class="sel-val" id="ward-cat-val">All</span><span class="sel-chev" aria-hidden="true">▾</span></button>
+              <div class="cdd closet-cat-cdd">
+                <button type="button" class="cdd-btn closet-cat-btn" id="ward-cat-clothing-btn" data-cdd-manual data-cat-group="clothing" aria-haspopup="true" aria-expanded="false" aria-label="Clothing — filter by category"><span class="cdd-label" id="ward-cat-clothing-label">Clothing</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
+                <div class="cdd-menu" id="ward-cat-clothing-menu" hidden role="menu" aria-label="Clothing categories"></div>
+              </div>
+              <div class="cdd closet-cat-cdd">
+                <button type="button" class="cdd-btn closet-cat-btn" id="ward-cat-accessories-btn" data-cdd-manual data-cat-group="accessories" aria-haspopup="true" aria-expanded="false" aria-label="Accessories — filter by category"><span class="cdd-label" id="ward-cat-accessories-label">Accessories</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
+                <div class="cdd-menu" id="ward-cat-accessories-menu" hidden role="menu" aria-label="Accessories categories"></div>
+              </div>
+              <div class="cdd closet-cat-cdd">
+                <button type="button" class="cdd-btn closet-cat-btn" id="ward-cat-shoes-btn" data-cdd-manual data-cat-group="shoes" aria-haspopup="true" aria-expanded="false" aria-label="Shoes — filter by category"><span class="cdd-label" id="ward-cat-shoes-label">Shoes</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
+                <div class="cdd-menu cdd-menu-r" id="ward-cat-shoes-menu" hidden role="menu" aria-label="Shoes categories"></div>
+              </div>
               <button type="button" class="sel-row top3-box" id="closet-add-entry"><span class="sel-name">Add</span><span class="sel-val">Add a piece</span><span class="sel-chev" aria-hidden="true">›</span></button>
               <button type="button" class="sel-row top3-box" id="closet-gaps-entry"><span class="sel-name">Closet gaps</span><span class="sel-val" id="closet-gaps-count">Pieces your looks are missing</span><span class="sel-chev" aria-hidden="true">›</span></button>
             </div>
-            <div class="sel-opts filter-row" id="ward-filters" role="group" aria-label="Filter by category" hidden></div>
             <div class="item-grid" id="item-grid"></div>
           </div>
           </div>
@@ -4233,7 +4251,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.32";
+var WARDROBE_BUILD = "2026-11-17.33";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -6054,7 +6072,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/466b4eb824f7.webp",
+    img: "assets/photos/2cbb78c72684.webp",
     title: "Navy Swim & White Linen",
     imgAlt: "You wearing navy swim shorts with a white drawstring and an open white linen camp shirt, with brown leather sandals, the pool behind you",
     swatches: [
@@ -6498,7 +6516,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/c4f5642acdf1.webp",
+    img: "assets/photos/4e7c4257ccaf.webp",
     title: "Sage Swim & Ecru Linen",
     imgAlt: "You wearing sage green swim shorts with an ecru linen camp shirt worn open and no tee underneath, and tan sandals",
     swatches: [
@@ -6508,7 +6526,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/c221ee220717.webp",
+    img: "assets/photos/2722a7f9516f.webp",
     title: "White Swim & Navy Linen",
     imgAlt: "You wearing white swim shorts with a navy linen camp shirt, and brown leather sandals",
     swatches: [
@@ -9476,7 +9494,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/dec9f35bc267.webp",
+    img: "assets/photos/871884991759.webp",
     title: "Crimson & Navy — Patek World Time",
     imgAlt: "You wearing a crimson crew-neck knit, navy wool trousers and dark brown loafers, with a rose gold Patek World Time on your wrist",
     watchId: "seed-patek-5110r",
@@ -9498,7 +9516,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/0cd3507fb197.webp",
+    img: "assets/photos/871cc3dcd197.webp",
     title: "Black Suit & Burgundy Tie — Breguet Classique",
     imgAlt: "You wearing a black suit with a white shirt, burgundy tie and black Oxford shoes, with a yellow gold Breguet on your wrist",
     watchId: "seed-breguet-3050",
@@ -9510,7 +9528,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/acfff0361762.webp",
+    img: "assets/photos/a5419a321d39.webp",
     title: "Grey Suit & Sky Tie — VC Overseas",
     imgAlt: "You wearing a grey suit with a white shirt, sky blue tie and black Oxford shoes, with a steel Vacheron Overseas on your wrist",
     watchId: "seed-vc-overseas-42040",
@@ -9854,7 +9872,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/10c05db0b1af.webp",
+    img: "assets/photos/2c989feebb91.webp",
     title: "Off-White Merino Tee & Olive Linen Shorts",
     imgAlt: "You wearing Unbound Merino Off-White Merino Tee, Olive Linen Shorts and White Leather Sneaker",
     watchId: "seed-ap-25594ba",
@@ -9898,7 +9916,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/c81e60f940d4.webp",
+    img: "assets/photos/33c5824c0690.webp",
     title: "Navy Heather Knit Polo & Navy Stripe Furlane Slippers",
     imgAlt: "You wearing Kiton Navy Heather Knit Polo, Stone Tailored Shorts and Vibi Venezia Navy Stripe Furlane Slippers",
     watchId: "seed-vc-overseas-42040",
@@ -9909,7 +9927,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/645aabe4008b.webp",
+    img: "assets/photos/302eb0219181.webp",
     title: "Ecru Jeans & Camo Pony-Hair Loafers",
     imgAlt: "You wearing Altea Sand Knit Tee, Ecru Jeans and Belgian Shoes Camo Pony-Hair Loafers",
     watchId: "seed-ap-25594ba",
@@ -9920,7 +9938,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/73e2bc4e654e.webp",
+    img: "assets/photos/a70677cf6250.webp",
     title: "Cream Cable-Knit Crew & Charcoal Jeans",
     imgAlt: "You wearing Cream Cable-Knit Crew, Charcoal Jeans and White Leather Sneaker",
     watchId: "seed-ap-25594ba",
@@ -9942,7 +9960,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/851271998079.webp",
+    img: "assets/photos/c91f3ab8e448.webp",
     title: "Navy Piqué Polo & Navy Stripe Furlane Slippers",
     imgAlt: "You wearing Navy Piqué Polo, Navy Chinos and Vibi Venezia Navy Stripe Furlane Slippers",
     watchId: "seed-cartier-gouvernail",
@@ -9953,7 +9971,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/c13bd374a0e5.webp",
+    img: "assets/photos/a46a421c4ab7.webp",
     title: "Ecru Chinos & Corridor Charcoal Pocket Tee",
     imgAlt: "You wearing Corridor Charcoal Pocket Tee, Ecru Chinos and Cream Knit Trainer",
     watchId: "seed-ap-25594ba",
@@ -9964,7 +9982,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/69dad1e01ca3.webp",
+    img: "assets/photos/d345313aecb3.webp",
     title: "Olive Knit Polo & Cream Chinos",
     imgAlt: "You wearing Brunello Cucinelli Olive Knit Polo, Cream Chinos and Adidas Cream Sneakers",
     watchId: "seed-ap-25594ba",
@@ -9999,7 +10017,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/d5bed3bf8181.webp",
+    img: "assets/photos/de14db7e7413.webp",
     title: "Navy Camp Shirt & Charcoal Wool Trousers",
     imgAlt: "You wearing Navy Camp Shirt, Charcoal Wool Trousers and Navy Canvas Espadrille",
     watchId: "seed-cartier-gouvernail",
@@ -10010,7 +10028,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/b3c9c366ab9f.webp",
+    img: "assets/photos/38544550f5b2.webp",
     title: "Brown Linen Knit Crew & White Linen Trousers",
     imgAlt: "You wearing Brown Linen Knit Crew, White Linen Trousers, White Leather Sneaker and Brown Suede Belt",
     watchId: "seed-ap-25594ba",
@@ -10046,7 +10064,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/a7c2431f12ac.webp",
+    img: "assets/photos/877567090e0f.webp",
     title: "Sage Linen Polo & Ecru Jeans",
     imgAlt: "You wearing Sage Linen Polo, Ecru Jeans, Black Leather Tassel Loafer and Black Leather Belt",
     watchId: "seed-ap-25594ba",
@@ -10081,7 +10099,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/32eda979825c.webp",
+    img: "assets/photos/fe916e14ae7b.webp",
     title: "Light Blue Chambray Shirt & White Jeans",
     imgAlt: "You wearing Light Blue Chambray Shirt, White Jeans, Loro Piana Cream Knit 360 Flexy Walk Sneakers and Brown Suede Belt",
     watchId: "seed-ap-25594ba",
@@ -10119,7 +10137,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/a7880d85b24e.webp",
+    img: "assets/photos/db79e141a8eb.webp",
     title: "Black Checkerboard Short-Sleeve Sweater & Grey Flannel Trousers",
     imgAlt: "You wearing Scott Fraser Collection Black Checkerboard Short-Sleeve Sweater, Grey Flannel Trousers, Black Leather Bit Loafer and Brown Leather Belt",
     watchId: "seed-patek-5110r",
@@ -10143,7 +10161,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/6dca0e24ef39.webp",
+    img: "assets/photos/55cc9ddc3293.webp",
     title: "Charcoal Knit Vest & Rust Corduroy Furlane Slippers",
     imgAlt: "You wearing Brunello Cucinelli Navy Breton Stripe Polo, Navy Chinos, Vibi Venezia Rust Corduroy Furlane Slippers and Canali Charcoal Knit Vest",
     watchId: "seed-cartier-gouvernail",
@@ -10232,7 +10250,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/5a521672c11e.webp",
+    img: "assets/photos/844306344e9c.webp",
     title: "Charcoal Blazer & White Oxford Button-Down Shirt",
     imgAlt: "You wearing Charcoal Blazer, White Oxford Button-Down Shirt, Black Wool Trousers, Balenciaga Black Leather Penny Loafers, Black Leather Belt and White Linen Pocket Square",
     watchId: "seed-cartier-gouvernail",
@@ -10331,7 +10349,7 @@ var RENDER_FORMALITY = {
   "assets/photos/8f3357c68b84.webp": 5,
   "assets/photos/c5d653c4049d.webp": 3,
   "assets/photos/ef3b352ca3f3.webp": 5,
-  "assets/photos/466b4eb824f7.webp": 1,
+  "assets/photos/2cbb78c72684.webp": 1,
   "assets/photos/fd9d19c854f7.webp": 2,
   "assets/photos/fd60650d44d5.webp": 6,
   "assets/photos/27f2ffbea4b1.webp": 7,
@@ -10373,8 +10391,8 @@ var RENDER_FORMALITY = {
   "assets/photos/e3a5a61527e7.webp": 6,
   "assets/photos/3619d6773e67.webp": 6,
   "assets/photos/8e744a90ad86.webp": 7,
-  "assets/photos/c4f5642acdf1.webp": 1,
-  "assets/photos/c221ee220717.webp": 1,
+  "assets/photos/4e7c4257ccaf.webp": 1,
+  "assets/photos/2722a7f9516f.webp": 1,
   "assets/photos/9d4e5e6200a2.webp": 3,
   "assets/photos/31991d18629b.webp": 3,
   "assets/photos/ab992cb3be40.webp": 3,
@@ -10675,48 +10693,48 @@ var RENDER_FORMALITY = {
   "assets/photos/6f6e38f027aa.webp": 5,
   "assets/photos/74d38a8d6b38.webp": 5,
   "assets/photos/918f47bf65dc.webp": 5,
-  "assets/photos/dec9f35bc267.webp": 4,
+  "assets/photos/871884991759.webp": 4,
   "assets/photos/9d0cd659d307.webp": 4,
-  "assets/photos/0cd3507fb197.webp": 6,
-  "assets/photos/acfff0361762.webp": 6,
+  "assets/photos/871cc3dcd197.webp": 6,
+  "assets/photos/a5419a321d39.webp": 6,
   "assets/photos/1721de1440a4.webp": 1,
   "assets/photos/202b0eaad2c0.webp": 1,
   "assets/photos/5c434f082ca3.webp": 1,
   "assets/photos/a70ef76fc941.webp": 1,
   "assets/photos/573137e79639.webp": 2,
-  "assets/photos/10c05db0b1af.webp": 2,
+  "assets/photos/2c989feebb91.webp": 2,
   "assets/photos/84482f306ede.webp": 2,
   "assets/photos/283f3e9d0261.webp": 2,
   "assets/photos/75b4eaadecb6.webp": 3,
-  "assets/photos/c81e60f940d4.webp": 3,
-  "assets/photos/645aabe4008b.webp": 3,
-  "assets/photos/73e2bc4e654e.webp": 3,
+  "assets/photos/33c5824c0690.webp": 3,
+  "assets/photos/302eb0219181.webp": 3,
+  "assets/photos/a70677cf6250.webp": 3,
   "assets/photos/567508883914.webp": 3,
-  "assets/photos/851271998079.webp": 3,
-  "assets/photos/c13bd374a0e5.webp": 3,
-  "assets/photos/69dad1e01ca3.webp": 3,
+  "assets/photos/c91f3ab8e448.webp": 3,
+  "assets/photos/a46a421c4ab7.webp": 3,
+  "assets/photos/d345313aecb3.webp": 3,
   "assets/photos/12e1ef018bcc.webp": 4,
   "assets/photos/eeca48e45c15.webp": 4,
-  "assets/photos/d5bed3bf8181.webp": 4,
-  "assets/photos/b3c9c366ab9f.webp": 4,
+  "assets/photos/de14db7e7413.webp": 4,
+  "assets/photos/38544550f5b2.webp": 4,
   "assets/photos/0a1741dde4f6.webp": 4,
   "assets/photos/ee7814e373a2.webp": 4,
-  "assets/photos/a7c2431f12ac.webp": 4,
+  "assets/photos/877567090e0f.webp": 4,
   "assets/photos/1288d219a23b.webp": 4,
   "assets/photos/944ef219c541.webp": 5,
-  "assets/photos/32eda979825c.webp": 5,
+  "assets/photos/fe916e14ae7b.webp": 5,
   "assets/photos/c9f4fa22a034.webp": 5,
   "assets/photos/e0cc3bb23780.webp": 5,
-  "assets/photos/a7880d85b24e.webp": 5,
+  "assets/photos/db79e141a8eb.webp": 5,
   "assets/photos/56cf3693bd67.webp": 5,
-  "assets/photos/6dca0e24ef39.webp": 5,
+  "assets/photos/55cc9ddc3293.webp": 5,
   "assets/photos/7f1490079fb5.webp": 5,
   "assets/photos/5ab4681e4548.webp": 6,
   "assets/photos/138ec8b335af.webp": 6,
   "assets/photos/df0bdee59b83.webp": 6,
   "assets/photos/db0afb45a51b.webp": 6,
   "assets/photos/e5d9ac5a5acf.webp": 6,
-  "assets/photos/5a521672c11e.webp": 6,
+  "assets/photos/844306344e9c.webp": 6,
   "assets/photos/ca9acab9a39b.webp": 7,
   "assets/photos/d7ea7c441ca0.webp": 7,
   "assets/photos/7494aeb7863b.webp": 4
@@ -12042,7 +12060,7 @@ function changeAlts(look, catKey) {
    with the pool data, so the feature can return if the pool of
    photographed combinations ever gets deep enough. */
 
-var PIECE_LIBRARY_RAW = [["top-white-crew-tee","top","tops","White Crew-Neck Tee","Sulpher Yellow","#f5ecc2",2,55,95,0,"",""],["top-cream-crew-tee","top","tops","Cream Crew-Neck Tee","Sulpher Yellow","#f5ecc2",2,55,95,0,"",""],["top-navy-crew-tee","top","tops","Navy Crew-Neck Tee","Dark Tyrian Blue","#12354e",2,55,95,0,"",""],["top-black-crew-tee","top","tops","Black Crew-Neck Tee","Black","#111314",2,55,95,0,"",""],["top-charcoal-pocket-tee","top","tops","Charcoal Pocket Tee","Slate Color","#34454c",2,55,95,0,"",""],["top-grey-heather-tee","top","tops","Grey Heather Tee","Warm Gray","#a1a39a",2,55,95,0,"",""],["top-olive-tee","top","tops","Olive Tee","Deep Grayish Olive","#635a3a",2,55,95,0,"",""],["top-sand-knit-tee","top","tops","Sand Knit Tee","Olive Buff","#c1c494",3,55,90,0,"",""],["top-slate-slub-pocket-tee","top","tops","Slate Blue Slub Pocket Tee","Artemesia Green","#709390",2,60,95,0,"",""],["top-mustard-pocket-tee","top","tops","Mustard Yellow Pocket Tee","Olive Ocher","#d6b43e",2,55,95,0,"",""],["top-breton-stripe-tee","top","tops","Navy Breton Stripe Tee","Dark Tyrian Blue","#12354e",3,55,95,0,"",""],["top-white-pique-polo","top","tops","White Piqué Polo","Sulpher Yellow","#f5ecc2",3,60,95,0,"",""],["top-navy-pique-polo","top","tops","Navy Piqué Polo","Dark Tyrian Blue","#12354e",3,60,95,0,"",""],["top-black-pique-polo","top","tops","Black Piqué Polo","Black","#111314",3,60,95,0,"",""],["top-sky-pique-polo","top","tops","Sky Blue Piqué Polo","Light Glaucous Blue","#a5c8d1",3,60,95,0,"",""],["top-terracotta-pique-polo","top","tops","Terracotta Piqué Polo","Cinnamon Rufous","#c27544",3,60,95,0,"",""],["top-sage-linen-polo","top","tops","Sage Linen Polo","Mineral Gray","#a2b0ad",3,68,95,0,"",""],["top-cream-knit-polo","top","tops","Cream Open-Collar Knit Polo","Sulpher Yellow","#f5ecc2",3,55,90,0,"",""],["knit-navy-cable-crew","top","knitwear","Navy Cable-Knit Crew","Dark Tyrian Blue","#12354e",3,30,58,0,"",""],["knit-cream-cable-crew","top","knitwear","Cream Cable-Knit Crew","Sulpher Yellow","#f5ecc2",3,30,58,0,"",""],["knit-charcoal-crew","top","knitwear","Charcoal Crew-Neck Sweater","Slate Color","#34454c",3,35,62,0,"",""],["knit-oatmeal-crew","top","knitwear","Oatmeal Heather Crew","Ivory Buff","#ebd3a2",3,30,58,0,"",""],["knit-taupe-crew","top","knitwear","Taupe Heather Crew","Buffy Citrine","#96874d",3,30,58,0,"",""],["knit-burgundy-roll-neck","top","knitwear","Burgundy Roll-Neck Sweater","Dusky Madder Violet","#4e1d4c",4,35,62,0,"",""],["knit-navy-roll-neck","top","knitwear","Navy Roll-Neck Sweater","Dark Tyrian Blue","#12354e",4,35,62,0,"",""],["knit-black-roll-neck","top","knitwear","Black Roll-Neck Sweater","Black","#111314",4,35,62,0,"",""],["knit-forest-crew","top","knitwear","Forest Green Crew-Neck Sweater","Slate Color","#34454c",3,30,58,0,"",""],["knit-chocolate-crew","top","knitwear","Chocolate Crew-Neck Sweater","Vandyke Brown","#4b3317",3,30,58,0,"",""],["knit-grey-v-neck","top","knitwear","Grey V-Neck Sweater","Artemesia Green","#709390",4,35,62,0,"",""],["knit-dusty-blue-knit-polo","top","knitwear","Dusty Blue Knit Polo","Artemesia Green","#709390",3,55,88,0,"",""],["knit-olive-knit-polo","top","knitwear","Olive Knit Polo","Deep Grayish Olive","#635a3a",3,55,88,0,"",""],["knit-navy-breton-polo","top","knitwear","Navy Breton Stripe Knit Polo","Dark Tyrian Blue","#12354e",3,55,88,0,"",""],["knit-black-checkerboard-knit","top","knitwear","Black Checkerboard Short-Sleeve Knit","Black","#111314",3,55,88,0,"",""],["knit-brown-linen-crew","top","knitwear","Brown Linen Knit Crew","Pale Raw Umber","#71502f",3,58,85,0,"",""],["shirt-white-oxford","top","shirts","White Oxford Button-Down Shirt","Sulpher Yellow","#f5ecc2",4,45,80,0,"",""],["shirt-blue-oxford","top","shirts","Light Blue Oxford Button-Down Shirt","Pale King's Blue","#a7d4e4",4,45,80,0,"",""],["shirt-white-poplin","top","shirts","White Poplin Dress Shirt","White","#ffffff",5,50,85,0,"",""],["shirt-pale-blue-poplin","top","shirts","Pale Blue Poplin Dress Shirt","Nile Blue","#bce4e5",4,50,85,0,"",""],["shirt-pink-oxford","top","shirts","Pale Pink Oxford Shirt","Hermosa Pink","#f9c1ce",4,45,80,0,"",""],["shirt-navy-gingham","top","shirts","Navy Gingham Check Shirt","Dark Tyrian Blue","#12354e",3,55,85,0,"",""],["shirt-white-linen","top","shirts","White Linen Shirt","Sulpher Yellow","#f5ecc2",3,68,95,0,"",""],["shirt-sand-linen","top","shirts","Sand Linen Shirt","Ivory Buff","#ebd3a2",3,68,95,0,"",""],["shirt-sky-linen","top","shirts","Sky Blue Linen Shirt","Light Glaucous Blue","#a5c8d1",3,68,95,0,"",""],["shirt-olive-safari","top","shirts","Olive Short-Sleeve Safari Shirt","Deep Grayish Olive","#635a3a",3,60,90,0,"",""],["shirt-white-camp","top","shirts","White Linen Camp Shirt","Sulpher Yellow","#f5ecc2",2,70,98,0,"",""],["shirt-sage-camp","top","shirts","Sage Linen Camp Shirt","Mineral Gray","#a2b0ad",2,70,98,0,"",""],["shirt-navy-camp","top","shirts","Navy Camp Shirt","Dark Tyrian Blue","#12354e",2,70,98,0,"",""],["shirt-cream-camp","top","shirts","Cream Camp Shirt","Sulpher Yellow","#f5ecc2",2,70,98,0,"",""],["shirt-terracotta-camp","top","shirts","Terracotta Camp Shirt","Cinnamon Rufous","#c27544",2,70,98,0,"",""],["shirt-chambray","top","shirts","Light Blue Chambray Shirt","Salvia Blue","#97acc8",3,55,85,0,"",""],["shirt-indigo-denim","top","shirts","Indigo Denim Shirt","Slate Color","#34454c",3,45,75,0,"",""],["navy-wool-trousers","bottom","trousers","Navy Wool Trousers","Deep Slate Olive","#253122",4,40,70,0,"",""],["charcoal-wool-trousers","bottom","trousers","Charcoal Wool Trousers","Slate Color","#34454c",4,40,70,0,"",""],["mid-grey-wool-trousers","bottom","trousers","Mid Grey Wool Trousers","Andover Green","#6d7e77",4,40,70,0,"",""],["light-grey-wool-trousers","bottom","trousers","Light Grey Wool Trousers","Neutral Gray","#b6bfc1",4,40,70,0,"",""],["black-wool-trousers","bottom","trousers","Black Wool Trousers","Black","#111314",5,40,70,0,"",""],["midnight-wool-trousers","bottom","trousers","Midnight Wool Trousers","Black","#111314",5,40,70,0,"",""],["grey-flannel-trousers","bottom","trousers","Grey Flannel Trousers","Light Grayish Olive","#848061",4,30,58,0,"",""],["cream-wool-trousers","bottom","trousers","Cream Wool Trousers","Sulpher Yellow","#f5ecc2",4,40,70,0,"",""],["white-linen-trousers","bottom","trousers","White Linen Trousers","Sulpher Yellow","#f5ecc2",3,68,95,0,"",""],["olive-taupe-linen-trousers","bottom","trousers","Olive Taupe Linen Trousers","Dark Citrine","#8b835b",3,68,95,0,"",""],["stone-linen-trousers","bottom","trousers","Stone Linen Trousers","Ecru","#c2ae93",3,68,95,0,"",""],["navy-linen-trousers","bottom","trousers","Navy Linen Trousers","Dark Tyrian Blue","#12354e",3,68,95,0,"",""],["sand-linen-trousers","bottom","trousers","Sand Linen Trousers","Olive Buff","#c1c494",3,68,95,0,"",""],["ecru-cotton-trousers","bottom","trousers","Ecru Cotton Trousers","Ivory Buff","#ebd3a2",3,55,88,0,"",""],["white-cotton-trousers","bottom","trousers","White Cotton Trousers","White","#ffffff",3,55,88,0,"",""],["olive-cotton-trousers","bottom","trousers","Olive Cotton Trousers","Olive Green","#6b7140",3,55,88,0,"",""],["stone-chinos","bottom","trousers","Stone Chinos","Ecru","#c2ae93",3,55,90,0,"",""],["navy-chinos","bottom","trousers","Navy Chinos","Dark Tyrian Blue","#12354e",3,55,90,0,"",""],["ecru-chinos","bottom","trousers","Ecru Chinos","Ivory Buff","#ebd3a2",3,55,90,0,"",""],["khaki-chinos","bottom","trousers","Khaki Chinos","Maple","#c59f6b",3,55,90,0,"",""],["olive-chinos","bottom","trousers","Olive Chinos","Olive Green","#6b7140",3,55,90,0,"",""],["white-chinos","bottom","trousers","White Chinos","White","#ffffff",3,55,90,0,"",""],["cream-chinos","bottom","trousers","Cream Chinos","Sulpher Yellow","#f5ecc2",3,55,90,0,"",""],["grey-chinos","bottom","trousers","Grey Chinos","Artemesia Green","#709390",3,55,90,0,"",""],["indigo-jeans","bottom","jeans","Indigo Jeans","Slate Color","#34454c",3,35,85,0,"",""],["indigo-bootcut-jeans","bottom","jeans","Indigo Bootcut Jeans","Violet Blue","#40456a",2,35,85,0,"",""],["white-jeans","bottom","jeans","White Jeans","Sulpher Yellow","#f5ecc2",3,35,85,0,"",""],["ecru-jeans","bottom","jeans","Ecru Jeans","Ivory Buff","#ebd3a2",3,35,85,0,"",""],["black-jeans","bottom","jeans","Black Jeans","Black","#111314",3,35,85,0,"",""],["washed-indigo-jeans","bottom","jeans","Washed Indigo Jeans","Artemesia Green","#709390",2,35,85,0,"",""],["charcoal-jeans","bottom","jeans","Charcoal Jeans","Slate Color","#34454c",3,35,85,0,"",""],["stone-jeans","bottom","jeans","Stone Jeans","Ecru","#c2ae93",2,35,85,0,"",""],["stone-tailored-shorts","bottom","shorts","Stone Tailored Shorts","Ecru","#c2ae93",2,70,98,0,"",""],["navy-tailored-shorts","bottom","shorts","Navy Tailored Shorts","Dark Tyrian Blue","#12354e",2,70,98,0,"",""],["white-tailored-shorts","bottom","shorts","White Tailored Shorts","White","#ffffff",2,70,98,0,"",""],["khaki-chino-shorts","bottom","shorts","Khaki Chino Shorts","Maple","#c59f6b",2,70,98,0,"",""],["olive-linen-shorts","bottom","shorts","Olive Linen Shorts","Olive Green","#6b7140",2,72,98,0,"",""],["navy-swim-shorts","bottom","swim","Navy Swim Shorts","Dark Tyrian Blue","#12354e",1,75,100,0,"",""],["sky-swim-shorts","bottom","swim","Sky Swim Shorts","Salvia Blue","#97acc8",1,75,100,0,"",""],["white-swim-shorts","bottom","swim","White Swim Shorts","Sulpher Yellow","#f5ecc2",1,75,100,0,"",""],["penny-loafer-dark-brown-leather","shoes","shoes","Dark Brown Leather Penny Loafer","Vandyke Brown","#4b3317",4,40,85,0,"",""],["penny-loafer-black-leather","shoes","shoes","Black Leather Penny Loafer","Black","#111314",4,40,85,0,"",""],["penny-loafer-burgundy-leather","shoes","shoes","Burgundy Leather Penny Loafer","Dusky Madder Violet","#4e1d4c",4,40,85,0,"",""],["penny-loafer-dark-brown-suede","shoes","shoes","Dark Brown Suede Penny Loafer","Vandyke Brown","#4b3317",3,45,80,0,"",""],["penny-loafer-chocolate-suede","shoes","shoes","Chocolate Suede Penny Loafer","Deep Slate Olive","#253122",3,45,80,0,"",""],["penny-loafer-navy-suede","shoes","shoes","Navy Suede Penny Loafer","Deep Slate Olive","#253122",3,45,80,0,"",""],["penny-loafer-stone-suede","shoes","shoes","Stone Suede Penny Loafer","Ecru","#c2ae93",3,45,80,0,"",""],["tassel-loafer-dark-brown-leather","shoes","shoes","Dark Brown Leather Tassel Loafer","Vandyke Brown","#4b3317",4,40,85,0,"",""],["tassel-loafer-black-leather","shoes","shoes","Black Leather Tassel Loafer","Black","#111314",4,40,85,0,"",""],["tassel-loafer-burgundy-suede","shoes","shoes","Burgundy Suede Tassel Loafer","Dusky Madder Violet","#4e1d4c",3,45,80,0,"",""],["bit-loafer-dark-brown-suede","shoes","shoes","Dark Brown Suede Bit Loafer","Vandyke Brown","#4b3317",3,45,80,0,"",""],["bit-loafer-black-leather","shoes","shoes","Black Leather Bit Loafer","Black","#111314",4,40,85,0,"",""],["belgian-loafer-black-leather","shoes","shoes","Black Leather Belgian Loafer","Black","#111314",3,40,85,0,"",""],["belgian-loafer-dark-brown-suede","shoes","shoes","Dark Brown Suede Belgian Loafer","Vandyke Brown","#4b3317",3,45,80,0,"",""],["belgian-loafer-navy-suede","shoes","shoes","Navy Suede Belgian Loafer","Deep Slate Olive","#253122",3,45,80,0,"",""],["white-leather-sneaker","shoes","shoes","White Leather Sneaker","Sulpher Yellow","#f5ecc2",2,35,90,0,"",""],["white-canvas-sneaker","shoes","shoes","White Canvas Sneaker","Sulpher Yellow","#f5ecc2",2,35,90,0,"",""],["cream-knit-trainer","shoes","shoes","Cream Knit Trainer","Ivory Buff","#ebd3a2",2,45,85,0,"",""],["grey-suede-sneaker","shoes","shoes","Grey Suede Sneaker","Krongbergs Green","#84875e",2,35,90,0,"",""],["navy-knit-trainer","shoes","shoes","Navy Knit Trainer","Dark Tyrian Blue","#12354e",2,45,85,0,"",""],["brown-leather-sneaker","shoes","shoes","Brown Leather Sneaker","Mars Brown Tobacco","#653514",3,35,90,0,"",""],["espadrille-navy-canvas","shoes","shoes","Navy Canvas Espadrille","Dark Tyrian Blue","#12354e",2,70,98,0,"",""],["espadrille-natural-canvas","shoes","shoes","Natural Canvas Espadrille","Ivory Buff","#ebd3a2",2,70,98,0,"",""],["espadrille-olive-canvas","shoes","shoes","Olive Canvas Espadrille","Deep Grayish Olive","#635a3a",2,70,98,0,"",""],["oxford-black-leather","shoes","shoes","Black Leather Cap-Toe Oxford","Black","#111314",5,30,78,0,"",""],["oxford-dark-brown-leather","shoes","shoes","Dark Brown Leather Oxford","Vandyke Brown","#4b3317",4,30,78,0,"",""],["oxford-burgundy-leather","shoes","shoes","Burgundy Leather Oxford","Cotinga Purple","#501345",4,30,78,0,"",""],["oxford-tan-leather","shoes","shoes","Tan Leather Oxford","Sudan Brown","#a36752",4,30,78,0,"",""],["patent-oxford-black","shoes","shoes","Black Patent Leather Dress Oxford","Black","#111314",5,35,80,0,"",""],["patent-loafer-black","shoes","shoes","Black Patent Leather Loafer","Black","#111314",5,35,80,0,"",""],["desert-boot-dark-brown-suede","shoes","shoes","Dark Brown Suede Desert Boot","Vandyke Brown","#4b3317",3,25,62,0,"",""],["desert-boot-sand-suede","shoes","shoes","Sand Suede Desert Boot","Isabella Color","#c5a56e",3,25,62,0,"",""],["chelsea-boot-black-leather","shoes","shoes","Black Leather Chelsea Boot","Black","#111314",4,25,62,0,"",""],["chelsea-boot-dark-brown-suede","shoes","shoes","Dark Brown Suede Chelsea Boot","Vandyke Brown","#4b3317",3,25,62,0,"",""],["sandal-dark-brown-leather","shoes","shoes","Dark Brown Leather Sandal","Vandyke Brown","#4b3317",2,72,100,0,"",""],["sandal-black-leather","shoes","shoes","Black Leather Sandal","Black","#111314",2,72,100,0,"",""],["suit-navy","layer","suit","Navy Suit","Dark Tyrian Blue","#12354e",4,40,72,0,"",""],["suit-charcoal","layer","suit","Charcoal Suit","Slate Color","#34454c",4,40,72,0,"",""],["suit-black","layer","suit","Black Suit","Black","#111314",4,40,72,0,"",""],["suit-grey","layer","suit","Mid Grey Suit","Andover Green","#6d7e77",4,40,72,0,"",""],["suit-forest","layer","suit","Forest Green Suit","Deep Slate Olive","#253122",4,40,72,0,"",""],["suit-slate","layer","suit","Slate Blue Suit","Dark Medici Blue","#547076",4,40,72,0,"",""],["suit-glen-check","layer","suit","Glen Check Suit","Deep Violet / Plumbeous","#70727c",4,40,72,0,"",""],["suit-tuxedo","layer","suit","Black Tuxedo","Black","#111314",5,40,72,0,"",""],["suit-olive","layer","suit","Olive Suit","Lincoln Green","#555832",4,40,72,0,"",""],["suit-tan","layer","suit","Tan Suit","Light Brown Drab","#b59392",4,60,88,0,"",""],["blazer-navy","layer","blazer","Navy Blazer","Dark Tyrian Blue","#12354e",4,42,72,0,"",""],["blazer-charcoal","layer","blazer","Charcoal Blazer","Slate Color","#34454c",4,42,72,0,"",""],["blazer-camel","layer","blazer","Camel Blazer","Maple","#c59f6b",4,42,72,0,"",""],["blazer-cream","layer","blazer","Cream Blazer","Sulpher Yellow","#f5ecc2",4,58,85,0,"",""],["blazer-grey","layer","blazer","Grey Blazer","Artemesia Green","#709390",4,42,72,0,"",""],["blazer-brown","layer","blazer","Brown Blazer","Sepia","#644b1e",4,42,72,0,"",""],["blazer-burgundy","layer","blazer","Burgundy Blazer","Dusky Madder Violet","#4e1d4c",4,42,72,0,"",""],["blazer-forest","layer","blazer","Forest Green Blazer","Deep Slate Olive","#253122",4,42,72,0,"",""],["overcoat-camel","layer","overcoat","Camel Overcoat","Maple","#c59f6b",4,20,50,0,"",""],["overcoat-navy","layer","overcoat","Navy Overcoat","Deep Slate Green","#112f2c",4,20,50,0,"",""],["overcoat-black","layer","overcoat","Black Overcoat","Black","#111314",4,20,50,0,"",""],["overcoat-charcoal","layer","overcoat","Charcoal Overcoat","Slate Color","#34454c",4,20,50,0,"",""],["jacket-chore-navy","layer","jacket","Navy Chore Jacket","Dark Tyrian Blue","#12354e",3,48,75,0,"",""],["jacket-chore-sand","layer","jacket","Sand Chore Jacket","Ecru","#c2ae93",3,48,75,0,"",""],["jacket-harrington-tan","layer","jacket","Tan Harrington Jacket","Maple","#c59f6b",3,50,78,0,"",""],["jacket-harrington-navy","layer","jacket","Navy Harrington Jacket","Dark Tyrian Blue","#12354e",3,50,78,0,"",""],["jacket-bomber-suede-chocolate","layer","jacket","Chocolate Suede Bomber Jacket","Vandyke Brown","#4b3317",3,45,68,0,"",""],["jacket-overshirt-navy","layer","jacket","Navy Wool Overshirt","Dark Tyrian Blue","#12354e",3,35,62,0,"",""],["tie-knit-burgundy","","tie","Burgundy Knitted Tie","Dusky Madder Violet","#4e1d4c",4,30,85,0,"",""],["tie-knit-navy","","tie","Navy Knitted Tie","Dark Tyrian Blue","#12354e",4,30,85,0,"",""],["tie-knit-forest","","tie","Forest Green Knitted Tie","Deep Slate Olive","#253122",4,30,85,0,"",""],["tie-knit-black","","tie","Black Knitted Tie","Black","#111314",4,30,85,0,"",""],["tie-silk-burgundy","","tie","Burgundy Silk Tie","Pale Burnt Lake","#802626",4,30,85,0,"",""],["tie-silk-navy-dot","","tie","Navy Polka Dot Silk Tie","Dark Tyrian Blue","#12354e",4,30,85,0,"",""],["tie-silk-striped","","tie","Navy & Burgundy Striped Silk Tie","Slate Color","#34454c",4,30,85,0,"",""],["tie-silk-grey","","tie","Grey Silk Tie","Artemesia Green","#709390",4,30,85,0,"",""],["bowtie-black-silk","","tie","Black Silk Bow Tie","Black","#111314",5,30,85,0,"",""],["bowtie-burgundy-silk","","tie","Burgundy Silk Bow Tie","Dusky Madder Violet","#4e1d4c",5,30,85,0,"",""],["belt-black-leather","","belt","Black Leather Belt","Black","#111314",4,30,85,0,"",""],["belt-brown-leather","","belt","Brown Leather Belt","Sepia","#644b1e",3,30,85,0,"",""],["belt-brown-suede","","belt","Brown Suede Belt","Pale Raw Umber","#71502f",3,30,85,0,"",""],["belt-black-suede","","belt","Black Suede Belt","Black","#111314",4,30,85,0,"",""],["pocket-square-white-linen","","pocket-square","White Linen Pocket Square","Sulpher Yellow","#f5ecc2",4,30,85,0,"",""],["pocket-square-cream-silk","","pocket-square","Cream Silk Pocket Square","Sulpher Yellow","#f5ecc2",5,30,85,0,"",""],["pocket-square-burgundy-silk","","pocket-square","Burgundy Silk Pocket Square","Dusky Madder Violet","#4e1d4c",5,30,85,0,"",""],["owned-isaia-polo","top","tops","Isaia Cream Knit Polo","Sulpher Yellow","#f5ecc2",3,55,90,1,"seed-isaia-polo","assets/photos/b88d4e8b011d.jpg"],["owned-octobre-tee","top","tops","Octobre Éditions Navy Tipped Knit Tee","Dark Tyrian Blue","#12354e",2,55,90,1,"seed-octobre-tee","assets/photos/cccd6ffc5d5b.jpg"],["owned-zegna-tee","top","tops","Zegna Navy 12milmil12 Knit Tee","Deep Slate Green","#112f2c",2,55,90,1,"seed-zegna-tee","assets/photos/d9094daf4f47.jpg"],["owned-whitesville-navy","top","tops","Whitesville Navy Heavyweight Tee","Dark Tyrian Blue","#12354e",2,45,82,1,"seed-whitesville-navy","assets/photos/331c5a7d52d7.jpg"],["owned-orlebar-tee","top","tops","Orlebar Brown Slate Blue Slub Pocket Tee","Artemesia Green","#709390",2,60,95,1,"seed-orlebar-tee","assets/photos/84f56ae82c62.jpg"],["owned-theory-navy","top","tops","Theory Navy Knit Tee","Dark Tyrian Blue","#12354e",2,55,90,1,"seed-theory-navy","assets/photos/0d869738ee51.jpg"],["owned-sfc-knit","top","knitwear","Scott Fraser Collection Black Checkerboard Short-Sleeve Sweater","Black","#111314",3,55,88,1,"seed-sfc-knit","assets/photos/bdeb6a13bfc1.jpg"],["owned-corridor-tee","top","tops","Corridor Charcoal Pocket Tee","Slate Color","#34454c",2,55,95,1,"seed-corridor-tee","assets/photos/cc93a210e480.jpg"],["owned-theory-charcoal","top","tops","Theory Charcoal Heather Knit Tee","Blackish Olive","#42533e",2,55,90,1,"seed-theory-charcoal","assets/photos/1f1164448e7e.jpg"],["owned-cucinelli-grey","top","tops","Brunello Cucinelli Grey Heather Tee","Warm Gray","#a1a39a",2,55,95,1,"seed-cucinelli-grey","assets/photos/42afd412b88d.jpg"],["owned-buckmason-oatmeal","top","knitwear","Buck Mason Oatmeal Heather Knit Crewneck","Ivory Buff","#ebd3a2",3,40,65,1,"seed-buckmason-oatmeal","assets/photos/48555cc64cd1.jpg"],["owned-buckmason-taupe","top","knitwear","Buck Mason Taupe Heather Knit Crewneck","Buffy Citrine","#96874d",3,40,65,1,"seed-buckmason-taupe","assets/photos/ac6d5d214b00.jpg"],["owned-frame-tee","top","tops","FRAME Cream Ribbed Knit Tee","Sulpher Yellow","#f5ecc2",2,55,90,1,"seed-frame-tee","assets/photos/1d8ddc47bf0e.jpg"],["owned-unbound-tee","top","tops","Unbound Merino Off-White Merino Tee","Sulpher Yellow","#f5ecc2",2,45,85,1,"seed-unbound-tee","assets/photos/87f8a0090530.jpg"],["owned-acne-tee","top","tops","Acne Studios White Face-Patch Tee","White","#ffffff",2,55,95,1,"seed-acne-tee","assets/photos/635c36bb0c73.jpg"],["owned-altea-tee","top","tops","Altea Sand Knit Tee","Olive Buff","#c1c494",2,55,90,1,"seed-altea-tee","assets/photos/228f77ffd143.jpg"],["owned-merz-olive","top","tops","Merz b. Schwanen Olive Tee","Olive Green","#6b7140",2,50,90,1,"seed-merz-olive","assets/photos/d56a8492d9d3.jpg"],["owned-cucinelli-stripe","top","tops","Brunello Cucinelli Grey Heather Striped-Collar Tee","Warm Gray","#a1a39a",2,55,95,1,"seed-cucinelli-stripe","assets/photos/29eb36238f25.jpg"],["owned-whitesville-grey","top","tops","Whitesville Grey Heather Heavyweight Tee","Warm Gray","#a1a39a",2,45,82,1,"seed-whitesville-grey","assets/photos/8bf1b37685ac.jpg"],["owned-asket-tee","top","tops","ASKET Cream Tee","Sulpher Yellow","#f5ecc2",2,55,95,1,"seed-asket-tee","assets/photos/fc265d782068.jpg"],["owned-alexmill-tee","top","tops","Alex Mill White Pocket Tee","White","#ffffff",2,55,95,1,"seed-alexmill-tee","assets/photos/3f4340d0f749.jpg"],["owned-massimo-white","top","tops","Massimo Dutti White Pocket Tee","White","#ffffff",2,55,95,1,"seed-massimo-white","assets/photos/38d7ac2121f2.jpg"],["owned-massimo-brown","top","knitwear","Massimo Dutti Brown Linen Knit Crewneck","Pale Raw Umber","#71502f",3,58,85,1,"seed-massimo-brown","assets/photos/00bbee999215.jpg"],["owned-toddsnyder-yellow","top","tops","Todd Snyder Yellow Pocket Tee","Cream Yellow","#fdbf68",2,55,95,1,"seed-toddsnyder-yellow","assets/photos/b854403c0b9d.jpg"],["owned-zigzag-tee","top","tops","Zigzag Stripe Tee","Sulpher Yellow","#f5ecc2",2,55,95,1,"seed-zigzag-tee","assets/photos/a0d510d4f4d0.jpg"],["owned-alexmill-polo","top","tops","Alex Mill White Knit Polo","White","#ffffff",3,55,90,1,"seed-alexmill-polo","assets/photos/f61a7752869e.jpg"],["owned-cucinelli-white-tee","top","tops","Brunello Cucinelli White Knit Tee","White","#ffffff",2,55,90,1,"seed-cucinelli-white-tee","assets/photos/73e485c65932.jpg"],["owned-loropiana-charcoal-polo","top","tops","Loro Piana Charcoal Ribbed Knit Polo","Slate Color","#34454c",3,55,90,1,"seed-loropiana-charcoal-polo","assets/photos/0a9875a534be.jpg"],["owned-cucinelli-charcoal-polo","top","tops","Brunello Cucinelli Charcoal Tipped Polo","Slate Color","#34454c",3,60,95,1,"seed-cucinelli-charcoal-polo","assets/photos/5140b394dcc5.jpg"],["owned-sunspel-polo","top","tops","Sunspel Grey Piqué Polo","Rainette Green","#8fa071",3,60,95,1,"seed-sunspel-polo","assets/photos/eaf04e47deac.jpg"],["owned-cucinelli-breton-polo","top","tops","Brunello Cucinelli Navy Breton Stripe Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-cucinelli-breton-polo","assets/photos/b913f08eb2b0.jpg"],["owned-cucinelli-stripe-polo","top","tops","Brunello Cucinelli Grey Navy Stripe Knit Polo","Deep Violet / Plumbeous","#70727c",3,55,90,1,"seed-cucinelli-stripe-polo","assets/photos/72526560b8b1.jpg"],["owned-cucinelli-beige-polo","top","tops","Brunello Cucinelli Beige Pinstripe Knit Polo","Olive Buff","#c1c494",3,55,90,1,"seed-cucinelli-beige-polo","assets/photos/4ce27e5e4be7.jpg"],["owned-cucinelli-cream-tipped-polo","top","tops","Brunello Cucinelli Cream Tipped Polo","Sulpher Yellow","#f5ecc2",3,60,95,1,"seed-cucinelli-cream-tipped-polo","assets/photos/c4cf3a7c3fc0.jpg"],["owned-cucinelli-brown-stripe-polo","top","tops","Brunello Cucinelli White Brown Stripe Polo","Sulpher Yellow","#f5ecc2",3,60,95,1,"seed-cucinelli-brown-stripe-polo","assets/photos/c99f1a2ab659.jpg"],["owned-cucinelli-ribbed-polo","top","tops","Brunello Cucinelli Cream Ribbed Knit Polo","Sulpher Yellow","#f5ecc2",3,55,90,1,"seed-cucinelli-ribbed-polo","assets/photos/66539c1530cc.jpg"],["owned-missoni-navy-polo","top","tops","Missoni Navy Zigzag Knit Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-missoni-navy-polo","assets/photos/01eaf8a9229c.jpg"],["owned-cucinelli-navy-polo","top","tops","Brunello Cucinelli Navy Piqué Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-cucinelli-navy-polo","assets/photos/74bf9f021f1a.jpg"],["owned-loropiana-navy-polo","top","tops","Loro Piana Navy Tipped Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-loropiana-navy-polo","assets/photos/ad4eb917633c.jpg"],["owned-zegna-polo","top","tops","Zegna Dark Navy High Performance Polo","Deep Slate Green","#112f2c",3,55,90,1,"seed-zegna-polo","assets/photos/60068aa893f4.jpg"],["owned-theory-polo","top","tops","Theory Navy Striped-Collar Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-theory-polo","assets/photos/8ddda1b49cf7.jpg"],["owned-loropiana-sage-polo","top","tops","Loro Piana Sage Linen Polo","Mineral Gray","#a2b0ad",3,68,95,1,"seed-loropiana-sage-polo","assets/photos/73a67351e87c.jpg"],["owned-cucinelli-olive-polo","top","tops","Brunello Cucinelli Olive Knit Polo","Olive Green","#6b7140",3,55,90,1,"seed-cucinelli-olive-polo","assets/photos/9c54fbef1ebe.jpg"],["owned-skyblue-polo","top","tops","Sky Blue Knit Polo","Light Glaucous Blue","#a5c8d1",3,55,90,1,"seed-skyblue-polo","assets/photos/81280b13f5ee.jpg"],["owned-cucinelli-dustyblue-polo","top","tops","Brunello Cucinelli Dusty Blue Knit Polo","Artemesia Green","#709390",3,55,90,1,"seed-cucinelli-dustyblue-polo","assets/photos/bd8728361f98.jpg"],["owned-loropiana-tipped-polo","top","tops","Loro Piana Navy Tipped Knit Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-loropiana-tipped-polo","assets/photos/9e2efb2eec15.jpg"],["owned-cucinelli-skyblue-polo","top","tops","Brunello Cucinelli Sky Blue Piqué Polo","Light Glaucous Blue","#a5c8d1",3,60,95,1,"seed-cucinelli-skyblue-polo","assets/photos/6d23c4c269b2.jpg"],["owned-cucinelli-terracotta-polo","top","tops","Brunello Cucinelli Terracotta Piqué Polo","Cinnamon Rufous","#c27544",3,60,95,1,"seed-cucinelli-terracotta-polo","assets/photos/9bdd2cb8017d.jpg"],["owned-cucinelli-burgundy-polo","top","tops","Brunello Cucinelli Burgundy Linen Polo","Pale Burnt Lake","#802626",3,68,95,1,"seed-cucinelli-burgundy-polo","assets/photos/61ea0badf1bd.jpg"],["owned-isaia-burgundy-polo","top","tops","Isaia Burgundy Knit Polo","Pale Burnt Lake","#802626",3,55,90,1,"seed-isaia-burgundy-polo","assets/photos/d6baa9413174.jpg"],["owned-missoni-burgundy-polo","top","tops","Missoni Burgundy Zigzag Knit Polo","Pale Burnt Lake","#802626",3,55,90,1,"seed-missoni-burgundy-polo","assets/photos/9d574fa86a11.jpg"],["owned-cucinelli-slate-polo","top","tops","Brunello Cucinelli Slate Stripe Polo","Artemesia Green","#709390",3,60,95,1,"seed-cucinelli-slate-polo","assets/photos/58e36e6f3b1e.jpg"],["owned-loropiana-espadrilles","shoes","shoes","Loro Piana Light Blue Knit Espadrilles","Light Glaucous Blue","#a5c8d1",2,70,98,1,"seed-loropiana-espadrilles","assets/photos/0eb3c06dd242.jpg"],["owned-vibi-mustard","shoes","shoes","Vibi Venezia Mustard Check Furlane Slippers","Olive Ocher","#d6b43e",3,55,90,1,"seed-vibi-mustard","assets/photos/84155e8fd479.jpg"],["owned-vibi-navy","shoes","shoes","Vibi Venezia Navy Stripe Furlane Slippers","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-vibi-navy","assets/photos/609536479732.jpg"],["owned-loropiana-grey-sneakers","shoes","shoes","Loro Piana Grey Suede Tennis Sneakers","Rainette Green","#8fa071",3,45,80,1,"seed-loropiana-grey-sneakers","assets/photos/6f8231b82235.jpg"],["owned-adidas-sneakers","shoes","shoes","Adidas Cream Sneakers","Sulpher Yellow","#f5ecc2",2,40,85,1,"seed-adidas-sneakers","assets/photos/d0b35250559a.jpg"],["owned-grey-court-sneakers","shoes","shoes","Grey White Leather Court Sneakers","Glaucous Green","#b4cdc2",2,40,85,1,"seed-grey-court-sneakers","assets/photos/2beffd278ab4.jpg"],["owned-stubbs-slippers","shoes","shoes","Stubbs & Wootton Blue Camo Needlepoint Slippers","Violet Blue","#40456a",3,55,90,1,"seed-stubbs-slippers","assets/photos/41d3ce31e34d.jpg"],["owned-loropiana-white-sneakers","shoes","shoes","Loro Piana White Leather Tennis Sneakers","White","#ffffff",3,40,85,1,"seed-loropiana-white-sneakers","assets/photos/41ba01b1c447.jpg"],["owned-loropiana-runners","shoes","shoes","Loro Piana Multicolour Runner Sneakers","Light Brownish Olive","#806e4b",2,45,85,1,"seed-loropiana-runners","assets/photos/230604c83947.jpg"],["owned-loropiana-summer-walk","shoes","shoes","Loro Piana Dark Brown Suede Summer Walk Loafers","Vandyke Brown","#4b3317",3,45,80,1,"seed-loropiana-summer-walk","assets/photos/c96390ec61c6.jpg"],["owned-vibi-black-velvet-furlane","shoes","shoes","Vibi Venezia Black Velvet Furlane Slippers","Black","#111314",3,55,90,1,"seed-vibi-black-velvet-furlane","assets/photos/db361533ae3a.jpg"],["owned-vibi-tan-velvet-furlane","shoes","shoes","Vibi Venezia Tan Velvet Furlane Slippers","Isabella Color","#c5a56e",3,55,90,1,"seed-vibi-tan-velvet-furlane","assets/photos/aa656e11aa5b.jpg"],["owned-edwardgreen-darkbrown-loafers","shoes","shoes","Edward Green Dark Brown Suede Penny Loafers","Vandyke Brown","#4b3317",4,45,80,1,"seed-edwardgreen-darkbrown-loafers","assets/photos/169bac2277c1.jpg"],["owned-edwardgreen-tan-loafers","shoes","shoes","Edward Green Greige Suede Penny Loafers","Warm Gray","#a1a39a",3,45,80,1,"seed-edwardgreen-tan-loafers","assets/photos/b95402cfe41d.jpg"],["owned-baudoin-rust-tassel-loafers","shoes","shoes","Baudoin & Lange Rust Suede Tassel Loafers","Sudan Brown","#a36752",3,45,80,1,"seed-baudoin-rust-tassel-loafers","assets/photos/ce716373b008.jpg"],["owned-gucci-green-eel-loafers","shoes","shoes","Gucci Dark Green Eel Horsebit Loafers","Slate Color","#34454c",4,40,85,1,"seed-gucci-green-eel-loafers","assets/photos/8cb916c16897.jpg"],["owned-balenciaga-black-loafers","shoes","shoes","Balenciaga Black Leather Penny Loafers","Black","#111314",4,40,85,1,"seed-balenciaga-black-loafers","assets/photos/703b33087b1b.jpg"],["owned-vibi-red-velvet-furlane","shoes","shoes","Vibi Venezia Red Velvet Furlane Slippers","Pale Burnt Lake","#802626",3,55,90,1,"seed-vibi-red-velvet-furlane","assets/photos/d1802e9663e1.jpg"],["owned-gucci-twotone-loafers","shoes","shoes","Gucci Black White Horsebit Loafers","Deep Slate Olive","#253122",4,40,85,1,"seed-gucci-twotone-loafers","assets/photos/3d2a4500ad9d.jpg"],["owned-fortela-concho-slippers","shoes","shoes","Fortela Tan Suede Concho Slippers","Isabella Color","#c5a56e",3,45,80,1,"seed-fortela-concho-slippers","assets/photos/d5d147124f51.jpg"],["owned-vibi-rust-corduroy-furlane","shoes","shoes","Vibi Venezia Rust Corduroy Furlane Slippers","Sudan Brown","#a36752",3,55,90,1,"seed-vibi-rust-corduroy-furlane","assets/photos/1686a0e5b87c.jpg"],["owned-armani-cream-loafers","shoes","shoes","Giorgio Armani Cream Woven Leather Loafers","Sulpher Yellow","#f5ecc2",3,55,88,1,"seed-armani-cream-loafers","assets/photos/f3a8698d7824.jpg"],["owned-loropiana-flexy-sneakers","shoes","shoes","Loro Piana Cream Knit 360 Flexy Walk Sneakers","Sulpher Yellow","#f5ecc2",3,45,85,1,"seed-loropiana-flexy-sneakers","assets/photos/426cfa6c8430.jpg"],["owned-stubbs-navy-slipons","shoes","shoes","Stubbs & Wootton Navy Woven Slip-On Sneakers","Dark Tyrian Blue","#12354e",2,55,90,1,"seed-stubbs-navy-slipons","assets/photos/42883d4f592b.jpg"],["owned-belgian-brown-lizard-loafers","shoes","shoes","Belgian Shoes Brown Lizard Loafers","Pale Raw Umber","#71502f",4,40,85,1,"seed-belgian-brown-lizard-loafers","assets/photos/fe7b6a8394f6.jpg"],["owned-belgian-olive-loafers","shoes","shoes","Belgian Shoes Olive Suede Loafers","Olive Green","#6b7140",3,45,80,1,"seed-belgian-olive-loafers","assets/photos/7b6f9998e799.jpg"],["owned-belgian-black-velvet-loafers","shoes","shoes","Belgian Shoes Black Velvet Loafers","Black","#111314",4,55,90,1,"seed-belgian-black-velvet-loafers","assets/photos/6330f011ed1f.jpg"],["owned-baudoin-brown-leather-loafers","shoes","shoes","Baudoin & Lange Dark Brown Leather Tassel Loafers","Vandyke Brown","#4b3317",4,40,85,1,"seed-baudoin-brown-leather-loafers","assets/photos/209a89055f60.jpg"],["owned-belgian-camo-loafers","shoes","shoes","Belgian Shoes Camo Pony-Hair Loafers","Olive Green","#6b7140",3,55,90,1,"seed-belgian-camo-loafers","assets/photos/6f77e1ad4356.jpg"],["owned-belgian-darkbrown-lizard-loafers","shoes","shoes","Belgian Shoes Dark Brown Lizard Loafers","Vandyke Brown","#4b3317",4,40,85,1,"seed-belgian-darkbrown-lizard-loafers","assets/photos/8eaf8abc32ca.jpg"],["owned-hermes-navy-polo","top","tops","Hermès Navy Piqué Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-hermes-navy-polo","assets/photos/23a1b98a88b6.jpg"],["owned-hermes-black-polo","top","tops","Hermès Black Piqué Polo","Black","#111314",3,60,95,1,"seed-hermes-black-polo","assets/photos/33257e8acdb3.jpg"],["owned-cucinelli-navy-pique-grey-polo","top","tops","Brunello Cucinelli Navy Piqué Polo, Grey Cuffs","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-cucinelli-navy-pique-grey-polo","assets/photos/eac793263454.jpg"],["owned-kiton-navy-polo","top","tops","Kiton Navy Heather Knit Polo","Slate Color","#34454c",3,55,90,1,"seed-kiton-navy-polo","assets/photos/9dfc4caf0c37.jpg"],["owned-stefanoricci-red-tee","top","tops","Stefano Ricci Red Geometric Knit Tee","Carmine Red","#a62c37",2,55,90,1,"seed-stefanoricci-red-tee","assets/photos/e799e1fc5df4.jpg"],["owned-cucinelli-safari-shirt","top","shirts","Brunello Cucinelli Olive Safari Shirt","Olive Green","#6b7140",3,58,90,1,"seed-cucinelli-safari-shirt","assets/photos/27b26c012761.jpg"],["owned-canali-charcoal-vest","layer","vest","Canali Charcoal Knit Vest","Slate Color","#34454c",4,40,68,1,"seed-canali-charcoal-vest","assets/photos/911715b28f48.jpg"],["owned-zanone-navy-vest","layer","vest","Zanone Navy Knit Vest","Dark Tyrian Blue","#12354e",4,40,68,1,"seed-zanone-navy-vest","assets/photos/0c5f2f5596ea.jpg"],["owned-fortela-navy-polo","top","tops","Fortela Navy Knit Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-fortela-navy-polo","assets/photos/e285e4ae173c.jpg"],["owned-hermes-white-polo","top","tops","Hermès White Piqué Polo","White","#ffffff",3,60,95,1,"seed-hermes-white-polo","assets/photos/ebe6c57e2778.jpg"],["owned-cricket","top","knitwear","Cream Cricket Sweater","Sulpher Yellow","#f5ecc2",3,38,62,1,"seed-cricket",""],["owned-loropiana-oatmeal-blazer","layer","blazer","Loro Piana Oatmeal Melange Blazer","Ecru","#c2ae93",3,55,85,1,"seed-loropiana-oatmeal-blazer","assets/photos/74fddef5abe5.jpg"]];
+var PIECE_LIBRARY_RAW = [["top-white-crew-tee","top","tops","White Crew-Neck Tee","Sulpher Yellow","#f5ecc2",2,55,95,0,"",""],["top-cream-crew-tee","top","tops","Cream Crew-Neck Tee","Sulpher Yellow","#f5ecc2",2,55,95,0,"",""],["top-navy-crew-tee","top","tops","Navy Crew-Neck Tee","Dark Tyrian Blue","#12354e",2,55,95,0,"",""],["top-black-crew-tee","top","tops","Black Crew-Neck Tee","Black","#111314",2,55,95,0,"",""],["top-charcoal-pocket-tee","top","tops","Charcoal Pocket Tee","Slate Color","#34454c",2,55,95,0,"",""],["top-grey-heather-tee","top","tops","Grey Heather Tee","Warm Gray","#a1a39a",2,55,95,0,"",""],["top-olive-tee","top","tops","Olive Tee","Deep Grayish Olive","#635a3a",2,55,95,0,"",""],["top-sand-knit-tee","top","tops","Sand Knit Tee","Olive Buff","#c1c494",3,55,90,0,"",""],["top-slate-slub-pocket-tee","top","tops","Slate Blue Slub Pocket Tee","Artemesia Green","#709390",2,60,95,0,"",""],["top-mustard-pocket-tee","top","tops","Mustard Yellow Pocket Tee","Olive Ocher","#d6b43e",2,55,95,0,"",""],["top-breton-stripe-tee","top","tops","Navy Breton Stripe Tee","Dark Tyrian Blue","#12354e",3,55,95,0,"",""],["top-white-pique-polo","top","tops","White Piqué Polo","Sulpher Yellow","#f5ecc2",3,60,95,0,"",""],["top-navy-pique-polo","top","tops","Navy Piqué Polo","Dark Tyrian Blue","#12354e",3,60,95,0,"",""],["top-black-pique-polo","top","tops","Black Piqué Polo","Black","#111314",3,60,95,0,"",""],["top-sky-pique-polo","top","tops","Sky Blue Piqué Polo","Light Glaucous Blue","#a5c8d1",3,60,95,0,"",""],["top-terracotta-pique-polo","top","tops","Terracotta Piqué Polo","Cinnamon Rufous","#c27544",3,60,95,0,"",""],["top-sage-linen-polo","top","tops","Sage Linen Polo","Mineral Gray","#a2b0ad",3,68,95,0,"",""],["top-cream-knit-polo","top","tops","Cream Open-Collar Knit Polo","Sulpher Yellow","#f5ecc2",3,55,90,0,"",""],["knit-navy-cable-crew","top","knitwear","Navy Cable-Knit Crew","Dark Tyrian Blue","#12354e",3,30,58,0,"",""],["knit-cream-cable-crew","top","knitwear","Cream Cable-Knit Crew","Sulpher Yellow","#f5ecc2",3,30,58,0,"",""],["knit-charcoal-crew","top","knitwear","Charcoal Crew-Neck Sweater","Slate Color","#34454c",3,35,62,0,"",""],["knit-oatmeal-crew","top","knitwear","Oatmeal Heather Crew","Ivory Buff","#ebd3a2",3,30,58,0,"",""],["knit-taupe-crew","top","knitwear","Taupe Heather Crew","Buffy Citrine","#96874d",3,30,58,0,"",""],["knit-burgundy-roll-neck","top","knitwear","Burgundy Roll-Neck Sweater","Dusky Madder Violet","#4e1d4c",4,35,62,0,"",""],["knit-navy-roll-neck","top","knitwear","Navy Roll-Neck Sweater","Dark Tyrian Blue","#12354e",4,35,62,0,"",""],["knit-black-roll-neck","top","knitwear","Black Roll-Neck Sweater","Black","#111314",4,35,62,0,"",""],["knit-forest-crew","top","knitwear","Forest Green Crew-Neck Sweater","Slate Color","#34454c",3,30,58,0,"",""],["knit-chocolate-crew","top","knitwear","Chocolate Crew-Neck Sweater","Vandyke Brown","#4b3317",3,30,58,0,"",""],["knit-grey-v-neck","top","knitwear","Grey V-Neck Sweater","Artemesia Green","#709390",4,35,62,0,"",""],["knit-dusty-blue-knit-polo","top","knitwear","Dusty Blue Knit Polo","Artemesia Green","#709390",3,55,88,0,"",""],["knit-olive-knit-polo","top","knitwear","Olive Knit Polo","Deep Grayish Olive","#635a3a",3,55,88,0,"",""],["knit-navy-breton-polo","top","knitwear","Navy Breton Stripe Knit Polo","Dark Tyrian Blue","#12354e",3,55,88,0,"",""],["knit-black-checkerboard-knit","top","knitwear","Black Checkerboard Short-Sleeve Knit","Black","#111314",3,55,88,0,"",""],["knit-brown-linen-crew","top","knitwear","Brown Linen Knit Crew","Pale Raw Umber","#71502f",3,58,85,0,"",""],["shirt-white-oxford","top","shirts","White Oxford Button-Down Shirt","Sulpher Yellow","#f5ecc2",4,45,80,0,"",""],["shirt-blue-oxford","top","shirts","Light Blue Oxford Button-Down Shirt","Pale King's Blue","#a7d4e4",4,45,80,0,"",""],["shirt-white-poplin","top","shirts","White Poplin Dress Shirt","White","#ffffff",5,50,85,0,"",""],["shirt-pale-blue-poplin","top","shirts","Pale Blue Poplin Dress Shirt","Nile Blue","#bce4e5",4,50,85,0,"",""],["shirt-pink-oxford","top","shirts","Pale Pink Oxford Shirt","Hermosa Pink","#f9c1ce",4,45,80,0,"",""],["shirt-navy-gingham","top","shirts","Navy Gingham Check Shirt","Dark Tyrian Blue","#12354e",3,55,85,0,"",""],["shirt-white-linen","top","shirts","White Linen Shirt","Sulpher Yellow","#f5ecc2",3,68,95,0,"",""],["shirt-sand-linen","top","shirts","Sand Linen Shirt","Ivory Buff","#ebd3a2",3,68,95,0,"",""],["shirt-sky-linen","top","shirts","Sky Blue Linen Shirt","Light Glaucous Blue","#a5c8d1",3,68,95,0,"",""],["shirt-olive-safari","top","shirts","Olive Short-Sleeve Safari Shirt","Deep Grayish Olive","#635a3a",3,60,90,0,"",""],["shirt-white-camp","top","shirts","White Linen Camp Shirt","Sulpher Yellow","#f5ecc2",2,70,98,0,"",""],["shirt-sage-camp","top","shirts","Sage Linen Camp Shirt","Mineral Gray","#a2b0ad",2,70,98,0,"",""],["shirt-navy-camp","top","shirts","Navy Camp Shirt","Dark Tyrian Blue","#12354e",2,70,98,0,"",""],["shirt-cream-camp","top","shirts","Cream Camp Shirt","Sulpher Yellow","#f5ecc2",2,70,98,0,"",""],["shirt-terracotta-camp","top","shirts","Terracotta Camp Shirt","Cinnamon Rufous","#c27544",2,70,98,0,"",""],["shirt-chambray","top","shirts","Light Blue Chambray Shirt","Salvia Blue","#97acc8",3,55,85,0,"",""],["shirt-indigo-denim","top","shirts","Indigo Denim Shirt","Slate Color","#34454c",3,45,75,0,"",""],["navy-wool-trousers","bottom","trousers","Navy Wool Trousers","Deep Slate Olive","#253122",4,40,70,0,"",""],["charcoal-wool-trousers","bottom","trousers","Charcoal Wool Trousers","Slate Color","#34454c",4,40,70,0,"",""],["mid-grey-wool-trousers","bottom","trousers","Mid Grey Wool Trousers","Andover Green","#6d7e77",4,40,70,0,"",""],["light-grey-wool-trousers","bottom","trousers","Light Grey Wool Trousers","Neutral Gray","#b6bfc1",4,40,70,0,"",""],["black-wool-trousers","bottom","trousers","Black Wool Trousers","Black","#111314",5,40,70,0,"",""],["midnight-wool-trousers","bottom","trousers","Midnight Wool Trousers","Black","#111314",5,40,70,0,"",""],["grey-flannel-trousers","bottom","trousers","Grey Flannel Trousers","Light Grayish Olive","#848061",4,30,58,0,"",""],["cream-wool-trousers","bottom","trousers","Cream Wool Trousers","Sulpher Yellow","#f5ecc2",4,40,70,0,"",""],["white-linen-trousers","bottom","trousers","White Linen Trousers","Sulpher Yellow","#f5ecc2",3,68,95,0,"",""],["olive-taupe-linen-trousers","bottom","trousers","Olive Taupe Linen Trousers","Dark Citrine","#8b835b",3,68,95,0,"",""],["stone-linen-trousers","bottom","trousers","Stone Linen Trousers","Ecru","#c2ae93",3,68,95,0,"",""],["navy-linen-trousers","bottom","trousers","Navy Linen Trousers","Dark Tyrian Blue","#12354e",3,68,95,0,"",""],["sand-linen-trousers","bottom","trousers","Sand Linen Trousers","Olive Buff","#c1c494",3,68,95,0,"",""],["ecru-cotton-trousers","bottom","trousers","Ecru Cotton Trousers","Ivory Buff","#ebd3a2",3,55,88,0,"",""],["white-cotton-trousers","bottom","trousers","White Cotton Trousers","White","#ffffff",3,55,88,0,"",""],["olive-cotton-trousers","bottom","trousers","Olive Cotton Trousers","Olive Green","#6b7140",3,55,88,0,"",""],["stone-chinos","bottom","trousers","Stone Chinos","Ecru","#c2ae93",3,55,90,0,"",""],["navy-chinos","bottom","trousers","Navy Chinos","Dark Tyrian Blue","#12354e",3,55,90,0,"",""],["ecru-chinos","bottom","trousers","Ecru Chinos","Ivory Buff","#ebd3a2",3,55,90,0,"",""],["khaki-chinos","bottom","trousers","Khaki Chinos","Maple","#c59f6b",3,55,90,0,"",""],["olive-chinos","bottom","trousers","Olive Chinos","Olive Green","#6b7140",3,55,90,0,"",""],["white-chinos","bottom","trousers","White Chinos","White","#ffffff",3,55,90,0,"",""],["cream-chinos","bottom","trousers","Cream Chinos","Sulpher Yellow","#f5ecc2",3,55,90,0,"",""],["grey-chinos","bottom","trousers","Grey Chinos","Artemesia Green","#709390",3,55,90,0,"",""],["indigo-jeans","bottom","jeans","Indigo Jeans","Slate Color","#34454c",3,35,85,0,"",""],["indigo-bootcut-jeans","bottom","jeans","Indigo Bootcut Jeans","Violet Blue","#40456a",2,35,85,0,"",""],["white-jeans","bottom","jeans","White Jeans","Sulpher Yellow","#f5ecc2",3,35,85,0,"",""],["ecru-jeans","bottom","jeans","Ecru Jeans","Ivory Buff","#ebd3a2",3,35,85,0,"",""],["black-jeans","bottom","jeans","Black Jeans","Black","#111314",3,35,85,0,"",""],["washed-indigo-jeans","bottom","jeans","Washed Indigo Jeans","Artemesia Green","#709390",2,35,85,0,"",""],["charcoal-jeans","bottom","jeans","Charcoal Jeans","Slate Color","#34454c",3,35,85,0,"",""],["stone-jeans","bottom","jeans","Stone Jeans","Ecru","#c2ae93",2,35,85,0,"",""],["stone-tailored-shorts","bottom","shorts","Stone Tailored Shorts","Ecru","#c2ae93",2,70,98,0,"",""],["navy-tailored-shorts","bottom","shorts","Navy Tailored Shorts","Dark Tyrian Blue","#12354e",2,70,98,0,"",""],["white-tailored-shorts","bottom","shorts","White Tailored Shorts","White","#ffffff",2,70,98,0,"",""],["khaki-chino-shorts","bottom","shorts","Khaki Chino Shorts","Maple","#c59f6b",2,70,98,0,"",""],["olive-linen-shorts","bottom","shorts","Olive Linen Shorts","Olive Green","#6b7140",2,72,98,0,"",""],["navy-swim-shorts","bottom","swim","Navy Swim Shorts","Dark Tyrian Blue","#12354e",1,75,100,0,"",""],["sky-swim-shorts","bottom","swim","Sky Swim Shorts","Salvia Blue","#97acc8",1,75,100,0,"",""],["white-swim-shorts","bottom","swim","White Swim Shorts","Sulpher Yellow","#f5ecc2",1,75,100,0,"",""],["penny-loafer-dark-brown-leather","shoes","shoes","Dark Brown Leather Penny Loafer","Vandyke Brown","#4b3317",4,40,85,0,"",""],["penny-loafer-black-leather","shoes","shoes","Black Leather Penny Loafer","Black","#111314",4,40,85,0,"",""],["penny-loafer-burgundy-leather","shoes","shoes","Burgundy Leather Penny Loafer","Dusky Madder Violet","#4e1d4c",4,40,85,0,"",""],["penny-loafer-dark-brown-suede","shoes","shoes","Dark Brown Suede Penny Loafer","Vandyke Brown","#4b3317",3,45,80,0,"",""],["penny-loafer-chocolate-suede","shoes","shoes","Chocolate Suede Penny Loafer","Deep Slate Olive","#253122",3,45,80,0,"",""],["penny-loafer-navy-suede","shoes","shoes","Navy Suede Penny Loafer","Deep Slate Olive","#253122",3,45,80,0,"",""],["penny-loafer-stone-suede","shoes","shoes","Stone Suede Penny Loafer","Ecru","#c2ae93",3,45,80,0,"",""],["tassel-loafer-dark-brown-leather","shoes","shoes","Dark Brown Leather Tassel Loafer","Vandyke Brown","#4b3317",4,40,85,0,"",""],["tassel-loafer-black-leather","shoes","shoes","Black Leather Tassel Loafer","Black","#111314",4,40,85,0,"",""],["tassel-loafer-burgundy-suede","shoes","shoes","Burgundy Suede Tassel Loafer","Dusky Madder Violet","#4e1d4c",3,45,80,0,"",""],["bit-loafer-dark-brown-suede","shoes","shoes","Dark Brown Suede Bit Loafer","Vandyke Brown","#4b3317",3,45,80,0,"",""],["bit-loafer-black-leather","shoes","shoes","Black Leather Bit Loafer","Black","#111314",4,40,85,0,"",""],["belgian-loafer-black-leather","shoes","shoes","Black Leather Belgian Loafer","Black","#111314",3,40,85,0,"",""],["belgian-loafer-dark-brown-suede","shoes","shoes","Dark Brown Suede Belgian Loafer","Vandyke Brown","#4b3317",3,45,80,0,"",""],["belgian-loafer-navy-suede","shoes","shoes","Navy Suede Belgian Loafer","Deep Slate Olive","#253122",3,45,80,0,"",""],["white-leather-sneaker","shoes","shoes","White Leather Sneaker","Sulpher Yellow","#f5ecc2",2,35,90,0,"",""],["white-canvas-sneaker","shoes","shoes","White Canvas Sneaker","Sulpher Yellow","#f5ecc2",2,35,90,0,"",""],["cream-knit-trainer","shoes","shoes","Cream Knit Trainer","Ivory Buff","#ebd3a2",2,45,85,0,"",""],["grey-suede-sneaker","shoes","shoes","Grey Suede Sneaker","Krongbergs Green","#84875e",2,35,90,0,"",""],["navy-knit-trainer","shoes","shoes","Navy Knit Trainer","Dark Tyrian Blue","#12354e",2,45,85,0,"",""],["brown-leather-sneaker","shoes","shoes","Brown Leather Sneaker","Mars Brown Tobacco","#653514",3,35,90,0,"",""],["espadrille-navy-canvas","shoes","shoes","Navy Canvas Espadrille","Dark Tyrian Blue","#12354e",2,70,98,0,"",""],["espadrille-natural-canvas","shoes","shoes","Natural Canvas Espadrille","Ivory Buff","#ebd3a2",2,70,98,0,"",""],["espadrille-olive-canvas","shoes","shoes","Olive Canvas Espadrille","Deep Grayish Olive","#635a3a",2,70,98,0,"",""],["oxford-black-leather","shoes","shoes","Black Leather Cap-Toe Oxford","Black","#111314",5,30,78,0,"",""],["oxford-dark-brown-leather","shoes","shoes","Dark Brown Leather Oxford","Vandyke Brown","#4b3317",4,30,78,0,"",""],["oxford-burgundy-leather","shoes","shoes","Burgundy Leather Oxford","Cotinga Purple","#501345",4,30,78,0,"",""],["oxford-tan-leather","shoes","shoes","Tan Leather Oxford","Sudan Brown","#a36752",4,30,78,0,"",""],["patent-oxford-black","shoes","shoes","Black Patent Leather Dress Oxford","Black","#111314",5,35,80,0,"",""],["patent-loafer-black","shoes","shoes","Black Patent Leather Loafer","Black","#111314",5,35,80,0,"",""],["desert-boot-dark-brown-suede","shoes","shoes","Dark Brown Suede Desert Boot","Vandyke Brown","#4b3317",3,25,62,0,"",""],["desert-boot-sand-suede","shoes","shoes","Sand Suede Desert Boot","Isabella Color","#c5a56e",3,25,62,0,"",""],["chelsea-boot-black-leather","shoes","shoes","Black Leather Chelsea Boot","Black","#111314",4,25,62,0,"",""],["chelsea-boot-dark-brown-suede","shoes","shoes","Dark Brown Suede Chelsea Boot","Vandyke Brown","#4b3317",3,25,62,0,"",""],["sandal-dark-brown-leather","shoes","shoes","Dark Brown Leather Sandal","Vandyke Brown","#4b3317",2,72,100,0,"",""],["sandal-black-leather","shoes","shoes","Black Leather Sandal","Black","#111314",2,72,100,0,"",""],["suit-navy","layer","suit","Navy Suit","Dark Tyrian Blue","#12354e",4,40,72,0,"",""],["suit-charcoal","layer","suit","Charcoal Suit","Slate Color","#34454c",4,40,72,0,"",""],["suit-black","layer","suit","Black Suit","Black","#111314",4,40,72,0,"",""],["suit-grey","layer","suit","Mid Grey Suit","Andover Green","#6d7e77",4,40,72,0,"",""],["suit-forest","layer","suit","Forest Green Suit","Deep Slate Olive","#253122",4,40,72,0,"",""],["suit-slate","layer","suit","Slate Blue Suit","Dark Medici Blue","#547076",4,40,72,0,"",""],["suit-glen-check","layer","suit","Glen Check Suit","Deep Violet / Plumbeous","#70727c",4,40,72,0,"",""],["suit-tuxedo","layer","suit","Black Tuxedo","Black","#111314",5,40,72,0,"",""],["suit-olive","layer","suit","Olive Suit","Lincoln Green","#555832",4,40,72,0,"",""],["suit-tan","layer","suit","Tan Suit","Light Brown Drab","#b59392",4,60,88,0,"",""],["blazer-navy","layer","blazer","Navy Blazer","Dark Tyrian Blue","#12354e",4,42,72,0,"",""],["blazer-charcoal","layer","blazer","Charcoal Blazer","Slate Color","#34454c",4,42,72,0,"",""],["blazer-camel","layer","blazer","Camel Blazer","Maple","#c59f6b",4,42,72,0,"",""],["blazer-cream","layer","blazer","Cream Blazer","Sulpher Yellow","#f5ecc2",4,58,85,0,"",""],["blazer-grey","layer","blazer","Grey Blazer","Artemesia Green","#709390",4,42,72,0,"",""],["blazer-brown","layer","blazer","Brown Blazer","Sepia","#644b1e",4,42,72,0,"",""],["blazer-burgundy","layer","blazer","Burgundy Blazer","Dusky Madder Violet","#4e1d4c",4,42,72,0,"",""],["blazer-forest","layer","blazer","Forest Green Blazer","Deep Slate Olive","#253122",4,42,72,0,"",""],["overcoat-camel","layer","overcoat","Camel Overcoat","Maple","#c59f6b",4,20,50,0,"",""],["overcoat-navy","layer","overcoat","Navy Overcoat","Deep Slate Green","#112f2c",4,20,50,0,"",""],["overcoat-black","layer","overcoat","Black Overcoat","Black","#111314",4,20,50,0,"",""],["overcoat-charcoal","layer","overcoat","Charcoal Overcoat","Slate Color","#34454c",4,20,50,0,"",""],["jacket-chore-navy","layer","jacket","Navy Chore Jacket","Dark Tyrian Blue","#12354e",3,48,75,0,"",""],["jacket-chore-sand","layer","jacket","Sand Chore Jacket","Ecru","#c2ae93",3,48,75,0,"",""],["jacket-harrington-tan","layer","jacket","Tan Harrington Jacket","Maple","#c59f6b",3,50,78,0,"",""],["jacket-harrington-navy","layer","jacket","Navy Harrington Jacket","Dark Tyrian Blue","#12354e",3,50,78,0,"",""],["jacket-bomber-suede-chocolate","layer","jacket","Chocolate Suede Bomber Jacket","Vandyke Brown","#4b3317",3,45,68,0,"",""],["jacket-overshirt-navy","layer","jacket","Navy Wool Overshirt","Dark Tyrian Blue","#12354e",3,35,62,0,"",""],["tie-knit-burgundy","","tie","Burgundy Knitted Tie","Dusky Madder Violet","#4e1d4c",4,30,85,0,"",""],["tie-knit-navy","","tie","Navy Knitted Tie","Dark Tyrian Blue","#12354e",4,30,85,0,"",""],["tie-knit-forest","","tie","Forest Green Knitted Tie","Deep Slate Olive","#253122",4,30,85,0,"",""],["tie-knit-black","","tie","Black Knitted Tie","Black","#111314",4,30,85,0,"",""],["tie-silk-burgundy","","tie","Burgundy Silk Tie","Pale Burnt Lake","#802626",4,30,85,0,"",""],["tie-silk-navy-dot","","tie","Navy Polka Dot Silk Tie","Dark Tyrian Blue","#12354e",4,30,85,0,"",""],["tie-silk-striped","","tie","Navy & Burgundy Striped Silk Tie","Slate Color","#34454c",4,30,85,0,"",""],["tie-silk-grey","","tie","Grey Silk Tie","Artemesia Green","#709390",4,30,85,0,"",""],["bowtie-black-silk","","tie","Black Silk Bow Tie","Black","#111314",5,30,85,0,"",""],["bowtie-burgundy-silk","","tie","Burgundy Silk Bow Tie","Dusky Madder Violet","#4e1d4c",5,30,85,0,"",""],["belt-black-leather","","belt","Black Leather Belt","Black","#111314",4,30,85,0,"",""],["belt-brown-leather","","belt","Brown Leather Belt","Sepia","#644b1e",3,30,85,0,"",""],["belt-brown-suede","","belt","Brown Suede Belt","Pale Raw Umber","#71502f",3,30,85,0,"",""],["belt-black-suede","","belt","Black Suede Belt","Black","#111314",4,30,85,0,"",""],["pocket-square-white-linen","","pocket-square","White Linen Pocket Square","Sulpher Yellow","#f5ecc2",4,30,85,0,"",""],["pocket-square-cream-silk","","pocket-square","Cream Silk Pocket Square","Sulpher Yellow","#f5ecc2",5,30,85,0,"",""],["pocket-square-burgundy-silk","","pocket-square","Burgundy Silk Pocket Square","Dusky Madder Violet","#4e1d4c",5,30,85,0,"",""],["owned-isaia-polo","top","tops","Isaia Cream Knit Polo","Sulpher Yellow","#f5ecc2",3,55,90,1,"seed-isaia-polo","assets/photos/b88d4e8b011d.jpg"],["owned-octobre-tee","top","tops","Octobre Éditions Navy Tipped Knit Tee","Dark Tyrian Blue","#12354e",2,55,90,1,"seed-octobre-tee","assets/photos/cccd6ffc5d5b.jpg"],["owned-zegna-tee","top","tops","Zegna Navy 12milmil12 Knit Tee","Deep Slate Green","#112f2c",2,55,90,1,"seed-zegna-tee","assets/photos/d9094daf4f47.jpg"],["owned-whitesville-navy","top","tops","Whitesville Navy Heavyweight Tee","Dark Tyrian Blue","#12354e",2,45,82,1,"seed-whitesville-navy","assets/photos/331c5a7d52d7.jpg"],["owned-orlebar-tee","top","tops","Orlebar Brown Slate Blue Slub Pocket Tee","Artemesia Green","#709390",2,60,95,1,"seed-orlebar-tee","assets/photos/84f56ae82c62.jpg"],["owned-theory-navy","top","tops","Theory Navy Knit Tee","Dark Tyrian Blue","#12354e",2,55,90,1,"seed-theory-navy","assets/photos/0d869738ee51.jpg"],["owned-sfc-knit","top","knitwear","Scott Fraser Collection Black Checkerboard Short-Sleeve Sweater","Black","#111314",3,55,88,1,"seed-sfc-knit","assets/photos/bdeb6a13bfc1.jpg"],["owned-corridor-tee","top","tops","Corridor Charcoal Pocket Tee","Slate Color","#34454c",2,55,95,1,"seed-corridor-tee","assets/photos/cc93a210e480.jpg"],["owned-theory-charcoal","top","tops","Theory Charcoal Heather Knit Tee","Blackish Olive","#42533e",2,55,90,1,"seed-theory-charcoal","assets/photos/1f1164448e7e.jpg"],["owned-cucinelli-grey","top","tops","Brunello Cucinelli Grey Heather Tee","Warm Gray","#a1a39a",2,55,95,1,"seed-cucinelli-grey","assets/photos/42afd412b88d.jpg"],["owned-buckmason-oatmeal","top","knitwear","Buck Mason Oatmeal Heather Knit Crewneck","Ivory Buff","#ebd3a2",3,40,65,1,"seed-buckmason-oatmeal","assets/photos/48555cc64cd1.jpg"],["owned-buckmason-taupe","top","knitwear","Buck Mason Taupe Heather Knit Crewneck","Buffy Citrine","#96874d",3,40,65,1,"seed-buckmason-taupe","assets/photos/ac6d5d214b00.jpg"],["owned-frame-tee","top","tops","FRAME Cream Ribbed Knit Tee","Sulpher Yellow","#f5ecc2",2,55,90,1,"seed-frame-tee","assets/photos/1d8ddc47bf0e.jpg"],["owned-unbound-tee","top","tops","Unbound Merino Off-White Merino Tee","Sulpher Yellow","#f5ecc2",2,45,85,1,"seed-unbound-tee","assets/photos/87f8a0090530.jpg"],["owned-acne-tee","top","tops","Acne Studios White Face-Patch Tee","White","#ffffff",2,55,95,1,"seed-acne-tee","assets/photos/635c36bb0c73.jpg"],["owned-altea-tee","top","tops","Altea Sand Knit Tee","Olive Buff","#c1c494",2,55,90,1,"seed-altea-tee","assets/photos/228f77ffd143.jpg"],["owned-merz-olive","top","tops","Merz b. Schwanen Olive Tee","Olive Green","#6b7140",2,50,90,1,"seed-merz-olive","assets/photos/d56a8492d9d3.jpg"],["owned-cucinelli-stripe","top","tops","Brunello Cucinelli Grey Heather Striped-Collar Tee","Warm Gray","#a1a39a",2,55,95,1,"seed-cucinelli-stripe","assets/photos/29eb36238f25.jpg"],["owned-whitesville-grey","top","tops","Whitesville Grey Heather Heavyweight Tee","Warm Gray","#a1a39a",2,45,82,1,"seed-whitesville-grey","assets/photos/8bf1b37685ac.jpg"],["owned-asket-tee","top","tops","ASKET Cream Tee","Sulpher Yellow","#f5ecc2",2,55,95,1,"seed-asket-tee","assets/photos/fc265d782068.jpg"],["owned-alexmill-tee","top","tops","Alex Mill White Pocket Tee","White","#ffffff",2,55,95,1,"seed-alexmill-tee","assets/photos/3f4340d0f749.jpg"],["owned-massimo-white","top","tops","Massimo Dutti White Pocket Tee","White","#ffffff",2,55,95,1,"seed-massimo-white","assets/photos/38d7ac2121f2.jpg"],["owned-massimo-brown","top","knitwear","Massimo Dutti Brown Linen Knit Crewneck","Pale Raw Umber","#71502f",3,58,85,1,"seed-massimo-brown","assets/photos/00bbee999215.jpg"],["owned-toddsnyder-yellow","top","tops","Todd Snyder Yellow Pocket Tee","Cream Yellow","#fdbf68",2,55,95,1,"seed-toddsnyder-yellow","assets/photos/b854403c0b9d.jpg"],["owned-zigzag-tee","top","tops","Zigzag Stripe Tee","Sulpher Yellow","#f5ecc2",2,55,95,1,"seed-zigzag-tee","assets/photos/a0d510d4f4d0.jpg"],["owned-alexmill-polo","top","tops","Alex Mill White Knit Polo","White","#ffffff",3,55,90,1,"seed-alexmill-polo","assets/photos/f61a7752869e.jpg"],["owned-cucinelli-white-tee","top","tops","Brunello Cucinelli White Knit Tee","White","#ffffff",2,55,90,1,"seed-cucinelli-white-tee","assets/photos/73e485c65932.jpg"],["owned-loropiana-charcoal-polo","top","tops","Loro Piana Charcoal Ribbed Knit Polo","Slate Color","#34454c",3,55,90,1,"seed-loropiana-charcoal-polo","assets/photos/0a9875a534be.jpg"],["owned-cucinelli-charcoal-polo","top","tops","Brunello Cucinelli Charcoal Tipped Polo","Slate Color","#34454c",3,60,95,1,"seed-cucinelli-charcoal-polo","assets/photos/5140b394dcc5.jpg"],["owned-sunspel-polo","top","tops","Sunspel Grey Piqué Polo","Rainette Green","#8fa071",3,60,95,1,"seed-sunspel-polo","assets/photos/eaf04e47deac.jpg"],["owned-cucinelli-breton-polo","top","tops","Brunello Cucinelli Navy Breton Stripe Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-cucinelli-breton-polo","assets/photos/6a3700eb79cf.jpg"],["owned-cucinelli-stripe-polo","top","tops","Brunello Cucinelli Grey Navy Stripe Knit Polo","Deep Violet / Plumbeous","#70727c",3,55,90,1,"seed-cucinelli-stripe-polo","assets/photos/72526560b8b1.jpg"],["owned-cucinelli-beige-polo","top","tops","Brunello Cucinelli Beige Pinstripe Knit Polo","Olive Buff","#c1c494",3,55,90,1,"seed-cucinelli-beige-polo","assets/photos/4ce27e5e4be7.jpg"],["owned-cucinelli-cream-tipped-polo","top","tops","Brunello Cucinelli Cream Tipped Polo","Sulpher Yellow","#f5ecc2",3,60,95,1,"seed-cucinelli-cream-tipped-polo","assets/photos/c4cf3a7c3fc0.jpg"],["owned-cucinelli-brown-stripe-polo","top","tops","Brunello Cucinelli White Brown Stripe Polo","Sulpher Yellow","#f5ecc2",3,60,95,1,"seed-cucinelli-brown-stripe-polo","assets/photos/c99f1a2ab659.jpg"],["owned-cucinelli-ribbed-polo","top","tops","Brunello Cucinelli Cream Ribbed Knit Polo","Sulpher Yellow","#f5ecc2",3,55,90,1,"seed-cucinelli-ribbed-polo","assets/photos/66539c1530cc.jpg"],["owned-missoni-navy-polo","top","tops","Missoni Navy Zigzag Knit Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-missoni-navy-polo","assets/photos/01eaf8a9229c.jpg"],["owned-cucinelli-navy-polo","top","tops","Brunello Cucinelli Navy Piqué Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-cucinelli-navy-polo","assets/photos/74bf9f021f1a.jpg"],["owned-loropiana-navy-polo","top","tops","Loro Piana Navy Tipped Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-loropiana-navy-polo","assets/photos/ad4eb917633c.jpg"],["owned-zegna-polo","top","tops","Zegna Dark Navy High Performance Polo","Deep Slate Green","#112f2c",3,55,90,1,"seed-zegna-polo","assets/photos/60068aa893f4.jpg"],["owned-theory-polo","top","tops","Theory Navy Striped-Collar Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-theory-polo","assets/photos/8ddda1b49cf7.jpg"],["owned-loropiana-sage-polo","top","tops","Loro Piana Sage Linen Polo","Mineral Gray","#a2b0ad",3,68,95,1,"seed-loropiana-sage-polo","assets/photos/73a67351e87c.jpg"],["owned-cucinelli-olive-polo","top","tops","Brunello Cucinelli Olive Knit Polo","Olive Green","#6b7140",3,55,90,1,"seed-cucinelli-olive-polo","assets/photos/9c54fbef1ebe.jpg"],["owned-skyblue-polo","top","tops","Sky Blue Knit Polo","Light Glaucous Blue","#a5c8d1",3,55,90,1,"seed-skyblue-polo","assets/photos/81280b13f5ee.jpg"],["owned-cucinelli-dustyblue-polo","top","tops","Brunello Cucinelli Dusty Blue Knit Polo","Artemesia Green","#709390",3,55,90,1,"seed-cucinelli-dustyblue-polo","assets/photos/bd8728361f98.jpg"],["owned-loropiana-tipped-polo","top","tops","Loro Piana Navy Tipped Knit Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-loropiana-tipped-polo","assets/photos/9e2efb2eec15.jpg"],["owned-cucinelli-skyblue-polo","top","tops","Brunello Cucinelli Sky Blue Piqué Polo","Light Glaucous Blue","#a5c8d1",3,60,95,1,"seed-cucinelli-skyblue-polo","assets/photos/6d23c4c269b2.jpg"],["owned-cucinelli-terracotta-polo","top","tops","Brunello Cucinelli Terracotta Piqué Polo","Cinnamon Rufous","#c27544",3,60,95,1,"seed-cucinelli-terracotta-polo","assets/photos/9bdd2cb8017d.jpg"],["owned-cucinelli-burgundy-polo","top","tops","Brunello Cucinelli Burgundy Linen Polo","Pale Burnt Lake","#802626",3,68,95,1,"seed-cucinelli-burgundy-polo","assets/photos/61ea0badf1bd.jpg"],["owned-isaia-burgundy-polo","top","tops","Isaia Burgundy Knit Polo","Pale Burnt Lake","#802626",3,55,90,1,"seed-isaia-burgundy-polo","assets/photos/d6baa9413174.jpg"],["owned-missoni-burgundy-polo","top","tops","Missoni Burgundy Zigzag Knit Polo","Pale Burnt Lake","#802626",3,55,90,1,"seed-missoni-burgundy-polo","assets/photos/9d574fa86a11.jpg"],["owned-cucinelli-slate-polo","top","tops","Brunello Cucinelli Slate Stripe Polo","Artemesia Green","#709390",3,60,95,1,"seed-cucinelli-slate-polo","assets/photos/58e36e6f3b1e.jpg"],["owned-loropiana-espadrilles","shoes","shoes","Loro Piana Light Blue Knit Espadrilles","Light Glaucous Blue","#a5c8d1",2,70,98,1,"seed-loropiana-espadrilles","assets/photos/0eb3c06dd242.jpg"],["owned-vibi-mustard","shoes","shoes","Vibi Venezia Mustard Check Furlane Slippers","Olive Ocher","#d6b43e",3,55,90,1,"seed-vibi-mustard","assets/photos/84155e8fd479.jpg"],["owned-vibi-navy","shoes","shoes","Vibi Venezia Navy Stripe Furlane Slippers","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-vibi-navy","assets/photos/609536479732.jpg"],["owned-loropiana-grey-sneakers","shoes","shoes","Loro Piana Grey Suede Tennis Sneakers","Rainette Green","#8fa071",3,45,80,1,"seed-loropiana-grey-sneakers","assets/photos/6f8231b82235.jpg"],["owned-adidas-sneakers","shoes","shoes","Adidas Cream Sneakers","Sulpher Yellow","#f5ecc2",2,40,85,1,"seed-adidas-sneakers","assets/photos/d0b35250559a.jpg"],["owned-grey-court-sneakers","shoes","shoes","Grey White Leather Court Sneakers","Glaucous Green","#b4cdc2",2,40,85,1,"seed-grey-court-sneakers","assets/photos/2beffd278ab4.jpg"],["owned-stubbs-slippers","shoes","shoes","Stubbs & Wootton Blue Camo Needlepoint Slippers","Violet Blue","#40456a",3,55,90,1,"seed-stubbs-slippers","assets/photos/41d3ce31e34d.jpg"],["owned-loropiana-white-sneakers","shoes","shoes","Loro Piana White Leather Tennis Sneakers","White","#ffffff",3,40,85,1,"seed-loropiana-white-sneakers","assets/photos/41ba01b1c447.jpg"],["owned-loropiana-runners","shoes","shoes","Loro Piana Multicolour Runner Sneakers","Light Brownish Olive","#806e4b",2,45,85,1,"seed-loropiana-runners","assets/photos/230604c83947.jpg"],["owned-loropiana-summer-walk","shoes","shoes","Loro Piana Dark Brown Suede Summer Walk Loafers","Vandyke Brown","#4b3317",3,45,80,1,"seed-loropiana-summer-walk","assets/photos/c96390ec61c6.jpg"],["owned-vibi-black-velvet-furlane","shoes","shoes","Vibi Venezia Black Velvet Furlane Slippers","Black","#111314",3,55,90,1,"seed-vibi-black-velvet-furlane","assets/photos/db361533ae3a.jpg"],["owned-vibi-tan-velvet-furlane","shoes","shoes","Vibi Venezia Tan Velvet Furlane Slippers","Isabella Color","#c5a56e",3,55,90,1,"seed-vibi-tan-velvet-furlane","assets/photos/aa656e11aa5b.jpg"],["owned-edwardgreen-darkbrown-loafers","shoes","shoes","Edward Green Dark Brown Suede Penny Loafers","Vandyke Brown","#4b3317",4,45,80,1,"seed-edwardgreen-darkbrown-loafers","assets/photos/169bac2277c1.jpg"],["owned-edwardgreen-tan-loafers","shoes","shoes","Edward Green Greige Suede Penny Loafers","Warm Gray","#a1a39a",3,45,80,1,"seed-edwardgreen-tan-loafers","assets/photos/b95402cfe41d.jpg"],["owned-baudoin-rust-tassel-loafers","shoes","shoes","Baudoin & Lange Rust Suede Tassel Loafers","Sudan Brown","#a36752",3,45,80,1,"seed-baudoin-rust-tassel-loafers","assets/photos/ce716373b008.jpg"],["owned-gucci-green-eel-loafers","shoes","shoes","Gucci Dark Green Eel Horsebit Loafers","Slate Color","#34454c",4,40,85,1,"seed-gucci-green-eel-loafers","assets/photos/8cb916c16897.jpg"],["owned-balenciaga-black-loafers","shoes","shoes","Balenciaga Black Leather Penny Loafers","Black","#111314",4,40,85,1,"seed-balenciaga-black-loafers","assets/photos/703b33087b1b.jpg"],["owned-vibi-red-velvet-furlane","shoes","shoes","Vibi Venezia Red Velvet Furlane Slippers","Pale Burnt Lake","#802626",3,55,90,1,"seed-vibi-red-velvet-furlane","assets/photos/d1802e9663e1.jpg"],["owned-gucci-twotone-loafers","shoes","shoes","Gucci Black White Horsebit Loafers","Deep Slate Olive","#253122",4,40,85,1,"seed-gucci-twotone-loafers","assets/photos/3d2a4500ad9d.jpg"],["owned-fortela-concho-slippers","shoes","shoes","Fortela Tan Suede Concho Slippers","Isabella Color","#c5a56e",3,45,80,1,"seed-fortela-concho-slippers","assets/photos/d5d147124f51.jpg"],["owned-vibi-rust-corduroy-furlane","shoes","shoes","Vibi Venezia Rust Corduroy Furlane Slippers","Sudan Brown","#a36752",3,55,90,1,"seed-vibi-rust-corduroy-furlane","assets/photos/1686a0e5b87c.jpg"],["owned-armani-cream-loafers","shoes","shoes","Giorgio Armani Cream Woven Leather Loafers","Sulpher Yellow","#f5ecc2",3,55,88,1,"seed-armani-cream-loafers","assets/photos/f3a8698d7824.jpg"],["owned-loropiana-flexy-sneakers","shoes","shoes","Loro Piana Cream Knit 360 Flexy Walk Sneakers","Sulpher Yellow","#f5ecc2",3,45,85,1,"seed-loropiana-flexy-sneakers","assets/photos/426cfa6c8430.jpg"],["owned-stubbs-navy-slipons","shoes","shoes","Stubbs & Wootton Navy Woven Slip-On Sneakers","Dark Tyrian Blue","#12354e",2,55,90,1,"seed-stubbs-navy-slipons","assets/photos/42883d4f592b.jpg"],["owned-belgian-brown-lizard-loafers","shoes","shoes","Belgian Shoes Brown Lizard Loafers","Pale Raw Umber","#71502f",4,40,85,1,"seed-belgian-brown-lizard-loafers","assets/photos/fe7b6a8394f6.jpg"],["owned-belgian-olive-loafers","shoes","shoes","Belgian Shoes Olive Suede Loafers","Olive Green","#6b7140",3,45,80,1,"seed-belgian-olive-loafers","assets/photos/7b6f9998e799.jpg"],["owned-belgian-black-velvet-loafers","shoes","shoes","Belgian Shoes Black Velvet Loafers","Black","#111314",4,55,90,1,"seed-belgian-black-velvet-loafers","assets/photos/6330f011ed1f.jpg"],["owned-baudoin-brown-leather-loafers","shoes","shoes","Baudoin & Lange Dark Brown Leather Tassel Loafers","Vandyke Brown","#4b3317",4,40,85,1,"seed-baudoin-brown-leather-loafers","assets/photos/209a89055f60.jpg"],["owned-belgian-camo-loafers","shoes","shoes","Belgian Shoes Camo Pony-Hair Loafers","Olive Green","#6b7140",3,55,90,1,"seed-belgian-camo-loafers","assets/photos/6f77e1ad4356.jpg"],["owned-belgian-darkbrown-lizard-loafers","shoes","shoes","Belgian Shoes Dark Brown Lizard Loafers","Vandyke Brown","#4b3317",4,40,85,1,"seed-belgian-darkbrown-lizard-loafers","assets/photos/8eaf8abc32ca.jpg"],["owned-hermes-navy-polo","top","tops","Hermès Navy Piqué Polo","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-hermes-navy-polo","assets/photos/23a1b98a88b6.jpg"],["owned-hermes-black-polo","top","tops","Hermès Black Piqué Polo","Black","#111314",3,60,95,1,"seed-hermes-black-polo","assets/photos/33257e8acdb3.jpg"],["owned-cucinelli-navy-pique-grey-polo","top","tops","Brunello Cucinelli Navy Piqué Polo, Grey Cuffs","Dark Tyrian Blue","#12354e",3,60,95,1,"seed-cucinelli-navy-pique-grey-polo","assets/photos/eac793263454.jpg"],["owned-kiton-navy-polo","top","tops","Kiton Navy Heather Knit Polo","Slate Color","#34454c",3,55,90,1,"seed-kiton-navy-polo","assets/photos/9dfc4caf0c37.jpg"],["owned-stefanoricci-red-tee","top","tops","Stefano Ricci Red Geometric Knit Tee","Carmine Red","#a62c37",2,55,90,1,"seed-stefanoricci-red-tee","assets/photos/e799e1fc5df4.jpg"],["owned-cucinelli-safari-shirt","top","shirts","Brunello Cucinelli Olive Safari Shirt","Olive Green","#6b7140",3,58,90,1,"seed-cucinelli-safari-shirt","assets/photos/27b26c012761.jpg"],["owned-canali-charcoal-vest","layer","vest","Canali Charcoal Knit Vest","Slate Color","#34454c",4,40,68,1,"seed-canali-charcoal-vest","assets/photos/911715b28f48.jpg"],["owned-zanone-navy-vest","layer","vest","Zanone Navy Knit Vest","Dark Tyrian Blue","#12354e",4,40,68,1,"seed-zanone-navy-vest","assets/photos/0c5f2f5596ea.jpg"],["owned-fortela-navy-polo","top","tops","Fortela Navy Knit Polo","Dark Tyrian Blue","#12354e",3,55,90,1,"seed-fortela-navy-polo","assets/photos/e285e4ae173c.jpg"],["owned-hermes-white-polo","top","tops","Hermès White Piqué Polo","White","#ffffff",3,60,95,1,"seed-hermes-white-polo","assets/photos/ebe6c57e2778.jpg"],["owned-cricket","top","knitwear","Cream Cricket Sweater","Sulpher Yellow","#f5ecc2",3,38,62,1,"seed-cricket",""],["owned-loropiana-oatmeal-blazer","layer","blazer","Loro Piana Oatmeal Melange Blazer","Ecru","#c2ae93",3,55,85,1,"seed-loropiana-oatmeal-blazer","assets/photos/74fddef5abe5.jpg"]];
 /* ================= Lazy swap rendering =================
    Change a piece in any look. The piece library (266 pieces,
    baked from the render pipeline's library) maps a look's pieces
@@ -14391,7 +14409,7 @@ var WARDROBE_RENDER_PAIRS = {
   "bottom": "Navy straight-leg chinos"
  },
  "seed-cucinelli-breton-polo|seed-vibi-navy": {
-  "img": "assets/photos/a6a187c24fec.jpg",
+  "img": "assets/photos/69da13878b3e.jpg",
   "bottom": "White tailored shorts"
  },
  "seed-cucinelli-stripe-polo|seed-stubbs-navy-slipons": {
@@ -14455,7 +14473,7 @@ var WARDROBE_RENDER_PAIRS = {
   "bottom": "White straight-leg chinos"
  },
  "seed-cucinelli-skyblue-polo|seed-loropiana-white-sneakers": {
-  "img": "assets/photos/64d7069e876e.jpg",
+  "img": "assets/photos/2d6c8f1e024e.jpg",
   "bottom": "Navy tailored shorts"
  },
  "seed-cucinelli-terracotta-polo|seed-vibi-rust-corduroy-furlane": {
@@ -16073,7 +16091,7 @@ var wardrobeItems = [
     colourHex: "#26304d",
     extraColours: [{ name: "White", hex: "#f7f4ee" }],
     notes: "Slim fit, short-sleeve, chest pocket.",
-    photo: "assets/photos/b913f08eb2b0.jpg",
+    photo: "assets/photos/6a3700eb79cf.jpg",
     originalPhoto: "assets/photos/debd8f96f495.jpg"
   },
   {
@@ -16786,7 +16804,7 @@ var SEED_CLEANED_PHOTOS = {
   "seed-canali-charcoal-vest": "assets/photos/911715b28f48.jpg",
   "seed-corridor-tee": "assets/photos/cc93a210e480.jpg",
   "seed-cucinelli-beige-polo": "assets/photos/4ce27e5e4be7.jpg",
-  "seed-cucinelli-breton-polo": "assets/photos/b913f08eb2b0.jpg",
+  "seed-cucinelli-breton-polo": "assets/photos/6a3700eb79cf.jpg",
   "seed-cucinelli-brown-stripe-polo": "assets/photos/c99f1a2ab659.jpg",
   "seed-cucinelli-burgundy-polo": "assets/photos/61ea0badf1bd.jpg",
   "seed-cucinelli-charcoal-polo": "assets/photos/5140b394dcc5.jpg",
@@ -16878,38 +16896,65 @@ wardrobeItems.forEach(function (i) {
 var wardFilter = "All";
 var photoDataUrl = null;
 
-document.getElementById("ward-filters").innerHTML = CATEGORIES.map(function (c) {
-  return '<button type="button" class="chip" data-cat="' + c + '" aria-pressed="' + (c === "All") + '">' + c + "</button>";
-}).join("");
-document.getElementById("ward-filters").addEventListener("click", function (e) {
-  var btn = e.target.closest("[data-cat]");
-  if (!btn) return;
-  wardFilter = btn.getAttribute("data-cat");
-  this.querySelectorAll("[data-cat]").forEach(function (b) { b.setAttribute("aria-pressed", b === btn ? "true" : "false"); });
-  renderWardrobe();
+/* Category filter — build .33: three compact dropdowns
+   (Clothing / Accessories / Shoes) replace the single Category
+   chip and its chip cloud. Each dropdown is a hero-pattern cdd:
+   a surface pill in the chips row with an anchored menu listing
+   that group's sub-categories — only categories that actually
+   have pieces, each with its count, A–Z — topped by an All
+   entry that clears the filter. A pick sets the one shared
+   wardFilter, so search, the A–Z brand rail and the grid
+   ordering compose exactly as they did with the old chip, and
+   only one sub-category filter is ever active. The group whose
+   category is active carries it on its label ("Clothing ·
+   Polos"); the other two keep their plain group names. Menus
+   are filled at open time, so pieces added later show up with
+   no extra wiring. */
+var WARD_CAT_GROUPS = [
+  { key: "clothing", label: "Clothing", cats: ["Bathing suits", "Blazers", "Button downs", "Coats", "Jackets", "Jeans", "Leather jackets", "Polos", "Shirts", "Shorts", "Suits", "Sweaters", "Tees", "Trousers", "Vests"] },
+  { key: "accessories", label: "Accessories", cats: ["Belts", "Gloves", "Hats", "Scarves", "Socks", "Sunglasses", "Ties"] },
+  { key: "shoes", label: "Shoes", cats: ["Shoes"] }
+];
+function wardCatCounts() {
+  var counts = {};
+  wardrobeItems.forEach(function (i) { counts[i.category] = (counts[i.category] || 0) + 1; });
+  return counts;
+}
+function syncWardCatLabels() {
+  WARD_CAT_GROUPS.forEach(function (g) {
+    var lab = document.getElementById("ward-cat-" + g.key + "-label");
+    if (!lab) return;
+    lab.textContent = (wardFilter !== "All" && g.cats.indexOf(wardFilter) !== -1) ? g.label + " · " + wardFilter : g.label;
+  });
+}
+function fillWardCatMenu(g) {
+  var menu = document.getElementById("ward-cat-" + g.key + "-menu");
+  if (!menu) return;
+  var counts = wardCatCounts();
+  var present = g.cats.filter(function (c) { return counts[c] > 0; });
+  var total = present.reduce(function (n, c) { return n + counts[c]; }, 0);
+  var html = '<button type="button" class="cdd-opt" role="menuitem" data-cat-pick="All" aria-pressed="' + (wardFilter === "All") + '"><span class="cdd-opt-name">All</span>' + (total ? '<span class="cat-count">' + total + "</span>" : "") + "</button>";
+  html += present.map(function (c) {
+    return '<button type="button" class="cdd-opt" role="menuitem" data-cat-pick="' + esc(c) + '" aria-pressed="' + (wardFilter === c) + '"><span class="cdd-opt-name">' + esc(c) + '</span><span class="cat-count">' + counts[c] + "</span></button>";
+  }).join("");
+  if (!present.length) html += '<div class="cdd-opt cdd-opt-none" aria-disabled="true"><span class="cdd-opt-name">Nothing here yet</span></div>';
+  menu.innerHTML = html;
+}
+WARD_CAT_GROUPS.forEach(function (g) {
+  var btn = document.getElementById("ward-cat-" + g.key + "-btn");
+  var menu = document.getElementById("ward-cat-" + g.key + "-menu");
+  if (!btn || !menu) return;
+  btn.addEventListener("click", function () { fillWardCatMenu(g); toggleCdd(btn); });
+  menu.addEventListener("click", function (e) {
+    var pick = e.target.closest ? e.target.closest("[data-cat-pick]") : null;
+    if (!pick) return;
+    wardFilter = pick.getAttribute("data-cat-pick");
+    syncWardCatLabels();
+    closeAllCdd();
+    renderWardrobe();
+  });
 });
-/* Category filter — one slim closed selector row, the Studio
-   sel-row pattern: a tap opens the category options beneath the
-   row; a pick applies the same filter as before, updates the
-   row's value and closes the row. */
-(function () {
-  var toggle = document.getElementById("ward-cat-toggle");
-  var opts = document.getElementById("ward-filters");
-  var val = document.getElementById("ward-cat-val");
-  if (!toggle || !opts) return;
-  toggle.addEventListener("click", function () {
-    var willOpen = opts.hidden;
-    opts.hidden = !willOpen;
-    toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
-  });
-  opts.addEventListener("click", function (e) {
-    var btn = e.target.closest("[data-cat]");
-    if (!btn) return;
-    if (val) val.textContent = btn.getAttribute("data-cat");
-    opts.hidden = true;
-    toggle.setAttribute("aria-expanded", "false");
-  });
-})();
+syncWardCatLabels();
 var wardQuery = "";
 var _wardSearchTimer = null;
 document.getElementById("ward-search").addEventListener("input", function () {
@@ -17380,9 +17425,7 @@ document.getElementById("add-form").addEventListener("submit", function (e) {
   document.getElementById("photo-label").textContent = "Photo";
   if (!wasEdit) {
     wardFilter = "All";
-    document.querySelectorAll("#ward-filters [data-cat]").forEach(function (b) {
-      b.setAttribute("aria-pressed", b.getAttribute("data-cat") === "All" ? "true" : "false");
-    });
+    syncWardCatLabels();
   }
   renderWardrobe();
   if (detailItemId) renderItemDetail();
