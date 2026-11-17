@@ -100,9 +100,10 @@ def main() -> int:
                 check(f"manifest icon {ic['src']}", st == 200, str(st))
             check("manifest start_url relative", man.get("start_url") in ("./", "."), str(man.get("start_url")))
 
-        # ---- the four sections -------------------------------------------
+        # ---- the five sections (build .39: Calendar is its own tab) -------
         for sel, panel in [("#section-closet", "panel-wardrobe"), ("#section-ideas", "panel-studio"),
-                           ("#tab-find", "panel-find"), ("#tab-today", "panel-today")]:
+                           ("#tab-find", "panel-find"), ("#tab-today", "panel-today"),
+                           ("#section-calendar", "panel-calendar")]:
             try:
                 page.click(sel, timeout=5000)
                 page.wait_for_timeout(700)

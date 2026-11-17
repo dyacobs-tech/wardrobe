@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-17.38" />
+    <meta name="wardrobe-build" content="2026-11-17.39" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2301,21 +2301,19 @@
       .cdd-opt .rec-badge { font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--brass); border: 1px solid var(--brass); border-radius: 2px; padding: 2px 6px; flex: none; }
       /* The hero's one quiet control row, under Like / Don't like */
       #panel-today .hero-controls { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; justify-content: flex-start; }
-      /* Build .36 — Today hero icon actions (approved mock-51 hero v2).
-         Scoped to #panel-today / .today-hero so the outfit pop-out,
-         which carries its own verdict buttons, is untouched. Icons
-         stroke currentColor, coloured #f7f1e5 at rest; the pressed
-         verdict fills cream and flips the icon dark — the same
-         filled state the app's on-photo pressed pills use. */
-      #panel-today .hero-icon-row { display: flex; }
-      #panel-today .hero-icon-cell { flex: 1; display: flex; justify-content: center; }
+      /* Build .39 (amendment) — the hero's four actions are compact
+         TEXT pills again (Like · Dislike · Style · Shop), same ids
+         and behaviour as the .36 icons; the pressed verdict still
+         fills cream and flips dark. Scoped to #panel-today /
+         .today-hero so the outfit pop-out is untouched. */
+      #panel-today .hero-icon-row { display: flex; gap: 6px; }
+      #panel-today .hero-icon-cell { flex: 1; display: flex; }
       #panel-today .hero-icon-btn {
-        width: 36px; height: 36px; min-height: 36px; border-radius: 999px; padding: 0; flex: none;
+        flex: 1; height: 32px; min-height: 32px; border-radius: 999px; padding: 0 6px;
         background: rgba(16,13,9,.42); border: 1px solid rgba(247,241,229,.45);
         color: #f7f1e5; display: inline-flex; align-items: center; justify-content: center;
-        cursor: pointer;
+        cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; white-space: nowrap;
       }
-      #panel-today .hero-icon-btn svg { width: 20px; height: 20px; display: block; }
       #panel-today .hero-icon-btn[aria-pressed="true"] { background: #f7f1e5; border-color: #f7f1e5; color: #191612; }
       .today-hero .hero-corner { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 3; }
       .today-hero .hero-corner-btn {
@@ -2405,7 +2403,7 @@
         padding: 4px 2px; position: relative;
         -webkit-tap-highlight-color: transparent;
       }
-      /* The four bar buttons share the full width equally (flex: 1 1 0),
+      /* The five bar buttons share the full width equally (flex: 1 1 0),
          so their centres are exactly equidistant. Each stack fills the
          bar's height and is anchored to its bottom: icon above label,
          the label's bottom edge exactly 10px above the bar's bottom
@@ -2430,7 +2428,7 @@
       }
       .profile-btn[aria-current="page"] { color: var(--brass); }
       /* Page rows for the regrouped sections. */
-      #subnav-closet { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      #subnav-closet { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       #subnav-ideas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       #subnav-closet #tab-wearing { white-space: normal; line-height: 1.15; padding: 4px 2px; }
       /* Anything pinned to the bottom edge sits above the bar:
@@ -2753,6 +2751,16 @@
       .worn-date-head:first-child { margin-top: 2px; }
       .worn-row.compact img { width: 44px; height: 44px; object-fit: cover; }
       .worn-thumb-ph { width: 44px; height: 44px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); flex: none; display: inline-block; }
+      /* Build .39 — Calendar sub-pages + Trips */
+      .cal-subtabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0 0 12px; }
+      .cal-subtab { height: 32px; min-height: 32px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--dim); font: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .03em; cursor: pointer; padding: 0 6px; white-space: nowrap; }
+      .cal-subtab[aria-pressed="true"] { background: var(--ink-btn); color: var(--accent-ink); border-color: transparent; }
+      .trip-card { display: grid; gap: 2px; width: 100%; text-align: left; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-alt); padding: 10px 12px; margin: 0 0 8px; cursor: pointer; font: inherit; color: var(--text); }
+      .trip-card .tc-name { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.2; }
+      .trip-card .tc-meta { font-size: 12.5px; color: var(--dim); line-height: 1.4; }
+      .trip-form { display: grid; gap: 8px; margin-top: 16px; }
+      .trip-form .tf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .trip-form .tf-pool { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); }
       .profile-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
       .profile-photo { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); flex: none; }
       .profile-name { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin: 0; line-height: 1.15; }
@@ -2763,7 +2771,7 @@
   <body>
     <header class="masthead">
       <div class="wrap">
-        <h1 class="brand">Wardrobe</h1>
+        <h1 class="brand" id="brand-home" title="Home" style="cursor:pointer">Wardrobe</h1>
         <button type="button" class="navbtn profile-btn" id="tab-profile" data-tab="profile" data-section="me" aria-controls="panel-pinfo" aria-label="Profile — info, location, cloud and backup"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg></button>
         <div class="rule-double" aria-hidden="true"></div>
       </div>
@@ -2779,7 +2787,6 @@
             <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
             <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks">My Looks</button>
             <button class="subtab" role="tab" id="tab-watches" aria-selected="false" aria-controls="panel-watches" data-tab="watches">Watches</button>
-            <button class="subtab" role="tab" id="tab-calendar" aria-selected="false" aria-controls="panel-calendar" data-tab="calendar">Calendar</button>
             <button class="subtab" role="tab" id="tab-wearing" aria-selected="false" aria-controls="panel-wearing" data-tab="wearing">Wearing Today</button>
           </div>
           <div class="subnav-group" id="subnav-ideas" role="tablist" hidden>
@@ -2836,17 +2843,16 @@
             <p class="today-loc" id="today-loc"><strong id="today-loc-name"></strong><span id="today-loc-weather"></span></p>
             <div class="today-dots" id="today-dots" aria-hidden="true"></div>
             <p class="today-suggest" id="today-suggest" hidden></p>
-            <!-- Build .36 (mock-51 hero v2): the verdict row and the
-                 text action row are now ONE row of four circular icon
-                 buttons — Like · Don't like · Style · Shop — same ids,
-                 same click behaviour. "Wore this today" leaves the
-                 hero; worn-marking stays in Calendar/planner and the
-                 outfit pop-out. -->
+            <!-- Build .39 (amendment): the four hero actions are TEXT
+                 pills — Like · Dislike · Style · Shop — same ids,
+                 same handlers, pressed verdict state as before.
+                 "Wore this today" stays off the hero; worn-marking
+                 lives in Calendar and the outfit pop-out. -->
             <div class="hero-icon-row">
-              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-like" aria-label="I like it" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.3a2 2 0 0 0 2-1.7l1.2-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></button></div>
-              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-dislike" aria-label="Don’t like it" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H6.7a2 2 0 0 0-2 1.7l-1.2 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg></button></div>
-              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-style" aria-label="Style this look"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M2 14h4"/><path d="M10 8h4"/><path d="M18 16h4"/></svg></button></div>
-              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-find" aria-label="Shop the look"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.1 12.1a1.5 1.5 0 0 1-1.5 1.4H7.6a1.5 1.5 0 0 1-1.5-1.4L5 8z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg></button></div>
+              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-like" aria-pressed="false">Like</button></div>
+              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-dislike" aria-pressed="false">Dislike</button></div>
+              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-style">Style</button></div>
+              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-find">Shop</button></div>
             </div>
             <!-- One quiet row of three compact dropdowns: watch,
                  outfit type, build from. Each shows only its current
@@ -3204,8 +3210,13 @@
       </section>
 
       <!-- ================= CALENDAR ================= -->
-      <section id="panel-calendar" role="tabpanel" aria-labelledby="tab-calendar" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Calendar — Trips" data-info-text="Trip capsules built from your closet for each trip's weather, with a packing checklist that remembers what you've packed. Worn outfits appear on their exact date in the week strip — tap a day to see everything worn that day. Below the week, What I wore lists every worn outfit under its exact date, newest first." aria-label="About: Calendar — Trips">i</button></div>
+      <section id="panel-calendar" role="tabpanel" aria-labelledby="section-calendar" hidden>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Calendar" data-info-text="This week plans the seven days ahead — a planned look becomes that day's Home hero. Trips holds a capsule and packing checklist per trip, built from your closet. What I wore lists every worn outfit under its exact date, newest first." aria-label="About: Calendar">i</button></div>
+        <div class="cal-subtabs" role="group" aria-label="Calendar pages">
+          <button type="button" class="cal-subtab" data-calview="week" aria-pressed="true">This week</button>
+          <button type="button" class="cal-subtab" data-calview="trips" aria-pressed="false">Trips</button>
+          <button type="button" class="cal-subtab" data-calview="worn" aria-pressed="false">What I wore</button>
+        </div>
         <div id="week-plan-wrap">
           <div class="wp-head">
             <h3 class="fav-head">This week</h3>
@@ -3217,21 +3228,39 @@
           </div>
           <div class="wp-grid" id="week-plan-grid"></div>
         </div>
-        <div id="worn-wrap">
+        <div id="worn-wrap" hidden>
           <h3 class="fav-head">What I wore</h3>
           <div id="worn-log-list"></div>
         </div>
-        <div id="trips-wrap">
-          <h3 class="fav-head">Trips — capsule &amp; packing</h3>
-          <div class="fb-chips" role="group" aria-label="Trips">
-            <button type="button" class="chip" data-trip="aspen">Aspen · Mar 12 – 26, 2027</button>
-            <button type="button" class="chip" data-trip="marbella">Marbella · Jun 21 – Jul 5, 2027</button>
+        <div id="trips-wrap" hidden>
+          <div id="trip-list"></div>
+          <div id="trip-detail" hidden>
+            <div id="capsule-out"></div>
           </div>
-          <div id="capsule-out" style="margin-top:10px"></div>
+          <form class="trip-form" id="trip-form">
+            <h3 class="fav-head" style="margin:0">New trip</h3>
+            <div>
+              <label class="field" for="trip-name">Name</label>
+              <input type="text" id="trip-name" autocomplete="off" />
+            </div>
+            <div class="tf-row">
+              <div>
+                <label class="field" for="trip-start">Start</label>
+                <input type="date" id="trip-start" />
+              </div>
+              <div>
+                <label class="field" for="trip-end">End</label>
+                <input type="date" id="trip-end" />
+              </div>
+            </div>
+            <div>
+              <label class="field" for="trip-dests">Destination(s) — comma separated for legs</label>
+              <input type="text" id="trip-dests" autocomplete="off" />
+            </div>
+            <label class="tf-pool"><input type="checkbox" id="trip-pool" /> Beach / pool days</label>
+            <button type="submit" class="btn-ink">Create trip</button>
+          </form>
         </div>
-        <!-- Calendar is trips only now. What I wore lives on the
-             Wearing page, beside the log that writes it — one
-             home for the whole worn record. -->
       </section>
 
       <!-- ================= WHAT I'M WEARING TODAY — SELFIE LOG ================= -->
@@ -3875,10 +3904,11 @@
     </main>
 
     <nav class="bottombar" id="bottombar" aria-label="Wardrobe sections">
-      <button type="button" class="navbtn" id="tab-today" data-tab="today" data-section="today" aria-controls="panel-today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><span>Today</span></button>
+      <button type="button" class="navbtn" id="tab-today" data-tab="today" data-section="today" aria-controls="panel-today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><span>Home</span></button>
       <button type="button" class="navbtn" id="section-closet" data-section="closet"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7.2a2 2 0 1 0-2-2"/><path d="M12 7.2v1.6L3.6 14.6a1.4 1.4 0 0 0 .8 2.6h15.2a1.4 1.4 0 0 0 .8-2.6L12 8.8"/></svg><span>Closet</span></button>
       <button type="button" class="navbtn" id="section-ideas" data-section="ideas"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Ideas</span></button>
       <button type="button" class="navbtn" id="tab-find" data-tab="find" data-section="find" aria-controls="panel-find"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Shop</span></button>
+      <button type="button" class="navbtn" id="section-calendar" data-section="calendar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Calendar</span></button>
     </nav>
 
 
@@ -4435,7 +4465,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.38";
+var WARDROBE_BUILD = "2026-11-17.39";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -21726,7 +21756,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems"];
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
@@ -21747,7 +21777,7 @@ document.getElementById("data-export").addEventListener("click", function () {
    that fails puts everything back. "Nothing was changed" is only
    ever said when it is true. */
 var BACKUP_VERSION = 1;
-var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "recentlyRemoved", "dealtImgs", "weekPlan"];
+var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "recentlyRemoved", "dealtImgs", "weekPlan", "trips", "packedItems"];
 var BACKUP_OBJECT_KEYS = ["profile", "overrides", "lazyRenders"];
 function readBackupFile(text) {
   var payload = JSON.parse(text);
@@ -24163,22 +24193,24 @@ var TABS = ["today", "studio", "wardrobe", "add", "gaps", "palettes", "looks", "
    and the product Wishlist.
    A section tab reopens the page last visited in it. */
 /* Audit pass: five destinations instead of four sections with up
-   to six pages each. Today and Profile are single pages; the
-   bottom bar carries Today · Closet · Ideas · Shop and Profile is
-   the icon in the masthead. Page names are unchanged, so stored
-   tabs, hashes and every switchTab("…") call still resolve. */
+   to six pages each. Home (the page named "today" in code) and
+   Profile are single pages; the bottom bar carries Home · Closet ·
+   Ideas · Shop · Calendar (build .39) and Profile is the icon in
+   the masthead. Page names are unchanged, so stored tabs, hashes
+   and every switchTab("…") call still resolve. */
 var SECTIONS = {
   today: ["today"],
-  closet: ["wardrobe", "add", "gaps", "looks", "watches", "calendar", "wearing"],
+  closet: ["wardrobe", "add", "gaps", "looks", "watches", "wearing"],
+  calendar: ["calendar"],
   ideas: ["studio", "icons", "palettes", "myinspo"],
   find: ["find", "search", "brands", "brand", "sale", "shopwish"],
   me: ["pinfo", "plocation", "pcloud"]
 };
-var sectionHome = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo" };
+var sectionHome = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo", calendar: "calendar" };
 /* Section tabs always open the section's FIRST page — the nav
    must be learnable. Last-page memory survives only in the
    refresh-restore path (restoreTab), never on a tab tap. */
-var SECTION_FIRST = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo" };
+var SECTION_FIRST = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo", calendar: "calendar" };
 /* Scroll position per page, restored on return — a round trip
    from a long list (Closet, Icons, My Looks) no longer restarts
    at the top. */
@@ -24211,6 +24243,7 @@ function switchTab(name, opts) {
   /* Profile is three sub pages now (build .28) — the old
      single-page name lands on Profile info, the default. */
   if (name === "profile") name = "pinfo";
+  if (name === "calnav") name = "calendar"; /* build .39: pseudo-view guard */
   if (TABS.indexOf(name) === -1) name = "today";
   var prevTab = currentTab;
   pageScroll[currentTab] = window.scrollY || 0;
@@ -24251,7 +24284,7 @@ function switchTab(name, opts) {
   if (name === "shopwish" && typeof renderShopWishlist === "function") renderShopWishlist();
   if (name === "search" && typeof renderFinds === "function") renderFinds();
   if (name === "gaps" && typeof renderWishlist === "function") renderWishlist();
-  if (name === "calendar" && typeof renderWeekPlan === "function") renderWeekPlan();
+  if (name === "calendar") { if (typeof renderWeekPlan === "function") renderWeekPlan(); if (typeof calViewApply === "function") calViewApply(); }
   persistTab();
 }
 /* ---------- Build .38 (2.11): the universal back ----------
@@ -24267,6 +24300,7 @@ function switchTab(name, opts) {
    rather than showing a dead button. The Profile × keeps its
    own return-to-previous behaviour, untouched. */
 var viewHist = [];
+var calNavStack = []; /* build .39: Calendar sub-view stack (This week / Trips / What I wore / trip detail), restored by viewBack via calNavRestore */
 var viewCur = (typeof currentTab !== "undefined" && currentTab) || "today";
 var viewNavGuard = false;
 function syncViewBack() {
@@ -24275,7 +24309,12 @@ function syncViewBack() {
 }
 function viewTrack(name) {
   if (viewNavGuard || !name) return;
-  if (name !== viewCur) { viewHist.push(viewCur); viewCur = name; }
+  /* Build .39: leaving Calendar collapses its sub-view stack —
+     the stack's paired history entries read as the Calendar page
+     itself, never as the "calnav" pseudo-view. */
+  var cur = viewCur === "calnav" ? "calendar" : viewCur;
+  if (name !== "calendar" && typeof calNavReset === "function") calNavReset();
+  if (name !== cur) { viewHist.push(cur); viewCur = name; }
   syncViewBack();
 }
 function viewPushLayer(kind) {
@@ -24295,6 +24334,7 @@ function viewBack() {
   var sheetOpen = false;
   document.querySelectorAll('[id$="-sheet"]').forEach(function (s) { if (!s.hidden) sheetOpen = true; });
   if (sheetOpen) return;
+  if (currentTab === "calendar" && calNavStack.length && typeof calNavRestore === "function") { calNavRestore(); return; }
   if (viewCur === "look") { closeLookLayer(); return; }
   if (viewCur === "fw") { closeFwLayer(); return; }
   if (!viewHist.length) return;
@@ -24311,6 +24351,8 @@ function viewBack() {
   syncViewBack();
 })();
 function navClick(e) {
+  /* Build .39: the Wardrobe wordmark is the Home link. */
+  if (e.target.closest && e.target.closest("#brand-home")) { switchTab("today"); return; }
   var tab = e.target.closest("[data-tab]");
   if (tab) {
     /* Opening Shop the look from the top nav always renders the
@@ -25307,6 +25349,63 @@ var TRIPS = {
     essentials: ["Ski jacket & pants", "Base layers", "Ski socks", "Sunscreen — altitude sun", "Lip balm", "Passport / ID", "Charger"],
     note: "Aspen: cold air, bright sun, dinners that dress up. Layers first — knits under blazers, a real coat, closed shoes — the outfits above are built from your closet." }
 };
+/* ---------- Build .39: Trips as synced objects + packed state ----------
+   Trip records live in the synced "trips" collection (store key
+   "trips"); the two built-in capsules seed as records on first
+   run, carrying their full capsule definitions, so nothing about
+   Marbella or Aspen is lost and every trip — seeded or created —
+   is the same kind of object. Packing state is the synced
+   "packed" collection (store key "packedItems", one record per
+   ticked item), migrated once from the old capsulePacked map,
+   which is still written as a mirror for backups and old builds. */
+var TRIP_SEEDS = [
+  { id: "trip-marbella", key: "marbella", name: "Marbella", start: "2027-06-21", end: "2027-07-05", legs: ["Marbella"], days: 14, slots: ["Day", "Pool", "Night"], temp: 86, nightTemp: 78, dates: "Jun 21 – Jul 5, 2027 · 14 nights", weather: TRIPS.marbella.weather, essentials: TRIPS.marbella.essentials.slice(), note: TRIPS.marbella.note },
+  { id: "trip-aspen", key: "aspen", name: "Aspen", start: "2027-03-12", end: "2027-03-26", legs: ["Aspen"], days: 14, slots: ["Day", "Après"], temp: 30, nightTemp: 24, dates: "Mar 12 – 26, 2027 · 14 nights", weather: TRIPS.aspen.weather, essentials: TRIPS.aspen.essentials.slice(), note: TRIPS.aspen.note }
+];
+var userTrips = store.get("trips", []);
+if (!Array.isArray(userTrips)) userTrips = [];
+(function () {
+  var changed = false;
+  TRIP_SEEDS.forEach(function (s) {
+    if (!userTrips.some(function (t) { return t && t.id === s.id; })) { userTrips.push(s); changed = true; }
+  });
+  if (changed) store.set("trips", userTrips);
+})();
+function saveUserTrips() { store.set("trips", userTrips); }
+function tripDef(key) {
+  var t = userTrips.filter(function (x) { return x && (x.key === key || x.id === key); })[0];
+  return t || TRIPS[key] || null;
+}
+function allTripKeys() {
+  var ks = [];
+  userTrips.forEach(function (t) { if (t && (t.key || t.id)) ks.push(t.key || t.id); });
+  Object.keys(TRIPS).forEach(function (k) { if (ks.indexOf(k) === -1) ks.push(k); });
+  return ks;
+}
+var packedItems = store.get("packedItems", null);
+if (!Array.isArray(packedItems)) {
+  packedItems = [];
+  var legacyPacked = store.get("capsulePacked", {}) || {};
+  Object.keys(legacyPacked).forEach(function (k) {
+    Object.keys(legacyPacked[k] || {}).forEach(function (label) {
+      if (legacyPacked[k][label]) packedItems.push({ id: k + "|" + label, trip: k, label: label });
+    });
+  });
+  store.set("packedItems", packedItems);
+}
+function savePacked() {
+  store.set("packedItems", packedItems);
+  var obj = {};
+  packedItems.forEach(function (p) { if (!obj[p.trip]) obj[p.trip] = {}; obj[p.trip][p.label] = true; });
+  store.set("capsulePacked", obj);
+}
+function packIsOn(key, label) { return packedItems.some(function (p) { return p.trip === key && p.label === label; }); }
+function packToggle(key, label) {
+  var ix = -1;
+  packedItems.forEach(function (p, i) { if (p.trip === key && p.label === label) ix = i; });
+  if (ix >= 0) packedItems.splice(ix, 1); else packedItems.push({ id: key + "|" + label, trip: key, label: label });
+  savePacked();
+}
 var currentCapsule = null;
 var capsuleLooks = [];
 var fwLooksBackup = null;
@@ -25339,12 +25438,10 @@ function capsuleOutfitHTML(look, gi) {
     (look.suggestedBottom ? '<span class="oc-meta">Pair with: ' + esc(look.suggestedBottom.name) + " — suggested</span>" : "") + "</button>";
 }
 function buildCapsule(key) {
-  var trip = TRIPS[key];
+  var trip = tripDef(key);
   var out = document.getElementById("capsule-out");
   if (!trip || !out) return;
   currentCapsule = key;
-  var packedAll = store.get("capsulePacked", {});
-  var packed = packedAll[key] || {};
   /* Outfits from his closet, organized BY DAY: each day carries
      its slots (Day / Pool / Night on a beach trip; Day / Après
      in the cold), each slot built from his closet pieces at the
@@ -25403,9 +25500,28 @@ function buildCapsule(key) {
   });
   if (checkItems.length) {
     html += '<h5 class="capsule-check-head">Packing checklist</h5><ul class="pack-list">' + checkItems.map(function (ci) {
-      var on = !!packed[ci.label];
+      var on = packIsOn(key, ci.label);
       return '<li><button type="button" class="pack-item" data-pack="' + esc(ci.label) + '" aria-pressed="' + (on ? "true" : "false") + '"><span class="pk-box" aria-hidden="true">' + (on ? "✓" : "") + '</span><span class="pk-cat">' + esc(ci.cat) + "</span><span>" + esc(ci.label) + "</span></button></li>";
     }).join("") + "</ul>";
+  }
+  /* Gaps for this trip: shoppable essentials the closet does not
+     cover, routed to Shop through the same Search-brief handoff
+     the Closet gaps use. Documents/consumables are not gaps. */
+  var nonShopGap = { "Passport": 1, "Passport / ID": 1, "Charger": 1, "Sunscreen": 1, "Sunscreen — altitude sun": 1, "Lip balm": 1 };
+  var gapLabels = [];
+  (trip.essentials || []).forEach(function (label) {
+    if (nonShopGap[label] || gapLabels.indexOf(label) !== -1) return;
+    var owned = wardrobeItems.some(function (it) {
+      var nm = (it.name || "").toLowerCase(), ct = (it.category || "").toLowerCase();
+      return nm.indexOf(label.toLowerCase()) !== -1 || (ct.length > 3 && label.toLowerCase().indexOf(ct) !== -1);
+    });
+    if (!owned) gapLabels.push(label);
+  });
+  if (trip.slots && trip.slots.indexOf("Pool") !== -1 && !hasSwim && gapLabels.indexOf("Swim trunks") === -1) gapLabels.push("Swim trunks");
+  if (gapLabels.length) {
+    html += '<h5 class="capsule-check-head">Gaps for this trip</h5>' + gapLabels.map(function (label) {
+      return '<div class="wish-row"><span class="w-main"><span class="w-name">' + esc(label) + '</span><span class="w-sub">Not in your closet</span></span><button type="button" class="btn-ghost" data-trip-gap="' + esc(label) + '">Shop the look</button></div>';
+    }).join("");
   }
   html += '<p class="capsule-note">' + trip.note + "</p></article>";
   out.innerHTML = html;
@@ -25413,15 +25529,25 @@ function buildCapsule(key) {
 document.getElementById("trips-wrap").addEventListener("click", function (e) {
   var pk = e.target.closest("[data-pack]");
   if (pk && currentCapsule) {
-    var all = store.get("capsulePacked", {});
-    var mine = all[currentCapsule] || {};
-    var label = pk.getAttribute("data-pack");
-    if (mine[label]) delete mine[label]; else mine[label] = true;
-    all[currentCapsule] = mine;
-    store.set("capsulePacked", all);
+    packToggle(currentCapsule, pk.getAttribute("data-pack"));
     buildCapsule(currentCapsule);
     return;
   }
+  var tg = e.target.closest("[data-trip-gap]");
+  if (tg) {
+    var glabel = tg.getAttribute("data-trip-gap");
+    var gdesc = document.getElementById("find-desc"); if (gdesc) gdesc.value = glabel;
+    var gcat = document.getElementById("find-cat"); if (gcat) { try { gcat.value = glabel === "Swim trunks" ? "Bathing suits" : ""; } catch (err) {} }
+    if (typeof buildFindCatOpts === "function") buildFindCatOpts();
+    if (typeof syncFindSize === "function") syncFindSize();
+    var gdet = document.getElementById("find-details"); if (gdet) gdet.value = "Trip gap — " + ((tripDef(currentCapsule) || {}).name || "trip");
+    var gicon = document.getElementById("find-icon"); if (gicon) gicon.value = "";
+    switchTab("search");
+    toast("On the hunt — " + glabel + ".");
+    return;
+  }
+  var to = e.target.closest("[data-trip-open]");
+  if (to) { calOpenTrip(to.getAttribute("data-trip-open")); return; }
   var b = e.target.closest("[data-trip]");
   if (b) buildCapsule(b.getAttribute("data-trip"));
   var co = e.target.closest("[data-capsule-look]");
@@ -25437,6 +25563,125 @@ document.getElementById("trips-wrap").addEventListener("click", function (e) {
     }
   }
 });
+
+/* ---------- Build .39: Calendar sub-pages + Trips UI ----------
+   This week / Trips / What I wore are sub-views inside the
+   Calendar page. Moving between them — and into a trip — pushes
+   onto the universal back stack (calNavStack), so the small
+   top-margin chevron walks back out exactly the way it walks
+   between pages. */
+var calView = "week";
+function calViewApply() {
+  var wk = document.getElementById("week-plan-wrap"), tr = document.getElementById("trips-wrap"), wn = document.getElementById("worn-wrap");
+  if (!wk || !tr || !wn) return;
+  wk.hidden = calView !== "week";
+  tr.hidden = calView !== "trips";
+  wn.hidden = calView !== "worn";
+  document.querySelectorAll("[data-calview]").forEach(function (b) {
+    b.setAttribute("aria-pressed", b.getAttribute("data-calview") === calView ? "true" : "false");
+  });
+  if (calView === "week" && typeof renderWeekPlan === "function") renderWeekPlan();
+  if (calView === "worn" && typeof renderWornLog === "function") renderWornLog();
+  if (calView === "trips") renderTripList();
+}
+function calNavPush() {
+  calNavStack.push({ view: calView, trip: currentCapsule });
+  viewHist.push(viewCur);
+  viewCur = "calnav";
+  syncViewBack();
+}
+function calNavRestore() {
+  var st = calNavStack.pop();
+  viewHist.pop();
+  if (st) {
+    if (st.trip) { calView = "trips"; calShowTrip(st.trip); }
+    else if (st.view === "trips") { currentCapsule = null; calView = "trips"; calShowList(); }
+    else calView = st.view;
+    calViewApply();
+  }
+  viewCur = calNavStack.length ? "calnav" : "calendar";
+  syncViewBack();
+}
+function calNavReset() {
+  calNavStack.length = 0;
+  if (viewCur === "calnav") viewCur = "calendar";
+}
+function calShowList() {
+  var list = document.getElementById("trip-list"), det = document.getElementById("trip-detail"), form = document.getElementById("trip-form");
+  if (list) list.hidden = false;
+  if (form) form.hidden = false;
+  if (det) { det.hidden = true; var co = document.getElementById("capsule-out"); if (co) co.innerHTML = ""; }
+  renderTripList();
+}
+function calShowTrip(key) {
+  var list = document.getElementById("trip-list"), det = document.getElementById("trip-detail"), form = document.getElementById("trip-form");
+  if (list) list.hidden = true;
+  if (form) form.hidden = true;
+  if (det) det.hidden = false;
+  buildCapsule(key);
+}
+function calOpenTrip(key) {
+  if (!tripDef(key)) return;
+  calNavPush();
+  calShowTrip(key);
+}
+function tripDatesLabel(t) {
+  if (t.dates) return t.dates;
+  if (t.start && t.end) {
+    var a = planDateOfISO(t.start), b = planDateOfISO(t.end);
+    var fmt = function (d) { return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); };
+    var nights = Math.round((b - a) / 86400000);
+    return fmt(a) + " – " + fmt(b) + ", " + b.getFullYear() + " · " + nights + (nights === 1 ? " night" : " nights");
+  }
+  return "";
+}
+function renderTripList() {
+  var el = document.getElementById("trip-list");
+  if (!el) return;
+  el.innerHTML = allTripKeys().map(function (k) {
+    var t = tripDef(k);
+    if (!t) return "";
+    var dests = (t.legs && t.legs.length) ? t.legs.join(" · ") : "";
+    return '<button type="button" class="trip-card" data-trip-open="' + esc(k) + '"><span class="tc-name">' + esc(t.name) + '</span><span class="tc-meta">' + esc(tripDatesLabel(t)) + (dests ? " · " + esc(dests) : "") + "</span></button>";
+  }).join("");
+}
+document.getElementById("panel-calendar").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-calview]");
+  if (!b) return;
+  var v = b.getAttribute("data-calview");
+  if (v === calView && !currentCapsule) return;
+  calNavPush();
+  if (v !== "trips") currentCapsule = null;
+  calView = v;
+  if (v === "trips") calShowList();
+  calViewApply();
+});
+(function () {
+  var form = document.getElementById("trip-form");
+  if (!form) return;
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = (document.getElementById("trip-name").value || "").trim();
+    var start = document.getElementById("trip-start").value || "";
+    var end = document.getElementById("trip-end").value || "";
+    var dests = (document.getElementById("trip-dests").value || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+    if (!name || !start || !end) { toast("A trip needs a name, a start and an end date."); return; }
+    var a = planDateOfISO(start), b = planDateOfISO(end);
+    var days = Math.round((b - a) / 86400000) + 1;
+    if (days < 1) { toast("The end date is before the start."); return; }
+    if (days > 31) days = 31;
+    var pool = document.getElementById("trip-pool").checked;
+    var id = "trip-" + name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now().toString(36);
+    userTrips.push({ id: id, key: id, name: name, start: start, end: end, legs: dests.length ? dests : [name], days: days,
+      slots: pool ? ["Day", "Pool", "Night"] : ["Day", "Night"], temp: 75, nightTemp: 68,
+      weather: "Dealt at a mild-weather default (75°F days) — outfits build from your closet with light layers.",
+      essentials: ["Sunglasses", "Passport", "Charger", "A light layer for evenings"], note: "" });
+    saveUserTrips();
+    form.reset();
+    calOpenTrip(id);
+    toast("Trip created — " + name + ".");
+  });
+})();
 
 /* ---------- Week planner — seven days on the Calendar ----------
    Mon–Sun slots for the displayed week, with prev/next chevrons
@@ -26841,7 +27086,7 @@ renderMyInspo();
      one just because it dealt a look more recently. */
 var SYNC_URL = "https://wardrobe-sync.dyacobs.workers.dev";
 try { SYNC_URL = localStorage.getItem("wardrobe.syncurl") || SYNC_URL; } catch (e) {}
-var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors"];
+var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed"];
 function syBlank() {
   var o = { key: null, acct: null, last: 0, snap: {}, st: {}, tomb: {}, dirty: {}, status: "Not synced yet", lastOk: 0 };
   SY_COLLS.forEach(function (c) { o.snap[c] = {}; o.st[c] = {}; o.tomb[c] = {}; o.dirty[c] = {}; });
@@ -26906,6 +27151,8 @@ function syCollGet(c) {
     case "icons": return customIcons;
     case "plan": return weekPlan;
     case "anchors": return buildAnchors;
+    case "trips": return userTrips;
+    case "packed": return packedItems;
   }
   return [];
 }
@@ -26934,8 +27181,8 @@ function syMetaOf() {
    vanished ids become tombstones. Runs on every tracked store
    write (hinted to the affected collection) and in full at boot
    and at the start of every sync, so no write path is missed. */
-var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors" };
-var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors" };
+var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed" };
+var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems" };
 var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, dealtImgs: 1, dealtTitles: 1, dealtCombos: 1, dealtCards: 1, findBudget: 1, shopTier: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
 function syTrackChanges(onlyColl) {
   var now = Date.now(), ch = false;
@@ -27138,6 +27385,8 @@ function syPutLocal(c, data) {
   if (c === "looks") savedLooks = put(savedLooks);
   else if (c === "queue") queueLooks = put(queueLooks);
   else if (c === "plan") weekPlan = put(weekPlan);
+  else if (c === "trips") { userTrips = put(userTrips); store.set("trips", userTrips); }
+  else if (c === "packed") { packedItems = put(packedItems); store.set("packedItems", packedItems); }
   else if (c === "worn") wornLog = put(wornLog);
   else if (c === "inspo") inspoImages = put(inspoImages);
   else if (c === "finds") finds = put(finds);
@@ -27168,6 +27417,8 @@ function syRemoveLocal(c, id) {
   if (c === "looks") savedLooks = drop(savedLooks);
   else if (c === "queue") queueLooks = drop(queueLooks);
   else if (c === "plan") weekPlan = drop(weekPlan);
+  else if (c === "trips") { userTrips = drop(userTrips); store.set("trips", userTrips); }
+  else if (c === "packed") { packedItems = drop(packedItems); store.set("packedItems", packedItems); }
   else if (c === "worn") wornLog = drop(wornLog);
   else if (c === "inspo") inspoImages = drop(inspoImages);
   else if (c === "finds") finds = drop(finds);
