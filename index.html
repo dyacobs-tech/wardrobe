@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-17.40" />
+    <meta name="wardrobe-build" content="2026-11-17.41" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2784,6 +2784,26 @@
       .analyze-item-actions { display: flex; gap: 8px; }
       .analyze-item-actions .btn-ink, .analyze-item-actions .btn-ghost { flex: 1; }
       #panel-analyze input[type="color"] { width: 40px; height: 34px; flex: none; }
+      /* Build .41 — Receipts inbox (Shop section line + confirm
+         sheet) and the two presentation fixes. */
+      .shop-receipts .receipts-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .shop-receipts .receipts-line span { font-size: 14px; }
+      .shop-receipts p { margin: 0; font-size: 14px; color: var(--dim); }
+      #shop-receipts .btn-ghost { min-height: 30px; padding: 4px 12px; font-size: 11px; flex: none; }
+      #receipts-list { display: grid; gap: 12px; }
+      #panel-receipts input[type="number"] { width: 100%; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 16px; padding: 10px 12px; }
+      #panel-receipts input[type="color"] { width: 40px; height: 34px; flex: none; }
+      .receipt-meta { margin: 0; font-size: 13px; color: var(--dim); }
+      /* .41 Part B — bottom nav labels fit their tab at 390px:
+         equal shares with min-width: 0, smaller type and tighter
+         tracking; icon, 68px bar height unchanged. */
+      .bottombar .navbtn { min-width: 0; font-size: 10px; letter-spacing: .05em; }
+      .bottombar .navbtn span { min-width: 0; white-space: nowrap; }
+      /* .41 Part C — while the universal back chevron is shown
+         (body.view-back-on, toggled by syncViewBack), the sticky
+         sub-tab bars clear it on the left so the first pill's
+         text is never covered; no change when it is hidden. */
+      body.view-back-on .subnav .wrap { padding-left: 46px; }
     </style>
   </head>
   <body>
@@ -3682,9 +3702,15 @@
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
         <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Shop the look" data-info-text="The look on Today, piece by piece, with catalogue matches at your price tier — every piece carries its own Price tier and Search controls at its top. Mark purchased files a piece into Purchased below and into your Closet. Free-form briefs live under Search." aria-label="About Shop the look">i</button></div>
         <div id="find-look-mode" hidden></div>
+        <div id="shop-receipts" class="shop-purchased shop-receipts"><h3>Receipts</h3><p>Turn on sync to import receipts from your order emails</p></div>
         <div id="shop-purchased" hidden></div>
         <p class="meta" id="find-nolook">Open a look and tap Shop the look — its pieces and matches land here.</p>
-        
+
+      </section>
+      <!-- ================= RECEIPTS — ORDER-EMAIL IMPORT (sub-page, build .41) ================= -->
+      <section id="panel-receipts" role="tabpanel" aria-label="Receipts" hidden>
+        <button type="button" class="btn-ghost subpage-back" id="receipts-back">← Shop</button>
+        <div id="receipts-list"></div>
       </section>
       <!-- ================= SEARCH — free-form briefs (own sub tab, build .28) ================= -->
       <section id="panel-search" role="tabpanel" aria-labelledby="tab-search" hidden>
@@ -4498,7 +4524,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.40";
+var WARDROBE_BUILD = "2026-11-17.41";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -23675,6 +23701,13 @@ function syncShopLookToToday() {
    worker's collection contract is fixed, and adding a new
    collection to it is not attempted from the page. */
 var shopPurchases = store.get("shopPurchases", []);
+/* Build .41: the receipts inbox — parsed order-email line items
+   delivered by sync (the "receipts" collection). The app owns
+   the status transitions (pending → confirmed / dismissed)
+   through normal sync writes, exactly like trips/packed. */
+var receiptInbox = [];
+try { receiptInbox = store.get("receiptInbox", []); } catch (e) { receiptInbox = []; }
+if (!Array.isArray(receiptInbox)) receiptInbox = [];
 function shopEntryKey(e) { return (e.brand || "") + "|" + (e.name || "") + "|" + (e.url || ""); }
 function shopHash(str) {
   var h = 5381;
@@ -23741,7 +23774,7 @@ function renderPurchased() {
     var thumb = p.img ? '<img class="shop-thumb" src="' + esc(p.img) + '" alt="" loading="lazy" />' : "";
     return '<div class="shop-row">' + thumb +
       '<span class="shop-main"><span class="shop-name">' + esc(p.brand) + " — " + esc(p.name) + '</span>' +
-      '<span class="shop-sub">' + esc(p.retailer || "") + (p.dateMarked ? " · Marked " + esc(fmtDateShort(p.dateMarked)) : "") + " · In your Closet</span></span>" +
+      '<span class="shop-sub">' + esc(p.retailer || "") + (p.dateMarked ? " · Marked " + esc(fmtDateShort(p.dateMarked)) : "") + " · In your Closet" + (p.orderNo ? " · Order " + esc(p.orderNo) : "") + "</span></span>" +
       '<span class="shop-price">$' + Number(p.price).toLocaleString("en-US") + "</span>" +
       '<button type="button" class="btn-ghost shop-buy" data-unmark-purchase="' + esc(p.key) + '">Un-mark purchase</button></div>';
   }).join("");
@@ -23818,6 +23851,215 @@ function unmarkShopPurchased(key) {
     if (b) unmarkShopPurchased(b.getAttribute("data-unmark-purchase"));
   });
   renderPurchased();
+})();
+
+/* ================= Build .41 — Receipts inbox =================
+   Parsed order-email line items arrive through sync as the
+   "receipts" collection (receiptInbox). The Shop landing carries
+   a slim Receipts line above Purchased; Review opens the confirm
+   sheet (panel-receipts), one editable card per pending record.
+   Confirming files the piece into the Closet and records it in
+   Purchased, exactly like a Shop the look purchase, and stamps
+   the receipt record confirmed; Dismiss marks it dismissed.
+   Nothing files without a tap, and no photo is ever invented —
+   a card shows the order email's image only when it carried one. */
+function receiptById(id) {
+  for (var i = 0; i < receiptInbox.length; i++) if (receiptInbox[i] && receiptInbox[i].id === id) return receiptInbox[i];
+  return null;
+}
+function receiptNormName(s) {
+  return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
+}
+/* Purchased dedupe guard: a pending record already filed through
+   Purchased is not shown again — matched on order number +
+   normalized name, or on the purchase's Closet item pointing
+   back at this receipt. Excluded records are never mutated. */
+function receiptAlreadyFiled(rec) {
+  if (!rec) return false;
+  for (var i = 0; i < shopPurchases.length; i++) {
+    var p = shopPurchases[i];
+    if (p.orderNo && rec.orderNo && p.orderNo === rec.orderNo && receiptNormName(p.name) === receiptNormName(rec.name)) return true;
+    if (p.closetItemId) {
+      var it = closetItemById(p.closetItemId);
+      if (it && it.receiptId === rec.id) return true;
+    }
+  }
+  return false;
+}
+function receiptPendingVisible() {
+  return receiptInbox.filter(function (r) { return r && r.status === "pending" && !receiptAlreadyFiled(r); });
+}
+function receiptHasSyncKey() {
+  try { return !!(typeof SY !== "undefined" && SY && SY.key); } catch (e) { return false; }
+}
+function renderReceiptsSection() {
+  var box = document.getElementById("shop-receipts");
+  if (!box) return;
+  box.className = "shop-purchased shop-receipts";
+  var n = receiptPendingVisible().length;
+  var html = "<h3>Receipts</h3>";
+  if (n > 0) {
+    html += '<div class="receipts-line"><span>' + n + (n === 1 ? " receipt waiting" : " receipts waiting") + '</span>' +
+      '<button type="button" class="btn-ghost" data-receipts-review>Review</button></div>';
+  } else if (receiptHasSyncKey()) {
+    html += "<p>No receipts waiting</p>";
+  } else {
+    html += "<p>Turn on sync to import receipts from your order emails</p>";
+  }
+  box.innerHTML = html;
+}
+function receiptDefaultHex(name) {
+  var n = String(name || "").trim().toLowerCase();
+  if (n) {
+    for (var i = 0; i < COLORS.length; i++) if (COLORS[i].name.toLowerCase() === n) return COLORS[i].hex;
+    for (var j = 0; j < COLOUR_WORDS.length; j++) if (COLOUR_WORDS[j][0] === n) return COLOUR_WORDS[j][1];
+    var words = n.split(/\s+/);
+    for (var k = 0; k < words.length; k++) {
+      for (var m = 0; m < COLOUR_WORDS.length; m++) if (COLOUR_WORDS[m][0] === words[k]) return COLOUR_WORDS[m][1];
+    }
+  }
+  return "#232d3f";
+}
+function receiptsCatOptions(selected) {
+  var src = document.getElementById("item-cat");
+  var out = '<option value=""' + (!selected ? " selected" : "") + "></option>";
+  if (!src) return out;
+  for (var i = 0; i < src.options.length; i++) {
+    var v = src.options[i].value;
+    out += "<option" + (v === selected ? " selected" : "") + ">" + esc(v) + "</option>";
+  }
+  return out;
+}
+var receiptsSheetSig = null;
+function renderReceipts() {
+  var list = document.getElementById("receipts-list");
+  if (!list) return;
+  /* Same discipline as the analyze sheet: a background sync
+     render must never rebuild the sheet mid-edit — only re-render
+     when the set of pending cards actually changed. */
+  var pending = receiptPendingVisible().slice().sort(function (a, b) {
+    var d = String(b.orderDate || "").localeCompare(String(a.orderDate || ""));
+    if (d) return d;
+    return (b.importedAt || 0) - (a.importedAt || 0);
+  });
+  var sig = pending.map(function (r) { return r.id + ":" + r.status; }).join("|");
+  if (sig === receiptsSheetSig && list.innerHTML) return;
+  receiptsSheetSig = sig;
+  if (!pending.length) { list.innerHTML = '<div class="card empty">No receipts waiting</div>'; return; }
+  list.innerHTML = pending.map(function (rec) {
+    var fid = "rc-" + String(rec.id).replace(/[^a-zA-Z0-9_-]/g, "-");
+    var hex = /^#[0-9a-f]{6}$/i.test(rec.colourHex || "") ? rec.colourHex : receiptDefaultHex(rec.colourName);
+    var metaParts = [];
+    if (rec.retailer) metaParts.push(rec.retailer);
+    if (rec.orderDate) metaParts.push(fmtDateShort(rec.orderDate));
+    if (rec.orderNo) metaParts.push("Order " + rec.orderNo);
+    return '<article class="card add-form receipt-item" data-receipt-id="' + esc(rec.id) + '">' +
+      (rec.img ? '<img class="analyze-item-photo" src="' + esc(rec.img) + '" alt="Photograph of ' + esc(rec.name || "") + '" loading="lazy" decoding="async" />' : "") +
+      '<div><label class="field" for="' + fid + '-name">Name</label>' +
+      '<input type="text" id="' + fid + '-name" data-rc-f="name" value="' + esc(rec.name || "") + '" /></div>' +
+      '<div><label class="field" for="' + fid + '-cat">Category</label>' +
+      '<select id="' + fid + '-cat" data-rc-f="category">' + receiptsCatOptions(rec.category || "") + "</select></div>" +
+      '<div><label class="field" for="' + fid + '-colour">Colour</label>' +
+      '<div style="display:flex;gap:10px;align-items:center">' +
+      '<input type="text" id="' + fid + '-colour" data-rc-f="colourName" value="' + esc(rec.colourName || "") + '" style="flex:1" />' +
+      '<input type="color" data-rc-f="colourHex" value="' + esc(hex) + '" aria-label="Pick the colour" /></div></div>' +
+      '<div><label class="field" for="' + fid + '-brand">Brand</label>' +
+      '<input type="text" id="' + fid + '-brand" data-rc-f="brand" value="' + esc(rec.brand || "") + '" /></div>' +
+      '<div><label class="field" for="' + fid + '-price">Price</label>' +
+      '<input type="number" id="' + fid + '-price" data-rc-f="price" min="0" step="any" value="' + (typeof rec.price === "number" ? rec.price : "") + '" /></div>' +
+      (metaParts.length ? '<p class="receipt-meta">' + esc(metaParts.join(" · ")) + "</p>" : "") +
+      '<div class="analyze-item-actions">' +
+      '<button type="button" class="btn-ink" data-receipt-add>Add to closet</button>' +
+      '<button type="button" class="btn-ghost" data-receipt-dismiss>Dismiss</button>' +
+      "</div></article>";
+  }).join("");
+}
+function receiptConfirm(card, rec) {
+  function field(f) { var el = card.querySelector('[data-rc-f="' + f + '"]'); return el ? el.value : ""; }
+  var nameRaw = field("name").trim();
+  if (!nameRaw) return;
+  var brand = field("brand").trim();
+  var displayName = brand && nameRaw.toLowerCase().indexOf(brand.toLowerCase()) !== 0 ? brand + " " + nameRaw : nameRaw;
+  var category = field("category");
+  var colourNameRaw = field("colourName").trim();
+  var colourHex = /^#[0-9a-f]{6}$/i.test(field("colourHex")) ? field("colourHex") : receiptDefaultHex(colourNameRaw);
+  var wada = nearestWada(colourHex);
+  var colourName = colourNameRaw || wada.name;
+  var extraColours = colourNameRaw ? [{ name: "Nearest Wada: " + wada.name, hex: wada.hex }] : [];
+  var priceRaw = field("price").trim();
+  var price = priceRaw === "" ? null : Number(priceRaw);
+  if (price !== null && isNaN(price)) price = null;
+  var itemId = "rcptbuy-" + shopHash(String(rec.id));
+  if (!closetItemById(itemId)) {
+    wardrobeItems.unshift({
+      id: itemId,
+      name: displayName,
+      brand: brand,
+      category: category,
+      colourName: colourName,
+      colourHex: colourHex,
+      extraColours: extraColours,
+      notes: "Bought via receipt import — " + (rec.retailer || "") + (rec.orderNo ? ", order " + rec.orderNo : "") + ".",
+      price: price,
+      retailer: rec.retailer || "",
+      url: "",
+      receiptBought: true,
+      receiptId: rec.id,
+      wearCount: 0,
+      lastWorn: null,
+      laundry: false,
+      photo: rec.img || null
+    });
+  }
+  var purchaseKey = "receipt-" + rec.id;
+  shopPurchases.unshift({
+    key: purchaseKey, brand: brand, name: nameRaw,
+    price: price, retailer: rec.retailer || "", url: "", img: rec.img || "",
+    cat: "", category: category, piece: "",
+    dateMarked: rec.orderDate || localTodayISO(), orderDate: rec.orderDate || "", orderNo: rec.orderNo || "",
+    closetItemId: itemId
+  });
+  saveShopPurchases();
+  rec.status = "confirmed";
+  rec.closetItemId = itemId;
+  rec.purchaseKey = purchaseKey;
+  persistAll();
+  store.set("receiptInbox", receiptInbox);
+  renderReceipts();
+  renderReceiptsSection();
+  renderPurchased();
+  renderWardrobe();
+  toast("Added — " + displayName + ".");
+}
+function receiptDismiss(rec) {
+  rec.status = "dismissed";
+  store.set("receiptInbox", receiptInbox);
+  renderReceipts();
+  renderReceiptsSection();
+}
+(function receiptsWire() {
+  var list = document.getElementById("receipts-list");
+  if (list) list.addEventListener("click", function (e) {
+    var add = e.target.closest ? e.target.closest("[data-receipt-add]") : null;
+    var dis = e.target.closest ? e.target.closest("[data-receipt-dismiss]") : null;
+    var btn = add || dis;
+    if (!btn) return;
+    var card = btn.closest("[data-receipt-id]");
+    if (!card) return;
+    var rec = receiptById(card.getAttribute("data-receipt-id"));
+    if (!rec) return;
+    if (add) receiptConfirm(card, rec); else receiptDismiss(rec);
+  });
+  var sec = document.getElementById("shop-receipts");
+  if (sec) sec.addEventListener("click", function (e) {
+    if (e.target.closest && e.target.closest("[data-receipts-review]")) switchTab("receipts");
+  });
+  var back = document.getElementById("receipts-back");
+  if (back) back.addEventListener("click", function () { switchTab("find"); });
+  renderReceiptsSection();
+  /* SY is initialized later in the script; re-render once the
+     whole script has run so the sync-key line reads correctly. */
+  setTimeout(function () { renderReceiptsSection(); }, 0);
 })();
 
 /* ================= Shop — Sale items & product Wishlist =================
@@ -24211,7 +24453,7 @@ function renderFindLookMode() {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "add", "gaps", "analyze", "palettes", "looks", "icons", "brands", "brand", "find", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "wardrobe", "add", "gaps", "analyze", "palettes", "looks", "icons", "brands", "brand", "find", "receipts", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -24236,7 +24478,7 @@ var SECTIONS = {
   closet: ["wardrobe", "add", "gaps", "analyze", "looks", "watches", "wearing"],
   calendar: ["calendar"],
   ideas: ["studio", "icons", "palettes", "myinspo"],
-  find: ["find", "search", "brands", "brand", "sale", "shopwish"],
+  find: ["find", "receipts", "search", "brands", "brand", "sale", "shopwish"],
   me: ["pinfo", "plocation", "pcloud"]
 };
 var sectionHome = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo", calendar: "calendar" };
@@ -24318,6 +24560,8 @@ function switchTab(name, opts) {
   if (name === "search" && typeof renderFinds === "function") renderFinds();
   if (name === "gaps" && typeof renderWishlist === "function") renderWishlist();
   if (name === "analyze" && typeof renderAnalyzeSheet === "function") renderAnalyzeSheet();
+  if (name === "receipts" && typeof renderReceipts === "function") renderReceipts();
+  if (name === "find" && typeof renderReceiptsSection === "function") renderReceiptsSection();
   if ((name === "wardrobe" || name === "add") && typeof analyzeRefreshUI === "function") analyzeRefreshUI();
   if (name === "calendar") { if (typeof renderWeekPlan === "function") renderWeekPlan(); if (typeof calViewApply === "function") calViewApply(); }
   persistTab();
@@ -24341,6 +24585,10 @@ var viewNavGuard = false;
 function syncViewBack() {
   var btn = document.getElementById("view-back");
   if (btn) btn.hidden = !viewHist.length;
+  /* Build .41: the sticky sub-tab bars key their left clearance
+     off this class, so the first pill clears the chevron exactly
+     while it is shown. */
+  document.body.classList.toggle("view-back-on", !!viewHist.length);
 }
 function viewTrack(name) {
   if (viewNavGuard || !name) return;
@@ -24425,6 +24673,9 @@ function tabFromHash() {
   /* Closet sub-pages are reached in-app only: a boot, refresh or
      deep link naming one lands on the Closet landing instead. */
   if (parts[0] === "add" || parts[0] === "gaps" || parts[0] === "analyze") return { tab: "wardrobe", icon: null };
+  /* Receipts is reached in-app only (Shop → Review): a boot,
+     refresh or deep link naming it lands on the Shop landing. */
+  if (parts[0] === "receipts") return { tab: "find", icon: null };
   return { tab: parts[0], icon: parts[1] ? decodeURIComponent(parts[1]) : null };
 }
 window.addEventListener("hashchange", function () {
@@ -24472,6 +24723,7 @@ function restoreTab() {
   var name = sess || (from && from.tab) || store.get("tab", "today");
   if (TABS.indexOf(name) === -1) name = "today";
   if (name === "add" || name === "gaps" || name === "analyze") name = "wardrobe";
+  if (name === "receipts") name = "find";
   if (name === "today" && !from) { persistTab(); return; }
   switchTab(name, { restore: true });
   if (name === "icons") {
@@ -27121,7 +27373,7 @@ renderMyInspo();
      one just because it dealt a look more recently. */
 var SYNC_URL = "https://wardrobe-sync.dyacobs.workers.dev";
 try { SYNC_URL = localStorage.getItem("wardrobe.syncurl") || SYNC_URL; } catch (e) {}
-var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed"];
+var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed", "receipts"];
 function syBlank() {
   var o = { key: null, acct: null, last: 0, snap: {}, st: {}, tomb: {}, dirty: {}, status: "Not synced yet", lastOk: 0 };
   SY_COLLS.forEach(function (c) { o.snap[c] = {}; o.st[c] = {}; o.tomb[c] = {}; o.dirty[c] = {}; });
@@ -27188,6 +27440,7 @@ function syCollGet(c) {
     case "anchors": return buildAnchors;
     case "trips": return userTrips;
     case "packed": return packedItems;
+    case "receipts": return receiptInbox;
   }
   return [];
 }
@@ -27216,8 +27469,8 @@ function syMetaOf() {
    vanished ids become tombstones. Runs on every tracked store
    write (hinted to the affected collection) and in full at boot
    and at the start of every sync, so no write path is missed. */
-var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed" };
-var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems" };
+var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts" };
+var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox" };
 var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, dealtImgs: 1, dealtTitles: 1, dealtCombos: 1, dealtCards: 1, findBudget: 1, shopTier: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
 function syTrackChanges(onlyColl) {
   var now = Date.now(), ch = false;
@@ -27422,6 +27675,7 @@ function syPutLocal(c, data) {
   else if (c === "plan") weekPlan = put(weekPlan);
   else if (c === "trips") { userTrips = put(userTrips); store.set("trips", userTrips); }
   else if (c === "packed") { packedItems = put(packedItems); store.set("packedItems", packedItems); }
+  else if (c === "receipts") { receiptInbox = put(receiptInbox); store.set("receiptInbox", receiptInbox); if (typeof renderReceipts === "function") renderReceipts(); if (typeof renderReceiptsSection === "function") renderReceiptsSection(); }
   else if (c === "worn") wornLog = put(wornLog);
   else if (c === "inspo") inspoImages = put(inspoImages);
   else if (c === "finds") finds = put(finds);
@@ -27454,6 +27708,7 @@ function syRemoveLocal(c, id) {
   else if (c === "plan") weekPlan = drop(weekPlan);
   else if (c === "trips") { userTrips = drop(userTrips); store.set("trips", userTrips); }
   else if (c === "packed") { packedItems = drop(packedItems); store.set("packedItems", packedItems); }
+  else if (c === "receipts") { receiptInbox = drop(receiptInbox); store.set("receiptInbox", receiptInbox); if (typeof renderReceipts === "function") renderReceipts(); if (typeof renderReceiptsSection === "function") renderReceiptsSection(); }
   else if (c === "worn") wornLog = drop(wornLog);
   else if (c === "inspo") inspoImages = drop(inspoImages);
   else if (c === "finds") finds = drop(finds);
@@ -27535,7 +27790,7 @@ function syRefresh() {
   try { store.set("wornLog", wornLog); } catch (e) {}
   try { store.set("inspoImages", inspoImages); } catch (e) {}
   try { store.set("finds", finds); } catch (e) {}
-  [renderSaved, renderWardrobe, renderWatches, renderWornLog, renderInspoImages, renderMyInspo, renderFinds, renderCustomPalettes, renderIcons, renderRecentlyRemoved, renderLoc, syncPaletteSelect, renderPurchased, renderWeekPlan, renderProfileHead].forEach(function (f) {
+  [renderSaved, renderWardrobe, renderWatches, renderWornLog, renderInspoImages, renderMyInspo, renderFinds, renderCustomPalettes, renderIcons, renderRecentlyRemoved, renderLoc, syncPaletteSelect, renderPurchased, renderWeekPlan, renderProfileHead, renderReceipts, renderReceiptsSection].forEach(function (f) {
     try { if (typeof f === "function") f(); } catch (e) {}
   });
   try { dataNoteRender(); } catch (e) {}
