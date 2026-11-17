@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.45" />
+    <meta name="wardrobe-build" content="2026-11-17.46" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -4757,7 +4757,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.45";
+var WARDROBE_BUILD = "2026-11-17.46";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -13337,6 +13337,35 @@ function emulateOwnedStrict(pc) {
   if (!famA || !famB) return null;
   return Object.keys(famA).some(function (k) { return !!famB[k]; }) ? own : null;
 }
+/* (b2) YOU OWN — fallback (build .46), modelled on the
+   paste-a-link duplicate check's linkDuplicateFallback: the
+   strict test's colour-family vocabulary has no neutral colour
+   names (oatmeal, greige, ecru and friends), so a genuine owned
+   match is missed whenever either side names one. Same category
+   gate as the strict test — the candidate's closet category
+   must map to the piece's catalogue category, and the piece's
+   category must be non-null — then a match is an equal colour
+   NAME (trimmed, case-insensitive, both non-empty) or a hex
+   distance under the ownedClosetMatch threshold (3200). Lives
+   only in Emulate's owned path; the strict test is untouched. */
+function emulateOwnedFallback(pc) {
+  var cat = catalogueCatForPiece(pc);
+  if (!cat) return null;
+  var pcName = pc && pc.colourName ? String(pc.colourName).trim().toLowerCase() : "";
+  var found = null;
+  wardrobeItems.forEach(function (it) {
+    if (found || !it) return;
+    if (catalogueCatForPiece({ garment: it.category || "" }) !== cat) return;
+    var itemName = it.colourName ? String(it.colourName).trim().toLowerCase() : "";
+    var nameMatch = !!(pcName && itemName && itemName === pcName);
+    var hexMatch = false;
+    if (it.colourHex && pc.hex) {
+      try { hexMatch = dist2(hexRgb(it.colourHex), hexRgb(pc.hex)) < 3200; } catch (e) { hexMatch = false; }
+    }
+    if (nameMatch || hexMatch) found = it;
+  });
+  return found;
+}
 /* A product row in the .42 shop-row style with the match tag
    spelled out in the sub line — the same markup and data
    attributes as shopRowHTML, worked by the panel's own delegated
@@ -13348,7 +13377,7 @@ function emulateRowHTML(e, pc, tag) {
   var wished = (typeof isWishlisted === "function") && isWishlisted(e);
   return '<div class="shop-row">' +
     '<a class="shop-row-main" target="_blank" rel="noopener" href="' + esc(e.url) + '">' + thumb +
-    '<span class="shop-main"><span class="shop-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="shop-sub">' + esc(e.retailer) + " · " + esc(shopTierInfo(e.tier).name) + (tag ? " · " + tag : "") + "</span></span>" +
+    '<span class="shop-main"><span class="shop-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="shop-sub">' + esc(e.retailer) + " · " + esc(shopTierInfo(e.tier).name) + (sellerLabel(e) ? " · " + esc(sellerLabel(e)) : "") + (tag ? " · " + tag : "") + "</span></span>" +
     '<span class="shop-price">$' + Number(e.price).toLocaleString("en-US") + "</span></a>" +
     '<button type="button" class="btn-ghost shop-buy" data-mark-purchase="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (bought ? "true" : "false") + '">' + (bought ? "Purchased — un-mark" : "Mark purchased") + "</button>" +
     '<button type="button" class="btn-ghost shop-buy" data-wish-toggle="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (wished ? "true" : "false") + '">' + (wished ? "In wishlist — remove" : "Add to wishlist") + "</button>" +
@@ -13363,7 +13392,7 @@ function emulatePieceHTML(pc) {
   if (exact.length) {
     match = exact.map(function (e) { return emulateRowHTML(e, pc, "Exact match"); }).join("");
   } else {
-    var own = emulateOwnedStrict(pc);
+    var own = emulateOwnedStrict(pc) || emulateOwnedFallback(pc);
     if (own) {
       match = '<p class="emulate-own"><strong>You own:</strong> ' + esc(own.name) + "</p>";
     } else {
@@ -24362,12 +24391,14 @@ function brandNormName(s) {
 function catalogueForBrand(name) {
   var n = brandNormName(name);
   if (!n) return [];
-  return SHOP_CATALOGUE.filter(function (e) {
+  return shopCatalogueAll().filter(function (e) {
     var b = brandNormName(e.brand);
     return b === n || (Math.min(b.length, n.length) >= 5 && (b.indexOf(n) !== -1 || n.indexOf(b) !== -1));
   }).sort(function (a, b2) {
     var c = String(a.cat || "").localeCompare(String(b2.cat || ""));
     if (c) return c;
+    var sr = sellerRank(a) - sellerRank(b2);
+    if (sr) return sr;
     return String(a.name || "").localeCompare(String(b2.name || ""));
   });
 }
@@ -24388,6 +24419,7 @@ function renderBrandView() {
 }
 function openBrandView(name, url, meta) {
   brandViewState = { name: name, url: url || "", meta: meta || "" };
+  if (typeof loadShopDb === "function") loadShopDb();
   renderBrandView();
   switchTab("brand");
 }
@@ -24405,14 +24437,14 @@ function openBrandView(name, url, meta) {
     var mb = e.target.closest("[data-mark-purchase]");
     if (mb) {
       var entry = null;
-      SHOP_CATALOGUE.forEach(function (m) { if (shopEntryKey(m) === mb.getAttribute("data-mark-purchase")) entry = m; });
+      shopCatalogueAll().forEach(function (m) { if (shopEntryKey(m) === mb.getAttribute("data-mark-purchase")) entry = m; });
       if (entry) { toggleShopPurchase(entry, null); renderBrandView(); }
       return;
     }
     var wb = e.target.closest("[data-wish-toggle]");
     if (wb) {
       var wentry = null;
-      SHOP_CATALOGUE.forEach(function (m) { if (shopEntryKey(m) === wb.getAttribute("data-wish-toggle")) wentry = m; });
+      shopCatalogueAll().forEach(function (m) { if (shopEntryKey(m) === wb.getAttribute("data-wish-toggle")) wentry = m; });
       if (wentry && typeof toggleWishlistItem === "function") { toggleWishlistItem(wentry, null); renderBrandView(); }
       return;
     }
@@ -24508,6 +24540,28 @@ function catalogueCatForPiece(pc) {
    affordable first); at Price insensitive the ELITE leads —
    tier band descending first (insensitive, luxury, accessible,
    affordable), match score descending within each band. */
+/* Seller quality (build .46): shop-database entries carry
+   e.st (brand_direct | authorized_retailer |
+   new_item_marketplace | drop_shipper) and e.sq (elite | good |
+   acceptable | poor); baked-catalogue entries carry neither
+   and sit neutral. Rank: brand-direct 0, authorised / elite 1,
+   no seller data 2, any other seller data 3, poor 4. The label
+   names only the top of that ladder, for the row sub-lines. */
+function sellerRank(e) {
+  if (!e) return 2;
+  if (e.st === "brand_direct") return 0;
+  if (e.st === "authorized_retailer" || e.sq === "elite") return 1;
+  if (e.sq === "poor") return 4;
+  if (e.st || e.sq) return 3;
+  return 2;
+}
+function sellerLabel(e) {
+  if (!e) return "";
+  if (e.st === "brand_direct") return "Brand direct";
+  if (e.st === "authorized_retailer") return "Authorised retailer";
+  if (e.sq === "elite") return "Elite seller";
+  return "";
+}
 function catalogueScored(pc, applyCeiling, tierKey) {
   var cat = catalogueCatForPiece(pc);
   if (!cat) return [];
@@ -24557,6 +24611,10 @@ function catalogueScored(pc, applyCeiling, tierKey) {
       var tr2 = shopTierRank(a.e.tier) - shopTierRank(b.e.tier);
       if (tr2) return tr2;
     }
+    /* Seller quality (build .46): among otherwise-equal
+       matches, brand-direct / authorised / elite sellers lead. */
+    var srk = sellerRank(a.e) - sellerRank(b.e);
+    if (srk) return srk;
     /* Final tiebreak: name A–Z, so equal matches are
        alphabetical and the order is deterministic. */
     return String(a.e.name || "").localeCompare(String(b.e.name || ""));
@@ -24607,6 +24665,7 @@ function loadShopDb() {
     shopDbLoaded = true;
     if (typeof findLookMode !== "undefined" && findLookMode) renderFindLookMode();
     if (typeof currentTab !== "undefined" && currentTab === "emulate" && typeof renderEmulate === "function") renderEmulate();
+    if (typeof brandViewState !== "undefined" && brandViewState && typeof currentTab !== "undefined" && currentTab === "brand" && typeof renderBrandView === "function") renderBrandView();
   }).catch(function () { shopDbLoading = false; });
 }
 /* Per-piece state — the root-cause fix for "it defaults to the
@@ -24720,7 +24779,7 @@ function shopAltRowHTML(e, pc, idx, selected) {
   var thumb = e.img ? '<img class="shop-thumb" src="' + esc(e.img) + '" alt="" loading="lazy" />' : "";
   return '<div class="shop-row shop-alt">' +
     '<a class="shop-row-main" target="_blank" rel="noopener" href="' + esc(e.url) + '">' + thumb +
-    '<span class="shop-main"><span class="shop-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="shop-sub">' + esc(e.retailer) + " · " + esc(shopTierInfo(e.tier).name) + ((pc && pc.iconGarment && e.iconGarment && e.iconGarment === pc.iconGarment) ? " · Exact match" : "") + "</span></span>" +
+    '<span class="shop-main"><span class="shop-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="shop-sub">' + esc(e.retailer) + " · " + esc(shopTierInfo(e.tier).name) + (sellerLabel(e) ? " · " + esc(sellerLabel(e)) : "") + ((pc && pc.iconGarment && e.iconGarment && e.iconGarment === pc.iconGarment) ? " · Exact match" : "") + "</span></span>" +
     '<span class="shop-price">$' + Number(e.price).toLocaleString("en-US") + "</span></a>" +
     '<button type="button" class="btn-ghost shop-buy" data-piece-select="' + idx + '" data-sel-key="' + esc(shopEntryKey(e)) + '">Select</button></div>';
 }
@@ -24730,7 +24789,7 @@ function shopRowHTML(e, pc) {
   var wished = (typeof isWishlisted === "function") && isWishlisted(e);
   return '<div class="shop-row">' +
     '<a class="shop-row-main" target="_blank" rel="noopener" href="' + esc(e.url) + '">' + thumb +
-    '<span class="shop-main"><span class="shop-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="shop-sub">' + esc(e.retailer) + " · " + esc(shopTierInfo(e.tier).name) + ((pc && pc.iconGarment && e.iconGarment && e.iconGarment === pc.iconGarment) ? " · Exact match" : "") + "</span></span>" +
+    '<span class="shop-main"><span class="shop-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="shop-sub">' + esc(e.retailer) + " · " + esc(shopTierInfo(e.tier).name) + (sellerLabel(e) ? " · " + esc(sellerLabel(e)) : "") + ((pc && pc.iconGarment && e.iconGarment && e.iconGarment === pc.iconGarment) ? " · Exact match" : "") + "</span></span>" +
     '<span class="shop-price">$' + Number(e.price).toLocaleString("en-US") + "</span></a>" +
     '<button type="button" class="btn-ghost shop-buy" data-mark-purchase="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (bought ? "true" : "false") + '">' + (bought ? "Purchased — un-mark" : "Mark purchased") + "</button>" +
     '<button type="button" class="btn-ghost shop-buy" data-wish-toggle="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (wished ? "true" : "false") + '">' + (wished ? "In wishlist — remove" : "Add to wishlist") + "</button>" +
