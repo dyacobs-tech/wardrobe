@@ -16,6 +16,7 @@ entry can be deleted. Any NEW failure fails the run (exit 1).
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -170,6 +171,14 @@ def main() -> int:
     for status, name, detail in results:
         print(f"{status:7} {name:<{width}}  {detail}")
     fails = [r for r in results if r[0] == "FAIL"]
+    if os.environ.get("GITHUB_ACTIONS"):
+        # Annotations show on the run page and through the public API.
+        for status, name, detail in results:
+            if status in ("FAIL", "FIXED?"):
+                lvl = "error" if status == "FAIL" else "notice"
+                msg = f"{status} {name}: {detail}".replace("%", "%25").replace("", "").replace("
+", " ")
+                print(f"::{lvl} title=Smoke test::{msg[:900]}")
     print(f"\n{len(fails)} new failure(s); "
           f"{sum(r[0] == 'KNOWN' for r in results)} known issue(s); "
           f"{sum(r[0] == 'FIXED?' for r in results)} known issue(s) now passing.")
