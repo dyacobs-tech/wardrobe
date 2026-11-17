@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.46" />
+    <meta name="wardrobe-build" content="2026-11-17.47" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2425,7 +2425,8 @@
          tall black band with the labels floating at its top. The bar is
          now a fixed 68px tall, padding 0, and each button's icon+label
          stack fills the bar's full height, bottom-anchored with a fixed
-         10px below the label: the same geometry on every device,
+         2px below the label (build .47 lowered it from 10px at the
+         user's request): the same geometry on every device,
          whatever env() would have resolved to. The body clearance and
          the toast lift use the same fixed 68px. */
       :root { --bb-h: 68px; }
@@ -2450,12 +2451,13 @@
       /* The five bar buttons share the full width equally (flex: 1 1 0),
          so their centres are exactly equidistant. Each stack fills the
          bar's height and is anchored to its bottom: icon above label,
-         the label's bottom edge exactly 10px above the bar's bottom
-         edge — flush, no dead space under the labels. */
+         the label's bottom edge exactly 2px above the bar's bottom
+         edge (build .47 lowered it from 10px at the user's request)
+         — flush, no dead space under the labels. */
       .bottombar .navbtn {
         flex: 1 1 0; height: 100%; min-height: 0; box-sizing: border-box;
         display: flex; flex-direction: column; align-items: center;
-        justify-content: flex-end; gap: 4px; padding: 0 0 10px;
+        justify-content: flex-end; gap: 4px; padding: 0 0 2px;
       }
       .navbtn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
       .navbtn[aria-current="page"] { color: var(--text); }
@@ -4757,7 +4759,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.46";
+var WARDROBE_BUILD = "2026-11-17.47";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -12662,7 +12664,6 @@ function generateComboLook(opts) {
     if (!look) return null;
     look.generated = true;
     look.comboKey = comboKey(icon.id, plate.plate, formalityOf(look.img), "");
-    look.title = freshComboTitle(icon, plate, usedTitles);
     look.meta = icon.name + " × Plate " + plate.plate + " · a new combination";
     look.notes = ["A pairing dealt for the first time: " + icon.name + "'s direction in Plate " + plate.plate + "'s colours (" + plate.colors.map(function (c) { return c.name; }).join(", ") + ")."].concat(look.notes || []);
     return look;
@@ -12694,7 +12695,6 @@ function generateComboLook(opts) {
     look2.generated = true;
     look2.comboKey = comboKey(ic2.id, p2.plate, level2, anchor2);
     if (anchor2) { look2.anchorNames = [anchor2]; }
-    look2.title = freshComboTitle(ic2, p2, usedTitles);
     look2.meta = ic2.name + " × Plate " + p2.plate + " · a new combination";
     look2.notes = ["A combination dealt for the first time: " + ic2.name + "'s direction in Plate " + p2.plate + "'s colours (" + p2.colors.map(function (c) { return c.name; }).join(", ") + ")" + (anchor2 ? ", anchored in your " + anchor2 : "") + "."].concat(look2.notes || []);
     return look2;
@@ -13319,7 +13319,7 @@ function emulateExactFor(pc) {
   });
   return out;
 }
-/* (b) YOU OWN — the loose closet matcher admitted only when it
+/* (b) Owned match — the loose closet matcher admitted only when it
    also passes the strict check: the owned piece's closet
    category maps to the same catalogue category as the garment
    (catalogueCatForPiece on both sides), and its colour sits in
@@ -13337,7 +13337,7 @@ function emulateOwnedStrict(pc) {
   if (!famA || !famB) return null;
   return Object.keys(famA).some(function (k) { return !!famB[k]; }) ? own : null;
 }
-/* (b2) YOU OWN — fallback (build .46), modelled on the
+/* (b2) Owned match — fallback (build .46), modelled on the
    paste-a-link duplicate check's linkDuplicateFallback: the
    strict test's colour-family vocabulary has no neutral colour
    names (oatmeal, greige, ecru and friends), so a genuine owned
@@ -13392,18 +13392,17 @@ function emulatePieceHTML(pc) {
   if (exact.length) {
     match = exact.map(function (e) { return emulateRowHTML(e, pc, "Exact match"); }).join("");
   } else {
-    var own = emulateOwnedStrict(pc) || emulateOwnedFallback(pc);
-    if (own) {
-      match = '<p class="emulate-own"><strong>You own:</strong> ' + esc(own.name) + "</p>";
-    } else {
-      var cat = catalogueCatForPiece(pc);
-      var closest = null;
-      if (cat) {
-        var ms = catalogueMatches(pc);
-        for (var i = 0; i < ms.length; i++) { if (ms[i].cat === cat) { closest = ms[i]; break; } }
-      }
-      match = closest ? emulateRowHTML(closest, pc, "Closest match") : '<p class="emulate-none">No match in the catalogue yet</p>';
+    /* Build .47: no owned flags in Emulate (user's request) —
+       purchasable Exact / Closest matches only. The owned-match
+       helpers stay in place, dormant, for the paste-a-link
+       duplicate sense-check, which is a separate feature. */
+    var cat = catalogueCatForPiece(pc);
+    var closest = null;
+    if (cat) {
+      var ms = catalogueMatches(pc);
+      for (var i = 0; i < ms.length; i++) { if (ms[i].cat === cat) { closest = ms[i]; break; } }
     }
+    match = closest ? emulateRowHTML(closest, pc, "Closest match") : '<p class="emulate-none">No match in the catalogue yet</p>';
   }
   return '<div class="emulate-piece">' + row + '<div class="emulate-match">' + match + "</div></div>";
 }
@@ -13932,7 +13931,6 @@ function iconPhotoFindLook(ic, lk) {
 function plateFindLook(p) {
   var names = p.colors.map(function (c) { return c.name.toLowerCase(); }).join(" and ");
   var look = buildLook("An outfit in " + names + " (Wada Plate " + p.plate + ")", "", "", { basis: "palette", plate: p, source: "inspo" });
-  look.title = "Plate " + p.plate + " — " + p.colors.map(function (c) { return c.name; }).join(" & ");
   return look;
 }
 document.addEventListener("click", function (e) {
@@ -16172,9 +16170,10 @@ function freshRenderFor(others) {
     if (o.img) usedImg[o.img] = true;
     if (o.title) usedTitle[o.title] = true;
   });
-  var cands = RENDER_POOL.filter(function (r) { return !usedImg[r.img] && !usedTitle[titleForRender(r)] && !(typeof dealtTitleSet !== "undefined" && dealtTitleSet[titleForRender(r)]); });
-  if (!cands.length) cands = RENDER_POOL.filter(function (r) { return !usedImg[r.img] && !usedTitle[titleForRender(r)]; });
-  if (!cands.length) cands = RENDER_POOL.filter(function (r) { return !usedImg[r.img]; });
+  /* Freshness is by photograph only (build .47): titles are a
+     function of the photograph, so a title check here could veto
+     the one honest caption a fresh photograph carries. */
+  var cands = RENDER_POOL.filter(function (r) { return !usedImg[r.img]; });
   if (!cands.length) return null;
   /* Freshest first: nothing from the most recent deal while
      anything older remains, and among those, the oldest bucket —
@@ -16193,7 +16192,9 @@ function freshRenderFor(others) {
    earlier take in this hand — photograph, title or plate;
    (2) its pairing (icon × plate × formality) is absent from the
    permanent combination history; and (3) its title is absent
-   from the permanent title history. A take that fails is made
+   from the permanent title history — unless the title is the
+   pictured photograph's own caption, which is never spent
+   (build .47). A take that fails is made
    fresh, never shipped as a repeat: an in-hand photograph/title
    clash with a clean history is repaired with a fresh render,
    and anything history has already spent is replaced by a
@@ -16217,18 +16218,22 @@ function enforceFreshTake(look, others, ctx) {
        title rule, both checked here and in the deck. */
     var pairingDealt = !look.refLook && look.plate != null && typeof dealtComboSet !== "undefined" &&
       !!dealtComboSet[comboKey(look.iconId, look.plate, formalityOf(look.img), "")];
-    var titleDealt = !!(look.title && typeof dealtTitleSet !== "undefined" && dealtTitleSet[look.title]);
+    /* A title that is the pictured photograph's own caption is
+       NEVER spent (build .47): dealtTitles must not veto the one
+       honest name a photograph carries, or the repair below would
+       replace a truthful card with a generated one wearing a
+       plate's colour names over an unrelated photograph. */
+    var picturedRender = renderByImg(look.img);
+    var ownCaption = picturedRender ? titleForRender(picturedRender) : null;
+    var titleDealt = !!(look.title && typeof dealtTitleSet !== "undefined" && dealtTitleSet[look.title]) && look.title !== ownCaption;
     if (!clash && !pairingDealt && !titleDealt) return look;
-    if ((clash === "img" || clash === "title") && !pairingDealt && !titleDealt && !look.paletteName) {
+    if ((clash === "img" || clash === "title") && !pairingDealt && !titleDealt) {
       var fr = freshRenderFor(others.concat([look]));
       if (fr && fr.img !== look.img) {
-        var candTitle = titleForRender(fr);
-        if (!(typeof dealtTitleSet !== "undefined" && dealtTitleSet[candTitle])) {
-          look.img = fr.img;
-          look.imgAlt = fr.imgAlt || look.imgAlt;
-          look.title = candTitle;
-          continue;
-        }
+        look.img = fr.img;
+        look.imgAlt = fr.imgAlt || look.imgAlt;
+        look.title = titleForRender(fr);
+        continue;
       }
     }
     var exclImgs = {};
@@ -16333,7 +16338,7 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
         occasion: occasion, season: season, excludeImgs: excludeImgs
       });
     }
-    return applySource(strictFormalityPass(looks, baseOpts), baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc);
+    return normalizeTakeTitles(applySource(strictFormalityPass(looks, baseOpts), baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc));
   }
   for (var i = 0; i < 6; i++) {
     var opts = Object.assign({}, baseOpts);
@@ -16382,7 +16387,7 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
         var origRecent = recentSwap[look.img] ? 1 : 0;
         if (origGroup < swapGroup || (origGroup === swapGroup && (origRecent < swapRecent || (origRecent === swapRecent && (origCost < swapCost || (origCost === swapCost && dealtBucket(look.img) <= swapBucket)))))) swap = null;
       }
-      if (swap) { look.img = swap.img; look.imgAlt = swap.imgAlt || look.imgAlt; if (!look.paletteName) look.title = titleForRender(swap); }
+      if (swap) { look.img = swap.img; look.imgAlt = swap.imgAlt || look.imgAlt; look.title = titleForRender(swap); }
     }
     /* A combination already dealt is not a new look — rebuild on
        a fresh plate until the pairing is one never dealt before. */
@@ -16428,7 +16433,7 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
     excludeImgs[look.img] = true;
     if (look.plate && excludePlates.indexOf(look.plate) === -1) excludePlates.push(look.plate);
   }
-  return applySource(strictFormalityPass(looks, baseOpts), baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc);
+  return normalizeTakeTitles(applySource(strictFormalityPass(looks, baseOpts), baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc));
 }
 /* The one card swatch strip — the same .swatch-strip the detail
    uses, span-based so it can live inside a <button> card. The
@@ -16465,8 +16470,32 @@ function optionCardHTML(look, idx) {
        that is styling content, not chrome. */
     (look.suggestedBottom ? '<span class="oc-meta fw-pair">Pair with: ' + esc(look.suggestedBottom.name) + ' — suggested</span>' : "") + "</span></button>";
 }
+/* FINAL TITLE NORMALIZATION (build .47): a card's title is a
+   function of its photograph, never of the deal's recipe. For
+   every ordinary pool-render take, the title IS the pictured
+   render's own caption — so the same photograph carries the same
+   title on every path, present and future. Swap looks, wardrobe
+   looks, uploaded looks and iconSpec/reference looks are exempt:
+   their photographs are not pool renders and their titles are
+   their own. */
+function normalizeTakeTitles(looks) {
+  (looks || []).forEach(function (look) {
+    if (!look) return;
+    if (look.swapPieces || look.swapComboId) return;
+    if (look.fwPieces || look.fwRender) return;
+    if (look.source === "uploaded") return;
+    if (look.iconSpec || look.refLook) return;
+    var r = renderByImg(look.img);
+    if (r) look.title = titleForRender(r);
+  });
+  return looks;
+}
 function renderOptions(looks, request) {
   if (!looks || !looks.length) return;
+  /* Last-resort guard (build .47): normalize before the hand is
+     set and recorded, so recordCards / recordLookCombos /
+     recordTitles below store the FINAL (img, title) pairs. */
+  normalizeTakeTitles(looks);
   currentOptions = looks.slice(0, 6);
   if (request) lastSixRequest = request;
   currentLook = currentOptions[0];
@@ -17263,7 +17292,6 @@ function buildLook(desc, occasion, season, opts) {
   if (occasion) metaBits.push(occasion);
   if (season) metaBits.push(season);
   if (basis === "icon") metaBits.push("Icon alone — no palette");
-  else if (opts.palette) metaBits.push("Custom palette — " + opts.palette.name + (icon ? " · icon leads" : ""));
   else metaBits.push("Wada Plate " + plate.plate + " · " + plateKind(plate.colors.length).toLowerCase() + (icon ? " · chosen to fit the icon" : ""));
   var notes = [];
   if (icon && basis === "icon") {
@@ -17364,11 +17392,13 @@ function buildLook(desc, occasion, season, opts) {
   var finalRender = renderByImg(finalImg);
   return {
     id: newLookId(),
-    /* Caption follows the photograph: each take is titled for the
-       outfit actually in its picture (the render's own colour
-       story), so six different photos never share one repeated
-       "sienna & yellow" caption. A custom palette keeps its name. */
-    title: opts.palette ? opts.palette.name : (finalRender ? titleForRender(finalRender) : title),
+    /* Caption follows the photograph (build .47): each take is
+       titled for the outfit actually in its picture (the render's
+       own colour story), so six different photos never share one
+       repeated "sienna & yellow" caption. A target palette's name
+       is never a title — paletteName below stays a data field for
+       deal mechanics only. */
+    title: finalRender ? titleForRender(finalRender) : title,
     meta: metaBits.join(" · "),
     desc: desc,
     iconId: icon ? icon.id : null,
@@ -24745,11 +24775,11 @@ function pieceDefaultSel(d, tierKey) {
   if (d.bestOverall) return shopEntryKey(d.bestOverall);
   return d.alts.length ? shopEntryKey(d.alts[0]) : "";
 }
-/* Owned-first: a closet piece that covers this look piece —
+/* Closet matcher: a closet piece that covers this look piece —
    same closet category and a close colour, the wishlist/gaps
-   test — leads the section as "You own: …", and the products
-   below it are alternatives for the gap or an upgrade, never
-   a verdict that the piece is missing. */
+   test. Since build .47 it no longer surfaces as an owned
+   row in Shop the look or Emulate (user's request); it remains
+   in service for the paste-a-link duplicate sense-check. */
 function ownedClosetMatch(pc) {
   var cat = garmentCategory(pc.garment);
   var noun = (pc.garment || "").toLowerCase().split(" ").pop();
@@ -24760,12 +24790,6 @@ function ownedClosetMatch(pc) {
     if (noun && (it.name || "").toLowerCase().indexOf(noun) !== -1) found = it;
   });
   return found;
-}
-function shopOwnedRowHTML(it) {
-  var thumb = it.photo ? '<img class="shop-thumb" src="' + esc(it.photo) + '" alt="" loading="lazy" />' : "";
-  return '<div class="shop-owned-row">' + thumb +
-    '<span class="shop-main"><span class="shop-owned-tag">You own</span>' +
-    '<span class="shop-name">' + esc(it.name) + "</span></span></div>";
 }
 /* One alternative row. The selected alternative is the full
    shopRowHTML card (brass-ringed, "Selected" pill) — Mark
@@ -25643,14 +25667,15 @@ function updateSaleRail() {
   if (looksWishPanel) looksWishPanel.addEventListener("click", wishClick);
   renderShopWishlist();
 })();
-/* A piece's section body (build .42): the owned lead when he
-   already has the piece, then the alternatives — one per price
-   band, the selected one carrying the actions. No honest match
-   anywhere keeps the plain empty state. */
+/* A piece's section body (build .42): the purchasable
+   alternatives only — one per price band, the selected one
+   carrying the actions. No honest match anywhere keeps the
+   plain empty state. (Build .47: the owned-first
+   lead row was removed at the user's request — Shop the look
+   shows only what is available to purchase.) */
 function shopMatchesHTML(d, idx) {
   if (!d.alts.length) return '<p class="shop-nomatch">No exact match yet in the catalogue</p>';
   var html = "";
-  if (d.owned) html += shopOwnedRowHTML(d.owned);
   if (d.tierKey !== "insensitive" && !d.alts.some(function (e) { return (e.tier || "insensitive") === d.tierKey; })) {
     html += '<p class="shop-alt-note">Nothing at ' + esc(shopTierInfo(d.tierKey).name) + " for this piece — the other prices:</p>";
   }
@@ -25693,7 +25718,7 @@ function renderFindLookMode() {
   shopModeData = shopPiecesForLook(look).map(function (pc, idx) {
     var alt = catalogueAlternatives(pc);
     var st = pieceStateFor(look, idx);
-    var d = { pc: pc, desc: pieceDescription(pc), alts: alt.alts, bestOverall: alt.bestOverall, total: catalogueMatchTotal(pc), owned: ownedClosetMatch(pc), tierKey: st.tier };
+    var d = { pc: pc, desc: pieceDescription(pc), alts: alt.alts, bestOverall: alt.bestOverall, total: catalogueMatchTotal(pc), tierKey: st.tier };
     d.selKey = st.sel && alt.alts.some(function (e) { return shopEntryKey(e) === st.sel; }) ? st.sel : pieceDefaultSel(d, st.tier);
     /* The section's action handlers resolve their entry inside
        this list by key, as they always have. */
