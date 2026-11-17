@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-17.29" />
+    <meta name="wardrobe-build" content="2026-11-17.30" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -670,6 +670,48 @@
       .swap-pick .sp-name { font-family: var(--font-display); font-size: 17px; font-weight: 600; line-height: 1.2; }
       .swap-pick .sp-sub { font-size: 12px; color: var(--dim); }
       .swap-owned { flex: none; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+      /* Build a look (build .30) — the three doors, the pickers,
+         and the upload confirm sheet. Rows reuse the swap-pick
+         shape; the wardrobe door is a photo grid of his pieces. */
+      .build-door { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; cursor: pointer; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; color: var(--text); font: inherit; margin: 0 0 7px; }
+      .build-door .bd-main { flex: 1; min-width: 0; display: grid; gap: 1px; }
+      .build-door .bd-name { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.2; }
+      .build-door .bd-sub { font-size: 12px; color: var(--dim); }
+      .build-door .bd-chev { color: var(--brass); font-size: 20px; flex: none; }
+      .build-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; max-height: 52vh; overflow-y: auto; }
+      .build-cell { display: block; padding: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; overflow: hidden; text-align: left; font: inherit; color: var(--text); }
+      .build-cell img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
+      .build-cell .bc-dot { width: 100%; aspect-ratio: 3 / 4; display: block; }
+      .build-cell .bc-name { display: block; font-size: 11px; font-weight: 600; line-height: 1.25; padding: 5px 6px 6px; }
+      .build-shop-list { max-height: 52vh; overflow-y: auto; }
+      .build-pick-off { opacity: .55; cursor: default; }
+      .build-swatches { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+      .build-swatch { width: 26px; height: 26px; border-radius: 999px; border: 1px solid var(--border); padding: 0; cursor: pointer; }
+      .build-swatch[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .build-combo-tag { position: absolute; left: 10px; bottom: 10px; background: rgba(20,17,13,.75); color: #f7f1e5; font-size: 12px; line-height: 1.25; padding: 7px 11px; border-radius: 999px; max-width: calc(100% - 20px); }
+      /* Feedback behind one icon (build .30, user request): the
+         pop-out's old Feedback sprawl — the chips drop, the
+         comment, Save / Remove, Shop, Share — collapses into a
+         single small icon at the end of the watch row. The icon
+         is visually a 28px disc inside the standard invisible
+         44px touch area; tapping it opens the Feedback sheet. */
+      .pop-act-row { display: flex; align-items: center; gap: 8px; }
+      .fb-icon-btn { margin-left: auto; flex: none; width: 44px; height: 44px; padding: 0; border: none; background: none; cursor: pointer; display: grid; place-items: center; }
+      .fb-disc { width: 28px; height: 28px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--brass); display: grid; place-items: center; }
+      .fb-menu { display: grid; margin-bottom: 14px; }
+      .fb-menu-row { display: flex; align-items: center; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid var(--border); padding: 12px 2px; font: inherit; font-size: 15px; font-weight: 600; color: var(--text); cursor: pointer; }
+      .fb-menu-row:last-child { border-bottom: none; }
+      .fb-menu-row.danger { color: var(--accent); }
+      /* Colours / On the wrist / Sunglasses as three boxes
+         (build .30, user request): one row of equal compact
+         boxes where the three stacked accordions were; a single
+         shared panel under the row shows the open box's content
+         — the exact HTML its accordion held. */
+      .trio-boxes { display: flex; gap: 6px; margin-top: 10px; }
+      .trio-box { flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 8px 2px; font-family: var(--font-ui); font-size: 12px; font-weight: 600; white-space: nowrap; color: var(--text); cursor: pointer; text-align: center; }
+      .trio-box[aria-expanded="true"] { border-color: var(--brass); color: var(--brass); }
+      .trio-panel { margin-top: 8px; }
+      .trio-panel[hidden] { display: none; }
       .profile-grid { display: grid; gap: 14px; }
       @media (min-width: 640px) { .profile-grid { grid-template-columns: 1fr 1fr; } }
       @media (min-width: 960px) { .profile-grid { grid-template-columns: 1fr 1fr 1fr; } }
@@ -2580,13 +2622,29 @@
       /* Build .28 — Closet top row + brand rails, Ideas source
          toggle, My Looks pill scroll, Shop piece controls, worn
          dates, Sale rail, Profile sub pages. */
-      .closet-top3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
-      .closet-top3 .sel-row { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; min-height: 48px; padding: 6px 22px 6px 10px; position: relative; width: 100%; text-align: left; }
-      .closet-top3 .sel-val { flex: none; width: 100%; }
-      .closet-top3 .sel-chev { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); }
-      .ward-rail { position: fixed; right: 3px; top: 50%; transform: translateY(-50%); z-index: 60; display: flex; flex-direction: column; gap: 1px; padding: 6px 2px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 82%, transparent); }
+      /* Compact chips, not tiles (user, Nov 17): build .28 laid
+         these out as three equal grid columns stretched across
+         the screen. Now each box is only as wide as its own
+         content — name over value, hero-dropdown height — the
+         row sits left-aligned, and flex stretch keeps all three
+         the same height. A long category name may widen its box;
+         the row wraps rather than ever forcing equal thirds. */
+      .closet-top3 { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+      .closet-top3 .sel-row { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; min-height: 34px; padding: 5px 18px 5px 9px; position: relative; width: auto; flex: none; text-align: left; }
+      .closet-top3 .sel-val { flex: none; width: auto; }
+      .closet-top3 .sel-chev { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); }
+      /* The Closet + Sale rails match the Brands rail (.brand-rail)
+         EXACTLY (user, Nov 17): the same compact pill — fixed,
+         right margin, vertically centered, letters at natural
+         tight spacing. Build .28 shipped these buttons with a
+         height but no min-height, so the global 44px touch-target
+         min-height stretched the strip to 1,181px — past both
+         ends of the screen. The explicit min-height: 15px below
+         is what keeps the pill compact, exactly as .brand-rail
+         does. */
+      .ward-rail { position: fixed; right: 3px; top: 50%; transform: translateY(-50%); z-index: 60; display: flex; flex-direction: column; align-items: center; gap: 0; padding: 5px 0; border-radius: 999px; background: color-mix(in srgb, var(--surface) 82%, transparent); }
       .ward-rail[hidden] { display: none; }
-      .ward-rail button { width: 17px; height: 17px; padding: 0; border: 0; background: none; font-size: 10px; font-weight: 600; line-height: 17px; text-align: center; color: var(--text); cursor: pointer; }
+      .ward-rail button { width: 17px; min-height: 15px; padding: 0; border: none; background: none; font-family: var(--font-ui); font-size: 11px; font-weight: 600; letter-spacing: 0; line-height: 1.35; color: var(--dim); cursor: pointer; text-align: center; }
       .ward-rail button.off { opacity: .28; }
       #panel-wardrobe .item-grid { padding-right: 22px; }
       #panel-wardrobe .item-card { scroll-margin-top: 118px; }
@@ -2740,6 +2798,7 @@
             <div class="studio-home-bar">
               <button type="button" class="btn-accent" id="studio-deal">Give me ideas</button>
               <button type="button" class="btn-ghost" id="studio-customize" aria-expanded="false" aria-controls="studio-form">Customize</button>
+              <button type="button" class="btn-ghost" id="studio-build">Build a look</button>
             </div>
             
             <form class="card studio-form" id="studio-form" style="display:none">
@@ -3759,6 +3818,80 @@
         </div>
       </div>
     </div>
+    <div class="info-pop-backdrop" id="build-sheet" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="build-sheet-title">
+        <div class="principles-head">
+          <h3 id="build-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Build a look</h3>
+          <button type="button" class="info-pop-close" id="build-sheet-close" aria-label="Close build a look">&times;</button>
+        </div>
+        <p class="meta" style="margin:0 0 12px">Style an outfit around one piece — yours, one you're eyeing, or one you upload.</p>
+        <button type="button" class="build-door" data-build-door="wardrobe"><span class="bd-main"><span class="bd-name">From my wardrobe</span><span class="bd-sub">A piece from your Closet</span></span><span class="bd-chev" aria-hidden="true">›</span></button>
+        <button type="button" class="build-door" data-build-door="shop"><span class="bd-main"><span class="bd-name">Shop items</span><span class="bd-sub">The catalogue, sale items and your wishlist</span></span><span class="bd-chev" aria-hidden="true">›</span></button>
+        <button type="button" class="build-door" data-build-door="upload"><span class="bd-main"><span class="bd-name">Upload new item</span><span class="bd-sub">A photo of a piece you love</span></span><span class="bd-chev" aria-hidden="true">›</span></button>
+      </div>
+    </div>
+    <div class="info-pop-backdrop" id="build-wardrobe-sheet" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="build-wardrobe-title">
+        <div class="principles-head">
+          <h3 id="build-wardrobe-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">From my wardrobe</h3>
+          <button type="button" class="info-pop-close" id="build-wardrobe-close" aria-label="Close wardrobe picker">&times;</button>
+        </div>
+        <p class="meta" style="margin:0 0 12px">Tap the piece to build around.</p>
+        <div class="build-grid" id="build-wardrobe-grid"></div>
+      </div>
+    </div>
+    <div class="info-pop-backdrop" id="build-shop-sheet" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="build-shop-title">
+        <div class="principles-head">
+          <h3 id="build-shop-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Shop items</h3>
+          <button type="button" class="info-pop-close" id="build-shop-close" aria-label="Close shop picker">&times;</button>
+        </div>
+        <div class="upload-sec">
+          <label class="field" for="build-shop-search">Search</label>
+          <input type="search" id="build-shop-search" placeholder="Brand, piece, colour…" autocomplete="off" />
+        </div>
+        <div class="build-shop-list" id="build-shop-list"></div>
+      </div>
+    </div>
+    <div class="info-pop-backdrop" id="build-upload-sheet" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="build-upload-title">
+        <div class="principles-head">
+          <h3 id="build-upload-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Upload new item</h3>
+          <button type="button" class="info-pop-close" id="build-upload-close" aria-label="Close upload">&times;</button>
+        </div>
+        <div class="wearing-photo-btns">
+          <label class="photo-drop" for="build-photo-camera"><span class="pd-title">Take a photo</span><input type="file" id="build-photo-camera" accept="image/*" capture="user" /></label>
+          <label class="photo-drop" for="build-photo-upload"><span class="pd-title">Choose a photo</span><input type="file" id="build-photo-upload" accept="image/*" /></label>
+        </div>
+        <p class="meta" id="build-upload-status" role="status" hidden style="margin:10px 0 0"></p>
+      </div>
+    </div>
+    <div class="info-pop-backdrop" id="build-confirm-sheet" hidden>
+      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="build-confirm-title">
+        <div class="principles-head">
+          <h3 id="build-confirm-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Your piece</h3>
+          <button type="button" class="info-pop-close" id="build-confirm-close" aria-label="Close piece details">&times;</button>
+        </div>
+        <img id="build-preview" alt="Your uploaded piece" hidden />
+        <div class="upload-sec">
+          <label class="field" for="build-name">Name</label>
+          <input type="text" id="build-name" value="Uploaded jacket" autocomplete="off" />
+        </div>
+        <div class="upload-sec">
+          <label class="field" for="build-cat">Category</label>
+          <select id="build-cat"></select>
+        </div>
+        <div class="upload-sec">
+          <label class="field" for="build-colour-name">Colour</label>
+          <input type="text" id="build-colour-name" placeholder="e.g. Beige" autocomplete="off" />
+          <div class="build-swatches" id="build-swatches"></div>
+        </div>
+        <div class="wearing-actions upload-sec">
+          <button type="button" class="btn-ghost" id="build-confirm-cancel">Cancel</button>
+          <button type="button" class="btn-accent" id="build-confirm-go">Build the look</button>
+        </div>
+      </div>
+    </div>
     <div class="popout" id="photo-popout" hidden>
       <img id="popout-img" alt="" />
       <button type="button" class="popout-close" id="popout-close" aria-label="Close full-size photo">&times;</button>
@@ -4100,7 +4233,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.29";
+var WARDROBE_BUILD = "2026-11-17.30";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -11336,19 +11469,14 @@ function persistLookFeedback(look) {
 }
 
 function feedbackHTML(look) {
-  var chips = ["Too bright", "Too dark", "More formal", "More casual", "Different shoes", "Keep the top", "Keep the bottom", "New colour story"];
   /* The card is a look, not a control panel: verdict + refresh +
-     queue stay in the open; the feedback chips and comment fold
-     into ONE collapsed Feedback drop, and there is ONE Save —
-     "Save this version" saves the look with whatever verdict,
-     chips and comment are set, so the two old Save buttons that
-     did near-identical things are one. */
-  var fbInner =
-    '<div class="fb-chips">' + chips.map(function (c) {
-      return '<button type="button" class="chip" data-fb-chip="' + c + '" aria-pressed="false">' + c + "</button>";
-    }).join("") + "</div>" +
-    '<label class="field" for="fb-text">Your comment on this look</label>' +
-    '<textarea id="fb-text" autocomplete="off" placeholder="What works, what doesn\u2019t — saved with the look">' + esc(look.comment || "") + "</textarea>";
+     queue stay in the open. Everything else that used to sprawl
+     here — the feedback chips and comment, Save this version,
+     Remove this look, Shop the look, Share as image — now lives
+     behind the single Feedback icon at the end of the watch row
+     (build .30, user request); see fbSheetHTML. There is still
+     ONE Save: "Save this version" saves the look with whatever
+     verdict, chips and comment are set in that sheet. */
   return '<div class="feedback">' +
     '<div class="verdict-row">' +
     '<button type="button" class="verdict-btn" data-verdict="like" aria-pressed="' + (look.verdict === "like" ? "true" : "false") + '">I like it</button>' +
@@ -11357,12 +11485,59 @@ function feedbackHTML(look) {
     '<div class="look-actions verdict-actions">' +
     '<button type="button" class="btn-accent" data-action="refresh-look">Refresh the look</button>' +
     '<button type="button" class="btn-ghost" data-action="queue-look">Add to queue</button>' +
-    "</div>" +
-    dropHTML("Feedback", fbInner) +
-    '<div class="look-actions">' +
-    '<button type="button" class="btn-ghost" data-action="save-look">Save this version</button>' +
-    '<button type="button" class="btn-ghost danger" data-action="remove-look" aria-pressed="false">Remove this look</button>' +
     "</div></div>";
+}
+
+/* The Feedback icon + sheet (build .30). The icon button is a
+   28px speech-bubble disc inside a 44px touch area, sitting at
+   the end of the pop-out's watch row. The sheet is the app's
+   bottom-sheet pattern; its four menu rows carry the EXACT
+   attributes the old in-card buttons carried (data-action
+   save-look / remove-look / share-look, data-find-open), so
+   every existing handler — including Remove's two-tap confirm
+   and Save's chip/comment harvest — behaves identically. The
+   chips and comment keep their ids and classes for the same
+   reason. */
+var FB_ICON_SVG = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
+function fbIconHTML() {
+  return '<button type="button" class="fb-icon-btn" data-fb-open aria-label="Feedback — save, remove, shop or share this look"><span class="fb-disc" aria-hidden="true">' + FB_ICON_SVG + "</span></button>";
+}
+function fbSheetHTML(look) {
+  var chips = ["Too bright", "Too dark", "More formal", "More casual", "Different shoes", "Keep the top", "Keep the bottom", "New colour story"];
+  return '<div class="info-pop-backdrop" data-fb-sheet hidden>' +
+    '<div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="fb-sheet-title">' +
+    '<div class="principles-head"><h3 id="fb-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Feedback</h3>' +
+    '<button type="button" class="info-pop-close" data-fb-close aria-label="Close feedback">&times;</button></div>' +
+    '<div class="fb-menu">' +
+    '<button type="button" class="fb-menu-row" data-action="save-look">Save this version</button>' +
+    '<button type="button" class="fb-menu-row danger" data-action="remove-look" aria-pressed="false">Remove this look</button>' +
+    '<button type="button" class="fb-menu-row" data-find-open>Shop the look</button>' +
+    '<button type="button" class="fb-menu-row" data-action="share-look">Share as image</button>' +
+    "</div>" +
+    '<div class="fb-chips">' + chips.map(function (c) {
+      return '<button type="button" class="chip" data-fb-chip="' + c + '" aria-pressed="false">' + c + "</button>";
+    }).join("") + "</div>" +
+    '<label class="field" for="fb-text">Your comment on this look</label>' +
+    '<textarea id="fb-text" autocomplete="off" placeholder="What works, what doesn\u2019t — saved with the look">' + esc(look.comment || "") + "</textarea>" +
+    "</div></div>";
+}
+
+/* The three detail boxes (build .30): the row + one shared
+   panel + a hidden store holding each section's content div.
+   Tapping a box moves its div from the store into the panel;
+   tapping the open box (or switching) moves it back. Moving
+   the actual nodes keeps any controls inside the sections
+   wired exactly as they were inside the accordions. */
+function trioBoxesHTML(secs) {
+  if (!secs.length) return "";
+  return '<div class="trio-boxes" role="group" aria-label="Colours, on the wrist, sunglasses">' +
+    secs.map(function (s) {
+      return '<button type="button" class="trio-box" data-trio="' + s.key + '" aria-expanded="false">' + s.label + "</button>";
+    }).join("") + "</div>" +
+    '<div class="trio-panel" data-trio-panel hidden></div>' +
+    '<div class="trio-store" hidden>' + secs.map(function (s) {
+      return '<div data-trio-content="' + s.key + '">' + s.html + "</div>";
+    }).join("") + "</div>";
 }
 
 /* The reference photographs behind a look's direction — the icon's
@@ -11970,6 +12145,12 @@ function swapMapForLook(look) {
   if (!look || look.refLook) return null;
   var out = {};
   if (look.swapPieces) {
+    /* A Build-a-look anchor (build .30) is a synthetic piece —
+       a shopped product or an upload — that lives only in the
+       look's own anchorPiece descriptor. Register it on demand
+       so the mapping (and its Change-a-piece rows for the other
+       slots) works after any reload or sync. */
+    if (look.anchorPiece && look.anchorPiece.id && !PIECE_BY_ID[look.anchorPiece.id]) PIECE_BY_ID[look.anchorPiece.id] = look.anchorPiece;
     Object.keys(look.swapPieces).forEach(function (slot) {
       var p = PIECE_BY_ID[look.swapPieces[slot]];
       if (p && !out[slot]) out[slot] = { piece: p };
@@ -12108,6 +12289,15 @@ function swapSectionHTML(look, fwIdx) {
   var fwAttr = typeof fwIdx === "number" ? ' data-swap-fw="' + fwIdx + '"' : "";
   var rows = slots.map(function (s) {
     var p = map[s].piece;
+    /* The Build-a-look anchor itself is not swappable in v1
+       (build .30): its row names it as the anchor and carries
+       no Change button. */
+    if (look.anchorPieceId && p.id === look.anchorPieceId) {
+      return '<div class="piece-row">' +
+        '<span class="cdot" style="background:' + esc(p.wh) + '"></span>' +
+        '<span class="p-main"><span class="p-name">' + esc(p.name) + '</span>' +
+        '<span class="p-sub">' + SWAP_SLOT_LABELS[s] + " · Anchor</span></span></div>";
+    }
     return '<div class="piece-row">' +
       '<span class="cdot" style="background:' + esc(p.wh) + '"></span>' +
       '<span class="p-main"><span class="p-name">' + esc(p.name) + '</span>' +
@@ -12662,7 +12852,11 @@ function styleAssembleCombos(anchor, exclude, limit) {
     if (i === fillSlots.length) {
       var idsBySlot = {};
       Object.keys(chosen).forEach(function (s) { idsBySlot[s] = chosen[s].id; });
-      var idList = ["top", "bottom", "shoes", "layer"].filter(function (s) { return idsBySlot[s]; }).map(function (s) { return idsBySlot[s]; });
+      /* "accessory" joins the id list for Build-a-look anchors
+         (a belt or tie fixed alongside the three filled slots);
+         wardrobe anchors never hold that slot, so their
+         comboIds are unchanged. */
+      var idList = ["top", "bottom", "shoes", "layer", "accessory"].filter(function (s) { return idsBySlot[s]; }).map(function (s) { return idsBySlot[s]; });
       var comboId = swapComboId(idList, "");
       if (!exclude[comboId]) { exclude[comboId] = 1; results.push({ idsBySlot: idsBySlot, comboId: comboId }); }
       return;
@@ -12845,6 +13039,10 @@ function startStyleRenderWatch() {
 }
 function styleThisItem(it) {
   if (!it) return;
+  /* One anchored view at a time: entering Style this retires
+     any Build-a-look results (and their render watch). */
+  buildCtx = null;
+  if (typeof stopBuildWatch === "function") stopBuildWatch();
   styleItemCtx = { itemId: it.id, shown: {} };
   styleResults = styleDeal(it, 6);
   if (!styleResults.length) {
@@ -12873,6 +13071,456 @@ document.addEventListener("click", function (e) {
   }
 });
 
+/* ================= Build a look (build .30) =================
+   One builder, three doors in — a piece from his wardrobe
+   (door 1 reuses Style this [item] untouched), a shopped
+   product (door 2), or an uploaded photo (door 3). Doors 2–3
+   anchor on a SYNTHETIC library piece:
+
+   - Shop anchors carry their retailer image in the piece id
+     itself — "x:<library cat>:<encoded image URL>" — so the
+     id alone tells the render watcher where the garment photo
+     lives; the watcher downloads it and chains it like any
+     library piece (verified end-to-end against the live
+     worker + watcher before this UI was wired). Only SKUs
+     WITH a photo can anchor: a render must picture the anchor
+     it names, so image-less rows are excluded, never matched
+     to a lookalike.
+   - Upload anchors have no public URL and their photo cannot
+     ride the render job under the live worker contract (the
+     combo is rebuilt worker-side to piece-id strings only),
+     so uploaded pieces assemble combinations — shown honestly
+     with the uploaded photo — but do not queue renders.
+
+   Built looks name their anchor ("Built around: …" in the
+   pop-out), keep Change-a-piece rows for every other mapped
+   slot, and the anchor itself is not swappable in v1. */
+var buildCtx = null, buildResults = [];
+var buildAnchors = store.get("buildAnchors", []);
+if (!Array.isArray(buildAnchors)) buildAnchors = [];
+function saveBuildAnchors() { store.set("buildAnchors", buildAnchors); }
+
+var BUILD_CAT_MAP = { knitwear: ["knitwear", "top"], top: ["tops", "top"], shirt: ["shirts", "top"], blazer: ["blazer", "layer"], suit: ["suit", "layer"], outerwear: ["jacket", "layer"], trousers: ["trousers", "bottom"], jeans: ["jeans", "bottom"], shorts: ["shorts", "bottom"], swim: ["swim", "bottom"], shoes: ["shoes", "shoes"], belt: ["belt", "accessory"], tie: ["tie", "accessory"] };
+var BUILD_FS_BY_CAT = { knitwear: 3, top: 2, shirt: 4, blazer: 3, suit: 5, outerwear: 3, trousers: 3, jeans: 2, shorts: 2, swim: 1, shoes: 3, belt: 3, tie: 4 };
+var BUILD_UPLOAD_FS = { Shoes: 3, Shirts: 4, "Button downs": 4, Tees: 2, Polos: 3, Sweaters: 3, Jeans: 2, Shorts: 2, "Bathing suits": 1, Trousers: 3, Suits: 5, Blazers: 3, Jackets: 3, Coats: 4, "Leather jackets": 3, Vests: 4, Belts: 3, Ties: 4 };
+var BUILD_UPLOAD_CATS = ["Shirts", "Button downs", "Tees", "Polos", "Sweaters", "Blazers", "Jackets", "Coats", "Leather jackets", "Vests", "Suits", "Trousers", "Jeans", "Shorts", "Bathing suits", "Shoes", "Belts", "Ties"];
+var BUILD_UPLOAD_NOUN = { Shirts: "shirt", "Button downs": "shirt", Tees: "tee", Polos: "polo", Sweaters: "sweater", Blazers: "blazer", Jackets: "jacket", Coats: "coat", "Leather jackets": "leather jacket", Vests: "vest", Suits: "suit", Trousers: "trousers", Jeans: "jeans", Shorts: "shorts", "Bathing suits": "swim trunks", Shoes: "shoes", Belts: "belt", Ties: "tie" };
+
+/* ---------- Shop anchors ---------- */
+function buildShopColour(e) {
+  var c = shopColourFor(e, null);
+  if (c && c.hex && c.hex !== "#8a8d8f") return { hex: c.hex, name: c.name || "" };
+  if (e.hex) return { hex: e.hex, name: e.colourName || "" };
+  var text = (" " + (e.brand || "") + " " + (e.name || "") + " ").toLowerCase();
+  var words = COLOUR_WORDS.slice().sort(function (a, b) { return b[0].length - a[0].length; });
+  for (var i = 0; i < words.length; i++) {
+    var w = words[i][0];
+    if (text.indexOf(" " + w + " ") !== -1 || text.indexOf(" " + w + "-") !== -1 || text.indexOf("-" + w + " ") !== -1) return { hex: words[i][1], name: w };
+  }
+  return { hex: "#8a8d8f", name: "" };
+}
+function buildShopPiece(e) {
+  if (!e || !e.img) return null;
+  var m = BUILD_CAT_MAP[e.cat];
+  if (!m && e.category) {
+    if (e.category === "Belts") m = ["belt", "accessory"];
+    else if (e.category === "Ties") m = ["tie", "accessory"];
+    else {
+      var slot = swapSlotForClosetCat(e.category);
+      var lib = (SWAP_LIBCATS[e.category] || [null])[0];
+      if (slot && lib) m = [lib, slot];
+    }
+  }
+  if (!m) return null;
+  var col = buildShopColour(e);
+  var id = "x:" + m[0] + ":" + encodeURIComponent(e.img);
+  var piece = {
+    id: id, slot: m[1], cat: m[0],
+    name: ((e.brand ? e.brand + " " : "") + (e.name || "")).trim(),
+    wn: nearestWada(col.hex).name, wh: col.hex,
+    fs: BUILD_FS_BY_CAT[m[0]] || 3, temp: [30, 95],
+    owned: false, cid: null, img: e.img, anchor: true
+  };
+  PIECE_BY_ID[id] = piece;
+  return piece;
+}
+function buildEntryByKey(key) {
+  var found = null;
+  SHOP_CATALOGUE.forEach(function (e) { if (!found && shopEntryKey(e) === key) found = e; });
+  if (!found) SALE_ITEMS.forEach(function (e) { if (!found && shopEntryKey(e) === key) found = e; });
+  if (!found) found = wishlistFor(key);
+  return found;
+}
+var buildShopByKey = {};
+function buildShopEntries() {
+  var out = [], seen = {};
+  buildShopByKey = {};
+  function push(e, src) {
+    if (!e) return;
+    var key = shopEntryKey(e);
+    if (seen[key]) return;
+    seen[key] = 1;
+    var norm = { key: key, brand: e.brand || "", name: e.name || "", retailer: e.retailer || "", price: e.price, tier: e.tier || "", url: e.url || "", img: e.img || "", cat: e.cat || "", category: e.category || "", keys: e.keys || [], hex: e.hex || "", colourName: e.colourName || "", src: src };
+    buildShopByKey[key] = norm;
+    out.push(norm);
+  }
+  SHOP_CATALOGUE.forEach(function (e) { push(e, "catalogue"); });
+  SALE_ITEMS.forEach(function (e) { push(e, "sale"); });
+  shopWishlist.forEach(function (w) { push(w, "wishlist"); });
+  return out;
+}
+
+/* ---------- Upload anchors ---------- */
+function buildUploadPiece(a) {
+  if (!a) return null;
+  var slot = swapSlotForClosetCat(a.category);
+  var lib = (SWAP_LIBCATS[a.category] || [null])[0];
+  if (a.category === "Belts") { slot = "accessory"; lib = "belt"; }
+  if (a.category === "Ties") { slot = "accessory"; lib = "tie"; }
+  if (!slot || !lib) return null;
+  var piece = {
+    id: a.id, slot: slot, cat: lib, name: a.name,
+    wn: nearestWada(a.colourHex || "#8a8d8f").name, wh: a.colourHex || "#8a8d8f",
+    fs: BUILD_UPLOAD_FS[a.category] || 3, temp: [30, 95],
+    owned: false, cid: null, img: a.photo, anchor: true, uploadAnchor: true
+  };
+  PIECE_BY_ID[piece.id] = piece;
+  return piece;
+}
+buildAnchors.forEach(function (a) { buildUploadPiece(a); });
+
+/* ---------- Assembly ---------- */
+function buildComboLook(idsBySlot, comboId, piece) {
+  var order = ["top", "bottom", "shoes", "layer", "accessory"];
+  var slotsUsed = order.filter(function (s) { return idsBySlot[s]; });
+  var idList = slotsUsed.map(function (s) { return idsBySlot[s]; });
+  var pieces = slotsUsed.map(function (s) { return PIECE_BY_ID[idsBySlot[s]]; }).filter(Boolean);
+  if (!pieces.length) return null;
+  var look = {
+    id: newLookId(),
+    title: pieces.map(function (p) { return p.name; }).join(" × "),
+    meta: "Built around the " + piece.name,
+    desc: pieces.map(function (p) { return p.name; }).join(" with "),
+    iconId: null, blendId: null, basis: "both", version: 1, plate: null, paletteName: null,
+    img: "", imgAlt: "You wearing " + pieces.map(function (p) { return p.name; }).join(", "),
+    swatches: pieces.map(function (p) { return { name: p.wn, hex: p.wh, role: cap(p.cat || "Piece") }; }),
+    flatlay: pieces.map(function (p) { return { hex: p.wh, label: cap(p.cat || "Piece"), detail: "" }; }),
+    notes: ["Built around the " + piece.name + " — every other piece completes it."],
+    source: "combo",
+    anchorNames: pieces.filter(function (p) { return p.cid; }).map(function (p) { var ci = closetItemById(p.cid); return ci ? ci.name : p.name; }),
+    swapPieces: idsBySlot,
+    swapComboId: comboId,
+    swapFromPhoto: "",
+    builtAround: piece.name,
+    anchorPieceId: piece.id,
+    anchorSlot: piece.slot,
+    anchorPiece: { id: piece.id, slot: piece.slot, cat: piece.cat, name: piece.name, wn: piece.wn, wh: piece.wh, fs: piece.fs, owned: false, cid: null, img: piece.uploadAnchor ? null : piece.img, anchor: true }
+  };
+  if (buildCtx && buildCtx.upload) {
+    look.img = buildCtx.upload.photo;
+    look.imgAlt = "Your uploaded " + buildCtx.upload.name;
+    look.buildUpload = true;
+    look.notes = look.notes.concat(["Renders of uploaded pieces aren't available yet — this is the combination, shown with your uploaded photo; the pieces are listed under Change a piece."]);
+    return look;
+  }
+  var existing = swapFindExistingRender(idList);
+  if (existing) { look.img = existing; return look; }
+  if (!swapSyncKey()) return null;
+  look.swapState = "rendering";
+  /* Same call shape as styleComboLook: (look, idsBySlot, "") —
+     swapSubmitJob builds the worker body from the slot map and
+     takes the comboId from look.swapComboId. */
+  swapSubmitJob(look, idsBySlot, "");
+  swapPersistLook(look);
+  return look;
+}
+function buildDeal(piece, limit) {
+  if (!buildCtx) return [];
+  var out = [];
+  var combos = styleAssembleCombos(piece, buildCtx.shown, limit + 6);
+  for (var ci = 0; ci < combos.length && out.length < limit; ci++) {
+    var look = buildComboLook(combos[ci].idsBySlot, combos[ci].comboId, piece);
+    if (!look) continue;
+    if (!look.buildUpload && look.swapState !== "rendering" && look.img && graduatedImgs()[look.img]) continue;
+    out.push(look);
+  }
+  return out;
+}
+function openBuildResults(piece, label, upload) {
+  styleItemCtx = null;
+  if (typeof stopStyleRenderWatch === "function") stopStyleRenderWatch();
+  buildCtx = { piece: piece, label: label, upload: upload || null, shown: {} };
+  buildResults = buildDeal(piece, 6);
+  if (!buildResults.length) {
+    buildCtx = null;
+    toast("No outfits around the " + label + " yet — it pairs as more pieces are added.");
+    return false;
+  }
+  if (typeof switchTab === "function") switchTab("studio");
+  renderBuildResults();
+  return true;
+}
+function buildAroundShopEntry(e) {
+  var piece = buildShopPiece(e);
+  if (!piece) { toast("That kind of piece can't anchor a look yet."); return; }
+  openBuildResults(piece, piece.name, null);
+}
+function buildCardHTML(look, idx) {
+  if (look.buildUpload) {
+    return '<button type="button" class="card option-card" data-build-idx="' + idx + '" role="listitem">' +
+      '<span class="pane" style="position:relative;display:block;aspect-ratio:3/4"><img src="' + esc(look.img) + '" alt="' + esc(look.imgAlt || "") + '" style="width:100%;height:100%;object-fit:cover;display:block" />' +
+      '<span class="build-combo-tag">The combination — renders aren\u2019t available for uploads yet</span></span>' +
+      '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
+      cardStripHTML(look.swatches) + "</span></button>";
+  }
+  if (look.swapState === "rendering") {
+    return '<button type="button" class="card option-card" data-build-idx="' + idx + '" role="listitem">' +
+      '<span class="pane swap-rendering" style="position:relative;display:block;aspect-ratio:3/4">' +
+      '<span class="swap-render-line">Rendering this combination\u2026</span></span>' +
+      '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
+      cardStripHTML(look.swatches) + "</span></button>";
+  }
+  return '<button type="button" class="card option-card" data-build-idx="' + idx + '" role="listitem">' +
+    '<img src="' + esc(lookImg(look)) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy" />' +
+    '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
+    cardStripHTML(look.swatches) + "</span></button>";
+}
+function renderBuildResults(keepScroll) {
+  var el = document.getElementById("look-result");
+  if (!el || !buildCtx) return;
+  el.innerHTML = '<div class="options-head"><span class="oc-label">Built around: ' + esc(buildCtx.label) + '</span>' +
+    '<button type="button" class="btn-ghost" data-build-more>Six more ideas</button></div>' +
+    '<div class="options-grid" role="list">' + buildResults.map(function (look, idx) { return buildCardHTML(look, idx); }).join("") + "</div>";
+  if (!keepScroll) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  startBuildWatch();
+}
+var buildWatchTimer = null;
+function stopBuildWatch() { if (buildWatchTimer) { clearInterval(buildWatchTimer); buildWatchTimer = null; } }
+function startBuildWatch() {
+  stopBuildWatch();
+  if (!buildResults.some(function (l) { return l.swapState === "rendering"; })) return;
+  buildWatchTimer = setInterval(function () {
+    if (!buildCtx) { stopBuildWatch(); return; }
+    if (typeof swapResumePending === "function") swapResumePending();
+    var changed = false;
+    buildResults.forEach(function (l) {
+      if (l.swapState === "rendering" && l.swapComboId && lazyRenders[l.swapComboId]) {
+        l.img = lazyRenders[l.swapComboId];
+        l.swapPhoto = lazyRenders[l.swapComboId];
+        l.swapState = null;
+        changed = true;
+      }
+    });
+    if (changed) renderBuildResults(true);
+    if (!buildResults.some(function (l) { return l.swapState === "rendering"; })) stopBuildWatch();
+  }, 20000);
+}
+
+/* ---------- The three doors ---------- */
+function buildSheetEl(id) { return document.getElementById(id); }
+function showBuildSheet(id) { var s = buildSheetEl(id); if (s) s.hidden = false; }
+function hideBuildSheet(id) { var s = buildSheetEl(id); if (s) s.hidden = true; }
+function openBuildWardrobe() {
+  var grid = buildSheetEl("build-wardrobe-grid");
+  if (!grid) return;
+  var items = wardrobeItems.filter(function (i) { return !i.laundry; }).slice().sort(function (a, b) {
+    var c = String(a.category || "").localeCompare(String(b.category || ""));
+    if (c) return c;
+    var br = String(wardBrandKey(a)).localeCompare(String(wardBrandKey(b)));
+    if (br) return br;
+    return String(a.name || "").localeCompare(String(b.name || ""));
+  });
+  grid.innerHTML = items.length ? items.map(function (i) {
+    var media = i.photo ? '<img src="' + i.photo + '" alt="" loading="lazy" />' : '<span class="bc-dot" style="background:' + esc(i.colourHex || "#ccc") + '"></span>';
+    return '<button type="button" class="build-cell" data-build-ward="' + esc(i.id) + '">' + media + '<span class="bc-name">' + esc(i.name) + "</span></button>";
+  }).join("") : '<p class="meta" style="margin:0">Nothing in your closet yet.</p>';
+  showBuildSheet("build-wardrobe-sheet");
+}
+function renderBuildShopList() {
+  var list = buildSheetEl("build-shop-list");
+  if (!list) return;
+  var q = (buildSheetEl("build-shop-search").value || "").trim().toLowerCase();
+  var entries = buildShopEntries().filter(function (e) {
+    if (!q) return true;
+    var hay = (e.brand + " " + e.name + " " + (e.category || "") + " " + (e.cat || "") + " " + (e.keys || []).join(" ")).toLowerCase();
+    return q.split(/\s+/).every(function (w) { return hay.indexOf(w) !== -1; });
+  });
+  entries.sort(function (a, b) {
+    var ai = a.img ? 0 : 1, bi = b.img ? 0 : 1;
+    if (ai !== bi) return ai - bi;
+    return (a.brand + " " + a.name).localeCompare(b.brand + " " + b.name);
+  });
+  var total = entries.length;
+  var shown = entries.slice(0, 80);
+  list.innerHTML = (total > 80 ? '<p class="meta" style="margin:0 0 8px">Showing 80 of ' + total + " — keep typing to narrow it down.</p>" : "") +
+    (shown.length ? shown.map(function (e) {
+      var sub = esc(e.retailer) + (e.price != null && e.price !== "" ? " · $" + Number(e.price).toLocaleString("en-US") : "") + (e.tier ? " · " + esc(shopTierInfo(e.tier).name) : "");
+      if (!e.img) {
+        return '<div class="swap-pick build-pick-off"><span class="cdot" style="background:' + esc(buildShopColour(e).hex) + '"></span><span class="sp-main"><span class="sp-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="sp-sub">' + sub + '</span><span class="sp-sub">No photo — can\u2019t style yet</span></span></div>';
+      }
+      var media = '<img src="' + esc(e.img) + '" alt="" loading="lazy" />';
+      return '<button type="button" class="swap-pick" data-build-shop="' + esc(e.key) + '">' + media + '<span class="sp-main"><span class="sp-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="sp-sub">' + sub + "</span></span></button>";
+    }).join("") : '<p class="meta" style="margin:0">Nothing matches that search.</p>');
+}
+function openBuildShop() {
+  var inp = buildSheetEl("build-shop-search");
+  if (inp) inp.value = "";
+  renderBuildShopList();
+  showBuildSheet("build-shop-sheet");
+}
+
+/* ---------- Upload door ---------- */
+var buildPhotoDataUrl = null, buildNameTouched = false, buildSwatchHex = "";
+function openBuildConfirm() {
+  var catSel = buildSheetEl("build-cat");
+  if (catSel && !catSel.options.length) {
+    catSel.innerHTML = BUILD_UPLOAD_CATS.map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + "</option>"; }).join("");
+    catSel.value = "Jackets";
+  }
+  var sw = buildSheetEl("build-swatches");
+  if (sw && !sw.children.length) {
+    sw.innerHTML = COLOUR_WORDS.map(function (w) {
+      return '<button type="button" class="build-swatch" data-build-swatch="' + esc(w[0]) + '" style="background:' + esc(w[1]) + '" title="' + esc(cap(w[0])) + '" aria-label="' + esc(cap(w[0])) + '" aria-pressed="false"></button>';
+    }).join("");
+  }
+  buildNameTouched = false;
+  buildSwatchHex = "";
+  sw.querySelectorAll("[data-build-swatch]").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+  var nameInp = buildSheetEl("build-name");
+  if (nameInp) nameInp.value = "Uploaded " + (BUILD_UPLOAD_NOUN[catSel ? catSel.value : "Jackets"] || "piece");
+  var colInp = buildSheetEl("build-colour-name");
+  if (colInp) colInp.value = "";
+  var prev = buildSheetEl("build-preview");
+  if (prev && buildPhotoDataUrl) { prev.src = buildPhotoDataUrl; prev.hidden = false; }
+  showBuildSheet("build-confirm-sheet");
+}
+function confirmBuildUpload() {
+  var cat = buildSheetEl("build-cat").value;
+  var name = (buildSheetEl("build-name").value || "").trim() || ("Uploaded " + (BUILD_UPLOAD_NOUN[cat] || "piece"));
+  var colName = (buildSheetEl("build-colour-name").value || "").trim();
+  var hex = "";
+  if (colName) {
+    var lw = colName.toLowerCase();
+    for (var i = 0; i < COLOUR_WORDS.length; i++) if (COLOUR_WORDS[i][0] === lw) { hex = COLOUR_WORDS[i][1]; break; }
+  }
+  if (!hex) hex = buildSwatchHex || "#8a8d8f";
+  var anchor = { id: "up-" + Date.now().toString(36) + Math.floor(Math.random() * 1e5).toString(36), name: name, category: cat, colourName: colName, colourHex: hex, photo: buildPhotoDataUrl, createdAt: Date.now() };
+  buildAnchors.unshift(anchor);
+  saveBuildAnchors();
+  var piece = buildUploadPiece(anchor);
+  hideBuildSheet("build-confirm-sheet");
+  buildPhotoDataUrl = null;
+  if (!piece) { toast("That category can't anchor a look yet."); return; }
+  openBuildResults(piece, anchor.name, anchor);
+}
+function wireBuildUpload(inputId) {
+  var inp = buildSheetEl(inputId);
+  if (!inp) return;
+  inp.addEventListener("change", function () {
+    var f = inp.files && inp.files[0];
+    inp.value = "";
+    if (!f) return;
+    var st = buildSheetEl("build-upload-status");
+    if (st) { st.hidden = false; st.textContent = "Preparing your photo…"; }
+    processPhotoFile(f, function (url) {
+      if (st) st.hidden = true;
+      if (!url) { toast("That photo couldn't be read — try another one."); return; }
+      buildPhotoDataUrl = url;
+      hideBuildSheet("build-upload-sheet");
+      openBuildConfirm();
+    });
+  });
+}
+wireBuildUpload("build-photo-camera");
+wireBuildUpload("build-photo-upload");
+var buildNameInp = buildSheetEl("build-name");
+if (buildNameInp) buildNameInp.addEventListener("input", function () { buildNameTouched = true; });
+var buildCatSel = buildSheetEl("build-cat");
+if (buildCatSel) buildCatSel.addEventListener("change", function () {
+  if (buildNameTouched) return;
+  var n = buildSheetEl("build-name");
+  if (n) n.value = "Uploaded " + (BUILD_UPLOAD_NOUN[buildCatSel.value] || "piece");
+});
+var buildShopSearchInp = buildSheetEl("build-shop-search");
+if (buildShopSearchInp) buildShopSearchInp.addEventListener("input", renderBuildShopList);
+var buildGoBtn = buildSheetEl("build-confirm-go");
+if (buildGoBtn) buildGoBtn.addEventListener("click", confirmBuildUpload);
+var buildCancelBtn = buildSheetEl("build-confirm-cancel");
+if (buildCancelBtn) buildCancelBtn.addEventListener("click", function () { hideBuildSheet("build-confirm-sheet"); });
+
+/* ---------- Build wiring: the Ideas button, the doors, the
+   results grid, and Style this on every product surface. --- */
+var studioBuildBtn = document.getElementById("studio-build");
+if (studioBuildBtn) studioBuildBtn.addEventListener("click", function () { showBuildSheet("build-sheet"); });
+[["build-sheet", "build-sheet-close"], ["build-wardrobe-sheet", "build-wardrobe-close"], ["build-shop-sheet", "build-shop-close"], ["build-upload-sheet", "build-upload-close"], ["build-confirm-sheet", "build-confirm-close"]].forEach(function (pair) {
+  var c = buildSheetEl(pair[1]);
+  if (c) c.addEventListener("click", function () { hideBuildSheet(pair[0]); });
+  var bk = buildSheetEl(pair[0]);
+  if (bk) bk.addEventListener("click", function (e) { if (e.target === bk) bk.hidden = true; });
+});
+document.addEventListener("keydown", function (e) {
+  if (e.key !== "Escape") return;
+  ["build-sheet", "build-wardrobe-sheet", "build-shop-sheet", "build-upload-sheet", "build-confirm-sheet"].forEach(function (id) { hideBuildSheet(id); });
+});
+document.addEventListener("click", function (e) {
+  if (!e.target.closest) return;
+  var door = e.target.closest("[data-build-door]");
+  if (door) {
+    hideBuildSheet("build-sheet");
+    var d = door.getAttribute("data-build-door");
+    if (d === "wardrobe") openBuildWardrobe();
+    else if (d === "shop") openBuildShop();
+    else if (d === "upload") showBuildSheet("build-upload-sheet");
+    return;
+  }
+  var ward = e.target.closest("[data-build-ward]");
+  if (ward) {
+    var it = closetItemById(ward.getAttribute("data-build-ward"));
+    hideBuildSheet("build-wardrobe-sheet");
+    if (it) styleThisItem(it);
+    return;
+  }
+  var shopPick = e.target.closest("[data-build-shop]");
+  if (shopPick) {
+    var e1 = buildShopByKey[shopPick.getAttribute("data-build-shop")] || buildEntryByKey(shopPick.getAttribute("data-build-shop"));
+    hideBuildSheet("build-shop-sheet");
+    if (e1) buildAroundShopEntry(e1);
+    return;
+  }
+  var sw = e.target.closest("[data-build-swatch]");
+  if (sw) {
+    var word = sw.getAttribute("data-build-swatch");
+    buildSwatchHex = "";
+    for (var i = 0; i < COLOUR_WORDS.length; i++) if (COLOUR_WORDS[i][0] === word) buildSwatchHex = COLOUR_WORDS[i][1];
+    var ci = buildSheetEl("build-colour-name");
+    if (ci) ci.value = cap(word);
+    var wrap = sw.closest(".build-swatches");
+    if (wrap) wrap.querySelectorAll("[data-build-swatch]").forEach(function (b) { b.setAttribute("aria-pressed", b === sw ? "true" : "false"); });
+    return;
+  }
+  var more = e.target.closest("[data-build-more]");
+  if (more) {
+    if (!buildCtx) return;
+    var next = buildDeal(buildCtx.piece, 6);
+    if (!next.length) { toast("No more outfits around the " + buildCtx.label + "."); return; }
+    buildResults = next;
+    renderBuildResults();
+    return;
+  }
+  var card = e.target.closest("[data-build-idx]");
+  if (card) {
+    var look = buildResults[parseInt(card.getAttribute("data-build-idx"), 10)];
+    if (look) openLookLayer(look);
+    return;
+  }
+  var ss = e.target.closest("[data-style-shop]");
+  if (ss) { var se = buildEntryByKey(ss.getAttribute("data-style-shop")); if (se) buildAroundShopEntry(se); return; }
+  var sl = e.target.closest("[data-style-sale]");
+  if (sl) { var si = SALE_ITEMS[parseInt(sl.getAttribute("data-style-sale"), 10)]; if (si) buildAroundShopEntry(si); return; }
+  var swi = e.target.closest("[data-style-wish]");
+  if (swi) { var we = wishlistFor(swi.getAttribute("data-style-wish")); if (we) buildAroundShopEntry(we); return; }
+});
+
 function lookCardHTML(look, opts) {
   opts = opts || {};
   var refTag = look.refLook ? '<span class="pane-tag">Reference — ' + esc(look.imgInspo ? "your image" : ((look.iconId ? (iconById(look.iconId) || {}).name : "") || "icon")) + "</span>" : "";
@@ -12896,8 +13544,9 @@ function lookCardHTML(look, opts) {
   else if (look.source === "inspo") sourceLine = '<p class="source-line"><strong>Only inspo</strong><button type="button" class="info-btn sm" data-info-title="Only inspo" data-info-text="Built entirely outside your wardrobe — fresh inspo, nothing pulled from your closet." aria-label="About: only inspo looks">i</button></p>';
   /* The direction line lives in the Customize form's live
      preview; the card doesn't repeat it. */
+  var builtLine = look.builtAround ? '<p class="source-line"><strong>Built around:</strong> ' + esc(look.builtAround) + "</p>" : "";
   var head = "<h3>" + esc(look.title) + (look.version > 1 ? ' <span style="font-size:18px;color:var(--brass);font-style:italic">· take ' + look.version + "</span>" : "") + "</h3>" +
-    metaLine + sourceLine;
+    metaLine + sourceLine + builtLine;
   var stylingLine = "";
   var notes = (look.notes && look.notes.length) ? look.notes : (cardIcon ? [cardIcon.rules[0], cardIcon.rules[1]] : []);
   if (opts.actions === false) {
@@ -12907,11 +13556,18 @@ function lookCardHTML(look, opts) {
       (notes.length ? notesHTML(notes) : "") +
       "</div></article>";
   }
+  /* Colours / On the wrist / Sunglasses are one row of three
+     boxes with a shared panel now (build .30); the other two
+     accordions keep their stacked rows below. Sections with no
+     content get no box, exactly as dropHTML skipped them. */
+  var trioSecs = [
+    { key: "colours", label: "Colours", html: stripHTML(look.swatches, "sm") + legendHTML(look.swatches) },
+    { key: "wrist", label: "On the wrist", html: wristHTML(look, true) },
+    { key: "shades", label: "Sunglasses", html: shadesHTML(look, true) }
+  ].filter(function (s) { return !!s.html; });
   var drops =
-    dropHTML("Colours", stripHTML(look.swatches, "sm") + legendHTML(look.swatches)) +
+    trioBoxesHTML(trioSecs) +
     dropHTML("Why it works", notes.length ? notesHTML(notes) : "") +
-    dropHTML("On the wrist", wristHTML(look, true)) +
-    dropHTML("Sunglasses", shadesHTML(look, true)) +
     dropHTML("The reference", inspoHTML(look, true));
   /* An uploaded look lists the Closet pieces it was tagged with —
      named as his, exactly as tagged. */
@@ -12923,16 +13579,15 @@ function lookCardHTML(look, opts) {
   }
   return '<article class="card look-card">' + media + '<div class="look-body">' +
     head + stylingLine +
-    watchRowHTML(look) +
+    '<div class="pop-act-row">' + watchRowHTML(look) + fbIconHTML() + "</div>" +
     feedbackHTML(look) +
-    '<div class="look-actions">' +
-    '<button type="button" class="btn-accent" data-find-open>Shop the look</button>' +
-    (look.plate ? '<button type="button" class="btn-ghost" data-action="open-plate" data-plate="' + look.plate + '">Open Plate ' + look.plate + "</button>" : "") +
-    '<button type="button" class="btn-ghost" data-action="share-look">Share as image</button>' +
-    "</div>" +
+    (look.plate ? '<div class="look-actions">' +
+    '<button type="button" class="btn-ghost" data-action="open-plate" data-plate="' + look.plate + '">Open Plate ' + look.plate + "</button>" +
+    "</div>" : "") +
     taggedBlock +
     swapSectionHTML(look) +
     drops +
+    fbSheetHTML(look) +
     "</div></article>";
 }
 
@@ -13014,6 +13669,70 @@ function activeFbText() {
 document.getElementById("look-layer-close").addEventListener("click", closeLookLayer);
 document.addEventListener("click", function (e) {
   if (lookLayerOpen && e.target.closest && (e.target.closest("[data-tab]") || e.target.closest("[data-section]"))) closeLookLayer();
+});
+
+/* Feedback sheet open/close (build .30). Opening and the × /
+   backdrop close are plain bubble-phase clicks. The menu-row
+   close runs in the CAPTURE phase so it reads Remove's
+   aria-pressed BEFORE the action handler arms it: a first tap
+   on Remove only arms the "Tap again to remove" confirm and
+   the sheet stays open; any other row (or the confirming
+   second tap) closes the sheet while the row's own handler
+   still runs untouched. */
+document.addEventListener("click", function (e) {
+  if (!e.target.closest) return;
+  if (e.target.closest("[data-fb-open]")) {
+    var sh = document.querySelector("[data-fb-sheet]");
+    if (sh) {
+      sh.hidden = false;
+      var c = sh.querySelector("[data-fb-close]");
+      if (c) c.focus({ preventScroll: true });
+    }
+    return;
+  }
+  if (e.target.closest("[data-fb-close]")) {
+    var s2 = e.target.closest("[data-fb-sheet]");
+    if (s2) s2.hidden = true;
+    return;
+  }
+  if (e.target.hasAttribute && e.target.hasAttribute("data-fb-sheet")) e.target.hidden = true;
+});
+document.addEventListener("click", function (e) {
+  if (!e.target.closest) return;
+  var row = e.target.closest(".fb-menu-row");
+  if (!row) return;
+  if (row.getAttribute("data-action") === "remove-look" && row.getAttribute("aria-pressed") !== "true") return;
+  var s3 = row.closest("[data-fb-sheet]");
+  if (s3) s3.hidden = true;
+}, true);
+document.addEventListener("keydown", function (e) {
+  if (e.key !== "Escape") return;
+  var s = document.querySelector("[data-fb-sheet]:not([hidden])");
+  if (s) s.hidden = true;
+});
+
+/* Trio box toggling (build .30): one panel, one open section
+   at a time; tapping the open box closes the panel. */
+document.addEventListener("click", function (e) {
+  var box = e.target.closest ? e.target.closest("[data-trio]") : null;
+  if (!box) return;
+  var card = box.closest(".look-card");
+  if (!card) return;
+  var panel = card.querySelector("[data-trio-panel]");
+  var store = card.querySelector(".trio-store");
+  if (!panel || !store) return;
+  var key = box.getAttribute("data-trio");
+  var openKey = panel.getAttribute("data-open-key") || "";
+  if (panel.firstChild) store.appendChild(panel.firstChild);
+  panel.removeAttribute("data-open-key");
+  card.querySelectorAll("[data-trio]").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+  if (openKey === key) { panel.hidden = true; return; }
+  var content = store.querySelector('[data-trio-content="' + key + '"]');
+  if (!content) { panel.hidden = true; return; }
+  panel.appendChild(content);
+  panel.setAttribute("data-open-key", key);
+  panel.hidden = false;
+  box.setAttribute("aria-expanded", "true");
 });
 
 /* ================= Six takes — everywhere except Today =================
@@ -19336,7 +20055,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors"];
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
@@ -21000,7 +21719,11 @@ function shopRowHTML(e, pc) {
     '<span class="shop-main"><span class="shop-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="shop-sub">' + esc(e.retailer) + " · " + esc(shopTierInfo(e.tier).name) + "</span></span>" +
     '<span class="shop-price">$' + Number(e.price).toLocaleString("en-US") + "</span></a>" +
     '<button type="button" class="btn-ghost shop-buy" data-mark-purchase="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (bought ? "true" : "false") + '">' + (bought ? "Purchased — un-mark" : "Mark purchased") + "</button>" +
-    '<button type="button" class="btn-ghost shop-buy" data-wish-toggle="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (wished ? "true" : "false") + '">' + (wished ? "In wishlist — remove" : "Add to wishlist") + "</button></div>";
+    '<button type="button" class="btn-ghost shop-buy" data-wish-toggle="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (wished ? "true" : "false") + '">' + (wished ? "In wishlist — remove" : "Add to wishlist") + "</button>" +
+    /* Style this (build .30): only where the SKU has a photo —
+       a render must picture the anchor it names, so image-less
+       rows are excluded rather than matched to a lookalike. */
+    (e.img ? '<button type="button" class="btn-ghost shop-buy" data-style-shop="' + esc(shopEntryKey(e)) + '">Style this</button>' : "") + "</div>";
 }
 var findLookMode = null;
 function shopPiecesForLook(look) {
@@ -21299,7 +22022,8 @@ function shopWishRowHTML(w) {
     '<span class="shop-sub">' + esc(w.retailer) + (w.addedISO ? " · Saved " + esc(fmtDateShort(w.addedISO)) : "") + '</span></span>' +
     '<span class="shop-price">' + price + "</span></a>" +
     '<button type="button" class="btn-ghost shop-buy" data-wish-buy="' + esc(w.key) + '">Mark purchased</button>' +
-    '<button type="button" class="btn-ghost shop-buy" data-wish-remove="' + esc(w.key) + '">Remove</button></div>';
+    '<button type="button" class="btn-ghost shop-buy" data-wish-remove="' + esc(w.key) + '">Remove</button>' +
+    (w.img ? '<button type="button" class="btn-ghost shop-buy" data-style-wish="' + esc(w.key) + '">Style this</button>' : "") + "</div>";
 }
 /* Every wishlist mutation funnels through renderShopWishlist —
    keep the My Looks Wishlist subtab in step when it is the view
@@ -21378,6 +22102,7 @@ function renderSaleItems() {
       '<span class="sale-actions">' +
       '<a class="btn-ghost shop-buy" target="_blank" rel="noopener" href="' + esc(it.url) + '">View</a>' +
       '<button type="button" class="btn-ghost shop-buy" data-sale-wish="' + x.i + '" aria-pressed="' + (wished ? "true" : "false") + '">' + (wished ? "In wishlist — remove" : "Add to wishlist") + "</button>" +
+      (it.img ? '<button type="button" class="btn-ghost shop-buy" data-style-sale="' + x.i + '">Style this</button>' : "") +
       "</span></div></article>";
   }).join("") + "</div>";
   updateSaleRail();
@@ -21852,6 +22577,21 @@ document.addEventListener("visibilitychange", function () { if (document.visibil
     if (window.scrollY > 0) return;
     var t = e.target;
     if (t.closest && (t.closest("input, textarea, select, .az-rail, .brand-rail, .ward-rail"))) return;
+    /* Fixed overlays scroll THEMSELVES while the window stays
+       at scrollY 0, so a pull that starts inside one — the
+       outfit pop-out layer, a bottom sheet, the photo viewer —
+       is that layer's own scroll, never a page refresh. Arming
+       here was the Nov 17 bug: scrolling inside an open look
+       pulled past 92px, reloaded the app, and dropped the user
+       back on the home page. */
+    if (t.closest && (t.closest(".look-layer, .info-pop-backdrop, .popout"))) return;
+    /* Anchored results (Style this / Build a look) live in
+       #look-result and exist only in memory — a refresh there
+       throws the user back to the section home, so pulls
+       starting on those results never arm either. */
+    if (t.closest && t.closest("#look-result") &&
+        ((typeof styleItemCtx !== "undefined" && styleItemCtx) ||
+         (typeof buildCtx !== "undefined" && buildCtx))) return;
     startY = e.touches[0].clientY;
     armed = true;
   }, { passive: true });
@@ -23893,7 +24633,7 @@ renderMyInspo();
      one just because it dealt a look more recently. */
 var SYNC_URL = "https://wardrobe-sync.dyacobs.workers.dev";
 try { SYNC_URL = localStorage.getItem("wardrobe.syncurl") || SYNC_URL; } catch (e) {}
-var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan"];
+var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors"];
 function syBlank() {
   var o = { key: null, acct: null, last: 0, snap: {}, st: {}, tomb: {}, dirty: {}, status: "Not synced yet", lastOk: 0 };
   SY_COLLS.forEach(function (c) { o.snap[c] = {}; o.st[c] = {}; o.tomb[c] = {}; o.dirty[c] = {}; });
@@ -23957,6 +24697,7 @@ function syCollGet(c) {
     case "palettes": return customPalettes;
     case "icons": return customIcons;
     case "plan": return weekPlan;
+    case "anchors": return buildAnchors;
   }
   return [];
 }
@@ -23985,7 +24726,7 @@ function syMetaOf() {
    vanished ids become tombstones. Runs on every tracked store
    write (hinted to the affected collection) and in full at boot
    and at the start of every sync, so no write path is missed. */
-var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan" };
+var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors" };
 var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, dealtImgs: 1, dealtTitles: 1, dealtCombos: 1, dealtCards: 1, findBudget: 1, shopTier: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
 function syTrackChanges(onlyColl) {
   var now = Date.now(), ch = false;
@@ -24109,6 +24850,11 @@ function syPutLocal(c, data) {
     customIcons.forEach(function (r, i) { if (r.id === n.id) ix = i; });
     if (ix >= 0) customIcons[ix] = n; else customIcons.push(n);
   }
+  else if (c === "anchors") {
+    buildAnchors = put(buildAnchors);
+    store.set("buildAnchors", buildAnchors);
+    buildAnchors.forEach(function (a) { buildUploadPiece(a); });
+  }
 }
 function syRemoveLocal(c, id) {
   function drop(arr) { return arr.filter(function (r) { return syRecId(c, r) !== id; }); }
@@ -24122,6 +24868,7 @@ function syRemoveLocal(c, id) {
   else if (c === "items") wardrobeItems = drop(wardrobeItems);
   else if (c === "watches") watches = drop(watches);
   else if (c === "icons") customIcons = drop(customIcons);
+  else if (c === "anchors") { buildAnchors = drop(buildAnchors); store.set("buildAnchors", buildAnchors); }
 }
 function syRebuildSeedLists() {
   function rebuild(list) {
