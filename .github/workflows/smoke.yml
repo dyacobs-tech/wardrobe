@@ -1,0 +1,48 @@
+name: Smoke test
+
+# Boots each build in a headless iPhone-sized browser (tests/smoke.py).
+# Sync/render worker calls are blocked, so no run touches real data.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "URL to test (blank = the checked-out commit)"
+        required: false
+  schedule:
+    - cron: "0 13 * * *"   # daily, against the live site
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Playwright + Chromium
+        run: |
+          pip install playwright==1.48.0
+          python -m playwright install --with-deps chromium
+      - name: Pick target
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "url=https://dyacobs-tech.github.io/wardrobe/" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ github.event.inputs.url }}" ]; then
+            echo "url=${{ github.event.inputs.url }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=http://localhost:8000/" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Serve this commit
+        if: steps.target.outputs.url == 'http://localhost:8000/'
+        run: |
+          python -m http.server 8000 >/dev/null 2>&1 &
+          sleep 2
+      - name: Run smoke test
+        run: python tests/smoke.py "${{ steps.target.outputs.url }}"
