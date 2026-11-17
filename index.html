@@ -25297,6 +25297,22 @@ function renderShopWishlist() {
 var linkCandidate = null;
 var linkCandidatePc = null;
 var linkCandidateDupe = null;
+function linkDuplicateFallback(entry, pc, candidateHex) {
+  if (!entry || !entry.category) return null;
+  var candName = pc && pc.colourName ? String(pc.colourName).trim().toLowerCase() : "";
+  var found = null;
+  wardrobeItems.forEach(function (it) {
+    if (found || !it || it.category !== entry.category) return;
+    var itemName = it.colourName ? String(it.colourName).trim().toLowerCase() : "";
+    var nameMatch = !!(candName && itemName && itemName === candName);
+    var hexMatch = false;
+    if (it.colourHex && candidateHex) {
+      try { hexMatch = dist2(hexRgb(it.colourHex), hexRgb(candidateHex)) < 3200; } catch (e) { hexMatch = false; }
+    }
+    if (nameMatch || hexMatch) found = it;
+  });
+  return found;
+}
 function linkClassify(title) {
   var t = (title || "").toLowerCase();
   function hit(re, cat, kind) { return re.test(t) ? [cat, kind] : null; }
@@ -25410,6 +25426,7 @@ function checkLink() {
     linkCandidate = entry;
     linkCandidatePc = pc;
     linkCandidateDupe = cat ? emulateOwnedStrict({ garment: entry.name, colourName: pc.colourName, detail: "", hex: col.hex }) : null;
+    if (!linkCandidateDupe && entry.category) linkCandidateDupe = linkDuplicateFallback(entry, pc, col.hex);
     linkStatus("");
     renderLinkCandidate();
   }).catch(function () {
