@@ -16,19 +16,16 @@ on:
 
 jobs:
   smoke:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    # Microsoft's Playwright image ships Python, Playwright and Chromium with
+    # all system libraries, so nothing has to be installed per run.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.60.0-noble
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install Playwright + Chromium
-        run: |
-          pip install playwright==1.60.0
-          python -m playwright install --with-deps chromium
       - name: Pick target
         id: target
         run: |
@@ -42,7 +39,7 @@ jobs:
       - name: Serve this commit
         if: steps.target.outputs.url == 'http://localhost:8000/'
         run: |
-          python -m http.server 8000 >/dev/null 2>&1 &
+          python3 -m http.server 8000 >/dev/null 2>&1 &
           sleep 2
       - name: Run smoke test
-        run: python tests/smoke.py "${{ steps.target.outputs.url }}"
+        run: python3 tests/smoke.py "${{ steps.target.outputs.url }}"
