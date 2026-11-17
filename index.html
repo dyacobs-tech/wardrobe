@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.43" />
+    <meta name="wardrobe-build" content="2026-11-17.44" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2842,33 +2842,165 @@
       .shop-owned-row { display: flex; align-items: center; gap: 10px; border: 1px dashed var(--brass); border-radius: var(--radius); padding: 7px 10px; background: var(--surface); }
       .shop-owned-tag { display: block; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
       .shop-alt-note { margin: 0; font-size: 13px; color: var(--dim); font-style: italic; }
-      /* ---------- Build .42 — desktop web: a phone-width column ----------
-         On a wide browser the shell used to stretch to 1120px and
-         the hero/look imagery went full-width horizontal. At
-         700px and up the app now sits in a centered 430px column
-         on the app's dark backdrop; fixed chrome (bottom bar,
-         look layers, back chevron, A–Z rail) aligns to the column.
-         Below 700px nothing in this block applies — the phone
-         layout is untouched. */
-      @media (min-width: 700px) {
-        html, body { background: #14110d; }
-        .wrap { width: 430px; max-width: 100%; padding-left: 16px; padding-right: 16px; }
-        .masthead { width: 430px; max-width: 100%; margin: 0 auto; background: var(--bg); }
-        .navstack { width: 430px; max-width: 100%; margin: 0 auto; }
-        main.wrap { background: var(--bg); }
-        /* The Today view's full-bleed rules (main:has(> #panel-today…)
-           sets max-width: none so the hero runs edge to edge) win
-           over a plain .wrap cap on specificity — restated here at
-           the same specificity so on desktop the hero runs to the
-           edges of the COLUMN instead of the browser. */
-        main:has(> #panel-today:not([hidden])) { width: 430px; max-width: 430px; margin: 0 auto; }
-        .bottombar { left: 0; right: 0; margin-left: auto; margin-right: auto; width: 430px; max-width: 100%; }
-        .look-layer { left: 0; right: 0; margin-left: auto; margin-right: auto; width: 430px; max-width: 100%; }
-        .view-back-fab { left: calc(50% - 215px + 6px); }
-        .ward-rail { right: calc(50% - 215px + 3px); }
-        .popout img { max-width: 430px; }
-        .info-pop-card { max-width: 430px; }
-        .info-pop-backdrop .principles { max-width: 430px; }
+      /* ---------- Build .44 — proper desktop layout (≥1024px) ----------
+         Build .42's stopgap — the whole app squeezed into a centered
+         430px phone column — is REMOVED; the user rejected it ("the
+         website looks awful in this format") and picked a real
+         desktop layout instead. At 1024px and up the app now lays
+         out like a website in its own design language: a fixed top
+         bar (wordmark left, the five section tabs as a horizontal
+         nav beneath it, Profile at the wordmark's right), content
+         on a centered 1280px measure, multi-column grids, the Home
+         hero composed as a portrait photo beside a side panel with
+         the title, palette and actions, and the detail layers and
+         sheets as centered panels. Below 1024px NOTHING in this
+         block applies — phone and small-tablet layout is exactly
+         build .43. Presentation only: no handler, state or sync
+         behaviour changes anywhere. */
+      @media (min-width: 1024px) {
+        :root { --desk-max: 1280px; --desk-pad: 40px; --hdr-h: 118px; }
+
+        /* ----- Frame: room for the fixed header; no bottom bar ----- */
+        body { padding-top: var(--hdr-h); padding-bottom: 48px; }
+        body:has(> main > #panel-today:not([hidden])) { padding-bottom: 0; }
+        .wrap { max-width: var(--desk-max); padding: 0 var(--desk-pad); }
+        main { padding: 30px 0 56px; }
+        main:has(> #panel-today:not([hidden])) { max-width: none; padding: 0; }
+
+        /* ----- Top bar, row 1: wordmark left, Profile right ----- */
+        .masthead {
+          position: fixed; top: 0; left: 0; right: 0; z-index: 48;
+          background: color-mix(in srgb, var(--bg) 94%, transparent);
+          -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+        }
+        .masthead .wrap { height: 66px; display: flex; align-items: center; padding-top: 0; padding-bottom: 0; }
+        .masthead .brand,
+        body:has(> main > #panel-today:not([hidden])) .masthead .brand {
+          font-size: 26px; letter-spacing: .22em; text-indent: 0; text-align: left;
+        }
+        .masthead .rule-double { display: none; }
+        .masthead .profile-btn { position: static; transform: none; margin-left: auto; flex: none; }
+
+        /* ----- Top bar, row 2: the five sections, horizontal nav -----
+           (This is the same .bottombar element and the same buttons —
+           same ids, same switchTab behaviour, same order — restyled
+           from a fixed bottom bar into the header's nav row. The
+           ≥900px floating-pill rules are overridden in full.) */
+        .bottombar {
+          top: 66px; bottom: auto; left: 0; right: 0; transform: none;
+          width: auto; max-width: none; height: 52px;
+          padding: 0 max(var(--desk-pad), calc((100vw - var(--desk-max)) / 2 + var(--desk-pad)));
+          justify-content: flex-start; gap: 2px;
+          border: none; border-bottom: 1px solid var(--border); border-radius: 0;
+          box-shadow: none; z-index: 47;
+        }
+        .bottombar .navbtn {
+          flex: 0 0 auto; height: 100%; min-height: 0;
+          flex-direction: row; align-items: center; justify-content: center;
+          gap: 9px; padding: 0 18px; font-size: 12px; letter-spacing: .12em;
+        }
+        .bottombar .navbtn svg { width: 19px; height: 19px; }
+        .bottombar .navbtn:hover { color: var(--text); }
+        .bottombar .navbtn[aria-current="page"]::after { top: auto; bottom: 0; }
+
+        /* ----- Sub-nav row sticks under the header ----- */
+        .navstack { top: var(--hdr-h); }
+        body.view-back-on .subnav .wrap { padding-left: var(--desk-pad); }
+        .subnav-group { flex: none; gap: 2px; }
+        .subtab { flex: 0 0 auto; padding: 0 14px; min-height: 36px; font-size: 12px; }
+
+        /* ----- Floating chrome aligns to the desktop frame ----- */
+        .view-back-fab { top: calc(var(--hdr-h) + 12px); left: max(10px, calc((100vw - var(--desk-max)) / 2 - 46px)); }
+        .ward-rail { right: max(3px, calc((100vw - var(--desk-max)) / 2 - 30px)); }
+        #panel-wardrobe .item-card, #panel-sale .sale-card { scroll-margin-top: 176px; }
+        .toast, .undo-toast, .update-bar { bottom: 24px; }
+        .sync-note { bottom: 76px; }
+
+        /* ----- Home: portrait photo + side panel hero ----- */
+        #panel-today:not([hidden]) .today-hero { min-height: 520px; }
+        #today-img { left: 0; right: auto; width: 54%; }
+        .today-hero .today-collage { left: 0; right: auto; width: 54%; }
+        #panel-today .today-shade { display: none; }
+        #panel-today .today-caption {
+          display: flex; flex-direction: column; justify-content: center; gap: 14px;
+          left: auto; right: 0; top: 0; bottom: 0; width: 46%;
+          padding: 48px 64px 48px 56px; background: #14110d;
+        }
+        #panel-today .today-caption h2 { font-size: clamp(34px, 3.2vw, 46px); line-height: 1.04; margin: 0 0 6px; }
+        #panel-today .today-kicker { font-size: 12px; }
+        #panel-today .today-loc { font-size: 14px; }
+        #panel-today .today-loc strong { font-size: 17px; }
+        #panel-today .hero-icon-row { max-width: 540px; gap: 8px; }
+        #panel-today .hero-icon-btn { min-height: 38px; font-size: 12.5px; }
+        .today-hero .hero-corner { top: 18px; right: 22px; }
+
+        /* ----- Multi-column content grids ----- */
+        .studio-grid { max-width: none; }
+        .options-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+        #panel-icons .iconic-row { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+        .icon-detail-card { max-width: none; }
+        .item-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+        #panel-wardrobe .ward-grid { grid-template-columns: 1fr; }
+        .saved-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+        .sale-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+        .myinspo-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+        .custom-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        #receipts-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        #analyze-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+        .item-card:hover, .saved-card:hover, .sale-card:hover, .board-card:hover, .option-card:hover { border-color: var(--border-strong); }
+
+        /* ----- Shop the look: piece sections two-up ----- */
+        #find-look-mode { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+        #find-look-mode[hidden] { display: none; }
+        #find-look-mode .shop-look-head { grid-column: 1 / -1; display: grid; grid-template-columns: 300px minmax(0, 1fr); column-gap: 24px; align-items: start; }
+        #find-look-mode .shop-look-head img { grid-row: 1 / span 2; width: 300px; max-height: 380px; }
+        #find-look-mode .shop-piece { border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-card); padding: 16px 18px; margin-top: 0; }
+        #shop-purchased { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; }
+        #shop-purchased h3, #shop-purchased > p { grid-column: 1 / -1; }
+        #shopwish-list .wish-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; }
+
+        /* ----- Calendar: the week at a glance, trips in columns ----- */
+        .wp-grid { gap: 10px; }
+        .wp-day { padding: 10px 8px 12px; gap: 4px; }
+        .wp-day:hover { border-color: var(--border-strong); }
+        .wp-dow { font-size: 11px; }
+        .wp-date { font-size: 17px; }
+        .wp-fc { font-size: 11px; min-height: 15px; }
+        .cal-subtabs { display: flex; gap: 8px; }
+        .cal-subtab { flex: 0 0 auto; padding: 0 22px; height: 36px; min-height: 36px; }
+        #trip-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        #trip-list[hidden] { display: none; }
+        .trip-card { margin: 0; }
+        .trip-form { max-width: 580px; }
+        .capsule-outfits { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .pack-list { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 36px; }
+
+        /* ----- Detail layers & sheets: centered panels ----- */
+        .look-layer {
+          background: color-mix(in srgb, #0c0a07 76%, transparent);
+          -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+          padding: 38px 16px 52px;
+        }
+        .look-layer-bar { width: min(940px, 100%); margin: 0 auto 12px; }
+        .look-layer-bar .btn-ghost { background: var(--surface); }
+        .look-layer-body, .fw-layer-body {
+          width: min(940px, 100%); margin: 0 auto;
+          background: var(--bg); border: 1px solid var(--border); box-shadow: var(--shadow-lift);
+          padding: 22px 26px 26px;
+        }
+        .info-pop-backdrop { place-items: center !important; padding: 32px !important; }
+        .info-pop-backdrop .info-pop-card { max-width: 620px; }
+        #find-sheet .info-pop-card { max-width: 920px; }
+        .popout img { width: auto; height: auto; max-width: min(1100px, 92vw); max-height: 92dvh; }
+
+        /* ----- Emulate: the icon's photo left, the breakdown beside it ----- */
+        .emulate-card { max-width: 1120px; margin: 0 auto; padding: 26px 30px; }
+        .emulate-card::after { content: ""; display: block; clear: both; }
+        .emulate-photo { float: left; width: 400px; margin: 0 30px 18px 0; }
+        .emulate-render { clear: both; }
+
+        /* ----- Forms keep a readable measure ----- */
+        #panel-add .add-form, .wearing-form, .loc-card, .data-card { max-width: 860px; }
       }
     </style>
   </head>
@@ -4595,7 +4727,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.43";
+var WARDROBE_BUILD = "2026-11-17.44";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
