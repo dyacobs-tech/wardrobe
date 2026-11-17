@@ -10,7 +10,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-17.33" />
+    <meta name="wardrobe-build" content="2026-11-17.34" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -2739,7 +2740,7 @@
           <div class="today-caption">
             <p class="today-kicker">Outfit of the day</p>
             <h2 id="today-name"></h2>
-            <p class="today-loc" id="today-loc"><strong id="today-loc-name">Palm Beach, Florida</strong><span id="today-loc-weather"></span></p>
+            <p class="today-loc" id="today-loc"><strong id="today-loc-name"></strong><span id="today-loc-weather"></span></p>
             <div class="today-dots" id="today-dots" aria-hidden="true"></div>
             <p class="today-suggest" id="today-suggest" hidden></p>
             <div class="today-actions">
@@ -2863,7 +2864,6 @@
                     <option>Summer</option>
                     <option>Fall</option>
                     <option>Winter</option>
-                    <option>Palm Beach winter</option>
                   </select>
                 </div>
               </div>
@@ -3579,13 +3579,15 @@
       <!-- ================= PROFILE ================= -->
       <section id="panel-pinfo" role="tabpanel" aria-labelledby="tab-pinfo" hidden>
         <div class="profile-head">
-          <img class="profile-photo" src="assets/photos/a05d740fa57f.jpg" alt="David Jacobs" />
-          <div class="profile-head-main"><h3 class="profile-name">David Jacobs</h3><p class="meta">Palm Beach, Florida</p></div>
+          <img class="profile-photo" id="pf-head-photo" alt="" hidden />
+          <div class="profile-head-main"><h3 class="profile-name" id="pf-head-name"></h3><p class="meta" id="pf-head-city"></p></div>
         </div>
         <form class="card add-form" id="profile-form">
           <div class="profile-grid">
-            <div><label class="field" for="pf-shoe">Shoe — US men's</label><input type="text" id="pf-shoe" value="9" autocomplete="off" /></div>
-            <div><label class="field" for="pf-tee">Tee size</label><input type="text" id="pf-tee" value="Small" autocomplete="off" /></div>
+            <div><label class="field" for="pf-name">Name</label><input type="text" id="pf-name" autocomplete="off" /></div>
+            <div><label class="field" for="pf-photo">Profile photo</label><input type="file" id="pf-photo" accept="image/*" /></div>
+            <div><label class="field" for="pf-shoe">Shoe — US men's</label><input type="text" id="pf-shoe" autocomplete="off" /></div>
+            <div><label class="field" for="pf-tee">Tee size</label><input type="text" id="pf-tee" autocomplete="off" /></div>
             <div><label class="field" for="pf-polo">Polo size</label><input type="text" id="pf-polo" autocomplete="off" /></div>
             <div><label class="field" for="pf-shirt">Shirt — neck / size</label><input type="text" id="pf-shirt" placeholder="e.g. 15.5 / Small" autocomplete="off" /></div>
             <div><label class="field" for="pf-knit">Sweater / knit size</label><input type="text" id="pf-knit" autocomplete="off" /></div>
@@ -3618,7 +3620,7 @@
           <div>
             <div class="card-head-info"><h3>Location &amp; weather</h3><button type="button" class="info-btn sm" data-info-from="loc-note" data-info-title="Location &amp; weather" aria-label="About: location and weather">i</button></div>
             <div class="loc-now" style="margin-top:8px">
-              <span class="loc-name" id="loc-current-name">Palm Beach, Florida</span>
+              <span class="loc-name" id="loc-current-name"></span>
               <span class="loc-kind" id="loc-current-kind">Home — default</span>
             </div>
             <p class="loc-weather" id="loc-weather" style="margin-top:6px">Checking the weather there…</p>
@@ -3653,6 +3655,14 @@
           <div>
             <label class="field" for="sync-key">This device's sync key</label>
             <input type="text" id="sync-key" readonly value="(created on first sync)" onclick="this.select()" />
+          </div>
+          <div>
+            <label class="field" for="sync-regcode">Registration code — new devices only</label>
+            <div class="loc-search-row">
+              <input type="text" id="sync-regcode" placeholder="Code for creating an account" autocomplete="off" />
+              <button type="button" class="btn-ink" id="sync-regcode-btn">Save code</button>
+            </div>
+            <p class="form-note" id="sync-regcode-note" style="margin:0"></p>
           </div>
           <div>
             <label class="field" for="sync-link-key">Use a key from another device</label>
@@ -3924,6 +3934,7 @@
     </div>
     <div class="update-bar" id="update-bar" role="status" hidden><span>A newer Wardrobe is ready.</span><button type="button" id="update-btn">Refresh</button></div>
     <div class="sync-note" id="sync-note" role="status" hidden><span id="sync-note-text"></span><button type="button" id="sync-note-retry">Retry</button><button type="button" class="sync-note-x" id="sync-note-dismiss" aria-label="Dismiss sync note">&times;</button></div>
+    <div class="sync-note" id="data-alert" role="alert" hidden><span id="data-alert-text"></span><button type="button" id="data-alert-btn">Restore</button><button type="button" class="sync-note-x" id="data-alert-dismiss" aria-label="Dismiss data note">&times;</button></div>
     <div class="toast" id="toast" role="status"></div>
     <div class="undo-toast" id="undo-toast" role="status" hidden><span id="undo-msg"></span><button type="button" id="undo-btn">Undo</button></div>
 
@@ -4100,14 +4111,24 @@ function storeNoteFailure() {
    Before this, a damaged value loaded as [] and the next save
    wrote [] over the real data. */
 var _storeCorrupt = [];
+/* A key that failed to parse is POISONED: its in-memory fallback
+   (usually an empty list) must never be written back over the raw
+   value, and sync must never diff it — diffing an empty fallback
+   against the snapshot tombstones every record in the collection
+   and uploads the deletions. The raw text stays exactly where it
+   was (plus the copies below) until the user restores from a good
+   copy via the data alert. */
+var _storePoisoned = {};
 function storeNoteCorrupt(k, raw) {
   _storeCorrupt.push(k);
+  _storePoisoned[k] = 1;
   var V = window.photoVault;
   try { if (V) V.keep("corrupt:" + k + ":" + Date.now(), raw); } catch (e) {}
   try { if (raw.length < 200000) localStorage.setItem("wardrobe.__corrupt." + k, raw); } catch (e) {}
   if (_storeCorrupt.length === 1) setTimeout(function () {
     try { toast("Some saved data couldn't be read (" + _storeCorrupt.join(", ") + "). A copy was kept on this device — nothing was thrown away."); } catch (e) {}
   }, 1800);
+  setTimeout(function () { try { if (typeof dataNoteRender === "function") dataNoteRender(); } catch (e) {} }, 60);
 }
 var store = (function () {
   var V = window.photoVault || { enabled: false, cache: {}, missing: 0 };
@@ -4141,6 +4162,10 @@ var store = (function () {
       catch (e) { storeNoteCorrupt(k, raw); return fallback; }
     },
     set: function (k, v) {
+      /* Poisoned key: refuse the write — the value in memory is a
+         fallback, not the user's data. Restore clears the poison
+         first (import, or the sync re-download path). */
+      if (_storePoisoned[k]) return false;
       var s;
       try { s = JSON.stringify(v, replacer); } catch (e) { storeNoteFailure(); return false; }
       if (s === undefined) return api.remove(k);
@@ -4155,6 +4180,9 @@ var store = (function () {
       delete last[k];
       try { localStorage.removeItem("wardrobe." + k); return true; } catch (e) { return false; }
     },
+    poisoned: function (k) { return !!_storePoisoned[k]; },
+    poisonedKeys: function () { return Object.keys(_storePoisoned); },
+    clearPoison: function (k) { delete _storePoisoned[k]; },
     /* Raw text of a key, and putting raw text back — used by
        import to roll back exactly what was there. */
     raw: function (k) { try { return localStorage.getItem("wardrobe." + k); } catch (e) { return null; } },
@@ -4236,7 +4264,11 @@ function dayOfYear(d) {
 function sanitizeIncoming(v, key) {
   if (typeof v === "string") {
     if (key && /hex$/i.test(key)) return /^#[0-9a-f]{3,8}$/i.test(v) ? v : "#888888";
-    if (key && /^(id|img|photo|src|url|href|fwRender|iconId|blendId|lookId|key|shopKey|closetItemId|watchId|plate)$/.test(key)) {
+    /* EVERY image/photo/url/src-ish key is cleaned, not just an
+       exact-name list: swapPhoto, swapFromPhoto and _img used to
+       slip past and flow straight into <img src="...">, where a
+       quote in the value could break out of the attribute. */
+    if (key && (/img|photo|url|src|href/i.test(key) || /^(id|fwRender|iconId|blendId|lookId|key|shopKey|closetItemId|watchId|plate)$/.test(key))) {
       var s = v.replace(/["'<>`]/g, "");
       if (/^\s*(javascript|vbscript):/i.test(s)) return "";
       if (/^\s*data:/i.test(s) && !/^\s*data:image\/(jpeg|png|webp|gif);base64,[a-z0-9+\/=]+$/i.test(s)) return "";
@@ -4251,17 +4283,20 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.33";
+var WARDROBE_BUILD = "2026-11-17.34";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
-  if (!store.set("items", wardrobeItems.filter(function (i) { return i.id.indexOf("seed-") !== 0; }))) ok = false;
-  if (!store.set("palettes", customPalettes)) ok = false;
-  if (!store.set("watches", watches.filter(function (w) { return w.id.indexOf("seed-") !== 0; }))) ok = false;
-  if (!store.set("looks", savedLooks)) ok = false;
-  if (!store.set("icons", customIcons)) ok = false;
-  if (!store.set("deletedIds", deletedIds)) ok = false;
-  if (!store.set("overrides", entryOverrides)) ok = false;
+  /* Poisoned keys are skipped, not failed: their raw values stay
+     untouched until restored, and other saves must not report a
+     failure because of them. */
+  if (!store.poisoned("items") && !store.set("items", wardrobeItems.filter(function (i) { return i.id.indexOf("seed-") !== 0; }))) ok = false;
+  if (!store.poisoned("palettes") && !store.set("palettes", customPalettes)) ok = false;
+  if (!store.poisoned("watches") && !store.set("watches", watches.filter(function (w) { return w.id.indexOf("seed-") !== 0; }))) ok = false;
+  if (!store.poisoned("looks") && !store.set("looks", savedLooks)) ok = false;
+  if (!store.poisoned("icons") && !store.set("icons", customIcons)) ok = false;
+  if (!store.poisoned("deletedIds") && !store.set("deletedIds", deletedIds)) ok = false;
+  if (!store.poisoned("overrides") && !store.set("overrides", entryOverrides)) ok = false;
   return ok;
 }
 function applyEntryState(list) {
@@ -5794,7 +5829,7 @@ function renderInspoImages() {
   var box = document.getElementById("inspo-thumbs");
   if (box) {
     box.innerHTML = inspoImages.map(function (en) {
-      return '<button type="button" class="inspo-thumb" data-inspo-img="' + en.id + '" aria-pressed="' + (en.id === activeInspoId ? "true" : "false") + '" aria-label="Use this saved image as inspo"><img src="' + en.img + '" alt="" loading="lazy" /></button>';
+      return '<button type="button" class="inspo-thumb" data-inspo-img="' + en.id + '" aria-pressed="' + (en.id === activeInspoId ? "true" : "false") + '" aria-label="Use this saved image as inspo"><img src="' + esc(en.img) + '" alt="" loading="lazy" /></button>';
     }).join("");
   }
   var bar = document.getElementById("inspo-active");
@@ -5802,7 +5837,7 @@ function renderInspoImages() {
   var active = activeInspoId ? inspoImageById(activeInspoId) : null;
   if (!active) { bar.hidden = true; bar.innerHTML = ""; return; }
   bar.hidden = false;
-  bar.innerHTML = '<img src="' + active.img + '" alt="" />' +
+  bar.innerHTML = '<img src="' + esc(active.img) + '" alt="" />' +
     '<span class="ia-main"><strong>Building from your image</strong>' + esc(active.desc || "Your uploaded inspiration — tap Give me ideas.") + "</span>" +
     '<button type="button" class="btn-ghost" data-inspo-clear>Clear</button>' +
     '<button type="button" class="btn-ghost" data-inspo-delete="' + active.id + '">Delete</button>';
@@ -9483,7 +9518,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/918f47bf65dc.webp",
+    img: "assets/photos/86e1bf5609d6.webp",
     title: "Olive Suit & White Shirt — Royal Oak Moonphase",
     imgAlt: "You wearing an olive suit with a white shirt and no tie, with brown suede loafers and a yellow gold Royal Oak moonphase on your wrist",
     watchId: "seed-ap-25594ba",
@@ -10692,7 +10727,7 @@ var RENDER_FORMALITY = {
   "assets/photos/d7b8e7719323.webp": 4,
   "assets/photos/6f6e38f027aa.webp": 5,
   "assets/photos/74d38a8d6b38.webp": 5,
-  "assets/photos/918f47bf65dc.webp": 5,
+  "assets/photos/86e1bf5609d6.webp": 5,
   "assets/photos/871884991759.webp": 4,
   "assets/photos/9d0cd659d307.webp": 4,
   "assets/photos/871cc3dcd197.webp": 6,
@@ -11567,7 +11602,7 @@ function trioBoxesHTML(secs) {
 function iconicRowHTML(ic, limit) {
   var looks = limit ? ic.looks.slice(0, limit) : ic.looks;
   return '<div class="iconic-row">' + looks.map(function (lk, li) {
-    return '<figure class="iconic"><img src="' + lk.img + '" alt="' + esc(ic.name + " — " + lk.caption) + '" loading="lazy" />' +
+    return '<figure class="iconic"><img src="' + esc(lk.img) + '" alt="' + esc(ic.name + " — " + lk.caption) + '" loading="lazy" />' +
       '<figcaption><strong>' + esc(lk.caption) + "</strong>" +
       '<button type="button" class="btn-ghost" data-icon-look="' + ic.id + '" data-look-idx="' + li + '">Style this look</button>' +
       '<button type="button" class="btn-ghost" data-find-icon-look="' + ic.id + '" data-look-idx="' + li + '">Shop the look</button></figcaption></figure>';
@@ -12402,8 +12437,11 @@ function swapSectionHTML(look, fwIdx) {
       '<span class="p-sub">' + SWAP_SLOT_LABELS[s] + (p.owned ? " · Yours" : "") + '</span></span>' +
       '<button type="button" class="btn-ghost" data-swap-slot="' + s + '"' + fwAttr + ">Change</button></div>";
   }).join("");
-  var note = (look.swapState === "rendering" && !swapSyncKey())
-    ? '<p class="swap-note">Cloud sync must be on for swap rendering.</p>' : "";
+  var note = "";
+  if (!swapSyncKey() && (look.swapState === "rendering" || look.swapState === "nosync" || look.swapState === "pending"))
+    note = '<p class="swap-note">Turn on sync to render new looks</p>';
+  else if (look.swapState === "failed")
+    note = '<p class="swap-note">Couldn\u2019t render \u2014 close and reopen this look to retry.</p>';
   return '<div class="find-pieces swap-sec"><h4>Change a piece</h4>' + rows + note + "</div>";
 }
 
@@ -12531,12 +12569,33 @@ function swapSettleCombo(comboId, url) {
   function settle(l) {
     if (!l || l.swapComboId !== comboId) return;
     if (url) { l.img = url; l.swapPhoto = url; l.swapState = null; }
-    else if (l.swapState === "rendering") { l.swapState = null; l.img = l.swapFromPhoto || l.img; l.swapPhoto = l.img; }
+    else if (l.swapState === "rendering" || l.swapState === "pending") {
+      /* Failure settles VISIBLY: a swap with an original photo
+         falls back to it; a combination with nothing to show
+         lands in the failed state ("Couldn't render — retry")
+         instead of spinning forever. */
+      if (l.swapFromPhoto) { l.swapState = null; l.img = l.swapFromPhoto; l.swapPhoto = l.img; }
+      else l.swapState = "failed";
+    }
   }
   settle(typeof currentLook !== "undefined" ? currentLook : null);
   if (typeof lookLayerStash !== "undefined" && lookLayerStash) settle(lookLayerStash.look);
   if (typeof currentOptions !== "undefined" && currentOptions) currentOptions.forEach(settle);
   if (typeof fwLooks !== "undefined" && fwLooks) fwLooks.forEach(settle);
+  /* Style-this and Build-a-look results hold their OWN copies of
+     a combination — they never settled before, so their cards
+     span forever after a failed job. Settle and re-deal them. */
+  if (typeof styleResults !== "undefined" && styleResults && styleResults.some(function (l) { return l.swapComboId === comboId; })) {
+    styleResults.forEach(settle);
+    if (typeof styleItemCtx !== "undefined" && styleItemCtx && typeof renderStyleResults === "function") {
+      var sit = closetItemById(styleItemCtx.itemId);
+      if (sit) renderStyleResults(sit, true);
+    }
+  }
+  if (typeof buildResults !== "undefined" && buildResults && buildResults.some(function (l) { return l.swapComboId === comboId; })) {
+    buildResults.forEach(settle);
+    if (typeof renderBuildResults === "function") renderBuildResults(true);
+  }
   if (typeof savedLooks !== "undefined" && savedLooks) {
     var before = JSON.stringify(savedLooks.filter(function (l) { return l.swapComboId === comboId; }));
     savedLooks.forEach(settle);
@@ -12554,6 +12613,38 @@ function swapSettleCombo(comboId, url) {
     document.getElementById("look-layer-body").innerHTML = lookCardHTML(currentLook);
   }
   if (typeof currentOptions !== "undefined" && currentOptions && currentOptions.some(function (l) { return l.swapComboId === comboId; }) && typeof rerenderOptions === "function") rerenderOptions();
+}
+/* Flip every live copy of a combination into the rendering
+   state — used when a card is actually OPENED and its render is
+   submitted at that moment (renders are no longer submitted at
+   deal time). */
+function swapMarkRendering(comboId) {
+  function mark(l) { if (l && l.swapComboId === comboId) l.swapState = "rendering"; }
+  mark(typeof currentLook !== "undefined" ? currentLook : null);
+  if (typeof lookLayerStash !== "undefined" && lookLayerStash) mark(lookLayerStash.look);
+  if (typeof currentOptions !== "undefined" && currentOptions) currentOptions.forEach(mark);
+  if (typeof fwLooks !== "undefined" && fwLooks) fwLooks.forEach(mark);
+  if (typeof styleResults !== "undefined" && styleResults) styleResults.forEach(mark);
+  if (typeof buildResults !== "undefined" && buildResults) buildResults.forEach(mark);
+  if (typeof savedLooks !== "undefined" && savedLooks) savedLooks.forEach(mark);
+  if (typeof queueLooks !== "undefined" && queueLooks) queueLooks.forEach(mark);
+  if (typeof persistAll === "function") persistAll();
+  if (typeof saveQueue === "function") saveQueue();
+}
+/* The one line a not-yet-rendered combination shows, by state.
+   A persisted "rendering" with no sync key can never finish —
+   it reads as the sync message, never as a spinner. */
+function swapCardLine(look) {
+  if (!look) return "";
+  if (look.swapState === "pending") return "Tap to render this combination";
+  if (look.swapState === "failed") return "Couldn\u2019t render \u2014 retry";
+  if (look.swapState === "nosync") return "Turn on sync to render new looks";
+  if (look.swapState === "rendering" && !swapSyncKey()) return "Turn on sync to render new looks";
+  return "Rendering this combination\u2026";
+}
+function swapCardState(look) {
+  if (look && look.swapState === "rendering" && !swapSyncKey()) return "nosync";
+  return look ? look.swapState : null;
 }
 /* A swap is no longer a pop-out-only object: the swapped look
    joins the queue (My Looks → Queued) the moment it is picked,
@@ -12617,6 +12708,16 @@ function pickSwap(i) {
     look.swapPhoto = readyUrl;
     look.swapState = null;
     look.fwRender = null;
+  } else if (!swapSyncKey()) {
+    /* No sync key: NEVER enter the rendering state — the job
+       cannot be submitted, so a "Rendering…" card would spin
+       forever. Show the original photo under the nosync state;
+       opening the look once sync is on submits it then. */
+    look.img = look.swapFromPhoto;
+    look.swapPhoto = look.swapFromPhoto;
+    look.swapState = "nosync";
+    look.fwRender = null;
+    toast("Turn on sync to render new looks \u2014 showing the original photo for now.");
   } else {
     look.img = look.swapFromPhoto;
     look.swapPhoto = look.swapFromPhoto;
@@ -12666,7 +12767,24 @@ function swapSubmitJob(look, idsBySlot, watchId, opts) {
        this check it would sail past the catch below and stay
        just as invisible as a network drop. That silent-400 mode
        is exactly what killed swaps in builds .17/.18. */
-    if (r && typeof r.ok === "boolean" && !r.ok) throw new Error("swap submit " + r.status);
+    if (r && typeof r.ok === "boolean" && !r.ok) {
+      /* The worker's per-day render cap answers 429 with a
+         named error: settle this combination visibly (original
+         photo, or the failed state) and say why — never leave
+         it spinning against a cap that resets tomorrow. */
+      if (r.status === 429 && typeof r.json === "function") {
+        return r.json().catch(function () { return null; }).then(function (j) {
+          if (j && j.error === "render_cap") {
+            stopSwapPoll();
+            swapSettleCombo(look.swapComboId, null);
+            if (typeof toast === "function") toast("Daily render limit reached \u2014 try again tomorrow.");
+            return false;
+          }
+          throw new Error("swap submit 429");
+        });
+      }
+      throw new Error("swap submit " + r.status);
+    }
     /* The POST body is the job itself. The enqueue is
        idempotent for a job that already failed (an earlier
        render died on a transient watcher error), so the
@@ -12787,16 +12905,25 @@ function swapPollTick() {
 }
 /* One-shot check for swaps left rendering by an earlier
    session — the queued/saved copies persist, so a render that
-   landed while the app was closed is picked up on launch. */
+   landed while the app was closed is picked up on launch.
+   Guarded: the Style/Build watches call this every 20s while
+   cards are on screen, and unguarded calls started overlapping
+   retry chains for the same combination. One sweep at a time;
+   a call that arrives mid-sweep is dropped (the next tick, or
+   the pop-out poll, covers it). */
+var _swapResumeBusy = false;
 function swapResumePending() {
   if (!swapSyncKey()) return;
+  if (_swapResumeBusy) return;
+  _swapResumeBusy = true;
   var pending = {};
   [typeof queueLooks !== "undefined" ? queueLooks : [], typeof savedLooks !== "undefined" ? savedLooks : []].forEach(function (arr) {
     (arr || []).forEach(function (l) { if (l && l.swapState === "rendering" && l.swapComboId) pending[l.swapComboId] = 1; });
   });
+  var chains = [];
   Object.keys(pending).forEach(function (comboId) {
     if (lazyRenders[comboId]) { swapSettleCombo(comboId, lazyRenders[comboId]); return; }
-    swapFetch(swapSyncBase() + "/render-queue/" + comboId, {
+    chains.push(swapFetch(swapSyncBase() + "/render-queue/" + comboId, {
       headers: { "authorization": "Bearer " + swapSyncKey() }
     }, 20000).then(function (r) {
       if (r.status === 404) return { __missing: true };
@@ -12854,8 +12981,10 @@ function swapResumePending() {
         };
         resumeTry();
       } else if (j.status === "failed") swapSettleCombo(comboId, null);
-    }).catch(function () {});
+    }).catch(function () {}));
   });
+  if (!chains.length) { _swapResumeBusy = false; return; }
+  Promise.all(chains).then(function () { _swapResumeBusy = false; }, function () { _swapResumeBusy = false; });
 }
 setTimeout(swapResumePending, 4000);
 
@@ -13026,10 +13155,15 @@ function styleComboLook(idsBySlot, comboId, anchorItem) {
   var tracked = (typeof queueLooks !== "undefined" ? queueLooks : []).concat(typeof savedLooks !== "undefined" ? savedLooks : [])
     .filter(function (l) { return l && l.swapComboId === comboId; })[0];
   if (tracked) return JSON.parse(JSON.stringify(tracked));
+  /* A new combination is NOT submitted at deal time — dealing
+     six cards used to submit six renders (and six more per
+     "Six more ideas") whether or not anyone opened them. The
+     card waits in the pending state; opening it submits the
+     render (see openLookLayer). Without a sync key it waits in
+     the nosync state instead — never "rendering". */
   var look = baseLook();
-  look.swapState = "rendering";
+  look.swapState = swapSyncKey() ? "pending" : "nosync";
   look.swapPhoto = "";
-  swapSubmitJob(look, idsBySlot, "");
   swapPersistLook(look);
   return look;
 }
@@ -13083,18 +13217,20 @@ function styleDeal(it, limit) {
   return out;
 }
 function styleCardHTML(look, idx) {
-  if (look.swapState === "rendering") {
-    /* The rendering state, never piece photographs: the look's
-       title and swatches with the slim rendering line. */
+  var cstate = swapCardState(look);
+  if (cstate === "rendering" || cstate === "pending" || cstate === "failed" || cstate === "nosync") {
+    /* The not-yet-rendered states, never piece photographs: the
+       look's title and swatches with the slim state line —
+       spinner text only while a render is truly in flight. */
     return '<button type="button" class="card option-card" data-style-idx="' + idx + '" role="listitem">' +
       '<span class="pane swap-rendering" style="position:relative;display:block;aspect-ratio:3/4">' +
-      '<span class="swap-render-line">Rendering this combination\u2026</span></span>' +
+      '<span class="swap-render-line">' + esc(swapCardLine(look)) + '</span></span>' +
       '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
       cardStripHTML(look.swatches) + "</span></button>";
   }
   var src = look.fwRender ? fwRenderSrc(look) : lookImg(look);
   return '<button type="button" class="card option-card" data-style-idx="' + idx + '" role="listitem">' +
-    '<img src="' + src + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy" />' +
+    '<img src="' + esc(src) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy" />' +
     '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
     cardStripHTML(look.swatches) + "</span></button>";
 }
@@ -13323,12 +13459,12 @@ function buildComboLook(idsBySlot, comboId, piece) {
   }
   var existing = swapFindExistingRender(idList);
   if (existing) { look.img = existing; return look; }
-  if (!swapSyncKey()) return null;
-  look.swapState = "rendering";
-  /* Same call shape as styleComboLook: (look, idsBySlot, "") —
-     swapSubmitJob builds the worker body from the slot map and
-     takes the comboId from look.swapComboId. */
-  swapSubmitJob(look, idsBySlot, "");
+  /* Same submit-on-open contract as styleComboLook: the card is
+     dealt in the pending state (nosync without a key) and the
+     render is submitted only when the card is opened. Dealing
+     no longer returns null without a key — the combination
+     shows, with the sync message in place of a spinner. */
+  look.swapState = swapSyncKey() ? "pending" : "nosync";
   swapPersistLook(look);
   return look;
 }
@@ -13371,10 +13507,11 @@ function buildCardHTML(look, idx) {
       '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
       cardStripHTML(look.swatches) + "</span></button>";
   }
-  if (look.swapState === "rendering") {
+  var bcstate = swapCardState(look);
+  if (bcstate === "rendering" || bcstate === "pending" || bcstate === "failed" || bcstate === "nosync") {
     return '<button type="button" class="card option-card" data-build-idx="' + idx + '" role="listitem">' +
       '<span class="pane swap-rendering" style="position:relative;display:block;aspect-ratio:3/4">' +
-      '<span class="swap-render-line">Rendering this combination\u2026</span></span>' +
+      '<span class="swap-render-line">' + esc(swapCardLine(look)) + '</span></span>' +
       '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
       cardStripHTML(look.swatches) + "</span></button>";
   }
@@ -13429,7 +13566,7 @@ function openBuildWardrobe() {
     return String(a.name || "").localeCompare(String(b.name || ""));
   });
   grid.innerHTML = items.length ? items.map(function (i) {
-    var media = i.photo ? '<img src="' + i.photo + '" alt="" loading="lazy" />' : '<span class="bc-dot" style="background:' + esc(i.colourHex || "#ccc") + '"></span>';
+    var media = i.photo ? '<img src="' + esc(i.photo) + '" alt="" loading="lazy" />' : '<span class="bc-dot" style="background:' + esc(i.colourHex || "#ccc") + '"></span>';
     return '<button type="button" class="build-cell" data-build-ward="' + esc(i.id) + '">' + media + '<span class="bc-name">' + esc(i.name) + "</span></button>";
   }).join("") : '<p class="meta" style="margin:0">Nothing in your closet yet.</p>';
   showBuildSheet("build-wardrobe-sheet");
@@ -13623,8 +13760,10 @@ function lookCardHTML(look, opts) {
   opts = opts || {};
   var refTag = look.refLook ? '<span class="pane-tag">Reference — ' + esc(look.imgInspo ? "your image" : ((look.iconId ? (iconById(look.iconId) || {}).name : "") || "icon")) + "</span>" : "";
   var cardImg = look.swapPhoto || lookImg(look);
-  var mediaPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + cardImg + '"';
-  var media = '<div class="look-media single"><div class="pane' + (look.swapState === "rendering" ? " swap-rendering" : "") + '"><img src="' + cardImg + '" alt="' + esc(look.imgAlt || "") + '"' + mediaPop + ' />' + refTag + (look.swapState === "rendering" ? '<div class="swap-render-line">Rendering this combination\u2026</div>' : "") + "</div></div>";
+  var lcState = swapCardState(look);
+  var lcWaiting = lcState === "rendering" || lcState === "pending" || lcState === "failed" || lcState === "nosync";
+  var mediaPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + esc(cardImg) + '"';
+  var media = '<div class="look-media single"><div class="pane' + (lcState === "rendering" ? " swap-rendering" : "") + '"><img src="' + esc(cardImg) + '" alt="' + esc(look.imgAlt || "") + '"' + mediaPop + ' />' + refTag + (lcWaiting ? '<div class="swap-render-line">' + esc(swapCardLine(look)) + "</div>" : "") + "</div></div>";
   var cardIcon = look.iconId ? iconById(look.iconId) : null;
   var cardBlend = look.blendId ? iconById(look.blendId) : null;
   var dirLine = cardIcon ? '<p class="dir-line">In the direction of <strong>' + esc(cardIcon.name) + "</strong> — " + esc(cardIcon.lane) + (cardBlend ? ', blended with <strong>' + esc(cardBlend.name) + "</strong> — " + esc(cardBlend.lane) : "") + "</p>" : "";
@@ -13700,6 +13839,15 @@ function openLookLayer(look) {
   if (!lookLayerOpen) lookLayerStash = { options: currentOptions, look: currentLook };
   lookLayerOpen = true;
   currentLook = look;
+  /* Submit-on-open: a combination dealt in the pending state
+     (or failed, or dealt while sync was off) submits its render
+     only now that its card is actually opened — dealing alone
+     never spends a render. */
+  if (look && (look.swapState === "pending" || look.swapState === "failed" || look.swapState === "nosync") && look.swapComboId && look.swapPieces && swapSyncKey()) {
+    look.swapState = "rendering";
+    swapMarkRendering(look.swapComboId);
+    swapSubmitJob(look, look.swapPieces, swapWatchIdFor(look) || "");
+  }
   /* A swapped look still waiting on its render resumes its
      poll whenever it is opened — closing the pop-out earlier
      paused the check, never cancelled the swap. */
@@ -14293,9 +14441,9 @@ function savedCardPaletteHTML(look) {
 }
 function optionCardHTML(look, idx) {
   var label = OPTION_LABELS[idx] || ("Take " + (idx + 1));
-  var ocPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + lookImg(look) + '"';
+  var ocPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + esc(lookImg(look)) + '"';
   return '<button type="button" class="card option-card' + (idx === 0 ? " selected" : "") + '" data-option-idx="' + idx + '" aria-pressed="' + (idx === 0 ? "true" : "false") + '" role="listitem">' +
-    '<img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy"' + ocPop + ' />' +
+    '<img src="' + esc(lookImg(look)) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy"' + ocPop + ' />' +
     '<span class="oc-body">' +
     '<span class="oc-title">' + esc(look.title) + '</span>' +
     /* No palette strip on cards (build .28) — the pop-out keeps
@@ -17601,7 +17749,7 @@ function renderSaved() {
   if (looksFilter === "removed") {
     var removedList = (typeof recentlyRemoved !== "undefined" && recentlyRemoved) ? recentlyRemoved : [];
     grid.innerHTML = removedList.length ? removedList.map(function (r) {
-      return '<div class="removed-row" style="grid-column:1/-1">' + (r._img || r.img ? '<img src="' + (r._img || r.img) + '" alt="" loading="lazy" data-popout="' + (r._img || r.img) + '" />' : "") +
+      return '<div class="removed-row" style="grid-column:1/-1">' + (r._img || r.img ? '<img src="' + esc(r._img || r.img) + '" alt="" loading="lazy" data-popout="' + esc(r._img || r.img) + '" />' : "") +
         '<span class="r-name">' + esc(r.title || "Look") + '</span>' +
         '<button type="button" class="btn-ghost" data-restore-removed="' + r.id + '">Restore</button></div>';
     }).join("") : '<p class="meta" style="grid-column:1/-1">Nothing removed — anything you remove lands here, so you can bring it back.</p>';
@@ -17705,7 +17853,7 @@ function renderSaved() {
       '<button type="button" data-worn-toggle="' + l.id + '">' + (l.worn ? "Worn ✓ — undo" : "Mark worn") + "</button>" +
       removeItem +
       "</div>" +
-      '<img src="' + img + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + img + '"') + ' />' +
+      '<img src="' + esc(img) + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + esc(img) + '"') + ' />' +
       /* Cards are photo + title + menu only (build .28): the
          status badges and the palette strip are gone from cards —
          the filter chips carry status now, and the pop-out keeps
@@ -17816,7 +17964,7 @@ function lookGridCard(l, actionsHTML) {
   return '<article class="card saved-card">' +
     '<button type="button" class="card-menu-btn" data-menu-btn aria-label="Actions for ' + esc(l.title) + '" aria-haspopup="true" aria-expanded="false">•••</button>' +
     '<div class="card-menu" hidden>' + menuItems + "</div>" +
-    '<img src="' + (l.img || "assets/photos/316150a1e65e.webp") + '" alt="' + esc(l.imgAlt || "") + '" loading="lazy" ' + (l.refLook ? 'data-fav-open="' + l.id + '"' : 'data-popout="' + (l.img || "assets/photos/316150a1e65e.webp") + '"') + ' />' +
+    '<img src="' + esc(l.img || "assets/photos/316150a1e65e.webp") + '" alt="' + esc(l.imgAlt || "") + '" loading="lazy" ' + (l.refLook ? 'data-fav-open="' + l.id + '"' : 'data-popout="' + esc(l.img || "assets/photos/316150a1e65e.webp") + '"') + ' />' +
     '<div class="sb"><h4 data-fav-open="' + l.id + '">' + esc(l.title) + "</h4>" +
     "</div></article>";
 }
@@ -18167,7 +18315,7 @@ function wristHTML(look, bare) {
     ? watches.filter(function (w) { return w.id === wristPickId && !w.sold; })[0] : null;
   if (forced && (!rec.watch || rec.watch.id !== forced.id)) {
     var fpick = '<div class="w-pick">' +
-      (forced.photo ? '<img src="' + forced.photo + '" alt="" />' : "") +
+      (forced.photo ? '<img src="' + esc(forced.photo) + '" alt="" />' : "") +
       '<div><div class="w-name">' + esc(forced.name) + '</div>' +
       '<div class="w-sub">' + esc(forced.metal) + " · " + esc(forced.dialName) + (forced.strap === "Not recorded" ? "" : " · " + esc(forced.strap)) + "</div></div></div>";
     var finner = fpick + "<ul>" +
@@ -18178,7 +18326,7 @@ function wristHTML(look, bare) {
   }
   if (!rec.watch) return "";
   var pick = '<div class="w-pick">' +
-    (rec.watch.photo ? '<img src="' + rec.watch.photo + '" alt="" />' : "") +
+    (rec.watch.photo ? '<img src="' + esc(rec.watch.photo) + '" alt="" />' : "") +
     '<div><div class="w-name">' + esc(rec.watch.name) + '</div>' +
     '<div class="w-sub">' + esc(rec.watch.metal) + " · " + esc(rec.watch.dialName) + (rec.watch.strap === "Not recorded" ? "" : " · " + esc(rec.watch.strap)) + "</div></div></div>";
   var inner = pick +
@@ -18999,7 +19147,7 @@ function parseOccasionText(t) {
   else if (/weekend|at home/.test(s)) occasion = "Weekend at home";
   else if (/work|office|meeting|smart/.test(s)) occasion = "Smart casual";
   var season = "";
-  if (/winter/.test(s)) season = "Palm Beach winter";
+  if (/winter/.test(s)) season = "Winter";
   else if (/summer/.test(s)) season = "Summer";
   else if (/spring/.test(s)) season = "Spring";
   else if (/\bfall\b|autumn/.test(s)) season = "Fall";
@@ -19245,7 +19393,7 @@ function shareLookImage(look) {
    for the whole session: switching tabs and coming back does not
    re-deal, and a reload / pull-to-refresh within the session
    restores this session's look instead of dealing a new one.
-   Palm Beach weather then has its say — a hot morning swaps the
+   Local weather then has its say — a hot morning swaps the
    deal to a light look, a cold one to layers — unless the user
    has already dealt or styled for themselves. dailyLook() below
    is kept for a location change, which re-deals the day on the
@@ -19767,12 +19915,14 @@ function renderToday() {
 }
 
 /* ================= Location & weather =================
-   Home is the default location (Palm Beach, Florida). Traveling
-   swaps the current location — a searched city or one of your
-   places — and the weather there re-deals the day and steers
-   Studio looks that have no season chosen. Weather comes from
-   Open-Meteo for the current location's coordinates. */
-var HOME_DEFAULT = { name: "Palm Beach, Florida", lat: 26.70306, lon: -80.03661, admin: "Florida", country: "United States" };
+   Home is the default location — the user's own, kept in their
+   synced data, never baked into this page (a fresh install starts
+   blank until they set one). Traveling swaps the current
+   location — a searched city or one of your places — and the
+   weather there re-deals the day and steers Studio looks that
+   have no season chosen. Weather comes from Open-Meteo for the
+   current location's coordinates. */
+var HOME_DEFAULT = { name: "", lat: 0, lon: 0, admin: "", country: "" };
 var QUICK_LOCS = {
   "palm-beach": HOME_DEFAULT,
   "new-york": { name: "New York, New York", lat: 40.7128, lon: -74.006, admin: "New York", country: "United States" },
@@ -19836,7 +19986,7 @@ function renderQuickLocs() {
   var keys = Object.keys(QUICK_LOCS);
   var lq = document.getElementById("loc-quick");
   if (lq) {
-    lq.innerHTML = keys.map(function (k) {
+    lq.innerHTML = keys.filter(function (k) { return QUICK_LOCS[k].name; }).map(function (k) {
       return '<button type="button" class="chip" data-quick-loc="' + k + '">' + esc(QUICK_LOCS[k].name) + "</button>";
     }).join("");
   }
@@ -19905,6 +20055,8 @@ function applyWeatherToToday() {
 }
 function fetchWeather(attempt) {
   if (!window.fetch) return;
+  /* No location set yet (fresh install): nothing to fetch for. */
+  if (!currentLoc.lat && !currentLoc.lon) return;
   var url = "https://api.open-meteo.com/v1/forecast?latitude=" + currentLoc.lat + "&longitude=" + currentLoc.lon +
     "&current=temperature_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&temperature_unit=fahrenheit&past_days=7&forecast_days=16&timezone=auto";
   var askedLat = currentLoc.lat, askedLon = currentLoc.lon;
@@ -20126,15 +20278,52 @@ document.getElementById("today-style").addEventListener("click", function () {
 });
 
 /* ================= Profile =================
-   Your measurements. Shoe US men's 9 and tee Small are known and
-   pre-filled; the rest are yours to complete. Saved on this device
-   through the same store as the closet, and Shop the look reads its
-   sizes from here. */
-var PROFILE_FIELDS = ["shoe", "tee", "polo", "shirt", "knit", "blazer", "coat", "waist", "inseam", "jeans", "shorts", "glove", "hat", "belt", "sleeve", "chest", "height", "fit", "notes"];
-var profile = Object.assign({ shoe: "9", tee: "Small" }, store.get("profile", {}));
+   Your name, photo and measurements — yours alone, kept in your
+   own store/sync data; this page ships with none of it, so a
+   fresh install shows a blank header until you fill it in. Saved
+   on this device through the same store as the closet, and Shop
+   the look reads its sizes from here. */
+var PROFILE_FIELDS = ["name", "shoe", "tee", "polo", "shirt", "knit", "blazer", "coat", "waist", "inseam", "jeans", "shorts", "glove", "hat", "belt", "sleeve", "chest", "height", "fit", "notes"];
+var profile = Object.assign({}, store.get("profile", {}));
 PROFILE_FIELDS.forEach(function (f) {
   var el = document.getElementById("pf-" + f);
   if (el && profile[f]) el.value = profile[f];
+});
+/* The header renders from the profile + home location above —
+   never from markup — so it is blank wherever no profile exists. */
+function renderProfileHead() {
+  var nameEl = document.getElementById("pf-head-name");
+  var cityEl = document.getElementById("pf-head-city");
+  var imgEl = document.getElementById("pf-head-photo");
+  if (nameEl) nameEl.textContent = profile.name || "";
+  if (cityEl) cityEl.textContent = (typeof homeLoc !== "undefined" && homeLoc && homeLoc.name) || "";
+  if (imgEl) {
+    if (profile.photo) { imgEl.src = profile.photo; imgEl.hidden = false; }
+    else { imgEl.removeAttribute("src"); imgEl.hidden = true; }
+  }
+}
+renderProfileHead();
+var pfPhotoEl = document.getElementById("pf-photo");
+if (pfPhotoEl) pfPhotoEl.addEventListener("change", function () {
+  var f = pfPhotoEl.files && pfPhotoEl.files[0];
+  if (!f) return;
+  var rd = new FileReader();
+  rd.onload = function () {
+    var img = new Image();
+    img.onload = function () {
+      var max = 512, sc = Math.min(1, max / Math.max(img.width || 1, img.height || 1));
+      var cv = document.createElement("canvas");
+      cv.width = Math.max(1, Math.round(img.width * sc));
+      cv.height = Math.max(1, Math.round(img.height * sc));
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      profile.photo = cv.toDataURL("image/jpeg", 0.85);
+      store.set("profile", profile);
+      renderProfileHead();
+      toast("Profile photo saved.");
+    };
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(f);
 });
 document.getElementById("profile-form").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -20143,6 +20332,7 @@ document.getElementById("profile-form").addEventListener("submit", function (e) 
     if (el) profile[f] = el.value.trim();
   });
   store.set("profile", profile);
+  renderProfileHead();
   syncFindSize();
   toast("Profile saved — Shop the look will size from it.");
 });
@@ -20225,6 +20415,9 @@ function applyBackupData(data) {
   /* Import REPLACES: a key absent from the file is cleared, so it
      can't leave newer on-device state silently in force. Exact
      prior text is held so a failed write restores it. */
+  /* Import is an explicit restore: clear any poison first, or the
+     store would refuse the very writes that repair the data. */
+  DATA_KEYS.forEach(function (k) { store.clearPoison(k); });
   var before = {}, failed = [];
   DATA_KEYS.forEach(function (k) { before[k] = store.raw(k); });
   DATA_KEYS.forEach(function (k) {
@@ -22923,6 +23116,9 @@ function saveStudioSettings() {
 function restoreStudioSettings() {
   var s = store.get("studioSettings", null);
   if (!s) return;
+  /* The old "Palm Beach winter" season label is retired; stored
+     settings carrying it land on plain Winter. */
+  if (s.season === "Palm Beach winter") s.season = "Winter";
   STUDIO_FIELDS.forEach(function (id) { var el = document.getElementById(id); if (el && typeof s[id] === "string") el.value = s[id]; });
   if (s.basis && s.basis !== studioBasis) setBasis(s.basis);
   if (s.dress) applyDressFor(s.dress, true);
@@ -24898,11 +25094,16 @@ function syMetaOf() {
    write (hinted to the affected collection) and in full at boot
    and at the start of every sync, so no write path is missed. */
 var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors" };
+var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors" };
 var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, dealtImgs: 1, dealtTitles: 1, dealtCombos: 1, dealtCards: 1, findBudget: 1, shopTier: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
 function syTrackChanges(onlyColl) {
   var now = Date.now(), ch = false;
   var colls = onlyColl ? [onlyColl] : SY_COLLS;
   colls.forEach(function (c) {
+    /* Poisoned store key: the in-memory list is a fallback, not
+       the data. Diffing it would tombstone every real record —
+       skip the collection entirely until it is restored. */
+    if (store.poisoned(SY_COLL_KEY[c])) return;
     var seen = {};
     syCollGet(c).forEach(function (r) {
       var id = syRecId(c, r);
@@ -24920,6 +25121,7 @@ function syTrackChanges(onlyColl) {
      upgrade never makes stale settings look new. */
   var meta = syMetaOf(), mch = false;
   Object.keys(meta).forEach(function (f) {
+    if (store.poisoned(f) || _syMetaRestore[f]) return; /* fallback value — never tracked, never uploaded */
     var h = syHsh(meta[f]), cur = SY.mf[f];
     if (!cur) { SY.mf[f] = { h: h, t: SY.st.m || 0 }; ch = true; }
     else if (cur.h !== h) { cur.h = h; cur.t = now; mch = true; }
@@ -24960,6 +25162,21 @@ function setSyncStatus(t) {
    sync also retries itself once after 30 seconds, so a brief
    connection drop heals without the user doing anything. */
 var _syFailed = false, _syRetryT = null, _syNoteOff = false;
+/* Mass-delete guard state: a sync pass that would delete more
+   than ~20% of a collection is held until the user confirms it
+   in the data alert (the worker enforces the same rule and can
+   raise the hold itself with a 409). _syMassOkUntil arms one
+   confirmed pass; _syMassDenied holds a coll silently for the
+   session after a "Keep them" answer. */
+var _syMassHold = null, _syMassOkUntil = 0, _syMassDenied = {};
+/* Settings fields being restored from the server after a poison:
+   untracked and unuploaded until the download lands, so their
+   in-memory fallback values can never overwrite the good copy. */
+var _syMetaRestore = {};
+/* Set when the worker refuses /register for want of the
+   registration code: background syncs stand down (no retry loop)
+   until the user saves a code and taps Sync now. */
+var _syRegNeed = false;
 function syPendingCount() {
   var n = SY.dirty.m ? 1 : 0;
   SY_COLLS.forEach(function (c) { n += Object.keys(SY.dirty[c]).length; });
@@ -24978,6 +25195,84 @@ function syNoteRender() {
       : "Couldn't sync — " + pending + (pending === 1 ? " change is" : " changes are") + " still on this device.";
   }
 }
+/* The data alert: two guards share one slim note (never a popup).
+   1) A stored list couldn't be read (poisoned key): its raw value
+      is preserved and its uploads are blocked; Restore pulls the
+      last good copy back from sync (or offers a backup import
+      when this device has no sync key).
+   2) A sync pass would delete more than ~20% of a collection:
+      held until the user confirms the deletions here.
+   Dismissing hides the note for the session; the blocks stay. */
+var _dataNoteOff = false, _dataNoteMode = "";
+function dataNoteRender() {
+  var el = document.getElementById("data-alert");
+  if (!el) return;
+  var tx = document.getElementById("data-alert-text");
+  var btn = document.getElementById("data-alert-btn");
+  var poisoned = store.poisonedKeys();
+  if (!_dataNoteOff && poisoned.length) {
+    _dataNoteMode = "poison";
+    el.hidden = false;
+    if (tx) tx.textContent = "This list couldn't be read — " + poisoned.join(", ") + ". The unreadable copy is kept safe on this device and nothing from it will be uploaded. Restore from " + (SY && SY.key ? "your synced copy?" : "a backup?");
+    if (btn) btn.textContent = "Restore";
+    return;
+  }
+  if (!_dataNoteOff && _syMassHold) {
+    _dataNoteMode = "mass";
+    el.hidden = false;
+    if (tx) tx.textContent = "Sync wants to delete " + _syMassHold.deletions + " of " + _syMassHold.live + " in one list. Delete them everywhere?";
+    if (btn) btn.textContent = "Delete them";
+    return;
+  }
+  _dataNoteMode = "";
+  el.hidden = true;
+}
+function dataAlertAction() {
+  if (_dataNoteMode === "mass") {
+    /* Confirmed: arm one pass and let it through both guards. */
+    _syMassOkUntil = Date.now() + 120000;
+    _syMassHold = null;
+    dataNoteRender();
+    syncNow(false, true);
+    return;
+  }
+  if (_dataNoteMode !== "poison") return;
+  var keys = store.poisonedKeys();
+  if (!keys.length) { dataNoteRender(); return; }
+  if (SY && SY.key) {
+    /* Restore from the synced copy: drop the local fallback state
+       for the poisoned keys, forget what this device thinks the
+       server holds for them, and re-download from sequence zero.
+       The preserved raw text stays in the corrupt-copy store. */
+    keys.forEach(function (k) {
+      store.clearPoison(k);
+      store.putRaw(k, null);
+      var coll = SY_KEY_COLL[k];
+      if (coll) { SY.snap[coll] = {}; SY.st[coll] = {}; SY.tomb[coll] = {}; SY.dirty[coll] = {}; }
+      else if (SY_META_KEYS[k]) { delete SY.mf[k]; _syMetaRestore[k] = 1; }
+    });
+    SY.last = 0;
+    saveSY();
+    toast("Restoring from your synced copy…");
+    dataNoteRender();
+    syncNow(false, true);
+  } else {
+    var f = document.getElementById("data-import-file");
+    if (f) { toast("No synced copy on this device — choose a backup file to restore from."); f.click(); }
+    else toast("No synced copy on this device — import a backup from Profile to restore.");
+  }
+}
+function dataAlertDismiss() {
+  if (_dataNoteMode === "mass" && _syMassHold) {
+    /* "Not now" = keep them: hold this collection's mass delete
+       silently for the rest of the session. */
+    _syMassDenied[_syMassHold.coll] = 1;
+    _syMassHold = null;
+  }
+  _dataNoteOff = true;
+  dataNoteRender();
+}
+
 /* fetch with a deadline: a request that never answers used to
    leave sync "busy" until the page was reloaded. */
 function syFetch(url, opts, ms) {
@@ -25113,9 +25408,10 @@ function syRefresh() {
   try { store.set("wornLog", wornLog); } catch (e) {}
   try { store.set("inspoImages", inspoImages); } catch (e) {}
   try { store.set("finds", finds); } catch (e) {}
-  [renderSaved, renderWardrobe, renderWatches, renderWornLog, renderInspoImages, renderMyInspo, renderFinds, renderCustomPalettes, renderIcons, renderRecentlyRemoved, renderLoc, syncPaletteSelect, renderPurchased, renderWeekPlan].forEach(function (f) {
+  [renderSaved, renderWardrobe, renderWatches, renderWornLog, renderInspoImages, renderMyInspo, renderFinds, renderCustomPalettes, renderIcons, renderRecentlyRemoved, renderLoc, syncPaletteSelect, renderPurchased, renderWeekPlan, renderProfileHead].forEach(function (f) {
     try { if (typeof f === "function") f(); } catch (e) {}
   });
+  try { dataNoteRender(); } catch (e) {}
   var se = document.getElementById("syncstat");
   if (se) se.innerHTML = syncStatusHTML();
   var kf = document.getElementById("sync-key");
@@ -25139,6 +25435,7 @@ function syncNow(isRetry, force) {
   /* Key rejected earlier: background check-ins stand down until
      the user retries (Sync now), relinks, or the app is reopened. */
   if (!force && SY.rej) return;
+  if (!force && _syRegNeed) return;
   if (!force && SY.key) {
     try { syTrackChanges(); } catch (e) {}
     var anyDirty = !!SY.dirty.m;
@@ -25154,8 +25451,24 @@ function syncNow(isRetry, force) {
     try {
       if (!SY.key) {
         setSyncStatus("Creating sync account…");
-        var r0 = await syFetch(SYNC_URL + "/register", { method: "POST" }, 20000);
+        /* The worker gates /register behind a registration code
+           (kept in this device's local store only). Without it —
+           or with a wrong one — the worker answers 403: stand
+           down quietly and tell the user where the code goes,
+           instead of retry-looping a request that cannot pass. */
+        var regCode = "";
+        try { regCode = store.get("regCode", "") || ""; } catch (e) {}
+        var r0 = await syFetch(SYNC_URL + "/register", {
+          method: "POST",
+          headers: regCode ? { "x-register-secret": regCode } : {}
+        }, 20000);
+        if (r0.status === 403) {
+          _syRegNeed = true;
+          setSyncStatus("Sync needs the registration code — enter it under Cloud sync in Profile, then tap Sync now. Nothing on this device was changed.");
+          return;
+        }
         if (!r0.ok) throw new Error("register " + r0.status);
+        _syRegNeed = false;
         var j0 = await r0.json();
         if (!j0 || !j0.key) throw new Error("register failed");
         /* Adopt the auto-created account ONLY if no key has
@@ -25200,6 +25513,24 @@ function syncNow(isRetry, force) {
           else if (SY.tomb[c][id]) changes.push({ coll: c, id: id, updatedAt: SY.tomb[c][id], deleted: true });
         });
       });
+      /* Mass-delete guard (client side; the worker enforces the
+         same rule): hold any pass that would delete more than
+         ~20% of a collection until the user confirms it in the
+         data alert. Held tombstones stay dirty — they are simply
+         not sent in this pass. */
+      if (Date.now() > _syMassOkUntil) {
+        var delByColl = {}, liveByColl = {};
+        changes.forEach(function (ch) { if (ch.deleted) delByColl[ch.coll] = (delByColl[ch.coll] || 0) + 1; });
+        Object.keys(delByColl).forEach(function (c) {
+          var del = delByColl[c];
+          var live = Object.keys(SY.snap[c] || {}).length;
+          if (del >= 6 && del > (live + del) * 0.2 && !_syMassDenied[c]) {
+            if (!_syMassHold) _syMassHold = { coll: c, deletions: del, live: live + del };
+            changes = changes.filter(function (ch) { return !(ch.deleted && ch.coll === c); });
+          }
+        });
+        if (_syMassHold) { saveSY(); try { dataNoteRender(); } catch (e) {} }
+      }
       /* Uploads go in batches of about 900 KB, so a first sync
          full of photographs is not one enormous request that
          fails as a whole. Settings ride on the last batch. */
@@ -25213,7 +25544,12 @@ function syncNow(isRetry, force) {
       if (SY.dirty.m) {
         var ft = {};
         Object.keys(SY.mf).forEach(function (f) { ft[f] = SY.mf[f].t || 0; });
-        metaOut = { updatedAt: SY.st.m || Date.now(), data: Object.assign({}, syMetaOf(), { _ft: ft }) };
+        var metaData = Object.assign({}, syMetaOf(), { _ft: ft });
+        /* A poisoned settings field rides along as its fallback
+           value in syMetaOf — leave it out of the upload entirely
+           so the server's good copy survives. */
+        Object.keys(metaData).forEach(function (f) { if (f !== "_ft" && (store.poisoned(f) || _syMetaRestore[f])) delete metaData[f]; });
+        metaOut = { updatedAt: SY.st.m || Date.now(), data: metaData };
       }
       var since = SY.last, lastNow = null, sent = 0, down = 0;
       var changedAny = false, changedLooks = false;
@@ -25221,6 +25557,7 @@ function syncNow(isRetry, force) {
         var batch = batches[bi];
         var isLast = bi === batches.length - 1;
         var body = { since: since, changes: batch, meta: isLast ? metaOut : null };
+        if (Date.now() <= _syMassOkUntil) body.confirmMassDelete = true;
         if (batches.length > 1) setSyncStatus("Syncing… " + (bi + 1) + " of " + batches.length);
         var r = await syFetch(SYNC_URL + "/sync", {
           method: "POST",
@@ -25234,6 +25571,22 @@ function syncNow(isRetry, force) {
           SY.rej = (SY.rej || 0) + 1;
           setSyncStatus("Sync paused — the server didn't accept this device's sync key. Nothing on this device was changed.");
           return;
+        }
+        if (r.status === 409) {
+          /* The worker's own mass-delete guard fired (this client
+             was already past its check, e.g. a confirmed window
+             lapsed mid-pass). Nothing in this batch was applied;
+             the tombstones stay dirty. Ask the user. */
+          var j409 = null;
+          try { j409 = await r.json(); } catch (e) {}
+          if (j409 && j409.error === "mass_delete") {
+            _syMassHold = { coll: j409.coll, deletions: j409.deletions, live: j409.live };
+            saveSY();
+            try { dataNoteRender(); } catch (e) {}
+            setSyncStatus("Sync paused — that pass would delete " + j409.deletions + " of " + j409.live + " in one list. Confirm it in the note above Profile, or keep them.");
+            return;
+          }
+          throw new Error("sync 409");
         }
         if (!r.ok) throw new Error("sync " + r.status);
         var j = await r.json();
@@ -25278,6 +25631,8 @@ function syncNow(isRetry, force) {
       if (lastNow !== null) SY.last = lastNow;
       SY.lastOk = Date.now();
       SY.rej = 0;
+      _syMassOkUntil = 0; /* a confirmed pass is spent */
+      _syMetaRestore = {}; /* the download had its chance this pass */
       _syFailed = false; _syNoteOff = false;
       clearTimeout(_syRetryT);
       saveSY();
@@ -25357,6 +25712,23 @@ function linkSyncKey() {
   var snd = document.getElementById("sync-note-dismiss");
   if (snd) snd.addEventListener("click", function () { _syNoteOff = true; syNoteRender(); });
   syNoteRender();
+  var dab = document.getElementById("data-alert-btn");
+  if (dab) dab.addEventListener("click", dataAlertAction);
+  var dad = document.getElementById("data-alert-dismiss");
+  if (dad) dad.addEventListener("click", dataAlertDismiss);
+  dataNoteRender();
+  /* Registration code (worker /register is gated): kept only in
+     this device's local store — never synced, never exported. */
+  var rci = document.getElementById("sync-regcode");
+  if (rci) { try { rci.value = store.get("regCode", "") || ""; } catch (e) {} }
+  var rcb = document.getElementById("sync-regcode-btn");
+  if (rcb) rcb.addEventListener("click", function () {
+    var v = (rci && rci.value ? rci.value : "").trim();
+    try { store.set("regCode", v); } catch (e) {}
+    _syRegNeed = false;
+    var n = document.getElementById("sync-regcode-note");
+    if (n) n.textContent = v ? "Code saved on this device — tap Sync now to create the account." : "Code cleared.";
+  });
   var lb = document.getElementById("sync-link-btn");
   if (lb) lb.addEventListener("click", linkSyncKey);
   var na = document.getElementById("sync-new-acct");
