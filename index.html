@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.49" />
+    <meta name="wardrobe-build" content="2026-11-17.50" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2752,6 +2752,11 @@
       .source-seg button { min-height: 36px; padding: 6px 4px; border: 0; border-right: 1px solid var(--border); background: var(--surface); color: var(--dim); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
       .source-seg button:last-child { border-right: 0; }
       .source-seg button[aria-pressed="true"] { background: var(--ink-btn); color: var(--ink-btn-text); }
+      /* Build .50: the Ideas deal surface's Outfit type row —
+         the Dress-for chip family, wrapping under the source seg. */
+      .ideas-type-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 10px; }
+      #panel-studio .ideas-type-row .chip { flex: none; }
+      .ideas-type-label { font-family: var(--font-ui); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-right: 2px; }
       #panel-looks .fb-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
       #panel-looks .fb-chips::-webkit-scrollbar { display: none; }
       #panel-looks .fb-chips .chip { flex: none; }
@@ -3042,12 +3047,13 @@
         <div class="wrap">
           <div class="subnav-group" id="subnav-closet" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
-            <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks">My Looks</button>
+            <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks">My Outfits</button>
             <button class="subtab" role="tab" id="tab-watches" aria-selected="false" aria-controls="panel-watches" data-tab="watches">Watches</button>
             <button class="subtab" role="tab" id="tab-wearing" aria-selected="false" aria-controls="panel-wearing" data-tab="wearing">Wearing Today</button>
           </div>
           <div class="subnav-group" id="subnav-ideas" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Ideas</button>
+            <button class="subtab" role="tab" id="tab-outfitideas" aria-selected="false" aria-controls="panel-outfitideas" data-tab="outfitideas">Outfit Ideas</button>
             <button class="subtab" role="tab" id="tab-icons" aria-selected="false" aria-controls="panel-icons" data-tab="icons">Icons <span class="count" id="icon-tab-count"></span></button>
             <button class="subtab" role="tab" id="tab-palettes" aria-selected="false" aria-controls="panel-palettes" data-tab="palettes">Palettes <span class="count" id="palette-count">348</span></button>
             <button class="subtab" role="tab" id="tab-myinspo" aria-selected="false" aria-controls="panel-myinspo" data-tab="myinspo">My Inspo</button>
@@ -3160,6 +3166,23 @@
               <button type="button" data-source="wardrobe" aria-pressed="false">Wardrobe</button>
               <button type="button" data-source="inspo" aria-pressed="false">Inspo</button>
               <button type="button" data-source="combo" aria-pressed="true">Combo</button>
+            </div>
+            <!-- Build .50: the dress-level selector lives on the
+                 deal surface too, not only inside Customize. Same
+                 data-studio-type attributes, same one app-wide
+                 formality state — setFormality and the selector
+                 sync drive this row, the Customize row and the
+                 Today dropdown together. -->
+            <div class="ideas-type-row" id="ideas-type-row" role="group" aria-label="Outfit type">
+              <span class="ideas-type-label">Outfit type</span>
+              <button type="button" class="chip" data-studio-type-any aria-pressed="false">Any</button>
+              <button type="button" class="chip" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
+              <button type="button" class="chip" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
+              <button type="button" class="chip" data-studio-type="3" aria-pressed="false">Casual</button>
+              <button type="button" class="chip" data-studio-type="4" aria-pressed="false">Smart Casual</button>
+              <button type="button" class="chip" data-studio-type="5" aria-pressed="false">Business Casual</button>
+              <button type="button" class="chip" data-studio-type="6" aria-pressed="false">Formal</button>
+              <button type="button" class="chip" data-studio-type="7" aria-pressed="false">Black Tie</button>
             </div>
             <div class="studio-home-bar">
               <button type="button" class="btn-accent" id="studio-deal">Give me ideas</button>
@@ -3296,6 +3319,28 @@
           </div>
         </div>
 
+      </section>
+
+      <!-- ================= OUTFIT IDEAS (build .50) =================
+           The zero-owned half of the one saved-looks collection:
+           complete outfits saved from deals, emulations and
+           uploaded outfit photographs. Reference material is NOT
+           here — the inspo library and the Icons lookboard keep
+           their own surfaces. -->
+      <section id="panel-outfitideas" role="tabpanel" aria-labelledby="tab-outfitideas" hidden>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Outfit Ideas" data-info-text="Complete outfits you saved that use none of your own pieces — dealt ideas, emulated looks and outfit photographs you uploaded — filtered by the chips above. Removing a look only un-saves it." aria-label="About: Outfit Ideas">i</button></div>
+        <h3 class="fav-head">Outfit Ideas</h3>
+        <div class="looks-tools">
+          <input type="search" id="oi-search" class="ward-search" aria-label="Search your outfit ideas" placeholder="Search your outfit ideas — a colour, a piece, a note" autocomplete="off" />
+          <div class="fb-chips" role="group" aria-label="Filter outfit ideas">
+            <button type="button" class="chip" data-oi-filter="all" aria-pressed="true">All</button>
+            <button type="button" class="chip" data-oi-filter="queued" aria-pressed="false">Queued</button>
+            <button type="button" class="chip" data-oi-filter="worn" aria-pressed="false">Worn</button>
+            <button type="button" class="chip" data-oi-filter="liked" aria-pressed="false">Liked</button>
+            <button type="button" class="chip" data-oi-filter="new" aria-pressed="false">Not worn yet</button>
+          </div>
+        </div>
+        <div class="saved-grid" id="outfit-ideas-grid"></div>
       </section>
 
       <!-- ================= WARDROBE ================= -->
@@ -3469,7 +3514,7 @@
 
       <!-- ================= LOOKS ================= -->
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="My Looks" data-info-text="Looks you liked or saved, the built-in catalogue, and anything queued for later — one list, filtered by the chips above. Removing a look only un-saves it; the Recently removed chip keeps every removal, restorable, for as long as you need. The Wishlist chip shows the same wishlist as Shop — one list, two doors." aria-label="About: My Looks">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="My Outfits" data-info-text="Outfits you saved that are built from your own pieces — wardrobe looks and combinations anchored in them — filtered by the chips above. Removing an outfit only un-saves it; the Recently removed chip keeps every removal, restorable, for as long as you need. The Wishlist chip shows the same wishlist as Shop — one list, two doors." aria-label="About: My Outfits">i</button></div>
         <div class="looks-tools">
           <input type="search" id="looks-search" class="ward-search" aria-label="Search your looks" placeholder="Search your looks — a colour, a piece, a note" autocomplete="off" />
           <div class="fb-chips" role="group" aria-label="Filter looks">
@@ -4762,7 +4807,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.49";
+var WARDROBE_BUILD = "2026-11-17.50";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -12679,7 +12724,11 @@ function generateComboLook(opts) {
      rung names it freshly. With the closet's anchors counted,
      this space runs to hundreds of thousands. */
   var anchorNames = [""];
-  if (typeof closetAnchorItems !== "undefined") closetAnchorItems().forEach(function (a) { if (a && a.name && anchorNames.indexOf(a.name) === -1) anchorNames.push(a.name); });
+  /* Build .50: an inspo deal never carries closet anchors — the
+     anchor variants of the combination space are closed to it,
+     so a generated inspo take can never arrive wearing a closet
+     piece's name. */
+  if (opts.source !== "inspo" && typeof closetAnchorItems !== "undefined") closetAnchorItems().forEach(function (a) { if (a && a.name && anchorNames.indexOf(a.name) === -1) anchorNames.push(a.name); });
   var plateOrder = shuffleArr(PLATES.filter(function (p) { return !exclPlates[p.plate]; }));
   for (var pi = 0; pi < plateOrder.length; pi++) {
     var p2 = plateOrder[pi];
@@ -12946,6 +12995,7 @@ var savedLooks = store.get("looks", []);
    them into the worn catalogue in Looks) or taken off. */
 var queueLooks = store.get("queue", []) || [];
 var looksFilter = "all";
+var oiFilter = "all"; /* build .50: Ideas → Outfit Ideas' own filter state */
 function saveQueue() { store.set("queue", queueLooks); }
 
 /* ================= Week plan — one planned look per date =================
@@ -13453,9 +13503,9 @@ function emulateRenderHTML(ic, lk, fl) {
   var html = '<div class="emulate-render">';
   if (done) {
     html += '<img src="' + esc(lazyRenders[saved.swapComboId]) + '" alt="You, in this look" />' +
-      '<p class="emulate-note">Rendered — find it in My Looks, next to the original photograph.</p>';
+      '<p class="emulate-note">Rendered — find it in ' + savedHomeName(saved) + ', next to the original photograph.</p>';
   } else if (saved && saved.swapState) {
-    html += '<p class="emulate-note">' + esc(swapCardLine(saved)) + " — the render lives in My Looks.</p>";
+    html += '<p class="emulate-note">' + esc(swapCardLine(saved)) + " — the render lives in " + savedHomeName(saved) + ".</p>";
   }
   if (!core) {
     html += '<button type="button" class="btn-accent" disabled>Render me in this look</button>' +
@@ -14353,6 +14403,34 @@ function mappedClosetPieces(look) {
     });
   }
   return out;
+}
+/* Build .50 — the saved collections partition. ONE savedLooks
+   collection (the sync shape is unchanged), two homes, decided
+   LIVE by provenance through the same mappedClosetPieces
+   machinery: a saved look with at least one mapped owned piece
+   lives in Closet → My Outfits (wardrobe-only and combo saves
+   alike); a saved look with none lives in Ideas → Outfit Ideas.
+   The classifier is the migration — on first run every existing
+   save lands in its correct home by the same rule, with no
+   record rewritten or lost, and every new save files itself by
+   it. A look appears in exactly one home, never both. */
+var _homeCache = {}, _homeCacheSig = null;
+function savedLookHome(look) {
+  /* Memoised per closet signature: the mapping is provenance,
+     and provenance only moves when the closet does. */
+  var sig = (typeof closetSig === "function") ? closetSig() : "";
+  if (sig !== _homeCacheSig) { _homeCache = {}; _homeCacheSig = sig; }
+  var key = look && look.id ? look.id + "|" + (look.img || "") + "|" + (look.swapComboId || "") + "|" + ((look.fwPieces || []).length) : null;
+  if (key && _homeCache[key] !== undefined) return _homeCache[key];
+  var home = mappedClosetPieces(look).length >= 1 ? "outfits" : "ideas";
+  if (key) _homeCache[key] = home;
+  return home;
+}
+function savedHomeName(look) {
+  return savedLookHome(look) === "outfits" ? "My Outfits" : "Outfit Ideas";
+}
+function savedHomePath(look) {
+  return savedLookHome(look) === "outfits" ? "Closet → My Outfits." : "Ideas → Outfit Ideas.";
 }
 function swapDisplayPhoto(look) {
   if (!look) return "";
@@ -16058,19 +16136,26 @@ function closetAnchorItems() {
 function applySource(looks, source, origDesc) {
   if (!looks || !looks.length) return looks;
   looks.forEach(function (look) { look.source = source; });
-  if (source === "inspo") return looks;
-  var anchors = closetAnchorItems();
-  if (!anchors.length) return looks;
-  if (source === "wardrobe") {
-    looks.forEach(function (look) { look.anchorNames = anchors.map(function (a) { return a.name; }).slice(0, 3); });
+  /* Build .50 — source segregation is enforced at generation,
+     never at the label: this pass may only describe what a take
+     already IS, never dress it in another source's evidence.
+     Inspo takes carry NO closet anchors — any a take arrived
+     with are stripped. Wardrobe takes never reach this pass at
+     all (buildSixLooks deals them from buildClosetLooks only),
+     so no anchor names are stamped here in Wardrobe's name.
+     Combo anchor names are the take's OWN mapped closet pieces
+     — the provenance the combo pass verified — never a rotating
+     closet name the take does not contain. */
+  if (source === "inspo") {
+    looks.forEach(function (look) { look.anchorNames = []; look.anchorHex = null; });
     return looks;
   }
-  /* Combo: one owned anchor per take, rotating through the closet so
-     the six takes are anchored in different pieces you own. */
-  looks.forEach(function (look, i) {
-    var a = anchors[i % anchors.length];
-    look.anchorNames = [a.name];
-    look.anchorHex = a.colourHex || null;
+  if (source === "wardrobe") return looks;
+  looks.forEach(function (look) {
+    var mapped = (typeof mappedClosetPieces === "function") ? mappedClosetPieces(look) : [];
+    look.anchorNames = mapped.map(function (p) { return p.name; });
+    var first = mapped.length && typeof closetItemById === "function" ? closetItemById(mapped[0].id) : null;
+    look.anchorHex = first ? (first.colourHex || null) : null;
   });
   return looks;
 }
@@ -16249,6 +16334,7 @@ function enforceFreshTake(look, others, ctx) {
     var gen = generateComboLook({
       version: ctx.version || look.version || 1,
       iconId: ctx.iconId || null,
+      source: ctx.source || null,
       occasion: ctx.occasion || "", season: ctx.season || "",
       excludeImgs: exclImgs, excludePlates: exclPlates, excludeTitles: exclTitles
     });
@@ -16296,8 +16382,142 @@ function strictFormalityPass(looks, baseOpts) {
     return nl;
   });
 }
+/* Build .50 — COMBO means genuinely both, verified per take at
+   the end of the deal: at least one mapped OWNED closet piece
+   AND at least one mapped NON-owned garment (a swap-map slot
+   whose piece has no cid resolving to a closet item). A take
+   that fails is repaired, never relabelled: first rebuilt as an
+   anchored combination around a rotating owned closet piece
+   (the owned anchor fixed in its slot, the remaining slots
+   filled from the piece library, so both sides hold by
+   construction); then — if assembly cannot produce a passing
+   take carrying a photograph of its own — re-drawn from the
+   render pool until one passes. Freshness (no repeated
+   photograph, title or plate inside the hand) is checked on
+   every repair, and a repaired pool take keeps its own
+   photograph's caption (the .47 title rule). */
+function comboTakePasses(look) {
+  if (!look || typeof mappedClosetPieces !== "function") return false;
+  if (mappedClosetPieces(look).length < 1) return false;
+  var map = (typeof swapMapForLook === "function") ? swapMapForLook(look) : null;
+  if (!map) return false;
+  return Object.keys(map).some(function (slot) {
+    var p = map[slot] && map[slot].piece;
+    if (!p) return false;
+    if (!p.cid) return true;
+    var it = (typeof closetItemById === "function") ? closetItemById(p.cid) : null;
+    return !it;
+  });
+}
+/* Screening for an assembled combination, WITHOUT building its
+   look: styleComboLook persists every new combination it is
+   handed (the render queue's tracking), so candidates are
+   judged from their piece ids alone and only the ONE chosen
+   combination is ever built. Both sides are read straight off
+   the library pieces: an owned piece is one whose cid resolves
+   to a closet item; anything else in the map is non-owned. */
+function comboIdsPass(idsBySlot) {
+  var owned = 0, nonOwned = 0;
+  Object.keys(idsBySlot || {}).forEach(function (s) {
+    var p = (typeof PIECE_BY_ID !== "undefined") ? PIECE_BY_ID[idsBySlot[s]] : null;
+    if (!p) return;
+    if (p.cid && typeof closetItemById === "function" && closetItemById(p.cid)) owned++;
+    else nonOwned++;
+  });
+  return owned >= 1 && nonOwned >= 1;
+}
+function comboTitleFor(idsBySlot) {
+  var order = ["top", "bottom", "shoes", "layer"];
+  return order.filter(function (s) { return idsBySlot[s]; }).map(function (s) {
+    var p = (typeof PIECE_BY_ID !== "undefined") ? PIECE_BY_ID[idsBySlot[s]] : null;
+    return p ? p.name : "";
+  }).filter(Boolean).join(" × ");
+}
+function comboHasPhoto(comboId) {
+  if (typeof lazyRenders !== "undefined" && lazyRenders && lazyRenders[comboId]) return true;
+  var tracked = (typeof queueLooks !== "undefined" ? queueLooks : []).concat(typeof savedLooks !== "undefined" ? savedLooks : [])
+    .filter(function (l) { return l && l.swapComboId === comboId; })[0];
+  return !!(tracked && (tracked.swapPhoto || tracked.img));
+}
+function comboAnchoredRepair(others, version, rotate, requirePhoto, deadline) {
+  var anchors = (typeof closetAnchorItems === "function") ? closetAnchorItems() : [];
+  if (!anchors.length || typeof PIECE_BY_CID === "undefined") return null;
+  var exclude = {};
+  others.forEach(function (o) { if (o && o.swapComboId) exclude[o.swapComboId] = 1; });
+  var triedAnchors = 0;
+  for (var ai = 0; ai < anchors.length && triedAnchors < 4; ai++) {
+    if (deadline && Date.now() > deadline) return null;
+    var item = anchors[(ai + rotate) % anchors.length];
+    var anchorPiece = PIECE_BY_CID[item.id];
+    if (!anchorPiece || !anchorPiece.slot) continue;
+    triedAnchors++;
+    var combos = styleAssembleCombos(anchorPiece, exclude, 6);
+    for (var ci = 0; ci < combos.length; ci++) {
+      if (!comboIdsPass(combos[ci].idsBySlot)) continue;
+      var title = comboTitleFor(combos[ci].idsBySlot);
+      if (title && others.some(function (o) { return o && o.title === title; })) continue;
+      if (requirePhoto && !comboHasPhoto(combos[ci].comboId)) continue;
+      var look = styleComboLook(combos[ci].idsBySlot, combos[ci].comboId, item);
+      if (!look) continue;
+      if (!comboTakePasses(look)) continue;
+      if (takeConflict(others, look)) continue;
+      if (requirePhoto && !look.swapPhoto && !look.img) continue;
+      look.version = version;
+      return look;
+    }
+  }
+  return null;
+}
+function comboProvenancePass(looks, baseOpts) {
+  if (!looks || !looks.length) return looks;
+  var out = looks.slice();
+  /* Repairs share one time budget: assembly is the expensive
+     step, and a deal must never hang on it — past the budget the
+     pool re-draw (cheap) is the only repair still attempted. */
+  var deadline = Date.now() + 6000;
+  for (var i = 0; i < out.length; i++) {
+    if (comboTakePasses(out[i])) continue;
+    var others = out.filter(function (_, j) { return j !== i; });
+    var version = out[i].version || (i + 1);
+    var repaired = comboAnchoredRepair(others, version, i, true, deadline);
+    if (!repaired) {
+      /* Re-draw pool takes (bounded) until one passes both
+         provenance and the hand's freshness rule. */
+      var tried = [{ img: out[i].img }];
+      for (var t = 0; t < 30 && !repaired; t++) {
+        var fr = freshRenderFor(others.concat(tried));
+        if (!fr) break;
+        tried.push({ img: fr.img });
+        var cand = renderAsLook(fr);
+        cand.version = version;
+        if (takeConflict(others, cand)) continue;
+        if (comboTakePasses(cand)) repaired = cand;
+      }
+    }
+    if (!repaired && Date.now() <= deadline) repaired = comboAnchoredRepair(others, version, i, false, deadline);
+    if (repaired) out[i] = repaired;
+  }
+  return out;
+}
+/* The one exit every six-takes hand leaves by: formality first,
+   then — for Combo — the provenance pass, then the (now purely
+   descriptive) source stamp, then title normalization. */
+function finalizeSix(looks, baseOpts, desc, src) {
+  looks = strictFormalityPass(looks, baseOpts);
+  if (src === "combo") looks = comboProvenancePass(looks, baseOpts);
+  return normalizeTakeTitles(applySource(looks, src, desc));
+}
 function buildSixLooks(desc, occasion, season, baseOpts) {
   baseOpts = baseOpts || {};
+  var dealSource = baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo");
+  /* Build .50 — WARDROBE means closet only, at generation: a
+     Wardrobe deal is the verified closet window and nothing
+     else. Pool renders are never built here and stamped
+     "wardrobe" afterwards; if the closet cannot deal, the hand
+     is empty and the caller shows the closet-too-thin toast. */
+  if (dealSource === "wardrobe") {
+    return (typeof wardrobeSixLooks === "function" && wardrobeSixLooks()) || [];
+  }
   var looks = [];
   var excludePlates = (baseOpts._initialExcludePlates || []).slice();
   if (baseOpts.excludePlates) baseOpts.excludePlates.forEach(function (p) { if (excludePlates.indexOf(p) === -1) excludePlates.push(p); });
@@ -16337,11 +16557,11 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
        never true. */
     for (var di = 0; di < looks.length; di++) {
       looks[di] = enforceFreshTake(looks[di], looks.slice(0, di), {
-        version: di + 1, iconId: baseOpts.iconId || null,
+        version: di + 1, iconId: baseOpts.iconId || null, source: dealSource,
         occasion: occasion, season: season, excludeImgs: excludeImgs
       });
     }
-    return normalizeTakeTitles(applySource(strictFormalityPass(looks, baseOpts), baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc));
+    return finalizeSix(looks, baseOpts, desc, dealSource);
   }
   for (var i = 0; i < 6; i++) {
     var opts = Object.assign({}, baseOpts);
@@ -16429,14 +16649,14 @@ function buildSixLooks(desc, occasion, season, baseOpts) {
        title that history has already spent, and only a check on
        the final take catches it. */
     look = enforceFreshTake(look, looks, {
-      version: i + 1, iconId: baseOpts.iconId || null,
+      version: i + 1, iconId: baseOpts.iconId || null, source: dealSource,
       occasion: occasion, season: season, excludeImgs: excludeImgs
     });
     looks.push(look);
     excludeImgs[look.img] = true;
     if (look.plate && excludePlates.indexOf(look.plate) === -1) excludePlates.push(look.plate);
   }
-  return normalizeTakeTitles(applySource(strictFormalityPass(looks, baseOpts), baseOpts.source || (typeof studioSource !== "undefined" ? studioSource : "combo"), desc));
+  return finalizeSix(looks, baseOpts, desc, dealSource);
 }
 /* The one card swatch strip — the same .swatch-strip the detail
    uses, span-based so it can live inside a <button> card. The
@@ -17692,12 +17912,20 @@ function doStyleFromForm() {
       if (!silent) toast("Six takes built from your image.");
       return;
     }
-    /* Wardrobe source + a dealer's deal (no typed brief): the six
-       are the verified wardrobe renders, dealt as a window by
-       dealWardrobeSix — never text-built takes. A typed Customize
-       brief in Wardrobe mode builds as it always has. */
-    if (studioSource === "wardrobe" && (!userDesc || /dealer|surprise/i.test(userDesc)) && typeof dealWardrobeSix === "function" && dealWardrobeSix()) {
-      if (!silent) toast("Six takes created — from your wardrobe.");
+    /* Wardrobe source deals the verified wardrobe renders and
+       NOTHING else (build .50): every Wardrobe-mode deal —
+       source-seg tap, Give me ideas, Customize form submit,
+       typed brief, surprise — goes through dealWardrobeSix,
+       whose looks all come from buildClosetLooks. If the closet
+       cannot deal, the closet-too-thin toast shows and nothing
+       is dealt; a pool take is never stamped "wardrobe" in its
+       place. */
+    if (studioSource === "wardrobe") {
+      if (typeof dealWardrobeSix === "function" && dealWardrobeSix()) {
+        if (!silent) toast("Six takes created — from your wardrobe.");
+        return;
+      }
+      toast("Your closet needs a top and a pair of shoes before it can build outfits — add pieces in the Closet and it builds from them.");
       return;
     }
     /* Board seed (build .43): an inspo deal with no typed brief
@@ -17727,6 +17955,10 @@ function doStyleFromForm() {
   } catch (err) {
     /* Create must never fail silently: deal six instead. */
     try {
+      if (studioSource === "wardrobe") {
+        toast("Your closet needs a top and a pair of shoes before it can build outfits — add pieces in the Closet and it builds from them.");
+        return;
+      }
       renderOptions(buildSixLooks("A surprise pick from the book", "", "", { basis: studioBasis, source: studioSource }), { desc: "A surprise pick from the book", occasion: "", season: "", opts: { basis: studioBasis, source: studioSource } });
       if (!silent) toast("Six takes created.");
     } catch (e2) {
@@ -17872,7 +18104,7 @@ function onLookResultClick(e) {
     } else {
       queueLooks.unshift(JSON.parse(JSON.stringify(currentLook)));
       saveQueue();
-      toast("Queued — find it in Closet → My Looks.");
+      toast("Queued — find it in " + savedHomePath(currentLook));
     }
     return;
   }
@@ -17895,7 +18127,7 @@ function onLookResultClick(e) {
     }
     queueLooks = queueLooks.filter(function (x) { return x.id !== victim.id; });
     saveQueue();
-    toast("Removed from My Looks.");
+    toast("Removed from " + savedHomeName(victim) + ".");
     if (lookLayerOpen) {
       if (lookLayerStash) {
         lookLayerStash.options = lookLayerStash.options.filter(function (l) { return l.id !== victim.id; });
@@ -20076,14 +20308,14 @@ function saveLook(look) {
      in Studio always lands in the Looks tab. */
   var dupe = savedLooks.some(function (l) { return l.id === look.id && l.img === look.img && l.title === look.title; });
   if (dupe) {
-    toast("Already saved — it's in My Looks.");
+    toast("Already saved — it's in " + savedHomeName(look) + ".");
     return;
   }
   if (savedLooks.some(function (l) { return l.id === look.id; })) look.id = newLookId();
   savedLooks.unshift(look);
   renderSaved();
   var keptLook = persistAll();
-  toast(keptLook ? "Saved — find it in Closet → My Looks." : "Saved on screen, but storage is full — it won't survive a reload. Export a backup from Profile.");
+  toast(keptLook ? "Saved — find it in " + savedHomePath(look) : "Saved on screen, but storage is full — it won't survive a reload. Export a backup from Profile.");
 }
 /* The render each grid card is actually showing, by look id — kept so
    opening a card shows the same outfit the tile showed. */
@@ -20101,6 +20333,7 @@ function renderSaved() {
         '<span class="r-name">' + esc(r.title || "Look") + '</span>' +
         '<button type="button" class="btn-ghost" data-restore-removed="' + r.id + '">Restore</button></div>';
     }).join("") : '<p class="meta" style="grid-column:1/-1">Nothing removed — anything you remove lands here, so you can bring it back.</p>';
+    if (typeof renderOutfitIdeas === "function") renderOutfitIdeas();
     return;
   }
   if (looksFilter === "wishlist") {
@@ -20108,6 +20341,7 @@ function renderSaved() {
     grid.innerHTML = wishList.length && typeof shopWishRowHTML === "function"
       ? '<div class="wish-list" style="grid-column:1/-1">' + shopWishlistSorted().map(shopWishRowHTML).join("") + "</div>"
       : '<p class="meta" style="grid-column:1/-1">Nothing wishlisted yet — save pieces from Shop the look or Sale items and they wait for you here.</p>';
+    if (typeof renderOutfitIdeas === "function") renderOutfitIdeas();
     return;
   }
   /* Removed seed looks stay out via Recently removed (restoring
@@ -20134,6 +20368,11 @@ function renderSaved() {
   });
   queuedOnly.forEach(function (q) { if (q.fwRender) assigned[q.id] = fwRenderSrc(q); else if (q.img) assigned[q.id] = q.img; });
   var universe = all.concat(queuedOnly);
+  /* Build .50: this panel is My Outfits — only looks with at
+     least one mapped owned piece render here. Zero-owned saved
+     looks render in Ideas → Outfit Ideas (renderOutfitIdeas,
+     refreshed at every exit of this function). */
+  universe = universe.filter(function (l) { return savedLookHome(l) === "outfits"; });
   var shown = universe.filter(function (l) {
     if (looksFilter === "queued" && !queueIds[l.id]) return false;
     if (looksFilter === "worn" && !l.worn) return false;
@@ -20175,9 +20414,10 @@ function renderSaved() {
   });
   gridImgById = assigned;
   if (!shown.length) {
-    grid.innerHTML = '<p class="meta">' + (all.length
-      ? "No looks match — try a different search or filter."
-      : "No looks saved yet — tap I like it on a look and it waits for you here.") + "</p>";
+    grid.innerHTML = '<p class="meta">' + ((q || looksFilter !== "all" || universe.length)
+      ? "No outfits match — try a different search or filter."
+      : "No outfits saved yet — save a look built from your pieces and it waits for you here.") + "</p>";
+    if (typeof renderOutfitIdeas === "function") renderOutfitIdeas();
     return;
   }
   grid.innerHTML = shown.map(function (l) {
@@ -20209,8 +20449,13 @@ function renderSaved() {
       '<div class="sb"><h4 ' + openAttr + '>' + esc(l.title) + "</h4>" +
       "</div></article>";
   }).join("");
+  if (typeof renderOutfitIdeas === "function") renderOutfitIdeas();
 }
-document.getElementById("saved-grid").addEventListener("click", function (e) {
+/* One card-grid handler for both saved collections (build .50):
+   My Outfits and Outfit Ideas share open / delete behaviour —
+   the document-level handler above them keeps Queue, Mark worn
+   and Shop the look working identically in both homes. */
+function onSavedGridClick(e) {
   var dl = e.target.closest("[data-delete-look]");
   if (dl) {
     if (dl.getAttribute("aria-pressed") !== "true") { dl.setAttribute("aria-pressed", "true"); dl.textContent = "Tap again"; return; }
@@ -20223,7 +20468,7 @@ document.getElementById("saved-grid").addEventListener("click", function (e) {
     savedLooks = savedLooks.filter(function (x) { return x.id !== dlId; });
     renderSaved();
     persistAll();
-    toast("Removed from My Looks.");
+    toast("Removed from " + (dlLook ? savedHomeName(dlLook) : "your saved looks") + ".");
     return;
   }
   var rs = e.target.closest("[data-remove-seed]");
@@ -20233,7 +20478,7 @@ document.getElementById("saved-grid").addEventListener("click", function (e) {
     if (seed) {
       if (typeof registerRemoved === "function") registerRemoved(seed, seed.img);
       renderSaved();
-      toast("Removed from My Looks.");
+      toast("Removed from " + savedHomeName(seed) + ".");
     }
     return;
   }
@@ -20246,6 +20491,105 @@ document.getElementById("saved-grid").addEventListener("click", function (e) {
     if (gridImgById[id]) copy.img = gridImgById[id];
     renderLook(copy);
   }
+}
+document.getElementById("saved-grid").addEventListener("click", onSavedGridClick);
+
+/* ================= Outfit Ideas (build .50) =================
+   Ideas' saved collection: the zero-owned half of the ONE
+   savedLooks collection, classified live by savedLookHome.
+   Complete, wearable outfit looks only — dealt inspo looks,
+   emulated looks, uploaded outfit photographs. Reference
+   material never lands here: the inspo image library (My
+   Inspo) and the Icons lookboard are separate surfaces and
+   their entries are not savedLooks. Same cards, same menu,
+   same behaviour as My Outfits — open/pop-out, Shop the look,
+   Queue, Mark worn, Remove — in their new home. */
+function renderOutfitIdeas() {
+  var grid = document.getElementById("outfit-ideas-grid");
+  if (!grid) return;
+  var removedSeedIds = {};
+  (typeof recentlyRemoved !== "undefined" && recentlyRemoved ? recentlyRemoved : []).forEach(function (r) { if (r._seed) removedSeedIds[r.id] = true; });
+  var all = savedLooks.concat(SEED_LOOKS.filter(function (s) { return dislikedImgs.indexOf(s.img) === -1 && !removedSeedIds[s.id]; }));
+  var queueIds = {};
+  queueLooks.forEach(function (q) { queueIds[q.id] = true; });
+  var queuedOnly = queueLooks.filter(function (q) {
+    return !savedLooks.some(function (s) { return s.id === q.id; }) &&
+      !SEED_LOOKS.some(function (s) { return s.id === q.id; });
+  });
+  queuedOnly.forEach(function (q) { if (q.fwRender) gridImgById[q.id] = fwRenderSrc(q); else if (q.img) gridImgById[q.id] = q.img; });
+  var universe = all.concat(queuedOnly).filter(function (l) { return savedLookHome(l) === "ideas"; });
+  var searchEl = document.getElementById("oi-search");
+  var q = searchEl ? searchEl.value.trim().toLowerCase() : "";
+  var shown = universe.filter(function (l) {
+    if (oiFilter === "queued" && !queueIds[l.id]) return false;
+    if (oiFilter === "worn" && !l.worn) return false;
+    if (oiFilter === "liked" && l.verdict !== "like") return false;
+    if (oiFilter === "new" && l.worn) return false;
+    if (!q) return true;
+    var hay = [l.title, l.meta, l.notes, l.comment, (l.swatches || []).map(function (s) { return s.name + " " + (s.role || ""); }).join(" ")].join(" ").toLowerCase();
+    return hay.indexOf(q) !== -1;
+  });
+  shown = shown.map(function (l, i) { return { look: l, i: i }; }).sort(function (a, b) {
+    var c = String(a.look.title || "").toLowerCase().localeCompare(String(b.look.title || "").toLowerCase());
+    return c !== 0 ? c : a.i - b.i;
+  }).map(function (x) { return x.look; });
+  /* The same photo honesty as the My Outfits grid: a card shows
+     its OWN look's photograph, with the same standing
+     corrections (reference, wardrobe render, upload, taupe). */
+  var assigned = {};
+  shown.forEach(function (l) {
+    if (l.refLook && l.img) { assigned[l.id] = l.img; return; }
+    if (l.fwRender) { assigned[l.id] = fwRenderSrc(l); return; }
+    if (l.source === "uploaded" && l.img) { assigned[l.id] = l.img; return; }
+    if (isTaupeLook(l)) { assigned[l.id] = TAUPE_RENDER; return; }
+    assigned[l.id] = l.img || (rankedPhotoLooks(l.swatches)[0] || {}).img || "assets/photos/316150a1e65e.webp";
+  });
+  Object.keys(assigned).forEach(function (k) { gridImgById[k] = assigned[k]; });
+  if (!shown.length) {
+    grid.innerHTML = '<p class="meta" style="grid-column:1/-1">' + ((q || oiFilter !== "all" || universe.length)
+      ? "No outfit ideas match — try a different search or filter."
+      : "No outfit ideas saved yet — save a look and it waits for you here.") + "</p>";
+    return;
+  }
+  grid.innerHTML = shown.map(function (l) {
+    var img = assigned[l.id] || lookImg(l);
+    var alt = "";
+    RENDER_POOL.forEach(function (r) { if (r.img === img && r.imgAlt) alt = r.imgAlt; });
+    var isSaved = savedLooks.indexOf(l) !== -1;
+    var isQueuedOnly = !isSaved && SEED_LOOKS.indexOf(l) === -1;
+    var removeItem = isQueuedOnly
+      ? '<button type="button" class="danger" data-queue-remove="' + l.id + '">Take off queue</button>'
+      : (isSaved
+        ? '<button type="button" class="danger" data-delete-look="' + l.id + '" aria-pressed="false">Remove</button>'
+        : '<button type="button" class="danger" data-remove-seed="' + l.id + '" aria-pressed="false">Remove</button>');
+    var openAttr = isQueuedOnly ? 'data-fav-open="' + l.id + '"' : 'data-open-look="' + l.id + '"';
+    return '<article class="card saved-card">' +
+      '<button type="button" class="card-menu-btn" data-menu-btn aria-label="Actions for ' + esc(l.title) + '" aria-haspopup="true" aria-expanded="false">•••</button>' +
+      '<div class="card-menu" hidden>' +
+      '<button type="button" ' + openAttr + '>Open</button>' +
+      '<button type="button" data-find-look-id="' + l.id + '">Shop the look</button>' +
+      '<button type="button" data-queue-add="' + l.id + '">Queue</button>' +
+      '<button type="button" data-worn-toggle="' + l.id + '">' + (l.worn ? "Worn ✓ — undo" : "Mark worn") + "</button>" +
+      removeItem +
+      "</div>" +
+      '<img src="' + esc(img) + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + esc(img) + '"') + ' />' +
+      '<div class="sb"><h4 ' + openAttr + '>' + esc(l.title) + "</h4>" +
+      "</div></article>";
+  }).join("");
+}
+var oiGridEl = document.getElementById("outfit-ideas-grid");
+if (oiGridEl) oiGridEl.addEventListener("click", onSavedGridClick);
+var oiSearchEl = document.getElementById("oi-search");
+if (oiSearchEl) oiSearchEl.addEventListener("input", function () { renderOutfitIdeas(); });
+var oiPanelEl = document.getElementById("panel-outfitideas");
+if (oiPanelEl) oiPanelEl.addEventListener("click", function (e) {
+  var f = e.target.closest("[data-oi-filter]");
+  if (!f) return;
+  oiFilter = f.getAttribute("data-oi-filter");
+  document.querySelectorAll("[data-oi-filter]").forEach(function (b) {
+    b.setAttribute("aria-pressed", b === f ? "true" : "false");
+  });
+  renderOutfitIdeas();
 });
 renderSaved();
 
@@ -20274,7 +20618,7 @@ function addToQueue(id) {
   if (gridImgById[id]) copy.img = gridImgById[id];
   queueLooks.unshift(copy);
   saveQueue();
-  toast("Queued — find it in Closet → My Looks.");
+  toast("Queued — find it in " + savedHomePath(copy));
 }
 function toggleWorn(id) {
   var f = findLookAnywhere(id);
@@ -20307,7 +20651,7 @@ function toggleWorn(id) {
     if (mwRes.state === "watch" && mwRes.watch) { mwEntry.watch = mwRes.watch.name; mwEntry.watchId = mwRes.watch.id; }
     recordWorn(mwEntry);
     renderWornLog();
-    toast("Worn — catalogued in My Looks.");
+    toast("Worn — catalogued in " + savedHomeName(look) + ".");
   }
   renderSaved();
 }
@@ -24295,22 +24639,22 @@ var SHOP_CATALOGUE = [
   {"brand": "AMIRI", "cat": "belt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262886M131000_1/amiri-black-ma-4cm-enamel-reversible-belt.jpg", "keys": ["black", "brown", "belt", "leather", "reversible"], "name": "Black 'MA' 4cm Enamel Reversible Belt", "price": 490, "retailer": "SSENSE", "tier": "luxury", "url": "https://www.ssense.com/en-us/men/product/amiri/black-ma-4cm-enamel-reversible-belt/19287151"},
   {"brand": "Acne Studios", "cat": "belt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262129M131000_1/acne-studios-brown-reversible-leather-belt.jpg", "keys": ["brown", "black", "belt", "leather", "suede", "reversible"], "name": "Brown Reversible Leather Belt", "price": 510, "retailer": "SSENSE", "tier": "luxury", "url": "https://www.ssense.com/en-us/men/product/acne-studios/brown-reversible-leather-belt/19487221"},
   {"brand": "Ferragamo", "cat": "belt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262270M131014_1/salvatore-ferragamo-black-reversible-and-adjustable-gancini-belt.jpg", "keys": ["black", "brown", "belt", "leather", "reversible", "dress"], "name": "Black Reversible & Adjustable Gancini Belt", "price": 530, "retailer": "SSENSE", "tier": "luxury", "url": "https://www.ssense.com/en-us/men/product/salvatore-ferragamo/black-reversible-and-adjustable-gancini-belt/19402321"},
-  {"brand": "Santoni", "cat": "belt", "img": "https://scontent.fsub30-1.fna.fbcdn.net/v/t45.5328-4/886522925_1149712994048767", "keys": ["black", "leather", "belt", "polished"], "name": "Polished-Buckle Belt", "price": 550, "retailer": "Farfetch", "tier": "luxury", "url": "https://www.farfetch.com/shopping/men/santoni-polished-buckle-belt-item-32263353.aspx?lang=en-US"},
+  {"brand": "Santoni", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "polished"], "name": "Polished-Buckle Belt", "price": 550, "retailer": "Farfetch", "tier": "luxury", "url": "https://www.farfetch.com/shopping/men/santoni-polished-buckle-belt-item-32263353.aspx?lang=en-US"},
   {"brand": "Ferragamo", "cat": "belt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262270M131011_1/salvatore-ferragamo-black-reversible-and-adjustable-gancini-belt.jpg", "keys": ["black", "belt", "leather", "reversible"], "name": "Black Reversible & Adjustable Gancini Belt", "price": 575, "retailer": "SSENSE", "tier": "luxury", "url": "https://www.ssense.com/en-us/men/product/salvatore-ferragamo/black-reversible-and-adjustable-gancini-belt/19402291"},
   {"brand": "Tom Ford", "cat": "belt", "img": "", "keys": ["brown", "caramel", "croc-effect", "leather", "belt", "t loop"], "name": "T Loop croc-effect leather belt", "price": 595, "retailer": "Mytheresa", "tier": "luxury", "url": "https://www.mytheresa.com/us/en/men/tom-ford-t-loop-croc-effect-leather-belt-brown-p01097188"},
-  {"brand": "Loro Piana", "cat": "belt", "img": "https://scontent.fsub30-1.fna.fbcdn.net/v/t45.5328-4/524958835_1274724334139460", "keys": ["black", "leather", "belt", "calf"], "name": "Alsavel Pin-Buckle Belt", "price": 604, "retailer": "Bergdorf Goodman", "tier": "luxury", "url": "https://modesens.com/product/loro-piana-alsavel-pinbuckle-belt-black-111478554/"},
+  {"brand": "Loro Piana", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "calf"], "name": "Alsavel Pin-Buckle Belt", "price": 604, "retailer": "Bergdorf Goodman", "tier": "luxury", "url": "https://modesens.com/product/loro-piana-alsavel-pinbuckle-belt-black-111478554/"},
   {"brand": "Tom Ford", "cat": "belt", "img": "", "keys": ["black", "braided", "leather", "belt"], "name": "Braided leather belt", "price": 623, "retailer": "Mytheresa", "tier": "insensitive", "url": "https://www.mytheresa.com/us/en/men/tom-ford-braided-leather-belt-black-p01105289"},
   {"brand": "John Lobb", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "calf"], "name": "Square 022 Belt — Palladium Buckle", "price": 680, "retailer": "John Lobb", "tier": "luxury", "url": "https://www.johnlobb.com/en_us/accessories/square-022-belt"},
-  {"brand": "Zegna", "cat": "belt", "img": "https://scontent.fsub30-1.fna.fbcdn.net/v/t45.5328-4/544403909_4119427651649264", "keys": ["black", "leather", "belt"], "name": "Black Leather Belt", "price": 690, "retailer": "Zegna", "tier": "luxury", "url": "https://www.zegna.com/us-en/product.zegna-male-black-leather-belt-black-110.35581991/"},
-  {"brand": "Berluti", "cat": "belt", "img": "https://scontent.fsub30-1.fna.fbcdn.net/v/t45.5328-4/836213003_3602275879935490", "keys": ["black", "leather", "belt", "venezia", "calf"], "name": "Classic Venezia Leather Belt", "price": 790, "retailer": "Mytheresa", "tier": "luxury", "url": "https://www.mytheresa.com/us/en/men/berluti-classic-leather-belt-black-p00481351"},
+  {"brand": "Zegna", "cat": "belt", "img": "", "keys": ["black", "leather", "belt"], "name": "Black Leather Belt", "price": 690, "retailer": "Zegna", "tier": "luxury", "url": "https://www.zegna.com/us-en/product.zegna-male-black-leather-belt-black-110.35581991/"},
+  {"brand": "Berluti", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "venezia", "calf"], "name": "Classic Venezia Leather Belt", "price": 790, "retailer": "Mytheresa", "tier": "luxury", "url": "https://www.mytheresa.com/us/en/men/berluti-classic-leather-belt-black-p00481351"},
   {"brand": "Tom Ford", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "t buckle"], "name": "T leather belt", "price": 790, "retailer": "Mytheresa", "tier": "insensitive", "url": "https://www.mytheresa.com/us/en/men/tom-ford-t-leather-belt-black-p01151508"},
   {"brand": "Tom Ford", "cat": "belt", "img": "", "keys": ["navy", "blue", "black", "reversible", "leather", "belt"], "name": "T Icon reversible leather belt", "price": 850, "retailer": "Mytheresa", "tier": "insensitive", "url": "https://www.mytheresa.com/us/en/men/tom-ford-reversible-icon-leather-belt-blue-p00488899"},
-  {"brand": "Tom Ford", "cat": "belt", "img": "https://scontent.fsub30-1.fna.fbcdn.net/v/t45.5328-4/745885181_1578844573761012", "keys": ["black", "leather", "belt"], "name": "Leather Classic Belt", "price": 875, "retailer": "Harrods", "tier": "luxury", "url": "https://modesens.com/product/tom-ford-leather-classic-belt-black-136917907/"},
+  {"brand": "Tom Ford", "cat": "belt", "img": "", "keys": ["black", "leather", "belt"], "name": "Leather Classic Belt", "price": 875, "retailer": "Harrods", "tier": "luxury", "url": "https://modesens.com/product/tom-ford-leather-classic-belt-black-136917907/"},
   {"brand": "TOM FORD", "cat": "belt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261076M131007_1/tom-ford-brown-and-black-grain-leather-t-icon-reversible-belt.jpg", "keys": ["brown", "black", "belt", "leather", "reversible"], "name": "Brown & Black Grain Leather T Icon Reversible Belt", "price": 925, "retailer": "SSENSE", "tier": "insensitive", "url": "https://www.ssense.com/en-us/men/product/tom-ford/brown-and-black-grain-leather-t-icon-reversible-belt/18709581"},
-  {"brand": "Brunello Cucinelli", "cat": "belt", "img": "https://scontent.fsub30-1.fna.fbcdn.net/v/t45.5328-4/613073555_1213608180106400", "keys": ["black", "leather", "belt", "calf"], "name": "Leather Belt", "price": 1000, "retailer": "Farfetch", "tier": "insensitive", "url": "https://www.farfetch.com/shopping/men/brunello-cucinelli-leather-belt-item-24015619.aspx?lang=en-US"},
+  {"brand": "Brunello Cucinelli", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "calf"], "name": "Leather Belt", "price": 1000, "retailer": "Farfetch", "tier": "insensitive", "url": "https://www.farfetch.com/shopping/men/brunello-cucinelli-leather-belt-item-24015619.aspx?lang=en-US"},
   {"brand": "TOM FORD", "cat": "belt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/252076M131005_1/tom-ford-brown-woven-suede-angled-buckle-belt.jpg", "keys": ["brown", "belt", "woven", "suede"], "name": "Brown Woven Suede Angled Buckle Belt", "price": 1030, "retailer": "SSENSE", "tier": "insensitive", "url": "https://www.ssense.com/en-us/men/product/tom-ford/brown-woven-suede-angled-buckle-belt/17887181"},
-  {"brand": "Kiton", "cat": "belt", "img": "https://scontent.fsub30-1.fna.fbcdn.net/v/t45.5328-4/841923785_1713266186408393", "keys": ["black", "leather", "belt"], "name": "3.5cm Leather Belt", "price": 1280, "retailer": "Mr Porter", "tier": "insensitive", "url": "https://modesens.com/product/kiton-35cm-leather-belt-black-143605824/"},
-  {"brand": "Santoni", "cat": "belt", "img": "https://scontent.fsub30-1.fna.fbcdn.net/v/t45.5328-4/595886657_817169747985356_2", "keys": ["black", "crocodile", "belt", "leather"], "name": "Crocodile Leather Belt", "price": 1500, "retailer": "Harrods", "tier": "insensitive", "url": "https://modesens.com/product/santoni-crocodile-leather-belt-black-103798858/"},
+  {"brand": "Kiton", "cat": "belt", "img": "", "keys": ["black", "leather", "belt"], "name": "3.5cm Leather Belt", "price": 1280, "retailer": "Mr Porter", "tier": "insensitive", "url": "https://modesens.com/product/kiton-35cm-leather-belt-black-143605824/"},
+  {"brand": "Santoni", "cat": "belt", "img": "", "keys": ["black", "crocodile", "belt", "leather"], "name": "Crocodile Leather Belt", "price": 1500, "retailer": "Harrods", "tier": "insensitive", "url": "https://modesens.com/product/santoni-crocodile-leather-belt-black-103798858/"},
   {"brand": "Berluti", "cat": "belt", "img": "", "keys": ["black", "alligator", "belt", "leather"], "name": "Classic Alligator Leather Belt 35mm", "price": 6450, "retailer": "Berluti", "tier": "insensitive", "url": "https://www.berluti.com/en-us/classic-alligator-leather-belt-35-mm/C0035-001.html"},
   {"brand": "The Dark Knot", "cat": "tie", "icon": "agnelli", "iconGarment": "agnelli-polka-dot-tie", "img": "", "keys": ["navy", "polka dot", "silk", "spots"], "matchNote": "Exact pattern and colourway: handmade 100% woven silk tie, navy with small repeating silver/light polka dots — Agnelli's navy spot tie. Standard 8.3cm width rather than his slimmest examples. Price verified on the product page 2026-11-17, in stock.", "name": "French Creek Polka Dot Silk Tie — Navy / Silver", "price": 84, "retailer": "The Dark Knot", "tier": "affordable", "url": "https://thedarkknot.com/collections/regular-width-ties/products/french-creek-polka-dot-silk-tie-navy-silver"},
   {"brand": "mfpen", "cat": "tie", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/262505M158000_1/mfpen-navy-formal-tie.jpg", "keys": ["navy", "knitted tie", "tie", "knit", "silk"], "name": "Navy Formal Tie (Knit Silk)", "price": 140, "retailer": "SSENSE", "tier": "accessible", "url": "https://www.ssense.com/en-us/men/product/mfpen/navy-formal-tie/19479481"},
@@ -24559,9 +24903,11 @@ function catalogueCatForPiece(pc) {
   return null;
 }
 /* Catalogue matches for a piece, scored: same garment
-   category, colour family as a gate, then keyword overlap
-   between the piece description and the entry's keys — at
-   least two keys, one of them a garment or material key.
+   category, then the build .50 strict gates (garment TYPE,
+   positive colour evidence, shared attribute — see
+   catalogueScored), then keyword overlap between the piece
+   description and the entry's keys — at least two keys, one of
+   them a garment or material key — orders the survivors.
    Attribute keys (fabric, pattern, silhouette, defining
    detail) count double, so an entry matching the piece's
    actual attributes outranks a generic same-colour entry
@@ -24595,6 +24941,72 @@ function sellerLabel(e) {
   if (e.sq === "elite") return "Elite seller";
   return "";
 }
+/* Build .50 — strict similarity: a garment TYPE finer than the
+   catalogue category, derived from garment text and interpreted
+   WITHIN a category (in Shoes, "polo" is a colour word and an
+   "oxford" is a shoe, never a shirt; everywhere else a polo is
+   a polo, never a sweater). Returns one of: polo, sweater, tee,
+   shirt, blazer, suit, jacket, trousers, jeans, shorts, swim,
+   loafer, sneaker, boot, shoe (other shoe), tie, belt — or null
+   when the text names no determinable type. */
+function garmentTypeFromText(t, cat) {
+  var s = " " + String(t || "").toLowerCase().replace(/-/g, " ").replace(/polo ralph lauren/g, " ralph lauren") + " ";
+  if (cat !== "shoes") {
+    if (/swim|bathing|\btrunks?\b/.test(s)) return "swim";
+    if (/necktie|\btie\b/.test(s)) return "tie";
+    if (/\bbelt\b/.test(s)) return "belt";
+    if (/polo/.test(s)) return "polo";
+    if (/blazer|sport coat|dinner jacket|tuxedo/.test(s)) return "blazer";
+    if (/\bsuits?\b|suiting/.test(s)) return "suit";
+    if (/jacket|overcoat|\bcoat\b|overshirt|bomber|harrington|trucker|parka|trench|waistcoat|gilet/.test(s)) return "jacket";
+    if (/sweater|jumper|crew neck|crewneck|roll neck|rollneck|turtleneck|cardigan|knitwear|\bknit\b|knitted|quarter zip|zip neck|mock neck/.test(s)) return "sweater";
+    if (/\btee\b|t shirt|henley/.test(s)) return "tee";
+    if (/shirt|oxford|button down/.test(s)) return "shirt";
+    if (/\bjeans?\b|denim/.test(s)) return "jeans";
+    if (/\bshorts?\b/.test(s)) return "shorts";
+    if (/trousers?|chinos?|\bpants?\b/.test(s)) return "trousers";
+  }
+  if (/loafer/.test(s)) return "loafer";
+  if (/sneaker|trainer/.test(s)) return "sneaker";
+  if (/\bboots?\b|chelsea|chukka/.test(s)) return "boot";
+  if (/shoes?|derby|brogue|oxford|espadrille|sandals?|slipper|monk|moccasin/.test(s)) return "shoe";
+  if (cat === "shoes") return "shoe";
+  return null;
+}
+/* The colour words (keys + detection words) of the families a
+   subject's colour set touches — the vocabulary an entry's NAME
+   can offer as positive colour evidence. */
+function shopColourWordsFor(fam) {
+  var words = {};
+  SHOP_COLOUR_FAMILIES.forEach(function (f) {
+    if (!f.keys.some(function (k) { return fam[k]; })) return;
+    f.keys.concat(f.detect).forEach(function (w) { words[String(w).toLowerCase()] = 1; });
+  });
+  return Object.keys(words);
+}
+/* Attribute words (the SHOP_ATTR vocabulary) present in a text,
+   word by word — a subject "carries" an attribute when one of
+   these words is in its garment text. */
+function shopAttrWordsInText(text) {
+  var set = {};
+  String(text || "").toLowerCase().replace(/-/g, " ").replace(/é/g, "e").split(/[^a-z0-9]+/).forEach(function (w) {
+    if (w && SHOP_ATTR_WORDS[w]) set[w] = 1;
+  });
+  return set;
+}
+/* An entry's attribute vocabulary: its attribute keys
+   themselves, plus the vocabulary words inside multi-word keys
+   ("tassel loafer" carries tassel). */
+function entryAttrWords(e) {
+  var set = {};
+  (e.keys || []).forEach(function (k) {
+    var kk = String(k).toLowerCase().replace(/-/g, " ").replace(/é/g, "e");
+    if (!shopAttrKey(kk)) return;
+    set[kk] = 1;
+    kk.split(" ").forEach(function (w) { if (SHOP_ATTR_WORDS[w]) set[w] = 1; });
+  });
+  return set;
+}
 function catalogueScored(pc, applyCeiling, tierKey) {
   var cat = catalogueCatForPiece(pc);
   if (!cat) return [];
@@ -24602,15 +25014,47 @@ function catalogueScored(pc, applyCeiling, tierKey) {
   var text = (pieceDescription(pc) + " " + (pc.garment || "") + " " + (pc.detail || "")).toLowerCase().replace(/-/g, " ");
   var tokens = text.split(/[^a-z0-9]+/).filter(Boolean);
   var fam = pieceColourKeySet(pc);
+  /* Build .50 gates, applied before scoring — Shop the look and
+     Emulate's Closest matches both read through here, and
+     catalogueMatchTotal counts through the same gates, so a
+     piece with no true match shows nothing at a tier rather
+     than relaxing into near misses:
+     1. garment TYPE must match exactly (cross-type entries are
+        excluded even inside a category; an entry whose type
+        cannot be determined is excluded);
+     2. colour needs POSITIVE evidence — an in-family colour key
+        among the entry's keys, or an in-family colour word in
+        its name; entries with no colour evidence are excluded
+        (only when the subject itself has a detectable family);
+     3. when the subject carries attribute keys (piqué, suede,
+        linen, herringbone, tassel…), the entry must share at
+        least one; attribute matches still count double for
+        ORDER among the survivors. */
+  var subjType = garmentTypeFromText((pc.garment || "") + " " + (pc.detail || ""), cat);
+  var famWords = fam ? shopColourWordsFor(fam) : null;
+  var subjAttrs = shopAttrWordsInText(text);
+  var hasSubjAttrs = Object.keys(subjAttrs).length > 0;
   var scored = [];
   shopCatalogueAll().forEach(function (e) {
     if (e.cat !== cat) return;
     if (applyCeiling && shopTierRank(e.tier) > ceiling) return;
+    if (subjType) {
+      var eType = garmentTypeFromText((e.name || "") + " " + (e.keys || []).join(" "), e.cat);
+      if (eType !== subjType) return;
+    }
     var eColours = e.keys.filter(function (k) { return SHOP_COLOUR_KEYS[k.toLowerCase()]; });
     var colourOK = false, colourLiteral = false;
     if (fam) {
-      if (eColours.length && !eColours.some(function (k) { return fam[k.toLowerCase()]; })) return;
       colourOK = eColours.some(function (k) { return fam[k.toLowerCase()]; });
+      if (!colourOK) {
+        var eNameLc = (e.name || "").toLowerCase();
+        colourOK = famWords.some(function (w) { return eNameLc.indexOf(" " + w) !== -1 || eNameLc.indexOf(w + " ") !== -1 || eNameLc === w; });
+      }
+      if (!colourOK) return;
+    }
+    if (hasSubjAttrs) {
+      var eAttrs = entryAttrWords(e);
+      if (!Object.keys(eAttrs).some(function (w) { return subjAttrs[w]; })) return;
     }
     var matched = 0, garmentMatched = 0, attrMatched = 0;
     e.keys.forEach(function (k) {
@@ -25825,7 +26269,7 @@ function renderFindLookMode() {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "add", "gaps", "analyze", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -25849,7 +26293,7 @@ var SECTIONS = {
   today: ["today"],
   closet: ["wardrobe", "add", "gaps", "analyze", "looks", "watches", "wearing"],
   calendar: ["calendar"],
-  ideas: ["studio", "icons", "emulate", "palettes", "myinspo"],
+  ideas: ["studio", "outfitideas", "icons", "emulate", "palettes", "myinspo"],
   find: ["find", "receipts", "search", "brands", "brand", "sale", "shopwish"],
   me: ["pinfo", "plocation", "pcloud"]
 };
@@ -25927,6 +26371,7 @@ function switchTab(name, opts) {
     if (back) window.scrollTo(0, back);
     else window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  if ((name === "looks" || name === "outfitideas") && typeof renderSaved === "function") renderSaved();
   if (name === "sale" && typeof renderSaleItems === "function") renderSaleItems();
   if (name === "shopwish" && typeof renderShopWishlist === "function") renderShopWishlist();
   if (name === "search" && typeof renderFinds === "function") renderFinds();
@@ -26593,7 +27038,7 @@ function likeToday() {
   syncTodayVerdict();
   /* Build .38 (2.8): the like toast carries Undo — one tap
      restores the look to the rotation immediately. */
-  showUndoToast("Liked — saved to My Looks; it sits out for 14 days.", function () {
+  showUndoToast("Liked — saved to " + savedHomeName(todayLook) + "; it sits out for 14 days.", function () {
     unlikeLookById(likedId);
     if (todayLook && todayLook.id === likedId) { todayLook.verdict = null; todayLook.likedAt = null; syncTodayVerdict(); }
     toast("Undone — that outfit is back in the rotation.");
@@ -27928,8 +28373,9 @@ function syncStudioSelectors() {
   if (anyDress) anyDress.setAttribute("aria-pressed", (typeof dressForKey !== "undefined" && dressForKey) ? "false" : "true");
   var tv = document.getElementById("type-sel-val");
   if (tv) tv.textContent = studioTypeAny ? "Any" : (STUDIO_TYPE_LABELS[formalityLevel - 1] || "Smart Casual");
-  var anyType = document.querySelector("[data-studio-type-any]");
-  if (anyType) anyType.setAttribute("aria-pressed", studioTypeAny ? "true" : "false");
+  document.querySelectorAll("[data-studio-type-any]").forEach(function (anyType) {
+    anyType.setAttribute("aria-pressed", studioTypeAny ? "true" : "false");
+  });
   if (studioTypeAny) {
     document.querySelectorAll("[data-studio-type]").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
   }
@@ -27977,6 +28423,34 @@ if (studioTypeRow) studioTypeRow.addEventListener("click", function (e) {
   syncStudioSelectors();
 });
 syncStudioSelectors();
+
+/* ---------- Build .50: Outfit type row on the Ideas deal surface ----------
+   The same pills, on the surface where deals happen: they carry
+   the same data-studio-type / data-studio-type-any attributes,
+   so setFormality drives them and syncStudioType (hooked into
+   renderFormality) plus syncStudioSelectors keep every selector
+   — this row, the Customize row, the Today dropdown, a brief's
+   parsed level — showing the ONE state. A pick re-deals the
+   Ideas grid at once when a deal is showing, through the same
+   dealIdeasForSource path the source seg uses; otherwise it
+   simply constrains the next deal. A manual pick after a brief
+   deal wins over the brief's level, exactly as in Customize. */
+var ideasTypeRow = document.getElementById("ideas-type-row");
+if (ideasTypeRow) ideasTypeRow.addEventListener("click", function (e) {
+  var anyBtn = e.target.closest ? e.target.closest("[data-studio-type-any]") : null;
+  if (anyBtn) {
+    studioTypeAny = true;
+    setFormality(4, { silent: true });
+  } else {
+    var b = e.target.closest ? e.target.closest("[data-studio-type]") : null;
+    if (!b) return;
+    studioTypeAny = false;
+    setFormality(parseInt(b.getAttribute("data-studio-type"), 10));
+  }
+  syncStudioSelectors();
+  if (typeof currentOptions !== "undefined" && currentOptions && currentOptions.length &&
+      typeof window.dealIdeasForSource === "function") window.dealIdeasForSource();
+});
     </script>
     <script type="wardrobe/app">
 "use strict";
@@ -28440,7 +28914,7 @@ function saveUploadedLook(withTags) {
   var prev = document.getElementById("upload-preview");
   if (prev) { prev.hidden = true; prev.removeAttribute("src"); }
   closeUploadConfirm();
-  toast(kept ? "Look saved to My Looks." : "Saved on screen, but storage is full — export a backup from Profile.");
+  toast(kept ? "Look saved to " + savedHomeName(look) + "." : "Saved on screen, but storage is full — export a backup from Profile.");
 }
 var uploadSaveBtn = document.getElementById("upload-save");
 if (uploadSaveBtn) uploadSaveBtn.addEventListener("click", function () { saveUploadedLook(true); });
@@ -28574,9 +29048,17 @@ function dealFromWardrobe() {
    until the window runs dry, then the oldest return — the same
    discipline as the inspo deck. renderOptions records the six
    as dealt, so the next deal advances the window. */
-function dealWardrobeSix() {
+/* The Wardrobe six, as a value (build .50): the window of
+   verified closet looks dealWardrobeSix renders — and the ONLY
+   looks a Wardrobe-stamped deal may ever contain, since every
+   one of them comes from buildClosetLooks (fwPieces present,
+   every id a closet item). buildSixLooks returns this same
+   window for any deal whose source is Wardrobe, so no path can
+   stamp pool renders as wardrobe looks. Null when the closet
+   cannot deal. */
+function wardrobeSixLooks() {
   var cl = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
-  if (!cl || !cl.length) return false;
+  if (!cl || !cl.length) return null;
   var fresh = cl.filter(function (l) { return !isGraduatedLook(l); });
   var pool = fresh.length ? fresh : cl;
   function dealt(l) {
@@ -28592,6 +29074,11 @@ function dealWardrobeSix() {
       if (six.length < 6 && !used[l.fwRender || l.img]) { used[l.fwRender || l.img] = 1; six.push(l); }
     });
   }
+  return six.length ? six : null;
+}
+function dealWardrobeSix() {
+  var six = wardrobeSixLooks();
+  if (!six) return false;
   renderOptions(six, { desc: "From your wardrobe", occasion: "", season: "", opts: { basis: (typeof studioBasis !== "undefined" ? studioBasis : "both"), source: "wardrobe" } });
   return true;
 }
@@ -28630,7 +29117,7 @@ function dealWardrobeSix() {
       var lk = fwLooks[parseInt(fwLike.getAttribute("data-fw-like"), 10)];
       if (lk) {
         likeLook(lk);
-        toast("Liked — saved and queued in My Looks.");
+        toast("Liked — saved and queued in My Outfits.");
       }
       return;
     }
@@ -28697,6 +29184,9 @@ function dealWardrobeSix() {
     dealSilent = true;
     doStyleFromForm();
   }
+  /* Build .50: the Ideas Outfit type row re-deals through this
+     same path when a deal is showing. */
+  window.dealIdeasForSource = dealIdeasForSource;
   var seg = document.getElementById("ideas-source-seg");
   if (seg) seg.addEventListener("click", function (e) {
     var b = e.target.closest("[data-source]");
