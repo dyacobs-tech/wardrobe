@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-17.37" />
+    <meta name="wardrobe-build" content="2026-11-17.38" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -111,7 +111,10 @@
          What I'm Wearing Today) and shows only while one
          of that section's pages is open. Both rows stick together. */
       .navstack {
-        position: sticky; top: 0; z-index: 40;
+        /* Build .38 (2.10 rider): when stuck, the stack pins below
+           the status bar, never under it — the offset is the
+           safe-area inset (0 in a browser tab). */
+        position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40;
         background: color-mix(in srgb, var(--bg) 92%, transparent);
         backdrop-filter: blur(10px);
         border-bottom: 1px solid var(--border);
@@ -547,7 +550,7 @@
       .icon-name-row .chev { color: var(--brass); font-size: 22px; line-height: 1; flex: none; }
       .icon-name-row:active { background: var(--surface-alt); }
       .az-rail {
-        position: sticky; top: 114px; flex: none; width: 30px;
+        position: sticky; top: calc(114px + env(safe-area-inset-top, 0px)); flex: none; width: 30px;
         height: min(560px, calc(100dvh - 120px)); min-height: 280px;
         display: flex; flex-direction: column; align-items: stretch;
         background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
@@ -778,7 +781,7 @@
       }
       .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
       .ptr {
-        position: fixed; left: 50%; top: 10px; transform: translateX(-50%) translateY(-8px);
+        position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 10px); transform: translateX(-50%) translateY(-8px);
         background: var(--ink-btn); color: var(--ink-btn-text); padding: 9px 18px; border-radius: 999px;
         font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
         opacity: 0; pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; z-index: 60;
@@ -2050,7 +2053,10 @@
       .look-layer {
         position: fixed; inset: 0; z-index: 90; background: var(--bg);
         overflow-y: auto; -webkit-overflow-scrolling: touch;
-        padding: 8px 14px 24px;
+        /* Build .38 (2.10): the BACK bar clears the iOS status bar —
+           the layer is fixed at inset 0, so its top padding carries
+           the safe-area inset (0 in a browser tab, ~47px standalone). */
+        padding: calc(env(safe-area-inset-top, 0px) + 8px) 14px 24px;
       }
       .look-layer[hidden] { display: none; }
       .look-layer-bar { display: flex; align-items: center; margin-bottom: 10px; }
@@ -2133,6 +2139,14 @@
       #panel-palettes .featured .look-actions .btn-ghost {
         min-height: 32px; padding: 0 9px; font-size: 11px; letter-spacing: .07em;
         white-space: nowrap; flex: 1 1 0; min-width: 0;
+      }
+      /* Build .38 (2.14): the nowrap above squeezed "USE THIS
+         PALETTE" past its box into "SHOP THE LOOK" — the three
+         labels now wrap INSIDE equal-width, matched-height boxes. */
+      #panel-palettes #featured .look-actions > .btn-accent,
+      #panel-palettes #featured .look-actions > .btn-ghost {
+        min-height: 40px; padding: 6px 5px; white-space: normal; line-height: 1.3;
+        display: flex; align-items: center; justify-content: center; text-align: center;
       }
       /* Plate grid — tighter cards on the standard card scale */
       #panel-palettes #plate-count { font-size: 12.5px; margin: 0 0 8px; }
@@ -2697,6 +2711,41 @@
       #subnav-find:not([hidden]) { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
       #subnav-find::-webkit-scrollbar { display: none; }
       #subnav-find .subtab { flex: 0 0 auto; width: auto; padding: 0 12px; }
+      /* ---------- Build .38 ---------- */
+      /* 2.11 (refined, user Nov 17): the universal back is a SMALL
+         ICON ONLY — a slim chevron, no label, no bar, no layout
+         height. It is fixed in the top-left margin with the 2.10
+         safe-area clearance, floating over the masthead's empty
+         left corner at rest and over the stuck navstack when
+         scrolled; a whisper of frosted background keeps it
+         legible wherever it lands. z-index 100 puts it above the
+         outfit layers (90) and below the photo pop-out (120) and
+         sheets (110), which keep their own closes. The layers'
+         old text BACK buttons are hidden — this icon replaces
+         them (their handlers stay bound as a fallback). */
+      .view-back-fab { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 4px); left: 6px; z-index: 100; width: 30px; height: 30px; min-height: 30px; padding: 0; border: none; border-radius: 999px; background: color-mix(in srgb, var(--bg) 55%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: var(--dim); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+      .view-back-fab[hidden] { display: none; }
+      .view-back-fab:active { color: var(--text); background: var(--surface-alt); }
+      #look-layer-close, .fw-layer [data-fw-close] { display: none; }
+      /* 2.12 — the hero corner is now one ••• cdd: keep its absolute
+         corner placement (the .cdd base rule sets relative) and let
+         its menu hug the corner. */
+      .hero-corner.cdd { position: absolute; }
+      .hero-corner .cdd-menu { min-width: 168px; }
+      .hero-corner .cdd-btn.hero-corner-btn { font-size: 13px; letter-spacing: .04em; width: auto; min-width: 34px; padding: 0 8px; }
+      /* 2.14 — the featured plate's three actions: fixed at the
+         palettes rule itself (see #panel-palettes #featured
+         .look-actions above) — equal widths, matched heights,
+         labels wrap inside their own box. */
+      /* 2.13 — Add a piece is a pill like the three closet filters;
+         the row tightens just enough for all four on one line. */
+      .closet-add-btn { background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); }
+      .closet-top3 .cdd-btn { padding: 0 8px; font-size: 11.5px; }
+      /* 2.15 — in-app brand view head. */
+      .brand-view-head { margin: 2px 0 10px; }
+      .brand-view-head h3 { font-family: var(--font-display); font-size: 24px; font-weight: 600; margin: 0 0 2px; }
+      .brand-view-head .bv-meta { color: var(--dim); font-size: 12.5px; margin: 0 0 6px; line-height: 1.4; }
+      .brand-store-link { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); text-decoration: none; }
       .shop-ctl-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 2px 0 8px; }
       .shop-ctl-cell { min-width: 0; }
       .shop-search-group { margin: 8px 10px 2px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
@@ -2756,6 +2805,11 @@
       </nav>
     </div>
 
+    <!-- Build .38 (2.11, refined): the universal back — one small
+         chevron icon, fixed in the top-left margin, shown only
+         when the in-app view history has a previous view. -->
+    <button type="button" class="view-back-fab" id="view-back" hidden aria-label="Back to previous page"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>
+
     <main class="wrap">
 
       <!-- ================= TODAY — OUTFIT OF THE DAY ================= -->
@@ -2764,12 +2818,17 @@
           <img id="today-img" src="assets/photos/9a543e585d8b.webp" alt="" fetchpriority="high" decoding="async" />
           <div class="today-collage" id="today-collage" hidden></div>
           <div class="today-shade" aria-hidden="true"></div>
-          <!-- Build .36 (mock-51 hero v2): Share + Upload leave the
-               caption and sit on the photo's top-right corner — same
-               ids, same handlers. -->
-          <div class="hero-corner">
-            <button type="button" class="hero-corner-btn" id="today-share" aria-label="Share"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v3.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V15"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></button>
-            <button type="button" class="hero-corner-btn" id="today-upload" aria-label="Upload a look"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7.6 7.6L12 3.2l4.4 4.4"/><path d="M18 10.5h1.2A1.8 1.8 0 0 1 21 12.3v6.9a1.8 1.8 0 0 1-1.8 1.8H4.8A1.8 1.8 0 0 1 3 19.2v-6.9a1.8 1.8 0 0 1 1.8-1.8H6"/></svg></button>
+          <!-- Build .38 (2.12): the two lookalike corner glyphs are
+               ONE ••• button now — its menu carries the two actions
+               as text, wired to the same ids and handlers the icons
+               used (today-share → shareLookImage, today-upload →
+               the upload sheet). -->
+          <div class="hero-corner cdd">
+            <button type="button" class="cdd-btn hero-corner-btn" id="today-more" aria-haspopup="true" aria-expanded="false" aria-label="More actions for this look">•••</button>
+            <div class="cdd-menu cdd-menu-r" id="today-more-menu" hidden role="menu" aria-label="Look actions">
+              <button type="button" class="cdd-opt" id="today-share" role="menuitem">Share this look</button>
+              <button type="button" class="cdd-opt" id="today-upload" role="menuitem">Upload a look</button>
+            </div>
           </div>
           <div class="today-caption">
             <p class="today-kicker">Outfit of the day</p>
@@ -2992,7 +3051,7 @@
                 <button type="button" class="cdd-btn closet-cat-btn" id="ward-cat-shoes-btn" data-cdd-manual data-cat-group="shoes" aria-haspopup="true" aria-expanded="false" aria-label="Shoes — filter by category"><span class="cdd-label" id="ward-cat-shoes-label">Shoes</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
                 <div class="cdd-menu cdd-menu-r" id="ward-cat-shoes-menu" hidden role="menu" aria-label="Shoes categories"></div>
               </div>
-              <button type="button" class="sel-row top3-box" id="closet-add-entry"><span class="sel-name">Add</span><span class="sel-val">Add a piece</span><span class="sel-chev" aria-hidden="true">›</span></button>
+              <button type="button" class="cdd-btn closet-add-btn" id="closet-add-entry"><span class="cdd-label">+ Add a piece</span></button>
               <button type="button" class="sel-row top3-box" id="closet-gaps-entry"><span class="sel-name">Closet gaps</span><span class="sel-val" id="closet-gaps-count">Pieces your looks are missing</span><span class="sel-chev" aria-hidden="true">›</span></button>
             </div>
             <div class="item-grid" id="item-grid"></div>
@@ -3207,196 +3266,211 @@
 
       <!-- ================= BRANDS — SHOPS TO SHOP ================= -->
       <section id="panel-brands" role="tabpanel" aria-labelledby="tab-brands" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Brands" data-info-text="The houses and shops worth shopping — quiet luxury and craft-led menswear from your Fashion Brands list: no visible logos, fabric and cut over branding. Tap a name to open its store." aria-label="About Brands">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Brands" data-info-text="The houses and shops worth shopping — quiet luxury and craft-led menswear from your Fashion Brands list: no visible logos, fabric and cut over branding. Tap a name to see its pieces from the catalogue, right here in the app." aria-label="About Brands">i</button></div>
         <div class="brand-search">
           <label class="field" for="brand-search">Search brands</label>
           <input type="search" id="brand-search" placeholder="Name, place, knitwear, tailoring…" autocomplete="off" />
         </div>
         <div id="brand-list">
           <p class="brand-group-head">Heritage knitwear</p>
-          <a class="brand-row" href="https://us.saint-james.com/" target="_blank" rel="noopener" data-brand-search="saint james normandy france breton mariniere sailor jumper knitwear wool">
-            <span class="b-main"><span class="b-name">Saint James</span><span class="b-meta">Normandy, France · est. 1889 — the Breton sailor jumper and marinière, pure new wool, knitted near Mont Saint-Michel.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.sns-herning.com/" target="_blank" rel="noopener" data-brand-search="s.n.s. herning sns denmark fisherman sweater bubble knit knitwear">
-            <span class="b-main"><span class="b-name">S.N.S. Herning</span><span class="b-meta">Herning, Denmark · est. 1931 — the Fisherman sweater in its signature bubble knit, still knitted in Herning.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.williamlockie.com/" target="_blank" rel="noopener" data-brand-search="william lockie hawick scotland cashmere lambswool knitwear">
-            <span class="b-main"><span class="b-name">William Lockie</span><span class="b-meta">Hawick, Scotland · est. 1874 — cashmere and lambswool knitwear from the Scottish Borders, still family-run.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.gransasso.it/" target="_blank" rel="noopener" data-brand-search="gran sasso abruzzo italy merino cashmere knitwear fine gauge">
-            <span class="b-main"><span class="b-name">Gran Sasso</span><span class="b-meta">Abruzzo, Italy · est. 1952 — fine-gauge merino and cashmere knitwear, fully fashioned in Italy.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.johnsmedley.com/" target="_blank" rel="noopener" data-brand-search="john smedley derbyshire england sea island cotton merino knitwear">
-            <span class="b-main"><span class="b-name">John Smedley</span><span class="b-meta">Derbyshire, England · est. 1784 — Sea Island cotton and extra-fine merino; the world's oldest knitwear maker.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.fedelicashmere.com/" target="_blank" rel="noopener" data-brand-search="fedeli monza italy cashmere knitwear fine gauge">
-            <span class="b-main"><span class="b-name">Fedeli</span><span class="b-meta">Monza, Italy · est. 1934 — superfine cashmere and cotton knitwear, still family-run after ninety years.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.merzbschwanen.com/" target="_blank" rel="noopener" data-brand-search="merz b. schwanen berlin loopwheeled tee sweatshirt knitwear cotton">
-            <span class="b-main"><span class="b-name">Merz b. Schwanen</span><span class="b-meta">Berlin · est. 1911 — loopwheeled cotton tees, sweatshirts and knits, woven on vintage machines.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.sunspel.com/" target="_blank" rel="noopener" data-brand-search="sunspel england cotton riviera polo tee basics knitwear">
-            <span class="b-main"><span class="b-name">Sunspel</span><span class="b-meta">England · est. 1860 — fine cotton basics; the Riviera polo and the original luxury T-shirt.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://us.saint-james.com/" data-brand-search="saint james normandy france breton mariniere sailor jumper knitwear wool">
+            <span class="b-main"><span class="b-name">Saint James</span><span class="b-meta">Normandy, France · est. 1889 — the Breton sailor jumper and marinière, pure new wool, knitted near Mont Saint-Michel.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.sns-herning.com/" data-brand-search="s.n.s. herning sns denmark fisherman sweater bubble knit knitwear">
+            <span class="b-main"><span class="b-name">S.N.S. Herning</span><span class="b-meta">Herning, Denmark · est. 1931 — the Fisherman sweater in its signature bubble knit, still knitted in Herning.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.williamlockie.com/" data-brand-search="william lockie hawick scotland cashmere lambswool knitwear">
+            <span class="b-main"><span class="b-name">William Lockie</span><span class="b-meta">Hawick, Scotland · est. 1874 — cashmere and lambswool knitwear from the Scottish Borders, still family-run.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.gransasso.it/" data-brand-search="gran sasso abruzzo italy merino cashmere knitwear fine gauge">
+            <span class="b-main"><span class="b-name">Gran Sasso</span><span class="b-meta">Abruzzo, Italy · est. 1952 — fine-gauge merino and cashmere knitwear, fully fashioned in Italy.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.johnsmedley.com/" data-brand-search="john smedley derbyshire england sea island cotton merino knitwear">
+            <span class="b-main"><span class="b-name">John Smedley</span><span class="b-meta">Derbyshire, England · est. 1784 — Sea Island cotton and extra-fine merino; the world's oldest knitwear maker.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.fedelicashmere.com/" data-brand-search="fedeli monza italy cashmere knitwear fine gauge">
+            <span class="b-main"><span class="b-name">Fedeli</span><span class="b-meta">Monza, Italy · est. 1934 — superfine cashmere and cotton knitwear, still family-run after ninety years.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.merzbschwanen.com/" data-brand-search="merz b. schwanen berlin loopwheeled tee sweatshirt knitwear cotton">
+            <span class="b-main"><span class="b-name">Merz b. Schwanen</span><span class="b-meta">Berlin · est. 1911 — loopwheeled cotton tees, sweatshirts and knits, woven on vintage machines.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.sunspel.com/" data-brand-search="sunspel england cotton riviera polo tee basics knitwear">
+            <span class="b-main"><span class="b-name">Sunspel</span><span class="b-meta">England · est. 1860 — fine cotton basics; the Riviera polo and the original luxury T-shirt.</span></span><span class="b-shop">View ›</span>
+          </button>
           <p class="brand-group-head">Quiet luxury &amp; tailoring</p>
-          <a class="brand-row" href="https://www.atemporubato.com/" target="_blank" rel="noopener" data-brand-search="rubato stockholm sweden knitwear officers chino trousers ivy">
-            <span class="b-main"><span class="b-name">Rubato</span><span class="b-meta">Stockholm · est. 2018 — cult lambswool knits and Japanese-made trousers; above all the Officer's Chino.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="http://stoffa.co/" target="_blank" rel="noopener" data-brand-search="stoffa new york made to order soft tailoring italy">
-            <span class="b-main"><span class="b-name">Stoffa</span><span class="b-meta">New York · est. 2014 — made-to-order soft tailoring, made in Italy; relaxed cuts, natural pastels.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://pjt.com/" target="_blank" rel="noopener" data-brand-search="p. johnson pjt sydney australia tailoring neapolitan made to measure suits">
-            <span class="b-main"><span class="b-name">P. Johnson</span><span class="b-meta">Sydney · est. 2009 — laid-back Australian tailoring with a Neapolitan soul; made-to-measure and ready-to-wear.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.samanamel.com/" target="_blank" rel="noopener" data-brand-search="saman amel stockholm sweden tailoring made to measure suits italian scandinavian">
-            <span class="b-main"><span class="b-name">Saman Amel</span><span class="b-meta">Stockholm — soft southern-Italian construction with Scandinavian restraint; made-to-measure tailoring.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.therow.com/" target="_blank" rel="noopener" data-brand-search="the row new york olsen no logo luxury tailoring">
-            <span class="b-main"><span class="b-name">The Row</span><span class="b-meta">New York — the original no-logo luxury house; understated, impeccably cut, the priciest name here.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.loropiana.com/" target="_blank" rel="noopener" data-brand-search="loro piana italy piedmont cashmere quiet luxury knitwear tailoring">
-            <span class="b-main"><span class="b-name">Loro Piana</span><span class="b-meta">Piedmont, Italy · est. 1924 — cashmere and the finest natural fibres, from its own mills; quiet luxury defined.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.brunellocucinelli.com/" target="_blank" rel="noopener" data-brand-search="brunello cucinelli solomeo italy cashmere knitwear soft tailoring luxury">
-            <span class="b-main"><span class="b-name">Brunello Cucinelli</span><span class="b-meta">Solomeo, Italy · est. 1978 — cashmere knitwear and soft tailoring, all made in Italy.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.octobre-editions.com/" target="_blank" rel="noopener" data-brand-search="octobre editions sezane paris menswear knitwear shirts tailoring">
-            <span class="b-main"><span class="b-name">Octobre Éditions</span><span class="b-meta">Paris · est. 2016 — Sézane's menswear line: French knits, shirting and soft tailoring.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.aspesi.com/" target="_blank" rel="noopener" data-brand-search="aspesi milan italy jackets nylon shirts tailoring">
-            <span class="b-main"><span class="b-name">Aspesi</span><span class="b-meta">Milan · est. 1961 — featherweight nylon jackets and quiet, unstructured tailoring.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://marfastance.com/" target="_blank" rel="noopener" data-brand-search="marfa stance coats quilt reversible outerwear london">
-            <span class="b-main"><span class="b-name">Marfa Stance</span><span class="b-meta">London · est. 2019 — buildable, reversible coats and quilts, designed to be kept.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.kiton.com/" target="_blank" rel="noopener" data-brand-search="kiton naples italy tailoring suits handmade luxury">
-            <span class="b-main"><span class="b-name">Kiton</span><span class="b-meta">Naples · est. 1968 — the pinnacle of Neapolitan tailoring; cut and sewn by hand.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.isaia.it/" target="_blank" rel="noopener" data-brand-search="isaia naples italy tailoring suits knit polo coral">
-            <span class="b-main"><span class="b-name">Isaia</span><span class="b-meta">Naples · est. 1957 — Neapolitan tailoring with character; coral red is the house mark.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.thomsweeney.com/" target="_blank" rel="noopener" data-brand-search="thom sweeney london tailoring bespoke suits british">
-            <span class="b-main"><span class="b-name">Thom Sweeney</span><span class="b-meta">London · est. 2007 — contemporary British tailoring, bespoke and ready-to-wear.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.thombrowne.com/" target="_blank" rel="noopener" data-brand-search="thom browne new york tailoring grey suit four bar">
-            <span class="b-main"><span class="b-name">Thom Browne</span><span class="b-meta">New York · est. 2001 — shrunken grey tailoring and the four-bar stripe.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.zegna.com/" target="_blank" rel="noopener" data-brand-search="zegna ermenegildo italy tailoring suits fabrics leisurewear">
-            <span class="b-main"><span class="b-name">Zegna</span><span class="b-meta">Trivero, Italy · est. 1910 — its own mills, its own cloth; luxury tailoring and leisurewear.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.bottegaveneta.com/" target="_blank" rel="noopener" data-brand-search="bottega veneta italy intrecciato leather tailoring luxury">
-            <span class="b-main"><span class="b-name">Bottega Veneta</span><span class="b-meta">Vicenza, Italy · est. 1966 — intrecciato leather and logo-free luxury.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.armani.com/" target="_blank" rel="noopener" data-brand-search="giorgio armani milan suits soft tailoring greige">
-            <span class="b-main"><span class="b-name">Giorgio Armani</span><span class="b-meta">Milan · est. 1975 — the soft, deconstructed suit; greige is the house colour.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.dior.com/" target="_blank" rel="noopener" data-brand-search="christian dior paris dior men tailoring suits kim jones">
-            <span class="b-main"><span class="b-name">Christian Dior</span><span class="b-meta">Paris · est. 1946 — Dior Men: sharp, modern tailoring.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.ralphlauren.com/" target="_blank" rel="noopener" data-brand-search="ralph lauren new york polo purple label tailoring classics">
-            <span class="b-main"><span class="b-name">Ralph Lauren</span><span class="b-meta">New York · est. 1967 — Purple Label at the top; American classics throughout.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.tomford.com/" target="_blank" rel="noopener" data-brand-search="tom ford tailoring suits evening luxury menswear">
-            <span class="b-main"><span class="b-name">Tom Ford</span><span class="b-meta">New York · est. 2005 — razor-sharp evening tailoring and luxury staples.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.canali.com/" target="_blank" rel="noopener" data-brand-search="canali italy tailoring suits made in italy">
-            <span class="b-main"><span class="b-name">Canali</span><span class="b-meta">Sovico, Italy · est. 1934 — family-run tailoring, all made in Italy.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.eleventy.com/" target="_blank" rel="noopener" data-brand-search="eleventy milan italy smart luxury tailoring knitwear">
-            <span class="b-main"><span class="b-name">Eleventy</span><span class="b-meta">Milan · est. 2007 — smart luxury: soft tailoring and knits at a gentler price.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://altea.com/" target="_blank" rel="noopener" data-brand-search="altea milan italy knitwear scarves colour sartori">
-            <span class="b-main"><span class="b-name">Altea</span><span class="b-meta">Milan · est. 1892 — colour-led Italian knitwear and scarves, family-run.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.toddsnyder.com/" target="_blank" rel="noopener" data-brand-search="todd snyder new york menswear tailoring classics champion">
-            <span class="b-main"><span class="b-name">Todd Snyder</span><span class="b-meta">New York · est. 2011 — American classics reworked, from sweatshirts to sharp tailoring.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.herno.com/" target="_blank" rel="noopener" data-brand-search="herno lesa italy outerwear down jackets coats quiet luxury">
-            <span class="b-main"><span class="b-name">Herno</span><span class="b-meta">Lesa, Italy · est. 1948 — outerwear only: featherlight down jackets and coats in technical fabrics, cut like tailoring.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.moncler.com/" target="_blank" rel="noopener" data-brand-search="moncler down jackets outerwear luxury puffer">
-            <span class="b-main"><span class="b-name">Moncler</span><span class="b-meta">Milan · est. 1952 — the benchmark down jacket, born in the French Alps.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.greysonclothiers.com/" target="_blank" rel="noopener" data-brand-search="greyson clothiers golf polo performance menswear">
-            <span class="b-main"><span class="b-name">Greyson</span><span class="b-meta">Detroit · est. 2015 — golf-first performance polos and tailoring that crosses over.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.petermillar.com/" target="_blank" rel="noopener" data-brand-search="peter millar golf polo resort menswear crown sport">
-            <span class="b-main"><span class="b-name">Peter Millar</span><span class="b-meta">Raleigh, NC · est. 2001 — golf and resort polish; Crown Sport performance.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.frame-store.com/" target="_blank" rel="noopener" data-brand-search="frame los angeles denim jeans menswear premium">
-            <span class="b-main"><span class="b-name">FRAME</span><span class="b-meta">Los Angeles · est. 2012 — premium denim and clean, minimal tailoring.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.ogier-og.com/" target="_blank" rel="noopener" data-brand-search="ogier maison ogier france alps cashmere knitwear luxury italy natural fabrics">
-            <span class="b-main"><span class="b-name">Ogier</span><span class="b-meta">French Alps · est. 1948 — mountain-born luxury house; cashmere and natural fabrics crafted in Italy, backed by a lifetime guarantee.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.atemporubato.com/" data-brand-search="rubato stockholm sweden knitwear officers chino trousers ivy">
+            <span class="b-main"><span class="b-name">Rubato</span><span class="b-meta">Stockholm · est. 2018 — cult lambswool knits and Japanese-made trousers; above all the Officer's Chino.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="http://stoffa.co/" data-brand-search="stoffa new york made to order soft tailoring italy">
+            <span class="b-main"><span class="b-name">Stoffa</span><span class="b-meta">New York · est. 2014 — made-to-order soft tailoring, made in Italy; relaxed cuts, natural pastels.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://pjt.com/" data-brand-search="p. johnson pjt sydney australia tailoring neapolitan made to measure suits">
+            <span class="b-main"><span class="b-name">P. Johnson</span><span class="b-meta">Sydney · est. 2009 — laid-back Australian tailoring with a Neapolitan soul; made-to-measure and ready-to-wear.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.samanamel.com/" data-brand-search="saman amel stockholm sweden tailoring made to measure suits italian scandinavian">
+            <span class="b-main"><span class="b-name">Saman Amel</span><span class="b-meta">Stockholm — soft southern-Italian construction with Scandinavian restraint; made-to-measure tailoring.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.therow.com/" data-brand-search="the row new york olsen no logo luxury tailoring">
+            <span class="b-main"><span class="b-name">The Row</span><span class="b-meta">New York — the original no-logo luxury house; understated, impeccably cut, the priciest name here.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.loropiana.com/" data-brand-search="loro piana italy piedmont cashmere quiet luxury knitwear tailoring">
+            <span class="b-main"><span class="b-name">Loro Piana</span><span class="b-meta">Piedmont, Italy · est. 1924 — cashmere and the finest natural fibres, from its own mills; quiet luxury defined.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.brunellocucinelli.com/" data-brand-search="brunello cucinelli solomeo italy cashmere knitwear soft tailoring luxury">
+            <span class="b-main"><span class="b-name">Brunello Cucinelli</span><span class="b-meta">Solomeo, Italy · est. 1978 — cashmere knitwear and soft tailoring, all made in Italy.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.octobre-editions.com/" data-brand-search="octobre editions sezane paris menswear knitwear shirts tailoring">
+            <span class="b-main"><span class="b-name">Octobre Éditions</span><span class="b-meta">Paris · est. 2016 — Sézane's menswear line: French knits, shirting and soft tailoring.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.aspesi.com/" data-brand-search="aspesi milan italy jackets nylon shirts tailoring">
+            <span class="b-main"><span class="b-name">Aspesi</span><span class="b-meta">Milan · est. 1961 — featherweight nylon jackets and quiet, unstructured tailoring.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://marfastance.com/" data-brand-search="marfa stance coats quilt reversible outerwear london">
+            <span class="b-main"><span class="b-name">Marfa Stance</span><span class="b-meta">London · est. 2019 — buildable, reversible coats and quilts, designed to be kept.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.kiton.com/" data-brand-search="kiton naples italy tailoring suits handmade luxury">
+            <span class="b-main"><span class="b-name">Kiton</span><span class="b-meta">Naples · est. 1968 — the pinnacle of Neapolitan tailoring; cut and sewn by hand.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.isaia.it/" data-brand-search="isaia naples italy tailoring suits knit polo coral">
+            <span class="b-main"><span class="b-name">Isaia</span><span class="b-meta">Naples · est. 1957 — Neapolitan tailoring with character; coral red is the house mark.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.thomsweeney.com/" data-brand-search="thom sweeney london tailoring bespoke suits british">
+            <span class="b-main"><span class="b-name">Thom Sweeney</span><span class="b-meta">London · est. 2007 — contemporary British tailoring, bespoke and ready-to-wear.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.thombrowne.com/" data-brand-search="thom browne new york tailoring grey suit four bar">
+            <span class="b-main"><span class="b-name">Thom Browne</span><span class="b-meta">New York · est. 2001 — shrunken grey tailoring and the four-bar stripe.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.zegna.com/" data-brand-search="zegna ermenegildo italy tailoring suits fabrics leisurewear">
+            <span class="b-main"><span class="b-name">Zegna</span><span class="b-meta">Trivero, Italy · est. 1910 — its own mills, its own cloth; luxury tailoring and leisurewear.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.bottegaveneta.com/" data-brand-search="bottega veneta italy intrecciato leather tailoring luxury">
+            <span class="b-main"><span class="b-name">Bottega Veneta</span><span class="b-meta">Vicenza, Italy · est. 1966 — intrecciato leather and logo-free luxury.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.armani.com/" data-brand-search="giorgio armani milan suits soft tailoring greige">
+            <span class="b-main"><span class="b-name">Giorgio Armani</span><span class="b-meta">Milan · est. 1975 — the soft, deconstructed suit; greige is the house colour.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.dior.com/" data-brand-search="christian dior paris dior men tailoring suits kim jones">
+            <span class="b-main"><span class="b-name">Christian Dior</span><span class="b-meta">Paris · est. 1946 — Dior Men: sharp, modern tailoring.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.ralphlauren.com/" data-brand-search="ralph lauren new york polo purple label tailoring classics">
+            <span class="b-main"><span class="b-name">Ralph Lauren</span><span class="b-meta">New York · est. 1967 — Purple Label at the top; American classics throughout.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.tomford.com/" data-brand-search="tom ford tailoring suits evening luxury menswear">
+            <span class="b-main"><span class="b-name">Tom Ford</span><span class="b-meta">New York · est. 2005 — razor-sharp evening tailoring and luxury staples.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.canali.com/" data-brand-search="canali italy tailoring suits made in italy">
+            <span class="b-main"><span class="b-name">Canali</span><span class="b-meta">Sovico, Italy · est. 1934 — family-run tailoring, all made in Italy.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.eleventy.com/" data-brand-search="eleventy milan italy smart luxury tailoring knitwear">
+            <span class="b-main"><span class="b-name">Eleventy</span><span class="b-meta">Milan · est. 2007 — smart luxury: soft tailoring and knits at a gentler price.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://altea.com/" data-brand-search="altea milan italy knitwear scarves colour sartori">
+            <span class="b-main"><span class="b-name">Altea</span><span class="b-meta">Milan · est. 1892 — colour-led Italian knitwear and scarves, family-run.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.toddsnyder.com/" data-brand-search="todd snyder new york menswear tailoring classics champion">
+            <span class="b-main"><span class="b-name">Todd Snyder</span><span class="b-meta">New York · est. 2011 — American classics reworked, from sweatshirts to sharp tailoring.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.herno.com/" data-brand-search="herno lesa italy outerwear down jackets coats quiet luxury">
+            <span class="b-main"><span class="b-name">Herno</span><span class="b-meta">Lesa, Italy · est. 1948 — outerwear only: featherlight down jackets and coats in technical fabrics, cut like tailoring.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.moncler.com/" data-brand-search="moncler down jackets outerwear luxury puffer">
+            <span class="b-main"><span class="b-name">Moncler</span><span class="b-meta">Milan · est. 1952 — the benchmark down jacket, born in the French Alps.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.greysonclothiers.com/" data-brand-search="greyson clothiers golf polo performance menswear">
+            <span class="b-main"><span class="b-name">Greyson</span><span class="b-meta">Detroit · est. 2015 — golf-first performance polos and tailoring that crosses over.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.petermillar.com/" data-brand-search="peter millar golf polo resort menswear crown sport">
+            <span class="b-main"><span class="b-name">Peter Millar</span><span class="b-meta">Raleigh, NC · est. 2001 — golf and resort polish; Crown Sport performance.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.frame-store.com/" data-brand-search="frame los angeles denim jeans menswear premium">
+            <span class="b-main"><span class="b-name">FRAME</span><span class="b-meta">Los Angeles · est. 2012 — premium denim and clean, minimal tailoring.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.ogier-og.com/" data-brand-search="ogier maison ogier france alps cashmere knitwear luxury italy natural fabrics">
+            <span class="b-main"><span class="b-name">Ogier</span><span class="b-meta">French Alps · est. 1948 — mountain-born luxury house; cashmere and natural fabrics crafted in Italy, backed by a lifetime guarantee.</span></span><span class="b-shop">View ›</span>
+          </button>
           <p class="brand-group-head">Shoes &amp; slippers</p>
           <!-- Adidas is footwear-only in this app: data-brand-scope="Shoes" on the row
                is the restriction of record — Shop surfaces and catalogue sweeps must
                never attach the brand to clothing. -->
-          <a class="brand-row" href="https://www.adidas.com/" target="_blank" rel="noopener" data-brand-search="adidas shoes footwear sneakers trainers samba gazelle" data-brand-scope="Shoes">
-            <span class="b-main"><span class="b-name">Adidas</span><span class="b-meta">Herzogenaurach, Germany · est. 1949 — the Three Stripes, footwear only here: Samba, Gazelle and the cream sneakers in the Closet.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.baudoinandlange.com/" target="_blank" rel="noopener" data-brand-search="baudoin lange london sagan loafers handmade shoes">
-            <span class="b-main"><span class="b-name">Baudoin &amp; Lange</span><span class="b-meta">London · est. 2016 — the Sagan loafer, handmade and unlined.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.stubbsandwootton.com/" target="_blank" rel="noopener" data-brand-search="stubbs wootton palm beach slippers needlepoint velvet shoes">
-            <span class="b-main"><span class="b-name">Stubbs &amp; Wootton</span><span class="b-meta">Palm Beach · est. 1993 — needlepoint and velvet slippers, made in Spain.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.belmianshoes.com/" target="_blank" rel="noopener" data-brand-search="belgian shoes new york loafers henri hand sewn">
-            <span class="b-main"><span class="b-name">Belgian Shoes</span><span class="b-meta">New York · est. 1955 — the hand-sewn Belgian loafer with its little bow.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.velasca.com" target="_blank" rel="noopener" data-brand-search="velasca milan italy handmade shoes menswear loafers tailoring marche">
-            <span class="b-main"><span class="b-name">Velasca</span><span class="b-meta">Milan · est. 2013 — handmade Italian shoes and menswear, made in Marche.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.vibivenezia.it/" target="_blank" rel="noopener" data-brand-search="vibi venezia venice furlane velvet slippers friulane">
-            <span class="b-main"><span class="b-name">Vibi Venezia</span><span class="b-meta">Venice · est. 2015 — velvet furlane slippers, handmade in Friuli.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.adidas.com/" data-brand-search="adidas shoes footwear sneakers trainers samba gazelle" data-brand-scope="Shoes">
+            <span class="b-main"><span class="b-name">Adidas</span><span class="b-meta">Herzogenaurach, Germany · est. 1949 — the Three Stripes, footwear only here: Samba, Gazelle and the cream sneakers in the Closet.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.baudoinandlange.com/" data-brand-search="baudoin lange london sagan loafers handmade shoes">
+            <span class="b-main"><span class="b-name">Baudoin &amp; Lange</span><span class="b-meta">London · est. 2016 — the Sagan loafer, handmade and unlined.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.stubbsandwootton.com/" data-brand-search="stubbs wootton palm beach slippers needlepoint velvet shoes">
+            <span class="b-main"><span class="b-name">Stubbs &amp; Wootton</span><span class="b-meta">Palm Beach · est. 1993 — needlepoint and velvet slippers, made in Spain.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.belmianshoes.com/" data-brand-search="belgian shoes new york loafers henri hand sewn">
+            <span class="b-main"><span class="b-name">Belgian Shoes</span><span class="b-meta">New York · est. 1955 — the hand-sewn Belgian loafer with its little bow.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.velasca.com" data-brand-search="velasca milan italy handmade shoes menswear loafers tailoring marche">
+            <span class="b-main"><span class="b-name">Velasca</span><span class="b-meta">Milan · est. 2013 — handmade Italian shoes and menswear, made in Marche.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.vibivenezia.it/" data-brand-search="vibi venezia venice furlane velvet slippers friulane">
+            <span class="b-main"><span class="b-name">Vibi Venezia</span><span class="b-meta">Venice · est. 2015 — velvet furlane slippers, handmade in Friuli.</span></span><span class="b-shop">View ›</span>
+          </button>
           <p class="brand-group-head">Everyday &amp; value</p>
-          <a class="brand-row" href="https://www.levi.com/" target="_blank" rel="noopener" data-brand-search="levi's levis jeans 501 denim trucker jacket">
-            <span class="b-main"><span class="b-name">Levi's</span><span class="b-meta">San Francisco · est. 1853 — the original blue jean; 501s above all.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.vans.com/" target="_blank" rel="noopener" data-brand-search="vans sneakers authentic old skool canvas shoes">
-            <span class="b-main"><span class="b-name">Vans</span><span class="b-meta">California · est. 1966 — canvas classics: the Authentic and the Old Skool.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.alexmill.com/" target="_blank" rel="noopener" data-brand-search="alex mill new york staples chore coat tees menswear">
-            <span class="b-main"><span class="b-name">Alex Mill</span><span class="b-meta">New York · est. 2012 — easy staples done properly: chore coats, tees, washed knits.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.buckmason.com/" target="_blank" rel="noopener" data-brand-search="buck mason venice california american basics tees knitwear denim essentials">
-            <span class="b-main"><span class="b-name">Buck Mason</span><span class="b-meta">Venice, California · est. 2013 — American basics done properly: fine-knit tees, fleece and denim in honest fabrics, no logos.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.jcrew.com/" target="_blank" rel="noopener" data-brand-search="j.crew jcrew ludlow wallace barnes menswear prep">
-            <span class="b-main"><span class="b-name">J.Crew</span><span class="b-meta">New York · est. 1983 — American prep staples; Ludlow tailoring and Wallace &amp; Barnes.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.uniqlo.com/" target="_blank" rel="noopener" data-brand-search="uniqlo japan basics merino knit selvedge u line">
-            <span class="b-main"><span class="b-name">Uniqlo</span><span class="b-meta">Japan · est. 1949 — engineered basics: merino knits, selvedge and the U line.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.abercrombie.com/" target="_blank" rel="noopener" data-brand-search="abercrombie fitch menswear staples tailoring logo free">
-            <span class="b-main"><span class="b-name">Abercrombie &amp; Fitch</span><span class="b-meta">Ohio · est. 1892 — reinvented logo-free: clean staples and honest tailoring.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://propercloth.com/" target="_blank" rel="noopener" data-brand-search="proper cloth custom shirts made to measure new york">
-            <span class="b-main"><span class="b-name">Proper Cloth</span><span class="b-meta">New York · est. 2008 — custom shirts to your measurements, ordered online.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://www.asket.com/" target="_blank" rel="noopener" data-brand-search="asket stockholm essentials permanent collection menswear traceable">
-            <span class="b-main"><span class="b-name">ASKET</span><span class="b-meta">Stockholm · est. 2015 — one permanent collection of essentials, fully traceable.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://unboundmerino.com/" target="_blank" rel="noopener" data-brand-search="unbound merino travel merino tee wool toronto">
-            <span class="b-main"><span class="b-name">Unbound Merino</span><span class="b-meta">Toronto · est. 2016 — merino tees and travel staples that go weeks between washes.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.levi.com/" data-brand-search="levi's levis jeans 501 denim trucker jacket">
+            <span class="b-main"><span class="b-name">Levi's</span><span class="b-meta">San Francisco · est. 1853 — the original blue jean; 501s above all.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.vans.com/" data-brand-search="vans sneakers authentic old skool canvas shoes">
+            <span class="b-main"><span class="b-name">Vans</span><span class="b-meta">California · est. 1966 — canvas classics: the Authentic and the Old Skool.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.alexmill.com/" data-brand-search="alex mill new york staples chore coat tees menswear">
+            <span class="b-main"><span class="b-name">Alex Mill</span><span class="b-meta">New York · est. 2012 — easy staples done properly: chore coats, tees, washed knits.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.buckmason.com/" data-brand-search="buck mason venice california american basics tees knitwear denim essentials">
+            <span class="b-main"><span class="b-name">Buck Mason</span><span class="b-meta">Venice, California · est. 2013 — American basics done properly: fine-knit tees, fleece and denim in honest fabrics, no logos.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.jcrew.com/" data-brand-search="j.crew jcrew ludlow wallace barnes menswear prep">
+            <span class="b-main"><span class="b-name">J.Crew</span><span class="b-meta">New York · est. 1983 — American prep staples; Ludlow tailoring and Wallace &amp; Barnes.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.uniqlo.com/" data-brand-search="uniqlo japan basics merino knit selvedge u line">
+            <span class="b-main"><span class="b-name">Uniqlo</span><span class="b-meta">Japan · est. 1949 — engineered basics: merino knits, selvedge and the U line.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.abercrombie.com/" data-brand-search="abercrombie fitch menswear staples tailoring logo free">
+            <span class="b-main"><span class="b-name">Abercrombie &amp; Fitch</span><span class="b-meta">Ohio · est. 1892 — reinvented logo-free: clean staples and honest tailoring.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://propercloth.com/" data-brand-search="proper cloth custom shirts made to measure new york">
+            <span class="b-main"><span class="b-name">Proper Cloth</span><span class="b-meta">New York · est. 2008 — custom shirts to your measurements, ordered online.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.asket.com/" data-brand-search="asket stockholm essentials permanent collection menswear traceable">
+            <span class="b-main"><span class="b-name">ASKET</span><span class="b-meta">Stockholm · est. 2015 — one permanent collection of essentials, fully traceable.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://unboundmerino.com/" data-brand-search="unbound merino travel merino tee wool toronto">
+            <span class="b-main"><span class="b-name">Unbound Merino</span><span class="b-meta">Toronto · est. 2016 — merino tees and travel staples that go weeks between washes.</span></span><span class="b-shop">View ›</span>
+          </button>
           <p class="brand-group-head">Stores</p>
-          <a class="brand-row" href="https://www.mrporter.com/" target="_blank" rel="noopener" data-brand-search="mr porter mrporter london store multi brand designer menswear mr p watches shoes">
-            <span class="b-main"><span class="b-name">Mr Porter</span><span class="b-meta">London — the multi-brand store: designer menswear, shoes and watches, plus its own Mr P. label.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://suitsupply.com/" target="_blank" rel="noopener" data-brand-search="suitsupply suit supply amsterdam tailoring suits custom italian fabrics">
-            <span class="b-main"><span class="b-name">Suitsupply</span><span class="b-meta">Amsterdam · est. 2000 — sharp suits and tailoring in Italian fabrics, ready-to-wear and custom-made.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://poolhousenewyork.com/" target="_blank" rel="noopener" data-brand-search="pool house new york vintage menswear store ivy tailoring workwear">
-            <span class="b-main"><span class="b-name">Pool House New York</span><span class="b-meta">New York — vintage menswear, hand-picked: Ivy, tailoring and workwear.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
-          <a class="brand-row" href="https://humanassembly.com/" target="_blank" rel="noopener" data-brand-search="human assembly store menswear independent makers small batch">
-            <span class="b-main"><span class="b-name">Human Assembly</span><span class="b-meta">Online — small-batch menswear and goods from independent makers.</span></span><span class="b-shop">Shop ↗</span>
-          </a>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://www.mrporter.com/" data-brand-search="mr porter mrporter london store multi brand designer menswear mr p watches shoes">
+            <span class="b-main"><span class="b-name">Mr Porter</span><span class="b-meta">London — the multi-brand store: designer menswear, shoes and watches, plus its own Mr P. label.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://suitsupply.com/" data-brand-search="suitsupply suit supply amsterdam tailoring suits custom italian fabrics">
+            <span class="b-main"><span class="b-name">Suitsupply</span><span class="b-meta">Amsterdam · est. 2000 — sharp suits and tailoring in Italian fabrics, ready-to-wear and custom-made.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://poolhousenewyork.com/" data-brand-search="pool house new york vintage menswear store ivy tailoring workwear">
+            <span class="b-main"><span class="b-name">Pool House New York</span><span class="b-meta">New York — vintage menswear, hand-picked: Ivy, tailoring and workwear.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://humanassembly.com/" data-brand-search="human assembly store menswear independent makers small batch">
+            <span class="b-main"><span class="b-name">Human Assembly</span><span class="b-meta">Online — small-batch menswear and goods from independent makers.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://kujten.com/" data-brand-search="kujten paris france mongolian cashmere knitwear sweaters cardigans">
+            <span class="b-main"><span class="b-name">Kujten</span><span class="b-meta">Paris, France · est. 2012 — Mongolian cashmere knitwear: featherweight sweaters and cardigans in natural, undyed fibre.</span></span><span class="b-shop">View ›</span>
+          </button>
+          <button type="button" class="brand-row" data-brand-open data-brand-url="https://corridornyc.com/" data-brand-search="corridor nyc brooklyn menswear shirting knitwear tailoring natural fibres">
+            <span class="b-main"><span class="b-name">Corridor</span><span class="b-meta">Brooklyn, New York · est. 2013 — textured shirting, knitwear and tailoring in natural fibres, designed in Brooklyn.</span></span><span class="b-shop">View ›</span>
+          </button>
         </div>
         <div class="card empty" id="brand-empty" hidden>No brand matches that search.</div>
+      </section>
+
+      <!-- ================= BRAND — IN-APP CATALOGUE VIEW (build .38, 2.15) =================
+           Tapping a brand opens THIS page: the brand's own SKUs from
+           the baked catalogue, in Shop the look's product rows. The
+           store itself is one link in the head — the row tap never
+           leaves the app any more. -->
+      <section id="panel-brand" role="tabpanel" aria-label="Brand" hidden>
+        <div id="brand-view"></div>
       </section>
 
       <!-- ================= MY INSPO — YOUR UPLOADED INSPIRATION ================= -->
@@ -4361,7 +4435,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.37";
+var WARDROBE_BUILD = "2026-11-17.38";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -12316,25 +12390,33 @@ function recordDislike(img) {
   dislikedImgs.push(img);
   store.set("dislikedImgs", dislikedImgs);
 }
-/* Like-graduation (build 2026-11-16.10): a look the user has
-   tapped "I like it" on graduates — it is never dealt again on
-   the opening surfaces (Today hero, Ideas six takes, From
-   wardrobe) until it is un-liked or removed from My Looks.
-   Graduation is derived live at deal time from the EXISTING
-   liked state — the same savedLooks collection My Looks reads:
-   an entry counts exactly when its verdict === "like" (the
-   My Looks "Liked" filter's predicate). There is no separate
-   graduation list, so un-liking or removing a look restores its
-   eligibility automatically. Dealt looks carry fresh ids, so a
-   saved liked copy joins back to future deals by photograph —
-   entry.img and, for closet-built looks, entry.fwRender — and
-   closet-built looks also join by their fwPieces piece-id
-   signature. These helpers read the live savedLooks global at
-   call time, since sync can replace it. */
+/* Like-graduation (build 2026-11-16.10; build .38, item 2.8 —
+   user-approved Nov 17): a liked look graduates out of the
+   dealing rotation for a ~14-day COOLDOWN, then returns on its
+   own; un-liking restores it immediately. Graduation is derived
+   live at deal time from the EXISTING liked state — the same
+   savedLooks collection My Looks reads: an entry counts exactly
+   when its verdict === "like" (the My Looks "Liked" filter's
+   predicate) AND its likedAt stamp is still inside the cooldown.
+   Entries saved before likedAt existed are stamped at boot, so
+   every like carries a stamp. There is no separate graduation
+   list, so un-liking or removing a look restores its eligibility
+   automatically. Dealt looks carry fresh ids, so a saved liked
+   copy joins back to future deals by photograph — entry.img and,
+   for closet-built looks, entry.fwRender — and closet-built
+   looks also join by their fwPieces piece-id signature. These
+   helpers read the live savedLooks global at call time, since
+   sync can replace it. */
+var LIKE_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000;
+function likeIsFresh(entry) {
+  if (!entry || entry.verdict !== "like") return false;
+  if (!entry.likedAt) return true; /* unstamped legacy like — boot stamps it; never strand a look */
+  return (Date.now() - entry.likedAt) < LIKE_COOLDOWN_MS;
+}
 function graduatedImgs() {
   var set = {};
   (typeof savedLooks !== "undefined" ? savedLooks : []).forEach(function (entry) {
-    if (!entry || entry.verdict !== "like") return;
+    if (!likeIsFresh(entry)) return;
     if (entry.img) set[entry.img] = true;
     if (entry.fwRender) set[entry.fwRender] = true;
   });
@@ -12349,7 +12431,7 @@ function fwPiecesKey(fwPieces) {
 function graduatedFwKeys() {
   var set = {};
   (typeof savedLooks !== "undefined" ? savedLooks : []).forEach(function (entry) {
-    if (!entry || entry.verdict !== "like") return;
+    if (!likeIsFresh(entry)) return;
     var key = fwPiecesKey(entry.fwPieces);
     if (key) set[key] = true;
   });
@@ -12523,6 +12605,17 @@ function toast(msg) {
 /* ================= Studio ================= */
 var currentLook = null;
 var savedLooks = store.get("looks", []);
+/* Build .38 (2.8) boot migration: likes saved before the cooldown
+   existed carry no likedAt — stamp them "now", so every standing
+   like gets its full 14 days from this build rather than expiring
+   (or graduating forever) on a missing stamp. */
+(function stampLegacyLikes() {
+  var changed = false;
+  savedLooks.forEach(function (l) {
+    if (l && l.verdict === "like" && !l.likedAt) { l.likedAt = Date.now(); changed = true; }
+  });
+  if (changed) store.set("looks", savedLooks);
+})();
 /* The Queue: looks the user plans to wear or emulate, kept as
    snapshots in their own list until they are worn (which moves
    them into the worn catalogue in Looks) or taken off. */
@@ -12601,7 +12694,11 @@ function persistLookFeedback(look) {
   if (!look) return;
   var saved = savedLooks.filter(function (l) { return l.id === look.id; })[0];
   if (saved) {
+    var wasLike = saved.verdict === "like";
     saved.verdict = look.verdict || null;
+    /* Build .38 (2.8): a fresh like stamps the cooldown clock; a
+       standing like keeps its original stamp. */
+    if (saved.verdict === "like" && !wasLike) saved.likedAt = Date.now();
     saved.comment = look.comment || "";
     persistAll();
     renderSaved();
@@ -14942,7 +15039,10 @@ var lookLayerOpen = false;
 var lookLayerStash = null;
 function openLookLayer(look) {
   if (typeof swapPoll !== "undefined" && swapPoll && (!look || look.swapComboId !== swapPoll.comboId)) stopSwapPoll();
-  if (!lookLayerOpen) lookLayerStash = { options: currentOptions, look: currentLook };
+  if (!lookLayerOpen) {
+    lookLayerStash = { options: currentOptions, look: currentLook };
+    if (typeof viewPushLayer === "function") viewPushLayer("look"); /* build .38 (2.11) */
+  }
   lookLayerOpen = true;
   currentLook = look;
   /* Submit-on-open: a combination dealt in the pending state
@@ -14968,6 +15068,7 @@ function closeLookLayer() {
   if (typeof stopSwapPoll === "function") stopSwapPoll();
   if (!lookLayerOpen) return;
   lookLayerOpen = false;
+  if (typeof viewPopLayer === "function") viewPopLayer("look"); /* build .38 (2.11) */
   var layer = document.getElementById("look-layer");
   layer.hidden = true;
   document.getElementById("look-layer-body").innerHTML = "";
@@ -15908,6 +16009,56 @@ function manifestBottom(desc) {
   return { name: d.charAt(0).toUpperCase() + d.slice(1), colour: colour, hex: hex, garment: garment };
 }
 
+/* Build .38 (2.3): weather as a HARD filter, not a nudge. Above
+   ~72°F the heavy cold-weather classes can never be dealt;
+   below ~55°F the warm-weather classes can never be dealt. (The
+   Nov 17 opener was a tweed blazer at 74°F — a soft score let it
+   through; a ban cannot.) Applied to closet combos here and to
+   pool looks in the deal + weather paths via lookWxText. */
+var WX_HEAVY_RE = /tweed|roll[\s-]?neck|turtle[\s-]?neck|flannel|cable[\s-]?knit|chunky|heavy[\s-]?knit|fisherman|aran/i;
+var WX_LIGHT_RE = /linen|\bshorts\b|bathing suit|swim/i;
+function wxBannedText(text, tempF) {
+  if (typeof tempF !== "number" || !text) return false;
+  if (tempF > 72 && WX_HEAVY_RE.test(text)) return true;
+  if (tempF < 55 && WX_LIGHT_RE.test(text)) return true;
+  return false;
+}
+function comboWxText(pair) {
+  var entry = pair[2];
+  return ((pair[0].name || "") + " " + (pair[0].category || "") + " " + (pair[1] ? (pair[1].name || "") : "") + " " + (entry && typeof entry.bottom === "string" ? entry.bottom : "")).toLowerCase();
+}
+function lookWxText(look) {
+  if (!look) return "";
+  var parts = [look.title || "", look.meta || "", look.desc || ""];
+  (look.swatches || []).forEach(function (s) { parts.push(s.role || ""); });
+  (look.flatlay || []).forEach(function (f) { parts.push(f.label || ""); });
+  if (typeof lookPieces === "function") {
+    try { lookPieces(look).forEach(function (pc) { parts.push(pc.garment || ""); }); } catch (e) {}
+  }
+  return parts.join(" ").toLowerCase();
+}
+/* Build .38 (2.2): pieces worn in the last 7–10 days down-weight
+   the rotation — a combo containing one sinks below every combo
+   without one (stable: the existing order survives inside each
+   class, so the daily salt/shuffle still does its work). */
+function recentlyWornPieceIds(days) {
+  var set = {};
+  var cut = Date.now() - (days || 10) * 864e5;
+  (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).forEach(function (it) {
+    if (!it || !it.lastWorn) return;
+    var t = new Date(it.lastWorn + "T12:00:00").getTime();
+    if (!isNaN(t) && t >= cut) set[it.id] = true;
+  });
+  return set;
+}
+function downweightRecentCombos(combos) {
+  var recent = recentlyWornPieceIds(10);
+  if (!Object.keys(recent).length) return combos;
+  return combos.map(function (pair, ix) {
+    return { pair: pair, ix: ix, pen: (recent[pair[0].id] || recent[pair[1].id]) ? 1 : 0 };
+  }).sort(function (a, b) { return (a.pen - b.pen) || (a.ix - b.ix); })
+    .map(function (w) { return w.pair; });
+}
 function buildClosetLooks(opts) {
   var wx = (opts && typeof opts.temp === "number") ? { temp: opts.temp, rainy: !!opts.rainy } : null;
   var avail = wardrobeItems.filter(function (i) { return !i.laundry; });
@@ -15959,6 +16110,13 @@ function buildClosetLooks(opts) {
   });
   if (!renderCombos.length) return null;
   if (wx) {
+    /* Build .38 (2.3): the hard ban runs before scoring — a
+       banned combo is not dealt at this temperature at all. If
+       EVERY combo is banned (a closet of only heavy knits on a
+       hot day), the unfiltered list stands: a warm outfit beats
+       no outfit. */
+    var unbannedCombos = renderCombos.filter(function (pair) { return !wxBannedText(comboWxText(pair), wx.temp); });
+    if (unbannedCombos.length) renderCombos = unbannedCombos;
     renderCombos.sort(function (a, b) {
       var d = (weatherTopScore(b[0], wx.temp, wx.rainy) + weatherShoeScore(b[1], wx.temp, wx.rainy)) - (weatherTopScore(a[0], wx.temp, wx.rainy) + weatherShoeScore(a[1], wx.temp, wx.rainy));
       return d !== 0 ? d : (a[0].name < b[0].name ? -1 : 1);
@@ -15967,8 +16125,10 @@ function buildClosetLooks(opts) {
       var rr = ((salt % renderCombos.length) + renderCombos.length) % renderCombos.length;
       renderCombos = renderCombos.slice(rr).concat(renderCombos.slice(0, rr));
     }
+    renderCombos = downweightRecentCombos(renderCombos);
   } else {
     shuffleArr(renderCombos);
+    renderCombos = downweightRecentCombos(renderCombos);
   }
   var combos = renderCombos;
   return combos.slice(0, 6).map(function (pair, i) {
@@ -18829,6 +18989,7 @@ function addToQueueTop(look) {
 }
 function likeLook(look) {
   look.verdict = "like";
+  look.likedAt = Date.now(); /* build .38 (2.8): the 14-day cooldown clock starts at the like */
   addToSavedTop(look);
   addToQueueTop(look);
   persistAll();
@@ -19063,7 +19224,11 @@ function toggleWorn(id) {
     queueLooks = queueLooks.filter(function (x) { return x.id !== id; });
     saveQueue();
     persistAll();
-    var mwEntry = { date: look.wornDate, title: look.title, img: look.img || lookImg(look), pieces: [], lookId: id };
+    /* Build .38 (2.5): My Looks "Mark worn" credits the look's
+       closet pieces through the ONE shared mappedClosetPieces
+       path — the same mapping the hero's woreToday uses. */
+    var mwPieces = (typeof mappedClosetPieces === "function") ? mappedClosetPieces(look) : [];
+    var mwEntry = { date: look.wornDate, title: look.title, img: look.img || lookImg(look), pieces: mwPieces.map(function (p) { return p.name; }), pieceIds: mwPieces, lookId: id };
     var mwRes = (typeof resolveWatch === "function") ? resolveWatch(look) : { state: "none" };
     if (mwRes.state === "watch" && mwRes.watch) { mwEntry.watch = mwRes.watch.name; mwEntry.watchId = mwRes.watch.id; }
     recordWorn(mwEntry);
@@ -20583,6 +20748,16 @@ function persistOpeningLook(look) {
   if (look.fwPieces && look.fwPieces.length && look.source === "wardrobe") {
     try { store.set("todayOpeningCloset", { date: localTodayISO(), look: JSON.parse(JSON.stringify(look)) }); } catch (e) {}
   }
+  /* Build .38 (2.1): pool opening looks lock durably too — the
+     outfit of the day is the same look all day in EVERY source
+     mode, across app opens. Keyed by photograph + source mode
+     (a dealt clone's id is fresh each deal; its img is not).
+     Every hero change path persists through here, so "Deal
+     another", a swipe and a weather swap all move the lock;
+     nothing else can. */
+  if (look.img && look.source !== "wardrobe") {
+    try { store.set("todayOpeningPool", { date: localTodayISO(), img: look.img, source: look.source || "" }); } catch (e) {}
+  }
 }
 function openingLook() {
   var nav = navTypeToday();
@@ -20639,6 +20814,12 @@ function openingLook() {
       var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l); });
       var clwDeal = clwFresh.length ? clwFresh : clw;
       todaySeedId = clwDeal[0].id;
+      /* Build .38 (2.1): the dealt closet look is persisted as
+         the day's opening look HERE — before this, the wardrobe
+         branch returned it unpersisted, so the durable lock only
+         existed if a later action happened to write it, and a
+         second app open dealt a different outfit of the day. */
+      persistOpeningLook(clwDeal[0]);
       return clwDeal[0];
     }
     savedSrc = "combo";
@@ -20646,6 +20827,28 @@ function openingLook() {
   var prevImg = store.get("lastOpeningImg", null) || (sess && sess.img) || null;
   var pool = RENDER_POOL.map(renderAsLook);
   var gradOpen = graduatedImgs();
+  /* Build .38 (2.1): the durable pool lock — a fresh open on the
+     same date in the same source mode restores the day's dealt
+     photograph instead of dealing a new one. A locked look that
+     has since been disliked, or has graduated into its 14-day
+     cooldown, falls through to the fresh deal below. */
+  var plock = store.get("todayOpeningPool", null);
+  if (plock && plock.date === localTodayISO() && plock.img && plock.source === savedSrc) {
+    var lockedPick = pool.filter(function (l) { return l.img === plock.img; })[0];
+    if (lockedPick && dislikedImgs.indexOf(lockedPick.img) === -1 && !gradOpen[lockedPick.img]) {
+      todaySeedId = lockedPick.id;
+      var lclone = JSON.parse(JSON.stringify(lockedPick));
+      lclone.id = "look-" + Date.now();
+      if (savedSrc === "inspo") { lclone.source = "inspo"; lclone.anchorNames = []; lclone.anchorHex = null; }
+      else if (savedSrc === "combo") {
+        lclone.source = "combo";
+        var caL = closetAnchorItems()[0];
+        if (caL) { lclone.anchorNames = [caL.name]; lclone.anchorHex = caL.colourHex || null; }
+      }
+      persistOpeningLook(lclone);
+      return lclone;
+    }
+  }
   var candidates = pool.filter(function (l) { return l.img !== prevImg && dislikedImgs.indexOf(l.img) === -1 && !gradOpen[l.img]; });
   if (!candidates.length) candidates = pool.filter(function (l) { return dislikedImgs.indexOf(l.img) === -1 && !gradOpen[l.img]; });
   if (!candidates.length) candidates = pool.filter(function (l) { return l.img !== prevImg; });
@@ -20909,7 +21112,7 @@ function toggleCdd(btn) {
 /* A pick in any hero / Ideas menu closes it — the functional
    handlers (the #today-type-row and #today-source-row listeners,
    the #ideas-source-seg handler) apply the choice itself. */
-["today-watch-menu", "today-type-row", "today-source-row", "ideas-source-menu"].forEach(function (id) {
+["today-watch-menu", "today-type-row", "today-source-row", "ideas-source-menu", "today-more-menu"].forEach(function (id) {
   var m = document.getElementById(id);
   if (m) m.addEventListener("click", function () { closeAllCdd(); });
 });
@@ -21135,6 +21338,15 @@ function applyWeatherToToday() {
     if (typeof buildClosetLooks !== "function") return;
     var doyW = dayOfYear();
     var wl = buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: doyW });
+    /* Build .38 (2.7): the weather re-pick respects graduation —
+       a liked look inside its cooldown is never weather-dealt
+       back onto the hero. (Dislikes can't occur here: closet
+       combos are generated, not photographed.) The unfiltered
+       list is the fallback so the hero never comes up blank. */
+    if (wl && wl.length) {
+      var wlFresh = wl.filter(function (l) { return !isGraduatedLook(l); });
+      if (wlFresh.length) wl = wlFresh;
+    }
     if (wl && wl.length && wl[0].title !== todayLook.title) {
       /* A watch he chose for today stays chosen across the
          weather refinement of the outfit. */
@@ -21147,25 +21359,49 @@ function applyWeatherToToday() {
     return;
   }
   var t = currentWeather.temp;
+  function swapToSeed(cand) {
+    todaySeedId = cand.id;
+    var keepId = todayLook.id;
+    todayLook = JSON.parse(JSON.stringify(cand));
+    todayLook.id = keepId;
+    /* The swapped look is the one actually shown this session:
+       keep the session record (and the next open's no-repeat
+       guard) pointed at it. */
+    store.set("lastOpeningImg", todayLook.img);
+    persistOpeningLook(todayLook);
+    renderToday();
+    /* Today stays ONE in the hero — the Studio keeps its six takes. */
+  }
+  /* Build .38 (2.3): the hard ban applies at EVERY temperature.
+     If the day's pool look is banned at the actual temperature
+     (the tweed blazer at 74°F), swap to the first seed that is
+     neither banned, disliked nor in its like-cooldown (2.7) —
+     this closes the 65–87°F gap the type swaps below never
+     covered. A user-chosen look never reaches here: the
+     todayTouched and planned-day guards above already returned. */
+  if (wxBannedText(lookWxText(todayLook), t)) {
+    var banCand = SEED_LOOKS.filter(function (l) {
+      return !wxBannedText(lookWxText(l), t) && dislikedImgs.indexOf(l.img) === -1 && !isGraduatedLook(l);
+    })[0];
+    if (banCand && banCand.id !== todaySeedId) swapToSeed(banCand);
+    return;
+  }
   var swapIds = t >= 88 ? ["seed-olive-cream", "seed-plate1", "seed-carmine-helvetia"]
     : t < 55 ? ["seed-charcoal-blazer", "seed-taupe", "seed-crimson"]
     : t <= 64 ? ["seed-charcoal-blazer", "seed-taupe", "seed-crimson"]
     : null;
   if (isRainy() && todaySeedId === "seed-plate3") swapIds = ["seed-charcoal-blazer", "seed-crimson", "seed-taupe"];
   if (!swapIds || swapIds.indexOf(todaySeedId) !== -1) return;
-  var cand = SEED_LOOKS.filter(function (l) { return l.id === swapIds[0]; })[0];
+  /* Build .38 (2.7): the type swap also respects dislikes and
+     graduation — walk the swap list for the first seed that is
+     neither disliked nor in its like-cooldown. */
+  var cand = null;
+  for (var si = 0; si < swapIds.length; si++) {
+    var c2 = SEED_LOOKS.filter(function (l) { return l.id === swapIds[si]; })[0];
+    if (c2 && dislikedImgs.indexOf(c2.img) === -1 && !isGraduatedLook(c2)) { cand = c2; break; }
+  }
   if (!cand) return;
-  todaySeedId = cand.id;
-  var keepId = todayLook.id;
-  todayLook = JSON.parse(JSON.stringify(cand));
-  todayLook.id = keepId;
-  /* The swapped look is the one actually shown this session:
-     keep the session record (and the next open's no-repeat
-     guard) pointed at it. */
-  store.set("lastOpeningImg", todayLook.img);
-  persistOpeningLook(todayLook);
-  renderToday();
-  /* Today stays ONE in the hero — the Studio keeps its six takes. */
+  swapToSeed(cand);
 }
 function fetchWeather(attempt) {
   if (!window.fetch) return;
@@ -21347,6 +21583,14 @@ function dealHeroForSource() {
   var currentImg = todayLook && todayLook.img;
   var gradHero = graduatedImgs();
   var candidates = pool.filter(function (l) { return l.img !== currentImg && dislikedImgs.indexOf(l.img) === -1 && !gradHero[l.img]; });
+  /* Build .38 (2.3): a fresh deal honours the hard weather ban
+     too when the weather is known — tweed cannot be dealt at
+     74°F by any path. If the ban would empty the deck, the
+     unfiltered candidates stand. */
+  if (currentWeather && typeof currentWeather.temp === "number" && candidates.length) {
+    var wxSafe = candidates.filter(function (l) { return !wxBannedText(lookWxText(l), currentWeather.temp); });
+    if (wxSafe.length) candidates = wxSafe;
+  }
   var pick = pickDealt(candidates.length ? candidates : pool);
   todaySeedId = pick.id;
   todayLook = JSON.parse(JSON.stringify(pick));
@@ -21722,8 +21966,9 @@ function renderFinds() {
       (f.details ? '<p class="details">' + esc(f.details) + "</p>" : "") +
       /* One closed Search control per brief (build .28) — the
          same grouped action menu as a Shop the look piece:
-         Google Shopping / eBay / Web from the brief's own query,
-         then its brand store under Brands when it has one.
+         eBay from the brief's own query, then its brand store
+         under Brands when it has one (build .38: retailer-direct
+         only, no search-engine links).
          Copy brief and Done stay as quiet text actions. */
       '<div class="look-actions">' +
       '<button type="button" class="btn-ghost" data-brief-search="' + f.id + '" aria-expanded="false">Search <span aria-hidden="true">▾</span></button>' +
@@ -21731,9 +21976,7 @@ function renderFinds() {
       '<button type="button" class="btn-ghost" data-delete-find="' + f.id + '">Done</button>' +
       "</div>" +
       '<div class="opt-list brief-search-list" data-brief-search-list="' + f.id + '" hidden>' +
-      '<a class="opt-item" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=shop&q=' + q + '">Google Shopping</a>' +
       '<a class="opt-item" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + q + '">eBay</a>' +
-      '<a class="opt-item" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + q + '">Web</a>' +
       (shop ? '<p class="shop-search-group">Brands</p><a class="opt-item" target="_blank" rel="noopener" href="' + shop.href + '">' + esc(shop.brand) + "</a>" : "") +
       "</div>" +
       "</article>";
@@ -21775,9 +22018,11 @@ document.getElementById("find-form").addEventListener("submit", function (e) {
     toast("On the hunt — searching " + shopF.brand + " first, in your size.");
     window.open(shopF.href, "_blank", "noopener");
   } else {
-    toast("On the hunt — tap Google Shopping or eBay on the brief to search in your size.");
+    toast("On the hunt — tap Search on the brief to shop it in your size.");
     var q = encodeURIComponent(findQuery(f));
-    window.open("https://www.google.com/search?tbm=shop&q=" + q, "_blank", "noopener");
+    /* Build .38 (2.15 amendment): the auto-opened search is the
+       retailer's own (eBay), never a search engine. */
+    window.open("https://www.ebay.com/sch/i.html?_nkw=" + q, "_blank", "noopener");
   }
 });
 document.getElementById("find-grid").addEventListener("click", function (e) {
@@ -21853,7 +22098,8 @@ buildFindCatOpts();
    plus Loro Piana, Brunello Cucinelli, Mr Porter and Suitsupply.
    Static rows in the page; the search box filters them by name,
    place or speciality, and a group head hides when none of its
-   brands match. Tapping a row opens the brand's own store. */
+   brands match. Tapping a row opens the in-app brand view
+   (build .38, 2.15): that brand's catalogue SKUs, in the app. */
 (function () {
   var input = document.getElementById("brand-search");
   var list = document.getElementById("brand-list");
@@ -23029,6 +23275,7 @@ var BRAND_DOMAINS = {
   "Octobre Éditions": "octobre-editions.com", "Fedeli": "fedelicashmere.com",
   "Aspesi": "aspesi.com", "Marfa Stance": "marfastance.com", "Kiton": "kiton.com",
   "Isaia": "isaia.it", "Baudoin & Lange": "baudoinandlange.com", "Thom Sweeney": "thomsweeney.com",
+  "Kujten": "kujten.com", "Corridor": "corridornyc.com",
   "Thom Browne": "thombrowne.com", "Zegna": "zegna.com", "Bottega Veneta": "bottegaveneta.com",
   "Giorgio Armani": "armani.com", "Christian Dior": "dior.com", "Greyson": "greysonclothiers.com",
   "Peter Millar": "petermillar.com", "Ralph Lauren": "ralphlauren.com", "Moncler": "moncler.com",
@@ -23039,12 +23286,111 @@ var BRAND_DOMAINS = {
   "Vibi Venezia": "vibivenezia.it", "Velasca": "velasca.com", "Todd Snyder": "toddsnyder.com", "Altea": "altea.com",
   "Ogier": "ogier-og.com"
 };
+/* Build .38 (2.15 amendment): an external search for an item
+   goes DIRECTLY to the brand's own website — its own search
+   where a pattern is verified against the live store, its
+   storefront home where none is. Never a search engine.
+   Verified patterns (checked Nov 17, 2026): Suitsupply
+   /en-us/search?q= (583 results for a test query), the Shopify
+   /search?q= stores (Sunspel, Buck Mason, Merz b. Schwanen,
+   Fortela, Corridor), Alexander Kraft's WooCommerce /?s=. SSENSE and
+   Mr Porter answered 404 to /search?q=, so they take the
+   storefront fallback like every unverified domain. */
+var BRAND_SEARCH_PATTERNS = [
+  { d: "suitsupply.com", u: function (q) { return "https://suitsupply.com/en-us/search?q=" + q; } },
+  { d: "sunspel.com", u: function (q) { return "https://www.sunspel.com/search?q=" + q; } },
+  { d: "buckmason.com", u: function (q) { return "https://www.buckmason.com/search?q=" + q; } },
+  { d: "merzbschwanen.com", u: function (q) { return "https://www.merzbschwanen.com/search?q=" + q; } },
+  { d: "fortela.com", u: function (q) { return "https://www.fortela.com/search?q=" + q; } },
+  { d: "corridornyc.com", u: function (q) { return "https://corridornyc.com/search?q=" + q; } },
+  { d: "alexanderkraft.com", u: function (q) { return "https://www.alexanderkraft.com/?s=" + q + "&post_type=product"; } }
+];
 function brandSearchURL(brand, desc) {
   var d = BRAND_DOMAINS[brand];
-  var q = "men's " + desc;
-  if (d) return "https://www.google.com/search?q=" + encodeURIComponent("site:" + d + " " + q);
-  return "https://www.google.com/search?tbm=shop&q=" + encodeURIComponent(brand + " " + q);
+  var q = encodeURIComponent("men's " + desc);
+  if (!d) return "https://www.ebay.com/sch/i.html?_nkw=" + encodeURIComponent(brand + " men's " + desc);
+  for (var i = 0; i < BRAND_SEARCH_PATTERNS.length; i++) {
+    if (BRAND_SEARCH_PATTERNS[i].d === d) return BRAND_SEARCH_PATTERNS[i].u(q);
+  }
+  return "https://" + d + "/";
 }
+/* ---------- Build .38 (2.15): the in-app brand view ----------
+   Tapping a brand in Brands opens this page: the brand's own
+   SKUs from the baked catalogue, in Shop the look's product
+   rows (shopRowHTML — image, name, price, tier, Mark purchased /
+   Add to wishlist / Style this, tap-through to the retailer).
+   A brand with no SKUs says so honestly and offers the store
+   link — never a search-engine link. Return is the universal
+   back (2.11): opening the view is a switchTab, so it sits on
+   the view history like any page. */
+var brandViewState = null;
+function brandNormName(s) {
+  return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+}
+function catalogueForBrand(name) {
+  var n = brandNormName(name);
+  if (!n) return [];
+  return SHOP_CATALOGUE.filter(function (e) {
+    var b = brandNormName(e.brand);
+    return b === n || (Math.min(b.length, n.length) >= 5 && (b.indexOf(n) !== -1 || n.indexOf(b) !== -1));
+  }).sort(function (a, b2) {
+    var c = String(a.cat || "").localeCompare(String(b2.cat || ""));
+    if (c) return c;
+    return String(a.name || "").localeCompare(String(b2.name || ""));
+  });
+}
+function renderBrandView() {
+  var box = document.getElementById("brand-view");
+  if (!box || !brandViewState) return;
+  var name = brandViewState.name, url = brandViewState.url, meta = brandViewState.meta;
+  var entries = catalogueForBrand(name);
+  var html = '<div class="brand-view-head"><h3>' + esc(name) + "</h3>" +
+    (meta ? '<p class="bv-meta">' + esc(meta) + "</p>" : "") +
+    (entries.length ? '<p class="bv-meta">' + entries.length + " piece" + (entries.length === 1 ? "" : "s") + " in the catalogue · prices checked " + SHOP_CATALOGUE_CHECKED + " — tap through for the live price.</p>" : "") +
+    (url ? '<a class="brand-store-link" target="_blank" rel="noopener" href="' + esc(url) + '">Visit the ' + esc(name) + " store ↗</a>" : "") +
+    "</div>";
+  html += entries.length
+    ? entries.map(function (e) { return shopRowHTML(e, null); }).join("")
+    : '<div class="card empty">Nothing in the catalogue for this brand yet</div>';
+  box.innerHTML = html;
+}
+function openBrandView(name, url, meta) {
+  brandViewState = { name: name, url: url || "", meta: meta || "" };
+  renderBrandView();
+  switchTab("brand");
+}
+(function () {
+  var list = document.getElementById("brand-list");
+  if (list) list.addEventListener("click", function (e) {
+    var row = e.target.closest ? e.target.closest("[data-brand-open]") : null;
+    if (!row) return;
+    var nm = row.querySelector(".b-name"), mt = row.querySelector(".b-meta");
+    openBrandView(nm ? nm.textContent.trim() : "", row.getAttribute("data-brand-url") || "", mt ? mt.textContent.trim() : "");
+  });
+  var bv = document.getElementById("brand-view");
+  if (bv) bv.addEventListener("click", function (e) {
+    if (!e.target.closest) return;
+    var mb = e.target.closest("[data-mark-purchase]");
+    if (mb) {
+      var entry = null;
+      SHOP_CATALOGUE.forEach(function (m) { if (shopEntryKey(m) === mb.getAttribute("data-mark-purchase")) entry = m; });
+      if (entry) { toggleShopPurchase(entry, null); renderBrandView(); }
+      return;
+    }
+    var wb = e.target.closest("[data-wish-toggle]");
+    if (wb) {
+      var wentry = null;
+      SHOP_CATALOGUE.forEach(function (m) { if (shopEntryKey(m) === wb.getAttribute("data-wish-toggle")) wentry = m; });
+      if (wentry && typeof toggleWishlistItem === "function") { toggleWishlistItem(wentry, null); renderBrandView(); }
+      return;
+    }
+    var ss = e.target.closest("[data-style-shop]");
+    if (ss) {
+      var se = (typeof buildEntryByKey === "function") ? buildEntryByKey(ss.getAttribute("data-style-shop")) : null;
+      if (se && typeof buildAroundShopEntry === "function") buildAroundShopEntry(se);
+    }
+  });
+})();
 /* Colour families: the catalogue keys already share shades
    within a family (khaki/sand, midnight/navy, charcoal/grey),
    so the colour gate works family to family — a piece naming
@@ -23712,9 +24058,10 @@ function renderFindLookMode() {
        tier + Search, two equal boxes, before the matches. The
        tier box is the shared global selector — a change
        re-filters every section via renderFindLookMode. Search
-       is ONE grouped action menu: Google Shopping / eBay —
-       vintage / Web, then this piece's brands at the selected
-       tier. Picking a destination opens that search at once;
+       is ONE grouped action menu: eBay — vintage, then this
+       piece's brands at the selected tier, each going DIRECTLY
+       to the brand's own site search or store (build .38 — no
+       search-engine links). Picking a destination opens that search at once;
        the box itself just reads "Search". The old foot-of-
        section Search brands bar and the stray eBay — vintage
        link are gone — both live in this menu now. */
@@ -23723,9 +24070,7 @@ function renderFindLookMode() {
     html += '<div class="shop-ctl-row"><div class="shop-ctl-cell">' + shopTierSelectorHTML() + '</div>' +
       '<div class="shop-ctl-cell shop-search-dd"><button type="button" class="sel-row shop-search-toggle" aria-expanded="false"><span class="sel-name">Search</span><span class="sel-val"></span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
       '<div class="opt-list shop-search-list" hidden>' +
-      '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=shop&q=' + q + '">Google Shopping</a>' +
       '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + eq + '">eBay — vintage</a>' +
-      '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + q + '">Web</a>' +
       (brands.length ? '<p class="shop-search-group">Brands</p>' + brands.map(function (b) {
         return '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">' + esc(b) + "</a>";
       }).join("") : "") +
@@ -23803,7 +24148,7 @@ function renderFindLookMode() {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "add", "gaps", "palettes", "looks", "icons", "brands", "find", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "wardrobe", "add", "gaps", "palettes", "looks", "icons", "brands", "brand", "find", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -23826,7 +24171,7 @@ var SECTIONS = {
   today: ["today"],
   closet: ["wardrobe", "add", "gaps", "looks", "watches", "calendar", "wearing"],
   ideas: ["studio", "icons", "palettes", "myinspo"],
-  find: ["find", "search", "brands", "sale", "shopwish"],
+  find: ["find", "search", "brands", "brand", "sale", "shopwish"],
   me: ["pinfo", "plocation", "pcloud"]
 };
 var sectionHome = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo" };
@@ -23870,6 +24215,7 @@ function switchTab(name, opts) {
   var prevTab = currentTab;
   pageScroll[currentTab] = window.scrollY || 0;
   currentTab = name;
+  if (typeof viewTrack === "function") viewTrack(name); /* build .38 (2.11): the universal back history */
   var sec = sectionOf(name);
   /* Remember where he came from when he steps INTO Profile, so
      the section's close (×) returns him to that page. */
@@ -23908,6 +24254,62 @@ function switchTab(name, opts) {
   if (name === "calendar" && typeof renderWeekPlan === "function") renderWeekPlan();
   persistTab();
 }
+/* ---------- Build .38 (2.11): the universal back ----------
+   One small chevron icon fixed in the top-left margin (no
+   label, no bar, no layout height — the user's refinement),
+   driven by an in-app view-history stack — NOT browser
+   history. switchTab is the single choke point for page
+   navigation and reports every move to viewTrack; the two
+   full-screen outfit layers push/pop themselves as views above
+   the page beneath, and this icon replaces their old text BACK
+   buttons. Tab switches count as navigation. When the stack is
+   empty (a fresh open on the landing view) the icon hides
+   rather than showing a dead button. The Profile × keeps its
+   own return-to-previous behaviour, untouched. */
+var viewHist = [];
+var viewCur = (typeof currentTab !== "undefined" && currentTab) || "today";
+var viewNavGuard = false;
+function syncViewBack() {
+  var btn = document.getElementById("view-back");
+  if (btn) btn.hidden = !viewHist.length;
+}
+function viewTrack(name) {
+  if (viewNavGuard || !name) return;
+  if (name !== viewCur) { viewHist.push(viewCur); viewCur = name; }
+  syncViewBack();
+}
+function viewPushLayer(kind) {
+  viewHist.push(viewCur);
+  viewCur = kind;
+  syncViewBack();
+}
+function viewPopLayer(kind) {
+  if (viewCur !== kind) return;
+  viewCur = viewHist.pop() || "today";
+  syncViewBack();
+}
+function viewBack() {
+  /* A modal sheet or the photo pop-out owns the screen while it
+     is open — it dismisses through its own close, never through
+     a page change behind it. */
+  var sheetOpen = false;
+  document.querySelectorAll('[id$="-sheet"]').forEach(function (s) { if (!s.hidden) sheetOpen = true; });
+  if (sheetOpen) return;
+  if (viewCur === "look") { closeLookLayer(); return; }
+  if (viewCur === "fw") { closeFwLayer(); return; }
+  if (!viewHist.length) return;
+  var target = viewHist.pop();
+  viewNavGuard = true;
+  viewCur = target;
+  switchTab(target);
+  viewNavGuard = false;
+  syncViewBack();
+}
+(function () {
+  var btn = document.getElementById("view-back");
+  if (btn) btn.addEventListener("click", viewBack);
+  syncViewBack();
+})();
 function navClick(e) {
   var tab = e.target.closest("[data-tab]");
   if (tab) {
@@ -24373,6 +24775,16 @@ var wornLog = store.get("wornLog", []);
 function recordWorn(entry) {
   var date = entry.date || localTodayISO();
   if (entry.lookId && wornLog.some(function (en) { return en.lookId === entry.lookId && en.date === date; })) return null;
+  /* Build .38 (2.5): piece credits arrive as mappedClosetPieces
+     {id, name} objects from some callers and bare ids from
+     others — normalize to id strings ONCE, here, and store them
+     on the log entry itself, so an un-mark later can roll back
+     exactly what this wear credited. (Before this, object-shaped
+     ids silently failed the closetItemById lookup and the
+     credit never landed at all.) */
+  var pids = (entry.pieceIds || []).map(function (p) {
+    return (p && typeof p === "object") ? p.id : p;
+  }).filter(function (p) { return !!p; });
   var e = {
     id: entry.id || ("worn-" + Date.now() + "-" + Math.floor(Math.random() * 1e6)),
     date: date,
@@ -24380,6 +24792,7 @@ function recordWorn(entry) {
     img: entry.img || "",
     pieces: entry.pieces || []
   };
+  if (pids.length) e.pieceIds = pids;
   if (entry.pieceDetails) e.pieceDetails = entry.pieceDetails;
   if (entry.selfie) e.selfie = true;
   if (entry.lookId) e.lookId = entry.lookId;
@@ -24391,20 +24804,55 @@ function recordWorn(entry) {
     var sv = savedLooks.filter(function (l) { return l.id === entry.lookId; })[0];
     if (sv) { sv.worn = true; sv.wornDate = date; }
   }
-  (entry.pieceIds || []).forEach(function (pid) {
+  pids.forEach(function (pid) {
     var it = closetItemById(pid);
     if (!it) return;
     it.wearCount = (it.wearCount || 0) + 1;
-    it.lastWorn = date;
-    it.laundry = false;
+    /* Build .38 (2.6): lastWorn never moves backwards, and a
+       past-dated wear never clears today's laundry state. */
+    if (!it.lastWorn || date > it.lastWorn) it.lastWorn = date;
+    if (date >= localTodayISO()) it.laundry = false;
     if (it.id.indexOf("seed-") === 0) saveEntryEdit("items", it);
   });
   return e;
 }
+/* Build .38 (2.5): roll back the piece credits of removed worn
+   entries — wearCount decremented per removed wear, lastWorn
+   recomputed from the wears still in the log (cleared when the
+   count is spent and no dated wear remains). Entries logged
+   before pieceIds were stored fall back to their piece names. */
+function rollbackWornCredits(removedEntries) {
+  var counts = {};
+  (removedEntries || []).forEach(function (en) {
+    var pids = (en.pieceIds && en.pieceIds.length) ? en.pieceIds : null;
+    if (!pids) {
+      pids = [];
+      (en.pieces || []).forEach(function (nm) {
+        var it = (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).filter(function (x) { return x.name === nm; })[0];
+        if (it) pids.push(it.id);
+      });
+    }
+    pids.forEach(function (pid) { counts[pid] = (counts[pid] || 0) + 1; });
+  });
+  Object.keys(counts).forEach(function (pid) {
+    var it = closetItemById(pid);
+    if (!it) return;
+    it.wearCount = Math.max(0, (it.wearCount || 0) - counts[pid]);
+    var latest = null;
+    wornLog.forEach(function (en) {
+      if ((en.pieceIds || []).indexOf(pid) !== -1 && (!latest || en.date > latest)) latest = en.date;
+    });
+    if (latest) it.lastWorn = latest;
+    else if (it.wearCount === 0) it.lastWorn = null;
+    if (it.id.indexOf("seed-") === 0) saveEntryEdit("items", it);
+  });
+}
 function removeWornForLook(lookId, date) {
-  var before = wornLog.length;
+  var removed = wornLog.filter(function (en) { return en.lookId === lookId && (!date || en.date === date); });
+  if (!removed.length) return;
   wornLog = wornLog.filter(function (en) { return !(en.lookId === lookId && (!date || en.date === date)); });
-  if (wornLog.length !== before) store.set("wornLog", wornLog);
+  store.set("wornLog", wornLog);
+  rollbackWornCredits(removed);
 }
 function addWornLog(entry) { recordWorn(entry); }
 /* Build .36: the hero's verdict buttons are icons now; their
@@ -24419,13 +24867,35 @@ function syncTodayVerdict() {
   if (like) like.setAttribute("aria-pressed", v === "like" ? "true" : "false");
   if (dislike) dislike.setAttribute("aria-pressed", v === "dislike" ? "true" : "false");
 }
+/* Build .38 (2.8): un-liking reverses a like completely — the
+   verdict clears (so the look is eligible again at once) and the
+   queued copy the like added comes back out. The saved copy
+   itself stays in My Looks, verdict-neutral, as the dislike-undo
+   precedent keeps entries. */
+function unlikeLookById(id) {
+  if (!id) return;
+  savedLooks.forEach(function (l) {
+    if (l.id === id && l.verdict === "like") { l.verdict = null; l.likedAt = null; }
+  });
+  queueLooks = queueLooks.filter(function (x) { return x.id !== id; });
+  saveQueue();
+  persistAll();
+  renderSaved();
+}
 function likeToday() {
   if (!todayLook) return;
   /* Most recently liked sits FIRST in My Looks, in the Queued
      state — the shared likeLook path. */
+  var likedId = todayLook.id;
   likeLook(todayLook);
   syncTodayVerdict();
-  toast("Liked \u2014 saved and queued in My Looks.");
+  /* Build .38 (2.8): the like toast carries Undo — one tap
+     restores the look to the rotation immediately. */
+  showUndoToast("Liked — saved to My Looks; it sits out for 14 days.", function () {
+    unlikeLookById(likedId);
+    if (todayLook && todayLook.id === likedId) { todayLook.verdict = null; todayLook.likedAt = null; syncTodayVerdict(); }
+    toast("Undone — that outfit is back in the rotation.");
+  });
 }
 function woreToday() {
   if (!todayLook) return;
@@ -24501,26 +24971,59 @@ function woreToday() {
 })();
 
 /* ---------- Worn log (22) ---------- */
+/* Build .38 (2.4): ONE merge for the two worn sources, shared by
+   both readers. A wear lives in the log AND as a worn flag on
+   the saved look (recordWorn writes both); merged naively, one
+   wear counts twice. A log entry registers under BOTH its
+   lookId|date key and its date|title key, duplicate log entries
+   for the same look + date collapse to the first, and a saved
+   look's synthetic entry is dropped when EITHER of its keys is
+   already registered — the old code cross-checked only the
+   lookId key, so a log entry with a missing or mismatched
+   lookId let the same wear through twice. iso = one date, or
+   null for every date. */
+function mergedWornEntries(iso) {
+  var entries = [], seen = {}, lookWorn = {};
+  wornLog.forEach(function (en) {
+    if (!en || !en.date) return;
+    if (iso && en.date !== iso) return;
+    if (en.lookId) {
+      var lk = "L|" + en.lookId + "|" + en.date;
+      if (lookWorn[lk]) return;
+      lookWorn[lk] = 1;
+    }
+    /* An entry for the same date + title + photograph as one
+       already kept is the same wear written twice (the log's
+       second pen — e.g. an import beside the recorded entry,
+       in either order) — it collapses too. A different
+       photograph never collapses: two looks can share a title,
+       they cannot share a photo and be two wears of it on
+       one day. */
+    var ti = "TI|" + en.date + "|" + en.title + "|" + (en.img || "");
+    if (seen[ti]) return;
+    seen[ti] = 1;
+    var k = en.id ? "id:" + en.id : "T|" + en.date + "|" + en.title;
+    if (seen[k]) return;
+    seen[k] = 1;
+    seen["T|" + en.date + "|" + en.title] = 1;
+    entries.push(en);
+  });
+  savedLooks.forEach(function (l) {
+    if (!l.worn || !l.wornDate) return;
+    if (iso && l.wornDate !== iso) return;
+    if (lookWorn["L|" + l.id + "|" + l.wornDate]) return;
+    if (seen["TI|" + l.wornDate + "|" + l.title + "|" + lookImg(l)]) return;
+    var k = "T|" + l.wornDate + "|" + l.title;
+    if (seen[k]) return;
+    seen[k] = 1;
+    entries.push({ date: l.wornDate, title: l.title, img: lookImg(l), pieces: [], lookId: l.id, synthetic: true });
+  });
+  return entries;
+}
 function renderWornLog() {
   var list = document.getElementById("worn-log-list");
   if (!list) return;
-  var entries = [], seen = {}, lookWorn = {};
-  wornLog.forEach(function (en) {
-    if (en && en.lookId && en.date) lookWorn[en.lookId + "|" + en.date] = 1;
-  });
-  wornLog.forEach(function (en) {
-    var k = en.id ? "id:" + en.id : en.date + "|" + en.title;
-    if (!seen[k]) { seen[k] = 1; entries.push(en); }
-  });
-  savedLooks.forEach(function (l) {
-    if (l.worn && l.wornDate) {
-      /* A look with a log entry renders from the log alone (build
-         .35) — the log entry is the one editable record. */
-      if (lookWorn[l.id + "|" + l.wornDate]) return;
-      var k = l.wornDate + "|" + l.title;
-      if (!seen[k]) { seen[k] = 1; entries.push({ date: l.wornDate, title: l.title, img: lookImg(l), pieces: [], lookId: l.id, synthetic: true }); }
-    }
-  });
+  var entries = mergedWornEntries(null);
   entries.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
   if (!entries.length) {
     list.innerHTML = '<p class="meta">Nothing worn yet \u2014 tap \u201cWore this today\u201d on Today, or Mark worn on a look.</p>';
@@ -24640,6 +25143,7 @@ function removeWornEdit() {
   if (!en) return;
   wornLog = wornLog.filter(function (x) { return x.id !== en.id; });
   store.set("wornLog", wornLog);
+  rollbackWornCredits([en]); /* build .38 (2.5): un-marking rolls the piece credits back too */
   if (en.lookId) {
     var sv = savedLooks.filter(function (l) { return l.id === en.lookId; })[0];
     if (sv && sv.worn) { sv.worn = false; sv.wornDate = null; persistAll(); }
@@ -24966,23 +25470,9 @@ function planMonday(offset) {
    history dedupes, newest first. The Calendar reads placement
    from here; the log itself is never altered. */
 function wornForDate(iso) {
-  var out = [], seen = {}, lookWorn = {};
-  wornLog.forEach(function (en) {
-    if (en && en.lookId && en.date) lookWorn[en.lookId + "|" + en.date] = 1;
-  });
-  wornLog.forEach(function (en) {
-    if (!en || en.date !== iso) return;
-    var k = en.id ? "id:" + en.id : en.date + "|" + en.title;
-    if (!seen[k]) { seen[k] = 1; out.push(en); }
-  });
-  savedLooks.forEach(function (l) {
-    if (l.worn && l.wornDate === iso) {
-      if (lookWorn[l.id + "|" + l.wornDate]) return;
-      var k = l.wornDate + "|" + l.title;
-      if (!seen[k]) { seen[k] = 1; out.push({ date: l.wornDate, title: l.title, img: lookImg(l), pieces: [] }); }
-    }
-  });
-  return out;
+  /* Build .38 (2.4): the same shared merge as the What I wore
+     list — one wear, one entry. */
+  return mergedWornEntries(iso);
 }
 function renderWeekPlan() {
   var grid = document.getElementById("week-plan-grid");
@@ -26126,6 +26616,7 @@ function openFwOutfit(idx) {
     '<button type="button" class="btn-ghost" data-fw-find="' + idx + '">Shop the look</button>' +
     '</div>' +
     '</article>';
+  if (layer.hidden && typeof viewPushLayer === "function") viewPushLayer("fw"); /* build .38 (2.11) */
   layer.hidden = false;
   layer.scrollTop = 0;
 }
@@ -26134,9 +26625,11 @@ function openFwOutfit(idx) {
 function closeFwLayer() {
   var layer = document.getElementById("fw-layer");
   var box = document.getElementById("fw-layer-body");
+  var wasOpen = !!(layer && !layer.hidden);
   if (layer) layer.hidden = true;
   if (box) box.innerHTML = "";
   if (fwLooksBackup) { fwLooks = fwLooksBackup; fwLooksBackup = null; }
+  if (wasOpen && typeof viewPopLayer === "function") viewPopLayer("fw"); /* build .38 (2.11) */
 }
 
 
