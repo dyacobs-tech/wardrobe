@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.23" />
+    <meta name="wardrobe-build" content="2026-11-16.24" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -3948,7 +3948,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.23";
+var WARDROBE_BUILD = "2026-11-16.24";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -16473,6 +16473,16 @@ function renderSaved() {
     var hay = [l.title, l.meta, l.notes, l.comment, (l.swatches || []).map(function (s) { return s.name + " " + (s.role || ""); }).join(" ")].join(" ").toLowerCase();
     return hay.indexOf(q) !== -1;
   });
+  /* My Looks displays alphabetically by title, A–Z, in every
+     filter view. Only this displayed copy is sorted — the
+     underlying savedLooks/SEED_LOOKS/queueLooks arrays keep
+     their order, so dealing, graduation, sync and persistence
+     are untouched. The pre-sort index is a stable tie-break so
+     equal titles keep a deterministic order. */
+  shown = shown.map(function (l, i) { return { look: l, i: i }; }).sort(function (a, b) {
+    var c = String(a.look.title || "").toLowerCase().localeCompare(String(b.look.title || "").toLowerCase());
+    return c !== 0 ? c : a.i - b.i;
+  }).map(function (x) { return x.look; });
   /* Photo honesty: a card shows its OWN look's photograph —
      always. If two saved looks share a photograph, the photo
      repeats; another outfit's photo is never substituted in.
