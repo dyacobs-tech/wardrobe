@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.50" />
+    <meta name="wardrobe-build" content="2026-11-17.51" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -240,7 +240,7 @@
       /* ---------- Studio ---------- */
       .studio-grid { display: grid; gap: 24px; }
       @media (min-width: 900px) { .studio-grid { max-width: 880px; } }
-      .studio-form { padding: 22px; display: grid; gap: 16px; }
+      .deal-controls { padding: 22px; display: grid; gap: 16px; }
       .form-row { display: grid; gap: 16px; }
       @media (min-width: 640px) { .form-row { grid-template-columns: 1fr 1fr; } }
       .examples { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -838,7 +838,7 @@
       .section-head h2 { font-size: clamp(22px, 4vw, 28px); }
       .add-form { padding: 14px 16px; gap: 10px; }
       .add-form h3 { font-size: 19px !important; }
-      .studio-form { padding: 14px 16px; gap: 12px; }
+      .deal-controls { padding: 14px 16px; gap: 12px; }
       .form-row { gap: 12px; }
       input[type="text"], input[type="search"], select, textarea { padding: 8px 10px; }
       .btn-ink, .btn-accent { min-height: 42px; padding: 10px 18px; }
@@ -942,7 +942,7 @@
          narrow gaps between every block, so a whole question fits
          on one phone screen with room to spare. Scoped to the
          Studio panel; every other page keeps its own sizing. */
-      #panel-studio .studio-form { padding: 10px 12px; gap: 8px; }
+      #panel-studio .deal-controls { padding: 10px 12px; gap: 8px; }
       #panel-studio .studio-grid { gap: 10px; }
       #panel-studio .choice-bar { gap: 6px; }
       #panel-studio .choice-chip { min-height: 28px; padding: 4px 10px; font-size: 11px; letter-spacing: .1em; }
@@ -1214,7 +1214,7 @@
       /* Studio Home — one-tap deal, wizard demoted to Customize */
       .studio-home-bar { display: flex; gap: 8px; margin-bottom: 10px; }
       .studio-home-bar .btn-accent { flex: 1; }
-      #panel-studio .studio-form { margin-bottom: 4px; }
+      #panel-studio .deal-controls { margin-bottom: 4px; }
 
       /* Formality chips — one tappable chip per level */
       .formality-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -1646,11 +1646,11 @@
       }
       /* One card — same border, radius, shadow and padding scale */
       .card { border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-card); }
-      .add-form, .studio-form, .loc-card, .data-card, .featured, .item-detail-card,
+      .add-form, .deal-controls, .loc-card, .data-card, .featured, .item-detail-card,
       .custom-card, .icon-card, .principles, .info-pop-card, .find-card,
       #panel-pinfo #profile-form, #panel-plocation #profile-form, #panel-pcloud #profile-form, #panel-pinfo .loc-card, #panel-plocation .loc-card, #panel-pcloud .loc-card, #panel-pinfo .data-card, #panel-plocation .data-card, #panel-pcloud .data-card,
       #panel-wardrobe .add-form, #panel-wardrobe .item-detail-card,
-      #panel-palettes .add-form, #panel-icons .add-form, #panel-studio .studio-form,
+      #panel-palettes .add-form, #panel-icons .add-form, #panel-studio .deal-controls,
       #panel-wearing .wearing-form, #panel-myinspo .myinspo-form,
       #panel-watches .add-form {
         padding: 14px 16px;
@@ -2641,7 +2641,7 @@
         margin: 14px 0 8px;
       }
       .fav-head:first-child { margin-top: 0; }
-      .add-form h3, .studio-form h3, .principles-head h3, .tools-toggle {
+      .add-form h3, .principles-head h3, .tools-toggle {
         font-family: var(--font-display) !important; font-size: 20px !important; font-weight: 600;
         line-height: 1.15; letter-spacing: 0; text-transform: none; color: var(--text);
       }
@@ -2681,7 +2681,7 @@
         font-size: 15px; font-weight: 600; line-height: 1.2; color: var(--text);
       }
       .wish-row, .worn-row, .piece-row { padding: 8px 10px; gap: 10px; }
-      .card, .add-form, .studio-form { border-radius: var(--radius); }
+      .card, .add-form { border-radius: var(--radius); }
       .add-form, #panel-add .add-form, #panel-wardrobe .add-form { padding: 12px 14px; gap: 10px; }
       /* Closet sub-pages — entry rows + back affordance, flush */
       .closet-entries { display: grid; gap: 8px; margin-top: 10px; }
@@ -2838,15 +2838,14 @@
       .analyze-item-actions { display: flex; gap: 8px; }
       .analyze-item-actions .btn-ink, .analyze-item-actions .btn-ghost { flex: 1; }
       #panel-analyze input[type="color"] { width: 40px; height: 34px; flex: none; }
-      /* Build .41 — Receipts inbox (Shop section line + confirm
-         sheet) and the two presentation fixes. */
-      .shop-receipts .receipts-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-      .shop-receipts .receipts-line span { font-size: 14px; }
-      .shop-receipts p { margin: 0; font-size: 14px; color: var(--dim); }
-      #shop-receipts .btn-ghost { min-height: 30px; padding: 4px 12px; font-size: 11px; flex: none; }
-      #receipts-list { display: grid; gap: 12px; }
-      #panel-receipts input[type="number"] { width: 100%; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 16px; padding: 10px 12px; }
-      #panel-receipts input[type="color"] { width: 40px; height: 34px; flex: none; }
+      /* Build .41 — Receipts inbox; build .51 — merged into
+         Purchased: the candidate cards render pinned at the top
+         of the Purchased list (see #purchased-receipts). */
+      #purchased-receipts { display: grid; gap: 12px; }
+      #purchased-receipts:empty { display: none; }
+      .purchased-pending-label { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); grid-column: 1 / -1; }
+      .receipt-item input[type="number"] { width: 100%; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 16px; padding: 10px 12px; }
+      .receipt-item input[type="color"] { width: 40px; height: 34px; flex: none; }
       .receipt-meta { margin: 0; font-size: 13px; color: var(--dim); }
       /* .41 Part B — bottom nav labels fit their tab at 390px:
          equal shares with min-width: 0, smaller type and tighter
@@ -2868,6 +2867,8 @@
       .shop-owned-row { display: flex; align-items: center; gap: 10px; border: 1px dashed var(--brass); border-radius: var(--radius); padding: 7px 10px; background: var(--surface); }
       .shop-owned-tag { display: block; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
       .shop-alt-note { margin: 0; font-size: 13px; color: var(--dim); font-style: italic; }
+      /* Build .51: the More / Fewer options toggle under a piece's matches */
+      .shop-more { width: 100%; min-height: 34px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
       /* ---------- Build .44 — proper desktop layout (≥1024px) ----------
          Build .42's stopgap — the whole app squeezed into a centered
          430px phone column — is REMOVED; the user rejected it ("the
@@ -2971,7 +2972,7 @@
         .sale-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
         .myinspo-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
         .custom-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        #receipts-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        #purchased-receipts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
         #analyze-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
         .item-card:hover, .saved-card:hover, .sale-card:hover, .board-card:hover, .option-card:hover { border-color: var(--border-strong); }
 
@@ -2982,7 +2983,7 @@
         #find-look-mode .shop-look-head img { grid-row: 1 / span 2; width: 300px; max-height: 380px; }
         #find-look-mode .shop-piece { border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-card); padding: 16px 18px; margin-top: 0; }
         #shop-purchased { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; }
-        #shop-purchased h3, #shop-purchased > p { grid-column: 1 / -1; }
+        #shop-purchased h3, #shop-purchased > p, #shop-purchased > #purchased-receipts { grid-column: 1 / -1; }
         #shopwish-list .wish-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; }
 
         /* ----- Calendar: the week at a glance, trips in columns ----- */
@@ -3168,11 +3169,12 @@
               <button type="button" data-source="combo" aria-pressed="true">Combo</button>
             </div>
             <!-- Build .50: the dress-level selector lives on the
-                 deal surface too, not only inside Customize. Same
-                 data-studio-type attributes, same one app-wide
-                 formality state — setFormality and the selector
-                 sync drive this row, the Customize row and the
-                 Today dropdown together. -->
+                 deal surface. Same data-studio-type attributes,
+                 same one app-wide formality state — setFormality
+                 and the selector sync drive this row and the Today
+                 dropdown together. (Build .51: this row is now the
+                 ONLY Outfit type selector; the Customize form's
+                 duplicate is deleted with the form.) -->
             <div class="ideas-type-row" id="ideas-type-row" role="group" aria-label="Outfit type">
               <span class="ideas-type-label">Outfit type</span>
               <button type="button" class="chip" data-studio-type-any aria-pressed="false">Any</button>
@@ -3186,7 +3188,6 @@
             </div>
             <div class="studio-home-bar">
               <button type="button" class="btn-accent" id="studio-deal">Give me ideas</button>
-              <button type="button" class="btn-ghost" id="studio-customize" aria-expanded="false" aria-controls="studio-form">Customize</button>
               <button type="button" class="btn-ghost" id="studio-build">Build a look</button>
             </div>
             
@@ -3197,9 +3198,45 @@
               <p class="form-note" id="brief-note" hidden></p>
               <button type="button" class="btn-accent" id="brief-deal">Deal from my words</button>
             </div>
-            <form class="card studio-form" id="studio-form" style="display:none">
-              <!-- Dress for + Outfit type live inside Customize now —
-                   the Ideas page opens on outfits, not furniture. -->
+            <!-- Build .51 — ONE deal surface. The hidden Customize
+                 form is deleted, not demoted: every control that
+                 steered a deal lives on this card, always visible,
+                 keeping the ids the engine reads (desc, season,
+                 occasion-text, style-direction, blend-direction,
+                 palette-source), so the brief flow, the Dress-for
+                 macros and the source / Outfit type sync behave
+                 exactly as before. Two form controls do not move:
+                 its duplicate Outfit type selector (the Outfit type
+                 row above is that control now — one formality
+                 state) and its Create button (Give me ideas above
+                 is the one deal path). -->
+            <div class="card deal-controls" id="deal-controls">
+              <div id="inspo-pick-field">
+                <div class="label-row"><label class="field">Icon direction</label><button type="button" class="info-btn sm" data-info-title="Inspo" data-info-text="Tap an icon and the look is built in their direction — their signature outfit, their colours, their shoe, their rules. Auto leaves it to the outfit itself." aria-label="About: inspo icons">i</button></div>
+                <div class="inspo-pick" id="inspo-pick" role="group" aria-label="Pick an icon to use as inspo"></div>
+              </div>
+              <!-- Your own inspo images live in Inspiration → My Inspo;
+                   the engine still builds from them exactly as before
+                   (buildImageLooks / activeInspoId), only the door moved. -->
+              <!-- One icon picker only: the chip row above. This
+                   hidden field carries the picker's value for the
+                   engine and the saved settings. -->
+              <input type="hidden" id="style-direction" name="style-direction" value="auto" />
+              <div class="direction-preview" id="direction-preview" aria-live="polite"></div>
+              <div>
+                <label class="field" for="blend-direction">Blend with — optional second icon</label>
+                <select id="blend-direction" name="blend-direction">
+                  <option value="">No blend — single direction</option>
+                </select>
+              </div>
+              <div>
+                <div class="label-row"><label class="field">Base the outfit on</label><button type="button" class="info-btn sm" id="basis-info" data-info-title="Base the outfit on" data-info-text="The icon leads. The palette brings only colour combinations that fit the icon's own world — it never recolours the icon's decisions." aria-label="About: base the outfit on">i</button></div>
+                <div class="basis-row" id="basis-row" role="group" aria-label="Base the outfit on">
+                  <button type="button" class="basis-btn" data-basis="icon" aria-pressed="false">Icon<small>Who you're dressing as</small></button>
+                  <button type="button" class="basis-btn" data-basis="palette" aria-pressed="false">Palette<small>Colour combinations lead</small></button>
+                  <button type="button" class="basis-btn" data-basis="both" aria-pressed="true">Both<small>Icon leads, palette supports</small></button>
+                </div>
+              </div>
               <div class="sel-stack">
               <div class="sel-block">
                 <button type="button" class="sel-row" id="dress-sel-toggle" aria-expanded="false" aria-controls="dress-for"><span class="sel-name">Dress for</span><span class="sel-val" id="dress-sel-val">Any</span><span class="sel-chev" aria-hidden="true">▾</span></button>
@@ -3213,36 +3250,8 @@
                   <button type="button" class="chip" data-dress="travel" aria-pressed="false">Travel</button>
                 </div>
               </div>
-              <div class="sel-block">
-                <button type="button" class="sel-row" id="type-sel-toggle" aria-expanded="false" aria-controls="studio-type-row"><span class="sel-name">Outfit type</span><span class="sel-val" id="type-sel-val">Smart Casual</span><span class="sel-chev" aria-hidden="true">▾</span></button>
-                <div class="sel-opts studio-type-row" id="studio-type-row" role="group" aria-label="Outfit type" hidden>
-                  <button type="button" data-studio-type-any aria-pressed="false">Any</button>
-                  <button type="button" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
-                  <button type="button" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
-                  <button type="button" data-studio-type="3" aria-pressed="false">Casual</button>
-                  <button type="button" data-studio-type="4" aria-pressed="false">Smart Casual</button>
-                  <button type="button" data-studio-type="5" aria-pressed="false">Business Casual</button>
-                  <button type="button" data-studio-type="6" aria-pressed="false">Formal</button>
-                  <button type="button" data-studio-type="7" aria-pressed="false">Black Tie</button>
-                </div>
-              </div>
-            </div>
-              <div>
-                <label class="field" for="desc">Outfit</label>
-                <textarea id="desc" name="desc" placeholder=""></textarea>
-              </div>
-              <div>
-                <div class="label-row"><label class="field">Base the outfit on</label><button type="button" class="info-btn sm" id="basis-info" data-info-title="Base the outfit on" data-info-text="The icon leads. The palette brings only colour combinations that fit the icon's own world — it never recolours the icon's decisions." aria-label="About: base the outfit on">i</button></div>
-                <div class="basis-row" id="basis-row" role="group" aria-label="Base the outfit on">
-                  <button type="button" class="basis-btn" data-basis="icon" aria-pressed="false">Icon<small>Who you're dressing as</small></button>
-                  <button type="button" class="basis-btn" data-basis="palette" aria-pressed="false">Palette<small>Colour combinations lead</small></button>
-                  <button type="button" class="basis-btn" data-basis="both" aria-pressed="true">Both<small>Icon leads, palette supports</small></button>
-                </div>
               </div>
               <div class="form-row">
-                <!-- Occasion is ONE control: the Dress-for chips
-                     plus the free-text line below. The duplicate
-                     Occasion select that lived here is gone. -->
                 <div>
                   <label class="field" for="season">Season</label>
                   <select id="season" name="season">
@@ -3253,41 +3262,21 @@
                     <option>Winter</option>
                   </select>
                 </div>
+                <div>
+                  <label class="field" for="palette-source">Palette — colour combinations, kept separate from the icon</label>
+                  <select id="palette-source" name="palette-source">
+                    <option value="auto">Auto</option>
+                  </select>
+                </div>
               </div>
-              <div id="inspo-pick-field">
-                <div class="label-row"><label class="field">Inspo — pick an icon to dress from</label><button type="button" class="info-btn sm" data-info-title="Inspo" data-info-text="Tap an icon and the look is built in their direction — their signature outfit, their colours, their shoe, their rules. Auto leaves it to the outfit itself." aria-label="About: inspo icons">i</button></div>
-                <div class="inspo-pick" id="inspo-pick" role="group" aria-label="Pick an icon to use as inspo"></div>
-              </div>
-              <!-- Your own inspo images live in Inspiration → My Inspo;
-                   the engine still builds from them exactly as before
-                   (buildImageLooks / activeInspoId), only the door moved. -->
-              <!-- One icon picker only: the thumbnail row above.
-                   The duplicate Style direction select is deleted;
-                   this hidden field simply carries the picker's
-                   value for the engine and the saved settings. -->
-              <input type="hidden" id="style-direction" name="style-direction" value="auto" />
-              <div>
-                <label class="field" for="blend-direction">Blend with — optional second icon</label>
-                <select id="blend-direction" name="blend-direction">
-                  <option value="">No blend — single direction</option>
-                </select>
-              </div>
-              <div class="direction-preview" id="direction-preview" aria-live="polite"></div>
               <div>
                 <label class="field" for="occasion-text">Occasion, in your words — optional</label>
                 <input type="text" id="occasion-text" placeholder="" autocomplete="off" />
               </div>
               <div>
-                <label class="field" for="palette-source">Palette — colour combinations, kept separate from the icon</label>
-                <select id="palette-source" name="palette-source">
-                  <option value="auto">Auto</option>
-                </select>
+                <label class="field" for="desc">Outfit</label>
+                <textarea id="desc" name="desc" placeholder=""></textarea>
               </div>
-              <!-- Build from lives in exactly two places — the
-                   Today row and the Ideas boxes, synced. The third
-                   copy that sat in this form is deleted. -->
-              <!-- Formality slider removed: one control only —
-                   Ideas' Outfit type selector drives the level. -->
               <div>
                 <div class="examples" id="examples">
                   <button type="button" class="chip" data-example="Crimson crew-neck knit with navy wool trousers and loafers">Crimson &amp; navy</button>
@@ -3306,10 +3295,7 @@
                 <div class="deal-progress-track"><div class="deal-progress-fill" id="deal-progress-fill"></div></div>
                 <p class="deal-progress-note" id="deal-progress-note">Pulling ideas from the book…</p>
               </div>
-              <div>
-                <button type="submit" class="btn-accent" id="style-btn">Give me ideas</button>
-              </div>
-            </form>
+            </div>
 
             <!-- No separate From wardrobe section (build .28):
                  the Wardrobe / Inspo / Combo toggle IS the source
@@ -3985,16 +3971,15 @@
           <div id="link-result"></div>
         </div>
         <div id="find-look-mode" hidden></div>
-        <div id="shop-receipts" class="shop-purchased shop-receipts"><h3>Receipts</h3><p>Turn on sync to import receipts from your order emails</p></div>
+        <!-- Build .51: no separate Receipts section — unconfirmed
+             receipt candidates pin on top of the Purchased list
+             below (renderPurchased), Confirm/Dismiss intact. -->
         <div id="shop-purchased" hidden></div>
         <p class="meta" id="find-nolook">Open a look and tap Shop the look — its pieces and matches land here.</p>
 
       </section>
-      <!-- ================= RECEIPTS — ORDER-EMAIL IMPORT (sub-page, build .41) ================= -->
-      <section id="panel-receipts" role="tabpanel" aria-label="Receipts" hidden>
-        <button type="button" class="btn-ghost subpage-back" id="receipts-back">← Shop</button>
-        <div id="receipts-list"></div>
-      </section>
+      <!-- Build .51: the Receipts sub-page is gone — its cards
+           live at the top of Purchased in Shop (above). -->
       <!-- ================= SEARCH — free-form briefs (own sub tab, build .28) ================= -->
       <section id="panel-search" role="tabpanel" aria-labelledby="tab-search" hidden>
         <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Search" data-info-text="Describe what you are after, pick a price tier — Affordable, Accessible, Luxury or Price insensitive — and keep the brief here with live search links in your size. Briefs from your closet gaps land here prefilled. Nothing is bought — you review and buy yourself." aria-label="About Search">i</button></div>
@@ -4807,7 +4792,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.50";
+var WARDROBE_BUILD = "2026-11-17.51";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -17668,7 +17653,10 @@ function runDealProgress(done) {
   var pct = document.getElementById("deal-progress-pct");
   var stage = document.getElementById("deal-progress-stage");
   var note = document.getElementById("deal-progress-note");
-  var styleBtn = document.getElementById("style-btn");
+  /* Build .51: the button disabled while a deal runs is the
+     surface's Give me ideas — the old form's Create button is
+     gone with the form. */
+  var styleBtn = document.getElementById("studio-deal");
   var dealerChip = dealerChipEl();
   var stages = [
     [0, "Shuffling the plates", "Pulling ideas from the book…"],
@@ -17914,8 +17902,8 @@ function doStyleFromForm() {
     }
     /* Wardrobe source deals the verified wardrobe renders and
        NOTHING else (build .50): every Wardrobe-mode deal —
-       source-seg tap, Give me ideas, Customize form submit,
-       typed brief, surprise — goes through dealWardrobeSix,
+       source-seg tap, Give me ideas, typed brief, surprise —
+       goes through dealWardrobeSix,
        whose looks all come from buildClosetLooks. If the closet
        cannot deal, the closet-too-thin toast shows and nothing
        is dealt; a pool take is never stamped "wardrobe" in its
@@ -17966,16 +17954,10 @@ function doStyleFromForm() {
     }
   }
 }
-document.getElementById("studio-form").addEventListener("submit", function (e) {
-  e.preventDefault();
-  if (dealing) return;
-  var desc = document.getElementById("desc").value.trim();
-  var isDealer = /dealer|surprise/i.test(desc) ||
-    (!desc && !currentOccasion() && !document.getElementById("season").value &&
-     document.getElementById("palette-source").value === "auto");
-  if (isDealer) runDealProgress(doStyleFromForm);
-  else doStyleFromForm();
-});
+/* Build .51: the Customize form and its submit handler are
+   gone. There is exactly ONE deal path in Ideas — Give me ideas
+   on the deal surface (wired in studioHome below), running this
+   same dealer check into doStyleFromForm. */
 document.getElementById("examples").addEventListener("click", function (e) {
   var closetBtn = e.target.closest("[data-closet]");
   if (closetBtn) {
@@ -21866,9 +21848,9 @@ function parseOccasionText(t) {
    Inspo: outside the wardrobe entirely — the brief as written.
    Combo (default): anchored in a piece you own, completed with
    inspo pieces to buy that look good with it. */
-/* One source-mode setting for the whole app: Today, Ideas and
-   Customize are three views onto this single value, stored
-   under one key — Only my wardrobe / Only inspo / Combo. */
+/* One source-mode setting for the whole app: Today and Ideas
+   are two views onto this single value, stored under one key —
+   Only my wardrobe / Only inspo / Combo. */
 var studioSource = store.get("todaySource", null);
 if (["wardrobe", "inspo", "combo"].indexOf(studioSource) === -1) studioSource = "combo";
 var closetOnly = false;
@@ -21888,9 +21870,8 @@ function setSource(s) {
   var infoBtn = document.getElementById("source-info");
   if (infoBtn) infoBtn.setAttribute("data-info-text", SOURCE_NOTES[s]);
 }
-/* The Customize form's own Build-from row is deleted — two
-   synced controls remain (Today's row, the Ideas boxes), each
-   with its own listener. */
+/* Build-from lives in exactly two synced controls — Today's
+   row and the Ideas boxes — each with its own listener. */
 setSource(studioSource);
 var CLOSET_GARMENT = { "Sweaters": "knit", "Polos": "polo", "Shirts": "shirt", "Button downs": "shirt", "Tees": "tee", "Trousers": "trousers", "Jeans": "jeans", "Shorts": "shorts", "Bathing suits": "swim trunks", "Blazers": "blazer", "Jackets": "jacket", "Coats": "coat", "Leather jackets": "leather jacket", "Suits": "blazer", "Shoes": "loafers", "Gloves": "gloves", "Vests": "vest", "Ties": "tie", "Scarves": "scarf", "Hats": "hat", "Sunglasses": "sunglasses", "Belts": "belt", "Socks": "socks" };
 function closetDescription() {
@@ -21985,99 +21966,10 @@ function shareLookImage(look) {
   img.src = lookImg(look);
 }
 
-/* ================= Studio — one question at a time =================
-   The form's fields are gathered into five steps and shown one at a
-   time: the outfit, what leads (the basis AND the build-from source
-   together, so both steering choices sit on one screen), occasion &
-   season, direction, then palette and Create. No wall of boxes. A
-   choices bar above the steps names the current choices and jumps
-   straight to the question that holds each one. */
-(function studioSteps() {
-  var form = document.getElementById("studio-form");
-  if (!form) return;
-  function F(el) {
-    if (!el) return null;
-    return el.parentNode === form ? el : el.parentElement;
-  }
-  function field(id) { return F(document.getElementById(id)); }
-  var groups = [
-    { title: "The outfit", els: [field("desc"), document.getElementById("examples")] },
-    { title: "What leads", els: [field("basis-row"), field("source-row")] },
-    { title: "Occasion & season", els: [form.querySelector(".form-row"), field("occasion-text")] },
-    { title: "Direction", els: [document.getElementById("inspo-pick-field"), field("style-direction"), field("blend-direction"), document.getElementById("direction-preview")] },
-    { title: "Palette — and create", els: [field("palette-source"), document.getElementById("deal-progress"), field("style-btn")] }
-  ];
-  var steps = groups.map(function (g, i) {
-    var sec = document.createElement("div");
-    sec.className = "studio-step";
-    sec.innerHTML = '<div class="studio-step-head"><h3>' + g.title + '</h3><span class="step-count">Question ' + (i + 1) + " of " + groups.length + "</span></div>";
-    g.els.forEach(function (el) { if (el && el.parentNode) sec.appendChild(el); });
-    form.appendChild(sec);
-    return sec;
-  });
-  var nav = document.createElement("div");
-  nav.className = "studio-nav";
-  nav.innerHTML = '<button type="button" class="btn-ghost" id="step-back">Back</button><button type="button" class="btn-ink" id="step-next">Next</button>';
-  form.appendChild(nav);
-  var idx = 0;
-  function show(i) {
-    idx = Math.max(0, Math.min(steps.length - 1, i));
-    steps.forEach(function (s, j) { s.hidden = j !== idx; });
-    document.getElementById("step-back").style.visibility = idx === 0 ? "hidden" : "visible";
-    document.getElementById("step-next").style.visibility = idx === steps.length - 1 ? "hidden" : "visible";
-  }
-  document.getElementById("step-back").addEventListener("click", function () { show(idx - 1); });
-  document.getElementById("step-next").addEventListener("click", function () { show(idx + 1); });
-  window.studioGoTo = show;
-  show(0);
-})();
-
-/* ================= Studio — your choices, always in reach =================
-   The three choices that steer every look — what leads (Icon,
-   Palette or Both), where the outfit comes from (My wardrobe,
-   Inspo or Combo) and who the direction is — live in a bar pinned
-   to the top of the form, above the steps, so they are visible and
-   changeable from any question instead of hiding on a later page.
-   Each chip names the current choice; tapping one jumps straight
-   to the question that holds it. The bar re-reads the choices
-   whenever they change, whichever control changed them. */
-(function studioChoices() {
-  var form = document.getElementById("studio-form");
-  if (!form || typeof window.studioGoTo !== "function") return;
-  var bar = document.createElement("div");
-  bar.className = "choice-bar";
-  bar.setAttribute("role", "group");
-  bar.setAttribute("aria-label", "Your Studio choices — tap one to change it");
-  bar.innerHTML =
-    '<button type="button" class="choice-chip" id="choice-basis">Leads <strong></strong></button>' +
-    '<button type="button" class="choice-chip" id="choice-source">Source <strong></strong></button>' +
-    '<button type="button" class="choice-chip" id="choice-direction">Direction <strong></strong></button>';
-  form.insertBefore(bar, form.firstChild);
-  var BASIS_LABEL = { icon: "Icon", palette: "Palette", both: "Both" };
-  var SOURCE_LABEL = { wardrobe: "Wardrobe", inspo: "Inspo", combo: "Combo" };
-  function directionLabel() {
-    var sel = document.getElementById("style-direction");
-    if (!sel || sel.value === "auto") return "Auto";
-    var ic = typeof iconById === "function" ? iconById(sel.value) : null;
-    return ic ? ic.name : sel.value;
-  }
-  function sync() {
-    bar.querySelector("#choice-basis strong").textContent = BASIS_LABEL[studioBasis] || "Both";
-    bar.querySelector("#choice-source strong").textContent = SOURCE_LABEL[studioSource] || "Combo";
-    bar.querySelector("#choice-direction strong").textContent = directionLabel();
-  }
-  var prevBasis = window.setBasis, prevSource = window.setSource;
-  if (typeof prevBasis === "function") window.setBasis = function (b) { prevBasis(b); sync(); };
-  if (typeof prevSource === "function") window.setSource = function (s) { prevSource(s); sync(); };
-  var dirSel = document.getElementById("style-direction");
-  if (dirSel) dirSel.addEventListener("change", sync);
-  var pick = document.getElementById("inspo-pick");
-  if (pick) pick.addEventListener("click", function () { setTimeout(sync, 0); });
-  document.getElementById("choice-basis").addEventListener("click", function () { window.studioGoTo(1); });
-  document.getElementById("choice-source").addEventListener("click", function () { window.studioGoTo(1); });
-  document.getElementById("choice-direction").addEventListener("click", function () { window.studioGoTo(3); });
-  sync();
-})();
+/* Build .51: the Studio step wizard and its choice bar are
+   deleted with the Customize form they paged through. The
+   deal surface shows every control at once; nothing here
+   needs steps, a choices bar or a go-to. */
 
 /* ================= Today — Outfit of the Day =================
    The opening page: one look, and it ROTATES on every fresh app
@@ -25171,6 +25063,11 @@ function savePieceState(look, idx, st) {
   shopPieceState[shopLookKey(look) + "|" + idx] = st;
   try { store.set("shopPieceState", shopPieceState); } catch (e) {}
 }
+/* Build .51: which pieces show their full alternatives list.
+   In-memory only — a piece section opens on its ONE selected
+   match, and "More options" expands it in place; the expansion
+   is throwaway view state, never stored or synced. */
+var shopExpandedPieces = {};
 function setPieceTier(idx, key) {
   if (!findLookMode || !SHOP_TIERS.some(function (t) { return t.key === key; })) return;
   var d = shopModeData[idx];
@@ -25377,13 +25274,42 @@ function refreshShopBuyButtons() {
     b.textContent = bought ? "Purchased — un-mark" : "Mark purchased";
   });
 }
+var purchasedReceiptsSig = null;
+var purchasedListSig = null;
 function renderPurchased() {
   var box = document.getElementById("shop-purchased");
   if (!box) return;
-  if (!shopPurchases.length) { box.hidden = true; box.innerHTML = ""; return; }
+  /* Build .51: Purchased is the single home for receipts too.
+     Unconfirmed receipt candidates pin ON TOP of this list with
+     their editable Confirm/Dismiss cards intact (receiptCardHTML
+     — the build .41 sheet's cards, moved); confirmed purchases
+     follow below, exactly as before. Presentation merge only:
+     the receipts sync collection, confirm-files-into-Closet,
+     dismiss stamping and the order-number + name dedupe are
+     unchanged underneath. */
+  var pending = receiptPendingVisible().slice().sort(function (a, b) {
+    var d = String(b.orderDate || "").localeCompare(String(a.orderDate || ""));
+    if (d) return d;
+    return (b.importedAt || 0) - (a.importedAt || 0);
+  });
+  if (!shopPurchases.length && !pending.length) {
+    box.hidden = true; box.innerHTML = "";
+    purchasedReceiptsSig = null; purchasedListSig = null;
+    return;
+  }
   box.hidden = false;
   box.className = "shop-purchased";
-  var html = "<h3>Purchased</h3>";
+  /* Same discipline as the old receipts sheet: a background sync
+     render must never rebuild the list mid-edit — only re-render
+     when the pending set or the purchases actually changed. */
+  var rSig = pending.map(function (r) { return r.id + ":" + r.status; }).join("|");
+  var pSig = shopPurchases.map(function (p) { return p.key; }).join("|");
+  if (box.innerHTML && rSig === purchasedReceiptsSig && pSig === purchasedListSig) return;
+  purchasedReceiptsSig = rSig; purchasedListSig = pSig;
+  var html = "<h3>Purchased</h3>" +
+    '<div id="purchased-receipts">' +
+    (pending.length ? '<p class="purchased-pending-label">Receipts waiting to confirm</p>' + pending.map(receiptCardHTML).join("") : "") +
+    "</div>";
   /* Purchased lists by type, then name A–Z (build .28) — a
      display copy; the stored order is untouched. */
   var shownPurchases = shopPurchases.slice().sort(function (a, b) {
@@ -25469,6 +25395,17 @@ function unmarkShopPurchased(key) {
 (function wirePurchased() {
   var pbox = document.getElementById("shop-purchased");
   if (pbox) pbox.addEventListener("click", function (e) {
+    /* Build .51: receipt Confirm/Dismiss are delegated here now
+       that the candidate cards render inside this list — the
+       same receiptConfirm / receiptDismiss the sheet ran. */
+    var add = e.target.closest ? e.target.closest("[data-receipt-add]") : null;
+    var dis = e.target.closest ? e.target.closest("[data-receipt-dismiss]") : null;
+    if (add || dis) {
+      var card = (add || dis).closest("[data-receipt-id]");
+      var rec = card ? receiptById(card.getAttribute("data-receipt-id")) : null;
+      if (rec) { if (add) receiptConfirm(card, rec); else receiptDismiss(rec); }
+      return;
+    }
     var b = e.target.closest ? e.target.closest("[data-unmark-purchase]") : null;
     if (b) unmarkShopPurchased(b.getAttribute("data-unmark-purchase"));
   });
@@ -25477,14 +25414,16 @@ function unmarkShopPurchased(key) {
 
 /* ================= Build .41 — Receipts inbox =================
    Parsed order-email line items arrive through sync as the
-   "receipts" collection (receiptInbox). The Shop landing carries
-   a slim Receipts line above Purchased; Review opens the confirm
-   sheet (panel-receipts), one editable card per pending record.
-   Confirming files the piece into the Closet and records it in
-   Purchased, exactly like a Shop the look purchase, and stamps
-   the receipt record confirmed; Dismiss marks it dismissed.
-   Nothing files without a tap, and no photo is ever invented —
-   a card shows the order email's image only when it carried one. */
+   "receipts" collection (receiptInbox). Build .51: there is no
+   separate Receipts section or review sheet — pending records
+   render as editable cards pinned on top of Purchased in Shop
+   (renderPurchased), and Confirm/Dismiss are delegated from
+   that list (wirePurchased). Confirming files the piece into
+   the Closet and records it in Purchased, exactly like a Shop
+   the look purchase, and stamps the receipt record confirmed;
+   Dismiss marks it dismissed. Nothing files without a tap, and
+   no photo is ever invented — a card shows the order email's
+   image only when it carried one. */
 function receiptById(id) {
   for (var i = 0; i < receiptInbox.length; i++) if (receiptInbox[i] && receiptInbox[i].id === id) return receiptInbox[i];
   return null;
@@ -25511,25 +25450,13 @@ function receiptAlreadyFiled(rec) {
 function receiptPendingVisible() {
   return receiptInbox.filter(function (r) { return r && r.status === "pending" && !receiptAlreadyFiled(r); });
 }
-function receiptHasSyncKey() {
-  try { return !!(typeof SY !== "undefined" && SY && SY.key); } catch (e) { return false; }
-}
-function renderReceiptsSection() {
-  var box = document.getElementById("shop-receipts");
-  if (!box) return;
-  box.className = "shop-purchased shop-receipts";
-  var n = receiptPendingVisible().length;
-  var html = "<h3>Receipts</h3>";
-  if (n > 0) {
-    html += '<div class="receipts-line"><span>' + n + (n === 1 ? " receipt waiting" : " receipts waiting") + '</span>' +
-      '<button type="button" class="btn-ghost" data-receipts-review>Review</button></div>';
-  } else if (receiptHasSyncKey()) {
-    html += "<p>No receipts waiting</p>";
-  } else {
-    html += "<p>Turn on sync to import receipts from your order emails</p>";
-  }
-  box.innerHTML = html;
-}
+/* Build .51: the separate Receipts section and its review sheet
+   are gone. renderReceiptsSection and renderReceipts survive as
+   names only — sync, tab and render-all code call them — and
+   both now render the one merged Purchased list, where the
+   unconfirmed candidates live pinned on top. */
+function renderReceiptsSection() { renderPurchased(); }
+function renderReceipts() { renderPurchased(); }
 function receiptDefaultHex(name) {
   var n = String(name || "").trim().toLowerCase();
   if (n) {
@@ -25552,49 +25479,37 @@ function receiptsCatOptions(selected) {
   }
   return out;
 }
-var receiptsSheetSig = null;
-function renderReceipts() {
-  var list = document.getElementById("receipts-list");
-  if (!list) return;
-  /* Same discipline as the analyze sheet: a background sync
-     render must never rebuild the sheet mid-edit — only re-render
-     when the set of pending cards actually changed. */
-  var pending = receiptPendingVisible().slice().sort(function (a, b) {
-    var d = String(b.orderDate || "").localeCompare(String(a.orderDate || ""));
-    if (d) return d;
-    return (b.importedAt || 0) - (a.importedAt || 0);
-  });
-  var sig = pending.map(function (r) { return r.id + ":" + r.status; }).join("|");
-  if (sig === receiptsSheetSig && list.innerHTML) return;
-  receiptsSheetSig = sig;
-  if (!pending.length) { list.innerHTML = '<div class="card empty">No receipts waiting</div>'; return; }
-  list.innerHTML = pending.map(function (rec) {
-    var fid = "rc-" + String(rec.id).replace(/[^a-zA-Z0-9_-]/g, "-");
-    var hex = /^#[0-9a-f]{6}$/i.test(rec.colourHex || "") ? rec.colourHex : receiptDefaultHex(rec.colourName);
-    var metaParts = [];
-    if (rec.retailer) metaParts.push(rec.retailer);
-    if (rec.orderDate) metaParts.push(fmtDateShort(rec.orderDate));
-    if (rec.orderNo) metaParts.push("Order " + rec.orderNo);
-    return '<article class="card add-form receipt-item" data-receipt-id="' + esc(rec.id) + '">' +
-      (rec.img ? '<img class="analyze-item-photo" src="' + esc(rec.img) + '" alt="Photograph of ' + esc(rec.name || "") + '" loading="lazy" decoding="async" />' : "") +
-      '<div><label class="field" for="' + fid + '-name">Name</label>' +
-      '<input type="text" id="' + fid + '-name" data-rc-f="name" value="' + esc(rec.name || "") + '" /></div>' +
-      '<div><label class="field" for="' + fid + '-cat">Category</label>' +
-      '<select id="' + fid + '-cat" data-rc-f="category">' + receiptsCatOptions(rec.category || "") + "</select></div>" +
-      '<div><label class="field" for="' + fid + '-colour">Colour</label>' +
-      '<div style="display:flex;gap:10px;align-items:center">' +
-      '<input type="text" id="' + fid + '-colour" data-rc-f="colourName" value="' + esc(rec.colourName || "") + '" style="flex:1" />' +
-      '<input type="color" data-rc-f="colourHex" value="' + esc(hex) + '" aria-label="Pick the colour" /></div></div>' +
-      '<div><label class="field" for="' + fid + '-brand">Brand</label>' +
-      '<input type="text" id="' + fid + '-brand" data-rc-f="brand" value="' + esc(rec.brand || "") + '" /></div>' +
-      '<div><label class="field" for="' + fid + '-price">Price</label>' +
-      '<input type="number" id="' + fid + '-price" data-rc-f="price" min="0" step="any" value="' + (typeof rec.price === "number" ? rec.price : "") + '" /></div>' +
-      (metaParts.length ? '<p class="receipt-meta">' + esc(metaParts.join(" · ")) + "</p>" : "") +
-      '<div class="analyze-item-actions">' +
-      '<button type="button" class="btn-ink" data-receipt-add>Add to closet</button>' +
-      '<button type="button" class="btn-ghost" data-receipt-dismiss>Dismiss</button>' +
-      "</div></article>";
-  }).join("");
+/* One receipt candidate's card — the build .41 sheet's editable
+   card verbatim (name / category / colour / brand / price, then
+   Add to closet = Confirm and Dismiss). Build .51 renders it at
+   the top of the Purchased list instead of on a separate sheet;
+   receiptConfirm reads its fields exactly as before. */
+function receiptCardHTML(rec) {
+  var fid = "rc-" + String(rec.id).replace(/[^a-zA-Z0-9_-]/g, "-");
+  var hex = /^#[0-9a-f]{6}$/i.test(rec.colourHex || "") ? rec.colourHex : receiptDefaultHex(rec.colourName);
+  var metaParts = [];
+  if (rec.retailer) metaParts.push(rec.retailer);
+  if (rec.orderDate) metaParts.push(fmtDateShort(rec.orderDate));
+  if (rec.orderNo) metaParts.push("Order " + rec.orderNo);
+  return '<article class="card add-form receipt-item" data-receipt-id="' + esc(rec.id) + '">' +
+    (rec.img ? '<img class="analyze-item-photo" src="' + esc(rec.img) + '" alt="Photograph of ' + esc(rec.name || "") + '" loading="lazy" decoding="async" />' : "") +
+    '<div><label class="field" for="' + fid + '-name">Name</label>' +
+    '<input type="text" id="' + fid + '-name" data-rc-f="name" value="' + esc(rec.name || "") + '" /></div>' +
+    '<div><label class="field" for="' + fid + '-cat">Category</label>' +
+    '<select id="' + fid + '-cat" data-rc-f="category">' + receiptsCatOptions(rec.category || "") + "</select></div>" +
+    '<div><label class="field" for="' + fid + '-colour">Colour</label>' +
+    '<div style="display:flex;gap:10px;align-items:center">' +
+    '<input type="text" id="' + fid + '-colour" data-rc-f="colourName" value="' + esc(rec.colourName || "") + '" style="flex:1" />' +
+    '<input type="color" data-rc-f="colourHex" value="' + esc(hex) + '" aria-label="Pick the colour" /></div></div>' +
+    '<div><label class="field" for="' + fid + '-brand">Brand</label>' +
+    '<input type="text" id="' + fid + '-brand" data-rc-f="brand" value="' + esc(rec.brand || "") + '" /></div>' +
+    '<div><label class="field" for="' + fid + '-price">Price</label>' +
+    '<input type="number" id="' + fid + '-price" data-rc-f="price" min="0" step="any" value="' + (typeof rec.price === "number" ? rec.price : "") + '" /></div>' +
+    (metaParts.length ? '<p class="receipt-meta">' + esc(metaParts.join(" · ")) + "</p>" : "") +
+    '<div class="analyze-item-actions">' +
+    '<button type="button" class="btn-ink" data-receipt-add>Add to closet</button>' +
+    '<button type="button" class="btn-ghost" data-receipt-dismiss>Dismiss</button>' +
+    "</div></article>";
 }
 function receiptConfirm(card, rec) {
   function field(f) { var el = card.querySelector('[data-rc-f="' + f + '"]'); return el ? el.value : ""; }
@@ -25661,27 +25576,10 @@ function receiptDismiss(rec) {
   renderReceiptsSection();
 }
 (function receiptsWire() {
-  var list = document.getElementById("receipts-list");
-  if (list) list.addEventListener("click", function (e) {
-    var add = e.target.closest ? e.target.closest("[data-receipt-add]") : null;
-    var dis = e.target.closest ? e.target.closest("[data-receipt-dismiss]") : null;
-    var btn = add || dis;
-    if (!btn) return;
-    var card = btn.closest("[data-receipt-id]");
-    if (!card) return;
-    var rec = receiptById(card.getAttribute("data-receipt-id"));
-    if (!rec) return;
-    if (add) receiptConfirm(card, rec); else receiptDismiss(rec);
-  });
-  var sec = document.getElementById("shop-receipts");
-  if (sec) sec.addEventListener("click", function (e) {
-    if (e.target.closest && e.target.closest("[data-receipts-review]")) switchTab("receipts");
-  });
-  var back = document.getElementById("receipts-back");
-  if (back) back.addEventListener("click", function () { switchTab("find"); });
+  /* Build .51: the sheet, its Review door and its back button are
+     gone — Confirm/Dismiss delegation lives in wirePurchased.
+     Only the first render of the merged list remains here. */
   renderReceiptsSection();
-  /* SY is initialized later in the script; re-render once the
-     whole script has run so the sync-key line reads correctly. */
   setTimeout(function () { renderReceiptsSection(); }, 0);
 })();
 
@@ -26119,14 +26017,31 @@ function updateSaleRail() {
    carrying the actions. No honest match anywhere keeps the
    plain empty state. (Build .47: the owned-first
    lead row was removed at the user's request — Shop the look
-   shows only what is available to purchase.) */
+   shows only what is available to purchase.)
+   Build .51 — slim default: the section opens on the ONE
+   selected alternative's card, nothing else. "More options"
+   expands in place to the full alternatives view below (every
+   band's best match, Select / Mark purchased / Wishlist
+   untouched); "Fewer options" collapses back to the one card. */
 function shopMatchesHTML(d, idx) {
   if (!d.alts.length) return '<p class="shop-nomatch">No exact match yet in the catalogue</p>';
   var html = "";
   if (d.tierKey !== "insensitive" && !d.alts.some(function (e) { return (e.tier || "insensitive") === d.tierKey; })) {
     html += '<p class="shop-alt-note">Nothing at ' + esc(shopTierInfo(d.tierKey).name) + " for this piece — the other prices:</p>";
   }
+  var expKey = shopLookKey(findLookMode) + "|" + idx;
+  if (d.alts.length > 1 && !shopExpandedPieces[expKey]) {
+    var sel = null;
+    d.alts.forEach(function (e) { if (shopEntryKey(e) === d.selKey) sel = e; });
+    if (!sel) sel = d.alts[0];
+    html += shopAltRowHTML(sel, d.pc, idx, true);
+    html += '<button type="button" class="btn-ghost shop-more" data-more-options="' + idx + '" aria-expanded="false">More options</button>';
+    return html;
+  }
   html += d.alts.map(function (e) { return shopAltRowHTML(e, d.pc, idx, shopEntryKey(e) === d.selKey); }).join("");
+  if (d.alts.length > 1) {
+    html += '<button type="button" class="btn-ghost shop-more" data-more-options="' + idx + '" aria-expanded="true">Fewer options</button>';
+  }
   return html;
 }
 var shopModeData = [];
@@ -26215,6 +26130,14 @@ function renderFindLookMode() {
   if (!box) return;
   box.addEventListener("click", function (e) {
     if (e.target.closest && e.target.closest("#shop-clear-look")) { clearFindLookMode(); return; }
+    var mo = e.target.closest ? e.target.closest("[data-more-options]") : null;
+    if (mo) {
+      var mIdx = parseInt(mo.getAttribute("data-more-options"), 10);
+      var mKey = shopLookKey(findLookMode) + "|" + mIdx;
+      shopExpandedPieces[mKey] = !shopExpandedPieces[mKey];
+      renderFindLookMode();
+      return;
+    }
     var sb = e.target.closest ? e.target.closest("[data-piece-select]") : null;
     if (sb) { setPieceSelection(parseInt(sb.getAttribute("data-piece-select"), 10), sb.getAttribute("data-sel-key")); return; }
     var mb = e.target.closest ? e.target.closest("[data-mark-purchase]") : null;
@@ -26269,7 +26192,7 @@ function renderFindLookMode() {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -26294,7 +26217,7 @@ var SECTIONS = {
   closet: ["wardrobe", "add", "gaps", "analyze", "looks", "watches", "wearing"],
   calendar: ["calendar"],
   ideas: ["studio", "outfitideas", "icons", "emulate", "palettes", "myinspo"],
-  find: ["find", "receipts", "search", "brands", "brand", "sale", "shopwish"],
+  find: ["find", "search", "brands", "brand", "sale", "shopwish"],
   me: ["pinfo", "plocation", "pcloud"]
 };
 var sectionHome = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo", calendar: "calendar" };
@@ -26377,7 +26300,6 @@ function switchTab(name, opts) {
   if (name === "search" && typeof renderFinds === "function") renderFinds();
   if (name === "gaps" && typeof renderWishlist === "function") renderWishlist();
   if (name === "analyze" && typeof renderAnalyzeSheet === "function") renderAnalyzeSheet();
-  if (name === "receipts" && typeof renderReceipts === "function") renderReceipts();
   if (name === "emulate" && typeof renderEmulate === "function") renderEmulate();
   if (name === "find" && typeof renderReceiptsSection === "function") renderReceiptsSection();
   if ((name === "wardrobe" || name === "add") && typeof analyzeRefreshUI === "function") analyzeRefreshUI();
@@ -26776,7 +26698,7 @@ document.addEventListener("click", function (e) {
   }
 });
 
-/* ---------- Studio Home — Deal me a look + Customize (1) ---------- */
+/* ---------- Studio Home — the one deal surface (1) ---------- */
 var STUDIO_FIELDS = ["desc", "season", "occasion-text", "style-direction", "blend-direction", "palette-source"];
 var dressForKey = "";
 function saveStudioSettings() {
@@ -26798,20 +26720,16 @@ function restoreStudioSettings() {
   if (typeof renderDirectionPreview === "function") renderDirectionPreview();
 }
 (function studioHome() {
-  var form = document.getElementById("studio-form");
+  /* Build .51: settings persistence now listens on the deal
+     surface card — the same change/input pair the Customize form
+     carried, so edits save exactly as before. The Customize
+     toggle is gone with the form: the surface is always open. */
+  var surface = document.getElementById("deal-controls");
   var deal = document.getElementById("studio-deal");
-  var cust = document.getElementById("studio-customize");
-  if (form) {
-    form.addEventListener("change", saveStudioSettings);
-    form.addEventListener("input", saveStudioSettings);
+  if (surface) {
+    surface.addEventListener("change", saveStudioSettings);
+    surface.addEventListener("input", saveStudioSettings);
   }
-  if (cust && form) cust.addEventListener("click", function () {
-    var open = form.style.display === "none";
-    form.style.display = open ? "" : "none";
-    cust.setAttribute("aria-expanded", open ? "true" : "false");
-    cust.textContent = open ? "Hide customize" : "Customize";
-    if (open) form.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  });
   if (deal) deal.addEventListener("click", function () {
     saveStudioSettings();
     var desc = document.getElementById("desc").value.trim();
@@ -28338,28 +28256,21 @@ var _origRenderFormality = window.renderFormality;
 if (typeof _origRenderFormality === "function") {
   window.renderFormality = function () { _origRenderFormality(); syncStudioType(); };
 }
-var studioTypeRow = document.getElementById("studio-type-row");
-if (studioTypeRow) studioTypeRow.addEventListener("click", function (e) {
-  var b = e.target.closest ? e.target.closest("[data-studio-type]") : null;
-  if (!b) return;
-  setFormality(parseInt(b.getAttribute("data-studio-type"), 10));
-});
 syncStudioType();
 
-/* ---------- Studio Ideas — slim closed selectors ----------
-   Dress-for and Outfit type live behind two slim rows under the
-   primary button. A tap opens that row's options beneath it (the
-   other row closes); a pick applies silently and closes the row —
-   the row's label is the only feedback. The underlying behaviour is
-   unchanged: Dress-for still drives applyDressFor (occasion +
-   formality), Outfit type still drives setFormality, so ideas land
-   exactly at the chosen type. "Any" clears Dress-for, and returns
-   Outfit type to the default range (the meter resting at Smart
-   Casual). */
+/* ---------- Studio Ideas — the slim Dress-for selector ----------
+   Dress-for lives behind one slim row on the deal surface. A tap
+   opens its options beneath it; a pick applies silently and
+   closes the row — the row's label is the only feedback. The
+   underlying behaviour is unchanged: Dress-for still drives
+   applyDressFor (occasion + formality), so ideas land exactly at
+   the chosen type. "Any" clears Dress-for. (Build .51: the form's
+   duplicate Outfit type row is deleted — the Outfit type pills on
+   the deal surface are that selector, below.) */
 var studioTypeAny = false;
 var STUDIO_TYPE_LABELS = ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"];
 function closeStudioSel(which) {
-  [["dress-sel-toggle", "dress-for"], ["type-sel-toggle", "studio-type-row"]].forEach(function (pair) {
+  [["dress-sel-toggle", "dress-for"]].forEach(function (pair) {
     if (which && pair[1] !== which) return;
     var t = document.getElementById(pair[0]), o = document.getElementById(pair[1]);
     if (o) o.hidden = true;
@@ -28371,8 +28282,6 @@ function syncStudioSelectors() {
   if (dv) dv.textContent = (typeof dressForKey !== "undefined" && dressForKey && typeof DRESS_FOR !== "undefined" && DRESS_FOR[dressForKey]) ? DRESS_FOR[dressForKey].label : "Any";
   var anyDress = document.querySelector("[data-dress-any]");
   if (anyDress) anyDress.setAttribute("aria-pressed", (typeof dressForKey !== "undefined" && dressForKey) ? "false" : "true");
-  var tv = document.getElementById("type-sel-val");
-  if (tv) tv.textContent = studioTypeAny ? "Any" : (STUDIO_TYPE_LABELS[formalityLevel - 1] || "Smart Casual");
   document.querySelectorAll("[data-studio-type-any]").forEach(function (anyType) {
     anyType.setAttribute("aria-pressed", studioTypeAny ? "true" : "false");
   });
@@ -28390,7 +28299,7 @@ var _origRenderFormality2 = window.renderFormality;
 if (typeof _origRenderFormality2 === "function") {
   window.renderFormality = function () { _origRenderFormality2(); syncStudioSelectors(); };
 }
-[["dress-sel-toggle", "dress-for"], ["type-sel-toggle", "studio-type-row"]].forEach(function (pair) {
+[["dress-sel-toggle", "dress-for"]].forEach(function (pair) {
   var t = document.getElementById(pair[0]), o = document.getElementById(pair[1]);
   if (!t || !o) return;
   t.addEventListener("click", function () {
@@ -28411,17 +28320,6 @@ if (dressOptsEl) dressOptsEl.addEventListener("click", function (e) {
   closeStudioSel();
   syncStudioSelectors();
 });
-if (studioTypeRow) studioTypeRow.addEventListener("click", function (e) {
-  var anyBtn = e.target.closest ? e.target.closest("[data-studio-type-any]") : null;
-  if (anyBtn) {
-    studioTypeAny = true;
-    setFormality(4, { silent: true });
-  } else if (e.target.closest && e.target.closest("[data-studio-type]")) {
-    studioTypeAny = false;
-  }
-  closeStudioSel();
-  syncStudioSelectors();
-});
 syncStudioSelectors();
 
 /* ---------- Build .50: Outfit type row on the Ideas deal surface ----------
@@ -28429,12 +28327,12 @@ syncStudioSelectors();
    the same data-studio-type / data-studio-type-any attributes,
    so setFormality drives them and syncStudioType (hooked into
    renderFormality) plus syncStudioSelectors keep every selector
-   — this row, the Customize row, the Today dropdown, a brief's
-   parsed level — showing the ONE state. A pick re-deals the
-   Ideas grid at once when a deal is showing, through the same
-   dealIdeasForSource path the source seg uses; otherwise it
-   simply constrains the next deal. A manual pick after a brief
-   deal wins over the brief's level, exactly as in Customize. */
+   — this row, the Today dropdown, a brief's parsed level —
+   showing the ONE state. A pick re-deals the Ideas grid at once
+   when a deal is showing, through the same dealIdeasForSource
+   path the source seg uses; otherwise it simply constrains the
+   next deal. A manual pick after a brief deal wins over the
+   brief's level. */
 var ideasTypeRow = document.getElementById("ideas-type-row");
 if (ideasTypeRow) ideasTypeRow.addEventListener("click", function (e) {
   var anyBtn = e.target.closest ? e.target.closest("[data-studio-type-any]") : null;
