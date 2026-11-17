@@ -176,7 +176,8 @@ def main() -> int:
         for status, name, detail in results:
             if status in ("FAIL", "FIXED?"):
                 lvl = "error" if status == "FAIL" else "notice"
-                msg = f"{status} {name}: {detail}".replace("%", "%25").replace("", "").replace("
+                msg = f"{status} {name}: {detail}".replace("%", "%25").replace("
+", "").replace("
 ", " ")
                 print(f"::{lvl} title=Smoke test::{msg[:900]}")
     print(f"\n{len(fails)} new failure(s); "
@@ -186,4 +187,13 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception:  # noqa: BLE001 — surface crashes as an annotation
+        import traceback
+        tb = traceback.format_exc()
+        print(tb)
+        if os.environ.get("GITHUB_ACTIONS"):
+            print("::error title=Smoke test crashed::" + tb.replace("%", "%25").replace("
+", "%0A")[-1800:])
+        sys.exit(2)
