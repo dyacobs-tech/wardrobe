@@ -10,7 +10,18 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-17.41" />
+    <meta property="og:title" content="Wardrobe" />
+    <meta property="og:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://dyacobs-tech.github.io/wardrobe/" />
+    <meta property="og:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Wardrobe" />
+    <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
+    <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
+    <meta name="wardrobe-build" content="2026-11-17.42" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2805,6 +2816,44 @@
          text is never covered; no change when it is hidden. */
       body.view-back-on .subnav .wrap { padding-left: 46px; }
     </style>
+    <style>
+      /* ---------- Build .42 — Shop the look alternatives ---------- */
+      .shop-matches { display: grid; gap: 8px; }
+      .shop-alt.is-selected .shop-row { border-color: var(--brass); box-shadow: inset 0 0 0 1px var(--brass); }
+      .shop-picked-row { margin: 0 0 4px; }
+      .shop-picked { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); }
+      .shop-owned-row { display: flex; align-items: center; gap: 10px; border: 1px dashed var(--brass); border-radius: var(--radius); padding: 7px 10px; background: var(--surface); }
+      .shop-owned-tag { display: block; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+      .shop-alt-note { margin: 0; font-size: 13px; color: var(--dim); font-style: italic; }
+      /* ---------- Build .42 — desktop web: a phone-width column ----------
+         On a wide browser the shell used to stretch to 1120px and
+         the hero/look imagery went full-width horizontal. At
+         700px and up the app now sits in a centered 430px column
+         on the app's dark backdrop; fixed chrome (bottom bar,
+         look layers, back chevron, A–Z rail) aligns to the column.
+         Below 700px nothing in this block applies — the phone
+         layout is untouched. */
+      @media (min-width: 700px) {
+        html, body { background: #14110d; }
+        .wrap { width: 430px; max-width: 100%; padding-left: 16px; padding-right: 16px; }
+        .masthead { width: 430px; max-width: 100%; margin: 0 auto; background: var(--bg); }
+        .navstack { width: 430px; max-width: 100%; margin: 0 auto; }
+        main.wrap { background: var(--bg); }
+        /* The Today view's full-bleed rules (main:has(> #panel-today…)
+           sets max-width: none so the hero runs edge to edge) win
+           over a plain .wrap cap on specificity — restated here at
+           the same specificity so on desktop the hero runs to the
+           edges of the COLUMN instead of the browser. */
+        main:has(> #panel-today:not([hidden])) { width: 430px; max-width: 430px; margin: 0 auto; }
+        .bottombar { left: 0; right: 0; margin-left: auto; margin-right: auto; width: 430px; max-width: 100%; }
+        .look-layer { left: 0; right: 0; margin-left: auto; margin-right: auto; width: 430px; max-width: 100%; }
+        .view-back-fab { left: calc(50% - 215px + 6px); }
+        .ward-rail { right: calc(50% - 215px + 3px); }
+        .popout img { max-width: 430px; }
+        .info-pop-card { max-width: 430px; }
+        .info-pop-backdrop .principles { max-width: 430px; }
+      }
+    </style>
   </head>
   <body>
     <header class="masthead">
@@ -4524,7 +4573,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.41";
+var WARDROBE_BUILD = "2026-11-17.42";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -14659,7 +14708,7 @@ function buildShopPiece(e) {
 }
 function buildEntryByKey(key) {
   var found = null;
-  SHOP_CATALOGUE.forEach(function (e) { if (!found && shopEntryKey(e) === key) found = e; });
+  shopCatalogueAll().forEach(function (e) { if (!found && shopEntryKey(e) === key) found = e; });
   if (!found) SALE_ITEMS.forEach(function (e) { if (!found && shopEntryKey(e) === key) found = e; });
   if (!found) found = wishlistFor(key);
   return found;
@@ -22296,13 +22345,24 @@ var shopTier = store.get("shopTier", "insensitive");
 if (!SHOP_TIERS.some(function (t) { return t.key === shopTier; })) shopTier = "insensitive";
 function shopTierName() { return shopTierInfo(shopTier).name; }
 /* The selector itself — the same sel-row + opt-list pattern as
-   the find Category selector. One builder serves both Shop the
-   look modes; every rendered copy carries the shop-tier-val
-   class so a change updates them all at once. */
-function shopTierSelectorHTML() {
-  return '<button type="button" class="sel-row" data-shop-tier-toggle aria-expanded="false"><span class="sel-name">Price tier</span><span class="sel-val shop-tier-val">' + esc(shopTierName()) + '</span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
+   the find Category selector. Build .42: Shop the look renders
+   one selector PER PIECE, bound to that piece's own tier
+   (data-piece-tier-opt + data-piece-idx; its value span carries
+   the piece-tier-val class, never shop-tier-val, so the global
+   renderShopTier sweep cannot touch it). Called without a
+   piece index it renders the shared global selector, exactly
+   as before. */
+function shopTierSelectorHTML(tierKey, pieceIdx) {
+  var cur = tierKey || shopTier;
+  if (pieceIdx == null) {
+    return '<button type="button" class="sel-row" data-shop-tier-toggle aria-expanded="false"><span class="sel-name">Price tier</span><span class="sel-val shop-tier-val">' + esc(shopTierInfo(cur).name) + '</span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
+      '<div class="opt-list" data-shop-tier-opts hidden>' + SHOP_TIERS.map(function (t) {
+        return '<button type="button" class="opt-item" data-shop-tier-opt="' + t.key + '"' + (t.key === cur ? ' aria-current="true"' : "") + ">" + esc(t.name) + "</button>";
+      }).join("") + "</div>";
+  }
+  return '<button type="button" class="sel-row" data-shop-tier-toggle aria-expanded="false"><span class="sel-name">Price tier</span><span class="sel-val piece-tier-val">' + esc(shopTierInfo(cur).name) + '</span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
     '<div class="opt-list" data-shop-tier-opts hidden>' + SHOP_TIERS.map(function (t) {
-      return '<button type="button" class="opt-item" data-shop-tier-opt="' + t.key + '"' + (t.key === shopTier ? ' aria-current="true"' : "") + ">" + esc(t.name) + "</button>";
+      return '<button type="button" class="opt-item" data-piece-tier-opt="' + t.key + '" data-piece-idx="' + pieceIdx + '"' + (t.key === cur ? ' aria-current="true"' : "") + ">" + esc(t.name) + "</button>";
     }).join("") + "</div>";
 }
 function renderShopTier() {
@@ -22338,6 +22398,15 @@ document.addEventListener("click", function (e) {
     setShopTier(opt.getAttribute("data-shop-tier-opt"));
   }
 });
+/* Build .42: a Shop the look piece's own tier option routes to
+   setPieceTier — it changes that piece only, never the global
+   tier and never another piece. */
+document.addEventListener("click", function (e) {
+  var opt = e.target.closest ? e.target.closest("[data-piece-tier-opt]") : null;
+  if (!opt) return;
+  closeShopTierSels();
+  setPieceTier(parseInt(opt.getAttribute("data-piece-idx"), 10), opt.getAttribute("data-piece-tier-opt"));
+});
 renderShopTier();
 /* The Search brands list in look mode follows the price tier:
    the union of the BRAND_TIERS sets mapped from the old scale
@@ -22349,8 +22418,8 @@ var SHOP_TIER_BRAND_SETS = {
   luxury: ["Price-conscious", "Value-minded", "Quality first", "Premium"],
   insensitive: ["Price-conscious", "Value-minded", "Quality first", "Premium", "No budget"]
 };
-function shopTierBrands() {
-  var sets = SHOP_TIER_BRAND_SETS[shopTier] || SHOP_TIER_BRAND_SETS.insensitive;
+function shopTierBrands(tierKey) {
+  var sets = SHOP_TIER_BRAND_SETS[tierKey || shopTier] || SHOP_TIER_BRAND_SETS.insensitive;
   var out = [], seen = {};
   sets.forEach(function (s) {
     (BRAND_TIERS[s] || []).forEach(function (b) { if (!seen[b]) { seen[b] = 1; out.push(b); } });
@@ -23565,15 +23634,15 @@ function catalogueCatForPiece(pc) {
    affordable first); at Price insensitive the ELITE leads —
    tier band descending first (insensitive, luxury, accessible,
    affordable), match score descending within each band. */
-function catalogueScored(pc, applyCeiling) {
+function catalogueScored(pc, applyCeiling, tierKey) {
   var cat = catalogueCatForPiece(pc);
   if (!cat) return [];
-  var ceiling = shopTierRank(shopTier);
+  var ceiling = shopTierRank(tierKey || shopTier);
   var text = (pieceDescription(pc) + " " + (pc.garment || "") + " " + (pc.detail || "")).toLowerCase().replace(/-/g, " ");
   var tokens = text.split(/[^a-z0-9]+/).filter(Boolean);
   var fam = pieceColourKeySet(pc);
   var scored = [];
-  SHOP_CATALOGUE.forEach(function (e) {
+  shopCatalogueAll().forEach(function (e) {
     if (e.cat !== cat) return;
     if (applyCeiling && shopTierRank(e.tier) > ceiling) return;
     var eColours = e.keys.filter(function (k) { return SHOP_COLOUR_KEYS[k.toLowerCase()]; });
@@ -23603,7 +23672,7 @@ function catalogueScored(pc, applyCeiling) {
     var score = matched + attrMatched + ((colourOK && !colourLiteral) ? 1 : 0);
     if (score >= 2 && garmentMatched >= 1) scored.push({ e: e, score: score });
   });
-  var eliteFirst = shopTier === "insensitive";
+  var eliteFirst = (tierKey || shopTier) === "insensitive";
   scored.sort(function (a, b) {
     if (eliteFirst) {
       var tr = shopTierRank(b.e.tier) - shopTierRank(a.e.tier);
@@ -23632,6 +23701,153 @@ function catalogueMatches(pc) {
    selected tier. */
 function catalogueMatchTotal(pc) {
   return catalogueScored(pc, false).length;
+}
+/* ================= Build .42 — shop database, per-piece state,
+   alternatives at different prices =================
+   The shop database (2,437 further verified records, ingested
+   Nov 17 from the Meta catalog + brand stores) ships as a
+   separate static file (the shop-db JSON in the repo assets,
+   ~750 KB) — fetched
+   lazily the first time Shop the look renders, never baked into
+   this page (baking would grow the page by ~30% and tax every
+   open). Until it lands, and wherever it cannot load (the
+   muse.ai preview has no repo assets), the baked catalogue
+   alone serves, exactly as before. Records merge by URL —
+   the ingest already deduped against the baked 978, and the
+   merge here dedupes again, so a record can never appear twice. */
+var SHOP_DB = [];
+var shopDbLoaded = false;
+var shopDbLoading = false;
+function shopCatalogueAll() {
+  return shopDbLoaded && SHOP_DB.length ? SHOP_CATALOGUE.concat(SHOP_DB) : SHOP_CATALOGUE;
+}
+function loadShopDb() {
+  if (shopDbLoaded || shopDbLoading) return;
+  shopDbLoading = true;
+  fetch("assets/shop-db" + ".json").then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) {
+    shopDbLoading = false;
+    if (!Array.isArray(j) || !j.length) return;
+    var seen = {};
+    SHOP_CATALOGUE.forEach(function (e) { if (e.url) seen[e.url] = 1; });
+    SHOP_DB = j.filter(function (e) { return e && e.url && e.name && typeof e.price === "number" && !seen[e.url]; });
+    shopDbLoaded = true;
+    if (typeof findLookMode !== "undefined" && findLookMode) renderFindLookMode();
+  }).catch(function () { shopDbLoading = false; });
+}
+/* Per-piece state — the root-cause fix for "it defaults to the
+   same level for ALL items". Before .42 the tier lived in ONE
+   global (shopTier): every piece section rendered that same
+   global, and picking a tier in any section called setShopTier,
+   which re-filtered every section. Now each piece section of a
+   carried look carries its own {tier, sel} in shopPieceState,
+   keyed by look + piece index. The state persists on-device
+   only — it is deliberately NOT added to DATA_KEYS or the sync
+   collections (the Batch-3 direction: shop/dealt UI state
+   stays device-local). The global shopTier remains what it
+   always was for the free-form Search page, and a piece's
+   starting tier the first time its look is shopped. */
+var shopPieceState = {};
+try { shopPieceState = store.get("shopPieceState", {}) || {}; } catch (e) { shopPieceState = {}; }
+if (!shopPieceState || typeof shopPieceState !== "object" || Array.isArray(shopPieceState)) shopPieceState = {};
+function shopLookKey(look) { return look ? String(look.id || look.title || "") : ""; }
+function pieceStateFor(look, idx) {
+  var st = shopPieceState[shopLookKey(look) + "|" + idx];
+  if (!st || typeof st !== "object") st = {};
+  if (!SHOP_TIERS.some(function (t) { return t.key === st.tier; })) st.tier = shopTier;
+  return st;
+}
+function savePieceState(look, idx, st) {
+  shopPieceState[shopLookKey(look) + "|" + idx] = st;
+  try { store.set("shopPieceState", shopPieceState); } catch (e) {}
+}
+function setPieceTier(idx, key) {
+  if (!findLookMode || !SHOP_TIERS.some(function (t) { return t.key === key; })) return;
+  var d = shopModeData[idx];
+  if (!d) return;
+  var st = pieceStateFor(findLookMode, idx);
+  st.tier = key;
+  /* Choosing a tier makes that tier's alternative the piece's
+     pick when the catalogue has one there; otherwise the
+     current pick stands. Only this piece's state is written —
+     no other section re-filters. */
+  var atTier = d.alts.filter(function (e) { return (e.tier || "insensitive") === key; })[0];
+  if (atTier) st.sel = shopEntryKey(atTier);
+  savePieceState(findLookMode, idx, st);
+  renderFindLookMode();
+}
+function setPieceSelection(idx, key) {
+  if (!findLookMode) return;
+  var st = pieceStateFor(findLookMode, idx);
+  st.sel = key;
+  savePieceState(findLookMode, idx, st);
+  renderFindLookMode();
+}
+/* The alternatives for a piece: the best-scored match in each
+   price band that has one — Affordable, Accessible, Luxury and
+   the elite (insensitive) band — ordered by price ascending,
+   so the piece's price spread sits side by side and the pick
+   is his, not the app's. Matching is catalogueScored with NO
+   ceiling: the same strict garment category, the same
+   colour-family gate, the same attribute scoring — a band with
+   no honest match simply does not appear. */
+var SHOP_ALT_TIERS = ["affordable", "accessible", "luxury", "insensitive"];
+function catalogueAlternatives(pc) {
+  var scored = catalogueScored(pc, false);
+  var best = {};
+  scored.forEach(function (sc) {
+    var t = sc.e.tier || "insensitive";
+    if (!best[t]) best[t] = sc.e;
+  });
+  var alts = SHOP_ALT_TIERS.filter(function (t) { return best[t]; }).map(function (t) { return best[t]; });
+  alts.sort(function (a, b) { return Number(a.price) - Number(b.price); });
+  return { alts: alts, bestOverall: scored.length ? scored[0].e : null };
+}
+/* A piece's default pick: the alternative in its own tier band
+   when there is one, else the best-scored match overall — the
+   product the old single-ceiling view led with. */
+function pieceDefaultSel(d, tierKey) {
+  var atTier = d.alts.filter(function (e) { return (e.tier || "insensitive") === tierKey; })[0];
+  if (atTier) return shopEntryKey(atTier);
+  if (d.bestOverall) return shopEntryKey(d.bestOverall);
+  return d.alts.length ? shopEntryKey(d.alts[0]) : "";
+}
+/* Owned-first: a closet piece that covers this look piece —
+   same closet category and a close colour, the wishlist/gaps
+   test — leads the section as "You own: …", and the products
+   below it are alternatives for the gap or an upgrade, never
+   a verdict that the piece is missing. */
+function ownedClosetMatch(pc) {
+  var cat = garmentCategory(pc.garment);
+  var noun = (pc.garment || "").toLowerCase().split(" ").pop();
+  var found = null;
+  wardrobeItems.forEach(function (it) {
+    if (found || it.category !== cat) return;
+    if (pc.hex && it.colourHex && dist2(hexRgb(it.colourHex), hexRgb(pc.hex)) < 3200) { found = it; return; }
+    if (noun && (it.name || "").toLowerCase().indexOf(noun) !== -1) found = it;
+  });
+  return found;
+}
+function shopOwnedRowHTML(it) {
+  var thumb = it.photo ? '<img class="shop-thumb" src="' + esc(it.photo) + '" alt="" loading="lazy" />' : "";
+  return '<div class="shop-owned-row">' + thumb +
+    '<span class="shop-main"><span class="shop-owned-tag">You own</span>' +
+    '<span class="shop-name">' + esc(it.name) + "</span></span></div>";
+}
+/* One alternative row. The selected alternative is the full
+   shopRowHTML card (brass-ringed, "Selected" pill) — Mark
+   purchased / Add to wishlist / Style this on it act on it,
+   exactly as before. The rest are compact rows with a Select
+   button: tapping it makes that product this piece's pick. */
+function shopAltRowHTML(e, pc, idx, selected) {
+  if (selected) {
+    return '<div class="shop-alt is-selected" data-selected-key="' + esc(shopEntryKey(e)) + '"><div class="shop-picked-row"><span class="shop-picked">✓ Selected</span></div>' + shopRowHTML(e, pc) + "</div>";
+  }
+  var thumb = e.img ? '<img class="shop-thumb" src="' + esc(e.img) + '" alt="" loading="lazy" />' : "";
+  return '<div class="shop-row shop-alt">' +
+    '<a class="shop-row-main" target="_blank" rel="noopener" href="' + esc(e.url) + '">' + thumb +
+    '<span class="shop-main"><span class="shop-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="shop-sub">' + esc(e.retailer) + " · " + esc(shopTierInfo(e.tier).name) + ((pc && pc.iconGarment && e.iconGarment && e.iconGarment === pc.iconGarment) ? " · Exact match" : "") + "</span></span>" +
+    '<span class="shop-price">$' + Number(e.price).toLocaleString("en-US") + "</span></a>" +
+    '<button type="button" class="btn-ghost shop-buy" data-piece-select="' + idx + '" data-sel-key="' + esc(shopEntryKey(e)) + '">Select</button></div>';
 }
 function shopRowHTML(e, pc) {
   var thumb = e.img ? '<img class="shop-thumb" src="' + esc(e.img) + '" alt="" loading="lazy" />' : "";
@@ -24311,17 +24527,19 @@ function updateSaleRail() {
   if (looksWishPanel) looksWishPanel.addEventListener("click", wishClick);
   renderShopWishlist();
 })();
-/* A piece's match rows. The tier ceiling is already applied
-   inside catalogueMatches, so everything given here renders.
-   The two empty states stay distinct: no matches at all for
-   the piece (total is zero) vs matches that all sit above the
-   selected tier (total is positive). */
-function shopMatchesHTML(matches, pc, total) {
-  if (!matches.length) {
-    if (total > 0) return '<p class="shop-nomatch">Nothing in the catalogue at ' + esc(shopTierName()) + " or below for this piece — raise the price tier to see more.</p>";
-    return '<p class="shop-nomatch">No exact match yet in the catalogue</p>';
+/* A piece's section body (build .42): the owned lead when he
+   already has the piece, then the alternatives — one per price
+   band, the selected one carrying the actions. No honest match
+   anywhere keeps the plain empty state. */
+function shopMatchesHTML(d, idx) {
+  if (!d.alts.length) return '<p class="shop-nomatch">No exact match yet in the catalogue</p>';
+  var html = "";
+  if (d.owned) html += shopOwnedRowHTML(d.owned);
+  if (d.tierKey !== "insensitive" && !d.alts.some(function (e) { return (e.tier || "insensitive") === d.tierKey; })) {
+    html += '<p class="shop-alt-note">Nothing at ' + esc(shopTierInfo(d.tierKey).name) + " for this piece — the other prices:</p>";
   }
-  return matches.map(function (e) { return shopRowHTML(e, pc); }).join("");
+  html += d.alts.map(function (e) { return shopAltRowHTML(e, d.pc, idx, shopEntryKey(e) === d.selKey); }).join("");
+  return html;
 }
 var shopModeData = [];
 function renderFindLookMode() {
@@ -24341,38 +24559,46 @@ function renderFindLookMode() {
   if (grid) grid.hidden = true;
   if (info) info.hidden = true;
   if (nl) nl.hidden = true;
+  loadShopDb();
   var look = findLookMode;
-  var tierName = shopTierName();
-  var brands = shopTierBrands();
   var img = lookImg(look);
   var html = '<div class="shop-look-head"><img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" />' +
     '<div class="shop-look-titlerow"><h3>' + esc(look.title || "Untitled") + '</h3><button type="button" class="btn-ghost shop-clear" id="shop-clear-look">✕ Clear look</button></div>' +
     '<p class="shop-honest">Catalogue prices checked ' + SHOP_CATALOGUE_CHECKED + " — tap through for the live price.</p>" +
     "</div>";
-  /* The price tier selector sits in every piece block's control
-     row now (build .28) — one global setting, rendered per
-     piece; catalogueMatches applies its ceiling before scoring,
-     and setShopTier re-renders this whole view on a change. */
-  shopModeData = shopPiecesForLook(look).map(function (pc) {
-    return { pc: pc, desc: pieceDescription(pc), matches: catalogueMatches(pc), total: catalogueMatchTotal(pc) };
+  /* Build .42: every piece block carries its OWN price tier
+     and its OWN selected product (shopPieceState — see the
+     block above catalogueAlternatives). A piece's tier change
+     re-renders the view, but each section reads only its own
+     state back, so no section's tier, list or pick can move
+     another's. Under the controls, the section shows the
+     piece's alternatives — the best match at each price band —
+     instead of the old single ceiling-filtered list. */
+  shopModeData = shopPiecesForLook(look).map(function (pc, idx) {
+    var alt = catalogueAlternatives(pc);
+    var st = pieceStateFor(look, idx);
+    var d = { pc: pc, desc: pieceDescription(pc), alts: alt.alts, bestOverall: alt.bestOverall, total: catalogueMatchTotal(pc), owned: ownedClosetMatch(pc), tierKey: st.tier };
+    d.selKey = st.sel && alt.alts.some(function (e) { return shopEntryKey(e) === st.sel; }) ? st.sel : pieceDefaultSel(d, st.tier);
+    /* The section's action handlers resolve their entry inside
+       this list by key, as they always have. */
+    d.matches = alt.alts;
+    return d;
   });
   shopModeData.forEach(function (d, idx) {
-    var desc = d.desc, matches = d.matches;
+    var desc = d.desc;
     html += '<div class="shop-piece"><h4>' + esc(desc) + "</h4>";
     /* Controls at the TOP of the section (build .28): Price
-       tier + Search, two equal boxes, before the matches. The
-       tier box is the shared global selector — a change
-       re-filters every section via renderFindLookMode. Search
-       is ONE grouped action menu: eBay — vintage, then this
-       piece's brands at the selected tier, each going DIRECTLY
-       to the brand's own site search or store (build .38 — no
-       search-engine links). Picking a destination opens that search at once;
-       the box itself just reads "Search". The old foot-of-
-       section Search brands bar and the stray eBay — vintage
-       link are gone — both live in this menu now. */
-    var q = encodeURIComponent("men's " + desc);
+       tier + Search, two equal boxes, before the alternatives.
+       The tier box is THIS piece's own selector (build .42).
+       Search is ONE grouped action menu: eBay — vintage, then
+       this piece's brands at THIS piece's tier, each going
+       DIRECTLY to the brand's own site search or store
+       (build .38 — no search-engine links). Picking a
+       destination opens that search at once; the box itself
+       just reads "Search". */
     var eq = encodeURIComponent("men's " + desc + " vintage");
-    html += '<div class="shop-ctl-row"><div class="shop-ctl-cell">' + shopTierSelectorHTML() + '</div>' +
+    var brands = shopTierBrands(d.tierKey);
+    html += '<div class="shop-ctl-row"><div class="shop-ctl-cell">' + shopTierSelectorHTML(d.tierKey, idx) + '</div>' +
       '<div class="shop-ctl-cell shop-search-dd"><button type="button" class="sel-row shop-search-toggle" aria-expanded="false"><span class="sel-name">Search</span><span class="sel-val"></span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
       '<div class="opt-list shop-search-list" hidden>' +
       '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + eq + '">eBay — vintage</a>' +
@@ -24380,7 +24606,7 @@ function renderFindLookMode() {
         return '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">' + esc(b) + "</a>";
       }).join("") : "") +
       "</div></div></div>";
-    html += '<div class="shop-matches" data-matches="' + idx + '">' + shopMatchesHTML(matches, d.pc, d.total) + "</div>";
+    html += '<div class="shop-matches" data-matches="' + idx + '">' + shopMatchesHTML(d, idx) + "</div>";
     html += "</div>";
   });
   box.innerHTML = html;
@@ -24401,6 +24627,8 @@ function renderFindLookMode() {
   if (!box) return;
   box.addEventListener("click", function (e) {
     if (e.target.closest && e.target.closest("#shop-clear-look")) { clearFindLookMode(); return; }
+    var sb = e.target.closest ? e.target.closest("[data-piece-select]") : null;
+    if (sb) { setPieceSelection(parseInt(sb.getAttribute("data-piece-select"), 10), sb.getAttribute("data-sel-key")); return; }
     var mb = e.target.closest ? e.target.closest("[data-mark-purchase]") : null;
     if (mb) {
       var mkey = mb.getAttribute("data-mark-purchase");
@@ -24409,7 +24637,7 @@ function renderFindLookMode() {
       var d2 = shopModeData[pIdx];
       var entry = null;
       if (d2) d2.matches.forEach(function (m) { if (shopEntryKey(m) === mkey) entry = m; });
-      if (!entry) SHOP_CATALOGUE.forEach(function (m) { if (shopEntryKey(m) === mkey) entry = m; });
+      if (!entry) shopCatalogueAll().forEach(function (m) { if (shopEntryKey(m) === mkey) entry = m; });
       if (entry) toggleShopPurchase(entry, d2 ? d2.pc : null);
       return;
     }
@@ -24421,7 +24649,7 @@ function renderFindLookMode() {
       var wd = shopModeData[wpIdx];
       var wentry = null;
       if (wd) wd.matches.forEach(function (m) { if (shopEntryKey(m) === wkey) wentry = m; });
-      if (!wentry) SHOP_CATALOGUE.forEach(function (m) { if (shopEntryKey(m) === wkey) wentry = m; });
+      if (!wentry) shopCatalogueAll().forEach(function (m) { if (shopEntryKey(m) === wkey) wentry = m; });
       if (wentry && typeof toggleWishlistItem === "function") toggleWishlistItem(wentry, wd ? wd.pc : null);
       return;
     }
