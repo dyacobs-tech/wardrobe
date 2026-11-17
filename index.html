@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.24" />
+    <meta name="wardrobe-build" content="2026-11-16.25" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -1227,8 +1227,8 @@
       @keyframes sheetUp { from { transform: translateY(26px); opacity: .4; } to { transform: translateY(0); opacity: 1; } }
       @media (prefers-reduced-motion: reduce) { .info-pop-backdrop .info-pop-card, .info-pop-backdrop .principles { animation: none; } }
       /* Closet Add — sticky Add button */
-      #panel-wardrobe #add-form { position: relative; }
-      #panel-wardrobe #item-submit { position: sticky; bottom: 10px; z-index: 3; box-shadow: var(--shadow-lift); }
+      #panel-add #add-form { position: relative; }
+      #panel-add #item-submit { position: sticky; bottom: 10px; z-index: 3; box-shadow: var(--shadow-lift); }
       .more-toggle { width: 100%; text-align: left; }
       /* Dress for row */
       .dress-for { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
@@ -2491,6 +2491,93 @@
       .wp-pick { padding: 0; min-height: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface-alt); cursor: pointer; }
       .wp-pick img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; display: block; }
 </style>
+    <style>
+      /* ================================================================
+         BUILD .25 — Closet sub-pages + ONE type/format system app-wide.
+         Today and Shop the look are the reference pages; every page,
+         sheet and toast conforms to the single treatment below.
+         Headings: display serif 20px/600. Labels: .field — 11px gold
+         small caps. Body/meta: 13.5px / 12.5px dim ramp. Buttons: the
+         btn-ink / btn-accent / btn-ghost set at one size. Fields: one
+         input style, 16px text (the build .7 no-zoom rule). Rows: one
+         title/sub/trailing structure. Also: fixed-width cell overflow
+         (week-strip weather) can never spill again.
+         ================================================================ */
+      /* Headings — one treatment everywhere */
+      .fav-head, .section-head h2 {
+        font-family: var(--font-display); font-size: 20px; font-weight: 600;
+        line-height: 1.15; letter-spacing: 0; text-transform: none; color: var(--text);
+        margin: 14px 0 8px;
+      }
+      .fav-head:first-child { margin-top: 0; }
+      .add-form h3, .studio-form h3, .principles-head h3, .tools-toggle {
+        font-family: var(--font-display) !important; font-size: 20px !important; font-weight: 600;
+        line-height: 1.15; letter-spacing: 0; text-transform: none; color: var(--text);
+      }
+      .principles-head h3 { margin: 0; }
+      /* Labels — one small-caps gold .field treatment on every page */
+      label.field, .sel-name, .profile-group-head, .brand-group-head,
+      #panel-studio label.field, #panel-wardrobe label.field, #panel-add label.field,
+      #panel-gaps label.field, #panel-profile label.field, #panel-icons label.field,
+      #panel-palettes label.field, #panel-find label.field, #panel-brands label.field,
+      #panel-wearing label.field, #panel-myinspo label.field, #panel-watches label.field,
+      #panel-looks label.field, #panel-calendar label.field, #panel-sale label.field,
+      #panel-shopwish label.field, #panel-today label.field {
+        font-family: var(--font-ui) !important; font-size: 11px !important; font-weight: 600;
+        letter-spacing: .16em !important; text-transform: uppercase; color: var(--brass) !important;
+        margin-bottom: 4px;
+      }
+      /* Body / caption ramp — one size, one dim */
+      .meta, .form-note, .w-sub, .piece-row .p-sub, .brand-row .b-meta,
+      .find-card .meta, .item-card p { font-size: 12.5px; color: var(--dim); line-height: 1.4; }
+      /* Buttons — exactly the established set, one size everywhere */
+      .btn-ink, .btn-accent, .btn-ghost {
+        min-height: 36px !important; padding: 6px 14px !important;
+        font-size: 12px !important; font-weight: 600; letter-spacing: .1em !important;
+        text-transform: uppercase; line-height: 1; border-radius: var(--radius);
+        display: inline-flex; align-items: center; justify-content: center;
+      }
+      .chip { min-height: 28px; padding: 4px 10px; font-size: 12px; }
+      /* Form fields — one style everywhere (16px text keeps the .7 no-zoom rule) */
+      input[type="text"], input[type="search"], input[type="date"], select, textarea {
+        font-size: 16px; padding: 8px 10px; min-height: 38px;
+      }
+      textarea { min-height: 64px; }
+      /* Rows & cards — one structure: 15px title, 12.5px dim sub, trailing action */
+      .wish-row .w-name, .worn-row .w-name, .piece-row .p-name,
+      .brand-row .b-name, .swap-pick .sp-name, .icon-result .ir-name,
+      .wp-current-name, .removed-row .w-name {
+        font-size: 15px; font-weight: 600; line-height: 1.2; color: var(--text);
+      }
+      .wish-row, .worn-row, .piece-row { padding: 8px 10px; gap: 10px; }
+      .card, .add-form, .studio-form { border-radius: var(--radius); }
+      .add-form, #panel-add .add-form, #panel-wardrobe .add-form { padding: 12px 14px; gap: 10px; }
+      /* Closet sub-pages — entry rows + back affordance, flush */
+      .closet-entries { display: grid; gap: 8px; margin-top: 10px; }
+      .subpage-back { margin: 0 0 10px; }
+      #panel-gaps #gap-wrap { margin-top: 2px; }
+      /* Fixed-width cells can never overflow (Change 4) */
+      .wp-day { position: relative; min-width: 0; overflow: hidden; }
+      .wp-dow, .wp-fc {
+        max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .wp-fc { font-size: 11px; line-height: 1.2; min-height: 13px; }
+      .sel-val, .cdd-label, .sel-chev { min-width: 0; }
+      .sel-val, .cdd-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .tab, .subtab { overflow: hidden; text-overflow: ellipsis; }
+      .brand-row .b-main, .piece-row .p-main, .swap-pick .sp-main { min-width: 0; }
+      /* Worn outfits on the week strip (Change 3) */
+      .wp-day.wp-hasworn { border-color: var(--brass); }
+      .wp-worn-count {
+        position: absolute; top: 3px; right: 3px; z-index: 2;
+        background: var(--brass); color: #14110d; border-radius: 999px;
+        font-size: 11px; font-weight: 700; line-height: 1; padding: 2px 5px;
+      }
+      .wp-worn-label {
+        font-size: 11px; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; color: var(--brass);
+      }
+    </style>
   </head>
   <body>
     <header class="masthead">
@@ -2759,10 +2846,20 @@
               <button type="button" class="sel-row" id="ward-cat-toggle" aria-expanded="false" aria-controls="ward-filters"><span class="sel-name">Category</span><span class="sel-val" id="ward-cat-val">All</span><span class="sel-chev" aria-hidden="true">▾</span></button>
               <div class="sel-opts filter-row" id="ward-filters" role="group" aria-label="Filter by category" hidden></div>
             </div>
+          <div class="closet-entries">
+            <button type="button" class="sel-row" id="closet-add-entry"><span class="sel-name">Add</span><span class="sel-val">Add a piece</span><span class="sel-chev" aria-hidden="true">›</span></button>
+            <button type="button" class="sel-row" id="closet-gaps-entry"><span class="sel-name">Closet gaps</span><span class="sel-val" id="closet-gaps-count">Pieces your looks are missing</span><span class="sel-chev" aria-hidden="true">›</span></button>
+          </div>
             <div class="item-grid" id="item-grid"></div>
           </div>
+          </div>
+      </section>
+
+      <!-- ================= CLOSET — ADD (sub-page) ================= -->
+      <section id="panel-add" role="tabpanel" aria-label="Add a piece" hidden>
+        <button type="button" class="btn-ghost subpage-back" data-back-wardrobe>← Closet</button>
           <form class="card add-form" id="add-form">
-            <h3 style="font-family:var(--font-display);font-size:24px;font-weight:600;margin:0">Add</h3>
+            <h3 class="fav-head" id="add-form-title">Add</h3>
             <div>
               <label class="field" for="item-name">Name</label>
               <input type="text" id="item-name" placeholder="" required />
@@ -2800,7 +2897,11 @@
             <button type="submit" class="btn-ink" id="item-submit">Add</button>
             <button type="button" class="btn-ghost" id="item-cancel-edit" hidden>Cancel edit</button>
           </form>
-        </div>
+      </section>
+
+      <!-- ================= CLOSET — GAPS (sub-page) ================= -->
+      <section id="panel-gaps" role="tabpanel" aria-label="Closet gaps" hidden>
+        <button type="button" class="btn-ghost subpage-back" data-back-wardrobe>← Closet</button>
         <div id="gap-wrap" hidden>
           <h3 class="fav-head">Closet gaps — pieces your looks are missing</h3>
           <div id="gap-list"></div>
@@ -2902,7 +3003,7 @@
 
       <!-- ================= CALENDAR ================= -->
       <section id="panel-calendar" role="tabpanel" aria-labelledby="tab-calendar" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Calendar — Trips" data-info-text="Trip capsules built from your closet for each trip's weather, with a packing checklist that remembers what you've packed. What you wore lives on the Wearing Today page, beside the log." aria-label="About: Calendar — Trips">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Calendar — Trips" data-info-text="Trip capsules built from your closet for each trip's weather, with a packing checklist that remembers what you've packed. Worn outfits appear on their exact date in the week strip — tap a day to see everything worn that day, beside the plan." aria-label="About: Calendar — Trips">i</button></div>
         <div id="week-plan-wrap">
           <div class="wp-head">
             <h3 class="fav-head">This week</h3>
@@ -3948,7 +4049,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.24";
+var WARDROBE_BUILD = "2026-11-16.25";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -15958,7 +16059,7 @@ function renderWardrobe() {
   if (!items.length) {
     grid.innerHTML = '<div class="card empty" style="grid-column:1/-1">' + (wardrobeItems.length
       ? "No pieces match that search — clear it, or pick another category."
-      : "Nothing in your closet yet — add your first piece with the form above, and outfits start building from it.") + "</div>";
+      : "Nothing in your closet yet — tap Add below to add your first piece, and outfits start building from it.") + "</div>";
     return;
   }
   grid.innerHTML = items.map(function (i) {
@@ -16185,6 +16286,8 @@ function endItemEdit() {
   editingItemId = null;
   document.getElementById("item-submit").textContent = "Add";
   document.getElementById("item-cancel-edit").hidden = true;
+  var at = document.getElementById("add-form-title");
+  if (at) at.textContent = "Add";
 }
 function startItemEdit(it) {
   editingItemId = it.id;
@@ -16200,7 +16303,10 @@ function startItemEdit(it) {
   else { prev.hidden = true; prev.removeAttribute("src"); }
   document.getElementById("item-submit").textContent = "Save changes";
   document.getElementById("item-cancel-edit").hidden = false;
-  document.getElementById("add-form").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  var at2 = document.getElementById("add-form-title");
+  if (at2) at2.textContent = "Edit";
+  if (typeof switchTab === "function") switchTab("add");
+  else document.getElementById("add-form").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 document.getElementById("item-cancel-edit").addEventListener("click", function () {
   document.getElementById("add-form").reset();
@@ -16209,6 +16315,7 @@ document.getElementById("item-cancel-edit").addEventListener("click", function (
   var prev = document.getElementById("photo-preview");
   prev.hidden = true; prev.removeAttribute("src");
   endItemEdit();
+  if (typeof switchTab === "function") switchTab("wardrobe");
 });
 document.getElementById("add-form").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -16276,6 +16383,7 @@ document.getElementById("add-form").addEventListener("submit", function (e) {
   }
   renderWardrobe();
   if (detailItemId) renderItemDetail();
+  if (typeof switchTab === "function") switchTab("wardrobe");
 });
 
 /* ================= Palettes ================= */
@@ -20398,7 +20506,7 @@ function renderFindLookMode() {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands", "find", "sale", "shopwish", "calendar", "profile", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "wardrobe", "add", "gaps", "palettes", "looks", "icons", "brands", "find", "sale", "shopwish", "calendar", "profile", "watches", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -20419,7 +20527,7 @@ var TABS = ["today", "studio", "wardrobe", "palettes", "looks", "icons", "brands
    tabs, hashes and every switchTab("…") call still resolve. */
 var SECTIONS = {
   today: ["today"],
-  closet: ["wardrobe", "looks", "watches", "calendar", "wearing"],
+  closet: ["wardrobe", "add", "gaps", "looks", "watches", "calendar", "wearing"],
   ideas: ["studio", "icons", "palettes", "myinspo"],
   find: ["find", "brands", "sale", "shopwish"],
   me: ["profile"]
@@ -20488,6 +20596,8 @@ function switchTab(name, opts) {
   }
   if (name === "sale" && typeof renderSaleItems === "function") renderSaleItems();
   if (name === "shopwish" && typeof renderShopWishlist === "function") renderShopWishlist();
+  if (name === "gaps" && typeof renderWishlist === "function") renderWishlist();
+  if (name === "calendar" && typeof renderWeekPlan === "function") renderWeekPlan();
   persistTab();
 }
 function navClick(e) {
@@ -20514,6 +20624,9 @@ function tabFromHash() {
   if (!h) return null;
   var parts = h.split("/");
   if (TABS.indexOf(parts[0]) === -1) return null;
+  /* Closet sub-pages are reached in-app only: a boot, refresh or
+     deep link naming one lands on the Closet landing instead. */
+  if (parts[0] === "add" || parts[0] === "gaps") return { tab: "wardrobe", icon: null };
   return { tab: parts[0], icon: parts[1] ? decodeURIComponent(parts[1]) : null };
 }
 window.addEventListener("hashchange", function () {
@@ -20560,6 +20673,7 @@ function restoreTab() {
   var from = tabFromHash();
   var name = sess || (from && from.tab) || store.get("tab", "today");
   if (TABS.indexOf(name) === -1) name = "today";
+  if (name === "add" || name === "gaps") name = "wardrobe";
   if (name === "today" && !from) { persistTab(); return; }
   switchTab(name, { restore: true });
   if (name === "icons") {
@@ -21122,7 +21236,9 @@ function renderGapList() {
   var wrap = document.getElementById("gap-wrap");
   var list = document.getElementById("gap-list");
   if (!wrap || !list) return;
-  if (!lastWishlist.length) { wrap.hidden = true; list.innerHTML = ""; return; }
+  var ce = document.getElementById("closet-gaps-count");
+  if (ce) ce.textContent = lastWishlist.length ? Math.min(8, lastWishlist.length) + " missing — pieces your looks need" : "Nothing missing";
+  if (!lastWishlist.length) { wrap.hidden = false; list.innerHTML = '<p class="meta">Nothing missing — every piece in your looks is covered by your closet.</p>'; return; }
   wrap.hidden = false;
   list.innerHTML = lastWishlist.slice(0, 8).map(function (w, i) {
     return '<div class="wish-row"><span class="cdot" style="background:' + (w.hex || "transparent") + '"></span>' +
@@ -21318,6 +21434,25 @@ function planMonday(offset) {
   var now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7) + (offset || 0) * 7, 12);
 }
+/* Every worn outfit recorded for one date — the worn log plus
+   looks flagged worn — deduped the same way the What I wore
+   history dedupes, newest first. The Calendar reads placement
+   from here; the log itself is never altered. */
+function wornForDate(iso) {
+  var out = [], seen = {};
+  wornLog.forEach(function (en) {
+    if (!en || en.date !== iso) return;
+    var k = en.id ? "id:" + en.id : en.date + "|" + en.title;
+    if (!seen[k]) { seen[k] = 1; out.push(en); }
+  });
+  savedLooks.forEach(function (l) {
+    if (l.worn && l.wornDate === iso) {
+      var k = l.wornDate + "|" + l.title;
+      if (!seen[k]) { seen[k] = 1; out.push({ date: l.wornDate, title: l.title, img: lookImg(l), pieces: [] }); }
+    }
+  });
+  return out;
+}
 function renderWeekPlan() {
   var grid = document.getElementById("week-plan-grid");
   if (!grid) return;
@@ -21331,19 +21466,27 @@ function renderWeekPlan() {
     var d = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i, 12);
     var iso = planISOOf(d);
     var look = planLookForDate(iso);
+    var worn = wornForDate(iso);
+    var wornImg = "";
+    for (var wi = 0; wi < worn.length; wi++) { if (worn[wi].img) { wornImg = worn[wi].img; break; } }
     var fc = (typeof dailyForecast !== "undefined" && dailyForecast) ? dailyForecast[iso] : null;
-    var fcTxt = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" + (fc.label ? " " + fc.label : "") : "";
-    var cls = "wp-day" + (iso === todayIso ? " wp-today" : "") + (iso < todayIso ? " wp-past" : "") + (look ? " wp-planned" : "");
-    var img = look ? lookImg(look) : "";
-    html += '<div class="' + cls + '" data-plan-day="' + iso + '" role="button" tabindex="0" aria-label="' +
-      esc(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) +
-      (look ? " — planned: " + esc(look.title) : " — tap to plan") + '">' +
+    var fcTxt = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" + (fc.label ? " " + fc.label.replace("Thunderstorms", "T-storms").replace("Thunderstorm", "T-storm") : "") : "";
+    var cls = "wp-day" + (iso === todayIso ? " wp-today" : "") + (iso < todayIso ? " wp-past" : "") + (look ? " wp-planned" : "") + (worn.length ? " wp-hasworn" : "");
+    /* Worn wins the CELL DISPLAY only — the plan underneath is
+       untouched and still shows in the day sheet. */
+    var img = wornImg || (look ? lookImg(look) : "");
+    var imgTitle = wornImg ? worn[0].title : (look ? look.title : "");
+    var aria = esc(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) +
+      (worn.length ? " — wore: " + esc(worn.map(function (w) { return w.title; }).join(", ")) : "") +
+      (look ? " — planned: " + esc(look.title) : (worn.length ? "" : " — tap to plan"));
+    html += '<div class="' + cls + '" data-plan-day="' + iso + '" role="button" tabindex="0" aria-label="' + aria + '">' +
+      (worn.length > 1 ? '<span class="wp-worn-count">' + worn.length + '</span>' : "") +
       '<span class="wp-dow">' + esc(d.toLocaleDateString(undefined, { weekday: "short" })) + '</span>' +
       '<span class="wp-date">' + d.getDate() + '</span>' +
       '<span class="wp-fc">' + esc(fcTxt) + '</span>' +
-      (look
-        ? '<img class="wp-thumb" src="' + esc(img) + '" alt="' + esc(look.title) + '" loading="lazy" decoding="async" data-popout="' + esc(img) + '" data-popout-alt="' + esc(look.imgAlt || look.title) + '" />'
-        : '<span class="wp-empty" aria-hidden="true">+</span>') +
+      (img
+        ? '<img class="wp-thumb" src="' + esc(img) + '" alt="' + esc(imgTitle) + '" loading="lazy" decoding="async" data-popout="' + esc(img) + '" data-popout-alt="' + esc(imgTitle) + '" />'
+        : (worn.length ? '<span class="wp-empty" aria-hidden="true">✓</span>' : '<span class="wp-empty" aria-hidden="true">+</span>')) +
       "</div>";
   }
   grid.innerHTML = html;
@@ -21401,8 +21544,16 @@ function openPlanSheet(iso) {
   var d = planDateOfISO(iso);
   if (title) title.textContent = d.toLocaleDateString(undefined, { weekday: "long" }) + " · " + d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
   var planned = planLookForDate(iso);
+  var wornDay = wornForDate(iso);
   var cands = planCandidates();
   var html = "";
+  if (wornDay.length) {
+    html += '<p class="wp-pick-label">Worn</p>' + wornDay.map(function (en) {
+      return '<div class="worn-row' + (en.selfie ? " selfie" : "") + '">' + (en.img ? '<img src="' + esc(en.img) + '" alt="" loading="lazy" data-popout="' + esc(en.img) + '" />' : "") +
+        '<span class="w-main"><span class="w-name">' + esc(en.title) + '</span>' +
+        '<span class="w-sub">' + esc(fmtDateShort(en.date)) + (en.pieces && en.pieces.length ? " · " + esc(en.pieces.join(", ")) : "") + (en.watch ? " · Watch: " + esc(en.watch) : "") + "</span></span></div>";
+    }).join("");
+  }
   if (planned) {
     var pimg = lookImg(planned);
     html += '<div class="wp-current"><img src="' + esc(pimg) + '" alt="" data-popout="' + esc(pimg) + '" data-popout-alt="' + esc(planned.imgAlt || planned.title) + '" />' +
@@ -21560,6 +21711,14 @@ function closePlanSheet() {
     });
   }
 })();
+
+/* ---------- Closet sub-pages — entry rows + back (25) ---------- */
+document.addEventListener("click", function (e) {
+  var back = e.target.closest ? e.target.closest("[data-back-wardrobe]") : null;
+  if (back) { if (typeof switchTab === "function") switchTab("wardrobe"); return; }
+  if (e.target.closest && e.target.closest("#closet-add-entry")) { if (typeof switchTab === "function") switchTab("add"); return; }
+  if (e.target.closest && e.target.closest("#closet-gaps-entry")) { if (typeof switchTab === "function") switchTab("gaps"); }
+});
 
 /* ---------- Profile measurements — grouped, two columns (13) ---------- */
 (function profileGroups() {
