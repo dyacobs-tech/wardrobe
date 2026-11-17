@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-17.35" />
+    <meta name="wardrobe-build" content="2026-11-17.36" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2287,6 +2287,30 @@
       .cdd-opt .rec-badge { font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--brass); border: 1px solid var(--brass); border-radius: 2px; padding: 2px 6px; flex: none; }
       /* The hero's one quiet control row, under Like / Don't like */
       #panel-today .hero-controls { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; justify-content: flex-start; }
+      /* Build .36 — Today hero icon actions (approved mock-51 hero v2).
+         Scoped to #panel-today / .today-hero so the outfit pop-out,
+         which carries its own verdict buttons, is untouched. Icons
+         stroke currentColor, coloured #f7f1e5 at rest; the pressed
+         verdict fills cream and flips the icon dark — the same
+         filled state the app's on-photo pressed pills use. */
+      #panel-today .hero-icon-row { display: flex; }
+      #panel-today .hero-icon-cell { flex: 1; display: flex; justify-content: center; }
+      #panel-today .hero-icon-btn {
+        width: 36px; height: 36px; min-height: 36px; border-radius: 999px; padding: 0; flex: none;
+        background: rgba(16,13,9,.42); border: 1px solid rgba(247,241,229,.45);
+        color: #f7f1e5; display: inline-flex; align-items: center; justify-content: center;
+        cursor: pointer;
+      }
+      #panel-today .hero-icon-btn svg { width: 20px; height: 20px; display: block; }
+      #panel-today .hero-icon-btn[aria-pressed="true"] { background: #f7f1e5; border-color: #f7f1e5; color: #191612; }
+      .today-hero .hero-corner { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 3; }
+      .today-hero .hero-corner-btn {
+        width: 34px; height: 34px; min-height: 34px; border-radius: 999px; padding: 0;
+        background: rgba(16,13,9,.42); border: 1px solid rgba(247,241,229,.45);
+        color: #f7f1e5; display: inline-flex; align-items: center; justify-content: center;
+        cursor: pointer;
+      }
+      .today-hero .hero-corner-btn svg { width: 20px; height: 20px; display: block; }
       #panel-today .hero-controls .cdd { min-width: 0; }
       #today-watch-dd { flex: 0 0 auto; }
       .watch-cdd { margin: 0 0 14px; }
@@ -2740,16 +2764,30 @@
           <img id="today-img" src="assets/photos/9a543e585d8b.webp" alt="" fetchpriority="high" decoding="async" />
           <div class="today-collage" id="today-collage" hidden></div>
           <div class="today-shade" aria-hidden="true"></div>
+          <!-- Build .36 (mock-51 hero v2): Share + Upload leave the
+               caption and sit on the photo's top-right corner — same
+               ids, same handlers. -->
+          <div class="hero-corner">
+            <button type="button" class="hero-corner-btn" id="today-share" aria-label="Share"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v3.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V15"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></button>
+            <button type="button" class="hero-corner-btn" id="today-upload" aria-label="Upload a look"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7.6 7.6L12 3.2l4.4 4.4"/><path d="M18 10.5h1.2A1.8 1.8 0 0 1 21 12.3v6.9a1.8 1.8 0 0 1-1.8 1.8H4.8A1.8 1.8 0 0 1 3 19.2v-6.9a1.8 1.8 0 0 1 1.8-1.8H6"/></svg></button>
+          </div>
           <div class="today-caption">
             <p class="today-kicker">Outfit of the day</p>
             <h2 id="today-name"></h2>
             <p class="today-loc" id="today-loc"><strong id="today-loc-name"></strong><span id="today-loc-weather"></span></p>
             <div class="today-dots" id="today-dots" aria-hidden="true"></div>
             <p class="today-suggest" id="today-suggest" hidden></p>
-            <div class="today-actions">
-              <button type="button" class="btn-today btn-today-line" id="today-like">I like it</button>
-              <button type="button" class="btn-today btn-today-line" id="today-dislike">Don’t like it</button>
-              <button type="button" class="btn-today btn-today-line" id="today-wore">Wore this today</button>
+            <!-- Build .36 (mock-51 hero v2): the verdict row and the
+                 text action row are now ONE row of four circular icon
+                 buttons — Like · Don't like · Style · Shop — same ids,
+                 same click behaviour. "Wore this today" leaves the
+                 hero; worn-marking stays in Calendar/planner and the
+                 outfit pop-out. -->
+            <div class="hero-icon-row">
+              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-like" aria-label="I like it" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.3a2 2 0 0 0 2-1.7l1.2-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></button></div>
+              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-dislike" aria-label="Don’t like it" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H6.7a2 2 0 0 0-2 1.7l-1.2 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg></button></div>
+              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-style" aria-label="Style this look"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M2 14h4"/><path d="M10 8h4"/><path d="M18 16h4"/></svg></button></div>
+              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-find" aria-label="Shop the look"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.1 12.1a1.5 1.5 0 0 1-1.5 1.4H7.6a1.5 1.5 0 0 1-1.5-1.4L5 8z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg></button></div>
             </div>
             <!-- One quiet row of three compact dropdowns: watch,
                  outfit type, build from. Each shows only its current
@@ -2785,12 +2823,6 @@
                   <button type="button" class="cdd-opt" data-source="combo" aria-pressed="true">Combo</button>
                 </div>
               </div>
-            </div>
-            <div class="today-actions-secondary">
-              <button type="button" class="btn-today-text" id="today-style">Style this look</button>
-              <button type="button" class="btn-today-text" id="today-find">Shop the look</button>
-              <button type="button" class="btn-today-text" id="today-share">Share</button>
-              <button type="button" class="btn-today-text" id="today-upload">Upload a look</button>
             </div>
           </div>
         </div>
@@ -4329,7 +4361,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.35";
+var WARDROBE_BUILD = "2026-11-17.36";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -10389,6 +10421,450 @@ var EXTRA_RENDERS = [
       { name: "Rust", hex: "#a85f38", role: "Rust Patterned Silk Pocket Square" }
     ]
   },
+  {
+    img: "assets/photos/cc33e6a7a4fb.webp",
+    title: "Theory Navy Knit Tee & Light Blue Knit Espadrilles",
+    imgAlt: "You wearing Loro Piana Light Blue Knit Espadrilles, Theory Navy Knit Tee and White Swim Shorts",
+    swatches: [
+      { name: "Light Glaucous Blue", hex: "#a8c4dd", role: "Loro Piana Light Blue Knit Espadrilles" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Theory Navy Knit Tee" },
+      { name: "Sulpher Yellow", hex: "#f2efe8", role: "White Swim Shorts" }
+    ]
+  },
+  {
+    img: "assets/photos/244e7e6183a5.webp",
+    title: "White Crew-Neck Tee & Light Blue Knit Espadrilles",
+    imgAlt: "You wearing Loro Piana Light Blue Knit Espadrilles, White Crew-Neck Tee and White Swim Shorts",
+    swatches: [
+      { name: "Light Glaucous Blue", hex: "#a8c4dd", role: "Loro Piana Light Blue Knit Espadrilles" },
+      { name: "Sulpher Yellow", hex: "#F5F1EA", role: "White Crew-Neck Tee" },
+      { name: "Sulpher Yellow", hex: "#f2efe8", role: "White Swim Shorts" }
+    ]
+  },
+  {
+    img: "assets/photos/33e39237d671.webp",
+    title: "Oatmeal Heather Knit Tee & Navy Swim Shorts",
+    imgAlt: "You wearing Navy Canvas Espadrille, Navy Swim Shorts and Buck Mason Oatmeal Heather Knit Tee",
+    swatches: [
+      { name: "Dark Tyrian Blue", hex: "#27324E", role: "Navy Canvas Espadrille" },
+      { name: "Dark Tyrian Blue", hex: "#22304a", role: "Navy Swim Shorts" },
+      { name: "Oatmeal Heather", hex: "#cec0aa", role: "Buck Mason Oatmeal Heather Knit Tee" }
+    ]
+  },
+  {
+    img: "assets/photos/9b2c010ca119.webp",
+    title: "Light Blue Knit Espadrilles & Sky Swim Shorts",
+    imgAlt: "You wearing FRAME Cream Ribbed Knit Tee, Loro Piana Light Blue Knit Espadrilles and Sky Swim Shorts",
+    swatches: [
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "FRAME Cream Ribbed Knit Tee" },
+      { name: "Light Glaucous Blue", hex: "#a8c4dd", role: "Loro Piana Light Blue Knit Espadrilles" },
+      { name: "Salvia Blue", hex: "#7fa8c9", role: "Sky Swim Shorts" }
+    ]
+  },
+  {
+    img: "assets/photos/181ebd408db9.webp",
+    title: "Altea Sand Knit Tee & Natural Canvas Espadrille",
+    imgAlt: "You wearing Natural Canvas Espadrille, Altea Sand Knit Tee and Sky Swim Shorts",
+    swatches: [
+      { name: "Ivory Buff", hex: "#D9C7A7", role: "Natural Canvas Espadrille" },
+      { name: "Olive Buff", hex: "#d3bd97", role: "Altea Sand Knit Tee" },
+      { name: "Salvia Blue", hex: "#7fa8c9", role: "Sky Swim Shorts" }
+    ]
+  },
+  {
+    img: "assets/photos/6e32fa779c4e.webp",
+    title: "Red Geometric Knit Tee & Olive Linen Shorts",
+    imgAlt: "You wearing Olive Linen Shorts, Adidas Cream Sneakers and Stefano Ricci Red Geometric Knit Tee",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Olive Green", hex: "#6b6a4f", role: "Olive Linen Shorts" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "Adidas Cream Sneakers" },
+      { name: "Carmine Red", hex: "#a02c2c", role: "Stefano Ricci Red Geometric Knit Tee" }
+    ]
+  },
+  {
+    img: "assets/photos/8b71372fd633.webp",
+    title: "Off-White Merino Tee & Olive Linen Shorts — White Canvas Sneaker",
+    imgAlt: "You wearing Olive Linen Shorts, Unbound Merino Off-White Merino Tee and White Canvas Sneaker",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Olive Green", hex: "#6b6a4f", role: "Olive Linen Shorts" },
+      { name: "Sulpher Yellow", hex: "#f4efe4", role: "Unbound Merino Off-White Merino Tee" },
+      { name: "Sulpher Yellow", hex: "#F2EFE6", role: "White Canvas Sneaker" }
+    ]
+  },
+  {
+    img: "assets/photos/f4afd2c893d3.webp",
+    title: "Corridor Charcoal Pocket Tee & Olive Linen Shorts",
+    imgAlt: "You wearing Cream Knit Trainer, Olive Linen Shorts and Corridor Charcoal Pocket Tee",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Ivory Buff", hex: "#E7DCC3", role: "Cream Knit Trainer" },
+      { name: "Olive Green", hex: "#6b6a4f", role: "Olive Linen Shorts" },
+      { name: "Slate Color", hex: "#3a3a3c", role: "Corridor Charcoal Pocket Tee" }
+    ]
+  },
+  {
+    img: "assets/photos/d835e10512bd.webp",
+    title: "Off-White Merino Tee & Light Blue Knit Espadrilles",
+    imgAlt: "You wearing Navy Tailored Shorts, Loro Piana Light Blue Knit Espadrilles and Unbound Merino Off-White Merino Tee",
+    watchId: "seed-vc-overseas-42040",
+    swatches: [
+      { name: "Dark Tyrian Blue", hex: "#26314a", role: "Navy Tailored Shorts" },
+      { name: "Light Glaucous Blue", hex: "#a8c4dd", role: "Loro Piana Light Blue Knit Espadrilles" },
+      { name: "Sulpher Yellow", hex: "#f4efe4", role: "Unbound Merino Off-White Merino Tee" }
+    ]
+  },
+  {
+    img: "assets/photos/dcc763347292.webp",
+    title: "Oatmeal Heather Knit Tee & Stone Tailored Shorts",
+    imgAlt: "You wearing Buck Mason Oatmeal Heather Knit Tee, Stubbs & Wootton Navy Woven Slip-On Sneakers and Stone Tailored Shorts",
+    watchId: "seed-grey-ghost",
+    swatches: [
+      { name: "Oatmeal Heather", hex: "#cec0aa", role: "Buck Mason Oatmeal Heather Knit Tee" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Stubbs & Wootton Navy Woven Slip-On Sneakers" },
+      { name: "Ecru", hex: "#c9b797", role: "Stone Tailored Shorts" }
+    ]
+  },
+  {
+    img: "assets/photos/e12c249a1aeb.webp",
+    title: "Whitesville Navy Heavyweight Tee & Multicolour Runner Sneakers",
+    imgAlt: "You wearing Navy Tailored Shorts, Loro Piana Multicolour Runner Sneakers and Whitesville Navy Heavyweight Tee",
+    watchId: "seed-vc-overseas-42040",
+    swatches: [
+      { name: "Dark Tyrian Blue", hex: "#26314a", role: "Navy Tailored Shorts" },
+      { name: "Light Brownish Olive", hex: "#7a7264", role: "Loro Piana Multicolour Runner Sneakers" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Whitesville Navy Heavyweight Tee" }
+    ]
+  },
+  {
+    img: "assets/photos/5a0254e85fa2.webp",
+    title: "Oatmeal Heather Knit Tee & Beige Corduroy Shorts",
+    imgAlt: "You wearing Beige Corduroy Shorts, Buck Mason Oatmeal Heather Knit Tee and Stubbs & Wootton Navy Woven Slip-On Sneakers",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Ecru", hex: "#cbb99b", role: "Beige Corduroy Shorts" },
+      { name: "Oatmeal Heather", hex: "#cec0aa", role: "Buck Mason Oatmeal Heather Knit Tee" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Stubbs & Wootton Navy Woven Slip-On Sneakers" }
+    ]
+  },
+  {
+    img: "assets/photos/411fc9054c50.webp",
+    title: "Cream Knit Tee & Olive Linen Shorts",
+    imgAlt: "You wearing Olive Linen Shorts, Adidas Cream Sneakers and FRAME Cream Ribbed Knit Tee",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Olive Green", hex: "#6b6a4f", role: "Olive Linen Shorts" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "Adidas Cream Sneakers" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "FRAME Cream Ribbed Knit Tee" }
+    ]
+  },
+  {
+    img: "assets/photos/dba60cf5abb5.webp",
+    title: "Navy Camp Shirt & Stone Tailored Shorts",
+    imgAlt: "You wearing Stubbs & Wootton Navy Woven Slip-On Sneakers, Navy Camp Shirt and Stone Tailored Shorts",
+    watchId: "seed-vc-overseas-42040",
+    swatches: [
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Stubbs & Wootton Navy Woven Slip-On Sneakers" },
+      { name: "Dark Tyrian Blue", hex: "#1E2A47", role: "Navy Camp Shirt" },
+      { name: "Ecru", hex: "#c9b797", role: "Stone Tailored Shorts" }
+    ]
+  },
+  {
+    img: "assets/photos/181c70b289d1.webp",
+    title: "Charcoal Pocket Tee & Olive Linen Shorts",
+    imgAlt: "You wearing Olive Linen Shorts, Adidas Cream Sneakers and Charcoal Pocket Tee",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Olive Green", hex: "#6b6a4f", role: "Olive Linen Shorts" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "Adidas Cream Sneakers" },
+      { name: "Slate Color", hex: "#3B3E44", role: "Charcoal Pocket Tee" }
+    ]
+  },
+  {
+    img: "assets/photos/61470af13e97.webp",
+    title: "Olive Chinos & White Piqué Polo",
+    imgAlt: "You wearing Olive Chinos, White Piqué Polo and White Leather Sneaker",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Olive Green", hex: "#6b6a4f", role: "Olive Chinos" },
+      { name: "Sulpher Yellow", hex: "#F5F1EA", role: "White Piqué Polo" },
+      { name: "Sulpher Yellow", hex: "#F4F1EA", role: "White Leather Sneaker" }
+    ]
+  },
+  {
+    img: "assets/photos/0664843013c6.webp",
+    title: "Sky Blue Knit Polo & Navy Chinos",
+    imgAlt: "You wearing Navy Chinos, Sky Blue Knit Polo and Stubbs & Wootton Navy Woven Slip-On Sneakers",
+    watchId: "seed-vc-overseas-42040",
+    swatches: [
+      { name: "Dark Tyrian Blue", hex: "#26314a", role: "Navy Chinos" },
+      { name: "Light Glaucous Blue", hex: "#a8c4dd", role: "Sky Blue Knit Polo" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Stubbs & Wootton Navy Woven Slip-On Sneakers" }
+    ]
+  },
+  {
+    img: "assets/photos/2e603a85542d.webp",
+    title: "Zigzag Stripe Tee & White Linen Trousers",
+    imgAlt: "You wearing Adidas Cream Sneakers, Zigzag Stripe Tee and White Linen Trousers",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "Adidas Cream Sneakers" },
+      { name: "Sulpher Yellow", hex: "#f5f1e8", role: "Zigzag Stripe Tee" },
+      { name: "Sulpher Yellow", hex: "#f4f1e8", role: "White Linen Trousers" }
+    ]
+  },
+  {
+    img: "assets/photos/858626ddfaa8.webp",
+    title: "Navy Breton Stripe Polo & Stone Suede Penny Loafer",
+    imgAlt: "You wearing Navy Tailored Shorts, Brunello Cucinelli Navy Breton Stripe Polo and Stone Suede Penny Loafer",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Dark Tyrian Blue", hex: "#26314a", role: "Navy Tailored Shorts" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Brunello Cucinelli Navy Breton Stripe Polo" },
+      { name: "Ecru", hex: "#B4A68C", role: "Stone Suede Penny Loafer" }
+    ]
+  },
+  {
+    img: "assets/photos/d84ee3de6ed3.webp",
+    title: "Sand Linen Shirt & Black Jeans",
+    imgAlt: "You wearing Black Jeans, Loro Piana Cream Knit 360 Flexy Walk Sneakers and Sand Linen Shirt",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Black", hex: "#1e1f22", role: "Black Jeans" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "Loro Piana Cream Knit 360 Flexy Walk Sneakers" },
+      { name: "Ivory Buff", hex: "#DCC7A4", role: "Sand Linen Shirt" }
+    ]
+  },
+  {
+    img: "assets/photos/5a2e0c8d373a.webp",
+    title: "Cream Cricket Sweater & White Linen Trousers",
+    imgAlt: "You wearing Belgian Shoes Olive Suede Loafers, Cream Cricket Sweater and White Linen Trousers",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Olive Green", hex: "#6b6a4f", role: "Belgian Shoes Olive Suede Loafers" },
+      { name: "Sulpher Yellow", hex: "#f2ead8", role: "Cream Cricket Sweater" },
+      { name: "Sulpher Yellow", hex: "#f4f1e8", role: "White Linen Trousers" }
+    ]
+  },
+  {
+    img: "assets/photos/dd6936f919c8.webp",
+    title: "Cream Knit Tee & Black Jeans",
+    imgAlt: "You wearing Black Jeans, FRAME Cream Ribbed Knit Tee and Loro Piana Cream Knit 360 Flexy Walk Sneakers",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Black", hex: "#1e1f22", role: "Black Jeans" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "FRAME Cream Ribbed Knit Tee" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "Loro Piana Cream Knit 360 Flexy Walk Sneakers" }
+    ]
+  },
+  {
+    img: "assets/photos/31d8e28bac7b.webp",
+    title: "Ecru Jeans & Cream Knit Polo",
+    imgAlt: "You wearing Ecru Jeans, Isaia Cream Knit Polo and Vibi Venezia Black Velvet Furlane Slippers",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Ivory Buff", hex: "#e6dcc4", role: "Ecru Jeans" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "Isaia Cream Knit Polo" },
+      { name: "Black", hex: "#1c1c1e", role: "Vibi Venezia Black Velvet Furlane Slippers" }
+    ]
+  },
+  {
+    img: "assets/photos/a56e03e47784.webp",
+    title: "Olive Knit Polo & Camo Pony-Hair Loafers",
+    imgAlt: "You wearing Cream Chinos, Belgian Shoes Camo Pony-Hair Loafers and Brunello Cucinelli Olive Knit Polo",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Sulpher Yellow", hex: "#ece3cd", role: "Cream Chinos" },
+      { name: "Olive Green", hex: "#6d6a55", role: "Belgian Shoes Camo Pony-Hair Loafers" },
+      { name: "Olive Green", hex: "#6b6a4f", role: "Brunello Cucinelli Olive Knit Polo" }
+    ]
+  },
+  {
+    img: "assets/photos/2014a9b2c4a0.webp",
+    title: "Charcoal Ribbed Knit Polo & Light Blue Knit Espadrilles",
+    imgAlt: "You wearing Loro Piana Charcoal Ribbed Knit Polo, Loro Piana Light Blue Knit Espadrilles and White Linen Trousers",
+    watchId: "seed-cartier-gouvernail",
+    swatches: [
+      { name: "Slate Color", hex: "#3a3a3c", role: "Loro Piana Charcoal Ribbed Knit Polo" },
+      { name: "Light Glaucous Blue", hex: "#a8c4dd", role: "Loro Piana Light Blue Knit Espadrilles" },
+      { name: "Sulpher Yellow", hex: "#f4f1e8", role: "White Linen Trousers" }
+    ]
+  },
+  {
+    img: "assets/photos/151d4570445e.webp",
+    title: "Navy Chore Jacket & Beige Corduroy Shorts",
+    imgAlt: "You wearing Beige Corduroy Shorts, Navy Chore Jacket, Stubbs & Wootton Navy Woven Slip-On Sneakers and Theory Navy Knit Tee",
+    watchId: "seed-vc-overseas-42040",
+    swatches: [
+      { name: "Ecru", hex: "#cbb99b", role: "Beige Corduroy Shorts" },
+      { name: "Dark Tyrian Blue", hex: "#26314e", role: "Navy Chore Jacket" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Stubbs & Wootton Navy Woven Slip-On Sneakers" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Theory Navy Knit Tee" }
+    ]
+  },
+  {
+    img: "assets/photos/0c394b27174d.webp",
+    title: "Sand Chore Jacket & Stone Tailored Shorts",
+    imgAlt: "You wearing Sand Chore Jacket, Hermès Navy Piqué Polo, Stone Suede Penny Loafer and Stone Tailored Shorts",
+    watchId: "seed-grey-ghost",
+    swatches: [
+      { name: "Ecru", hex: "#c9b18c", role: "Sand Chore Jacket" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Hermès Navy Piqué Polo" },
+      { name: "Ecru", hex: "#B4A68C", role: "Stone Suede Penny Loafer" },
+      { name: "Ecru", hex: "#c9b797", role: "Stone Tailored Shorts" }
+    ]
+  },
+  {
+    img: "assets/photos/9cd70bc66ace.webp",
+    title: "Navy Wool Overshirt & Grey Heather Striped-Collar Tee",
+    imgAlt: "You wearing Navy Wool Overshirt, Brunello Cucinelli Grey Heather Striped-Collar Tee, Stone Suede Penny Loafer and Stone Tailored Shorts",
+    watchId: "seed-vc-overseas-42040",
+    swatches: [
+      { name: "Dark Tyrian Blue", hex: "#2a3350", role: "Navy Wool Overshirt" },
+      { name: "Warm Gray", hex: "#9a9a98", role: "Brunello Cucinelli Grey Heather Striped-Collar Tee" },
+      { name: "Ecru", hex: "#B4A68C", role: "Stone Suede Penny Loafer" },
+      { name: "Ecru", hex: "#c9b797", role: "Stone Tailored Shorts" }
+    ]
+  },
+  {
+    img: "assets/photos/1a4c2200541d.webp",
+    title: "Sky Blue Piqué Polo & Light Blue Knit Espadrilles",
+    imgAlt: "You wearing Cream Chinos, Brunello Cucinelli Sky Blue Piqué Polo and Loro Piana Light Blue Knit Espadrilles",
+    watchId: "seed-cartier-gouvernail",
+    swatches: [
+      { name: "Sulpher Yellow", hex: "#ece3cd", role: "Cream Chinos" },
+      { name: "Light Glaucous Blue", hex: "#a8c4dd", role: "Brunello Cucinelli Sky Blue Piqué Polo" },
+      { name: "Light Glaucous Blue", hex: "#a8c4dd", role: "Loro Piana Light Blue Knit Espadrilles" }
+    ]
+  },
+  {
+    img: "assets/photos/70d638e7d88c.webp",
+    title: "Blue Fatigue Trousers & Charcoal Tipped Polo",
+    imgAlt: "You wearing Blue Cotton Twill Fatigue Trousers, Brunello Cucinelli Charcoal Tipped Polo and Stubbs & Wootton Navy Woven Slip-On Sneakers",
+    watchId: "seed-vc-overseas-42040",
+    swatches: [
+      { name: "Slate Color", hex: "#55708c", role: "Blue Cotton Twill Fatigue Trousers" },
+      { name: "Slate Color", hex: "#3a3a3c", role: "Brunello Cucinelli Charcoal Tipped Polo" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Stubbs & Wootton Navy Woven Slip-On Sneakers" }
+    ]
+  },
+  {
+    img: "assets/photos/e4f354f29741.webp",
+    title: "Charcoal Knit Vest & White Jeans",
+    imgAlt: "You wearing Black Leather Belt, Belgian Shoes Black Velvet Loafers, Canali Charcoal Knit Vest, Hermès Navy Piqué Polo and White Jeans",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Black", hex: "#17171a", role: "Black Leather Belt" },
+      { name: "Black", hex: "#1c1c1e", role: "Belgian Shoes Black Velvet Loafers" },
+      { name: "Slate Color", hex: "#3a3a3c", role: "Canali Charcoal Knit Vest" },
+      { name: "Dark Tyrian Blue", hex: "#26314b", role: "Hermès Navy Piqué Polo" },
+      { name: "Sulpher Yellow", hex: "#f2efe8", role: "White Jeans" }
+    ]
+  },
+  {
+    img: "assets/photos/095f16fedf34.webp",
+    title: "Charcoal Knit Vest & White Brown Stripe Polo",
+    imgAlt: "You wearing Black Suede Belt, Ecru Jeans, Canali Charcoal Knit Vest, Brunello Cucinelli White Brown Stripe Polo and Edward Green Dark Brown Suede Penny Loafers",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Black", hex: "#1b1b1e", role: "Black Suede Belt" },
+      { name: "Ivory Buff", hex: "#e6dcc4", role: "Ecru Jeans" },
+      { name: "Slate Color", hex: "#3a3a3c", role: "Canali Charcoal Knit Vest" },
+      { name: "Sulpher Yellow", hex: "#f5efe4", role: "Brunello Cucinelli White Brown Stripe Polo" },
+      { name: "Vandyke Brown", hex: "#4a3421", role: "Edward Green Dark Brown Suede Penny Loafers" }
+    ]
+  },
+  {
+    img: "assets/photos/cb61f9e3807b.webp",
+    title: "Cream Ribbed Knit Polo & Black Jeans",
+    imgAlt: "You wearing Black Suede Belt, Black Jeans, Adidas Cream Sneakers and Brunello Cucinelli Cream Ribbed Knit Polo",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Black", hex: "#1b1b1e", role: "Black Suede Belt" },
+      { name: "Black", hex: "#1e1f22", role: "Black Jeans" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "Adidas Cream Sneakers" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "Brunello Cucinelli Cream Ribbed Knit Polo" }
+    ]
+  },
+  {
+    img: "assets/photos/81e65bf76a9e.webp",
+    title: "Blue Fatigue Trousers & Dark Green Horsebit Loafers",
+    imgAlt: "You wearing Loro Piana Navy Tipped Knit Polo, Blue Cotton Twill Fatigue Trousers and Gucci Dark Green Eel Horsebit Loafers",
+    watchId: "seed-vc-overseas-42040",
+    swatches: [
+      { name: "Navy", hex: "#26314b", role: "Loro Piana Navy Tipped Knit Polo" },
+      { name: "Blue", hex: "#55708c", role: "Blue Cotton Twill Fatigue Trousers" },
+      { name: "Dark Green", hex: "#2e4038", role: "Gucci Dark Green Eel Horsebit Loafers" }
+    ]
+  },
+  {
+    img: "assets/photos/b6d3c983a07f.webp",
+    title: "Indigo Jeans & Olive Knit Polo",
+    imgAlt: "You wearing Indigo Jeans, Adidas Cream Sneakers and Brunello Cucinelli Olive Knit Polo",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Slate Color", hex: "#2e4057", role: "Indigo Jeans" },
+      { name: "Sulpher Yellow", hex: "#f0e6d2", role: "Adidas Cream Sneakers" },
+      { name: "Olive Green", hex: "#6b6a4f", role: "Brunello Cucinelli Olive Knit Polo" }
+    ]
+  },
+  {
+    img: "assets/photos/58c86b0010fd.webp",
+    title: "White Cotton Western Shirt & Cream Wool Trousers",
+    imgAlt: "You wearing Cream Wool Trousers, Black Leather Penny Loafer and White Cotton Western Shirt",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Sulpher Yellow", hex: "#ece3cd", role: "Cream Wool Trousers" },
+      { name: "Black", hex: "#17130F", role: "Black Leather Penny Loafer" },
+      { name: "Sulpher Yellow", hex: "#F5F1EA", role: "White Cotton Western Shirt" }
+    ]
+  },
+  {
+    img: "assets/photos/4a8f99acac5b.webp",
+    title: "White Linen Camp Shirt & Black Jeans",
+    imgAlt: "You wearing Black Jeans, Black Leather Sandal and White Linen Camp Shirt",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Black", hex: "#1e1f22", role: "Black Jeans" },
+      { name: "Black", hex: "#1A1511", role: "Black Leather Sandal" },
+      { name: "Sulpher Yellow", hex: "#F5F1EA", role: "White Linen Camp Shirt" }
+    ]
+  },
+  {
+    img: "assets/photos/68b49fe71bfb.webp",
+    title: "Sand Knit Tee & Navy Wool Trousers",
+    imgAlt: "You wearing Navy Wool Trousers, Sand Knit Tee and White Canvas Sneaker",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Deep Slate Olive", hex: "#232c3f", role: "Navy Wool Trousers" },
+      { name: "Olive Buff", hex: "#D8C69C", role: "Sand Knit Tee" },
+      { name: "Sulpher Yellow", hex: "#F2EFE6", role: "White Canvas Sneaker" }
+    ]
+  },
+  {
+    img: "assets/photos/fda68a021c04.webp",
+    title: "Charcoal Pocket Tee & White Linen Trousers",
+    imgAlt: "You wearing Brown Suede Belt, Dark Brown Suede Chelsea Boot, Charcoal Pocket Tee and White Linen Trousers",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Pale Raw Umber", hex: "#7a5230", role: "Brown Suede Belt" },
+      { name: "Vandyke Brown", hex: "#48331F", role: "Dark Brown Suede Chelsea Boot" },
+      { name: "Slate Color", hex: "#3B3E44", role: "Charcoal Pocket Tee" },
+      { name: "Sulpher Yellow", hex: "#f4f1e8", role: "White Linen Trousers" }
+    ]
+  },
+  {
+    img: "assets/photos/eb3de7319f0a.webp",
+    title: "White Oxford Button-Down Shirt & Light Grey Wool Trousers",
+    imgAlt: "You wearing Light Grey Wool Trousers, White Oxford Button-Down Shirt and Black Leather Tassel Loafer",
+    watchId: "seed-ap-25594ba",
+    swatches: [
+      { name: "Neutral Gray", hex: "#b4b6b8", role: "Light Grey Wool Trousers" },
+      { name: "Sulpher Yellow", hex: "#F5F1EA", role: "White Oxford Button-Down Shirt" },
+      { name: "Black", hex: "#16120E", role: "Black Leather Tassel Loafer" }
+    ]
+  }
 ];
 var RENDER_POOL = SEED_LOOKS.concat(EXTRA_RENDERS);
 
@@ -10818,7 +11294,47 @@ var RENDER_FORMALITY = {
   "assets/photos/844306344e9c.webp": 6,
   "assets/photos/ca9acab9a39b.webp": 7,
   "assets/photos/d7ea7c441ca0.webp": 7,
-  "assets/photos/7494aeb7863b.webp": 4
+  "assets/photos/7494aeb7863b.webp": 4,
+  "assets/photos/cc33e6a7a4fb.webp": 1,
+  "assets/photos/244e7e6183a5.webp": 1,
+  "assets/photos/33e39237d671.webp": 1,
+  "assets/photos/9b2c010ca119.webp": 1,
+  "assets/photos/181ebd408db9.webp": 1,
+  "assets/photos/6e32fa779c4e.webp": 2,
+  "assets/photos/8b71372fd633.webp": 2,
+  "assets/photos/f4afd2c893d3.webp": 2,
+  "assets/photos/d835e10512bd.webp": 2,
+  "assets/photos/dcc763347292.webp": 2,
+  "assets/photos/e12c249a1aeb.webp": 2,
+  "assets/photos/5a0254e85fa2.webp": 2,
+  "assets/photos/411fc9054c50.webp": 2,
+  "assets/photos/dba60cf5abb5.webp": 2,
+  "assets/photos/181c70b289d1.webp": 2,
+  "assets/photos/61470af13e97.webp": 3,
+  "assets/photos/0664843013c6.webp": 3,
+  "assets/photos/2e603a85542d.webp": 3,
+  "assets/photos/858626ddfaa8.webp": 3,
+  "assets/photos/d84ee3de6ed3.webp": 3,
+  "assets/photos/5a2e0c8d373a.webp": 3,
+  "assets/photos/dd6936f919c8.webp": 3,
+  "assets/photos/31d8e28bac7b.webp": 3,
+  "assets/photos/a56e03e47784.webp": 3,
+  "assets/photos/2014a9b2c4a0.webp": 3,
+  "assets/photos/151d4570445e.webp": 3,
+  "assets/photos/0c394b27174d.webp": 3,
+  "assets/photos/9cd70bc66ace.webp": 3,
+  "assets/photos/1a4c2200541d.webp": 3,
+  "assets/photos/70d638e7d88c.webp": 3,
+  "assets/photos/e4f354f29741.webp": 4,
+  "assets/photos/095f16fedf34.webp": 4,
+  "assets/photos/cb61f9e3807b.webp": 4,
+  "assets/photos/81e65bf76a9e.webp": 4,
+  "assets/photos/b6d3c983a07f.webp": 4,
+  "assets/photos/58c86b0010fd.webp": 4,
+  "assets/photos/4a8f99acac5b.webp": 4,
+  "assets/photos/68b49fe71bfb.webp": 4,
+  "assets/photos/fda68a021c04.webp": 4,
+  "assets/photos/eb3de7319f0a.webp": 4
 };
 var formalityLevel = store.get("formality", 4);
 if (!(formalityLevel >= 1 && formalityLevel <= 7)) formalityLevel = 4;
@@ -19978,6 +20494,7 @@ function renderToday() {
      look now on screen, so the Shop tab never opens on a stale
      photograph from an earlier deal. */
   if (typeof syncShopLookToToday === "function") syncShopLookToToday();
+  if (typeof syncTodayVerdict === "function") syncTodayVerdict();
 }
 
 /* ================= Location & weather =================
@@ -23359,11 +23876,24 @@ function removeWornForLook(lookId, date) {
   if (wornLog.length !== before) store.set("wornLog", wornLog);
 }
 function addWornLog(entry) { recordWorn(entry); }
+/* Build .36: the hero's verdict buttons are icons now; their
+   filled state is aria-pressed, synced from the look's verdict —
+   the same state the pop-out's verdict buttons show. Presentation
+   only: the verdict itself is still set by likeLook / the dislike
+   path, exactly as before. */
+function syncTodayVerdict() {
+  var v = (typeof todayLook !== "undefined" && todayLook) ? todayLook.verdict : null;
+  var like = document.getElementById("today-like");
+  var dislike = document.getElementById("today-dislike");
+  if (like) like.setAttribute("aria-pressed", v === "like" ? "true" : "false");
+  if (dislike) dislike.setAttribute("aria-pressed", v === "dislike" ? "true" : "false");
+}
 function likeToday() {
   if (!todayLook) return;
   /* Most recently liked sits FIRST in My Looks, in the Queued
      state — the shared likeLook path. */
   likeLook(todayLook);
+  syncTodayVerdict();
   toast("Liked \u2014 saved and queued in My Looks.");
 }
 function woreToday() {
@@ -23402,10 +23932,8 @@ function woreToday() {
 (function todayControls() {
   var like = document.getElementById("today-like");
   if (like) like.addEventListener("click", likeToday);
-  var wore = document.getElementById("today-wore");
-  /* "Wore this today" logs the hero outfit as worn in one tap —
-     the selfie log in Me stays the separate photo path. */
-  if (wore) wore.addEventListener("click", woreToday);
+  /* Build .36: the hero has no "Wore this today" button — worn-
+     marking stays available in Calendar/planner and the pop-out. */
   var hero = document.getElementById("today-hero");
   if (hero) {
     var sx = null, sy = null;
@@ -24385,6 +24913,7 @@ if (heroEl) {
   heroEl.addEventListener("click", function (e) {
     if (Date.now() - htEnd < 600 && htDist > 40) return;
     if (e.target.closest && e.target.closest(".today-caption")) return;
+    if (e.target.closest && e.target.closest(".hero-corner")) return;
     if (e.target.closest && e.target.closest("[data-popout]")) return;
     if (typeof todayLook !== "undefined" && todayLook) {
       /* The pop-out is the look's OWN image — the render of him
@@ -25452,7 +25981,7 @@ function setSyncStatus(t) {
 var _syFailed = false, _syRetryT = null, _syNoteOff = false;
 /* Mass-delete guard state: a sync pass that would delete more
    than ~20% of a collection is held until the user confirms it
-   in the data alert (the worker enforces the same rule and can
+   in the data-alert note (the worker enforces the same rule and can
    raise the hold itself with a 409). _syMassOkUntil arms one
    confirmed pass; _syMassDenied holds a coll silently for the
    session after a "Keep them" answer. */
