@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.27" />
+    <meta name="wardrobe-build" content="2026-11-17.28" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -968,22 +968,22 @@
          measurement inputs in a two-column grid on phones (half
          the scrolling), small labels, and tighter location and
          data cards. */
-      #panel-profile label.field { font-size: 11px; letter-spacing: .14em; margin-bottom: 3px; }
-      #panel-profile input[type="text"], #panel-profile input[type="search"], #panel-profile select, #panel-profile textarea { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
-      #panel-profile .profile-grid { gap: 8px; }
-      @media (max-width: 639px) { #panel-profile .profile-grid { grid-template-columns: 1fr 1fr; } }
-      #panel-profile #profile-form { padding: 10px 12px; gap: 7px; }
-      #panel-profile .loc-card { padding: 10px 12px; gap: 8px; margin-bottom: 12px !important; }
-      #panel-profile .loc-card h3 { font-size: 16px; }
-      #panel-profile .loc-now .loc-name { font-size: 16px; }
-      #panel-profile .loc-weather, #panel-profile .loc-rec { font-size: 13px; line-height: 1.4; }
-      #panel-profile .data-card { padding: 10px 12px; gap: 8px; margin-top: 10px; }
-      #panel-profile .data-card h3 { font-size: 16px; }
-      #panel-profile .data-card p { font-size: 13px; line-height: 1.45; }
-      #panel-profile .chip { min-height: 27px; padding: 3px 10px; font-size: 12px; }
-      #panel-profile .btn-ink, #panel-profile .btn-ghost, #panel-profile .btn-accent { min-height: 34px; padding: 6px 12px; font-size: 11.5px; }
-      #panel-profile .loc-actions { gap: 6px; margin-top: 8px; }
-      #panel-profile .loc-quick { gap: 6px; }
+      #panel-pinfo label.field, #panel-plocation label.field, #panel-pcloud label.field { font-size: 11px; letter-spacing: .14em; margin-bottom: 3px; }
+      #panel-pinfo input[type="text"], #panel-plocation input[type="text"], #panel-pcloud input[type="text"], #panel-pinfo input[type="search"], #panel-plocation input[type="search"], #panel-pcloud input[type="search"], #panel-pinfo select, #panel-plocation select, #panel-pcloud select, #panel-pinfo textarea, #panel-plocation textarea, #panel-pcloud textarea { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
+      #panel-pinfo .profile-grid, #panel-plocation .profile-grid, #panel-pcloud .profile-grid { gap: 8px; }
+      @media (max-width: 639px) { #panel-pinfo .profile-grid, #panel-plocation .profile-grid, #panel-pcloud .profile-grid { grid-template-columns: 1fr 1fr; } }
+      #panel-pinfo #profile-form, #panel-plocation #profile-form, #panel-pcloud #profile-form { padding: 10px 12px; gap: 7px; }
+      #panel-pinfo .loc-card, #panel-plocation .loc-card, #panel-pcloud .loc-card { padding: 10px 12px; gap: 8px; margin-bottom: 12px !important; }
+      #panel-pinfo .loc-card h3, #panel-plocation .loc-card h3, #panel-pcloud .loc-card h3 { font-size: 16px; }
+      #panel-pinfo .loc-now .loc-name, #panel-plocation .loc-now .loc-name, #panel-pcloud .loc-now .loc-name { font-size: 16px; }
+      #panel-pinfo .loc-weather, #panel-plocation .loc-weather, #panel-pcloud .loc-weather, #panel-pinfo .loc-rec, #panel-plocation .loc-rec, #panel-pcloud .loc-rec { font-size: 13px; line-height: 1.4; }
+      #panel-pinfo .data-card, #panel-plocation .data-card, #panel-pcloud .data-card { padding: 10px 12px; gap: 8px; margin-top: 10px; }
+      #panel-pinfo .data-card h3, #panel-plocation .data-card h3, #panel-pcloud .data-card h3 { font-size: 16px; }
+      #panel-pinfo .data-card p, #panel-plocation .data-card p, #panel-pcloud .data-card p { font-size: 13px; line-height: 1.45; }
+      #panel-pinfo .chip, #panel-plocation .chip, #panel-pcloud .chip { min-height: 27px; padding: 3px 10px; font-size: 12px; }
+      #panel-pinfo .btn-ink, #panel-plocation .btn-ink, #panel-pcloud .btn-ink, #panel-pinfo .btn-ghost, #panel-plocation .btn-ghost, #panel-pcloud .btn-ghost, #panel-pinfo .btn-accent, #panel-plocation .btn-accent, #panel-pcloud .btn-accent { min-height: 34px; padding: 6px 12px; font-size: 11.5px; }
+      #panel-pinfo .loc-actions, #panel-plocation .loc-actions, #panel-pcloud .loc-actions { gap: 6px; margin-top: 8px; }
+      #panel-pinfo .loc-quick, #panel-plocation .loc-quick, #panel-pcloud .loc-quick { gap: 6px; }
 
       /* ---------- Brands — shops inside Inspiration ----------
          A compact index of the houses and stores to shop: dense
@@ -1172,9 +1172,9 @@
       .plate-card .pc-use { width: calc(100% - 16px); margin: 0 8px 8px; min-height: 30px; padding: 4px 8px; font-size: 11px; }
 
       /* Profile — Backup as one small row */
-      #panel-profile #data-card { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
-      #panel-profile #data-card .card-head-info { flex: none; }
-      #panel-profile #data-card #data-status { flex-basis: 100%; }
+      #panel-pinfo #data-card, #panel-plocation #data-card, #panel-pcloud #data-card { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+      #panel-pinfo #data-card .card-head-info, #panel-plocation #data-card .card-head-info, #panel-pcloud #data-card .card-head-info { flex: none; }
+      #panel-pinfo #data-card #data-status, #panel-plocation #data-card #data-status, #panel-pcloud #data-card #data-status { flex-basis: 100%; }
       #panel-watches .add-form { padding: 10px 12px; gap: 7px; }
       #panel-watches label.field { font-size: 11px; letter-spacing: .14em; margin-bottom: 3px; }
       #panel-watches input[type="text"], #panel-watches select, #panel-watches textarea { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
@@ -1481,7 +1481,7 @@
       #panel-icons .btn-accent, #panel-icons .btn-ghost, #panel-icons .btn-ink,
       #panel-icons .icon-result .btn-accent, #panel-icons .icon-result .btn-ghost,
       .icon-result .btn-accent, .icon-result .btn-ghost,
-      #panel-profile .btn-ink, #panel-profile .btn-ghost, #panel-profile .btn-accent,
+      #panel-pinfo .btn-ink, #panel-plocation .btn-ink, #panel-pcloud .btn-ink, #panel-pinfo .btn-ghost, #panel-plocation .btn-ghost, #panel-pcloud .btn-ghost, #panel-pinfo .btn-accent, #panel-plocation .btn-accent, #panel-pcloud .btn-accent,
       #panel-watches .btn-ink, #panel-watches .btn-ghost, #panel-watches .btn-accent,
       #panel-studio .studio-nav .btn-ghost, #panel-studio .studio-nav .btn-ink,
       #panel-studio #style-btn,
@@ -1504,7 +1504,7 @@
       /* One chip — filters, feedback, formality, places, selectors */
       .chip, .fb-chips .chip, .fchip, .sel-opts .chip, .studio-type-row button,
       .dress-for .chip, .choice-chip,
-      #panel-studio .chip, #panel-wardrobe .chip, #panel-looks .chip, #panel-profile .chip, #panel-watches .chip,
+      #panel-studio .chip, #panel-wardrobe .chip, #panel-looks .chip, #panel-pinfo .chip, #panel-plocation .chip, #panel-pcloud .chip, #panel-watches .chip,
       #panel-today .today-formality .fchip, .today-loc-chips .tlc {
         min-height: 30px; padding: 4px 12px; font-size: 12.5px; font-weight: 500;
         letter-spacing: .02em; border-radius: 999px;
@@ -1517,7 +1517,7 @@
       input[type="text"], input[type="search"], select,
       #panel-studio input[type="text"], #panel-studio input[type="search"], #panel-studio select,
       #panel-wardrobe input[type="text"], #panel-wardrobe input[type="search"], #panel-wardrobe select,
-      #panel-profile input[type="text"], #panel-profile input[type="search"], #panel-profile select,
+      #panel-pinfo input[type="text"], #panel-plocation input[type="text"], #panel-pcloud input[type="text"], #panel-pinfo input[type="search"], #panel-plocation input[type="search"], #panel-pcloud input[type="search"], #panel-pinfo select, #panel-plocation select, #panel-pcloud select,
       #panel-icons input[type="text"], #panel-icons input[type="search"], #panel-icons select,
       #panel-palettes input[type="text"], #panel-palettes input[type="search"], #panel-palettes select,
       #panel-brands input[type="search"], #panel-looks input[type="search"],
@@ -1528,7 +1528,7 @@
         min-height: 38px; padding: 8px 11px; font-size: 15px;
       }
       textarea,
-      #panel-studio textarea, #panel-wardrobe textarea, #panel-profile textarea,
+      #panel-studio textarea, #panel-wardrobe textarea, #panel-pinfo textarea, #panel-plocation textarea, #panel-pcloud textarea,
       #panel-icons textarea, #panel-palettes textarea,
       #panel-watches textarea {
         padding: 8px 11px; font-size: 15px;
@@ -1536,7 +1536,7 @@
       #panel-find .find-searchbar { min-height: 38px; padding: 8px 14px; font-size: 15px; }
       /* One label — the small gold caps label, everywhere */
       label.field,
-      #panel-studio label.field, #panel-wardrobe label.field, #panel-profile label.field,
+      #panel-studio label.field, #panel-wardrobe label.field, #panel-pinfo label.field, #panel-plocation label.field, #panel-pcloud label.field,
       #panel-icons label.field, #panel-palettes label.field, #panel-find label.field,
       #panel-brands label.field, #panel-wearing label.field, #panel-myinspo label.field,
       #panel-watches label.field {
@@ -1555,7 +1555,7 @@
       .card { border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-card); }
       .add-form, .studio-form, .loc-card, .data-card, .featured, .item-detail-card,
       .custom-card, .icon-card, .principles, .info-pop-card, .find-card,
-      #panel-profile #profile-form, #panel-profile .loc-card, #panel-profile .data-card,
+      #panel-pinfo #profile-form, #panel-plocation #profile-form, #panel-pcloud #profile-form, #panel-pinfo .loc-card, #panel-plocation .loc-card, #panel-pcloud .loc-card, #panel-pinfo .data-card, #panel-plocation .data-card, #panel-pcloud .data-card,
       #panel-wardrobe .add-form, #panel-wardrobe .item-detail-card,
       #panel-palettes .add-form, #panel-icons .add-form, #panel-studio .studio-form,
       #panel-wearing .wearing-form, #panel-myinspo .myinspo-form,
@@ -1639,7 +1639,7 @@
       #panel-icons .btn-accent, #panel-icons .btn-ghost, #panel-icons .btn-ink,
       #panel-icons .icon-result .btn-accent, #panel-icons .icon-result .btn-ghost,
       .icon-result .btn-accent, .icon-result .btn-ghost,
-      #panel-profile .btn-ink, #panel-profile .btn-ghost, #panel-profile .btn-accent,
+      #panel-pinfo .btn-ink, #panel-plocation .btn-ink, #panel-pcloud .btn-ink, #panel-pinfo .btn-ghost, #panel-plocation .btn-ghost, #panel-pcloud .btn-ghost, #panel-pinfo .btn-accent, #panel-plocation .btn-accent, #panel-pcloud .btn-accent,
       #panel-watches .btn-ink, #panel-watches .btn-ghost, #panel-watches .btn-accent,
       #panel-studio .studio-nav .btn-ghost, #panel-studio .studio-nav .btn-ink,
       #panel-studio #style-btn,
@@ -1660,7 +1660,7 @@
       /* One chip — even smaller */
       .chip, .fb-chips .chip, .fchip, .sel-opts .chip, .studio-type-row button,
       .dress-for .chip, .choice-chip,
-      #panel-studio .chip, #panel-wardrobe .chip, #panel-looks .chip, #panel-profile .chip, #panel-watches .chip,
+      #panel-studio .chip, #panel-wardrobe .chip, #panel-looks .chip, #panel-pinfo .chip, #panel-plocation .chip, #panel-pcloud .chip, #panel-watches .chip,
       #panel-today .today-formality .fchip, .today-loc-chips .tlc {
         min-height: 23px; padding: 2px 8px; font-size: 11px;
       }
@@ -1712,7 +1712,7 @@
       input[type="text"], input[type="search"], select,
       #panel-studio input[type="text"], #panel-studio input[type="search"], #panel-studio select,
       #panel-wardrobe input[type="text"], #panel-wardrobe input[type="search"], #panel-wardrobe select,
-      #panel-profile input[type="text"], #panel-profile input[type="search"], #panel-profile select,
+      #panel-pinfo input[type="text"], #panel-plocation input[type="text"], #panel-pcloud input[type="text"], #panel-pinfo input[type="search"], #panel-plocation input[type="search"], #panel-pcloud input[type="search"], #panel-pinfo select, #panel-plocation select, #panel-pcloud select,
       #panel-icons input[type="text"], #panel-icons input[type="search"], #panel-icons select,
       #panel-palettes input[type="text"], #panel-palettes input[type="search"], #panel-palettes select,
       #panel-brands input[type="search"], #panel-looks input[type="search"],
@@ -1805,7 +1805,7 @@
 
       /* ---------- 3 · Type system — gold caps labels on one scale ---------- */
       label.field,
-      #panel-studio label.field, #panel-wardrobe label.field, #panel-profile label.field,
+      #panel-studio label.field, #panel-wardrobe label.field, #panel-pinfo label.field, #panel-plocation label.field, #panel-pcloud label.field,
       #panel-icons label.field, #panel-palettes label.field, #panel-find label.field,
       #panel-brands label.field, #panel-wearing label.field, #panel-myinspo label.field,
       #panel-watches label.field,
@@ -2442,7 +2442,7 @@
       /* Profile — the location and data cards are grids with an
          8px gap, and their action rows ALSO carried margin-top
          8px: a measured 16px double separator. One separator. */
-      #panel-profile .loc-actions { margin-top: 0; }
+      #panel-pinfo .loc-actions, #panel-plocation .loc-actions, #panel-pcloud .loc-actions { margin-top: 0; }
       /* Empty states — 16px of padding around a single line. */
       .empty { padding: 12px 16px; }
       /* Section furniture — letter, month and capsule heads
@@ -2518,7 +2518,7 @@
       /* Labels — one small-caps gold .field treatment on every page */
       label.field, .sel-name, .profile-group-head, .brand-group-head,
       #panel-studio label.field, #panel-wardrobe label.field, #panel-add label.field,
-      #panel-gaps label.field, #panel-profile label.field, #panel-icons label.field,
+      #panel-gaps label.field, #panel-pinfo label.field, #panel-plocation label.field, #panel-pcloud label.field, #panel-icons label.field,
       #panel-palettes label.field, #panel-find label.field, #panel-brands label.field,
       #panel-wearing label.field, #panel-myinspo label.field, #panel-watches label.field,
       #panel-looks label.field, #panel-calendar label.field, #panel-sale label.field,
@@ -2577,13 +2577,51 @@
         font-size: 11px; font-weight: 600; letter-spacing: .14em;
         text-transform: uppercase; color: var(--brass);
       }
+      /* Build .28 — Closet top row + brand rails, Ideas source
+         toggle, My Looks pill scroll, Shop piece controls, worn
+         dates, Sale rail, Profile sub pages. */
+      .closet-top3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+      .closet-top3 .sel-row { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; min-height: 48px; padding: 6px 22px 6px 10px; position: relative; width: 100%; text-align: left; }
+      .closet-top3 .sel-val { flex: none; width: 100%; }
+      .closet-top3 .sel-chev { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); }
+      .ward-rail { position: fixed; right: 3px; top: 50%; transform: translateY(-50%); z-index: 60; display: flex; flex-direction: column; gap: 1px; padding: 6px 2px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 82%, transparent); }
+      .ward-rail[hidden] { display: none; }
+      .ward-rail button { width: 17px; height: 17px; padding: 0; border: 0; background: none; font-size: 10px; font-weight: 600; line-height: 17px; text-align: center; color: var(--text); cursor: pointer; }
+      .ward-rail button.off { opacity: .28; }
+      #panel-wardrobe .item-grid { padding-right: 22px; }
+      #panel-wardrobe .item-card { scroll-margin-top: 118px; }
+      #panel-sale .sale-grid { padding-right: 22px; }
+      #panel-sale .sale-card { scroll-margin-top: 118px; }
+      .rail-flash { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .source-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; }
+      .source-seg button { min-height: 36px; padding: 6px 4px; border: 0; border-right: 1px solid var(--border); background: var(--surface); color: var(--dim); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+      .source-seg button:last-child { border-right: 0; }
+      .source-seg button[aria-pressed="true"] { background: var(--ink-btn); color: var(--ink-btn-text); }
+      #panel-looks .fb-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+      #panel-looks .fb-chips::-webkit-scrollbar { display: none; }
+      #panel-looks .fb-chips .chip { flex: none; }
+      #subnav-find:not([hidden]) { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+      #subnav-find::-webkit-scrollbar { display: none; }
+      #subnav-find .subtab { flex: 0 0 auto; width: auto; padding: 0 12px; }
+      .shop-ctl-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 2px 0 8px; }
+      .shop-ctl-cell { min-width: 0; }
+      .shop-search-group { margin: 8px 10px 2px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+      .worn-date-head { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); margin: 14px 0 6px; }
+      .worn-date-head:first-child { margin-top: 2px; }
+      .worn-row.compact img { width: 44px; height: 44px; object-fit: cover; }
+      .worn-thumb-ph { width: 44px; height: 44px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); flex: none; display: inline-block; }
+      .profile-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+      .profile-photo { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); flex: none; }
+      .profile-name { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin: 0; line-height: 1.15; }
+      #subnav-me { grid-template-columns: repeat(3, minmax(0, 1fr)) auto; }
+      .profile-close { font-size: 17px; line-height: 1; padding: 0 10px; }
     </style>
   </head>
   <body>
     <header class="masthead">
       <div class="wrap">
         <h1 class="brand">Wardrobe</h1>
-        <button type="button" class="navbtn profile-btn" id="tab-profile" data-tab="profile" data-section="me" aria-controls="panel-profile" aria-label="Profile, sizes, sync and backup"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg></button>
+        <button type="button" class="navbtn profile-btn" id="tab-profile" data-tab="profile" data-section="me" aria-controls="panel-pinfo" aria-label="Profile — info, location, cloud and backup"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg></button>
         <div class="rule-double" aria-hidden="true"></div>
       </div>
     </header>
@@ -2612,6 +2650,13 @@
             <button class="subtab" role="tab" id="tab-brands" aria-selected="false" aria-controls="panel-brands" data-tab="brands">Brands <span class="count" id="brand-count">53</span></button>
             <button class="subtab" role="tab" id="tab-sale" aria-selected="false" aria-controls="panel-sale" data-tab="sale">Sale items</button>
             <button class="subtab" role="tab" id="tab-shopwish" aria-selected="false" aria-controls="panel-shopwish" data-tab="shopwish">Wishlist</button>
+            <button class="subtab" role="tab" id="tab-search" aria-selected="false" aria-controls="panel-search" data-tab="search">Search</button>
+          </div>
+          <div class="subnav-group" id="subnav-me" role="tablist" hidden>
+            <button class="subtab" role="tab" id="tab-pinfo" aria-selected="false" aria-controls="panel-pinfo" data-tab="pinfo">Profile info</button>
+            <button class="subtab" role="tab" id="tab-plocation" aria-selected="false" aria-controls="panel-plocation" data-tab="plocation">Location</button>
+            <button class="subtab" role="tab" id="tab-pcloud" aria-selected="false" aria-controls="panel-pcloud" data-tab="pcloud">Cloud &amp; backup</button>
+            <button type="button" class="subtab profile-close" id="profile-close" aria-label="Close profile">×</button>
           </div>
         </div>
       </nav>
@@ -2663,10 +2708,10 @@
                 </div>
               </div>
               <div class="cdd cdd-up">
-                <button type="button" class="cdd-btn hero-cdd-btn" id="today-source-btn" data-cdd-manual aria-haspopup="true" aria-expanded="false" aria-label="Build from"><span class="cdd-label" id="today-source-label">Combo</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
-                <div class="cdd-menu cdd-menu-r" id="today-source-row" hidden role="menu" aria-label="Build from — Only my wardrobe, Only inspo, or Combo">
-                  <button type="button" class="cdd-opt" data-source="wardrobe" aria-pressed="false">Only my wardrobe</button>
-                  <button type="button" class="cdd-opt" data-source="inspo" aria-pressed="false">Only inspo</button>
+                <button type="button" class="cdd-btn hero-cdd-btn" id="today-source-btn" data-cdd-manual aria-haspopup="true" aria-expanded="false" aria-label="Source"><span class="cdd-label" id="today-source-label">Combo</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
+                <div class="cdd-menu cdd-menu-r" id="today-source-row" hidden role="menu" aria-label="Source — Wardrobe, Inspo, or Combo">
+                  <button type="button" class="cdd-opt" data-source="wardrobe" aria-pressed="false">Wardrobe</button>
+                  <button type="button" class="cdd-opt" data-source="inspo" aria-pressed="false">Inspo</button>
                   <button type="button" class="cdd-opt" data-source="combo" aria-pressed="true">Combo</button>
                 </div>
               </div>
@@ -2684,16 +2729,13 @@
 
       <!-- ================= STUDIO ================= -->
       <section id="panel-studio" role="tabpanel" aria-labelledby="tab-studio" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Ideas" data-info-text="Six takes at a time, dealt from the source you pick — Only my wardrobe, Only inspo, or the Combo mix. From wardrobe (below the six, in Combo) pairs your tops and your shoes, each completed with a bottom — a suggested pairing until your own bottoms are catalogued. Nothing repeats: every photograph dealt is remembered and never dealt again." aria-label="About: Ideas">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Ideas" data-info-text="Six takes at a time, dealt from the source you pick — Wardrobe, Inspo, or Combo. Wardrobe deals the verified renders of you in your own pieces, each completed with a suggested bottom until your own bottoms are catalogued; Inspo deals from the book; Combo mixes both. Nothing repeats: every photograph dealt is remembered and never dealt again." aria-label="About: Ideas">i</button></div>
         <div class="studio-grid">
           <div>
-            <div class="cdd ideas-source-cdd" id="ideas-source-seg">
-              <button type="button" class="cdd-btn ideas-source-btn" id="ideas-source-btn" data-cdd-manual aria-haspopup="true" aria-expanded="false" aria-label="Build from"><span class="cdd-cap">Build from</span><span class="cdd-label" id="ideas-source-label">Combo</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
-              <div class="cdd-menu" id="ideas-source-menu" hidden role="menu" aria-label="Build from — Only my wardrobe, Only inspo, or Combo">
-                <button type="button" class="cdd-opt" data-source="wardrobe" aria-pressed="false">Only my wardrobe</button>
-                <button type="button" class="cdd-opt" data-source="inspo" aria-pressed="false">Only inspo</button>
-                <button type="button" class="cdd-opt" data-source="combo" aria-pressed="true">Combo</button>
-              </div>
+            <div class="source-seg" id="ideas-source-seg" role="group" aria-label="Source — Wardrobe, Inspo or Combo">
+              <button type="button" data-source="wardrobe" aria-pressed="false">Wardrobe</button>
+              <button type="button" data-source="inspo" aria-pressed="false">Inspo</button>
+              <button type="button" data-source="combo" aria-pressed="true">Combo</button>
             </div>
             <div class="studio-home-bar">
               <button type="button" class="btn-accent" id="studio-deal">Give me ideas</button>
@@ -2815,17 +2857,10 @@
               </div>
             </form>
 
-            <section class="from-wardrobe" id="from-wardrobe" aria-label="From wardrobe">
-              <div class="fw-head">
-                <div class="fw-head-text">
-                  <h3>From wardrobe</h3>
-                  <p><span id="fw-count"></span></p>
-                </div>
-                <button type="button" class="btn-ghost" id="fw-more">Six more ideas</button>
-              </div>
-              <div class="options-grid" id="fw-grid" role="list"></div>
-              <p class="empty" id="fw-empty" hidden>Add a top and a pair of shoes in Closet, and outfits built from your own pieces will appear here.</p>
-            </section>
+            <!-- No separate From wardrobe section (build .28):
+                 the Wardrobe / Inspo / Combo toggle IS the source
+                 control, and the one grid below deals six of
+                 whichever source it names. -->
             <div class="look-result" id="look-result" aria-live="polite"></div>
           </div>
         </div>
@@ -2842,14 +2877,12 @@
               <label class="field" for="ward-search">Search your closet</label>
               <input type="search" id="ward-search" placeholder="Name, colour, category, notes…" autocomplete="off" />
             </div>
-            <div class="sel-block ward-cat-block">
-              <button type="button" class="sel-row" id="ward-cat-toggle" aria-expanded="false" aria-controls="ward-filters"><span class="sel-name">Category</span><span class="sel-val" id="ward-cat-val">All</span><span class="sel-chev" aria-hidden="true">▾</span></button>
-              <div class="sel-opts filter-row" id="ward-filters" role="group" aria-label="Filter by category" hidden></div>
+            <div class="closet-top3">
+              <button type="button" class="sel-row top3-box" id="ward-cat-toggle" aria-expanded="false" aria-controls="ward-filters"><span class="sel-name">Category</span><span class="sel-val" id="ward-cat-val">All</span><span class="sel-chev" aria-hidden="true">▾</span></button>
+              <button type="button" class="sel-row top3-box" id="closet-add-entry"><span class="sel-name">Add</span><span class="sel-val">Add a piece</span><span class="sel-chev" aria-hidden="true">›</span></button>
+              <button type="button" class="sel-row top3-box" id="closet-gaps-entry"><span class="sel-name">Closet gaps</span><span class="sel-val" id="closet-gaps-count">Pieces your looks are missing</span><span class="sel-chev" aria-hidden="true">›</span></button>
             </div>
-          <div class="closet-entries">
-            <button type="button" class="sel-row" id="closet-add-entry"><span class="sel-name">Add</span><span class="sel-val">Add a piece</span><span class="sel-chev" aria-hidden="true">›</span></button>
-            <button type="button" class="sel-row" id="closet-gaps-entry"><span class="sel-name">Closet gaps</span><span class="sel-val" id="closet-gaps-count">Pieces your looks are missing</span><span class="sel-chev" aria-hidden="true">›</span></button>
-          </div>
+            <div class="sel-opts filter-row" id="ward-filters" role="group" aria-label="Filter by category" hidden></div>
             <div class="item-grid" id="item-grid"></div>
           </div>
           </div>
@@ -2979,7 +3012,7 @@
 
       <!-- ================= LOOKS ================= -->
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="My Looks" data-info-text="Looks you liked or saved, the built-in catalogue, and anything queued for later — one list, filtered by the chips above. Removing a look only un-saves it; Recently removed (below) keeps every removal, restorable, for as long as you need." aria-label="About: My Looks">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="My Looks" data-info-text="Looks you liked or saved, the built-in catalogue, and anything queued for later — one list, filtered by the chips above. Removing a look only un-saves it; the Recently removed chip keeps every removal, restorable, for as long as you need. The Wishlist chip shows the same wishlist as Shop — one list, two doors." aria-label="About: My Looks">i</button></div>
         <div class="looks-tools">
           <input type="search" id="looks-search" class="ward-search" aria-label="Search your looks" placeholder="Search your looks — a colour, a piece, a note" autocomplete="off" />
           <div class="fb-chips" role="group" aria-label="Filter looks">
@@ -2988,13 +3021,11 @@
             <button type="button" class="chip" data-looks-filter="worn" aria-pressed="false">Worn</button>
             <button type="button" class="chip" data-looks-filter="liked" aria-pressed="false">Liked</button>
             <button type="button" class="chip" data-looks-filter="new" aria-pressed="false">Not worn yet</button>
+            <button type="button" class="chip" data-looks-filter="removed" aria-pressed="false">Recently removed</button>
+            <button type="button" class="chip" data-looks-filter="wishlist" aria-pressed="false">Wishlist</button>
           </div>
         </div>
         <div class="saved-grid" id="saved-grid"></div>
-        <div id="recently-removed-wrap" hidden>
-          <h3 class="fav-head">Recently removed</h3>
-          <div id="recently-removed-list"></div>
-        </div>
         <div id="wishlist-wrap">
           <h3 class="fav-head">Wishlist — pieces your looks are missing</h3>
           <div id="wishlist-list"></div>
@@ -3003,7 +3034,7 @@
 
       <!-- ================= CALENDAR ================= -->
       <section id="panel-calendar" role="tabpanel" aria-labelledby="tab-calendar" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Calendar — Trips" data-info-text="Trip capsules built from your closet for each trip's weather, with a packing checklist that remembers what you've packed. Worn outfits appear on their exact date in the week strip — tap a day to see everything worn that day, beside the plan." aria-label="About: Calendar — Trips">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Calendar — Trips" data-info-text="Trip capsules built from your closet for each trip's weather, with a packing checklist that remembers what you've packed. Worn outfits appear on their exact date in the week strip — tap a day to see everything worn that day. Below the week, What I wore lists every worn outfit under its exact date, newest first." aria-label="About: Calendar — Trips">i</button></div>
         <div id="week-plan-wrap">
           <div class="wp-head">
             <h3 class="fav-head">This week</h3>
@@ -3014,6 +3045,10 @@
             </span>
           </div>
           <div class="wp-grid" id="week-plan-grid"></div>
+        </div>
+        <div id="worn-wrap">
+          <h3 class="fav-head">What I wore</h3>
+          <div id="worn-log-list"></div>
         </div>
         <div id="trips-wrap">
           <h3 class="fav-head">Trips — capsule &amp; packing</h3>
@@ -3030,7 +3065,7 @@
 
       <!-- ================= WHAT I'M WEARING TODAY — SELFIE LOG ================= -->
       <section id="panel-wearing" role="tabpanel" aria-labelledby="tab-wearing" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Wearing Today" data-info-text="Log today's outfit with a photo and confirm the pieces — new pieces are catalogued into the Closet as you go. Below, What I wore: the full record, month by month, from every Mark worn and Wore this today too." aria-label="About: Wearing Today">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Wearing Today" data-info-text="Log today's outfit with a photo and confirm the pieces — new pieces are catalogued into the Closet as you go. The full record of what you wore lives in Calendar, under What I wore, listed by exact date." aria-label="About: Wearing Today">i</button></div>
         <div class="card add-form wearing-form">
           <img id="wearing-preview" alt="Your outfit photo" hidden />
           <div class="wearing-photo-btns">
@@ -3050,8 +3085,8 @@
             <button type="button" class="btn-accent" id="wearing-save">Save outfit</button>
           </div>
         </div>
-        <h3 class="fav-head">What I wore</h3>
-        <div id="worn-log-list"></div>
+        <!-- What I wore lives in Calendar now (build .28) —
+             this page is the logging form only. -->
       </section>
 
       <!-- The dead Queue and Favourites panels are deleted: the
@@ -3385,10 +3420,16 @@
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Shop the look" data-info-text="Describe what you're after, pick a price tier — Affordable, Accessible, Luxury or Price insensitive — and catalogue matches stay at or under it. Your size comes from your Profile. Then search for it, or keep the brief here." aria-label="About Shop the look">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Shop the look" data-info-text="The look on Today, piece by piece, with catalogue matches at your price tier — every piece carries its own Price tier and Search controls at its top. Mark purchased files a piece into Purchased below and into your Closet. Free-form briefs live under Search." aria-label="About Shop the look">i</button></div>
         <div id="find-look-mode" hidden></div>
         <div id="shop-purchased" hidden></div>
-        <div class="ward-grid">
+        <p class="meta" id="find-nolook">Open a look and tap Shop the look — its pieces and matches land here.</p>
+        
+      </section>
+      <!-- ================= SEARCH — free-form briefs (own sub tab, build .28) ================= -->
+      <section id="panel-search" role="tabpanel" aria-labelledby="tab-search" hidden>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Search" data-info-text="Describe what you are after, pick a price tier — Affordable, Accessible, Luxury or Price insensitive — and keep the brief here with live search links in your size. Briefs from your closet gaps land here prefilled. Nothing is bought — you review and buy yourself." aria-label="About Search">i</button></div>
+<div class="ward-grid">
           <div>
             <div class="find-grid" id="find-grid"></div>
           </div>
@@ -3459,33 +3500,10 @@
       </section>
 
       <!-- ================= PROFILE ================= -->
-      <section id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Profile" data-info-text="Your measurements and your location — Shop the look sizes every search from here, and recommendations follow the weather where you are." aria-label="About Profile">i</button></div>
-        <div class="card loc-card" id="loc-card" style="margin-top:0;margin-bottom:22px">
-          <div>
-            <div class="card-head-info"><h3>Location &amp; weather</h3><button type="button" class="info-btn sm" data-info-from="loc-note" data-info-title="Location &amp; weather" aria-label="About: location and weather">i</button></div>
-            <div class="loc-now" style="margin-top:8px">
-              <span class="loc-name" id="loc-current-name">Palm Beach, Florida</span>
-              <span class="loc-kind" id="loc-current-kind">Home — default</span>
-            </div>
-            <p class="loc-weather" id="loc-weather" style="margin-top:6px">Checking the weather there…</p>
-            <p class="loc-rec" id="loc-rec"></p>
-          </div>
-          <div>
-            <label class="field" for="loc-search">Traveling? Change location</label>
-            <div class="loc-search-row">
-              <input type="search" id="loc-search" placeholder="City — e.g. New York, London, Paris" autocomplete="off" />
-              <button type="button" class="btn-ink" id="loc-search-btn">Find</button>
-            </div>
-            <div id="loc-results" style="margin-top:10px"></div>
-          </div>
-          <!-- The quick-pick city chips live on Today only —
-               one list, one place. Search above covers the rest. -->
-          <div class="loc-actions">
-            <button type="button" class="btn-ghost" id="loc-set-home">Make this my home</button>
-            <button type="button" class="btn-ghost" id="loc-back-home" hidden>Back to home</button>
-          </div>
-          <p class="form-note" id="loc-note" hidden>Home is the default. Pick another place while you travel and the outfit of the day — and looks with no season chosen — follow the weather there. Come back home with one tap.</p>
+      <section id="panel-pinfo" role="tabpanel" aria-labelledby="tab-pinfo" hidden>
+        <div class="profile-head">
+          <img class="profile-photo" src="assets/photos/93eecdc2044f.jpg" alt="David Jacobs" />
+          <div class="profile-head-main"><h3 class="profile-name">David Jacobs</h3><p class="meta">Palm Beach, Florida</p></div>
         </div>
         <form class="card add-form" id="profile-form">
           <div class="profile-grid">
@@ -3517,6 +3535,36 @@
           </div>
           <div><button type="submit" class="btn-ink">Save profile</button></div>
         </form>
+      </section>
+      <section id="panel-plocation" role="tabpanel" aria-labelledby="tab-plocation" hidden>
+        <div class="card loc-card" id="loc-card" style="margin-top:0;margin-bottom:22px">
+          <div>
+            <div class="card-head-info"><h3>Location &amp; weather</h3><button type="button" class="info-btn sm" data-info-from="loc-note" data-info-title="Location &amp; weather" aria-label="About: location and weather">i</button></div>
+            <div class="loc-now" style="margin-top:8px">
+              <span class="loc-name" id="loc-current-name">Palm Beach, Florida</span>
+              <span class="loc-kind" id="loc-current-kind">Home — default</span>
+            </div>
+            <p class="loc-weather" id="loc-weather" style="margin-top:6px">Checking the weather there…</p>
+            <p class="loc-rec" id="loc-rec"></p>
+          </div>
+          <div>
+            <label class="field" for="loc-search">Traveling? Change location</label>
+            <div class="loc-search-row">
+              <input type="search" id="loc-search" placeholder="City — e.g. New York, London, Paris" autocomplete="off" />
+              <button type="button" class="btn-ink" id="loc-search-btn">Find</button>
+            </div>
+            <div id="loc-results" style="margin-top:10px"></div>
+          </div>
+          <!-- The quick-pick city chips live on Today only —
+               one list, one place. Search above covers the rest. -->
+          <div class="loc-actions">
+            <button type="button" class="btn-ghost" id="loc-set-home">Make this my home</button>
+            <button type="button" class="btn-ghost" id="loc-back-home" hidden>Back to home</button>
+          </div>
+          <p class="form-note" id="loc-note" hidden>Home is the default. Pick another place while you travel and the outfit of the day — and looks with no season chosen — follow the weather there. Come back home with one tap.</p>
+        </div>
+      </section>
+      <section id="panel-pcloud" role="tabpanel" aria-labelledby="tab-pcloud" hidden>
         <div class="card data-card" id="sync-card">
           <div class="card-head-info"><h3>☁️ Cloud sync</h3></div>
           <div id="syncstat"><div><b>Not synced yet</b></div><p class="meta" style="margin:0">Never synced</p></div>
@@ -4052,7 +4100,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.27";
+var WARDROBE_BUILD = "2026-11-17.28";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -9273,7 +9321,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/1e0dad112640.webp",
+    img: "assets/photos/74d38a8d6b38.webp",
     title: "Olive Suit & White Shirt — Grey Ghost",
     imgAlt: "You wearing an olive suit with a white shirt and no tie, with brown suede loafers and the pink gold Grey Ghost Day-Date on your wrist",
     watchId: "seed-grey-ghost",
@@ -9317,7 +9365,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/cce6bbb645be.webp",
+    img: "assets/photos/0cd3507fb197.webp",
     title: "Black Suit & Burgundy Tie — Breguet Classique",
     imgAlt: "You wearing a black suit with a white shirt, burgundy tie and black Oxford shoes, with a yellow gold Breguet on your wrist",
     watchId: "seed-breguet-3050",
@@ -9841,7 +9889,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/b860d9804452.webp",
+    img: "assets/photos/0a1741dde4f6.webp",
     title: "White Oxford Button-Down Shirt & Ecru Cotton Trousers",
     imgAlt: "You wearing White Oxford Button-Down Shirt, Ecru Cotton Trousers, Tan Leather Oxford and Black Leather Belt",
     watchId: "seed-ap-25594ba",
@@ -9912,7 +9960,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/bdaabcfa29fb.webp",
+    img: "assets/photos/c9f4fa22a034.webp",
     title: "Charcoal Blazer & Ecru Cotton Trousers",
     imgAlt: "You wearing Brunello Cucinelli Sky Blue Piqué Polo, Ecru Cotton Trousers, Giorgio Armani Cream Woven Leather Loafers and Charcoal Blazer",
     watchId: "seed-breguet-3050",
@@ -10492,11 +10540,11 @@ var RENDER_FORMALITY = {
   "assets/photos/a4a4a86c3c7d.webp": 6,
   "assets/photos/d7b8e7719323.webp": 4,
   "assets/photos/6f6e38f027aa.webp": 5,
-  "assets/photos/1e0dad112640.webp": 5,
+  "assets/photos/74d38a8d6b38.webp": 5,
   "assets/photos/918f47bf65dc.webp": 5,
   "assets/photos/dec9f35bc267.webp": 4,
   "assets/photos/9d0cd659d307.webp": 4,
-  "assets/photos/cce6bbb645be.webp": 6,
+  "assets/photos/0cd3507fb197.webp": 6,
   "assets/photos/acfff0361762.webp": 6,
   "assets/photos/1721de1440a4.webp": 1,
   "assets/photos/202b0eaad2c0.webp": 1,
@@ -10518,13 +10566,13 @@ var RENDER_FORMALITY = {
   "assets/photos/eeca48e45c15.webp": 4,
   "assets/photos/8899e54adc7b.webp": 4,
   "assets/photos/b3c9c366ab9f.webp": 4,
-  "assets/photos/b860d9804452.webp": 4,
+  "assets/photos/0a1741dde4f6.webp": 4,
   "assets/photos/ee7814e373a2.webp": 4,
   "assets/photos/a7c2431f12ac.webp": 4,
   "assets/photos/1288d219a23b.webp": 4,
   "assets/photos/944ef219c541.webp": 5,
   "assets/photos/32eda979825c.webp": 5,
-  "assets/photos/bdaabcfa29fb.webp": 5,
+  "assets/photos/c9f4fa22a034.webp": 5,
   "assets/photos/e0cc3bb23780.webp": 5,
   "assets/photos/a7880d85b24e.webp": 5,
   "assets/photos/56cf3693bd67.webp": 5,
@@ -13433,7 +13481,10 @@ function optionCardHTML(look, idx) {
     '<img src="' + lookImg(look) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy"' + ocPop + ' />' +
     '<span class="oc-body">' +
     '<span class="oc-title">' + esc(look.title) + '</span>' +
-    cardStripHTML(look.swatches) + "</span></button>";
+    /* No palette strip on cards (build .28) — the pop-out keeps
+       the colours. A wardrobe look keeps its Pair with line:
+       that is styling content, not chrome. */
+    (look.suggestedBottom ? '<span class="oc-meta fw-pair">Pair with: ' + esc(look.suggestedBottom.name) + ' — suggested</span>' : "") + "</span></button>";
 }
 function renderOptions(looks, request) {
   if (!looks || !looks.length) return;
@@ -14386,8 +14437,16 @@ function doStyleFromForm() {
       if (!silent) toast("Six takes built from your image.");
       return;
     }
+    /* Wardrobe source + a dealer's deal (no typed brief): the six
+       are the verified wardrobe renders, dealt as a window by
+       dealWardrobeSix — never text-built takes. A typed Customize
+       brief in Wardrobe mode builds as it always has. */
+    if (studioSource === "wardrobe" && (!userDesc || /dealer|surprise/i.test(userDesc)) && typeof dealWardrobeSix === "function" && dealWardrobeSix()) {
+      if (!silent) toast("Six takes created — from your wardrobe.");
+      return;
+    }
     renderOptions(buildSixLooks(finalDesc, occasion, season, opts), { desc: finalDesc, occasion: occasion, season: season, opts: opts });
-    if (!silent) toast("Six takes created — " + (studioSource === "wardrobe" ? "only from your wardrobe." : studioSource === "inspo" ? "only inspo." : "combo: yours + pieces to buy."));
+    if (!silent) toast("Six takes created — " + (studioSource === "wardrobe" ? "from your wardrobe." : studioSource === "inspo" ? "inspo." : "combo: yours + pieces to buy."));
   } catch (err) {
     /* Create must never fail silently: deal six instead. */
     try {
@@ -14416,10 +14475,9 @@ document.getElementById("examples").addEventListener("click", function (e) {
       toast("Your closet needs a top and a pair of shoes before it can build outfits — add pieces in the Closet and it builds from them.");
       return;
     }
-    dealFromWardrobe();
-    var fwSec = document.getElementById("from-wardrobe");
-    if (fwSec) fwSec.scrollIntoView({ behavior: "smooth", block: "start" });
-    toast(cl.length + (cl.length === 1 ? " outfit" : " outfits") + " from your wardrobe — in the From wardrobe section below.");
+    setSource("wardrobe");
+    if (typeof dealWardrobeSix === "function") dealWardrobeSix();
+    toast("Wardrobe source — six of your " + cl.length + " closet outfits at a time.");
     return;
   }
   var btn = e.target.closest("[data-example]");
@@ -14505,10 +14563,10 @@ function onLookResultClick(e) {
       ropts.excludeCards = prevImgs;
       if (typeof studioSource !== "undefined" && !ropts.source) ropts.source = studioSource;
       if (ropts.source === "wardrobe") {
-        /* A wardrobe hand re-deals from the closet itself — the
-           verified render looks — never from the inspo engine. */
-        var wcl = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
-        if (wcl && wcl.length) { renderOptions(wcl, lastSixRequest); return; }
+        /* A wardrobe hand re-deals the next window of verified
+           render looks — never the inspo engine, never the same
+           six again. */
+        if (typeof dealWardrobeSix === "function" && dealWardrobeSix()) return;
       }
       renderOptions(buildSixLooks(lastSixRequest.desc, lastSixRequest.occasion, lastSixRequest.season, ropts), lastSixRequest);
       /* Re-deals stay silent — the new six appearing IS the
@@ -16093,6 +16151,78 @@ function wearLineHTML(i) {
   else if (i.price) bits.push("$" + i.price);
   return '<p class="wear">' + esc(bits.join(" · ")) + "</p>";
 }
+/* ---------- Closet ordering + brand rail (build .28) ----------
+   The grid is alphabetical on BOTH keys: in All, clothing type
+   A–Z, then brand A–Z within the type, then item name A–Z; in a
+   single category, brand then name. Display only — the stored
+   wardrobeItems order (and sync) is never touched. Brand is the
+   name prefix: closet items carry no brand field, so the key is
+   the longest known brand the item name starts with (the closet's
+   own brands below, plus the Shop catalogue's once it has loaded,
+   longest first so "Brunello Cucinelli" beats a shorter match);
+   an item whose name matches no brand sorts by its full name. */
+var WARD_BRAND_SEED = ["Scott Fraser Collection", "Brunello Cucinelli", "Octobre Éditions", "Merz b. Schwanen", "Stubbs & Wootton", "Baudoin & Lange", "Giorgio Armani", "Unbound Merino", "Acne Studios", "Massimo Dutti", "Orlebar Brown", "Edward Green", "Belgian Shoes", "Loro Piana", "Todd Snyder", "Alex Mill", "Buck Mason", "Balenciaga", "Vibi Venezia", "Whitesville", "Stefano Ricci", "Corridor", "Sunspel", "Missoni", "Fortela", "Theory", "Hermès", "Adidas", "Altea", "ASKET", "Canali", "FRAME", "Gucci", "Isaia", "Kiton", "Zanone", "Zegna"];
+var _wardBrandList = null;
+function wardBrandList() {
+  if (_wardBrandList) return _wardBrandList;
+  var catReady = typeof SHOP_CATALOGUE !== "undefined" && !!SHOP_CATALOGUE;
+  var seen = {}, list = [];
+  function add(b) { if (b && !seen[b]) { seen[b] = 1; list.push(b); } }
+  WARD_BRAND_SEED.forEach(add);
+  if (catReady) SHOP_CATALOGUE.forEach(function (e) { add(e.brand); });
+  list.sort(function (a, b) { return b.length - a.length; });
+  if (catReady) _wardBrandList = list;
+  return list;
+}
+function wardBrandKey(item) {
+  var name = (item && item.name) || "";
+  var list = wardBrandList();
+  for (var i = 0; i < list.length; i++) {
+    if (name === list[i] || name.indexOf(list[i] + " ") === 0) return list[i];
+  }
+  return name;
+}
+/* The right-margin A–Z rail: keyed to brand, a tap jumps to the
+   first card of that letter in the current view (category +
+   search already applied — the rail reads the rendered grid).
+   Letters with no items in view are dimmed and disabled. The
+   rail hides while an item detail is open above the grid. */
+var wardRailEl = null;
+function updateWardRail() {
+  var panel = document.getElementById("panel-wardrobe");
+  if (!panel) return;
+  if (!wardRailEl) {
+    wardRailEl = document.createElement("nav");
+    wardRailEl.className = "ward-rail";
+    wardRailEl.setAttribute("aria-label", "Jump to brand initial");
+    wardRailEl.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(function (L) {
+      return '<button type="button" data-rail-letter="' + L + '" aria-label="Jump to brands starting with ' + L + '">' + L + "</button>";
+    }).join("");
+    wardRailEl.addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-rail-letter]") : null;
+      if (!b || b.disabled) return;
+      var card = document.querySelector('#item-grid .item-card[data-brand-initial="' + b.getAttribute("data-rail-letter") + '"]');
+      if (!card) return;
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+      card.classList.add("rail-flash");
+      setTimeout(function () { card.classList.remove("rail-flash"); }, 1300);
+    });
+    panel.appendChild(wardRailEl);
+  }
+  var detail = document.getElementById("item-detail");
+  var detailOpen = !!(detail && detail.innerHTML.trim().length);
+  var present = {};
+  document.querySelectorAll("#item-grid .item-card").forEach(function (c) {
+    var v = c.getAttribute("data-brand-initial");
+    if (v) present[v] = 1;
+  });
+  wardRailEl.hidden = detailOpen || !Object.keys(present).length;
+  wardRailEl.querySelectorAll("[data-rail-letter]").forEach(function (b) {
+    var on = !!present[b.getAttribute("data-rail-letter")];
+    b.disabled = !on;
+    b.classList.toggle("off", !on);
+  });
+}
 function renderWardrobe() {
   var q = wardQuery.trim().toLowerCase();
   var items = wardrobeItems.filter(function (i) {
@@ -16101,16 +16231,40 @@ function renderWardrobe() {
     var hay = (i.name + " " + i.category + " " + (i.colourName || "") + " " + (i.notes || "")).toLowerCase();
     return hay.indexOf(q) !== -1;
   });
+  /* Alphabetical on both keys (build .28): All sorts type →
+     brand → name; a single category sorts brand → name. Stable
+     via the pre-sort index; the stored array is untouched. */
+  var brandById = {};
+  var decorated = items.map(function (it, ix) {
+    var bk = wardBrandKey(it);
+    brandById[it.id] = bk;
+    return { it: it, ix: ix, bk: bk };
+  });
+  decorated.sort(function (a, b) {
+    if (wardFilter === "All") {
+      var cc = String(a.it.category || "").toLowerCase().localeCompare(String(b.it.category || "").toLowerCase());
+      if (cc) return cc;
+    }
+    var cb = a.bk.toLowerCase().localeCompare(b.bk.toLowerCase());
+    if (cb) return cb;
+    var cn = String(a.it.name || "").toLowerCase().localeCompare(String(b.it.name || "").toLowerCase());
+    if (cn) return cn;
+    return a.ix - b.ix;
+  });
+  items = decorated.map(function (d) { return d.it; });
   var grid = document.getElementById("item-grid");
   if (!items.length) {
     grid.innerHTML = '<div class="card empty" style="grid-column:1/-1">' + (wardrobeItems.length
       ? "No pieces match that search — clear it, or pick another category."
-      : "Nothing in your closet yet — tap Add below to add your first piece, and outfits start building from it.") + "</div>";
+      : "Nothing in your closet yet — tap Add above to add your first piece, and outfits start building from it.") + "</div>";
+    updateWardRail();
     return;
   }
   grid.innerHTML = items.map(function (i) {
     var colours = [{ name: i.colourName, hex: i.colourHex }].concat(i.extraColours || []);
-    return '<article class="card item-card' + (i.laundry ? " laundry" : "") + '">' +
+    var bk0 = (brandById[i.id] || i.name || "").charAt(0).toUpperCase();
+    var bInit = /^[A-Z]$/.test(bk0) ? bk0 : "#";
+    return '<article class="card item-card' + (i.laundry ? " laundry" : "") + '" data-brand-initial="' + bInit + '">' +
       (i.photo ? '<img class="photo" src="' + i.photo + '" alt="Photograph of ' + esc(i.name) + '" loading="lazy" decoding="async" />' : "") +
       '<span class="cat">' + esc(i.category) + "</span>" + (i.shopBought ? ' <span class="shop-bought-badge">Bought via Shop the look</span>' : "") +
       "<h4>" + esc(i.name) + "</h4>" +
@@ -16123,6 +16277,7 @@ function renderWardrobe() {
       '<button type="button" class="btn-ghost" data-item-wore="' + i.id + '">Mark worn</button></div>' +
       "</article>";
   }).join("");
+  updateWardRail();
 }
 renderWardrobe();
 
@@ -16137,7 +16292,7 @@ function closetItemById(id) { return wardrobeItems.filter(function (i) { return 
 function renderItemDetail() {
   var box = document.getElementById("item-detail");
   var it = detailItemId ? closetItemById(detailItemId) : null;
-  if (!it) { box.innerHTML = ""; return; }
+  if (!it) { box.innerHTML = ""; updateWardRail(); return; }
   var colours = [{ name: it.colourName, hex: it.colourHex }].concat(it.extraColours || []);
   var cpw = it.price && it.wearCount ? "$" + Math.round(it.price / it.wearCount) : "—";
   box.innerHTML = '<article class="card item-detail-card">' +
@@ -16168,6 +16323,7 @@ function renderItemDetail() {
     '<button type="button" class="btn-ghost" data-item-act="close">Close</button>' +
     "</div></article>";
   box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  updateWardRail();
 }
 document.getElementById("item-detail").addEventListener("click", function (e) {
   var b = e.target.closest("[data-item-act]");
@@ -16596,6 +16752,26 @@ function saveLook(look) {
 var gridImgById = {};
 function renderSaved() {
   var grid = document.getElementById("saved-grid");
+  /* Recently removed and Wishlist are views of their own behind
+     their chips (build .28). Removed looks render in recovery
+     order — never sorted. The Wishlist view renders the Shop
+     wishlist's own rows: one underlying list, two doors. */
+  if (looksFilter === "removed") {
+    var removedList = (typeof recentlyRemoved !== "undefined" && recentlyRemoved) ? recentlyRemoved : [];
+    grid.innerHTML = removedList.length ? removedList.map(function (r) {
+      return '<div class="removed-row" style="grid-column:1/-1">' + (r._img || r.img ? '<img src="' + (r._img || r.img) + '" alt="" loading="lazy" data-popout="' + (r._img || r.img) + '" />' : "") +
+        '<span class="r-name">' + esc(r.title || "Look") + '</span>' +
+        '<button type="button" class="btn-ghost" data-restore-removed="' + r.id + '">Restore</button></div>';
+    }).join("") : '<p class="meta" style="grid-column:1/-1">Nothing removed — anything you remove lands here, so you can bring it back.</p>';
+    return;
+  }
+  if (looksFilter === "wishlist") {
+    var wishList = (typeof shopWishlist !== "undefined" && shopWishlist) ? shopWishlist : [];
+    grid.innerHTML = wishList.length && typeof shopWishRowHTML === "function"
+      ? '<div class="wish-list" style="grid-column:1/-1">' + shopWishlistSorted().map(shopWishRowHTML).join("") + "</div>"
+      : '<p class="meta" style="grid-column:1/-1">Nothing wishlisted yet — save pieces from Shop the look or Sale items and they wait for you here.</p>';
+    return;
+  }
   /* Removed seed looks stay out via Recently removed (restoring
      brings them back); only an explicit Don't like it bans a
      photograph from the grid. */
@@ -16688,12 +16864,11 @@ function renderSaved() {
       removeItem +
       "</div>" +
       '<img src="' + img + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + img + '"') + ' />' +
+      /* Cards are photo + title + menu only (build .28): the
+         status badges and the palette strip are gone from cards —
+         the filter chips carry status now, and the pop-out keeps
+         the full detail. */
       '<div class="sb"><h4 ' + openAttr + '>' + esc(l.title) + "</h4>" +
-      (l.worn ? '<span class="your-badge">Worn' + (l.wornDate ? " · " + esc(fmtDateShort(l.wornDate)) : "") + "</span>" : "") +
-      (queueIds[l.id] ? '<span class="queued-badge">Queued</span>' : "") +
-      (l.verdict === "like" ? '<span class="your-badge">Liked</span>' : l.verdict === "dislike" ? '<span class="sold-badge">Not for me</span>' : "") +
-      (l.comment ? '<p class="meta">' + esc(l.comment) + "</p>" : "") +
-      savedCardPaletteHTML(l) +
       "</div></article>";
   }).join("");
 }
@@ -16801,8 +16976,6 @@ function lookGridCard(l, actionsHTML) {
     '<div class="card-menu" hidden>' + menuItems + "</div>" +
     '<img src="' + (l.img || "assets/photos/316150a1e65e.webp") + '" alt="' + esc(l.imgAlt || "") + '" loading="lazy" ' + (l.refLook ? 'data-fav-open="' + l.id + '"' : 'data-popout="' + (l.img || "assets/photos/316150a1e65e.webp") + '"') + ' />' +
     '<div class="sb"><h4 data-fav-open="' + l.id + '">' + esc(l.title) + "</h4>" +
-    (l.worn ? '<span class="your-badge">Worn' + (l.wornDate ? " · " + esc(fmtDateShort(l.wornDate)) : "") + "</span>" : "") +
-    savedCardPaletteHTML(l) +
     "</div></article>";
 }
 
@@ -18014,8 +18187,8 @@ var studioSource = store.get("todaySource", null);
 if (["wardrobe", "inspo", "combo"].indexOf(studioSource) === -1) studioSource = "combo";
 var closetOnly = false;
 var SOURCE_NOTES = {
-  wardrobe: "Only my wardrobe: every look is built from pieces in your Closet. Until your own bottoms are catalogued, a look built on your top and your shoes may be completed by a suggested bottom — always named as a suggestion, never as yours.",
-  inspo: "Only inspo: built entirely outside your wardrobe — icons, plates and your brief lead, and nothing is pulled from your Closet.",
+  wardrobe: "Wardrobe: every look is built from pieces in your Closet. Until your own bottoms are catalogued, a look built on your top and your shoes may be completed by a suggested bottom — always named as a suggestion, never as yours.",
+  inspo: "Inspo: built entirely outside your wardrobe — icons, plates and your brief lead, and nothing is pulled from your Closet.",
   combo: "Combo — the default mix: each look is anchored in something you already own, and the rest is inspo to buy that completes it. Pieces that are yours are named as yours; the rest carries a Shop the look button."
 };
 function setSource(s) {
@@ -18191,11 +18364,11 @@ function shareLookImage(look) {
   bar.setAttribute("aria-label", "Your Studio choices — tap one to change it");
   bar.innerHTML =
     '<button type="button" class="choice-chip" id="choice-basis">Leads <strong></strong></button>' +
-    '<button type="button" class="choice-chip" id="choice-source">Build from <strong></strong></button>' +
+    '<button type="button" class="choice-chip" id="choice-source">Source <strong></strong></button>' +
     '<button type="button" class="choice-chip" id="choice-direction">Direction <strong></strong></button>';
   form.insertBefore(bar, form.firstChild);
   var BASIS_LABEL = { icon: "Icon", palette: "Palette", both: "Both" };
-  var SOURCE_LABEL = { wardrobe: "Only my wardrobe", inspo: "Only inspo", combo: "Combo" };
+  var SOURCE_LABEL = { wardrobe: "Wardrobe", inspo: "Inspo", combo: "Combo" };
   function directionLabel() {
     var sel = document.getElementById("style-direction");
     if (!sel || sel.value === "auto") return "Auto";
@@ -19380,7 +19553,14 @@ function renderFinds() {
     grid.innerHTML = '<div class="card empty" style="grid-column:1/-1">Nothing on the hunt yet — describe the first piece.</div>';
     return;
   }
-  grid.innerHTML = finds.map(function (f) {
+  /* Briefs list by category, then description A–Z (build .28) —
+     a display copy; the stored order is untouched. */
+  var shownFinds = finds.slice().sort(function (a, b) {
+    var c = String(a.cat || "").localeCompare(String(b.cat || ""));
+    if (c) return c;
+    return String(a.desc || "").localeCompare(String(b.desc || ""));
+  });
+  grid.innerHTML = shownFinds.map(function (f) {
     var q = encodeURIComponent(findQuery(f));
     var shop = iconShopFor(f);
     /* A brief's stored budget field is legacy — kept on the
@@ -19391,14 +19571,23 @@ function renderFinds() {
       "<h4>" + esc(f.desc) + "</h4>" +
       '<p class="meta" data-find-meta="' + f.id + '">' + esc(meta) + "</p>" +
       (f.details ? '<p class="details">' + esc(f.details) + "</p>" : "") +
+      /* One closed Search control per brief (build .28) — the
+         same grouped action menu as a Shop the look piece:
+         Google Shopping / eBay / Web from the brief's own query,
+         then its brand store under Brands when it has one.
+         Copy brief and Done stay as quiet text actions. */
       '<div class="look-actions">' +
-      (shop ? '<a class="btn-ghost" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="' + shop.href + '">' + esc(shop.brand) + "</a>" : "") +
-      '<a class="btn-accent" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=shop&q=' + q + '">Google Shopping</a>' +
-      '<a class="btn-ghost" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + q + '">eBay</a>' +
-      '<a class="btn-ghost" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + q + '">Web</a>' +
+      '<button type="button" class="btn-ghost" data-brief-search="' + f.id + '" aria-expanded="false">Search <span aria-hidden="true">▾</span></button>' +
       '<button type="button" class="btn-ghost" data-copy-find="' + f.id + '">Copy brief</button>' +
       '<button type="button" class="btn-ghost" data-delete-find="' + f.id + '">Done</button>' +
-      "</div></article>";
+      "</div>" +
+      '<div class="opt-list brief-search-list" data-brief-search-list="' + f.id + '" hidden>' +
+      '<a class="opt-item" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=shop&q=' + q + '">Google Shopping</a>' +
+      '<a class="opt-item" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + q + '">eBay</a>' +
+      '<a class="opt-item" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + q + '">Web</a>' +
+      (shop ? '<p class="shop-search-group">Brands</p><a class="opt-item" target="_blank" rel="noopener" href="' + shop.href + '">' + esc(shop.brand) + "</a>" : "") +
+      "</div>" +
+      "</article>";
   }).join("");
 }
 function syncFindSize() {
@@ -19443,6 +19632,16 @@ document.getElementById("find-form").addEventListener("submit", function (e) {
   }
 });
 document.getElementById("find-grid").addEventListener("click", function (e) {
+  var bs = e.target.closest("[data-brief-search]");
+  if (bs) {
+    var bid = bs.getAttribute("data-brief-search");
+    var bl = e.currentTarget.querySelector('[data-brief-search-list="' + bid + '"]');
+    var willOpenB = !!(bl && bl.hidden);
+    e.currentTarget.querySelectorAll(".brief-search-list").forEach(function (l) { l.hidden = true; });
+    e.currentTarget.querySelectorAll("[data-brief-search]").forEach(function (b2) { b2.setAttribute("aria-expanded", "false"); });
+    if (bl && willOpenB) { bl.hidden = false; bs.setAttribute("aria-expanded", "true"); }
+    return;
+  }
   var del = e.target.closest("[data-delete-find]");
   if (del) {
     finds = finds.filter(function (f) { return f.id !== del.getAttribute("data-delete-find"); });
@@ -19591,7 +19790,7 @@ buildFindCatOpts();
    look mode with the look carried in; the Shop the look tab itself
    does the same with the current Today hero look, and the
    free-form find sits behind "✕ Clear look". */
-var SHOP_CATALOGUE_CHECKED = "Nov 16, 2026";
+var SHOP_CATALOGUE_CHECKED = "Nov 17, 2026";
 /* Price tiers — ONE four-stop selector replaces every budget
    slider. A SKU is eligible when its tier's rank is at or under
    the selected tier's rank (the ceiling rule): Accessible shows
@@ -20543,6 +20742,16 @@ var SHOP_CATALOGUE = [
   {"brand": "Edward Green", "cat": "shoes", "img": "", "keys": ["black", "leather", "chelsea", "boots"], "name": "Newmarket Grained-Leather Chelsea Boots", "price": 2175, "retailer": "Mr Porter", "tier": "insensitive", "url": "https://www.mrporter.com/en-us/mens/product/edward-green/shoes/chelsea-boots/newmarket-grained-leather-chelsea-boots/46376663162968080"},
   {"brand": "John Lobb", "cat": "shoes", "img": "", "keys": ["brown", "dark brown", "suede", "desert", "boots", "chukka"], "name": "Field Chukka Desert Boots", "price": 2430, "retailer": "Mr Porter", "tier": "insensitive", "url": "https://www.mrporter.com/en-us/mens/product/john-lobb/shoes/desert-boots/field-chukka-desert-boots/46376663163192490"},
   {"brand": "Edward Green", "cat": "shoes", "img": "", "keys": ["black", "loafer", "leather", "penny"], "name": "Piccadilly Leather Loafers", "price": 2925, "retailer": "Mr Porter", "tier": "insensitive", "url": "https://www.mrporter.com/en-us/mens/product/edward-green/shoes/loafers/piccadilly-leather-loafers/46376663163145747"},
+  {"brand": "Berluti", "cat": "belt", "img": "", "keys": ["black", "alligator", "belt", "leather"], "name": "Classic Alligator Leather Belt 35mm", "price": 6450, "retailer": "Berluti", "tier": "insensitive", "url": "https://www.berluti.com/en-us/classic-alligator-leather-belt-35-mm/C0035-001.html"},
+  {"brand": "Santoni", "cat": "belt", "img": "", "keys": ["black", "crocodile", "belt", "leather"], "name": "Crocodile Leather Belt", "price": 1500, "retailer": "Harrods", "tier": "insensitive", "url": "https://modesens.com/product/santoni-crocodile-leather-belt-black-103798858/"},
+  {"brand": "Kiton", "cat": "belt", "img": "", "keys": ["black", "leather", "belt"], "name": "3.5cm Leather Belt", "price": 1280, "retailer": "Mr Porter", "tier": "insensitive", "url": "https://modesens.com/product/kiton-35cm-leather-belt-black-143605824/"},
+  {"brand": "Brunello Cucinelli", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "calf"], "name": "Leather Belt", "price": 1000, "retailer": "Farfetch", "tier": "insensitive", "url": "https://www.farfetch.com/shopping/men/brunello-cucinelli-leather-belt-item-24015619.aspx?lang=en-US"},
+  {"brand": "Tom Ford", "cat": "belt", "img": "", "keys": ["black", "leather", "belt"], "name": "Leather Classic Belt", "price": 875, "retailer": "Harrods", "tier": "luxury", "url": "https://modesens.com/product/tom-ford-leather-classic-belt-black-136917907/"},
+  {"brand": "Berluti", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "venezia", "calf"], "name": "Classic Venezia Leather Belt", "price": 790, "retailer": "Mytheresa", "tier": "luxury", "url": "https://www.mytheresa.com/us/en/men/berluti-classic-leather-belt-black-p00481351"},
+  {"brand": "Zegna", "cat": "belt", "img": "", "keys": ["black", "leather", "belt"], "name": "Black Leather Belt", "price": 690, "retailer": "Zegna", "tier": "luxury", "url": "https://www.zegna.com/us-en/product.zegna-male-black-leather-belt-black-110.35581991/"},
+  {"brand": "John Lobb", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "calf"], "name": "Square 022 Belt — Palladium Buckle", "price": 680, "retailer": "John Lobb", "tier": "luxury", "url": "https://www.johnlobb.com/en_us/accessories/square-022-belt"},
+  {"brand": "Loro Piana", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "calf"], "name": "Alsavel Pin-Buckle Belt", "price": 604, "retailer": "Bergdorf Goodman", "tier": "luxury", "url": "https://modesens.com/product/loro-piana-alsavel-pinbuckle-belt-black-111478554/"},
+  {"brand": "Santoni", "cat": "belt", "img": "", "keys": ["black", "leather", "belt", "polished"], "name": "Polished-Buckle Belt", "price": 550, "retailer": "Farfetch", "tier": "luxury", "url": "https://www.farfetch.com/shopping/men/santoni-polished-buckle-belt-item-32263353.aspx?lang=en-US"},
   {"brand": "Hugo", "cat": "belt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261084M131019_1/hugo-hugo-boss-black-woven-belt.jpg", "keys": ["black", "belt", "woven"], "name": "Black Woven Belt", "price": 55, "retailer": "SSENSE", "tier": "affordable", "url": "https://www.ssense.com/en-us/men/product/hugo-hugo-boss/black-woven-belt/19092961"},
   {"brand": "Polo Ralph Lauren", "cat": "belt", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261213M131007_1/polo-ralph-lauren-black-pebbled-leather-belt.jpg", "keys": ["black", "leather", "pebbled"], "name": "Black Pebbled Leather Belt", "price": 72, "retailer": "SSENSE", "tier": "affordable", "url": "https://www.ssense.com/en-us/men/product/polo-ralph-lauren/black-pebbled-leather-belt/19178251"},
   {"brand": "Anderson's", "cat": "belt", "img": "", "keys": ["brown", "belt", "woven"], "name": "woven-design Belt", "price": 86, "retailer": "Farfetch", "tier": "accessible", "url": "https://www.farfetch.com/shopping/men/andersons-woven-design-belt-item-37111200.aspx?lang=en-US&&size=23"},
@@ -20720,8 +20929,11 @@ function catalogueCatForPiece(pc) {
    least two keys, one of them a garment or material key.
    With the tier ceiling applied, any entry whose tier rank
    exceeds the selected tier's rank is skipped before scoring.
-   Ordering: score descending; ties broken by tier rank
-   ascending, most affordable first. */
+   Ordering is tier-aware (build .28): at a capped tier, score
+   descending with ties broken by tier rank ascending (most
+   affordable first); at Price insensitive the ELITE leads —
+   tier band descending first (insensitive, luxury, accessible,
+   affordable), match score descending within each band. */
 function catalogueScored(pc, applyCeiling) {
   var cat = catalogueCatForPiece(pc);
   if (!cat) return [];
@@ -20749,9 +20961,20 @@ function catalogueScored(pc, applyCeiling) {
     var score = matched + ((colourOK && !colourLiteral) ? 1 : 0);
     if (score >= 2 && garmentMatched >= 1) scored.push({ e: e, score: score });
   });
+  var eliteFirst = shopTier === "insensitive";
   scored.sort(function (a, b) {
-    if (b.score !== a.score) return b.score - a.score;
-    return shopTierRank(a.e.tier) - shopTierRank(b.e.tier);
+    if (eliteFirst) {
+      var tr = shopTierRank(b.e.tier) - shopTierRank(a.e.tier);
+      if (tr) return tr;
+      if (b.score !== a.score) return b.score - a.score;
+    } else {
+      if (b.score !== a.score) return b.score - a.score;
+      var tr2 = shopTierRank(a.e.tier) - shopTierRank(b.e.tier);
+      if (tr2) return tr2;
+    }
+    /* Final tiebreak: name A–Z, so equal matches are
+       alphabetical and the order is deterministic. */
+    return String(a.e.name || "").localeCompare(String(b.e.name || ""));
   });
   return scored;
 }
@@ -20887,7 +21110,14 @@ function renderPurchased() {
   box.hidden = false;
   box.className = "shop-purchased";
   var html = "<h3>Purchased</h3>";
-  html += shopPurchases.map(function (p) {
+  /* Purchased lists by type, then name A–Z (build .28) — a
+     display copy; the stored order is untouched. */
+  var shownPurchases = shopPurchases.slice().sort(function (a, b) {
+    var c = String(a.category || a.cat || "").localeCompare(String(b.category || b.cat || ""));
+    if (c) return c;
+    return String(a.name || "").localeCompare(String(b.name || ""));
+  });
+  html += shownPurchases.map(function (p) {
     var thumb = p.img ? '<img class="shop-thumb" src="' + esc(p.img) + '" alt="" loading="lazy" />' : "";
     return '<div class="shop-row">' + thumb +
       '<span class="shop-main"><span class="shop-name">' + esc(p.brand) + " — " + esc(p.name) + '</span>' +
@@ -21045,25 +21275,48 @@ function buyWishlistItem(key) {
   if (!isShopPurchased(entry)) toggleShopPurchase(entry, pc);
   removeWishlistItem(key);
 }
+/* One wishlist row, shared by Shop > Wishlist and the My Looks
+   Wishlist subtab (build .28) — the same shopWishlist data
+   renders through both doors, and the data-wish-buy /
+   data-wish-remove handlers are wired on both panels. */
+/* Wishlist display order (build .28): type, then name A–Z.
+   One sorted copy behind both doors — Shop > Wishlist and the
+   My Looks subtab — the stored order is untouched. */
+function shopWishlistSorted() {
+  return shopWishlist.slice().sort(function (a, b) {
+    var c = String(a.cat || a.category || "").localeCompare(String(b.cat || b.category || ""));
+    if (c) return c;
+    return String(a.name || "").localeCompare(String(b.name || ""));
+  });
+}
+function shopWishRowHTML(w) {
+  var thumb = w.img ? '<img class="shop-thumb" src="' + esc(w.img) + '" alt="" loading="lazy" />' : "";
+  var price = "$" + Number(w.price).toLocaleString("en-US") +
+    (w.wasPrice ? ' <span class="sale-was">$' + Number(w.wasPrice).toLocaleString("en-US") + "</span>" : "");
+  return '<div class="shop-row">' +
+    '<a class="shop-row-main" target="_blank" rel="noopener" href="' + esc(w.url) + '">' + thumb +
+    '<span class="shop-main"><span class="shop-name">' + esc(w.brand) + " — " + esc(w.name) + '</span>' +
+    '<span class="shop-sub">' + esc(w.retailer) + (w.addedISO ? " · Saved " + esc(fmtDateShort(w.addedISO)) : "") + '</span></span>' +
+    '<span class="shop-price">' + price + "</span></a>" +
+    '<button type="button" class="btn-ghost shop-buy" data-wish-buy="' + esc(w.key) + '">Mark purchased</button>' +
+    '<button type="button" class="btn-ghost shop-buy" data-wish-remove="' + esc(w.key) + '">Remove</button></div>';
+}
+/* Every wishlist mutation funnels through renderShopWishlist —
+   keep the My Looks Wishlist subtab in step when it is the view
+   on screen, so the two doors never disagree. */
+function syncLooksWishView() {
+  if (typeof looksFilter !== "undefined" && looksFilter === "wishlist" && typeof renderSaved === "function") renderSaved();
+}
 function renderShopWishlist() {
   var box = document.getElementById("shopwish-list");
   if (!box) return;
   if (!shopWishlist.length) {
     box.innerHTML = '<p class="meta">Nothing saved yet — add products from Shop the look matches or Sale items and they wait here.</p>';
+    syncLooksWishView();
     return;
   }
-  box.innerHTML = '<div class="wish-list">' + shopWishlist.map(function (w) {
-    var thumb = w.img ? '<img class="shop-thumb" src="' + esc(w.img) + '" alt="" loading="lazy" />' : "";
-    var price = "$" + Number(w.price).toLocaleString("en-US") +
-      (w.wasPrice ? ' <span class="sale-was">$' + Number(w.wasPrice).toLocaleString("en-US") + "</span>" : "");
-    return '<div class="shop-row">' +
-      '<a class="shop-row-main" target="_blank" rel="noopener" href="' + esc(w.url) + '">' + thumb +
-      '<span class="shop-main"><span class="shop-name">' + esc(w.brand) + " — " + esc(w.name) + '</span>' +
-      '<span class="shop-sub">' + esc(w.retailer) + (w.addedISO ? " · Saved " + esc(fmtDateShort(w.addedISO)) : "") + '</span></span>' +
-      '<span class="shop-price">' + price + "</span></a>" +
-      '<button type="button" class="btn-ghost shop-buy" data-wish-buy="' + esc(w.key) + '">Mark purchased</button>' +
-      '<button type="button" class="btn-ghost shop-buy" data-wish-remove="' + esc(w.key) + '">Remove</button></div>';
-  }).join("") + "</div>";
+  box.innerHTML = '<div class="wish-list">' + shopWishlistSorted().map(shopWishRowHTML).join("") + "</div>";
+  syncLooksWishView();
 }
 var saleCatFilter = "All";
 function saleCategories() {
@@ -21089,14 +21342,26 @@ function renderSaleItems() {
   if (!SALE_ITEMS.length) {
     list.innerHTML = '<p class="meta">Sale items are being gathered — the first sweep lands here soon.</p>';
     if (count) count.textContent = "";
+    updateSaleRail();
     return;
   }
   var items = SALE_ITEMS.map(function (it, i) { return { it: it, i: i }; }).filter(function (x) {
     return saleCatFilter === "All" || (x.it.category || "Other") === saleCatFilter;
   });
+  /* Sale items list by type, then brand A–Z, then name A–Z
+     (build .28) — the stored sweep order is untouched, and the
+     original index rides along for the wishlist buttons. */
+  items.sort(function (a, b) {
+    var c = String(a.it.category || "Other").localeCompare(String(b.it.category || "Other"));
+    if (c) return c;
+    var br = String(a.it.brand || "").localeCompare(String(b.it.brand || ""));
+    if (br) return br;
+    return String(a.it.name || "").localeCompare(String(b.it.name || ""));
+  });
   if (count) count.textContent = items.length + (items.length === 1 ? " item" : " items");
   if (!items.length) {
     list.innerHTML = '<p class="meta">Nothing on sale in this category right now.</p>';
+    updateSaleRail();
     return;
   }
   list.innerHTML = '<div class="sale-grid">' + items.map(function (x) {
@@ -21104,7 +21369,7 @@ function renderSaleItems() {
     var off = (typeof it.off === "number" && it.off > 0) ? '<span class="sale-off">' + it.off + "% off</span>" : "";
     var was = (typeof it.wasPrice === "number" && it.wasPrice > it.price) ? '<span class="sale-was">$' + Number(it.wasPrice).toLocaleString("en-US") + "</span>" : "";
     var wished = !!wishlistFor(shopEntryKey(it));
-    return '<article class="sale-card">' +
+    return '<article class="sale-card" data-brand-initial="' + esc((it.brand || "#").charAt(0).toUpperCase()) + '">' +
       (it.img ? '<img src="' + esc(it.img) + '" alt="' + esc(it.brand + " " + it.name) + '" loading="lazy" />' : "") +
       '<div class="sale-body">' +
       '<span class="sale-name">' + esc(it.brand) + " — " + esc(it.name) + "</span>" +
@@ -21115,6 +21380,46 @@ function renderSaleItems() {
       '<button type="button" class="btn-ghost shop-buy" data-sale-wish="' + x.i + '" aria-pressed="' + (wished ? "true" : "false") + '">' + (wished ? "In wishlist — remove" : "Add to wishlist") + "</button>" +
       "</span></div></article>";
   }).join("") + "</div>";
+  updateSaleRail();
+}
+/* Sale items A–Z rail (build .28): the same right-margin
+   brand rail as the Closet — keyed to brand, tap jumps to the
+   first rendered card of that letter in the current (type-
+   grouped, category-filtered) view; letters with no items in
+   view are dimmed and disabled. */
+function updateSaleRail() {
+  var panel = document.getElementById("panel-sale");
+  if (!panel) return;
+  var rail = panel.querySelector(".sale-rail");
+  if (!rail) {
+    rail = document.createElement("nav");
+    rail.className = "ward-rail sale-rail";
+    rail.setAttribute("aria-label", "Jump to a brand");
+    rail.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(function (L) {
+      return '<button type="button" data-sale-letter="' + L + '" aria-label="Jump to brands starting with ' + L + '">' + L + "</button>";
+    }).join("");
+    rail.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-sale-letter]");
+      if (!b || b.disabled) return;
+      var L = b.getAttribute("data-sale-letter");
+      var card = panel.querySelector('.sale-card[data-brand-initial="' + L + '"]');
+      if (!card) return;
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+      card.classList.add("rail-flash");
+      setTimeout(function () { card.classList.remove("rail-flash"); }, 1300);
+    });
+    panel.appendChild(rail);
+  }
+  var present = {};
+  panel.querySelectorAll(".sale-card[data-brand-initial]").forEach(function (c) { present[c.getAttribute("data-brand-initial")] = true; });
+  var any = false;
+  rail.querySelectorAll("[data-sale-letter]").forEach(function (b) {
+    var on = !!present[b.getAttribute("data-sale-letter")];
+    b.disabled = !on;
+    b.classList.toggle("off", !on);
+    if (on) any = true;
+  });
+  rail.hidden = !any;
 }
 (function wireShopPages() {
   var salePanel = document.getElementById("panel-sale");
@@ -21128,13 +21433,18 @@ function renderSaleItems() {
       if (it) toggleWishlistItem(it, null);
     });
   }
-  var wishPanel = document.getElementById("panel-shopwish");
-  if (wishPanel) wishPanel.addEventListener("click", function (e) {
+  var wishClick = function (e) {
     var buy = e.target.closest ? e.target.closest("[data-wish-buy]") : null;
     if (buy) { buyWishlistItem(buy.getAttribute("data-wish-buy")); return; }
     var rm = e.target.closest ? e.target.closest("[data-wish-remove]") : null;
     if (rm) removeWishlistItem(rm.getAttribute("data-wish-remove"));
-  });
+  };
+  var wishPanel = document.getElementById("panel-shopwish");
+  if (wishPanel) wishPanel.addEventListener("click", wishClick);
+  /* The same rows render inside My Looks' Wishlist subtab —
+     its Mark purchased / Remove buttons run the same flow. */
+  var looksWishPanel = document.getElementById("panel-looks");
+  if (looksWishPanel) looksWishPanel.addEventListener("click", wishClick);
   renderShopWishlist();
 })();
 /* A piece's match rows. The tier ceiling is already applied
@@ -21155,15 +21465,18 @@ function renderFindLookMode() {
   if (!box) return;
   var grid = document.querySelector("#panel-find .ward-grid");
   var info = document.querySelector("#panel-find .page-info-row");
+  var nl = document.getElementById("find-nolook");
   if (!findLookMode) {
     box.hidden = true; box.innerHTML = "";
     if (grid) grid.hidden = false;
     if (info) info.hidden = false;
+    if (nl) nl.hidden = false;
     return;
   }
   box.hidden = false;
   if (grid) grid.hidden = true;
   if (info) info.hidden = true;
+  if (nl) nl.hidden = true;
   var look = findLookMode;
   var tierName = shopTierName();
   var brands = shopTierBrands();
@@ -21171,22 +21484,41 @@ function renderFindLookMode() {
   var html = '<div class="shop-look-head"><img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" />' +
     '<div class="shop-look-titlerow"><h3>' + esc(look.title || "Untitled") + '</h3><button type="button" class="btn-ghost shop-clear" id="shop-clear-look">✕ Clear look</button></div>' +
     '<p class="shop-honest">Catalogue prices checked ' + SHOP_CATALOGUE_CHECKED + " — tap through for the live price.</p>" +
-    shopTierSelectorHTML() + "</div>";
-  /* One price tier selector at the top governs every piece:
-     catalogueMatches applies its ceiling before scoring. */
+    "</div>";
+  /* The price tier selector sits in every piece block's control
+     row now (build .28) — one global setting, rendered per
+     piece; catalogueMatches applies its ceiling before scoring,
+     and setShopTier re-renders this whole view on a change. */
   shopModeData = shopPiecesForLook(look).map(function (pc) {
     return { pc: pc, desc: pieceDescription(pc), matches: catalogueMatches(pc), total: catalogueMatchTotal(pc) };
   });
   shopModeData.forEach(function (d, idx) {
     var desc = d.desc, matches = d.matches;
     html += '<div class="shop-piece"><h4>' + esc(desc) + "</h4>";
-    html += '<div class="shop-matches" data-matches="' + idx + '">' + shopMatchesHTML(matches, d.pc, d.total) + "</div>";
-    html += '<div class="shop-brand-dd"><button type="button" class="sel-row shop-brand-toggle" aria-expanded="false"><span class="sel-name">Search brands</span><span class="sel-val">' + esc(tierName) + '</span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
-      '<div class="opt-list shop-brand-list" hidden>' + brands.map(function (b) {
-        return '<a class="opt-item shop-brand-item" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">' + esc(b) + "</a>";
-      }).join("") + "</div></div>";
+    /* Controls at the TOP of the section (build .28): Price
+       tier + Search, two equal boxes, before the matches. The
+       tier box is the shared global selector — a change
+       re-filters every section via renderFindLookMode. Search
+       is ONE grouped action menu: Google Shopping / eBay —
+       vintage / Web, then this piece's brands at the selected
+       tier. Picking a destination opens that search at once;
+       the box itself just reads "Search". The old foot-of-
+       section Search brands bar and the stray eBay — vintage
+       link are gone — both live in this menu now. */
+    var q = encodeURIComponent("men's " + desc);
     var eq = encodeURIComponent("men's " + desc + " vintage");
-    html += '<a class="shop-ebay" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + eq + '">eBay — vintage <span aria-hidden="true">↗</span></a></div>';
+    html += '<div class="shop-ctl-row"><div class="shop-ctl-cell">' + shopTierSelectorHTML() + '</div>' +
+      '<div class="shop-ctl-cell shop-search-dd"><button type="button" class="sel-row shop-search-toggle" aria-expanded="false"><span class="sel-name">Search</span><span class="sel-val"></span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
+      '<div class="opt-list shop-search-list" hidden>' +
+      '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=shop&q=' + q + '">Google Shopping</a>' +
+      '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + eq + '">eBay — vintage</a>' +
+      '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + q + '">Web</a>' +
+      (brands.length ? '<p class="shop-search-group">Brands</p>' + brands.map(function (b) {
+        return '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">' + esc(b) + "</a>";
+      }).join("") : "") +
+      "</div></div></div>";
+    html += '<div class="shop-matches" data-matches="' + idx + '">' + shopMatchesHTML(matches, d.pc, d.total) + "</div>";
+    html += "</div>";
   });
   box.innerHTML = html;
 }
@@ -21230,22 +21562,22 @@ function renderFindLookMode() {
       if (wentry && typeof toggleWishlistItem === "function") toggleWishlistItem(wentry, wd ? wd.pc : null);
       return;
     }
-    var tg = e.target.closest ? e.target.closest(".shop-brand-toggle") : null;
+    var tg = e.target.closest ? e.target.closest(".shop-search-toggle") : null;
     if (tg) {
-      var wrap = tg.closest(".shop-brand-dd");
-      var list = wrap ? wrap.querySelector(".shop-brand-list") : null;
+      var wrap = tg.closest(".shop-search-dd");
+      var list = wrap ? wrap.querySelector(".shop-search-list") : null;
       var willOpen = !!(list && list.hidden);
-      box.querySelectorAll(".shop-brand-list").forEach(function (l) { l.hidden = true; });
-      box.querySelectorAll(".shop-brand-toggle").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+      box.querySelectorAll(".shop-search-list").forEach(function (l) { l.hidden = true; });
+      box.querySelectorAll(".shop-search-toggle").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
       if (list && willOpen) { list.hidden = false; tg.setAttribute("aria-expanded", "true"); }
       return;
     }
-    var item = e.target.closest ? e.target.closest(".shop-brand-item") : null;
+    var item = e.target.closest ? e.target.closest(".shop-search-item") : null;
     if (item) {
-      var w2 = item.closest(".shop-brand-dd");
+      var w2 = item.closest(".shop-search-dd");
       if (w2) {
-        var l2 = w2.querySelector(".shop-brand-list"); if (l2) l2.hidden = true;
-        var t2 = w2.querySelector(".shop-brand-toggle"); if (t2) t2.setAttribute("aria-expanded", "false");
+        var l2 = w2.querySelector(".shop-search-list"); if (l2) l2.hidden = true;
+        var t2 = w2.querySelector(".shop-search-toggle"); if (t2) t2.setAttribute("aria-expanded", "false");
       }
     }
   });
@@ -21258,7 +21590,7 @@ function renderFindLookMode() {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "wardrobe", "add", "gaps", "palettes", "looks", "icons", "brands", "find", "sale", "shopwish", "calendar", "profile", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "wardrobe", "add", "gaps", "palettes", "looks", "icons", "brands", "find", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -21281,14 +21613,14 @@ var SECTIONS = {
   today: ["today"],
   closet: ["wardrobe", "add", "gaps", "looks", "watches", "calendar", "wearing"],
   ideas: ["studio", "icons", "palettes", "myinspo"],
-  find: ["find", "brands", "sale", "shopwish"],
-  me: ["profile"]
+  find: ["find", "search", "brands", "sale", "shopwish"],
+  me: ["pinfo", "plocation", "pcloud"]
 };
-var sectionHome = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "profile" };
+var sectionHome = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo" };
 /* Section tabs always open the section's FIRST page — the nav
    must be learnable. Last-page memory survives only in the
    refresh-restore path (restoreTab), never on a tab tap. */
-var SECTION_FIRST = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "profile" };
+var SECTION_FIRST = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo" };
 /* Scroll position per page, restored on return — a round trip
    from a long list (Closet, Icons, My Looks) no longer restarts
    at the top. */
@@ -21298,6 +21630,9 @@ function sectionOf(name) {
   return "today";
 }
 var currentTab = "today";
+/* The page he was on before opening Profile — the Profile
+   section's close (×) returns there (build .28). */
+var profileReturnTo = null;
 function persistTab() {
   store.set("tab", currentTab);
   /* Session mirror: survives an in-place refresh even in webviews
@@ -21315,10 +21650,17 @@ function switchTab(name, opts) {
      states and filters inside My Looks now — old links and stored
      tabs land there. */
   if (name === "queue" || name === "favourites") name = "looks";
+  /* Profile is three sub pages now (build .28) — the old
+     single-page name lands on Profile info, the default. */
+  if (name === "profile") name = "pinfo";
   if (TABS.indexOf(name) === -1) name = "today";
+  var prevTab = currentTab;
   pageScroll[currentTab] = window.scrollY || 0;
   currentTab = name;
   var sec = sectionOf(name);
+  /* Remember where he came from when he steps INTO Profile, so
+     the section's close (×) returns him to that page. */
+  if (sec === "me" && sectionOf(prevTab) !== "me") profileReturnTo = prevTab;
   sectionHome[sec] = name;
   if (name === "studio" && typeof dealOpeningSix === "function") dealOpeningSix();
   /* Section buttons are plain navigation, not tabs: the one for
@@ -21348,6 +21690,7 @@ function switchTab(name, opts) {
   }
   if (name === "sale" && typeof renderSaleItems === "function") renderSaleItems();
   if (name === "shopwish" && typeof renderShopWishlist === "function") renderShopWishlist();
+  if (name === "search" && typeof renderFinds === "function") renderFinds();
   if (name === "gaps" && typeof renderWishlist === "function") renderWishlist();
   if (name === "calendar" && typeof renderWeekPlan === "function") renderWeekPlan();
   persistTab();
@@ -21370,6 +21713,17 @@ function navClick(e) {
   var navEl = document.querySelector(sel);
   if (navEl) navEl.addEventListener("click", navClick);
 });
+/* Profile close (×): back to the page he came from, from any
+   Profile sub page; Today when there is no page to return to. */
+(function () {
+  var btn = document.getElementById("profile-close");
+  if (!btn) return;
+  btn.addEventListener("click", function () {
+    var dest = profileReturnTo;
+    if (!dest || TABS.indexOf(dest) === -1 || sectionOf(dest) === "me") dest = "today";
+    switchTab(dest);
+  });
+})();
 function tabFromHash() {
   var h = "";
   try { h = (location.hash || "").replace(/^#\/?/, ""); } catch (e) { return null; }
@@ -21497,7 +21851,7 @@ document.addEventListener("visibilitychange", function () { if (document.visibil
     if (reloading || e.touches.length !== 1) return;
     if (window.scrollY > 0) return;
     var t = e.target;
-    if (t.closest && (t.closest("input, textarea, select, .az-rail, .brand-rail"))) return;
+    if (t.closest && (t.closest("input, textarea, select, .az-rail, .brand-rail, .ward-rail"))) return;
     startY = e.touches[0].clientY;
     armed = true;
   }, { passive: true });
@@ -21924,19 +22278,27 @@ function renderWornLog() {
     list.innerHTML = '<p class="meta">Nothing worn yet — tap “Wore this today” on Today, or Mark worn on a look.</p>';
     return;
   }
-  /* The full history, browsable by month — no silent cap, no
-     newest-30 cut. */
-  var html = "", lastMonth = "";
+  /* Grouped by EXACT DATE (build .28) — "Monday · Nov 16" —
+     newest date first, today included as the newest date; each
+     outfit a compact row with a small thumbnail (a pieces-only
+     entry gets a small placeholder block). This list lives in
+     Calendar only — the Wearing Today page is the form alone. */
+  var html = "", lastDay = "";
   entries.forEach(function (en) {
-    var mk = (en.date || "").slice(0, 7);
-    if (mk && mk !== lastMonth) {
-      lastMonth = mk;
-      var md = new Date(en.date + "T12:00:00");
-      html += '<p class="worn-month">' + (isNaN(md.getTime()) ? esc(mk) : md.toLocaleDateString(undefined, { month: "long", year: "numeric" })) + "</p>";
+    var dk = en.date || "";
+    if (dk && dk !== lastDay) {
+      lastDay = dk;
+      var dd = new Date(dk + "T12:00:00");
+      var head = isNaN(dd.getTime()) ? esc(dk) : dd.toLocaleDateString(undefined, { weekday: "long" }) + " · " + dd.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      html += '<p class="worn-date-head">' + head + "</p>";
     }
-    html += '<div class="worn-row' + (en.selfie ? " selfie" : "") + '">' + (en.img ? '<img src="' + en.img + '" alt="" loading="lazy" data-popout="' + en.img + '" />' : "") +
-      '<span class="w-main"><span class="w-name">' + esc(en.title) + '</span>' +
-      '<span class="w-sub">' + esc(fmtDateShort(en.date)) + (en.pieces && en.pieces.length ? " · " + esc(en.pieces.join(", ")) : "") + (en.watch ? " · Watch: " + esc(en.watch) : "") + "</span></span></div>";
+    var label = (en.pieces && en.pieces.length) ? en.pieces.join(", ") : (en.title || "Outfit");
+    var subParts = [];
+    if (en.pieces && en.pieces.length && en.title) subParts.push(en.title);
+    if (en.watch) subParts.push("Watch: " + en.watch);
+    html += '<div class="worn-row compact' + (en.selfie ? " selfie" : "") + '">' + (en.img ? '<img src="' + en.img + '" alt="" loading="lazy" data-popout="' + en.img + '" />' : '<span class="worn-thumb-ph" aria-hidden="true"></span>') +
+      '<span class="w-main"><span class="w-name">' + esc(label) + '</span>' +
+      (subParts.length ? '<span class="w-sub">' + esc(subParts.join(" · ")) + "</span>" : "") + "</span></div>";
   });
   list.innerHTML = html;
 }
@@ -21989,7 +22351,7 @@ function renderGapList() {
   var list = document.getElementById("gap-list");
   if (!wrap || !list) return;
   var ce = document.getElementById("closet-gaps-count");
-  if (ce) ce.textContent = lastWishlist.length ? Math.min(8, lastWishlist.length) + " missing — pieces your looks need" : "Nothing missing";
+  if (ce) ce.textContent = lastWishlist.length ? Math.min(8, lastWishlist.length) + " missing" : "Nothing missing";
   if (!lastWishlist.length) { wrap.hidden = false; list.innerHTML = '<p class="meta">Nothing missing — every piece in your looks is covered by your closet.</p>'; return; }
   wrap.hidden = false;
   list.innerHTML = lastWishlist.slice(0, 8).map(function (w, i) {
@@ -22004,16 +22366,24 @@ document.addEventListener("click", function (e) {
   if (!b) return;
   var w = lastWishlist[parseInt(b.getAttribute("data-wish-find"), 10)];
   if (!w) return;
-  var f = {
-    id: "find-" + Date.now(), desc: w.desc, cat: w.cat,
-    size: typeof profileSizeFor === "function" ? profileSizeFor(w.cat) : "",
-    budget: "", budgetTier: shopTierName(), budgetNote: "",
-    colour: w.colour, details: "From the wishlist — needed by: " + w.titles.join(", "), iconId: null
-  };
-  finds.unshift(f);
-  store.set("finds", finds);
-  renderFinds();
-  switchTab("find");
+  /* The gap-shopping surface is the Search tab's form now
+     (build .28): the same handoff data prefills it — the piece
+     as the description, its category, its colour, and the
+     needed-by note as the details — and Add & search creates
+     the brief there, in the size from the Profile. */
+  var descEl = document.getElementById("find-desc");
+  if (descEl) descEl.value = w.desc;
+  var catEl = document.getElementById("find-cat");
+  if (catEl) catEl.value = w.cat;
+  if (typeof buildFindCatOpts === "function") buildFindCatOpts();
+  if (typeof syncFindSize === "function") syncFindSize();
+  var colEl = document.getElementById("find-colour");
+  if (colEl) colEl.value = w.colour || "";
+  var detEl = document.getElementById("find-details");
+  if (detEl) detEl.value = "From the wishlist — needed by: " + w.titles.join(", ");
+  var iconEl = document.getElementById("find-icon");
+  if (iconEl) iconEl.value = "";
+  switchTab("search");
   toast("On the hunt — " + w.desc + ".");
 });
 
@@ -22306,19 +22676,27 @@ function openPlanSheet(iso) {
         '<span class="w-sub">' + esc(fmtDateShort(en.date)) + (en.pieces && en.pieces.length ? " · " + esc(en.pieces.join(", ")) : "") + (en.watch ? " · Watch: " + esc(en.watch) : "") + "</span></span></div>";
     }).join("");
   }
-  if (planned) {
-    var pimg = lookImg(planned);
-    html += '<div class="wp-current"><img src="' + esc(pimg) + '" alt="" data-popout="' + esc(pimg) + '" data-popout-alt="' + esc(planned.imgAlt || planned.title) + '" />' +
-      '<span class="wp-current-main"><span class="wp-current-name">' + esc(planned.title) + '</span><span class="wp-current-sub">Planned</span></span>' +
-      '<button type="button" class="btn-ghost" data-plan-clear>Remove</button></div>';
-  }
-  html += '<button type="button" class="btn-accent wp-deal" data-plan-deal>Deal a fresh one</button>';
-  if (cands.length) {
-    html += '<p class="wp-pick-label">Liked &amp; queued</p><div class="wp-pick-grid">' + cands.map(function (l) {
-      return '<button type="button" class="wp-pick" data-plan-pick="' + esc(l.id) + '" aria-label="Plan ' + esc(l.title) + '"><img src="' + esc(lookImg(l)) + '" alt="" loading="lazy" decoding="async" /></button>';
-    }).join("") + "</div>";
+  if (iso < localTodayISO()) {
+    /* A past day is a record, not a plan (build .28): worn
+       outfits only — no Deal a fresh one, no Liked & queued
+       picker, no plan controls. The stored plan for the day is
+       untouched; it simply isn't presented. */
+    if (!wornDay.length) html += '<p class="wp-pick-label">Nothing worn logged for this day.</p>';
   } else {
-    html += '<p class="wp-pick-label">No liked or queued looks yet</p>';
+    if (planned) {
+      var pimg = lookImg(planned);
+      html += '<div class="wp-current"><img src="' + esc(pimg) + '" alt="" data-popout="' + esc(pimg) + '" data-popout-alt="' + esc(planned.imgAlt || planned.title) + '" />' +
+        '<span class="wp-current-main"><span class="wp-current-name">' + esc(planned.title) + '</span><span class="wp-current-sub">Planned</span></span>' +
+        '<button type="button" class="btn-ghost" data-plan-clear>Remove</button></div>';
+    }
+    html += '<button type="button" class="btn-accent wp-deal" data-plan-deal>Deal a fresh one</button>';
+    if (cands.length) {
+      html += '<p class="wp-pick-label">Liked &amp; queued</p><div class="wp-pick-grid">' + cands.map(function (l) {
+        return '<button type="button" class="wp-pick" data-plan-pick="' + esc(l.id) + '" aria-label="Plan ' + esc(l.title) + '"><img src="' + esc(lookImg(l)) + '" alt="" loading="lazy" decoding="async" /></button>';
+      }).join("") + "</div>";
+    } else {
+      html += '<p class="wp-pick-label">No liked or queued looks yet</p>';
+    }
   }
   body.innerHTML = html;
   sheet.hidden = false;
@@ -22404,7 +22782,7 @@ function closePlanSheet() {
   if (typeof prevSwitchPlan === "function") {
     window.switchTab = function (name, opts) {
       prevSwitchPlan(name, opts);
-      if (name === "calendar") renderWeekPlan();
+      if (name === "calendar") { renderWeekPlan(); if (typeof renderWornLog === "function") renderWornLog(); }
     };
   }
 })();
@@ -23250,10 +23628,9 @@ function fwCardHTML(look, idx) {
   return '<button type="button" class="card option-card fw-card" data-fw-idx="' + idx + '" role="listitem">' +
     photos +
     '<span class="oc-body">' +
-    '<span class="oc-label">From wardrobe</span>' +
     '<span class="oc-title">' + esc(look.title) + '</span>' +
     (look.suggestedBottom ? '<span class="oc-meta fw-pair">Pair with: ' + esc(look.suggestedBottom.name) + ' — suggested</span>' : "") +
-    cardStripHTML(look.swatches) + "</span></button>";
+    "</span></button>";
 }
 
 /* The outfit view for a From wardrobe card: the verified render
@@ -23337,16 +23714,42 @@ function dealFromWardrobe() {
   if (more) more.hidden = false;
   grid.innerHTML = fwLooks.map(function (look, idx) { return fwCardHTML(look, idx); }).join("");
 }
+/* Deal six From wardrobe renders into the Ideas grid (build
+   .28): a window over the verified closet looks. Liked looks
+   graduate out (build .10); photographs already dealt sit out
+   until the window runs dry, then the oldest return — the same
+   discipline as the inspo deck. renderOptions records the six
+   as dealt, so the next deal advances the window. */
+function dealWardrobeSix() {
+  var cl = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
+  if (!cl || !cl.length) return false;
+  var fresh = cl.filter(function (l) { return !isGraduatedLook(l); });
+  var pool = fresh.length ? fresh : cl;
+  function dealt(l) {
+    return (l.fwRender && dealtImgHistory.indexOf(l.fwRender) !== -1) ||
+      (l.img && dealtImgHistory.indexOf(l.img) !== -1) ||
+      dealtImgHistory.indexOf(fwRenderSrc(l)) !== -1;
+  }
+  var six = pool.filter(function (l) { return !dealt(l); }).slice(0, 6);
+  if (six.length < 6) {
+    var used = {};
+    six.forEach(function (l) { used[l.fwRender || l.img] = 1; });
+    pool.forEach(function (l) {
+      if (six.length < 6 && !used[l.fwRender || l.img]) { used[l.fwRender || l.img] = 1; six.push(l); }
+    });
+  }
+  renderOptions(six, { desc: "From your wardrobe", occasion: "", season: "", opts: { basis: (typeof studioBasis !== "undefined" ? studioBasis : "both"), source: "wardrobe" } });
+  return true;
+}
 (function initFromWardrobe() {
   var grid = document.getElementById("fw-grid");
-  if (!grid) return;
-  dealFromWardrobe();
+  if (grid) dealFromWardrobe();
   var more = document.getElementById("fw-more");
   if (more) more.addEventListener("click", function () {
     dealFromWardrobe();
     if (!fwLooks.length) toast("Your closet needs a top and a pair of shoes before it can build outfits.");
   });
-  grid.addEventListener("click", function (e) {
+  if (grid) grid.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-fw-idx]");
     if (!btn || !fwLooks.length) return;
     var idx = parseInt(btn.getAttribute("data-fw-idx"), 10);
@@ -23424,30 +23827,19 @@ function dealFromWardrobe() {
      no wrapper needed to keep the controls in step. */
   function syncFwSectionVisibility() {
     var sec = document.getElementById("from-wardrobe");
-    /* The From wardrobe section shows only in Combo. In inspo-only
-       it steps aside (nothing of his is dealt); in wardrobe-only
-       the main grid IS From wardrobe, so the section would deal
-       the same closet outfits twice on one page. */
-    if (studioSource !== "combo") {
-      if (sec) sec.hidden = true;
-      closeFwLayer();
-    } else if (sec) {
-      sec.hidden = false;
-    }
+    /* The From wardrobe section is gone (build .28) — the toggle
+       names the source and the one grid deals it. All that is
+       left here is closing a stray FW outfit layer when the
+       source leaves Combo. */
+    if (sec) sec.hidden = true;
+    if (studioSource !== "combo") closeFwLayer();
   }
   function dealIdeasForSource() {
     syncFwSectionVisibility();
-    if (studioSource === "combo") dealFromWardrobe();
-    if (studioSource === "wardrobe") {
-      var cl = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
-      if (cl && cl.length) {
-        /* Graduated (liked) closet looks are filtered out; the
-           unfiltered list renders if filtering empties it. */
-        var clFresh = cl.filter(function (l) { return !isGraduatedLook(l); });
-        renderOptions(clFresh.length ? clFresh : cl, { desc: "From your wardrobe", occasion: "", season: "", opts: { basis: (typeof studioBasis !== "undefined" ? studioBasis : "both"), source: "wardrobe" } });
-        return;
-      }
-    }
+    /* One grid, six looks, whichever source the toggle names
+       (build .28): Wardrobe deals its window of verified closet
+       renders; Inspo and Combo deal through the form's engine. */
+    if (studioSource === "wardrobe" && dealWardrobeSix()) return;
     dealSilent = true;
     doStyleFromForm();
   }
