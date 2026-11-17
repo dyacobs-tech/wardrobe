@@ -26,6 +26,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+      - name: Install the Playwright Python package (browsers are in the image)
+        run: python3 -m pip install --break-system-packages playwright==1.60.0
       - name: Pick target
         id: target
         run: |
