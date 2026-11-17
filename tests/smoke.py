@@ -64,7 +64,11 @@ def main() -> int:
         page.on("pageerror", lambda e: errors.append(f"pageerror: {e}"))
         page.on("console", lambda m: errors.append(f"console.{m.type}: {m.text}")
                 if m.type == "error" and "workers.dev" not in m.text
-                and "ERR_FAILED" not in m.text else None)
+                and "ERR_FAILED" not in m.text
+                # Resource-load failures are judged by the own-origin
+                # 4xx/5xx check below; third-party images (retailer CDNs)
+                # can refuse cross-origin loads and are not app bugs.
+                and not m.text.startswith("Failed to load resource") else None)
         origin = re.match(r"https?://[^/]+", URL).group(0)
 
         def on_response(r):
