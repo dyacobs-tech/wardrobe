@@ -176,9 +176,7 @@ def main() -> int:
         for status, name, detail in results:
             if status in ("FAIL", "FIXED?"):
                 lvl = "error" if status == "FAIL" else "notice"
-                msg = f"{status} {name}: {detail}".replace("%", "%25").replace("
-", "").replace("
-", " ")
+                msg = f"{status} {name}: {detail}".replace("%", "%25").replace("\r", "").replace("\n", " ")
                 print(f"::{lvl} title=Smoke test::{msg[:900]}")
     print(f"\n{len(fails)} new failure(s); "
           f"{sum(r[0] == 'KNOWN' for r in results)} known issue(s); "
@@ -194,6 +192,5 @@ if __name__ == "__main__":
         tb = traceback.format_exc()
         print(tb)
         if os.environ.get("GITHUB_ACTIONS"):
-            print("::error title=Smoke test crashed::" + tb.replace("%", "%25").replace("
-", "%0A")[-1800:])
+            print("::error title=Smoke test crashed::" + tb.replace("%", "%25").replace("\n", "%0A")[-1800:])
         sys.exit(2)
