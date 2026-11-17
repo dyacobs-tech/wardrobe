@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wardrobe" />
-    <meta name="wardrobe-build" content="2026-11-16.25" />
+    <meta name="wardrobe-build" content="2026-11-16.26" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -4049,7 +4049,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-16.25";
+var WARDROBE_BUILD = "2026-11-16.26";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -9326,7 +9326,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/7dce4df82629.webp",
+    img: "assets/photos/acfff0361762.webp",
     title: "Grey Suit & Sky Tie — VC Overseas",
     imgAlt: "You wearing a grey suit with a white shirt, sky blue tie and black Oxford shoes, with a steel Vacheron Overseas on your wrist",
     watchId: "seed-vc-overseas-42040",
@@ -10494,7 +10494,7 @@ var RENDER_FORMALITY = {
   "assets/photos/dec9f35bc267.webp": 4,
   "assets/photos/9d0cd659d307.webp": 4,
   "assets/photos/cce6bbb645be.webp": 6,
-  "assets/photos/7dce4df82629.webp": 6,
+  "assets/photos/acfff0361762.webp": 6,
   "assets/photos/1721de1440a4.webp": 1,
   "assets/photos/202b0eaad2c0.webp": 1,
   "assets/photos/5c434f082ca3.webp": 1,
@@ -12318,7 +12318,7 @@ function swapSubmitJob(look, idsBySlot, watchId, opts) {
   Object.keys(idsBySlot).forEach(function (s) { if (slotOrder.indexOf(s) === -1 && idsBySlot[s]) pieces.push(idsBySlot[s]); });
   var combo = { pieces: pieces, watchId: watchId || null };
   if (typeof look.formality === "string" && look.formality) combo.formality = look.formality;
-  swapFetch(swapSyncBase() + "/render-queue", {
+  return swapFetch(swapSyncBase() + "/render-queue", {
     method: "POST",
     headers: { "authorization": "Bearer " + key, "content-type": "application/json" },
     body: JSON.stringify({ comboId: look.swapComboId, combo: combo })
@@ -12328,7 +12328,31 @@ function swapSubmitJob(look, idsBySlot, watchId, opts) {
        just as invisible as a network drop. That silent-400 mode
        is exactly what killed swaps in builds .17/.18. */
     if (r && typeof r.ok === "boolean" && !r.ok) throw new Error("swap submit " + r.status);
-    return r;
+    /* The POST body is the job itself. The enqueue is
+       idempotent for a job that already failed (an earlier
+       render died on a transient watcher error), so the
+       worker hands that failed job straight back: the render
+       will never run, and sitting in the rendering state
+       until the poller's first tick (~20s) only to revert is
+       the exact dead-end the user hit. Read the job and, on
+       "failed", settle this combination back to the original
+       photo NOW — by comboId, which is correct for every
+       caller (user pick, poller resubmit, resume resubmit,
+       Style-this anchored submits); the toast is for
+       user-initiated submits only. A body that won't parse
+       is tolerated as no job at all. */
+    var parseP = (r && typeof r.json === "function")
+      ? r.json().catch(function () { return null; })
+      : Promise.resolve(null);
+    return parseP.then(function (j) {
+      if (j && j.status === "failed") {
+        stopSwapPoll();
+        swapSettleCombo(look.swapComboId, null);
+        if (opts && opts.fromUser && typeof toast === "function") toast("That render didn't come through — showing the original photo.");
+        return false;
+      }
+      return true;
+    });
   }).catch(function () {
     /* A user-initiated submit that fails is no longer invisible:
        the pick handler flags its call {fromUser: true} and hears
@@ -12336,6 +12360,7 @@ function swapSubmitJob(look, idsBySlot, watchId, opts) {
        self-heal, the launch resume) pass no flag and stay
        silent — they retry on their own either way. */
     if (opts && opts.fromUser && typeof toast === "function") toast("That swap couldn't be sent — it will retry on its own.");
+    return false;
   });
 }
 /* Polling runs while the swapped look's pop-out is on screen;
@@ -12470,7 +12495,25 @@ function swapResumePending() {
         return;
       }
       if (j.status === "done") {
-        swapTryLoadRender(comboId, 0, function (url) { swapSettleCombo(comboId, url); }, function () {});
+        /* The job is done but this session has no URL for it
+           yet: the photo was published while the app was
+           closed and the file can still be propagating. One
+           load attempt used to be the whole story — a single
+           miss left the combination unsettled forever. Retry
+           with rising cache-busters, 15s apart, up to five
+           attempts; after the fifth, give up silently (the
+           pop-out poll remains the backstop). */
+        var resumeAttempt = 0;
+        var resumeTry = function () {
+          resumeAttempt++;
+          swapTryLoadRender(comboId, resumeAttempt, function (url) {
+            lazyRenders[comboId] = url;
+            swapSettleCombo(comboId, url);
+          }, function () {
+            if (resumeAttempt < 5) setTimeout(resumeTry, 15000);
+          });
+        };
+        resumeTry();
       } else if (j.status === "failed") swapSettleCombo(comboId, null);
     }).catch(function () {});
   });
