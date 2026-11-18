@@ -1,11 +1,12 @@
 // Wardrobe — offline cache
 // Strategy
-//  · App shell (the page): network-first with a short deadline, so new
-//    builds arrive when online and a weak signal falls back to the cached
-//    copy instead of hanging. Only a good (200) response ever replaces the
+//  · App shell (the page): network-first with a 30s deadline (build .58),
+//    so a 2.7MB index.html can finish on a typical phone link before any
+//    cached shell is used. Only a failed or over-deadline fetch falls back. Only a good (200) response ever replaces the
 //    cached shell, and it is always stored under one key.
-//  · Photos under assets/photos/ are content-hashed and immutable:
-//    cache-first, kept once seen.
+//  · Photos under assets/photos/ are cache-first, kept once seen.
+//    Cache names include WARDROBE_BUILD, so a new release re-fetches
+//    photos that were edited in place under the same filename.
 //  · Everything else on this origin (icons, the wardrobe-look renders, the
 //    manifest): network-first. These files keep their names when they
 //    change, so a cached copy must never win over a fresh one — the
@@ -21,13 +22,21 @@
 // builds, so ASSET_CACHE no longer grows one entry per buster.
 // Cross-origin requests (the sync worker included) are never cached:
 // the fetch handler returns early for any origin but this one.
-const SHELL_CACHE = 'wardrobe-shell-3';
-const PHOTO_CACHE = 'wardrobe-photos-1';
-const ASSET_CACHE = 'wardrobe-assets-2';
+// Build .58: cache names include the app build, so a new release
+// drops the previous photo/shell/asset caches on activate. That is
+// what lets returning clients pick up in-place photo edits (Breguet
+// 3050, Breton) that kept the same hashed filenames. The shell
+// deadline is 30s — long enough for a 2.7MB index.html on a typical
+// phone connection — so a slow fetch is not replaced by a stale
+// cached shell after 4 seconds.
+const WARDROBE_BUILD = '2026-11-18.58';
+const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
+const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
+const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png'];
-const SHELL_DEADLINE_MS = 4000;
+const SHELL_DEADLINE_MS = 30000;
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', (event) => {

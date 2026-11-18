@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.57" />
+    <meta name="wardrobe-build" content="2026-11-18.58" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -802,7 +802,7 @@
 
       /* footer styles deleted — there is no footer element. */
       .toast {
-        position: fixed; left: 50%; bottom: calc(68px + 20px); transform: translateX(-50%) translateY(16px);
+        position: fixed; left: 50%; bottom: calc(var(--bb-h) + 20px); transform: translateX(-50%) translateY(16px);
         background: var(--ink-btn); color: var(--ink-btn-text); padding: 12px 20px; border-radius: var(--radius);
         font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 200ms ease, transform 200ms ease; z-index: 60;
         max-width: min(92vw, 480px); text-align: center; box-shadow: var(--shadow-lift);
@@ -1048,7 +1048,7 @@
       #panel-pinfo label.field, #panel-plocation label.field, #panel-pcloud label.field { font-size: 11px; letter-spacing: .14em; margin-bottom: 3px; }
       #panel-pinfo input[type="text"], #panel-plocation input[type="text"], #panel-pcloud input[type="text"], #panel-pinfo input[type="search"], #panel-plocation input[type="search"], #panel-pcloud input[type="search"], #panel-pinfo select, #panel-plocation select, #panel-pcloud select, #panel-pinfo textarea, #panel-plocation textarea, #panel-pcloud textarea { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
       #panel-pinfo .profile-grid, #panel-plocation .profile-grid, #panel-pcloud .profile-grid { gap: 8px; }
-      @media (max-width: 639px) { #panel-pinfo .profile-grid, #panel-plocation .profile-grid, #panel-pcloud .profile-grid { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 639px) { #panel-pinfo .profile-grid, #panel-plocation .profile-grid, #panel-pcloud .profile-grid { grid-template-columns: 1fr; } }
       #panel-pinfo #profile-form, #panel-plocation #profile-form, #panel-pcloud #profile-form { padding: 10px 12px; gap: 7px; }
       #panel-pinfo .loc-card, #panel-plocation .loc-card, #panel-pcloud .loc-card { padding: 10px 12px; gap: 8px; margin-bottom: 12px !important; }
       #panel-pinfo .loc-card h3, #panel-plocation .loc-card h3, #panel-pcloud .loc-card h3 { font-size: 16px; }
@@ -1241,7 +1241,7 @@
 
       /* Undo toast */
       .undo-toast {
-        position: fixed; left: 50%; bottom: calc(68px + 20px); transform: translateX(-50%);
+        position: fixed; left: 50%; bottom: calc(var(--bb-h) + 20px); transform: translateX(-50%);
         background: var(--ink-btn); color: var(--ink-btn-text); padding: 9px 10px 9px 16px; border-radius: var(--radius);
         font-size: 13.5px; font-weight: 500; z-index: 70; display: flex; align-items: center; gap: 12px;
         max-width: min(92vw, 480px); box-shadow: var(--shadow-lift);
@@ -2083,7 +2083,7 @@
 
       /* ---------- Toast — a slim bottom bar, never a slab ---------- */
       .toast {
-        bottom: calc(68px + 14px);
+        bottom: calc(var(--bb-h) + 14px);
         padding: 8px 16px; border-radius: 999px;
         font-size: 12.5px; font-weight: 500; line-height: 1.25;
         max-width: min(92vw, 430px); z-index: 130;
@@ -2435,8 +2435,8 @@
          every device,
          whatever env() would have resolved to. The body clearance and
          the toast lift use the same fixed 68px. */
-      :root { --bb-h: 68px; }
-      body { padding-bottom: 68px; }
+      :root { --bb-h: calc(68px + env(safe-area-inset-bottom, 0px)); }
+      body { padding-bottom: var(--bb-h); }
       .bottombar {
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
         display: flex;
@@ -2444,8 +2444,9 @@
         -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
         border-top: 1px solid var(--border);
         box-sizing: border-box;
-        height: 68px;
+        height: var(--bb-h);
         padding: 0;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
       }
       .navbtn {
         -webkit-appearance: none; appearance: none; background: none; border: 0; margin: 0; cursor: pointer;
@@ -3052,6 +3053,10 @@
          fixed 3/4 photo area, one no-photo treatment, titles clamped
          to two lines, equal-height rows, actions pinned inside the
          card border. */
+      /* Build .58: these full-frame / stacked-caption rules are for
+         phone widths only. At ≥1024px the desktop side-panel hero
+         (photo 54% left, caption 46% right) must keep winning. */
+      @media (max-width: 1023px) {
       #panel-today:not([hidden]) .today-hero {
         height: auto; min-height: 0; max-height: none;
         display: flex; flex-direction: column; background: #14110d;
@@ -3072,6 +3077,7 @@
       #panel-today .today-caption {
         position: relative; left: auto; right: auto; bottom: auto; flex: none;
         background: linear-gradient(to bottom, #1c1712, #14110d);
+      }
       }
       #look-layer .look-media.single .pane img,
       .look-media.single .pane img {
@@ -3230,6 +3236,70 @@
         #panel-today .today-caption { padding-bottom: 24px; }
       }
     </style>
+    <style>
+      #subnav-me .subnav-scroll {
+        display: flex; flex: 1 1 auto; align-items: center;
+        min-width: 0; gap: 2px;
+      }
+      /* ================= Build .58 — sub-nav fits on one line =================
+         Phone sub-navs are now a single horizontal scroll strip. Labels
+         stay nowrap and are not ellipsized mid-word. Shop's 4+3 equal-cell
+         grid and the tight Ideas/Profile grids from build .56 are replaced
+         at the same breakpoint so "Shop the look", "Outfit Ideas",
+         "My Outfits" and "Cloud & backup" stay whole. The profile close
+         control stays pinned on the right. Desktop (≥1024px) is unchanged. */
+      @media (max-width: 1023px) {
+        .tab, .subtab { overflow: visible; text-overflow: unset; }
+        .subtab { white-space: nowrap; }
+        .subnav-group:not([hidden]) {
+          display: flex !important;
+          flex-wrap: nowrap;
+          gap: 2px;
+          width: 100%;
+          min-width: 0;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
+        }
+        .subnav-group::-webkit-scrollbar { display: none; }
+        .subnav-group .subtab {
+          flex: 0 0 auto;
+          width: auto;
+          max-width: none;
+          padding: 0 12px;
+          white-space: nowrap;
+          overflow: visible;
+          text-overflow: unset;
+        }
+        #subnav-closet #tab-wearing { white-space: nowrap; line-height: 1.2; padding: 0 12px; }
+        .subnav, .subnav .wrap, .navstack { max-width: 100%; min-width: 0; overflow-x: hidden; }
+        #subnav-me:not([hidden]) {
+          display: flex !important;
+          align-items: center;
+          overflow: hidden;
+          gap: 0;
+        }
+        #subnav-me .subnav-scroll {
+          display: flex;
+          flex: 1 1 auto;
+          min-width: 0;
+          gap: 2px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
+        }
+        #subnav-me .subnav-scroll::-webkit-scrollbar { display: none; }
+        #subnav-me #profile-close {
+          flex: 0 0 auto;
+          margin-left: 0;
+          position: static;
+          z-index: 1;
+          background: var(--bg);
+        }
+      }
+    </style>
   </head>
   <body>
     <header class="masthead">
@@ -3269,9 +3339,11 @@
             <button class="subtab" role="tab" id="tab-search" aria-selected="false" aria-controls="panel-search" data-tab="search">Search</button>
           </div>
           <div class="subnav-group" id="subnav-me" role="tablist" hidden>
+            <div class="subnav-scroll">
             <button class="subtab" role="tab" id="tab-pinfo" aria-selected="false" aria-controls="panel-pinfo" data-tab="pinfo">Profile info</button>
             <button class="subtab" role="tab" id="tab-plocation" aria-selected="false" aria-controls="panel-plocation" data-tab="plocation">Location</button>
             <button class="subtab" role="tab" id="tab-pcloud" aria-selected="false" aria-controls="panel-pcloud" data-tab="pcloud">Cloud &amp; backup</button>
+            </div>
             <button type="button" class="subtab profile-close" id="profile-close" aria-label="Close profile">×</button>
           </div>
         </div>
@@ -4333,7 +4405,7 @@
               <span class="loc-name" id="loc-current-name"></span>
               <span class="loc-kind" id="loc-current-kind">Home — default</span>
             </div>
-            <p class="loc-weather" id="loc-weather" style="margin-top:6px">Checking the weather there…</p>
+            <p class="loc-weather" id="loc-weather" style="margin-top:6px">Set your home city — search above, or pick a city below.</p>
             <p class="loc-rec" id="loc-rec"></p>
           </div>
           <div>
@@ -4343,9 +4415,8 @@
               <button type="button" class="btn-ink" id="loc-search-btn">Find</button>
             </div>
             <div id="loc-results" style="margin-top:10px"></div>
+            <div class="loc-quick" id="loc-quick" style="margin-top:10px"></div>
           </div>
-          <!-- The quick-pick city chips live on Today only —
-               one list, one place. Search above covers the rest. -->
           <div class="loc-actions">
             <button type="button" class="btn-ghost" id="loc-set-home">Make this my home</button>
             <button type="button" class="btn-ghost" id="loc-back-home" hidden>Back to home</button>
@@ -5118,7 +5189,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.57";
+var WARDROBE_BUILD = "2026-11-18.58";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -23429,12 +23500,16 @@ function renderQuickLocs() {
 function renderLoc() {
   renderQuickLocs();
   var travelling = isTraveling();
-  document.getElementById("loc-current-name").textContent = currentLoc.name;
-  document.getElementById("loc-current-kind").textContent = travelling ? "Traveling — not home" : "Home — default";
+  var locUnset = !(currentLoc && (Number(currentLoc.lat) || Number(currentLoc.lon)));
+  document.getElementById("loc-current-name").textContent = currentLoc.name || "";
+  document.getElementById("loc-current-kind").textContent = locUnset ? "No home set" : (travelling ? "Traveling — not home" : "Home — default");
   document.getElementById("loc-back-home").hidden = !travelling;
   var badge = travelling ? ' <span class="travel-badge">Traveling</span>' : "";
   document.getElementById("today-loc").innerHTML = "<strong>" + esc(currentLoc.name) + "</strong><span>" + esc(currentWeather ? Math.round(currentWeather.temp) + "°F · " + currentWeather.label : "") + "</span>" + badge;
-  if (currentWeather) {
+  if (locUnset && !currentWeather) {
+    document.getElementById("loc-weather").textContent = "Set your home city — search above, or pick a city below.";
+    document.getElementById("loc-rec").textContent = "";
+  } else if (currentWeather) {
     document.getElementById("loc-weather").textContent = Math.round(currentWeather.temp) + "°F now" +
       (typeof currentWeather.feels === "number" ? ", feels " + Math.round(currentWeather.feels) + "°F" : "") +
       (currentWeather.label ? " — " + currentWeather.label : "") +
@@ -23524,8 +23599,13 @@ function applyWeatherToToday() {
 }
 function fetchWeather(attempt) {
   if (!window.fetch) return;
-  /* No location set yet (fresh install): nothing to fetch for. */
-  if (!currentLoc.lat && !currentLoc.lon) return;
+  /* No location set yet (fresh install): nothing to fetch for.
+     Tell the user to set a home city — do not leave "Checking…". */
+  if (!currentLoc.lat && !currentLoc.lon) {
+    var el0 = document.getElementById("loc-weather");
+    if (el0 && !currentWeather) el0.textContent = "Set your home city — search above, or pick a city below.";
+    return;
+  }
   var url = "https://api.open-meteo.com/v1/forecast?latitude=" + currentLoc.lat + "&longitude=" + currentLoc.lon +
     "&current=temperature_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&temperature_unit=fahrenheit&past_days=7&forecast_days=16&timezone=auto";
   var askedLat = currentLoc.lat, askedLon = currentLoc.lon;
@@ -23922,7 +24002,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops"];
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
@@ -23943,7 +24023,7 @@ document.getElementById("data-export").addEventListener("click", function () {
    that fails puts everything back. "Nothing was changed" is only
    ever said when it is true. */
 var BACKUP_VERSION = 1;
-var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "recentlyRemoved", "dealtImgs", "weekPlan", "trips", "packedItems"];
+var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "recentlyRemoved", "dealtImgs", "weekPlan", "trips", "packedItems", "receiptInbox", "priceDrops"];
 var BACKUP_OBJECT_KEYS = ["profile", "overrides", "lazyRenders"];
 function readBackupFile(text) {
   var payload = JSON.parse(text);
@@ -24036,6 +24116,9 @@ function applyBackupData(data, opts) {
       if (!store.set(k, val)) failed.push(k);
     }
     else {
+      /* receiptInbox and priceDrops were added in build .58. An older
+         backup will not mention them — do not clear the live lists. */
+      if (k === "receiptInbox" || k === "priceDrops") return;
       if (exportedAt !== null) { var ns = newestLocalStamp(k); if (ns !== null && ns > exportedAt) return; }
       store.remove(k);
     }
@@ -30475,7 +30558,7 @@ else {
   if (!SY.bp || typeof SY.bp !== "object" || Array.isArray(SY.bp)) SY.bp = {};
   if (typeof SY.mig57 !== "string") SY.mig57 = "";
 }
-function saveSY() { try { localStorage.setItem("wardrobe.sync", JSON.stringify(SY)); } catch (e) {} }
+function saveSY() { try { localStorage.setItem("wardrobe.sync", JSON.stringify(SY)); return true; } catch (e) { try { storeNoteFailure(); } catch (e2) {} return false; } }
 function syHsh(x) {
   var t = JSON.stringify(x) || "";
   var h = 5381;
@@ -30754,8 +30837,8 @@ function dataNoteRender() {
   if (!_dataNoteOff && _syMassHold) {
     _dataNoteMode = "mass";
     el.hidden = false;
-    if (tx) tx.textContent = "Sync wants to delete " + _syMassHold.deletions + " of " + _syMassHold.live + " in one list. Delete them everywhere?";
-    if (btn) btn.textContent = "Delete them";
+    if (tx) tx.textContent = "This device is trying to delete " + _syMassHold.deletions + " of " + _syMassHold.live + " records in one list. Those deletes were not sent — nothing on the server was changed. If you really want to delete them on every device, tap Confirm deletes.";
+    if (btn) btn.textContent = "Confirm deletes";
     todayNotePad();
     return;
   }
@@ -31124,17 +31207,19 @@ function syncNow(isRetry, force) {
   (async function () {
     try {
       if (!SY.key) {
-        setSyncStatus("Creating sync account…");
-        /* The worker gates /register behind a registration code
-           (kept in this device's local store only). Without it —
-           or with a wrong one — the worker answers 403: stand
-           down quietly and tell the user where the code goes,
-           instead of retry-looping a request that cannot pass. */
+        /* Build .58: never hit /register without a code. A blank
+           POST only 403s and used to fire on every fresh visit. */
         var regCode = "";
         try { regCode = store.get("regCode", "") || ""; } catch (e) {}
+        if (!String(regCode).trim()) {
+          _syRegNeed = true;
+          setSyncStatus("Sync needs the registration code — enter it under Cloud sync in Profile, then tap Sync now. Nothing on this device was changed.");
+          return;
+        }
+        setSyncStatus("Creating sync account…");
         var r0 = await syFetch(SYNC_URL + "/register", {
           method: "POST",
-          headers: regCode ? { "x-register-secret": regCode } : {}
+          headers: { "x-register-secret": regCode }
         }, 20000);
         if (r0.status === 403) {
           _syRegNeed = true;
@@ -31308,8 +31393,13 @@ function syncNow(isRetry, force) {
         Object.keys(delByColl).forEach(function (c) {
           var del = delByColl[c];
           var live = Object.keys(SY.snap[c] || {}).length;
-          if (del >= 6 && del > (live + del) * 0.2 && !_syMassDenied[c]) {
-            if (!_syMassHold) _syMassHold = { coll: c, deletions: del, live: live + del };
+          var total = live + del;
+          /* Build .58 circuit breaker: never push a delete batch that
+             would remove more than 5 records, or more than 10% of a
+             collection, in one pass. Held tombstones stay dirty and
+             are not sent. The user can confirm in the data alert. */
+          if ((del > 5 || (del >= 2 && total > 0 && del > total * 0.1)) && !_syMassDenied[c]) {
+            if (!_syMassHold) _syMassHold = { coll: c, deletions: del, live: total };
             changes = changes.filter(function (ch) { return !(ch.deleted && ch.coll === c); });
           }
         });
@@ -31506,6 +31596,13 @@ function newSyncAccount() {
   if (!_syNewArmed) {
     _syNewArmed = true;
     if (note) note.textContent = "Start a fresh sync account for this device? Everything here is uploaded to it; your other devices will need the new key. Tap again to confirm.";
+    return;
+  }
+  var newCode = "";
+  try { newCode = store.get("regCode", "") || ""; } catch (e) {}
+  if (!String(newCode).trim()) {
+    _syNewArmed = false;
+    if (note) note.textContent = "Enter the registration code first, then tap again to start a new account. The current key was not changed.";
     return;
   }
   _syNewArmed = false;
