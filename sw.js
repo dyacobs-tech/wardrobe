@@ -22,14 +22,14 @@
 // builds, so ASSET_CACHE no longer grows one entry per buster.
 // Cross-origin requests (the sync worker included) are never cached:
 // the fetch handler returns early for any origin but this one.
-// Build .58/.59: cache names include the app build, so a new release
+// Build .58/.59/.61: cache names include the app build, so a new release
 // drops the previous photo/shell/asset caches on activate. That is
 // what lets returning clients pick up in-place photo edits (Breguet
 // 3050, Breton) that kept the same hashed filenames. The shell
 // deadline is 30s — long enough for a 2.7MB index.html on a typical
 // phone connection — so a slow fetch is not replaced by a stale
 // cached shell after 4 seconds.
-const WARDROBE_BUILD = '2026-11-18.60';
+const WARDROBE_BUILD = '2026-11-18.61';
 const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;

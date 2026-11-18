@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.60" />
+    <meta name="wardrobe-build" content="2026-11-18.61" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -3315,6 +3315,55 @@
         }
       }
     </style>
+    <style>
+      /* ================= Build .61 — bottom nav pinned to the viewport =================
+         The bar is a direct child of body (after </main>) and must stay
+         that way. On phone widths we strip every property that would make
+         html or body a containing block for position:fixed (transform,
+         filter, perspective, contain, will-change, isolation, a definite
+         height, overflow:hidden). Home in particular must not change
+         body's display or height — that was the .55/.59 iOS bug. The
+         bar itself is forced to position:fixed; bottom:0 with no
+         transform, identical on every page. Desktop (≥1024px) is
+         unchanged: the bar remains the top nav row. The 900–1023px
+         floating-pill rules are also left alone. */
+      @media (max-width: 899px) {
+        html, body {
+          transform: none;
+          filter: none;
+          perspective: none;
+          contain: none;
+          will-change: auto;
+          isolation: auto;
+          overflow: visible;
+        }
+        body {
+          display: block;
+          position: static;
+          height: auto;
+          max-height: none;
+        }
+        body:has(> main > #panel-today:not([hidden])) {
+          display: block;
+          position: static;
+          height: auto;
+          min-height: 0;
+          max-height: none;
+          overflow: visible;
+          transform: none;
+          filter: none;
+          contain: none;
+          will-change: auto;
+        }
+        #bottombar.bottombar {
+          position: fixed;
+          left: 0; right: 0; bottom: 0; top: auto;
+          transform: none;
+          width: auto; margin: 0;
+        }
+      }
+      #build-stamp { margin: 14px 0 0; font-size: 11px; letter-spacing: .06em; color: var(--dim); }
+    </style>
   </head>
   <body>
     <header class="masthead">
@@ -4480,6 +4529,7 @@
           </div>
           <p id="data-status" style="margin:0"></p>
         </div>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.61</p>
       </section>
 
       <!-- ================= WATCHES ================= -->
@@ -4549,6 +4599,9 @@
       </section>
     </main>
 
+    <!-- Bottom nav: MUST stay a direct child of body, outside main
+         and any transformed/contained wrapper, so position:fixed is
+         always relative to the viewport. -->
     <nav class="bottombar" id="bottombar" aria-label="Wardrobe sections">
       <button type="button" class="navbtn" id="tab-today" data-tab="today" data-section="today" aria-controls="panel-today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><span>Home</span></button>
       <button type="button" class="navbtn" id="section-closet" data-section="closet"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7.2a2 2 0 1 0-2-2"/><path d="M12 7.2v1.6L3.6 14.6a1.4 1.4 0 0 0 .8 2.6h15.2a1.4 1.4 0 0 0 .8-2.6L12 8.8"/></svg><span>Closet</span></button>
@@ -5204,7 +5257,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.60";
+var WARDROBE_BUILD = "2026-11-18.61";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -32210,25 +32263,48 @@ function analyzeFilePiece(card, job, ix) {
     }
   });
 
-  /* A home-screen app can stay open for days. On returning to it
-     (at most every 30 minutes) read the first 2 KB of the page
-     from the network and compare its build stamp with ours. */
+  /* A home-screen app can stay open for days. On load and on
+     returning to it (at most every 30 seconds) read the first 2 KB
+     of the page from the network and compare its build stamp with
+     ours. If a newer build is on the server, reload once (session
+     guard so it cannot loop). If we already reloaded for this build
+     and the stamps still disagree, show the update bar as a fallback. */
   var lastCheck = 0;
-  function checkBuild() {
-    if (!navigator.onLine || !window.fetch || Date.now() - lastCheck < 30 * 60 * 1000) return;
+  var BUILD_RELOAD_KEY = "wardrobe.reloadFor." + WARDROBE_BUILD;
+  function reloadOnceForBuild() {
+    try { if (sessionStorage.getItem(BUILD_RELOAD_KEY) === "1") return false; sessionStorage.setItem(BUILD_RELOAD_KEY, "1"); } catch (e) {}
+    location.reload();
+    return true;
+  }
+  function checkBuild(force) {
+    if (!navigator.onLine || !window.fetch) return;
+    if (!force && Date.now() - lastCheck < 30 * 1000) return;
     lastCheck = Date.now();
     fetch("index.html", { headers: { Range: "bytes=0-2047" }, cache: "no-store" })
       .then(function (r) { return (r.status === 200 || r.status === 206) ? r.text() : ""; })
       .then(function (t) {
         var m = /name="wardrobe-build"\s+content="([^"]+)"/.exec(t.slice(0, 4096));
-        if (m && m[1] && m[1] !== WARDROBE_BUILD) { var b = document.getElementById("update-bar"); if (b) b.hidden = false; }
+        if (m && m[1] && m[1] !== WARDROBE_BUILD) {
+          if (!reloadOnceForBuild()) {
+            var b = document.getElementById("update-bar");
+            if (b) b.hidden = false;
+          }
+        }
       })
       .catch(function () {});
   }
   var ub = document.getElementById("update-btn");
   if (ub) ub.addEventListener("click", function () { location.reload(); });
-  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") checkBuild(); });
-  lastCheck = Date.now();
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState !== "visible") return;
+    checkBuild();
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+        navigator.serviceWorker.getRegistration().then(function (r) { if (r && r.update) r.update(); });
+      }
+    } catch (e) {}
+  });
+  checkBuild(true);
 })();
 
 /* ================= Build .53 — data repair =================
@@ -32599,8 +32675,26 @@ function analyzeFilePiece(card, job, ix) {
          unavailable, blocked, or the file is absent. */
       if ("serviceWorker" in navigator) {
         try {
+          /* Build .61: a new SW already skipWaiting + clients.claim
+             (sw.js). Reload once when it takes control, so a returning
+             PWA picks up the new shell without a manual Refresh tap.
+             The session key is the running build, so a single reload
+             cannot loop. */
+          var swRefreshing = false;
+          navigator.serviceWorker.addEventListener("controllerchange", function () {
+            if (swRefreshing) return;
+            try {
+              var k = "wardrobe.swReload." + WARDROBE_BUILD;
+              if (sessionStorage.getItem(k) === "1") return;
+              sessionStorage.setItem(k, "1");
+            } catch (e) {}
+            swRefreshing = true;
+            location.reload();
+          });
           window.addEventListener("load", function () {
-            navigator.serviceWorker.register("sw.js").catch(function () {});
+            navigator.serviceWorker.register("sw.js").then(function (reg) {
+              try { if (reg && reg.update) reg.update(); } catch (e) {}
+            }).catch(function () {});
           });
         } catch (e) {}
       }
