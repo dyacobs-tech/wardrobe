@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.73" />
+    <meta name="wardrobe-build" content="2026-11-18.74" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -4202,7 +4202,7 @@
       .cf-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 12px; }
       .cf-head .fav-head { margin: 0; }
       .closet-feed.cf-solo .cf-head .fav-head { visibility: hidden; width: 0; overflow: hidden; }
-      .closet-feed.cf-solo .cf-head { justify-content: flex-start; }
+      .closet-feed.cf-solo .cf-head { justify-content: center; gap: 0; }
       .look-result.cf-replaced { display: none; }
       .cf-sentinel { height: 1px; }
       .saved-card .saved-flatlay { aspect-ratio: 3 / 4; }
@@ -4210,6 +4210,18 @@
       #panel-today .today-hero .today-collage.flatlay-host { display: block; background: #f5f1e8; padding: 0; }
       #panel-today .today-hero .today-collage.flatlay-host .flatlay { height: 100%; }
       #panel-today .today-hero .today-collage.flatlay-host img { position: static; width: 100%; height: 100%; object-fit: contain; }
+    
+      /* ---------- Build .74 ---------- */
+      /* Outfit-of-the-day title sits on the dark caption panel; the
+         .72 global heading colour (var(--text)) made it dark-on-dark. */
+      #panel-today .today-caption h2#today-name { color: #f7f1e5; }
+      /* Sub-tab bars stay centred while the back chevron is shown:
+         the chevron clearance is mirrored on the right so the equal
+         columns sit symmetrically in the viewport. */
+      @media (max-width: 1023px) {
+        body.view-back-on .subnav .wrap { padding-left: 26px; padding-right: 26px; }
+        body:not(.view-back-on) .subnav .wrap { padding-left: 8px; padding-right: 8px; }
+      }
     </style>
 
   </head>
@@ -5332,7 +5344,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.73</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.74</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -6764,7 +6776,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.73";
+var WARDROBE_BUILD = "2026-11-18.74";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -25135,7 +25147,16 @@ function fetchWeather(attempt) {
   var url = "https://api.open-meteo.com/v1/forecast?latitude=" + currentLoc.lat + "&longitude=" + currentLoc.lon +
     "&current=temperature_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&temperature_unit=fahrenheit&past_days=7&forecast_days=16&timezone=auto";
   var askedLat = currentLoc.lat, askedLon = currentLoc.lon;
-  syFetch(url, {}, 8000).then(function (r) { return r.json(); }).then(function (data) {
+  /* Build .74: fetchWeather runs at boot from an earlier script
+     block than the one that declares syFetch, so the name is not
+     bound yet on that first call. Fall back to a plain fetch with
+     the same 8s deadline instead of throwing. */
+  var wxFetch = (typeof syFetch === "function") ? syFetch(url, {}, 8000) : (function () {
+    if (typeof AbortController === "undefined") return fetch(url);
+    var ac = new AbortController(), t = setTimeout(function () { try { ac.abort(); } catch (e) {} }, 8000);
+    return fetch(url, { signal: ac.signal }).then(function (r) { clearTimeout(t); return r; }, function (e) { clearTimeout(t); throw e; });
+  })();
+  wxFetch.then(function (r) { return r.json(); }).then(function (data) {
     if (currentLoc.lat !== askedLat || currentLoc.lon !== askedLon) return;
     if (!data || !data.current || typeof data.current.temperature_2m !== "number") { weatherFailed(attempt); return; }
     /* The daily arrays now span past + forecast days, so today

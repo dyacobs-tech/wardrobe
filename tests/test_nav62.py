@@ -104,7 +104,7 @@ def main() -> int:
                 expected_h = 68 + inset
                 check(
                     f"{name}: build is .71",
-                    home and home.get("build") == "2026-11-18.73",
+                    home and home.get("build") == "2026-11-18.74",
                     str(home and home.get("build")),
                 )
                 anchored = home and (
@@ -167,7 +167,7 @@ def main() -> int:
                 )
                 check(
                     f"{name}: Cloud & backup shows build stamp .71",
-                    diag and "2026-11-18.73" in (diag.get("stamp") or ""),
+                    diag and "2026-11-18.74" in (diag.get("stamp") or ""),
                     str(diag),
                 )
                 check(

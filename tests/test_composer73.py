@@ -30,7 +30,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-18.73"
+BUILD = "2026-11-18.74"
 FIXTURE = json.loads((Path(__file__).resolve().parent / "fixture_closet83.json").read_text())
 BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 STANDALONE_INIT = """
@@ -174,7 +174,7 @@ def main() -> int:
             page.evaluate("setSource('inspo')"); page.wait_for_timeout(300)
             check("Inspo hides the closet feed", page.evaluate("document.getElementById('closet-feed').hidden"))
             page.evaluate("setSource('wardrobe')"); page.wait_for_timeout(300)
-            check("no JS errors", not [e for e in errors if "syFetch" not in e], errors[:3])
+            check("no JS errors", not errors, errors[:3])
             ctx.close(); browser.close()
     finally:
         httpd.shutdown()
