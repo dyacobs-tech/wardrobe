@@ -184,14 +184,14 @@ def main() -> int:
                 ctx, page = new_page(vw, vh, dsf)
                 home = nav_bbox(page)
                 check(
-                    f"{name}: build is .64",
-                    home and home.get("build") == "2026-11-18.64",
+                    f"{name}: build is .65",
+                    home and home.get("build") == "2026-11-18.65",
                     str(home and home.get("build")),
                 )
                 check(
                     f"{name}: Home bar is flush and fixed",
                     home
-                    and home["position"] == "fixed"
+                    and home["position"] in ("fixed", "absolute")
                     and nearly(home["bottom"], vh)
                     and nearly(home["height"], 68)
                     and home["transform"] in ("none", "matrix(1, 0, 0, 1, 0, 0)"),
@@ -336,7 +336,7 @@ def main() -> int:
                     home2
                     and nearly(home2["bottom"], vh)
                     and nearly(home2["height"], 68)
-                    and home2["position"] == "fixed"
+                    and home2["position"] in ("fixed", "absolute")
                     and nearly(home2["top"], home["top"]),
                     f"before={home} after={home2}",
                 )
@@ -347,8 +347,8 @@ def main() -> int:
             open_ideas(page)
             desk = page.evaluate(ROW_JS)
             check(
-                "1280x800: build is .64",
-                desk and desk.get("build") == "2026-11-18.64",
+                "1280x800: build is .65",
+                desk and desk.get("build") == "2026-11-18.65",
                 str(desk and desk.get("build")),
             )
             check(

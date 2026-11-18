@@ -1,6 +1,6 @@
-"""Build .64: phone subnavs never clip a tab at 375–430px, and the
+"""Build .65: phone subnavs never clip a tab at 375–430px, and the
 bottom bar stays flush on Home and Ideas (the .62 contract, plus
-the visualViewport --bb-shift no-op when already flush).
+the 100lvh slot keeps the bar flush when 100lvh equals the ICB).
 
 Never talks to the production sync worker.
 Usage (from the repo root):
@@ -62,7 +62,7 @@ def nav_bbox(page):
             cssBottom: cs.bottom,
             innerH: window.innerHeight,
             build: window.WARDROBE_BUILD || null,
-            shift: getComputedStyle(document.documentElement).getPropertyValue('--bb-shift').trim(),
+            slotPosition: (document.getElementById('bottombar-slot') && getComputedStyle(document.getElementById('bottombar-slot')).position),
             htmlMinH: getComputedStyle(document.documentElement).minHeight,
             htmlH: getComputedStyle(document.documentElement).height,
             bodyMinH: getComputedStyle(document.body).minHeight,
@@ -157,18 +157,18 @@ def main() -> int:
 
                 home = nav_bbox(page)
                 check(
-                    f"{name}: build is .64",
-                    home and home.get("build") == "2026-11-18.64",
+                    f"{name}: build is .65",
+                    home and home.get("build") == "2026-11-18.65",
                     str(home and home.get("build")),
                 )
                 check(
-                    f"{name}: Home bar is flush, fixed, no shift",
+                    f"{name}: Home bar is flush at the viewport bottom",
                     home
-                    and home["position"] == "fixed"
+                    and home["position"] in ("fixed", "absolute")
+                    and (home["position"] == "fixed" or home.get("slotPosition") == "fixed")
                     and nearly(home["bottom"], vh)
                     and nearly(home["height"], 68)
-                    and home["transform"] in ("none", "matrix(1, 0, 0, 1, 0, 0)")
-                    and (not home.get("shift") or home.get("shift") in ("0px", "0", "")),
+                    and home["transform"] in ("none", "matrix(1, 0, 0, 1, 0, 0)"),
                     str(home),
                 )
                 # html/body must not be locked to a definite viewport unit
@@ -287,7 +287,8 @@ def main() -> int:
                     home2
                     and nearly(home2["bottom"], vh)
                     and nearly(home2["height"], 68)
-                    and home2["position"] == "fixed",
+                    and home2["position"] in ("fixed", "absolute")
+                    and (home2["position"] == "fixed" or home2.get("slotPosition") == "fixed"),
                     str(home2),
                 )
                 ctx.close()
@@ -321,7 +322,7 @@ def main() -> int:
         for f in failures:
             print(" -", f)
         return 1
-    print("All subnav/nav .64 checks passed.")
+    print("All subnav/nav .65 checks passed.")
     return 0
 
 

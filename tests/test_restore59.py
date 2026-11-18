@@ -319,7 +319,7 @@ def run() -> int:
             page.wait_for_timeout(300)
             st = closet_state(page)
             expected_ids = sorted(f"item-{ITEM_TS + i}" for i in range(N_SERVER))
-            check("build is .64", st["build"] == "2026-11-18.64", st["build"])
+            check("build is .65", st["build"] == "2026-11-18.65", st["build"])
             check("all 83 server items reappear in memory", st["userCount"] == N_SERVER, f"got {st['userCount']}")
             check("all 83 persisted to wardrobe.items", st["storedUserCount"] == N_SERVER, f"got {st['storedUserCount']}")
             check("restored ids match the mock server", st["storedIds"] == expected_ids, f"got {len(st['storedIds'])} ids")
@@ -432,10 +432,13 @@ def run() -> int:
                   const b = document.body;
                   const cs = getComputedStyle(el);
                   const bs = getComputedStyle(b);
+                  const slot = document.getElementById('bottombar-slot');
+                  const scs = slot ? getComputedStyle(slot) : null;
                   return {
                     height: cs.height,
                     bottom: cs.bottom,
                     position: cs.position,
+                    slotPosition: scs ? scs.position : null,
                     paddingBottom: cs.paddingBottom,
                     transition: cs.transition,
                     bodyPad: bs.paddingBottom,
@@ -445,7 +448,7 @@ def run() -> int:
                 }"""
             )
             check("fresh profile: bar first paint == after load", nearly_eq(ui_first, ui_load), f"{ui_first} vs {ui_load}")
-            check("fresh profile: bar is position:fixed", style["position"] == "fixed", style["position"])
+            check("fresh profile: bar is fixed or absolute in the fixed slot", style["position"] == "fixed" or (style["position"]=="absolute" and style.get("slotPosition")=="fixed"), style.get("position")+" slot="+str(style.get("slotPosition")))
             check("fresh profile: bar height is 68px (inset 0 in this browser)", style["height"] == "68px", style["height"])
             check("fresh profile: body padding-bottom is 68px", style["bodyPad"] == "68px", style["bodyPad"])
             check("fresh profile: no transition on the bar", "none" in (style["transition"] or ""), style["transition"])

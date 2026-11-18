@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.64" />
+    <meta name="wardrobe-build" content="2026-11-18.65" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -3453,7 +3453,7 @@
       }
     </style>
     <style>
-      /* ================= Build .64 — subnav clip + iOS standalone bar =================
+      /* ================= Build .65 — 100lvh nav slot; .64 pin removed =================
          David's 10:34am ET Ideas → My Inspo shot (iPhone 16 Pro, 402×874
          @3x) showed two bugs at once: "MY IN" and its active pill clipped
          at the right edge of the subnav, and the bottom bar lifted ~61 CSS
@@ -3469,19 +3469,36 @@
          last pill is never cut. Profile's .58 reserved × slot is
          unchanged. Desktop (≥1024px) keeps the full labels.
 
-         Bottom bar: viewport-fit=cover and black-translucent were
-         already set; the ~61px gap matches the TOP safe area (status
-         bar / Dynamic Island), not the 34px home indicator, so this is
-         not just the iOS 26 "bottom:0 misses the bottom inset" bug.
-         A definite 100svh/100vh/100% height on html or body can still
-         make the layout viewport — the containing block for
-         position:fixed — shorter than the visual screen by that top
-         inset, on ANY page, not only Home. The robust rule is:
-         html,body { min-height:100%; height:auto } with no 100vh/svh
-         on them, and the bar at bottom:0 plus padding-bottom:
-         env(safe-area-inset-bottom). A visualViewport pin sets
-         --bb-shift only when the bar is actually high; tests and
-         browser tabs with a flush bar are a no-op. */
+         Bottom bar (.65): the .64 visualViewport pin is gone. On
+         David's 11:26am ET Calendar shot (1206×2622 @3x, 402×874)
+         it had overshot: bar top at 772 CSS px (905/1024) vs 710
+         (832/1024) in the earlier lifted shots — a ~62px downward
+         shift, the same size as the lift — so only the icons sat
+         on screen and the labels were cut off. Correct Closet
+         labels sit at ~830 CSS px (973/1024).
+
+         viewport-fit=cover and black-translucent are already set;
+         the viewport meta has no height=device-height or minimal-ui.
+         html,body stay height:auto / min-height:100% with overflow
+         visible and no -webkit-fill-available and no 100vh/svh, so
+         they are not a shorter containing block. The remaining iOS
+         standalone quirk is that position:fixed; bottom:0 can still
+         anchor to a layout viewport ~59–62px shorter than the
+         screen (the top safe area). A JS shift toward
+         screen.height is not safe: that region may be clipped, and
+         the same shortfall can be applied even when the bar is
+         already at or past the visual bottom.
+
+         The robust pattern is a position:fixed frame sized with
+         the stable large viewport unit (100lvh, which is ≥ the
+         ICB and does not shrink with toolbars) and the nav
+         position:absolute; bottom:0 inside it, with
+         pointer-events only on the nav. If 100lvh equals the
+         ICB, this is identical to bottom:0 (no overshoot). If
+         100lvh is the full screen, the bar sits on the true
+         bottom without any signed heuristic. Desktop and the
+         900–1023px pill are unchanged (the slot is
+         display:contents there). */
       .subtab-short { display: none; }
       html, body {
         height: auto !important;
@@ -3526,6 +3543,9 @@
         }
         #subnav-me #profile-close { padding: 0 8px; }
       }
+      /* The slot is a no-op on desktop / the 900–1023px floating pill
+         (display:contents). On the phone it becomes the fixed frame. */
+      #bottombar-slot { display: contents; }
       @media (max-width: 899px) {
         html, body,
         body:has(> main > #panel-today:not([hidden])) {
@@ -3540,12 +3560,30 @@
           will-change: auto !important;
           isolation: auto !important;
         }
-        :root { --bb-shift: 0px; }
-        #bottombar.bottombar {
+        #bottombar-slot {
+          display: block !important;
           position: fixed !important;
+          top: 0 !important;
           left: 0 !important;
           right: 0 !important;
-          bottom: var(--bb-shift, 0px) !important;
+          bottom: auto !important;
+          width: auto !important;
+          height: 100lvh !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          background: transparent !important;
+          transform: none !important;
+          filter: none !important;
+          contain: none !important;
+          pointer-events: none;
+          z-index: 45;
+        }
+        #bottombar.bottombar {
+          position: absolute !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
           top: auto !important;
           transform: none !important;
           width: auto !important;
@@ -3554,6 +3592,8 @@
           padding: 0 !important;
           padding-bottom: env(safe-area-inset-bottom, 0px) !important;
           box-sizing: border-box !important;
+          pointer-events: auto;
+          z-index: 45;
         }
       }
       @media (min-width: 1024px) {
@@ -4750,7 +4790,7 @@
           </div>
           <p id="data-status" style="margin:0"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.64</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.65</p>
         <p class="form-note" id="nav-diag"></p>
       </section>
 
@@ -4821,9 +4861,12 @@
       </section>
     </main>
 
-    <!-- Bottom nav: MUST stay a direct child of body, outside main
-         and any transformed/contained wrapper, so position:fixed is
-         always relative to the viewport. -->
+    <!-- Bottom nav slot: a direct child of body, outside main.
+         On the phone it is position:fixed; top:0; height:100lvh;
+         the nav is absolutely pinned to its bottom. At ≥900px the
+         slot is display:contents so the pill / desktop top nav
+         are unchanged. -->
+    <div id="bottombar-slot">
     <nav class="bottombar" id="bottombar" aria-label="Wardrobe sections">
       <button type="button" class="navbtn" id="tab-today" data-tab="today" data-section="today" aria-controls="panel-today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><span>Home</span></button>
       <button type="button" class="navbtn" id="section-closet" data-section="closet"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7.2a2 2 0 1 0-2-2"/><path d="M12 7.2v1.6L3.6 14.6a1.4 1.4 0 0 0 .8 2.6h15.2a1.4 1.4 0 0 0 .8-2.6L12 8.8"/></svg><span>Closet</span></button>
@@ -4831,6 +4874,7 @@
       <button type="button" class="navbtn" id="tab-find" data-tab="find" data-section="find" aria-controls="panel-find"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Shop</span></button>
       <button type="button" class="navbtn" id="section-calendar" data-section="calendar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Calendar</span></button>
     </nav>
+    </div>
     <script>
       /* Build .62 on-device nav diagnostic. Does not write styles to
          the bar, --bb-h, or body. Captures the first Home measurement
@@ -4859,6 +4903,15 @@
             var meta = document.querySelector('meta[name="wardrobe-build"]');
             build = (window.WARDROBE_BUILD || (meta && meta.getAttribute("content")) || "?");
           } catch (e) {}
+          function unitPx(unit) {
+            var d = document.createElement("div");
+            d.setAttribute("aria-hidden", "true");
+            d.style.cssText = "position:absolute;left:0;top:0;visibility:hidden;pointer-events:none;margin:0;padding:0;border:0;width:0;height:" + unit + ";";
+            (document.body || document.documentElement).appendChild(d);
+            var h = d.getBoundingClientRect().height;
+            d.parentNode.removeChild(d);
+            return Math.round(h * 10) / 10;
+          }
           return {
             build: build,
             innerHeight: window.innerHeight,
@@ -4868,7 +4921,12 @@
             navTop: Math.round(r.top * 10) / 10,
             navBottom: Math.round(r.bottom * 10) / 10,
             navHeight: Math.round(r.height * 10) / 10,
-            safeAreaBottom: getComputedStyle(probe).paddingBottom
+            safeAreaBottom: getComputedStyle(probe).paddingBottom,
+            vh: unitPx("100vh"),
+            svh: unitPx("100svh"),
+            lvh: unitPx("100lvh"),
+            dvh: unitPx("100dvh"),
+            clientH: document.documentElement.clientHeight
           };
         }
         function fmt(m, label) {
@@ -4879,7 +4937,9 @@
             + " · screenH " + m.screenHeight
             + " · standalone " + m.standalone
             + " · nav top/bottom/h " + m.navTop + "/" + m.navBottom + "/" + m.navHeight
-            + " · safe-bottom " + m.safeAreaBottom;
+            + " · safe-bottom " + m.safeAreaBottom
+            + " · 100vh/svh/lvh/dvh " + m.vh + "/" + m.svh + "/" + m.lvh + "/" + m.dvh
+            + " · clientH " + m.clientH;
         }
         function isHome() {
           var p = document.getElementById("panel-today");
@@ -4915,79 +4975,7 @@
         document.addEventListener("click", function () { setTimeout(run, 0); }, true);
       })();
     </script>
-    <script>
-      /* Build .64: if position:fixed; bottom:0 still sits above the
-         visual viewport bottom (iOS standalone black-translucent can
-         size the layout viewport short by the top safe area), shift
-         the bar down with --bb-shift. No write to --bb-h, height, or
-         the bar element itself. A flush bar (browser tests, no lift)
-         keeps --bb-shift at 0. Disabled at ≥900px so the floating
-         pill and the desktop top nav are untouched. */
-      (function () {
-        var last = 0;
-        function apply() {
-          try {
-            if (window.matchMedia && window.matchMedia("(min-width: 900px)").matches) {
-              if (last !== 0) {
-                document.documentElement.style.setProperty("--bb-shift", "0px");
-                last = 0;
-              }
-              return;
-            }
-            var bar = document.getElementById("bottombar");
-            if (!bar) return;
-            var vv = window.visualViewport;
-            var r = bar.getBoundingClientRect();
-            var layoutH = window.innerHeight;
-            var visualH = vv ? vv.height : layoutH;
-            var gap = visualH - r.bottom;
-            /* iOS standalone + black-translucent can make the layout
-               (and even the visual) viewport shorter than screen.height
-               by the top safe area (~59px). The bar is then flush with
-               that short box, so gap is ~0, but a dark strip still shows
-               below it. Detect that shortfall only in standalone, and
-               only when it looks like a status-bar inset (40–80px). */
-            var shortfall = 0;
-            var standalone = false;
-            try {
-              standalone = !!(window.navigator.standalone || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches));
-            } catch (e2) {}
-            if (standalone && window.screen && screen.height) {
-              var covered = vv ? (vv.offsetTop + vv.height) : layoutH;
-              var extra = screen.height - covered;
-              if (extra >= 40 && extra <= 80 && gap < 4) shortfall = extra;
-            }
-            var need = (gap >= 4 ? gap : 0) + shortfall;
-            if (need < 4) {
-              if (last !== 0) {
-                document.documentElement.style.setProperty("--bb-shift", "0px");
-                last = 0;
-              }
-              return;
-            }
-            var cur = parseFloat(getComputedStyle(bar).bottom) || 0;
-            var next = Math.round((cur - need) * 10) / 10;
-            if (next > 0) next = 0;
-            if (next < -120) next = -120;
-            if (Math.abs(next - last) < 0.5) return;
-            last = next;
-            document.documentElement.style.setProperty("--bb-shift", next + "px");
-          } catch (e) {}
-        }
-        function later() { requestAnimationFrame(function () { requestAnimationFrame(apply); }); }
-        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", later);
-        else later();
-        window.addEventListener("load", later);
-        window.addEventListener("resize", later);
-        window.addEventListener("pageshow", later);
-        if (window.visualViewport) {
-          visualViewport.addEventListener("resize", later);
-          visualViewport.addEventListener("scroll", later);
-        }
-      })();
-    </script>
-
-    <div class="ptr" id="ptr" aria-hidden="true">Pull to refresh</div>
+    <div class="ptr" id="ptr"    <div class="ptr" id="ptr" aria-hidden="true">Pull to refresh</div>
     <div class="info-pop-backdrop" id="info-pop" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="info-pop-title">
         <div class="principles-head">
@@ -5632,7 +5620,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.64";
+var WARDROBE_BUILD = "2026-11-18.65";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;

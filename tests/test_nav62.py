@@ -51,6 +51,8 @@ def bbox(page):
           if (!el) return null;
           const r = el.getBoundingClientRect();
           const cs = getComputedStyle(el);
+          const slot = document.getElementById('bottombar-slot');
+          const scs = slot ? getComputedStyle(slot) : null;
           return {
             top: r.top, bottom: r.bottom, height: r.height,
             position: cs.position, paddingBottom: cs.paddingBottom,
@@ -58,6 +60,8 @@ def bbox(page):
             innerH: window.innerHeight,
             vvH: window.visualViewport ? visualViewport.height : null,
             build: window.WARDROBE_BUILD || null,
+            slotPosition: scs ? scs.position : null,
+            slotHeight: scs ? scs.height : null,
           };
         }"""
     )
@@ -99,13 +103,17 @@ def main() -> int:
                 home = bbox(page)
                 expected_h = 68 + inset
                 check(
-                    f"{name}: build is .64",
-                    home and home.get("build") == "2026-11-18.64",
+                    f"{name}: build is .65",
+                    home and home.get("build") == "2026-11-18.65",
                     str(home and home.get("build")),
                 )
+                anchored = home and (
+                    home["position"] == "fixed"
+                    or (home["position"] == "absolute" and home.get("slotPosition") == "fixed")
+                )
                 check(
-                    f"{name}: bar is position:fixed on Home cold load",
-                    home and home["position"] == "fixed",
+                    f"{name}: bar is fixed, or absolute inside the fixed 100lvh slot, on Home cold load",
+                    anchored,
                     str(home),
                 )
                 check(
@@ -154,8 +162,8 @@ def main() -> int:
                 )
                 text = (diag or {}).get("diag") or ""
                 check(
-                    f"{name}: Cloud & backup shows build stamp .64",
-                    diag and "2026-11-18.64" in (diag.get("stamp") or ""),
+                    f"{name}: Cloud & backup shows build stamp .65",
+                    diag and "2026-11-18.65" in (diag.get("stamp") or ""),
                     str(diag),
                 )
                 check(
@@ -164,9 +172,12 @@ def main() -> int:
                     text[:400],
                 )
                 check(
-                    f"{name}: diagnostic includes innerH, vvH, standalone, nav rect, safe-bottom",
-                    all(s in text for s in ("innerH", "vvH", "standalone", "nav top/bottom/h", "safe-bottom")),
-                    text[:400],
+                    f"{name}: diagnostic includes innerH, vvH, standalone, nav rect, safe-bottom, viewport units, clientH",
+                    all(s in text for s in (
+                        "innerH", "vvH", "standalone", "nav top/bottom/h", "safe-bottom",
+                        "100vh/svh/lvh/dvh", "clientH",
+                    )),
+                    text[:500],
                 )
                 # Screenshot bottoms for the report
                 out = Path("/tmp/wardrobe-nav62")
@@ -227,7 +238,7 @@ def main() -> int:
                         home = bbox(page)
                         check(
                             f"webkit {label}+inset34: bar flush at bottom of {vh}px Home",
-                            home and nearly(home["bottom"], vh) and nearly(home["height"], 102) and home["position"] == "fixed",
+                            home and nearly(home["bottom"], vh) and nearly(home["height"], 102) and home["position"] in ("fixed", "absolute") and (home["position"]=="fixed" or home.get("slotPosition")=="fixed"),
                             str(home) + f" vh={vh}",
                         )
                         page.locator("#section-closet").click()
