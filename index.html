@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.61" />
+    <meta name="wardrobe-build" content="2026-11-18.62" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -3144,12 +3144,20 @@
          band still flexes and absorbs leftover height. */
       @media (max-width: 899px) {
         :root { --chrome-top: calc(min(env(safe-area-inset-top, 0px), 59px) + 34px); }
+        /* Build .62: do not lock the Today panel to 100svh. On a
+           black-translucent iOS PWA, 100svh can be shorter than the
+           visual screen by the top safe-area (~59px on iPhone 16 Pro).
+           A definite height on body used to make that short box the
+           containing block for the fixed bar — the bar sat ~59–68px
+           high with a dark strip of page background below it, on
+           Home only. The panel just flows; body padding-bottom:
+           var(--bb-h) already keeps content above the bar. */
         #panel-today:not([hidden]) {
           box-sizing: border-box;
           display: flex; flex-direction: column;
           min-height: 0;
-          height: calc(100svh - var(--bb-h) - var(--chrome-top));
-          max-height: calc(100svh - var(--bb-h) - var(--chrome-top));
+          height: auto;
+          max-height: none;
         }
         #panel-today:not([hidden]) .today-hero { min-height: 0; }
         #panel-today .today-hero img#today-img { flex: 1 1 auto; height: auto; min-height: 0; }
@@ -3327,42 +3335,69 @@
          transform, identical on every page. Desktop (≥1024px) is
          unchanged: the bar remains the top nav row. The 900–1023px
          floating-pill rules are also left alone. */
+      /* Build .62: one phone definition of the bar. No page- or
+         route-specific override. html/body must never be a
+         containing block (no transform/filter/contain/overflow/
+         definite height). Desktop (≥1024px) and the 900–1023px
+         floating pill are unchanged — they live in earlier
+         min-width queries. */
       @media (max-width: 899px) {
         html, body {
-          transform: none;
-          filter: none;
-          perspective: none;
-          contain: none;
-          will-change: auto;
-          isolation: auto;
-          overflow: visible;
+          transform: none !important;
+          filter: none !important;
+          perspective: none !important;
+          contain: none !important;
+          will-change: auto !important;
+          isolation: auto !important;
+          overflow: visible !important;
+          height: auto !important;
+          max-height: none !important;
         }
         body {
-          display: block;
-          position: static;
-          height: auto;
-          max-height: none;
+          display: block !important;
+          position: static !important;
+          min-height: 0;
+          padding-bottom: var(--bb-h);
         }
         body:has(> main > #panel-today:not([hidden])) {
-          display: block;
-          position: static;
-          height: auto;
-          min-height: 0;
-          max-height: none;
-          overflow: visible;
-          transform: none;
-          filter: none;
-          contain: none;
-          will-change: auto;
+          display: block !important;
+          position: static !important;
+          height: auto !important;
+          min-height: 0 !important;
+          max-height: none !important;
+          overflow: visible !important;
+          transform: none !important;
+          filter: none !important;
+          contain: none !important;
+          will-change: auto !important;
+          padding-bottom: var(--bb-h) !important;
         }
         #bottombar.bottombar {
-          position: fixed;
-          left: 0; right: 0; bottom: 0; top: auto;
-          transform: none;
-          width: auto; margin: 0;
+          position: fixed !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          top: auto !important;
+          transform: none !important;
+          width: auto !important;
+          margin: 0 !important;
+          height: var(--bb-h) !important;
+          padding: 0 !important;
+          padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+          box-sizing: border-box !important;
         }
       }
       #build-stamp { margin: 14px 0 0; font-size: 11px; letter-spacing: .06em; color: var(--dim); }
+      #nav-diag {
+        margin: 6px 0 0;
+        font-size: 10px;
+        line-height: 1.4;
+        letter-spacing: 0;
+        color: var(--dim);
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
     </style>
   </head>
   <body>
@@ -4529,7 +4564,8 @@
           </div>
           <p id="data-status" style="margin:0"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.61</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.62</p>
+        <p class="form-note" id="nav-diag"></p>
       </section>
 
       <!-- ================= WATCHES ================= -->
@@ -4609,8 +4645,90 @@
       <button type="button" class="navbtn" id="tab-find" data-tab="find" data-section="find" aria-controls="panel-find"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Shop</span></button>
       <button type="button" class="navbtn" id="section-calendar" data-section="calendar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Calendar</span></button>
     </nav>
-
-
+    <script>
+      /* Build .62 on-device nav diagnostic. Does not write styles to
+         the bar, --bb-h, or body. Captures the first Home measurement
+         in sessionStorage so Profile → Cloud & backup can show both
+         "Home at launch" and "now" in one screenshot. */
+      (function () {
+        var KEY = "wardrobe.navDiag.homeLaunch";
+        function measure() {
+          var nav = document.getElementById("bottombar");
+          var probe = document.getElementById("sai-probe");
+          if (!probe) {
+            probe = document.createElement("div");
+            probe.id = "sai-probe";
+            probe.setAttribute("aria-hidden", "true");
+            probe.style.cssText = "position:fixed;left:0;bottom:0;width:0;height:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;";
+            (document.body || document.documentElement).appendChild(probe);
+          }
+          var r = nav ? nav.getBoundingClientRect() : { top: 0, bottom: 0, height: 0 };
+          var vv = window.visualViewport;
+          var standalone = false;
+          try {
+            standalone = !!(window.navigator.standalone || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches));
+          } catch (e) {}
+          var build = "?";
+          try {
+            var meta = document.querySelector('meta[name="wardrobe-build"]');
+            build = (window.WARDROBE_BUILD || (meta && meta.getAttribute("content")) || "?");
+          } catch (e) {}
+          return {
+            build: build,
+            innerHeight: window.innerHeight,
+            vvHeight: vv ? Math.round(vv.height) : null,
+            screenHeight: (window.screen && screen.height) || null,
+            standalone: standalone,
+            navTop: Math.round(r.top * 10) / 10,
+            navBottom: Math.round(r.bottom * 10) / 10,
+            navHeight: Math.round(r.height * 10) / 10,
+            safeAreaBottom: getComputedStyle(probe).paddingBottom
+          };
+        }
+        function fmt(m, label) {
+          if (!m) return label + ": (none)";
+          return label + ": build " + m.build
+            + " · innerH " + m.innerHeight
+            + " · vvH " + m.vvHeight
+            + " · screenH " + m.screenHeight
+            + " · standalone " + m.standalone
+            + " · nav top/bottom/h " + m.navTop + "/" + m.navBottom + "/" + m.navHeight
+            + " · safe-bottom " + m.safeAreaBottom;
+        }
+        function isHome() {
+          var p = document.getElementById("panel-today");
+          if (p) return !p.hidden;
+          try {
+            var tab = localStorage.getItem("wardrobe.tab") || "";
+            return !tab || tab === "today";
+          } catch (e) { return true; }
+        }
+        function paint() {
+          var now = measure();
+          var launch = null;
+          try { launch = JSON.parse(sessionStorage.getItem(KEY) || "null"); } catch (e) {}
+          if (!launch && isHome()) {
+            launch = now;
+            try { sessionStorage.setItem(KEY, JSON.stringify(launch)); } catch (e) {}
+          }
+          var el = document.getElementById("nav-diag");
+          if (el) el.textContent = fmt(launch, "Home at launch") + "\n" + fmt(now, "now");
+        }
+        window.__wardrobeNavDiagPaint = paint;
+        function run() { try { paint(); } catch (e) {} }
+        function later() { requestAnimationFrame(function () { requestAnimationFrame(run); }); }
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", later);
+        else later();
+        window.addEventListener("load", run);
+        window.addEventListener("resize", run);
+        window.addEventListener("pageshow", run);
+        if (window.visualViewport) {
+          visualViewport.addEventListener("resize", run);
+          visualViewport.addEventListener("scroll", run);
+        }
+        document.addEventListener("click", function () { setTimeout(run, 0); }, true);
+      })();
+    </script>
 
     <div class="ptr" id="ptr" aria-hidden="true">Pull to refresh</div>
     <div class="info-pop-backdrop" id="info-pop" hidden>
@@ -5257,7 +5375,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.61";
+var WARDROBE_BUILD = "2026-11-18.62";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
