@@ -1,4 +1,4 @@
-"""Build .67 nav contract, re-checked on .69 (Cloud diagnostics hidden):
+"""Build .67 nav contract, re-checked on .70 (Home fits one screen):
 every phone page's document is at least screen-tall,
 and the bottom nav is flush and identical on short and long pages.
 
@@ -24,6 +24,7 @@ PAGES = [
     ("closet-outfits", ["#section-closet", "#tab-looks"]),
     ("closet-watches", ["#section-closet", "#tab-watches"]),
     ("closet-today", ["#section-closet", "#tab-wearing"]),
+    ("closet-gaps", ["#section-closet", "#tab-gaps"]),
     ("ideas-ideas", ["#section-ideas", "#tab-studio"]),
     ("ideas-outfits", ["#section-ideas", "#tab-outfitideas"]),
     ("ideas-icons", ["#section-ideas", "#tab-icons"]),
@@ -123,8 +124,8 @@ def main() -> int:
                     page.wait_for_timeout(80)
                     info = page.evaluate(INSPECT)
                     check(
-                        f"{tag} {slug}: build is .69",
-                        info and info.get("build") == "2026-11-18.69",
+                        f"{tag} {slug}: build is .70",
+                        info and info.get("build") == "2026-11-18.70",
                         str(info and info.get("build")),
                     )
                     check(
@@ -184,7 +185,7 @@ def main() -> int:
         for f in failures:
             print(" -", f)
         return 1
-    print("\nAll .69 nav/document-height checks passed (Cloud diagnostics hidden; nav unchanged from .67).")
+    print("\nAll .70 nav/document-height checks passed (Home fitted; nav contract unchanged from .67).")
     return 0
 
 

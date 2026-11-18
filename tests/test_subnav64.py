@@ -24,7 +24,7 @@ BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 
 # (section button, first landing tab, tabs to visit)
 SECTIONS = [
-    ("#section-closet", "tab-wardrobe", ["tab-wardrobe", "tab-looks", "tab-watches", "tab-wearing"]),
+    ("#section-closet", "tab-wardrobe", ["tab-wardrobe", "tab-looks", "tab-watches", "tab-wearing", "tab-gaps"]),
     ("#section-ideas", "tab-studio", ["tab-studio", "tab-outfitideas", "tab-icons", "tab-palettes", "tab-myinspo"]),
     ("#tab-find", "tab-shopmain", ["tab-shopmain", "tab-brands", "tab-sale", "tab-shopwish", "tab-purchased", "tab-receipts", "tab-search"]),
     ("#tab-profile", "tab-pinfo", ["tab-pinfo", "tab-plocation", "tab-pcloud"]),
@@ -157,8 +157,8 @@ def main() -> int:
 
                 home = nav_bbox(page)
                 check(
-                    f"{name}: build is .69",
-                    home and home.get("build") == "2026-11-18.69",
+                    f"{name}: build is .70",
+                    home and home.get("build") == "2026-11-18.70",
                     str(home and home.get("build")),
                 )
                 check(
@@ -204,6 +204,17 @@ def main() -> int:
                                 f"{name}: Ideas row fits every tab including Inspo",
                                 info and info.get("allFitInView") and info.get("count") == 5
                                 and any(r["id"] == "tab-myinspo" and "inspo" in r["text"].lower() for r in (info.get("rects") or [])),
+                                str(info),
+                            )
+                        if section_sel == "#section-closet":
+                            ids = [r["id"] for r in (info.get("rects") or [])]
+                            texts = [r["text"] for r in (info.get("rects") or [])]
+                            check(
+                                f"{name}: Closet has 5 tabs, Closet gaps immediately after Today, none clipped",
+                                info and info.get("allFitInView") and info.get("oneRow") and info.get("count") == 5
+                                and ids == ["tab-wardrobe", "tab-looks", "tab-watches", "tab-wearing", "tab-gaps"]
+                                and any("gaps" in x.lower() for x in texts)
+                                and not any(r.get("clippedByView") for r in (info.get("rects") or [])),
                                 str(info),
                             )
                         if tab_id == "tab-pcloud":

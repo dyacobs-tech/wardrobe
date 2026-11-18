@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.69" />
+    <meta name="wardrobe-build" content="2026-11-18.70" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2911,7 +2911,6 @@
       .shop-receipts .receipts-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
       .shop-receipts .receipts-line span { font-size: 14px; }
       .shop-receipts p { margin: 0; font-size: 14px; color: var(--dim); }
-      #shop-receipts .btn-ghost { min-height: 30px; padding: 4px 12px; font-size: 11px; flex: none; }
       #receipts-list { display: grid; gap: 12px; }
       #panel-receipts input[type="number"] { width: 100%; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 16px; padding: 10px 12px; }
       #panel-receipts input[type="color"] { width: 40px; height: 34px; flex: none; }
@@ -3595,6 +3594,99 @@
         #subnav-me #profile-close { flex: 0 0 auto; }
       }
     </style>
+
+    <style>
+      /* ================= Build .70 — Home fits on one phone screen =================
+         Everything on Today (header, photo, watch, outfit type,
+         controls, and the bottom nav) must sit on one screen with
+         no scrolling. The .67 nav rule still stands: html/body stay
+         at least screen-tall so a short page cannot lift the fixed
+         bar. On Home only, html min-height is 100lvh (no extra
+         safe-area), and the Today column is sized to the visible
+         area minus the masthead and the nav (var(--bb-h) already
+         reserved by body padding). The photo flexes; every other
+         Home element keeps its natural size. Closet's subnav is
+         five equal tabs, including Closet gaps. */
+      html:has(body > main > #panel-today:not([hidden])) {
+        min-height: 100lvh !important;
+      }
+      .navstack:has(> #subnav[hidden]) { display: none; }
+      @media (max-width: 899px) {
+        #panel-today:not([hidden]) {
+          display: flex;
+          flex-direction: column;
+          box-sizing: border-box;
+          height: calc(100lvh - var(--bb-h) - var(--home-chrome, 52px));
+          max-height: calc(100lvh - var(--bb-h) - var(--home-chrome, 52px));
+          min-height: 0;
+          overflow: hidden;
+        }
+        #panel-today .today-hero {
+          flex: 1 1 auto;
+          min-height: 0;
+          max-height: none;
+          height: auto;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+        }
+        /* Image is the only flexing child; caption/controls keep
+           their natural size below it. Do not absolutely fill the
+           hero — that letterboxed a void under the photo. */
+        #panel-today .today-hero img#today-img,
+        #panel-today .today-hero .today-collage {
+          flex: 1 1 auto;
+          min-height: 0;
+          max-height: none !important;
+          position: relative;
+          inset: auto;
+          width: 100%;
+          height: auto;
+          object-fit: contain;
+          object-position: center center;
+        }
+        #panel-today .today-caption,
+        #panel-today .today-hero .hero-corner {
+          flex: none;
+        }
+        #panel-today .today-caption {
+          position: relative;
+          left: auto; right: auto; bottom: auto;
+        }
+      }
+      /* Closet subnav: five tabs, all visible at 375px, no clip. */
+      #subnav-closet { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      @media (max-width: 1023px) {
+        #subnav-closet:not([hidden]) {
+          display: grid !important;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 0;
+          overflow: hidden;
+          width: 100%;
+        }
+        #subnav-closet .subtab {
+          flex: none;
+          width: auto;
+          min-width: 0;
+          max-width: none;
+          padding: 0 2px;
+          font-size: 10.5px;
+          letter-spacing: .02em;
+          text-align: center;
+          justify-content: center;
+          white-space: nowrap;
+          overflow: visible;
+          text-overflow: unset;
+        }
+      }
+      @media (max-width: 430px) {
+        #subnav-closet .subtab {
+          padding: 0 1px;
+          font-size: 10px;
+          letter-spacing: .01em;
+        }
+      }
+    </style>
   </head>
   <body>
     <header class="masthead">
@@ -3615,6 +3707,7 @@
             <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks" aria-label="My Outfits"><span class="subtab-full">My Outfits</span><span class="subtab-short">Outfits</span></button>
             <button class="subtab" role="tab" id="tab-watches" aria-selected="false" aria-controls="panel-watches" data-tab="watches">Watches</button>
             <button class="subtab" role="tab" id="tab-wearing" aria-selected="false" aria-controls="panel-wearing" data-tab="wearing">Today</button>
+            <button class="subtab" role="tab" id="tab-gaps" aria-selected="false" aria-controls="panel-gaps" data-tab="gaps" aria-label="Closet gaps">Closet gaps <span class="count" id="closet-gaps-count"></span></button>
           </div>
           <div class="subnav-group" id="subnav-ideas" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Ideas</button>
@@ -3938,7 +4031,6 @@
                 <div class="cdd-menu cdd-menu-r" id="ward-cat-shoes-menu" hidden role="menu" aria-label="Shoes categories"></div>
               </div>
               <button type="button" class="cdd-btn closet-add-btn" id="closet-add-entry"><span class="cdd-label">+ Add a piece</span></button>
-              <button type="button" class="sel-row top3-box" id="closet-gaps-entry"><span class="sel-name">Closet gaps</span><span class="sel-val" id="closet-gaps-count">Pieces your looks are missing</span><span class="sel-chev" aria-hidden="true">›</span></button>
             </div>
             <div class="closet-stale-row"><button type="button" class="chip" id="ward-stale-chip" aria-pressed="false">Not worn in 90 days</button><span class="meta" id="ward-stale-note"></span></div>
             <div class="item-grid" id="item-grid"></div>
@@ -4005,8 +4097,7 @@
       </section>
 
       <!-- ================= CLOSET — GAPS (sub-page) ================= -->
-      <section id="panel-gaps" role="tabpanel" aria-label="Closet gaps" hidden>
-        <button type="button" class="btn-ghost subpage-back" data-back-wardrobe>← Closet</button>
+      <section id="panel-gaps" role="tabpanel" aria-labelledby="tab-gaps" hidden>
         <div id="gap-wrap" hidden>
           <h3 class="fav-head">Closet gaps — pieces your looks are missing</h3>
           <div id="gap-list"></div>
@@ -4551,7 +4642,6 @@
           <div id="link-result"></div>
         </div>
         <div id="find-look-mode" hidden></div>
-        <div id="shop-receipts" class="shop-purchased shop-receipts"><h3>Receipts</h3><p>Turn on sync to import receipts from your order emails</p></div>
         <p class="meta" id="find-nolook">Open a look and tap Shop the look — its pieces and matches land here.</p>
 
       </section>
@@ -4760,7 +4850,7 @@
           </div>
           <p id="data-status" style="margin:0"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.69</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.70</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -4940,6 +5030,34 @@
         document.addEventListener("click", function () { setTimeout(run, 0); }, true);
       })();
     </script>
+
+    <script>
+      /* Build .70: measure the in-flow chrome above Today (masthead,
+         and the subnav stack only when it is shown) so the Home
+         column can fill exactly the area above the bottom nav. */
+      (function () {
+        function fit() {
+          var panel = document.getElementById("panel-today");
+          if (!panel || panel.hidden) return;
+          var mast = document.querySelector(".masthead");
+          var stack = document.querySelector(".navstack");
+          var sub = document.getElementById("subnav");
+          var h = mast ? mast.getBoundingClientRect().height : 0;
+          if (stack && sub && !sub.hidden) h += stack.getBoundingClientRect().height;
+          document.documentElement.style.setProperty("--home-chrome", (Math.round(h * 10) / 10) + "px");
+        }
+        window.__wardrobeFitToday = fit;
+        function run() { try { fit(); } catch (e) {} }
+        function later() { requestAnimationFrame(function () { requestAnimationFrame(run); }); }
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", later);
+        else later();
+        window.addEventListener("load", run);
+        window.addEventListener("resize", run);
+        window.addEventListener("pageshow", run);
+        document.addEventListener("click", function () { setTimeout(run, 0); }, true);
+      })();
+    </script>
+
     <div class="ptr" id="ptr"    <div class="ptr" id="ptr" aria-hidden="true">Pull to refresh</div>
     <div class="info-pop-backdrop" id="info-pop" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="info-pop-title">
@@ -5585,7 +5703,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.69";
+var WARDROBE_BUILD = "2026-11-18.70";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -26997,23 +27115,10 @@ function receiptHasSyncKey() {
   try { return !!(typeof SY !== "undefined" && SY && SY.key); } catch (e) { return false; }
 }
 function renderReceiptsSection() {
-  var box = document.getElementById("shop-receipts");
-  if (!box) return;
-  box.className = "shop-purchased shop-receipts";
+  /* Build .70: the Shop landing no longer carries a Receipts
+     teaser — Receipts is its own sub page. This helper only
+     keeps the subnav waiting-count in sync. */
   var n = receiptPendingVisible().length;
-  var html = "<h3>Receipts</h3>";
-  if (n > 0) {
-    html += '<div class="receipts-line"><span>' + n + (n === 1 ? " receipt waiting" : " receipts waiting") + '</span>' +
-      '<button type="button" class="btn-ghost" data-receipts-review>Review</button></div>';
-  } else if (receiptHasSyncKey()) {
-    html += "<p>No receipts waiting</p>";
-  } else {
-    html += "<p>Turn on sync to import receipts from your order emails</p>";
-  }
-  box.innerHTML = html;
-  /* Build .56: the Receipts sub tab carries the waiting count —
-     the weekly scan's "new receipts" state surfaces on the Shop
-     nav as well as on this landing line. */
   var rtc = document.getElementById("receipts-tab-count");
   if (rtc) rtc.textContent = n > 0 ? "(" + n + ")" : "";
 }
@@ -27159,10 +27264,6 @@ function receiptDismiss(rec) {
     var rec = receiptById(card.getAttribute("data-receipt-id"));
     if (!rec) return;
     if (add) receiptConfirm(card, rec); else receiptDismiss(rec);
-  });
-  var sec = document.getElementById("shop-receipts");
-  if (sec) sec.addEventListener("click", function (e) {
-    if (e.target.closest && e.target.closest("[data-receipts-review]")) switchTab("receipts");
   });
   renderReceiptsSection();
   /* SY is initialized later in the script; re-render once the
@@ -28013,7 +28114,7 @@ function tabFromHash() {
   if (TABS.indexOf(parts[0]) === -1) return null;
   /* Closet sub-pages are reached in-app only: a boot, refresh or
      deep link naming one lands on the Closet landing instead. */
-  if (parts[0] === "add" || parts[0] === "gaps" || parts[0] === "analyze") return { tab: "wardrobe", icon: null };
+  if (parts[0] === "add" || parts[0] === "analyze") return { tab: "wardrobe", icon: null };
   /* Receipts is reached in-app only (Shop → Review): a boot,
      refresh or deep link naming it lands on the Shop landing. */
   if (parts[0] === "receipts") return { tab: "find", icon: null };
@@ -28063,7 +28164,7 @@ function restoreTab() {
   var from = tabFromHash();
   var name = sess || (from && from.tab) || store.get("tab", "today");
   if (TABS.indexOf(name) === -1) name = "today";
-  if (name === "add" || name === "gaps" || name === "analyze") name = "wardrobe";
+  if (name === "add" || name === "analyze") name = "wardrobe";
   if (name === "receipts") name = "find";
   if (name === "today" && !from) { persistTab(); return; }
   switchTab(name, { restore: true });
@@ -28976,7 +29077,7 @@ function renderGapList() {
   var list = document.getElementById("gap-list");
   if (!wrap || !list) return;
   var ce = document.getElementById("closet-gaps-count");
-  if (ce) ce.textContent = lastWishlist.length ? Math.min(8, lastWishlist.length) + " missing" : "Nothing missing";
+  if (ce) ce.textContent = lastWishlist.length ? "(" + Math.min(8, lastWishlist.length) + ")" : "";
   if (!lastWishlist.length) { wrap.hidden = false; list.innerHTML = '<p class="meta">Nothing missing — every piece in your looks is covered by your closet.</p>'; return; }
   wrap.hidden = false;
   list.innerHTML = lastWishlist.slice(0, 8).map(function (w, i) {
@@ -29665,7 +29766,6 @@ document.addEventListener("click", function (e) {
   var back = e.target.closest ? e.target.closest("[data-back-wardrobe]") : null;
   if (back) { if (typeof switchTab === "function") switchTab("wardrobe"); return; }
   if (e.target.closest && e.target.closest("#closet-add-entry")) { if (typeof switchTab === "function") switchTab("add"); return; }
-  if (e.target.closest && e.target.closest("#closet-gaps-entry")) { if (typeof switchTab === "function") switchTab("gaps"); }
 });
 
 /* ---------- Profile measurements — grouped, two columns (13) ---------- */
