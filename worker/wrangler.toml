@@ -1,0 +1,20 @@
+# wardrobe-sync — Cloudflare Workers deployment config.
+# The Deno Deploy original (main.ts) is legacy: Deno Deploy shuts down
+# around April 2027 (Cloudflare acquired the Deno team, Oct 9, 2026).
+#
+# Local dev works with the placeholder ids below (wrangler dev uses a
+# local KV simulation). Do NOT deploy this worker without David's
+# explicit yes and a logged-in Cloudflare account (or API token).
+# Before a real deploy, replace `id` / `preview_id` with the ids
+# printed by:  npx wrangler kv namespace create SYNC_KV
+# (or the existing production namespace — never commit those ids).
+# Secrets (REGISTER_SECRET, RENDER_WATCHER_SECRET) are set with
+# `wrangler secret put` and are never stored in this file.
+name = "wardrobe-sync"
+main = "worker.ts"
+compatibility_date = "2025-06-01"
+
+[[kv_namespaces]]
+binding = "SYNC_KV"
+id = "REPLACE_ME_SYNC_KV"
+preview_id = "REPLACE_ME_SYNC_KV_PREVIEW"

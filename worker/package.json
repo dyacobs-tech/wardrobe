@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "wrangler": "^4.162.0"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "deno run --allow-env test_hardening.ts",
+    "test:worker": "deno run --allow-net --allow-env test.ts http://localhost:8787",
+    "deploy": "echo 'Refusing to deploy. This needs David\\'s explicit yes and a Cloudflare login or API token. Run wrangler deploy only after that.' && exit 1"
+  }
+}
