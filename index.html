@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.58" />
+    <meta name="wardrobe-build" content="2026-11-18.59" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -55,6 +55,11 @@
         --shadow-card: 0 1px 0 rgba(25,22,18,.04), 0 8px 24px -16px rgba(25,22,18,.25);
         --font-display: "Cormorant Garamond", "Times New Roman", Georgia, serif;
         --font-ui: "Jost", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+        /* Build .59: bar height and body clearance are this static
+           calc from the first rule, identical on every page. No JS,
+           no dvh, no transitions. env() is the platform inset (0
+           when there is none). */
+        --bb-h: calc(68px + env(safe-area-inset-bottom, 0px));
       }
       @media (prefers-color-scheme: dark) {
         :root {
@@ -87,6 +92,7 @@
         font-size: 16px;
         line-height: 1.55;
         -webkit-font-smoothing: antialiased;
+        padding-bottom: var(--bb-h);
       }
       ::selection { background: var(--accent); color: var(--accent-ink); }
       button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]), textarea { min-height: 2.75rem; }
@@ -1368,7 +1374,7 @@
          the room under the header. Everything INSIDE the hero —
          title, dots, action buttons, location chips, formality
          chips — stays small and tight, as does the wordmark. */
-      body:has(> main > #panel-today:not([hidden])) { display: flex; flex-direction: column; min-height: 100dvh; }
+      body:has(> main > #panel-today:not([hidden])) { display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; }
       main:has(> #panel-today:not([hidden])) { max-width: none; margin: 0; padding: 0; flex: 1 1 auto; display: flex; flex-direction: column; }
       body:has(> main > #panel-today:not([hidden])) .masthead .brand { font-size: clamp(24px, 5vw, 32px); }
       body:has(> main > #panel-today:not([hidden])) footer { margin-top: 0; }
@@ -2422,19 +2428,13 @@
         #panel-wardrobe .item-grid .item-colors .cname { flex: 1 1 100%; overflow-wrap: anywhere; }
       }
       /* ---------- Bottom bar: the four sections, within thumb reach ---------- */
-      /* Bar geometry (build .12): NO env() anywhere in the bar's geometry.
-         Builds .8 (raw inset) and .11 (inset capped at 34px) both failed
-         on the user's iPhone — the host webview reports a ~96pt bottom
-         inset there, so any env()-derived height turned the bar into a
-         tall black band with the labels floating at its top. The bar is
-         now a fixed 68px tall, padding 0, and each button's icon+label
-         stack fills the bar's full height, bottom-anchored with a fixed
-         4px below the label (build .47's 2px clipped at the screen
-         edge and build .48's 6px still read a little high on the
-         user's device, so build .49 settles at 4px): the same geometry on
-         every device,
-         whatever env() would have resolved to. The body clearance and
-         the toast lift use the same fixed 68px. */
+      /* Build .59: height and body padding are the same static calc
+         on every page, from first paint: 68px plus the platform
+         safe-area inset (0 when there is none). No JS writes the
+         height, no dvh/visual-viewport sizing, no transitions on
+         the bar or the body padding. The icon+label stack still
+         fills the 68px content box, bottom-anchored with 4px below
+         the label; the inset is extra padding under that. */
       :root { --bb-h: calc(68px + env(safe-area-inset-bottom, 0px)); }
       body { padding-bottom: var(--bb-h); }
       .bottombar {
@@ -2442,6 +2442,7 @@
         display: flex;
         background: color-mix(in srgb, var(--bg) 94%, transparent);
         -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+        transition: none;
         border-top: 1px solid var(--border);
         box-sizing: border-box;
         height: var(--bb-h);
@@ -3133,7 +3134,7 @@
          difference — contain-fit full frame throughout, caption,
          action pills and selector row at their existing sizes. */
       @media (max-width: 899px) {
-        body:has(> main > #panel-today:not([hidden])) { box-sizing: border-box; height: 100dvh; max-height: 100dvh; }
+        body:has(> main > #panel-today:not([hidden])) { box-sizing: border-box; height: 100vh; height: 100svh; max-height: 100vh; max-height: 100svh; }
         main:has(> #panel-today:not([hidden])) { min-height: 0; }
         #panel-today { min-height: 0; box-sizing: border-box; }
         #panel-today:not([hidden]) .today-hero { min-height: 0; }
@@ -5189,7 +5190,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.58";
+var WARDROBE_BUILD = "2026-11-18.59";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -5215,6 +5216,18 @@ function deleteEntry(listName, id) {
   if (id.indexOf("seed-") === 0) { if (deletedIds.indexOf(id) === -1) deletedIds.push(id); }
   if (listName === "items") wardrobeItems = wardrobeItems.filter(function (i) { return i.id !== id; });
   if (listName === "watches") watches = watches.filter(function (w) { return w.id !== id; });
+  /* Build .59: a deliberate single delete in this session may
+     keep its unsent tombstone. Mass / leftover tombs do not
+     use this mark and cannot block a live server record. */
+  try {
+    if (id && id.indexOf("seed-") !== 0 && typeof _sySessionDeletes !== "undefined") {
+      var _sdc = listName === "items" ? "items" : (listName === "watches" ? "watches" : null);
+      if (_sdc) {
+        if (!_sySessionDeletes[_sdc]) _sySessionDeletes[_sdc] = {};
+        _sySessionDeletes[_sdc][id] = 1;
+      }
+    }
+  } catch (e) {}
   return persistAll();
 }
 /* The built-in entries exactly as the app ships them, captured
@@ -27483,12 +27496,20 @@ var calNavStack = []; /* build .39: Calendar sub-view stack (This week / Trips /
 var viewCur = (typeof currentTab !== "undefined" && currentTab) || "today";
 var viewNavGuard = false;
 function syncViewBack() {
+  /* Build .59: Home is the root. The chevron must not show on
+     the Today landing, even if an earlier tab is still on the
+     in-app stack — going Home clears that stack. A look or
+     layer opened from Home can still push and show Back. */
+  var onHome = (typeof currentTab === "undefined" || currentTab === "today") &&
+               (viewCur === "today" || viewCur === "" || !viewCur);
+  if (onHome) viewHist = [];
+  var show = !!viewHist.length && !onHome;
   var btn = document.getElementById("view-back");
-  if (btn) btn.hidden = !viewHist.length;
+  if (btn) btn.hidden = !show;
   /* Build .41: the sticky sub-tab bars key their left clearance
      off this class, so the first pill clears the chevron exactly
      while it is shown. */
-  document.body.classList.toggle("view-back-on", !!viewHist.length);
+  document.body.classList.toggle("view-back-on", show);
 }
 function viewTrack(name) {
   if (viewNavGuard || !name) return;
@@ -30534,6 +30555,7 @@ function syBlank() {
   o.quar = []; /* build .56: remote records that failed to apply, quarantined per record */
   o.bp = {}; /* build .57: hashes of blobs this device has pushed */
   o.mig57 = ""; /* build .57: account key the one-time blob migration ran for */
+  o.restore59 = ""; /* build .59: account key the one-time tomb-restore re-download completed for */
   return o;
 }
 var SY = null;
@@ -30557,6 +30579,7 @@ else {
   if (!Array.isArray(SY.quar)) SY.quar = [];
   if (!SY.bp || typeof SY.bp !== "object" || Array.isArray(SY.bp)) SY.bp = {};
   if (typeof SY.mig57 !== "string") SY.mig57 = "";
+  if (typeof SY.restore59 !== "string") SY.restore59 = "";
 }
 function saveSY() { try { localStorage.setItem("wardrobe.sync", JSON.stringify(SY)); return true; } catch (e) { try { storeNoteFailure(); } catch (e2) {} return false; } }
 function syHsh(x) {
@@ -30766,6 +30789,13 @@ var _syFailed = false, _syRetryT = null, _syNoteOff = false;
    confirmed pass; _syMassDenied holds a coll silently for the
    session after a "Keep them" answer. */
 var _syMassHold = null, _syMassOkUntil = 0, _syMassDenied = {};
+/* Build .59: ids the user deleted in THIS page lifetime. Only a
+   single such delete (not a mass batch) may block a live server
+   record. Leftover unsent tombs are not in this map. */
+var _sySessionDeletes = {};
+/* Ids restored from a live server record over an unsent tomb —
+   never uploaded as a delete, even if trackChanges re-arms one. */
+var _syRestoredIds = {};
 /* Settings fields being restored from the server after a poison:
    untracked and unuploaded until the download lands, so their
    in-memory fallback values can never overwrite the good copy. */
@@ -31114,6 +31144,31 @@ function syQuarantine56(x, err) {
     if (SY.quar.length > 200) SY.quar = SY.quar.slice(SY.quar.length - 200);
   } catch (e) {}
 }
+/* Build .59: an unsent tomb is one the server has never
+   acknowledged (still dirty). Those must not block applying a
+   live server record, except a single user-initiated delete
+   made in this session. When in doubt, restore. */
+function syUnsentTomb(coll, id) {
+  return !!(SY.tomb[coll] && SY.tomb[coll][id] && SY.dirty[coll] && SY.dirty[coll][id]);
+}
+function syHasUnsentTombs() {
+  for (var i = 0; i < SY_COLLS.length; i++) {
+    var c = SY_COLLS[i], tombs = SY.tomb[c] || {}, dirty = SY.dirty[c] || {};
+    for (var id in tombs) { if (tombs[id] && dirty[id]) return true; }
+  }
+  return false;
+}
+function syPreserveSessionDelete(coll, id) {
+  if (!syUnsentTomb(coll, id)) return false;
+  if (!_sySessionDeletes[coll] || !_sySessionDeletes[coll][id]) return false;
+  var pending = 0;
+  Object.keys(SY.tomb[coll] || {}).forEach(function (k) {
+    if (SY.dirty[coll] && SY.dirty[coll][k]) pending++;
+  });
+  if (pending > 5) return false;
+  if (_syMassHold && _syMassHold.coll === coll) return false;
+  return true;
+}
 function syApplyDownload56(j) {
   var res = { down: 0, changedAny: false, changedLooks: false, count: 0 };
   if (!j) return res;
@@ -31141,14 +31196,24 @@ function syApplyDownload56(j) {
         }
         if (!x || SY_COLLS.indexOf(x.coll) === -1) return;
         var loc = SY.st[x.coll][x.id] || SY.tomb[x.coll][x.id] || 0;
-        if (!(x.updatedAt > loc)) return;
         if (x.deleted) {
+          if (!(x.updatedAt > loc)) return;
           syRemoveLocal(x.coll, x.id);
           SY.tomb[x.coll][x.id] = x.updatedAt;
           delete SY.snap[x.coll][x.id]; delete SY.st[x.coll][x.id];
           delete SY.dirty[x.coll][x.id];
           res.changedAny = true; res.down++; if (x.coll === "looks") res.changedLooks = true;
         } else if (x.data) {
+          /* Build .59: a live server record beats an unsent local
+             tomb, unless this is a single user-initiated delete
+             from this session. */
+          var _wasUnsentTomb = syUnsentTomb(x.coll, x.id);
+          if (syPreserveSessionDelete(x.coll, x.id)) return;
+          if (_wasUnsentTomb) {
+            /* fall through and restore — ignore the tomb stamp */
+          } else if (!(x.updatedAt > loc)) {
+            return;
+          }
           if (typeof x.data !== "object" || Array.isArray(x.data)) { syQuarantine56(x, "record data is not an object"); return; }
           var _xrid = null;
           try { _xrid = syRecId(x.coll, x.data); } catch (e) { _xrid = null; }
@@ -31159,6 +31224,13 @@ function syApplyDownload56(j) {
           SY.st[x.coll][x.id] = x.updatedAt;
           delete SY.tomb[x.coll][x.id];
           delete SY.dirty[x.coll][x.id];
+          /* Only ids restored over an unsent tomb are blocked from
+             a later delete upload — a normal apply must not freeze
+             a real user delete later in the session. */
+          if (_wasUnsentTomb) {
+            if (!_syRestoredIds[x.coll]) _syRestoredIds[x.coll] = {};
+            _syRestoredIds[x.coll][x.id] = 1;
+          }
           res.changedAny = true; res.down++; if (x.coll === "looks") res.changedLooks = true;
         } else {
           /* Build .56 verification fix: a non-deleted record with
@@ -31294,8 +31366,17 @@ function syncNow(isRetry, force) {
          first page may still be large — per-page persistence is
          the guarantee this client can make. */
       var down56 = 0, changedAny56 = false, changedLooks56 = false;
-      if (SY.lastOk) {
+      /* Build .59: one-time full paged re-download (since: 0) so
+         live server records can replace leftover unsent tombs.
+         Runs for an established account (or any account that
+         already has unsent tombs). A brand-new first sync still
+         uploads before any download. The restore59 flag is set
+         only after the pages finish and wardrobe.items persists. */
+      var needRestore59 = !!(SY.key && SY.restore59 !== SY.key && (SY.lastOk || syHasUnsentTombs()));
+      var restoreFailed59 = false;
+      if (SY.lastOk || needRestore59) {
         var _pg56 = 0;
+        var _dlSince = needRestore59 ? 0 : SY.last;
         while (_pg56 < 80) {
           _pg56++;
           var _pr56 = null;
@@ -31303,26 +31384,40 @@ function syncNow(isRetry, force) {
             _pr56 = await syFetch(SYNC_URL + "/sync", {
               method: "POST",
               headers: { "authorization": "Bearer " + SY.key, "content-type": "application/json" },
-              body: JSON.stringify({ since: SY.last, changes: [], meta: null, limit: 200 })
+              body: JSON.stringify({ since: _dlSince, changes: [], meta: null, limit: 200 })
             }, 60000);
-          } catch (e) { break; }
+          } catch (e) { restoreFailed59 = true; break; }
           if (_pr56.status === 401) {
             SY.rej = (SY.rej || 0) + 1;
             setSyncStatus("Sync paused — the server didn't accept this device's sync key. Nothing on this device was changed.");
             return;
           }
-          if (!_pr56.ok) break;
+          if (!_pr56.ok) { restoreFailed59 = true; break; }
           var _pj56 = null;
-          try { _pj56 = await _pr56.json(); } catch (e) { break; }
-          if (!_pj56 || typeof _pj56.now !== "number") break;
-          var _prev56 = SY.last;
+          try { _pj56 = await _pr56.json(); } catch (e) { restoreFailed59 = true; break; }
+          if (!_pj56 || typeof _pj56.now !== "number") { restoreFailed59 = true; break; }
+          var _prev56 = _dlSince;
           var _pa56 = syApplyDownload56(_pj56);
           down56 += _pa56.down; if (_pa56.changedAny) changedAny56 = true; if (_pa56.changedLooks) changedLooks56 = true;
           SY.last = _pj56.now;
+          _dlSince = _pj56.now;
           saveSY();
           if (_pa56.count === 0) break;
           if (_pj56.now === _prev56) break;
           if (_pa56.count < 200) break;
+        }
+        if (needRestore59 && !restoreFailed59) {
+          var _persisted59 = true;
+          try { _persisted59 = persistAll() !== false; } catch (e) { _persisted59 = false; }
+          if (_persisted59) { SY.restore59 = SY.key; saveSY(); }
+          if (_syMassHold) {
+            var _hc = _syMassHold.coll, _still = 0;
+            Object.keys((SY.tomb && SY.tomb[_hc]) || {}).forEach(function (id) {
+              if (SY.dirty[_hc] && SY.dirty[_hc][id]) _still++;
+            });
+            if (_still <= 5) { _syMassHold = null; try { dataNoteRender(); } catch (e) {} }
+          }
+          try { syRefresh(); } catch (e) {}
         }
       }
       var changes = [], held = 0;
@@ -31379,7 +31474,10 @@ function syncNow(isRetry, force) {
             else if (vaultGaps && JSON.stringify(data).indexOf('"idb:') !== -1) { held++; return; }
             changes.push({ coll: c, id: id, updatedAt: SY.st[c][id] || Date.now(), data: data });
           }
-          else if (SY.tomb[c][id]) changes.push({ coll: c, id: id, updatedAt: SY.tomb[c][id], deleted: true });
+          else if (SY.tomb[c][id]) {
+            if (_syRestoredIds[c] && _syRestoredIds[c][id]) return;
+            changes.push({ coll: c, id: id, updatedAt: SY.tomb[c][id], deleted: true });
+          }
         });
       });
       /* Mass-delete guard (client side; the worker enforces the

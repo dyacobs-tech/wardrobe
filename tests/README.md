@@ -12,11 +12,14 @@
 
 Requests to `*.workers.dev` (sync and render queue) are **blocked**, so a run never creates a sync account, uploads data or queues a render.
 
+A second Playwright check, `tests/test_restore59.py`, boots a simulated .57/.58 profile against a **local mock** of the sync protocol (never the production worker) and asserts the .59 closet restore plus the Home chevron and bottom-nav first-paint geometry.
+
 Run it locally:
 
     pip install playwright && python -m playwright install chromium
     python -m http.server 8000 &          # from the repo root
     python tests/smoke.py                  # or: python tests/smoke.py https://dyacobs-tech.github.io/wardrobe/
+    python tests/test_restore59.py          # local mock worker; never hits production
 
 `tests/smoke_baseline.json` lists issues known on 17 Nov 2026. They report `KNOWN` instead of failing. When one starts passing the run prints `FIXED?`; delete it from the baseline then. Any other failure fails the run.
 
