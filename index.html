@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.71" />
+    <meta name="wardrobe-build" content="2026-11-18.72" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -1847,10 +1847,10 @@
          card title 15px · look title 26px · wordmark 17px.
          ================================================================ */
       :root {
-        --fs-label: 10px; --ls-label: .18em;
-        --fs-meta: 12.5px; --fs-body: 13.5px;
-        --fs-card-title: 15px; --fs-look-title: 26px;
-        --hero-label-w: 76px; --ctl-h: 32px;
+        --fs-label: 11px; --ls-label: .14em;
+        --fs-meta: 13px; --fs-body: 15px;
+        --fs-card-title: 16px; --fs-look-title: 20px; --fs-title: 20px;
+        --hero-label-w: 76px; --ctl-h: 34px; --ctl-radius: 999px; --ctl-pad-x: 11px; --fs-ctl: 12px;
         --card-pad: 12px 14px; --card-body-pad: 12px;
       }
 
@@ -3826,11 +3826,371 @@
         justify-content: center;
       }
     </style>
+    <style>
+      /* ================= Build .72 — one design system =================
+         Closet's round pill is the canonical control. Every dropdown,
+         native select, chip, primary and secondary button uses the
+         same height, radius, font and padding. Cards, titles, labels,
+         inputs and colours all come from one token set. */
+      :root {
+        --font-title: var(--font-display);
+        --fs-title: 20px;
+        --fs-title-lg: 22px;
+        --fs-look-title: 20px;
+        --fs-card-title: 16px;
+        --fs-label: 11px;
+        --ls-label: .14em;
+        --fs-body: 15px;
+        --fs-meta: 13px;
+        --fs-ctl: 12px;
+        --ctl-h: 34px;
+        --ctl-radius: 999px;
+        --ctl-pad-x: 11px;
+        --ctl-fw: 600;
+        --ctl-border: 1px solid var(--border-strong);
+        --radius: 4px;
+        --card-pad: 12px 14px;
+        --card-body-pad: 12px;
+      }
+      body { font-size: var(--fs-body); line-height: 1.5; }
+
+      /* ---- typography ---- */
+      h2, h3, h4,
+      .section-head h2, .fav-head, h3.fav-head, .fw-head h3,
+      .look-body h3, .item-card h4, .featured h3, .gap-title,
+      .shop-look-titlerow h3, #find-sheet-title, #watch-sheet-title,
+      .type-title, .cal-title, .look-title {
+        font-family: var(--font-title) !important;
+        font-weight: 600 !important;
+        font-size: var(--fs-title) !important;
+        line-height: 1.2;
+        color: var(--text);
+      }
+      .fav-head, h3.fav-head { margin: 0; }
+      p.meta, .meta { margin: 0; font-size: var(--fs-meta); color: var(--dim); }
+      .form-note, .blurb, .item-card p, .dir-line, .deal-progress-note {
+        font-size: var(--fs-meta);
+        color: var(--dim);
+      }
+      label.field, .item-card .cat, .option-card .oc-label, .type-label,
+      .inspo-active .ia-main strong, .source-line strong, .hex {
+        font-family: var(--font-ui) !important;
+        font-size: var(--fs-label) !important;
+        font-weight: 600 !important;
+        letter-spacing: var(--ls-label) !important;
+        text-transform: uppercase;
+      }
+      .hex { color: var(--dim); }
+
+      /* ---- cards / boxes ---- */
+      .card, .item-card, .find-card, .sale-card, .saved-card, .data-card,
+      .link-card, #link-card, .option-card, .myinspo-card, .loc-card,
+      .add-form, .empty.card {
+        background: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        box-shadow: var(--shadow-card);
+        border-radius: var(--radius) !important;
+        color: var(--text);
+      }
+      .card:not(.item-card):not(.sale-card):not(.option-card):not(.saved-card):not(.myinspo-card):not(.colour-chip):not(.plate-card),
+      .data-card, .loc-card, .link-card, #link-card, .add-form,
+      .find-card, .empty.card {
+        padding: var(--card-pad) !important;
+      }
+      /* Image-led / media cards stay flush so media can bleed to the radius. */
+      .item-card, .sale-card, .option-card, .saved-card, .myinspo-card { padding: 0 !important; overflow: hidden; }
+      .item-card .body, .sale-card .body, .option-card .oc-body, .saved-card .body, .myinspo-card .mi-body {
+        padding: var(--card-body-pad);
+      }
+
+      /* ---- shared layout helpers (replace one-off inline styles) ---- */
+      .span-all { grid-column: 1 / -1; }
+      .row-inline { display: flex; gap: 10px; align-items: center; }
+      .grow { flex: 1; min-width: 0; }
+      .textarea-sm { min-height: 40px; }
+      .textarea-md { min-height: 64px; }
+      .media-cover { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .pane-frame { position: relative; display: block; aspect-ratio: 3 / 4; }
+      .empty-center { display: grid; place-items: center; width: 100%; color: var(--dim); font-size: var(--fs-meta); }
+
+      /* ---- canonical control: Closet round pill ---- */
+      .cdd-btn, .closet-cat-btn, .closet-add-btn,
+      .source-seg button, #ideas-source-seg button,
+      select,
+      .chip, .fchip,
+      .btn-accent, .btn-ink, .btn-ghost {
+        height: var(--ctl-h) !important;
+        min-height: var(--ctl-h) !important;
+        max-height: var(--ctl-h) !important;
+        padding: 0 var(--ctl-pad-x) !important;
+        border-radius: var(--ctl-radius) !important;
+        font-family: var(--font-ui) !important;
+        font-size: var(--fs-ctl) !important;
+        font-weight: var(--ctl-fw) !important;
+        letter-spacing: .02em !important;
+        line-height: 1 !important;
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px;
+        max-width: 100%;
+      }
+      .closet-top3 .cdd-btn, .closet-top3 .closet-cat-btn, .closet-top3 .closet-add-btn {
+        padding: 0 var(--ctl-pad-x) !important;
+        font-size: var(--fs-ctl) !important;
+        height: var(--ctl-h) !important;
+        min-height: var(--ctl-h) !important;
+      }
+      .cdd-btn:not(.hero-cdd-btn), .closet-cat-btn, .closet-add-btn {
+        background: var(--surface);
+        border: var(--ctl-border);
+        color: var(--text);
+      }
+      .hero-cdd-btn {
+        height: var(--ctl-h) !important;
+        min-height: var(--ctl-h) !important;
+        padding: 0 var(--ctl-pad-x) !important;
+        font-size: var(--fs-ctl) !important;
+        border-radius: var(--ctl-radius) !important;
+      }
+
+      /* Ideas (and any) segmented control — same pills, not a square bar */
+      .source-seg, #ideas-source-seg {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        border: 0;
+        border-radius: 0;
+        overflow: visible;
+        background: transparent;
+        grid-template-columns: none;
+      }
+      .source-seg button, #ideas-source-seg button {
+        border: var(--ctl-border);
+        background: var(--surface);
+        color: var(--text);
+        border-right: var(--ctl-border);
+        flex: 0 0 auto;
+        width: auto;
+      }
+      .source-seg button[aria-pressed="true"],
+      #ideas-source-seg button[aria-pressed="true"] {
+        background: var(--ink-btn);
+        color: var(--ink-btn-text);
+        border-color: var(--ink-btn);
+      }
+
+      /* Native <select> — same pill as Closet */
+      select {
+        -webkit-appearance: none;
+        appearance: none;
+        background-color: var(--surface) !important;
+        color: var(--text);
+        border: var(--ctl-border) !important;
+        padding: 0 28px 0 var(--ctl-pad-x) !important;
+        justify-content: flex-start !important;
+        width: auto;
+        max-width: 100%;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23191612' d='M1.2 1.2l4.8 4.8 4.8-4.8'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 10px 7px;
+      }
+      @media (prefers-color-scheme: dark) {
+        select {
+          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23f0e7d3' d='M1.2 1.2l4.8 4.8 4.8-4.8'/></svg>");
+        }
+      }
+
+      /* Chips */
+      .chip, .fchip {
+        background: var(--surface);
+        border: var(--ctl-border);
+        color: var(--text);
+      }
+      .chip[aria-pressed="true"], .chip.active, .fchip[aria-pressed="true"], .fchip.active {
+        background: var(--ink-btn);
+        color: var(--ink-btn-text);
+        border-color: var(--ink-btn);
+      }
+
+      /* One primary, one secondary — same geometry as the pill */
+      .btn-accent {
+        background: var(--accent);
+        color: var(--accent-ink);
+        border: 1px solid var(--accent);
+      }
+      .btn-ink {
+        background: var(--ink-btn);
+        color: var(--ink-btn-text);
+        border: 1px solid var(--ink-btn);
+      }
+      .btn-ghost {
+        background: var(--surface);
+        color: var(--text);
+        border: var(--ctl-border);
+      }
+      .btn-accent:hover, .btn-ink:hover { opacity: .9; }
+      .btn-ghost:hover { background: var(--surface-alt); }
+      label.btn-ghost { display: inline-flex; cursor: pointer; }
+
+      /* Inputs — same height and ink border; 4px radius (not a pill); 16px type to avoid iOS zoom */
+      input[type="text"], input[type="search"], input[type="url"], input[type="email"],
+      input[type="number"], input[type="date"], input[type="password"], input[type="tel"],
+      input:not([type]), textarea, #link-url {
+        height: var(--ctl-h) !important;
+        min-height: var(--ctl-h) !important;
+        padding: 0 10px !important;
+        border-radius: var(--radius) !important;
+        border: var(--ctl-border) !important;
+        background: var(--surface) !important;
+        color: var(--text);
+        font-family: var(--font-ui) !important;
+        font-size: 16px !important;
+        font-weight: 400;
+        line-height: 1.2;
+        box-sizing: border-box !important;
+      }
+      textarea { height: auto !important; max-height: none !important; padding: 8px 10px !important; }
+      #link-go, #panel-find #link-go {
+        height: var(--ctl-h) !important;
+        min-height: var(--ctl-h) !important;
+        max-height: var(--ctl-h) !important;
+        padding: 0 var(--ctl-pad-x) !important;
+        font-size: var(--fs-ctl) !important;
+        border-radius: var(--ctl-radius) !important;
+      }
+      #link-url, #panel-find #link-url {
+        height: var(--ctl-h) !important;
+        min-height: var(--ctl-h) !important;
+        padding: 0 10px !important;
+        font-size: 16px !important;
+        border-radius: var(--radius) !important;
+      }
+
+      /* Keep Home's on-screen fit: don't enlarge the hero action chips/buttons. */
+      #panel-today .btn-today, .btn-today {
+        height: auto !important;
+        min-height: 29px !important;
+        max-height: none !important;
+        padding: 5px 8px !important;
+        font-size: 11px !important;
+        letter-spacing: .08em !important;
+        border-radius: var(--ctl-radius) !important;
+      }
+      #panel-today .today-formality .fchip {
+        height: auto !important;
+        min-height: 23px !important;
+        max-height: none !important;
+        padding: 2px 8px !important;
+        font-size: 11px !important;
+      }
+
+      #brand-home { cursor: pointer; }
+      #loc-results, #loc-quick { margin-top: 10px; }
+      #sync-new-note, #sync-regcode-note, #sync-link-note, #data-status { margin: 0; }
+      #find-sheet-sub, #watch-sheet-sub, #swap-sheet-sub { margin: 0 0 12px; }
+      #upload-status, #build-upload-status { margin: 10px 0 0; }
+      #icon-blurb, #watch-notes { min-height: 56px; }
+      #icon-rules { min-height: 72px; }
+      .swap-note { margin: 0; }
+      .pc-body, .pc-names { display: block; }
+      /* Ideas action row — same Closet pills, not a 44px square grid. */
+      #panel-studio .studio-home-bar > .btn-accent,
+      #panel-studio .studio-home-bar > .btn-ghost,
+      #panel-studio .studio-home-bar .ideas-type-btn {
+        height: var(--ctl-h) !important;
+        min-height: var(--ctl-h) !important;
+        max-height: var(--ctl-h) !important;
+        padding: 0 var(--ctl-pad-x) !important;
+        font-size: var(--fs-ctl) !important;
+        font-weight: var(--ctl-fw) !important;
+        letter-spacing: .02em !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        border-radius: var(--ctl-radius) !important;
+      }
+      #panel-studio .studio-home-bar .ideas-type-btn .cdd-label {
+        white-space: nowrap !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block !important;
+        -webkit-line-clamp: unset;
+      }
+      /* Native selects must not be flex — WebKit will expand them
+         to the longest option and overflow the page / cover the nav. */
+      select {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+      }
+      .wr-top select { width: auto !important; flex: 1 1 auto; min-width: 0 !important; }
+      /* Let pills shrink in tight rows instead of overflowing the viewport. */
+      .cdd-btn, .chip, .btn-accent, .btn-ink, .btn-ghost, .fchip {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #panel-studio .studio-home-bar > .btn-accent,
+      #panel-studio .studio-home-bar > .btn-ghost,
+      #panel-studio .studio-home-bar .ideas-type-btn {
+        min-width: 0 !important;
+        width: 100%;
+        overflow: hidden !important;
+        padding: 0 4px !important;
+        white-space: normal !important;
+        line-height: 1.05 !important;
+        text-align: center !important;
+        hyphens: manual;
+      }
+      #panel-studio .studio-home-bar .ideas-type-btn .cdd-label {
+        white-space: normal !important;
+        overflow: hidden !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        text-overflow: ellipsis;
+        line-height: 1.05 !important;
+      }
+      /* Shop look title + CLEAR LOOK stay on one line. */
+      #panel-find .shop-look-titlerow,
+      .shop-look-titlerow {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      #panel-find .shop-look-titlerow h3,
+      .shop-look-titlerow h3 {
+        margin: 0 !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: 100%;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.2 !important;
+      }
+      #panel-find .shop-look-titlerow .btn-ghost,
+      .shop-look-titlerow .btn-ghost,
+      #shop-clear-look {
+        flex: 0 0 auto !important;
+      }
+      /* Shop look photo cap and title row from .71 stay in force. */
+    </style>
+
   </head>
   <body>
     <header class="masthead">
       <div class="wrap">
-        <h1 class="brand" id="brand-home" title="Home" style="cursor:pointer">Wardrobe</h1>
+        <h1 class="brand" id="brand-home" title="Home">Wardrobe</h1>
         <button type="button" class="navbtn profile-btn" id="tab-profile" data-tab="profile" data-section="me" aria-controls="panel-pinfo" aria-label="Profile — info, location, cloud and backup"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg></button>
         <div class="rule-double" aria-hidden="true"></div>
       </div>
@@ -4203,14 +4563,14 @@
             </div>
             <div>
               <label class="field" for="item-colour-name">Colour</label>
-              <div style="display:flex;gap:10px;align-items:center">
-                <input type="text" id="item-colour-name" placeholder="" style="flex:1" />
+              <div class="row-inline">
+                <input type="text" id="item-colour-name" placeholder="" class="grow" />
                 <input type="color" id="item-colour" value="#232d3f" aria-label="Pick the colour" />
               </div>
             </div>
             <div>
               <label class="field" for="item-notes">Notes</label>
-              <textarea id="item-notes" placeholder="" style="min-height:64px"></textarea>
+              <textarea id="item-notes" placeholder="" class="textarea-md"></textarea>
             </div>
             <div>
               <label class="field" for="item-price">Cost — what you paid ($, optional)</label>
@@ -4252,17 +4612,17 @@
           </div>
           <div>
             <label class="field" for="custom-desc">Colours</label>
-            <textarea id="custom-desc" placeholder="" style="min-height:40px"></textarea>
+            <textarea id="custom-desc" placeholder="" class="textarea-sm"></textarea>
           </div>
           <div>
             <label class="field">Colours so far</label>
-            <div class="draft-strip" id="draft-strip"><div style="display:grid;place-items:center;width:100%;color:var(--dim);font-size:13px"></div></div>
+            <div class="draft-strip" id="draft-strip"><div class="empty-center"></div></div>
             <ul class="draft-list" id="draft-list"></ul>
           </div>
           <div>
             <label class="field" for="custom-add-name">Add an exact colour</label>
-            <div style="display:flex;gap:10px;align-items:center">
-              <input type="text" id="custom-add-name" placeholder="" style="flex:1" />
+            <div class="row-inline">
+              <input type="text" id="custom-add-name" placeholder="" class="grow" />
               <input type="color" id="custom-add-hex" value="#1f6f6b" aria-label="Pick the exact colour" />
               <button type="button" class="btn-ghost" id="custom-add-btn">Add</button>
             </div>
@@ -4297,7 +4657,7 @@
 
         <div class="card featured" id="featured"></div>
 
-        <p id="plate-count" style="color:var(--dim);font-size:14px;margin:0 0 12px"></p>
+        <p id="plate-count" class="form-note"></p>
         <div class="plate-grid" id="plate-grid"></div>
         <div id="plate-empty"></div>
 
@@ -4352,7 +4712,7 @@
             <div id="capsule-out"></div>
           </div>
           <form class="trip-form" id="trip-form">
-            <h3 class="fav-head" style="margin:0">New trip</h3>
+            <h3 class="fav-head">New trip</h3>
             <div>
               <label class="field" for="trip-name">Name</label>
               <input type="text" id="trip-name" autocomplete="off" />
@@ -4630,7 +4990,7 @@
       <!-- ================= STYLE ICONS ================= -->
       <section id="panel-icons" role="tabpanel" aria-labelledby="tab-icons" hidden>
 
-        <div class="card add-form icon-tools" id="icon-search-card" style="margin-bottom:8px">
+        <div class="card add-form icon-tools" id="icon-search-card" >
           <button type="button" class="tools-toggle" id="icon-search-toggle" aria-expanded="false" aria-controls="icon-search-body"><span>Search for an icon</span><span class="tt-chev" aria-hidden="true">▾</span></button>
           <div class="tools-body" id="icon-search-body" hidden>
             <div>
@@ -4641,8 +5001,8 @@
           </div>
         </div>
 
-        <form class="card add-form icon-tools" id="icon-form" style="margin-bottom:12px">
-          <div style="display:flex;align-items:center;gap:8px"><button type="button" class="tools-toggle" id="icon-form-toggle" aria-expanded="false" aria-controls="icon-form-body" style="flex:1"><span>Add your own icon</span><span class="tt-chev" aria-hidden="true">▾</span></button></div>
+        <form class="card add-form icon-tools" id="icon-form" >
+          <div class="row-inline"><button type="button" class="tools-toggle" id="icon-form-toggle" aria-expanded="false" aria-controls="icon-form-body" class="grow"><span>Add your own icon</span><span class="tt-chev" aria-hidden="true">▾</span></button></div>
           <div class="tools-body" id="icon-form-body" hidden>
           <div class="form-row">
             <div>
@@ -4656,7 +5016,7 @@
           </div>
           <div>
             <label class="field" for="icon-blurb">Blurb</label>
-            <textarea id="icon-blurb" style="min-height:56px"></textarea>
+            <textarea id="icon-blurb"></textarea>
           </div>
           <div>
             <label class="field" for="icon-signature-desc">Signature outfit — completes vague requests</label>
@@ -4668,7 +5028,7 @@
           </div>
           <div>
             <label class="field" for="icon-rules">Rules — one per line</label>
-            <textarea id="icon-rules" style="min-height:72px"></textarea>
+            <textarea id="icon-rules"></textarea>
           </div>
           <div>
             <label class="field" for="icon-avoid">Avoid line</label>
@@ -4677,13 +5037,13 @@
           <div>
             <label class="field" for="icon-pal-desc">Palette colours — describe them</label>
             <input type="text" id="icon-pal-desc" />
-            <div class="draft-strip" id="icon-draft-strip"><div style="display:grid;place-items:center;width:100%;color:var(--dim);font-size:13px"></div></div>
+            <div class="draft-strip" id="icon-draft-strip"><div class="empty-center"></div></div>
             <ul class="draft-list" id="icon-draft-list"></ul>
           </div>
           <div>
             <label class="field" for="icon-add-name">Add an exact colour</label>
-            <div style="display:flex;gap:10px;align-items:center">
-              <input type="text" id="icon-add-name" style="flex:1" />
+            <div class="row-inline">
+              <input type="text" id="icon-add-name" class="grow" />
               <input type="color" id="icon-add-hex" value="#1f2a44" aria-label="Pick the exact colour" />
               <button type="button" class="btn-ghost" id="icon-add-btn">Add</button>
             </div>
@@ -4770,7 +5130,7 @@
             <div class="find-grid" id="find-grid"></div>
           </div>
           <form class="card add-form" id="find-form">
-            <h3 style="font-family:var(--font-display);font-size:24px;font-weight:600;margin:0">What are you looking for?</h3>
+            <h3 class="type-title">What are you looking for?</h3>
             <div>
               <label class="field" for="find-desc">Describe it</label>
               <input type="search" id="find-desc" class="find-searchbar" placeholder="e.g. Navy suede loafers, unlined, for summer" autocomplete="off" required />
@@ -4809,7 +5169,7 @@
             </div>
             <div>
               <label class="field" for="find-details">Details — brand, material, must-haves, things to avoid</label>
-              <textarea id="find-details" placeholder="e.g. Italian suede if possible, no logos, rubber sole" style="min-height:64px"></textarea>
+              <textarea id="find-details" placeholder="e.g. Italian suede if possible, no logos, rubber sole" class="textarea-md"></textarea>
             </div>
             <div class="label-row"><button type="submit" class="btn-accent">Add &amp; search</button></div>
           </form>
@@ -4875,20 +5235,20 @@
           </div>
           <div>
             <label class="field" for="pf-notes">Notes — alterations, brands that fit you, anything a search should know</label>
-            <textarea id="pf-notes" style="min-height:64px"></textarea>
+            <textarea id="pf-notes" class="textarea-md"></textarea>
           </div>
           <div><button type="submit" class="btn-ink">Save profile</button></div>
         </form>
       </section>
       <section id="panel-plocation" role="tabpanel" aria-labelledby="tab-plocation" hidden>
-        <div class="card loc-card" id="loc-card" style="margin-top:0;margin-bottom:22px">
+        <div class="card loc-card" id="loc-card" >
           <div>
             <div class="card-head-info"><h3>Location &amp; weather</h3></div>
-            <div class="loc-now" style="margin-top:8px">
+            <div class="loc-now" >
               <span class="loc-name" id="loc-current-name"></span>
               <span class="loc-kind" id="loc-current-kind">Home — default</span>
             </div>
-            <p class="loc-weather" id="loc-weather" style="margin-top:6px">Set your home city.</p>
+            <p class="loc-weather" id="loc-weather" >Set your home city.</p>
             <p class="loc-rec" id="loc-rec"></p>
           </div>
           <div>
@@ -4897,8 +5257,8 @@
               <input type="search" id="loc-search" placeholder="City — e.g. New York, London, Paris" autocomplete="off" />
               <button type="button" class="btn-ink" id="loc-search-btn">Find</button>
             </div>
-            <div id="loc-results" style="margin-top:10px"></div>
-            <div class="loc-quick" id="loc-quick" style="margin-top:10px"></div>
+            <div id="loc-results"></div>
+            <div class="loc-quick" id="loc-quick"></div>
           </div>
           <div class="loc-actions">
             <button type="button" class="btn-ghost" id="loc-set-home">Make this my home</button>
@@ -4909,12 +5269,12 @@
       <section id="panel-pcloud" role="tabpanel" aria-labelledby="tab-pcloud" hidden>
         <div class="card data-card" id="sync-card">
           <div class="card-head-info"><h3>☁️ Cloud sync</h3></div>
-          <div id="syncstat"><div><b>Not synced yet</b></div><p class="meta" style="margin:0">Never synced</p></div>
+          <div id="syncstat"><div><b>Not synced yet</b></div><p class="meta">Never synced</p></div>
           <div class="loc-actions">
             <button type="button" class="btn-ink" id="sync-now-btn">Sync now</button>
             <button type="button" class="btn-ghost" id="sync-new-acct" hidden>Start a new sync account</button>
           </div>
-          <p class="form-note" id="sync-new-note" style="margin:0"></p>
+          <p class="form-note" id="sync-new-note"></p>
           <div>
             <label class="field" for="sync-key">This device's sync key</label>
             <input type="text" id="sync-key" readonly value="(created on first sync)" onclick="this.select()" />
@@ -4925,7 +5285,7 @@
               <input type="text" id="sync-regcode" placeholder="Code for creating an account" autocomplete="off" />
               <button type="button" class="btn-ink" id="sync-regcode-btn">Save code</button>
             </div>
-            <p class="form-note" id="sync-regcode-note" style="margin:0"></p>
+            <p class="form-note" id="sync-regcode-note"></p>
           </div>
           <div>
             <label class="field" for="sync-link-key">Use a key from another device</label>
@@ -4933,20 +5293,20 @@
               <input type="text" id="sync-link-key" placeholder="Paste sync key" autocomplete="off" />
               <button type="button" class="btn-ink" id="sync-link-btn">Link</button>
             </div>
-            <p class="form-note" id="sync-link-note" style="margin:0"></p>
+            <p class="form-note" id="sync-link-note"></p>
           </div>
         </div>
         <div class="card data-card" id="data-card">
           <div class="card-head-info"><h3>Backup</h3></div>
           <div class="loc-actions">
             <button type="button" class="btn-ink" id="data-export">Export backup</button>
-            <label class="btn-ghost" for="data-import-file" style="display:inline-grid;place-items:center;cursor:pointer">Import backup</label>
+            <label class="btn-ghost" for="data-import-file" >Import backup</label>
             <input type="file" id="data-import-file" accept="application/json,.json" hidden />
             <button type="button" class="btn-ghost" id="data-undo-import" hidden>Undo last import</button>
           </div>
-          <p id="data-status" style="margin:0"></p>
+          <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.71</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.72</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -4962,7 +5322,7 @@
             <div class="item-grid" id="watch-grid"></div>
           </div>
           <form class="card add-form" id="watch-form">
-            <h3 style="font-family:var(--font-display);font-size:24px;font-weight:600;margin:0">Add</h3>
+            <h3 class="type-title">Add</h3>
             <div>
               <label class="field" for="watch-name">Name</label>
               <input type="text" id="watch-name" placeholder="" required />
@@ -4994,15 +5354,15 @@
               </div>
               <div>
                 <label class="field" for="watch-dial-name">Dial</label>
-                <div style="display:flex;gap:10px;align-items:center">
-                  <input type="text" id="watch-dial-name" placeholder="" style="flex:1" />
+                <div class="row-inline">
+                  <input type="text" id="watch-dial-name" placeholder="" class="grow" />
                   <input type="color" id="watch-dial" value="#8a8d8f" aria-label="Pick the dial colour" />
                 </div>
               </div>
             </div>
             <div>
               <label class="field" for="watch-notes">Notes</label>
-              <textarea id="watch-notes" placeholder="" style="min-height:56px"></textarea>
+              <textarea id="watch-notes" placeholder=""></textarea>
             </div>
             <label class="photo-drop" for="watch-photo">
               <span class="pd-title" id="watch-photo-label">Photo</span>
@@ -5157,27 +5517,27 @@
     <div class="info-pop-backdrop" id="find-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="find-sheet-title">
         <div class="principles-head">
-          <h3 id="find-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Shop the look</h3>
+          <h3 id="find-sheet-title" class="type-title">Shop the look</h3>
           <button type="button" class="info-pop-close" id="find-sheet-close" aria-label="Close find it">&times;</button>
         </div>
-        <p class="meta" id="find-sheet-sub" style="margin:0 0 12px"></p>
+        <p class="meta" id="find-sheet-sub"></p>
         <div id="find-sheet-pieces"></div>
       </div>
     </div>
     <div class="info-pop-backdrop" id="watch-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="watch-sheet-title">
         <div class="principles-head">
-          <h3 id="watch-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">On the wrist</h3>
+          <h3 id="watch-sheet-title" class="type-title">On the wrist</h3>
           <button type="button" class="info-pop-close" id="watch-sheet-close" aria-label="Close watch choices">&times;</button>
         </div>
-        <p class="meta" id="watch-sheet-sub" style="margin:0 0 12px"></p>
+        <p class="meta" id="watch-sheet-sub"></p>
         <div id="watch-sheet-list"></div>
       </div>
     </div>
     <div class="info-pop-backdrop" id="plan-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="plan-sheet-title">
         <div class="principles-head">
-          <h3 id="plan-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Plan</h3>
+          <h3 id="plan-sheet-title" class="type-title">Plan</h3>
           <button type="button" class="info-pop-close" id="plan-sheet-close" aria-label="Close planner">&times;</button>
         </div>
         <div id="plan-sheet-body"></div>
@@ -5186,30 +5546,30 @@
     <div class="info-pop-backdrop" id="swap-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="swap-sheet-title">
         <div class="principles-head">
-          <h3 id="swap-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Change a piece</h3>
+          <h3 id="swap-sheet-title" class="type-title">Change a piece</h3>
           <button type="button" class="info-pop-close" id="swap-sheet-close" aria-label="Close piece choices">&times;</button>
         </div>
-        <p class="meta" id="swap-sheet-sub" style="margin:0 0 12px"></p>
+        <p class="meta" id="swap-sheet-sub"></p>
         <div id="swap-sheet-list"></div>
       </div>
     </div>
     <div class="info-pop-backdrop" id="upload-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="upload-sheet-title">
         <div class="principles-head">
-          <h3 id="upload-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Upload a look</h3>
+          <h3 id="upload-sheet-title" class="type-title">Upload a look</h3>
           <button type="button" class="info-pop-close" id="upload-sheet-close" aria-label="Close upload">&times;</button>
         </div>
         <div class="wearing-photo-btns">
           <label class="photo-drop" for="upload-photo-camera"><span class="pd-title">Take a photo</span><input type="file" id="upload-photo-camera" accept="image/*" capture="user" /></label>
           <label class="photo-drop" for="upload-photo-upload"><span class="pd-title">Choose a photo</span><input type="file" id="upload-photo-upload" accept="image/*" /></label>
         </div>
-        <p class="meta" id="upload-status" role="status" hidden style="margin:10px 0 0"></p>
+        <p class="meta" id="upload-status" role="status" hidden></p>
       </div>
     </div>
     <div class="info-pop-backdrop" id="upload-confirm-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="upload-confirm-title">
         <div class="principles-head">
-          <h3 id="upload-confirm-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Save this look</h3>
+          <h3 id="upload-confirm-title" class="type-title">Save this look</h3>
           <button type="button" class="info-pop-close" id="upload-confirm-close" aria-label="Close save look">&times;</button>
         </div>
         <img id="upload-preview" alt="Your uploaded look" hidden />
@@ -5231,7 +5591,7 @@
     <div class="info-pop-backdrop" id="worn-edit-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="worn-edit-title">
         <div class="principles-head">
-          <h3 id="worn-edit-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Edit worn entry</h3>
+          <h3 id="worn-edit-title" class="type-title">Edit worn entry</h3>
           <button type="button" class="info-pop-close" id="worn-edit-close" aria-label="Close edit worn entry">&times;</button>
         </div>
         <div class="upload-sec">
@@ -5258,7 +5618,7 @@
     <div class="info-pop-backdrop" id="build-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="build-sheet-title">
         <div class="principles-head">
-          <h3 id="build-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Build a look</h3>
+          <h3 id="build-sheet-title" class="type-title">Build a look</h3>
           <button type="button" class="info-pop-close" id="build-sheet-close" aria-label="Close build a look">&times;</button>
         </div>
         <button type="button" class="build-door" data-build-door="wardrobe"><span class="bd-main"><span class="bd-name">From my wardrobe</span><span class="bd-sub">A piece from your Closet</span></span><span class="bd-chev" aria-hidden="true">›</span></button>
@@ -5269,7 +5629,7 @@
     <div class="info-pop-backdrop" id="build-wardrobe-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="build-wardrobe-title">
         <div class="principles-head">
-          <h3 id="build-wardrobe-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">From my wardrobe</h3>
+          <h3 id="build-wardrobe-title" class="type-title">From my wardrobe</h3>
           <button type="button" class="info-pop-close" id="build-wardrobe-close" aria-label="Close wardrobe picker">&times;</button>
         </div>
         <div class="brand-search">
@@ -5282,7 +5642,7 @@
     <div class="info-pop-backdrop" id="build-shop-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="build-shop-title">
         <div class="principles-head">
-          <h3 id="build-shop-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Shop items</h3>
+          <h3 id="build-shop-title" class="type-title">Shop items</h3>
           <button type="button" class="info-pop-close" id="build-shop-close" aria-label="Close shop picker">&times;</button>
         </div>
         <div class="upload-sec">
@@ -5295,20 +5655,20 @@
     <div class="info-pop-backdrop" id="build-upload-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="build-upload-title">
         <div class="principles-head">
-          <h3 id="build-upload-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Upload new item</h3>
+          <h3 id="build-upload-title" class="type-title">Upload new item</h3>
           <button type="button" class="info-pop-close" id="build-upload-close" aria-label="Close upload">&times;</button>
         </div>
         <div class="wearing-photo-btns">
           <label class="photo-drop" for="build-photo-camera"><span class="pd-title">Take a photo</span><input type="file" id="build-photo-camera" accept="image/*" capture="user" /></label>
           <label class="photo-drop" for="build-photo-upload"><span class="pd-title">Choose a photo</span><input type="file" id="build-photo-upload" accept="image/*" /></label>
         </div>
-        <p class="meta" id="build-upload-status" role="status" hidden style="margin:10px 0 0"></p>
+        <p class="meta" id="build-upload-status" role="status" hidden></p>
       </div>
     </div>
     <div class="info-pop-backdrop" id="build-confirm-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="build-confirm-title">
         <div class="principles-head">
-          <h3 id="build-confirm-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Your piece</h3>
+          <h3 id="build-confirm-title" class="type-title">Your piece</h3>
           <button type="button" class="info-pop-close" id="build-confirm-close" aria-label="Close piece details">&times;</button>
         </div>
         <img id="build-preview" alt="Your uploaded piece" hidden />
@@ -5787,7 +6147,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.71";
+var WARDROBE_BUILD = "2026-11-18.72";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -14421,7 +14781,7 @@ function fbSheetHTML(look) {
   var chips = ["Too bright", "Too dark", "More formal", "More casual", "Different shoes", "Keep the top", "Keep the bottom", "New colour story"];
   return '<div class="info-pop-backdrop" data-fb-sheet hidden>' +
     '<div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="fb-sheet-title">' +
-    '<div class="principles-head"><h3 id="fb-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Feedback</h3>' +
+    '<div class="principles-head"><h3 id="fb-sheet-title" class="type-title">Feedback</h3>' +
     '<button type="button" class="info-pop-close" data-fb-close aria-label="Close feedback">&times;</button></div>' +
     '<div class="fb-menu">' +
     '<button type="button" class="fb-menu-row" data-action="save-look">Save this version</button>' +
@@ -15151,7 +15511,7 @@ function openFindSheet(look) {
      size like every other photo of him. Looks read out of a
      caption carry no photograph and simply go without. */
   var sheetPhoto = look.img ? '<img class="find-sheet-photo" src="' + esc(lookImg(look)) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(lookImg(look)) + '" loading="lazy" />' : "";
-  document.getElementById("find-sheet-pieces").innerHTML = sheetPhoto + '<div class="find-pieces bare" style="border-top:none;margin-top:0;padding-top:0">' + findSheetRowsHTML(look) + "</div>";
+  document.getElementById("find-sheet-pieces").innerHTML = sheetPhoto + '<div class="find-pieces bare" >' + findSheetRowsHTML(look) + "</div>";
   var sheet = document.getElementById("find-sheet");
   sheet.hidden = false;
   var c = document.getElementById("find-sheet-close");
@@ -15782,7 +16142,7 @@ function swapSectionHTML(look, fwIdx) {
   var map = swapMapForLook(look);
   if (!map) return "";
   var slots = ["top", "bottom", "shoes", "layer"].filter(function (s) { return map[s]; });
-  if (!slots.length) return '<div class="find-pieces swap-sec"><h4>Change a piece</h4><p class="swap-note" style="margin:0">No swappable pieces in this look yet.</p></div>';
+  if (!slots.length) return '<div class="find-pieces swap-sec"><h4>Change a piece</h4><p class="swap-note">No swappable pieces in this look yet.</p></div>';
   var fwAttr = typeof fwIdx === "number" ? ' data-swap-fw="' + fwIdx + '"' : "";
   var rows = slots.map(function (s) {
     var p = map[s].piece;
@@ -15826,7 +16186,7 @@ function openSwapSheet(look, slotKey, opts) {
       '<span class="sp-main"><span class="sp-name">' + esc(p.name) + '</span>' +
       '<span class="sp-sub">' + esc(p.wn) + '</span></span>' +
       (p.owned ? '<span class="swap-owned">Yours</span>' : "") + "</button>";
-  }).join("") : '<p class="meta" style="margin:0">No compatible pieces for this slot.</p>';
+  }).join("") : '<p class="meta">No compatible pieces for this slot.</p>';
   var sheet = document.getElementById("swap-sheet");
   sheet.hidden = false;
   var c = document.getElementById("swap-sheet-close");
@@ -16587,7 +16947,7 @@ function styleCardHTML(look, idx) {
        look's title and swatches with the slim state line —
        spinner text only while a render is truly in flight. */
     return '<button type="button" class="card option-card" data-style-idx="' + idx + '" role="listitem">' +
-      '<span class="pane swap-rendering" style="position:relative;display:block;aspect-ratio:3/4">' +
+      '<span class="pane swap-rendering pane-frame">' +
       '<span class="swap-render-line">' + esc(swapCardLine(look)) + '</span></span>' +
       '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
       cardStripHTML(look.swatches) + "</span></button>";
@@ -16866,7 +17226,7 @@ function buildAroundShopEntry(e) {
 function buildCardHTML(look, idx) {
   if (look.buildUpload) {
     return '<button type="button" class="card option-card" data-build-idx="' + idx + '" role="listitem">' +
-      '<span class="pane" style="position:relative;display:block;aspect-ratio:3/4"><img src="' + esc(look.img) + '" alt="' + esc(look.imgAlt || "") + '" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" />' +
+      '<span class="pane pane-frame"><img src="' + esc(look.img) + '" alt="' + esc(look.imgAlt || "") + '" class="media-cover" loading="lazy" />' +
       '<span class="build-combo-tag">The combination — renders aren\u2019t available for uploads yet</span></span>' +
       '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
       cardStripHTML(look.swatches) + "</span></button>";
@@ -16874,7 +17234,7 @@ function buildCardHTML(look, idx) {
   var bcstate = swapCardState(look);
   if (bcstate === "rendering" || bcstate === "pending" || bcstate === "failed" || bcstate === "nosync") {
     return '<button type="button" class="card option-card" data-build-idx="' + idx + '" role="listitem">' +
-      '<span class="pane swap-rendering" style="position:relative;display:block;aspect-ratio:3/4">' +
+      '<span class="pane swap-rendering pane-frame">' +
       '<span class="swap-render-line">' + esc(swapCardLine(look)) + '</span></span>' +
       '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
       cardStripHTML(look.swatches) + "</span></button>";
@@ -16943,7 +17303,7 @@ function renderBuildWardrobeGrid() {
   grid.innerHTML = items.length ? items.map(function (i) {
     var media = i.photo ? '<img src="' + esc(i.photo) + '" alt="" loading="lazy" />' : '<span class="bc-dot" style="background:' + esc(i.colourHex || "#ccc") + '"></span>';
     return '<button type="button" class="build-cell" data-build-ward="' + esc(i.id) + '">' + media + '<span class="bc-name">' + esc(i.name) + (q ? '<span class="bc-cat">' + esc(i.category || "") + "</span>" : "") + "</span></button>";
-  }).join("") : '<p class="meta" style="margin:0">' + (q ? "Nothing matches that search." : "Nothing in your closet yet.") + "</p>";
+  }).join("") : '<p class="meta">' + (q ? "Nothing matches that search." : "Nothing in your closet yet.") + "</p>";
 }
 function openBuildWardrobe() {
   if (!buildSheetEl("build-wardrobe-grid")) return;
@@ -16971,7 +17331,7 @@ function renderBuildShopList() {
   });
   var total = entries.length;
   var shown = entries.slice(0, 80);
-  list.innerHTML = (total > 80 ? '<p class="meta" style="margin:0 0 8px">Showing 80 of ' + total + ".</p>" : "") +
+  list.innerHTML = (total > 80 ? '<p class="meta">Showing 80 of ' + total + ".</p>" : "") +
     (shown.length ? shown.map(function (e) {
       var sub = esc(e.retailer) + (e.price != null && e.price !== "" ? " · $" + Number(e.price).toLocaleString("en-US") : "") + (e.tier ? " · " + esc(shopTierInfo(e.tier).name) : "");
       if (!e.img) {
@@ -16979,7 +17339,7 @@ function renderBuildShopList() {
       }
       var media = '<img src="' + esc(e.img) + '" alt="" loading="lazy" />';
       return '<button type="button" class="swap-pick" data-build-shop="' + esc(e.key) + '">' + media + '<span class="sp-main"><span class="sp-name">' + esc(e.brand) + " — " + esc(e.name) + '</span><span class="sp-sub">' + sub + "</span></span></button>";
-    }).join("") : '<p class="meta" style="margin:0">Nothing matches that search.</p>');
+    }).join("") : '<p class="meta">Nothing matches that search.</p>');
 }
 function openBuildShop() {
   var inp = buildSheetEl("build-shop-search");
@@ -17166,7 +17526,7 @@ function lookCardHTML(look, opts) {
   /* The direction line lives in the Customize form's live
      preview; the card doesn't repeat it. */
   var builtLine = look.builtAround ? '<p class="source-line"><strong>Built around:</strong> ' + esc(look.builtAround) + "</p>" : "";
-  var head = "<h3>" + esc(displayTitleForLook(look)) + (look.version > 1 ? ' <span style="font-size:18px;color:var(--brass);font-style:italic">· take ' + look.version + "</span>" : "") + "</h3>" +
+  var head = "<h3>" + esc(displayTitleForLook(look)) + (look.version > 1 ? ' <span class="form-note">· take ' + look.version + "</span>" : "") + "</h3>" +
     metaLine + sourceLine + builtLine;
   var stylingLine = "";
   var notes = (look.notes && look.notes.length) ? look.notes : (cardIcon ? [cardIcon.rules[0], cardIcon.rules[1]] : []);
@@ -19650,13 +20010,13 @@ function renderDraft() {
   var strip = document.getElementById("draft-strip");
   var list = document.getElementById("draft-list");
   if (!draftColours.length) {
-    strip.innerHTML = '<div style="display:grid;place-items:center;width:100%;color:var(--dim);font-size:13px"></div>';
+    strip.innerHTML = '<div class="empty-center"></div>';
     list.innerHTML = "";
     return;
   }
   strip.innerHTML = draftColours.map(function (c) { return '<div style="background:' + c.hex + '" title="' + esc(c.name) + '"></div>'; }).join("");
   list.innerHTML = draftColours.map(function (c, i) {
-    return '<li><span class="dot" style="background:' + c.hex + '"></span><span>' + esc(c.name) + '</span><span class="hex" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">' + esc(c.hex) + '</span>' +
+    return '<li><span class="dot" style="background:' + c.hex + '"></span><span>' + esc(c.name) + '</span><span class="hex" >' + esc(c.hex) + '</span>' +
       '<button type="button" class="btn-ghost" data-draft-remove="' + i + '">Remove</button></li>';
   }).join("");
 }
@@ -21145,7 +21505,7 @@ function renderWardrobe() {
   items = decorated.map(function (d) { return d.it; });
   var grid = document.getElementById("item-grid");
   if (!items.length) {
-    grid.innerHTML = '<div class="card empty" style="grid-column:1/-1">' + (wardStaleOnly
+    grid.innerHTML = '<div class="card empty span-all">' + (wardStaleOnly
       ? "Nothing has been sitting unworn for 90 days — everything with a wear date is in rotation."
       : (wardrobeItems.length
         ? "No pieces match that search — clear it, or pick another category."
@@ -21200,7 +21560,7 @@ function renderItemDetail() {
   box.innerHTML = '<article class="card item-detail-card">' +
     (it.photo ? '<img class="photo" src="' + it.photo + '" alt="Photograph of ' + esc(it.name) + '" loading="lazy" decoding="async" />' : "") +
     (it.originalPhoto && it.photo && it.originalPhoto !== it.photo ? '<div class="orig-row"><button type="button" class="btn-ghost orig-btn" data-item-act="orig" aria-pressed="false">Original photo</button></div>' : "") +
-    '<div><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600">' + esc(it.category) + "</span>" +
+    '<div><span class="type-label">' + esc(it.category) + "</span>" +
     (it.shopBought ? ' <span class="shop-bought-badge">Bought via Shop the look</span>' : "") +
     (it.laundry ? ' <span class="laundry-badge">In laundry</span>' : "") + "</div>" +
     "<h3>" + esc(it.name) + "</h3>" +
@@ -21550,8 +21910,8 @@ function renderPlates() {
     return '<article class="card plate-card" aria-pressed="false">' +
       '<button type="button" class="pc-open" data-plate="' + p.plate + '" aria-label="Feature Plate ' + p.plate + '">' +
       '<span class="pc-strip">' + p.colors.map(function (c) { return '<div style="background:' + c.hex + '"></div>'; }).join("") + "</span>" +
-      '<span class="pc-body" style="display:block"><span class="pc-num">Plate ' + p.plate + " · " + p.colors.length + ' colours</span>' +
-      '<span class="pc-names" style="display:block">' + esc(p.colors.map(function (c) { return c.name; }).join(" & ")) + "</span></span></button></article>";
+      '<span class="pc-body"><span class="pc-num">Plate ' + p.plate + " · " + p.colors.length + ' colours</span>' +
+      '<span class="pc-names">' + esc(p.colors.map(function (c) { return c.name; }).join(" & ")) + "</span></span></button></article>";
   }).join("");
   var ch = document.getElementById("colour-index-head");
   if (ch) ch.textContent = "The colours — " + COLORS.length + " across the plates";
@@ -21689,18 +22049,18 @@ function renderSaved() {
   if (looksFilter === "removed") {
     var removedList = (typeof recentlyRemoved !== "undefined" && recentlyRemoved) ? recentlyRemoved : [];
     grid.innerHTML = removedList.length ? removedList.map(function (r) {
-      return '<div class="removed-row" style="grid-column:1/-1">' + (r._img || r.img ? '<img src="' + esc(r._img || r.img) + '" alt="" loading="lazy" data-popout="' + esc(r._img || r.img) + '" />' : "") +
+      return '<div class="removed-row span-all">' + (r._img || r.img ? '<img src="' + esc(r._img || r.img) + '" alt="" loading="lazy" data-popout="' + esc(r._img || r.img) + '" />' : "") +
         '<span class="r-name">' + esc(r.title || "Look") + '</span>' +
         '<button type="button" class="btn-ghost" data-restore-removed="' + r.id + '">Restore</button></div>';
-    }).join("") : '<p class="meta" style="grid-column:1/-1">Nothing removed.</p>';
+    }).join("") : '<p class="meta span-all">Nothing removed.</p>';
     if (typeof renderOutfitIdeas === "function") renderOutfitIdeas();
     return;
   }
   if (looksFilter === "wishlist") {
     var wishList = (typeof shopWishlist !== "undefined" && shopWishlist) ? shopWishlist : [];
     grid.innerHTML = wishList.length && typeof shopWishRowHTML === "function"
-      ? '<div class="wish-list" style="grid-column:1/-1">' + shopWishlistSorted().map(shopWishRowHTML).join("") + "</div>"
-      : '<p class="meta" style="grid-column:1/-1">Nothing wishlisted yet.</p>';
+      ? '<div class="wish-list span-all">' + shopWishlistSorted().map(shopWishRowHTML).join("") + "</div>"
+      : '<p class="meta span-all">Nothing wishlisted yet.</p>';
     if (typeof renderOutfitIdeas === "function") renderOutfitIdeas();
     return;
   }
@@ -21910,7 +22270,7 @@ function renderOutfitIdeas() {
   });
   Object.keys(assigned).forEach(function (k) { gridImgById[k] = assigned[k]; });
   if (!shown.length) {
-    grid.innerHTML = '<p class="meta" style="grid-column:1/-1">' + ((q || oiFilter !== "all" || universe.length)
+    grid.innerHTML = '<p class="meta span-all">' + ((q || oiFilter !== "all" || universe.length)
       ? "No outfit ideas match — try a different search or filter."
       : "No outfit ideas saved yet — save a look and it waits for you here.") + "</p>";
     return;
@@ -22482,7 +22842,7 @@ function renderWatches() {
   }
   var ordered = watchListTab === "sold" ? sold : owned;
   if (!ordered.length) {
-    grid.innerHTML = '<div class="card empty" style="grid-column:1/-1">Nothing here yet.</div>';
+    grid.innerHTML = '<div class="card empty span-all">Nothing here yet.</div>';
     return;
   }
   grid.innerHTML = ordered.map(function (w) {
@@ -22664,7 +23024,7 @@ function iconDetailHTML(ic) {
     '<div class="card-head-info"><h3>' + esc(ic.name) + '</h3></div>' +
     stripHTML(pal, "sm") +
     "<h5>Signature outfit</h5>" +
-    '<p class="blurb" style="font-family:var(--font-display);font-style:italic;font-size:17px">' + esc(ic.signatureDesc) + "</p>" +
+    '<p class="blurb blurb">' + esc(ic.signatureDesc) + "</p>" +
     "<h5>Signature pieces</h5>" +
     '<div class="sig-row">' + ic.signatures.map(function (s) { return "<span>" + esc(s) + "</span>"; }).join("") + "</div>" +
     (ic.looks && ic.looks.length ? lookboardHTML(ic) : "") +
@@ -23055,13 +23415,13 @@ function renderIconDraft() {
   var strip = document.getElementById("icon-draft-strip");
   var list = document.getElementById("icon-draft-list");
   if (!iconDraftColours.length) {
-    strip.innerHTML = '<div style="display:grid;place-items:center;width:100%;color:var(--dim);font-size:13px"></div>';
+    strip.innerHTML = '<div class="empty-center"></div>';
     list.innerHTML = "";
     return;
   }
   strip.innerHTML = iconDraftColours.map(function (c) { return '<div style="background:' + c.hex + '" title="' + esc(c.name) + '"></div>'; }).join("");
   list.innerHTML = iconDraftColours.map(function (c, i) {
-    return '<li><span class="dot" style="background:' + c.hex + '"></span><span>' + esc(c.name) + '</span><span class="hex" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">' + esc(c.hex) + '</span>' +
+    return '<li><span class="dot" style="background:' + c.hex + '"></span><span>' + esc(c.name) + '</span><span class="hex" >' + esc(c.hex) + '</span>' +
       '<button type="button" class="btn-ghost" data-icon-draft-remove="' + i + '">Remove</button></li>';
   }).join("");
 }
@@ -24223,18 +24583,18 @@ function searchLocation() {
   var q = document.getElementById("loc-search").value.trim();
   var box = document.getElementById("loc-results");
   if (!q) return;
-  box.innerHTML = '<p class="form-note" style="margin:0">Searching…</p>';
+  box.innerHTML = '<p class="form-note">Searching…</p>';
   fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(q) + "&count=6&language=en&format=json")
     .then(function (r) { return r.json(); })
     .then(function (data) {
       locResultsCache = (data && data.results) || [];
-      if (!locResultsCache.length) { box.innerHTML = '<p class="form-note" style="margin:0">No place found by that name — try the city on its own.</p>'; return; }
+      if (!locResultsCache.length) { box.innerHTML = '<p class="form-note">No place found by that name — try the city on its own.</p>'; return; }
       box.innerHTML = locResultsCache.map(function (r, i) {
         var nm = r.name + (r.admin1 ? ", " + r.admin1 : "");
-        return '<button type="button" class="loc-result" data-loc-idx="' + i + '"><span class="lr-main"><span class="lr-name">' + esc(nm) + '</span><span class="lr-sub">' + esc(r.country || "") + '</span></span><span class="btn-ghost" style="min-height:38px;padding:6px 12px">Use</span></button>';
+        return '<button type="button" class="loc-result" data-loc-idx="' + i + '"><span class="lr-main"><span class="lr-name">' + esc(nm) + '</span><span class="lr-sub">' + esc(r.country || "") + '</span></span><span class="btn-ghost" >Use</span></button>';
       }).join("");
     })
-    .catch(function () { box.innerHTML = '<p class="form-note" style="margin:0">Search didn\'t answer — check the connection and try again.</p>'; });
+    .catch(function () { box.innerHTML = '<p class="form-note">Search didn\'t answer — check the connection and try again.</p>'; });
 }
 document.getElementById("loc-search-btn").addEventListener("click", searchLocation);
 document.getElementById("loc-search").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); searchLocation(); } });
@@ -24830,7 +25190,7 @@ function findQuery(f) {
 function renderFinds() {
   var grid = document.getElementById("find-grid");
   if (!finds.length) {
-    grid.innerHTML = '<div class="card empty" style="grid-column:1/-1">Nothing on the hunt yet — describe the first piece.</div>';
+    grid.innerHTML = '<div class="card empty span-all">Nothing on the hunt yet — describe the first piece.</div>';
     return;
   }
   /* Briefs list by category, then description A–Z (build .28) —
@@ -27177,8 +27537,8 @@ function renderReceipts() {
       '<div><label class="field" for="' + fid + '-cat">Category</label>' +
       '<select id="' + fid + '-cat" data-rc-f="category">' + receiptsCatOptions(rec.category || "") + "</select></div>" +
       '<div><label class="field" for="' + fid + '-colour">Colour</label>' +
-      '<div style="display:flex;gap:10px;align-items:center">' +
-      '<input type="text" id="' + fid + '-colour" data-rc-f="colourName" value="' + esc(rec.colourName || "") + '" style="flex:1" />' +
+      '<div class="row-inline">' +
+      '<input type="text" id="' + fid + '-colour" data-rc-f="colourName" value="' + esc(rec.colourName || "") + '" class="grow" />' +
       '<input type="color" data-rc-f="colourHex" value="' + esc(hex) + '" aria-label="Pick the colour" /></div></div>' +
       '<div><label class="field" for="' + fid + '-brand">Brand</label>' +
       '<input type="text" id="' + fid + '-brand" data-rc-f="brand" value="' + esc(rec.brand || "") + '" /></div>' +
@@ -31267,11 +31627,11 @@ var _syT = null, _syBusy = false, _syApplying = false, _syAgain = false;
 function schedSync() { clearTimeout(_syT); _syT = setTimeout(function () { syncNow(); }, 1500); }
 function syncStatusHTML() {
   return "<div><b>" + esc(SY.status) + "</b></div>" +
-    '<p class="meta" style="margin:0">' + (SY.lastOk ? "Last synced " + new Date(SY.lastOk).toLocaleString() : "Never synced") +
+    '<p class="meta">' + (SY.lastOk ? "Last synced " + new Date(SY.lastOk).toLocaleString() : "Never synced") +
     (SY.acct ? " · account " + esc(String(SY.acct).slice(0, 8)) : "") + "</p>" +
     /* Build .56: the quarantine count lives here and only here —
        never a popup. */
-    ((SY.quar && SY.quar.length) ? '<p class="meta" style="margin:0">' + SY.quar.length + (SY.quar.length === 1 ? " synced record" : " synced records") + " couldn't be read and were skipped — everything else synced normally.</p>" : "");
+    ((SY.quar && SY.quar.length) ? '<p class="meta">' + SY.quar.length + (SY.quar.length === 1 ? " synced record" : " synced records") + " couldn't be read and were skipped — everything else synced normally.</p>" : "");
 }
 function syShowRejected() {
   var b = document.getElementById("sync-new-acct");
@@ -32545,8 +32905,8 @@ function renderAnalyzeSheet() {
         '<div><label class="field" for="' + fid + '-cat">Category</label>' +
         '<select id="' + fid + '-cat" data-an-f="category">' + analyzeCatOptions(it.category) + "</select></div>" +
         '<div><label class="field" for="' + fid + '-colour">Colour</label>' +
-        '<div style="display:flex;gap:10px;align-items:center">' +
-        '<input type="text" id="' + fid + '-colour" data-an-f="colourName" value="' + esc(it.colourName) + '" style="flex:1" />' +
+        '<div class="row-inline">' +
+        '<input type="text" id="' + fid + '-colour" data-an-f="colourName" value="' + esc(it.colourName) + '" class="grow" />' +
         '<input type="color" data-an-f="colourHex" value="' + esc(it.colourHex) + '" aria-label="Pick the colour" /></div></div>' +
         '<div><label class="field" for="' + fid + '-brand">Brand</label>' +
         '<input type="text" id="' + fid + '-brand" data-an-f="brand" value="' + esc(it.brand) + '" /></div>' +

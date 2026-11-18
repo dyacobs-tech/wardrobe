@@ -185,7 +185,7 @@ def main() -> int:
                 home = nav_bbox(page)
                 check(
                     f"{name}: build is .71",
-                    home and home.get("build") == "2026-11-18.71",
+                    home and home.get("build") == "2026-11-18.72",
                     str(home and home.get("build")),
                 )
                 check(
@@ -348,7 +348,7 @@ def main() -> int:
             desk = page.evaluate(ROW_JS)
             check(
                 "1280x800: build is .71",
-                desk and desk.get("build") == "2026-11-18.71",
+                desk and desk.get("build") == "2026-11-18.72",
                 str(desk and desk.get("build")),
             )
             check(
