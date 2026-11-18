@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.62" />
+    <meta name="wardrobe-build" content="2026-11-18.63" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -1218,8 +1218,8 @@
       .queued-badge { display: inline-block; border: 1px solid var(--indigo); color: var(--indigo); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; }
 
       /* Studio Home — one-tap deal, wizard demoted to Customize */
-      .studio-home-bar { display: flex; gap: 8px; margin-bottom: 10px; }
-      .studio-home-bar .btn-accent { flex: 1; }
+      .studio-home-bar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; align-items: stretch; }
+      .studio-home-bar .btn-accent { flex: none; }
       #panel-studio .studio-form { margin-bottom: 4px; }
 
       /* Formality chips — one tappable chip per level */
@@ -2767,11 +2767,59 @@
       .source-seg button { min-height: 36px; padding: 6px 4px; border: 0; border-right: 1px solid var(--border); background: var(--surface); color: var(--dim); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
       .source-seg button:last-child { border-right: 0; }
       .source-seg button[aria-pressed="true"] { background: var(--ink-btn); color: var(--ink-btn-text); }
-      /* Build .50: the Ideas deal surface's Outfit type row —
-         the Dress-for chip family, wrapping under the source seg. */
-      .ideas-type-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 10px; }
-      #panel-studio .ideas-type-row .chip { flex: none; }
-      .ideas-type-label { font-family: var(--font-ui); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-right: 2px; }
+      /* Build .63: Outfit type is a fourth button on the Ideas
+         action row, not a labelled chip strip. The four controls
+         share one grid row at every width, equal columns, text
+         may wrap to two lines but must not overflow. */
+      #panel-studio .studio-home-bar > .btn-accent,
+      #panel-studio .studio-home-bar > .btn-ghost,
+      #panel-studio .studio-home-bar .ideas-type-btn {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        min-height: 44px !important;
+        height: 100%;
+        padding: 6px 3px !important;
+        font-size: 10px !important;
+        letter-spacing: .03em !important;
+        line-height: 1.2;
+        white-space: normal;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      #panel-studio .studio-home-bar .ideas-type-dd { min-width: 0; width: 100%; }
+      #panel-studio .studio-home-bar .ideas-type-btn {
+        gap: 3px;
+        text-transform: none;
+        letter-spacing: .02em !important;
+        font-size: 10.5px !important;
+      }
+      #panel-studio .studio-home-bar .ideas-type-btn .cdd-label {
+        min-width: 0;
+        white-space: normal;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        text-align: center;
+        line-height: 1.15;
+      }
+      #panel-studio .studio-home-bar .ideas-type-btn .cdd-chev { flex: none; font-size: 10px; opacity: .7; }
+      #panel-studio .studio-home-bar .cdd-menu { min-width: min(220px, 78vw); z-index: 90; }
+      @media (min-width: 1024px) {
+        #panel-studio .studio-home-bar > .btn-accent,
+        #panel-studio .studio-home-bar > .btn-ghost,
+        #panel-studio .studio-home-bar .ideas-type-btn {
+          min-height: 44px !important;
+          font-size: 12px !important;
+          padding: 8px 10px !important;
+          letter-spacing: .06em !important;
+        }
+        #panel-studio .studio-home-bar .ideas-type-btn { font-size: 13px !important; letter-spacing: .02em !important; }
+      }
       #panel-looks .fb-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
       #panel-looks .fb-chips::-webkit-scrollbar { display: none; }
       #panel-looks .fb-chips .chip { flex: none; }
@@ -3541,25 +3589,26 @@
               <button type="button" data-source="inspo" aria-pressed="false">Inspo</button>
               <button type="button" data-source="combo" aria-pressed="true">Combo</button>
             </div>
-            <!-- Build .50: the dress-level selector lives on the
-                 deal surface too, not only inside Customize. Same
-                 data-studio-type attributes, same one app-wide
-                 formality state — setFormality and the selector
-                 sync drive this row, the Customize row and the
-                 Today dropdown together. -->
-            <div class="ideas-type-row" id="ideas-type-row" role="group" aria-label="Outfit type">
-              <span class="ideas-type-label">Outfit type</span>
-              <button type="button" class="chip" data-studio-type-any aria-pressed="false">Any</button>
-              <button type="button" class="chip" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
-              <button type="button" class="chip" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
-              <button type="button" class="chip" data-studio-type="3" aria-pressed="false">Casual</button>
-              <button type="button" class="chip" data-studio-type="4" aria-pressed="false">Smart Casual</button>
-              <button type="button" class="chip" data-studio-type="5" aria-pressed="false">Business Casual</button>
-              <button type="button" class="chip" data-studio-type="6" aria-pressed="false">Formal</button>
-              <button type="button" class="chip" data-studio-type="7" aria-pressed="false">Black Tie</button>
-            </div>
+            <!-- Build .63: outfit type is a dropdown on the four-
+                 button action row. Same data-studio-type attributes
+                 and one app-wide formality state — setFormality and
+                 the selector sync drive this menu, Customize, and
+                 the Today dropdown together. -->
             <div class="studio-home-bar">
               <button type="button" class="btn-accent" id="studio-deal">Give me ideas</button>
+              <div class="cdd ideas-type-dd" id="ideas-type-row">
+                <button type="button" class="btn-ghost ideas-type-btn" id="ideas-type-btn" data-cdd-manual aria-haspopup="true" aria-expanded="false" aria-label="Outfit type"><span class="cdd-label" id="ideas-type-label">Smart Casual</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
+                <div class="cdd-menu" id="ideas-type-menu" hidden role="menu" aria-label="Outfit type">
+                  <button type="button" class="cdd-opt" data-studio-type-any aria-pressed="false">Any</button>
+                  <button type="button" class="cdd-opt" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
+                  <button type="button" class="cdd-opt" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
+                  <button type="button" class="cdd-opt" data-studio-type="3" aria-pressed="false">Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="4" aria-pressed="false">Smart Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="5" aria-pressed="false">Business Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="6" aria-pressed="false">Formal</button>
+                  <button type="button" class="cdd-opt" data-studio-type="7" aria-pressed="false">Black Tie</button>
+                </div>
+              </div>
               <button type="button" class="btn-ghost" id="studio-customize" aria-expanded="false" aria-controls="studio-form">Customize</button>
               <button type="button" class="btn-ghost" id="studio-build">Build a look</button>
             </div>
@@ -4564,7 +4613,7 @@
           </div>
           <p id="data-status" style="margin:0"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.62</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.63</p>
         <p class="form-note" id="nav-diag"></p>
       </section>
 
@@ -5375,7 +5424,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.62";
+var WARDROBE_BUILD = "2026-11-18.63";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -23492,14 +23541,14 @@ function toggleCdd(btn) {
 }
 /* Hero + Ideas toggle buttons (marked data-cdd-manual so the
    generic delegation below leaves them to these listeners). */
-[["today-type-btn"], ["today-source-btn"], ["ideas-source-btn"]].forEach(function (pair) {
+[["today-type-btn"], ["today-source-btn"], ["ideas-source-btn"], ["ideas-type-btn"]].forEach(function (pair) {
   var b = document.getElementById(pair[0]);
   if (b) b.addEventListener("click", function () { toggleCdd(this); });
 });
 /* A pick in any hero / Ideas menu closes it — the functional
    handlers (the #today-type-row and #today-source-row listeners,
    the #ideas-source-seg handler) apply the choice itself. */
-["today-watch-menu", "today-type-row", "today-source-row", "ideas-source-menu", "today-more-menu"].forEach(function (id) {
+["today-watch-menu", "today-type-row", "today-source-row", "ideas-source-menu", "today-more-menu", "ideas-type-menu"].forEach(function (id) {
   var m = document.getElementById(id);
   if (m) m.addEventListener("click", function () { closeAllCdd(); });
 });
@@ -29710,8 +29759,11 @@ function syncStudioSelectors() {
   if (dv) dv.textContent = (typeof dressForKey !== "undefined" && dressForKey && typeof DRESS_FOR !== "undefined" && DRESS_FOR[dressForKey]) ? DRESS_FOR[dressForKey].label : "Any";
   var anyDress = document.querySelector("[data-dress-any]");
   if (anyDress) anyDress.setAttribute("aria-pressed", (typeof dressForKey !== "undefined" && dressForKey) ? "false" : "true");
+  var typeName = studioTypeAny ? "Any" : (STUDIO_TYPE_LABELS[formalityLevel - 1] || "Smart Casual");
   var tv = document.getElementById("type-sel-val");
-  if (tv) tv.textContent = studioTypeAny ? "Any" : (STUDIO_TYPE_LABELS[formalityLevel - 1] || "Smart Casual");
+  if (tv) tv.textContent = typeName;
+  var iv = document.getElementById("ideas-type-label");
+  if (iv) iv.textContent = typeName;
   document.querySelectorAll("[data-studio-type-any]").forEach(function (anyType) {
     anyType.setAttribute("aria-pressed", studioTypeAny ? "true" : "false");
   });
