@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.72" />
+    <meta name="wardrobe-build" content="2026-11-18.73" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -4185,6 +4185,32 @@
       }
       /* Shop look photo cap and title row from .71 stay in force. */
     </style>
+    <style>
+      /* ================= Build .73 — closet flat-lays ================= */
+      .flatlay { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 4px; padding: 6px; background: #f5f1e8; width: 100%; height: 100%; box-sizing: border-box; }
+      .flatlay .fl-cell { position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; overflow: hidden; background: #ede7db; border-radius: 6px; }
+      .flatlay .fl-cell img { position: static !important; width: 100% !important; height: 100% !important; object-fit: contain !important; object-position: center center !important; margin: 0; aspect-ratio: auto !important; flex: none; }
+      .flatlay .fl-swatch { border-radius: 6px; }
+      .flatlay .fl-watch img { width: auto !important; height: 74% !important; aspect-ratio: 1 / 1 !important; object-fit: cover !important; border-radius: 50%; }
+      .flatlay.fl-n3 > .fl-cell:first-child, .flatlay.fl-n5 > .fl-cell:first-child, .flatlay.fl-n7 > .fl-cell:first-child { grid-row: span 2; }
+      .cf-media { display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; margin: 0; border: 0; background: #f5f1e8; cursor: pointer; flex: none; border-radius: 0; min-height: 0; }
+      .cf-card { cursor: default; }
+      .cf-card .oc-body { flex: 0 0 auto !important; padding-bottom: 6px !important; }
+      .cf-actions { display: flex; gap: 6px; padding: 0 10px 10px; margin-top: auto; }
+      .cf-actions .chip { flex: 1 1 0; justify-content: center; }
+      .closet-feed[hidden] { display: none; }
+      .cf-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 12px; }
+      .cf-head .fav-head { margin: 0; }
+      .closet-feed.cf-solo .cf-head .fav-head { visibility: hidden; width: 0; overflow: hidden; }
+      .closet-feed.cf-solo .cf-head { justify-content: flex-start; }
+      .look-result.cf-replaced { display: none; }
+      .cf-sentinel { height: 1px; }
+      .saved-card .saved-flatlay { aspect-ratio: 3 / 4; }
+      .look-media .layer-flatlay { aspect-ratio: 4 / 5; max-height: 62dvh; margin: 0 auto; cursor: default; }
+      #panel-today .today-hero .today-collage.flatlay-host { display: block; background: #f5f1e8; padding: 0; }
+      #panel-today .today-hero .today-collage.flatlay-host .flatlay { height: 100%; }
+      #panel-today .today-hero .today-collage.flatlay-host img { position: static; width: 100%; height: 100%; object-fit: contain; }
+    </style>
 
   </head>
   <body>
@@ -5306,7 +5332,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.72</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.73</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -5907,6 +5933,597 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
 })();
     </script>
     <script type="wardrobe/app">
+/* ================= Build .73 — Closet outfit composer =================
+   Endless outfits from the live closet, on the device. A rules-based
+   composer: every closet piece is profiled (role, formality range,
+   colour family, lightness, pattern, warmth) from its own category,
+   name and colour; every top × bottom × shoes × optional layer that
+   passes the colour and formality rules is a valid outfit; outfits
+   are dealt by weighted sampling (styling score, likes/dislikes,
+   piece coverage so every piece — newest first — gets dealt) and a
+   recently seen combination is never dealt again. Pure: no DOM, no
+   app globals; the app glue lives in the last script block. */
+(function (root) {
+  "use strict";
+  var TOP_CATS = { "Tees": 1, "Polos": 1, "Shirts": 1, "Button downs": 1, "Sweaters": 1 };
+  var BOTTOM_CATS = { "Trousers": 1, "Jeans": 1, "Shorts": 1, "Bathing suits": 1 };
+  var LAYER_CATS = { "Blazers": 1, "Suits": 1, "Jackets": 1, "Coats": 1, "Leather jackets": 1, "Vests": 1 };
+  var ACC_CATS = { "Sunglasses": 1, "Hats": 1, "Scarves": 1, "Belts": 1 };
+  var FAMILIES = [
+    [/\bnavy\b|midnight|indigo/, "navy", true],
+    [/\bblack\b|onyx|jet/, "black", true],
+    [/charcoal|\bgr[ae]y\b|silver|heather|slate grey|slate gray/, "grey", true],
+    [/\bwhite\b|ivory|cream|ecru|off-white|bone|chalk/, "white", true],
+    [/beige|stone|khaki|sand|oatmeal|taupe|camel|\btan\b|natural|fawn|biscuit|mushroom/, "beige", true],
+    [/brown|chocolate|cognac|tobacco|espresso|mocha/, "brown", true],
+    [/olive|sage|army/, "olive", true],
+    [/denim|chambray|light blue|sky|powder blue|slate blue|blue stripe|\bblue\b/, "blue", true],
+    [/teal|petrol|turquoise/, "teal", false],
+    [/mint|dark green|forest|bottle green|\bgreen\b|emerald/, "green", false],
+    [/burgundy|wine|oxblood|bordeaux|maroon/, "burgundy", false],
+    [/\bred\b|crimson|scarlet|carmine/, "red", false],
+    [/yellow|mustard|lemon|butter/, "yellow", false],
+    [/orange|rust|terracotta|coral/, "orange", false],
+    [/pink|rose|salmon/, "pink", false],
+    [/purple|lilac|lavender|violet|plum/, "purple", false]
+  ];
+  var PATTERN_RE = /plaid|check|stripe|striped|checkerboard|houndstooth|gingham|paisley|tartan|breton|zigzag|geometric|camo/;
+
+  function hexToHsl(hex) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
+    if (!m) return { h: 0, s: 0, l: 50 };
+    var n = parseInt(m[1], 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, h = 0, s = 0;
+    if (mx !== mn) {
+      var d = mx - mn;
+      s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+      if (mx === r) h = (g - b) / d + (g < b ? 6 : 0); else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return { h: h, s: s, l: l * 100 };
+  }
+  function familyOf(colourText, hsl) {
+    var t = String(colourText || "").toLowerCase();
+    for (var i = 0; i < FAMILIES.length; i++) if (FAMILIES[i][0].test(t)) return { fam: FAMILIES[i][1], neutral: FAMILIES[i][2] };
+    /* No colour word: read the hex. Low saturation reads as a neutral. */
+    if (hsl.s < 0.18 || hsl.l > 88 || hsl.l < 14) return { fam: hsl.l > 70 ? "white" : (hsl.l < 25 ? "black" : "grey"), neutral: true };
+    var h = hsl.h;
+    var fam = h < 15 || h >= 345 ? "red" : h < 40 ? "orange" : h < 65 ? "yellow" : h < 160 ? "green" : h < 190 ? "teal" : h < 250 ? "blue" : h < 290 ? "purple" : "pink";
+    return { fam: fam, neutral: fam === "blue" && hsl.s < 0.45 };
+  }
+
+  /* Lightness from the colour's NAME first: closet hexes are sampled
+     from photos and run muddy (a white polo can sample mid-grey). */
+  var NAME_L = [
+    [/off-white|ivory|cream|ecru|bone|chalk/, 90], [/\bwhite\b/, 95], [/oatmeal|beige|stone|sand|khaki|natural/, 78],
+    [/mint|yellow|lemon|butter|powder|sky/, 80], [/camel|\btan\b|fawn/, 60], [/taupe|mushroom/, 58],
+    [/charcoal/, 25], [/\bgr[ae]y\b|silver|heather/, 58], [/olive|army/, 40], [/slate/, 45], [/denim|chambray|indigo/, 48],
+    [/teal|petrol/, 40], [/burgundy|wine|oxblood|maroon/, 28], [/\bred\b|rust|terracotta|orange/, 45],
+    [/brown|chocolate|cognac|tobacco/, 35], [/green|forest/, 32], [/navy|midnight/, 18], [/\bblack\b/, 10], [/\bblue\b/, 50], [/pink|rose|salmon/, 75]
+  ];
+  function nameLightness(colourName) {
+    var t = String(colourName || "").toLowerCase().split(/[\/·,]| and /)[0];
+    for (var i = 0; i < NAME_L.length; i++) {
+      if (NAME_L[i][0].test(t)) {
+        var L = NAME_L[i][1];
+        if (/\blight\b|pale|faded|washed/.test(t)) L += 18;
+        if (/\bdark\b|deep/.test(t)) L -= 15;
+        return Math.max(5, Math.min(97, L));
+      }
+    }
+    return null;
+  }
+  /* Formality ranges on the app's seven outfit types:
+     1 Swim/Pool · 2 Shorts & Tee · 3 Casual · 4 Smart Casual ·
+     5 Business Casual · 6 Formal · 7 Black Tie. */
+  function profile(item, idx) {
+    var cat = item.category || "";
+    var name = String(item.name || "").toLowerCase();
+    var colourName = String(item.colourName || "").toLowerCase();
+    var n = name + " " + colourName;
+    var hsl = hexToHsl(item.colourHex);
+    var fc = familyOf(colourName + " " + name, hsl);
+    var p = {
+      id: item.id, idx: idx, cat: cat, name: item.name || "", n: n,
+      role: "none", lo: 3, hi: 4, kind: "",
+      L: (function () { var nl = nameLightness(item.colourName); return nl === null ? hsl.l : nl; })(), fam: fc.fam, neutral: fc.neutral,
+      pattern: PATTERN_RE.test(n), denim: /denim|chambray/.test(n) || cat === "Jeans",
+      warm: 0, collared: false, overshirt: false, casualShirt: false, shortSleeve: false,
+      fresh: !!(item.addedISO && (Date.now() - Date.parse(item.addedISO)) < 21 * 864e5)
+    };
+    if (TOP_CATS[cat]) {
+      p.role = "top";
+      if (cat === "Tees") { p.lo = 1; p.hi = 3; p.kind = "tee"; p.shortSleeve = !/long-sleeve|long sleeve/.test(n); p.warm = -1; }
+      else if (cat === "Polos") {
+        p.collared = true; p.kind = "polo";
+        if (/long-sleeve|long sleeve|cashmere|knit|merino|wool/.test(n)) { p.lo = 3; p.hi = 6; p.warm = /cashmere|wool/.test(n) ? 1 : 0; }
+        else { p.lo = 1; p.hi = 4; p.shortSleeve = true; p.warm = -1; }
+      } else if (cat === "Sweaters") {
+        p.kind = "knit"; p.warm = 2;
+        if (/turtle|roll/.test(n)) { p.lo = 3; p.hi = 6; } else { p.lo = 3; p.hi = 5; }
+      } else {
+        p.collared = true; p.kind = "shirt";
+        if (/overshirt|shacket|waffle/.test(n)) { p.overshirt = true; p.casualShirt = true; p.lo = 3; p.hi = 4; p.kind = "overshirt"; p.warm = 1; }
+        else if (/flannel|western|corduroy|cord\b|work shirt|camp|hawaiian/.test(n)) { p.casualShirt = true; p.lo = 3; p.hi = 4; p.warm = /flannel|corduroy|suede/.test(n) ? 2 : 0; }
+        else if (/linen/.test(n)) { p.lo = 2; p.hi = 5; p.warm = -2; }
+        else if (/denim|chambray/.test(n)) { p.lo = 3; p.hi = 5; }
+        else if (/popover/.test(n)) { p.casualShirt = true; p.lo = 3; p.hi = 4; }
+        else if (/jersey/.test(n)) { p.lo = 3; p.hi = 5; }
+        else if (/plaid|check|cashmere/.test(n)) { p.casualShirt = true; p.lo = 3; p.hi = 4; p.warm = 1; }
+        else { p.lo = 3; p.hi = 7; }
+        if (/short-sleeve|short sleeve/.test(n)) { p.shortSleeve = true; p.hi = Math.min(p.hi, 4); p.lo = Math.min(p.lo, 2); }
+        if (p.pattern && !/stripe/.test(n)) p.hi = Math.min(p.hi, 4);
+        if (p.hi >= 7 && !(p.fam === "white" || p.fam === "black" || (p.fam === "blue" && p.L > 60))) p.hi = 6;
+      }
+    } else if (BOTTOM_CATS[cat]) {
+      p.role = "bottom";
+      if (cat === "Bathing suits") { p.lo = 1; p.hi = 1; p.kind = "swim"; p.warm = -3; }
+      else if (cat === "Shorts") { p.lo = 1; p.hi = 3; p.kind = "shorts"; p.warm = -3; if (/swim/.test(n)) p.hi = 2; }
+      else if (cat === "Jeans") { p.lo = 2; p.hi = 4; p.kind = "jeans"; }
+      else {
+        p.kind = "trousers";
+        if (/linen/.test(n)) { p.lo = 1; p.hi = 4; p.warm = -2; p.kind = "linen"; }
+        else if (/seersucker/.test(n)) { p.lo = 3; p.hi = /dress/.test(n) ? 6 : 5; p.warm = -2; }
+        else if (/5-pocket|five-pocket|jogger|drawstring/.test(n)) { p.lo = 2; p.hi = 4; }
+        else if (/chino|twill|cotton/.test(n)) { p.lo = 3; p.hi = 5; p.kind = "chinos"; }
+        else if (/dress|wool|flannel|tailored|pleat|tuxedo/.test(n) && !/seersucker/.test(n)) { p.lo = 4; p.hi = /tuxedo/.test(n) ? 7 : 6; p.warm = /flannel|wool/.test(n) ? 1 : 0; }
+        else { p.lo = 3; p.hi = 6; }
+        if (p.hi === 6 && (p.fam === "navy" || p.fam === "black" || p.fam === "grey") && /dress|tailored|wool|tuxedo/.test(n)) p.hi = 7;
+      }
+    } else if (cat === "Shoes") {
+      p.role = "shoes";
+      if (/espadrille/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "espadrille"; p.warm = -2; }
+      else if (/sneaker|runner|trainer|vans|canvas|toms\b/.test(n)) {
+        p.kind = "sneaker"; p.warm = -1;
+        if (/suede|leather|intrecciato/.test(n)) { p.lo = 1; p.hi = 4; } else { p.lo = 1; p.hi = 3; }
+      }
+      else if (/boat|deck/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "boat"; }
+      else if (/slide|sandal/.test(n)) { p.lo = 1; p.hi = 2; p.kind = "sandal"; p.warm = -3; }
+      else if (/venetian|furlane|slipper/.test(n)) { p.lo = 2; p.hi = 5; p.kind = "slipper"; }
+      else if (/loafer|moccasin|driver/.test(n)) {
+        p.kind = "loafer";
+        if (/driver|moccasin/.test(n)) { p.lo = 2; p.hi = 4; }
+        else if (/suede/.test(n)) { p.lo = 3; p.hi = 6; }
+        else { p.lo = 3; p.hi = 7; }
+        if (p.hi === 7 && !(p.fam === "black" || p.fam === "navy" || p.fam === "brown")) p.hi = 6;
+      }
+      else if (/oxford|derby|brogue|monk|opera|pump/.test(n)) { p.lo = 4; p.hi = 7; p.kind = "dress"; }
+      else if (/boot/.test(n)) { p.lo = 3; p.hi = 5; p.kind = "boot"; p.warm = 2; }
+      else { p.lo = 2; p.hi = 5; p.kind = "shoe"; }
+    } else if (LAYER_CATS[cat]) {
+      p.role = "layer";
+      if (cat === "Suits") { p.lo = 5; p.hi = 7; p.kind = "suit"; p.warm = 1; }
+      else if (cat === "Blazers") {
+        p.kind = "blazer"; p.warm = 1;
+        if (/knit|jersey|unstructured/.test(n)) { p.lo = 4; p.hi = 5; }
+        else if (/linen|seersucker/.test(n)) { p.lo = 4; p.hi = 6; p.warm = -1; }
+        else if (p.pattern) { p.lo = 4; p.hi = 5; }
+        else if (/velvet|tuxedo|dinner|dolce|burgundy|black|midnight/.test(n)) { p.lo = 5; p.hi = 7; }
+        else { p.lo = 4; p.hi = 6; }
+      }
+      else if (cat === "Coats") { p.lo = 3; p.hi = 7; p.kind = "coat"; p.warm = 3; }
+      else if (cat === "Vests") { p.lo = 3; p.hi = 5; p.kind = "vest"; }
+      else { p.lo = 2; p.hi = 4; p.kind = "jacket"; p.warm = 2; }
+    } else if (ACC_CATS[cat]) {
+      p.role = "acc"; p.lo = 1; p.hi = 7; p.kind = cat.toLowerCase();
+    }
+    if (/cashmere|wool|flannel|corduroy/.test(n) && p.warm < 1 && p.role !== "shoes") p.warm = 1;
+    return p;
+  }
+
+  function sameTone(a, b, dl) { return a.fam === b.fam && Math.abs(a.L - b.L) < dl; }
+
+  /* One outfit candidate. Returns null when a rule fails, else
+     { lo, hi, score } — the outfit-type range it works in and its
+     styling score. */
+  function evaluate(top, bottom, shoes, layer) {
+    var lo = Math.max(top.lo, bottom.lo, shoes.lo), hi = Math.min(top.hi, bottom.hi, shoes.hi);
+    if (layer) { lo = Math.max(lo, layer.lo); hi = Math.min(hi, layer.hi); }
+    if (lo > hi) return null;
+    var clothes = layer ? [layer, top, bottom] : [top, bottom];
+    var statements = 0, patterns = 0;
+    clothes.forEach(function (c) { if (!c.neutral) statements++; if (c.pattern) patterns++; });
+    if (statements > 1 || patterns > 1) return null;
+    if (shoes.pattern && patterns > 0) return null;
+    if (!shoes.neutral && statements > 0) return null;
+    /* Double denim — a denim or chambray shirt over blue jeans. */
+    if (bottom.cat === "Jeans" && bottom.fam === "blue" && (top.denim || (layer && layer.denim))) return null;
+    /* Tonal top and bottom only in the light family (cream on cream). */
+    if (sameTone(top, bottom, 12) && !(top.fam === "white" || top.fam === "beige") && !layer) return null;
+    if (layer) {
+      if (layer.kind === "blazer" || layer.kind === "suit") {
+        if (top.overshirt || /western/.test(top.n) || top.kind === "tee" && lo > 4) return null;
+        if (bottom.kind === "shorts" || bottom.kind === "swim") return null;
+        /* A blazer the colour of the trousers reads as an orphaned suit. */
+        if (layer.kind === "blazer" && sameTone(layer, bottom, 14)) return null;
+      }
+      if ((layer.kind === "knit" || layer.kind === "vest") && !(top.kind === "shirt" || (layer.kind === "vest" && top.kind === "polo"))) return null;
+      if (layer.kind === "overshirt" && !(top.kind === "tee" || (top.kind === "polo" && top.shortSleeve))) return null;
+      if (sameTone(layer, top, 10)) return null;
+      if (layer.pattern && top.pattern) return null;
+    }
+    /* Shorts and swim stay casual; a smart shirt never meets swim. */
+    if ((bottom.kind === "shorts" || bottom.kind === "swim") && top.kind === "knit") return null;
+    if ((bottom.kind === "shorts" || bottom.kind === "swim") && (shoes.kind === "loafer" && shoes.hi >= 7)) return null;
+    var score = 0;
+    var upper = layer || top;
+    var dl = Math.abs(upper.L - bottom.L);
+    if (dl >= 18 && dl <= 72) score += 1.5; else if (dl < 10) score -= 0.6;
+    if (layer && Math.abs(layer.L - top.L) >= 20) score += 0.5;
+    if (statements === 1) score += 0.5; else score += 0.2;
+    if (patterns === 1 && layer && !layer.pattern) score += 0.3;
+    if ((shoes.fam === "brown" || shoes.fam === "beige") && /navy|grey|blue|white|olive|beige/.test(bottom.fam)) score += 0.7;
+    if (shoes.fam === "navy" && /beige|white|grey|olive/.test(bottom.fam)) score += 0.7;
+    if (shoes.kind === "sneaker" && bottom.cat === "Jeans") score += 0.4;
+    if (shoes.fam === "brown" && bottom.fam === "black") score -= 0.8;
+    if (top.fam === "black" && bottom.fam === "navy") score -= 0.5;
+    if (sameTone(shoes, bottom, 6) && bottom.L > 70) score -= 0.3;
+    return { lo: lo, hi: hi, score: score };
+  }
+
+  /* Structural rules per outfit type. */
+  function fitsLevel(L, top, bottom, shoes, layer) {
+    var lk = layer ? layer.kind : "";
+    if (L === 1) return !layer && (bottom.kind === "swim" || bottom.kind === "shorts" || bottom.kind === "linen") && (top.kind === "tee" || top.shortSleeve || /linen/.test(top.n));
+    if (L === 2) return (bottom.kind === "shorts" || bottom.kind === "swim") && (top.kind === "tee" || top.kind === "polo" || /linen/.test(top.n) || top.shortSleeve) && (!layer || lk === "overshirt");
+    if (L === 3) return lk !== "blazer" && lk !== "suit";
+    if (L === 4) return true;
+    if (L === 5) return top.kind !== "tee" && bottom.kind !== "shorts" && bottom.kind !== "swim";
+    if (L === 6) return (lk === "blazer" || lk === "suit") && (top.kind === "shirt" && !top.casualShirt || top.kind === "polo" && !top.shortSleeve || top.kind === "knit" && /turtle|roll/.test(top.n));
+    if (L === 7) return (lk === "blazer" || lk === "suit") && layer.hi >= 7 && top.kind !== "tee";
+    return true;
+  }
+
+  function Deck(items) {
+    this.items = (items || []).filter(function (i) { return i && i.id && !i.laundry; });
+    this.prof = this.items.map(profile);
+    var tops = [], bottoms = [], shoes = [], layers = [], accs = [];
+    this.prof.forEach(function (p) {
+      if (p.role === "top") tops.push(p);
+      else if (p.role === "bottom") bottoms.push(p);
+      else if (p.role === "shoes") shoes.push(p);
+      else if (p.role === "layer") layers.push(p);
+      else if (p.role === "acc") accs.push(p);
+    });
+    /* Knits double as a layer over a collared shirt; overshirts
+       double as a layer over a tee or short-sleeve polo. */
+    var layerOpts = [null].concat(layers);
+    tops.forEach(function (t) {
+      if (t.kind === "knit") layerOpts.push(Object.assign({}, t, { role: "layer", kind: "knit" }));
+      if (t.overshirt) layerOpts.push(Object.assign({}, t, { role: "layer", kind: "overshirt" }));
+    });
+    this.tops = tops; this.bottoms = bottoms; this.shoes = shoes; this.layerOpts = layerOpts; this.accs = accs;
+    var combos = [];
+    for (var a = 0; a < tops.length; a++) for (var b = 0; b < bottoms.length; b++) for (var c = 0; c < shoes.length; c++) for (var d = 0; d < layerOpts.length; d++) {
+      var t = tops[a], bt = bottoms[b], s = shoes[c], ly = layerOpts[d];
+      if (ly && ly.id === t.id) continue;
+      var ev = evaluate(t, bt, s, ly);
+      if (!ev) continue;
+      var mask = 0;
+      for (var L = ev.lo; L <= ev.hi; L++) if (fitsLevel(L, t, bt, s, ly)) mask |= (1 << L);
+      if (!mask) continue;
+      var cids = [t.id, bt.id, s.id].concat(ly ? [ly.id] : []);
+      combos.push({ t: t, b: bt, s: s, l: ly, mask: mask, score: ev.score, ids: cids, key: comboKey(cids) });
+    }
+    this.combos = combos;
+  }
+  function comboKey(ids) { return ids.slice().sort().join("|"); }
+  Deck.prototype.forLevel = function (level) {
+    if (!level) return this.combos;
+    var bit = 1 << level;
+    this._lv = this._lv || {};
+    if (this._lv[level]) return this._lv[level];
+    var out = this.combos.filter(function (c) { return c.mask & bit; });
+    /* Formal / Black Tie when the closet has few pieces that dressy:
+       the true matches first, topped up with the most formal the
+       closet can do — a tailored jacket over a dress shirt or knit
+       polo on a Business Casual base (scored a notch lower). */
+    if (level >= 6 && out.length < 1500) {
+      var have = {};
+      out.forEach(function (c) { have[c.key] = 1; });
+      var extra = this.forLevel(level - 1).filter(function (c) {
+        return !have[c.key] && c.l && (c.l.kind === "blazer" || c.l.kind === "suit") && c.t.kind !== "tee" && !c.t.casualShirt && !c.t.shortSleeve && c.s.kind !== "sneaker" && c.s.kind !== "espadrille" && c.s.kind !== "boat" && c.b.kind !== "jeans";
+      });
+      out = out.concat(extra.map(function (c) { return Object.assign({}, c, { score: c.score - 0.6 }); }));
+      if (!out.length) out = this.forLevel(level - 1);
+    }
+    this._lv[level] = out;
+    return out;
+  };
+  Deck.prototype.uniqueCount = function (level) { return this.forLevel(level).length; };
+  Deck.prototype.coverage = function (level) {
+    var seen = {};
+    this.forLevel(level).forEach(function (c) { [c.t, c.b, c.s, c.l].forEach(function (p) { if (p) seen[p.id] = 1; }); });
+    return seen;
+  };
+  function itemIds(c) { var ids = [c.t.id, c.b.id, c.s.id]; if (c.l) ids.push(c.l.id); return ids; }
+
+  /* Deal `count` outfits.
+     opts: level (1–7 or null for any), temp (°F or null),
+     prefs { items: {id: w}, pairs: {"a|b": w} }, exposure {id: n},
+     recent (array of keys, newest last), banned {key: 1},
+     rng () -> [0,1). */
+  Deck.prototype.deal = function (count, opts) {
+    opts = opts || {};
+    var rng = opts.rng || Math.random;
+    var pool = this.forLevel(opts.level || null);
+    if (!pool.length) return [];
+    var temp = typeof opts.temp === "number" ? opts.temp : null;
+    if (temp !== null) {
+      var wx = pool.filter(function (c) {
+        if (temp >= 84 && (c.t.warm >= 2 || (c.l && c.l.warm >= 2))) return false;
+        if (temp < 55 && (c.b.kind === "shorts" || c.b.kind === "swim" || c.s.kind === "espadrille" || c.s.kind === "sandal")) return false;
+        if (temp < 45 && !c.l) return false;
+        return true;
+      });
+      if (wx.length) pool = wx;
+    }
+    var prefs = opts.prefs || {}, pItems = prefs.items || {}, pPairs = prefs.pairs || {};
+    var hasPairs = false;
+    for (var pk in pPairs) { if (pPairs[pk]) { hasPairs = true; break; } }
+    var exposure = opts.exposure || {};
+    var banned = opts.banned || {};
+    var recentArr = opts.recent || [];
+    var prof = this.prof, NI = prof.length;
+    /* Per-combo base weight: styling score + piece/pair preferences
+       + weather fit, computed once per deal. */
+    var base = new Float64Array(pool.length);
+    for (var i = 0; i < pool.length; i++) {
+      var c = pool[i], pref = 0;
+      var ids = c.ids;
+      for (var j = 0; j < ids.length; j++) {
+        pref += (pItems[ids[j]] || 0);
+        if (hasPairs) for (var k = j + 1; k < ids.length; k++) pref += (pPairs[ids[j] < ids[k] ? ids[j] + "|" + ids[k] : ids[k] + "|" + ids[j]] || 0);
+      }
+      var wxs = 0;
+      if (temp !== null) {
+        var w = c.t.warm + c.b.warm + (c.l ? c.l.warm : 0) + c.s.warm * 0.5;
+        wxs = temp >= 80 ? -w * 0.25 : temp < 60 ? w * 0.25 : 0;
+      }
+      /* Newly added pieces (last three weeks) lead the deal. */
+      var fr = (c.t.fresh ? 1 : 0) + (c.b.fresh ? 1 : 0) + (c.s.fresh ? 1 : 0) + (c.l && c.l.fresh ? 1 : 0);
+      base[i] = Math.exp(0.9 * (c.score + Math.max(-4, Math.min(4, pref)) + wxs + fr * 0.3));
+    }
+    var limit = Math.min(600, Math.floor(pool.length * 0.75));
+    var picked = [], localExp = {};
+    var excluded = new Uint8Array(pool.length);
+    function markRecent(lim) {
+      var recent = {};
+      for (var r = Math.max(0, recentArr.length - lim); r < recentArr.length; r++) recent[recentArr[r]] = 1;
+      for (var x = 0; x < pool.length; x++) excluded[x] = (banned[pool[x].key] || recent[pool[x].key]) ? 1 : 0;
+    }
+    markRecent(limit);
+    var fac = new Float64Array(NI);
+    for (var n = 0; n < count; n++) {
+      /* Coverage: a piece dealt less than the most-dealt piece is
+         boosted — a brand-new piece (never dealt) most of all. */
+      var maxE = 0, e;
+      for (var a = 0; a < NI; a++) { e = (exposure[prof[a].id] || 0) + (localExp[prof[a].id] || 0); if (e > maxE) maxE = e; }
+      for (var b = 0; b < NI; b++) {
+        e = (exposure[prof[b].id] || 0) + (localExp[prof[b].id] || 0);
+        fac[b] = Math.exp(0.9 * ((maxE - e) / (maxE + 1) * 0.9 + (e === 0 ? 0.9 : 0)));
+      }
+      var weights = new Float64Array(pool.length), total = 0;
+      for (var q = 0; q < pool.length; q++) {
+        if (excluded[q]) continue;
+        var cc = pool[q];
+        var wq = base[q] * fac[cc.t.idx] * fac[cc.b.idx] * fac[cc.s.idx] * (cc.l ? fac[cc.l.idx] : 1);
+        weights[q] = wq; total += wq;
+      }
+      if (total <= 0) {
+        /* Everything recently seen: shrink the window to its newest
+           third and deal the oldest again. */
+        if (limit > 0) { limit = Math.floor(limit / 3); markRecent(limit); picked.forEach(function (p) { excluded[p._i] = 1; }); n--; continue; }
+        break;
+      }
+      var x2 = rng() * total, chosen = -1;
+      for (var z = 0; z < pool.length; z++) { if (weights[z] <= 0) continue; chosen = z; x2 -= weights[z]; if (x2 <= 0) break; }
+      if (chosen < 0) break;
+      var pc = pool[chosen];
+      excluded[chosen] = 1;
+      pc.ids.forEach(function (id) { localExp[id] = (localExp[id] || 0) + 1; });
+      var acc = null;
+      if (this.accs.length && rng() < 0.35) acc = this.accs[Math.floor(rng() * this.accs.length)];
+      picked.push({ _i: chosen, key: pc.key, ids: pc.ids.slice(), top: pc.t, bottom: pc.b, shoes: pc.s, layer: pc.l, acc: acc, score: pc.score, mask: pc.mask });
+    }
+    return picked;
+  };
+
+  function pairKeys(ids) {
+    var out = [];
+    for (var i = 0; i < ids.length; i++) for (var j = i + 1; j < ids.length; j++) out.push(ids[i] < ids[j] ? ids[i] + "|" + ids[j] : ids[j] + "|" + ids[i]);
+    return out;
+  }
+  /* Feedback: a like lifts the pieces and their pairings, a dislike
+     drops the pairings hard (the pieces only a little — a disliked
+     outfit is usually one bad pairing, not a bad piece). */
+  function applyVerdict(prefs, ids, verdict) {
+    prefs.items = prefs.items || {}; prefs.pairs = prefs.pairs || {};
+    var di = verdict === "like" ? 0.35 : -0.15, dp = verdict === "like" ? 0.5 : -1.1;
+    ids.forEach(function (id) { prefs.items[id] = Math.max(-3, Math.min(3, (prefs.items[id] || 0) + di)); });
+    pairKeys(ids).forEach(function (k) { prefs.pairs[k] = Math.max(-4, Math.min(3, (prefs.pairs[k] || 0) + dp)); });
+    return prefs;
+  }
+
+  root.WardrobeComposer = {
+    version: 1,
+    profile: profile,
+    evaluate: evaluate,
+    fitsLevel: fitsLevel,
+    Deck: Deck,
+    comboKey: comboKey,
+    applyVerdict: applyVerdict,
+    pairKeys: pairKeys,
+    build: function (items) { return new Deck(items); }
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---------- Composer → app looks (build .73) ----------
+   buildClosetLooks hands off to these: the deck is cached per
+   closet signature, likes/dislikes and the seen-recently ring live
+   in the on-device "composerPrefs" key, and liked closet looks in
+   the synced "looks" collection feed the weighting on every device. */
+var COMPOSER_PREFS_KEY = "composerPrefs";
+var composerDeckCache = { sig: null, deck: null };
+function composerClosetSig(list) {
+  return list.map(function (i) { return [i.id, i.category, i.name, i.colourName, i.colourHex, i.laundry ? 1 : 0].join("~"); }).join("\n");
+}
+function composerDeck() {
+  var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
+  var sig = composerClosetSig(list);
+  if (composerDeckCache.sig !== sig || !composerDeckCache.deck) {
+    composerDeckCache = { sig: sig, deck: window.WardrobeComposer.build(list) };
+  }
+  return composerDeckCache.deck;
+}
+function composerPrefs() {
+  var p = null;
+  try { p = (typeof store !== "undefined") ? store.get(COMPOSER_PREFS_KEY, null) : null; } catch (e) { p = null; }
+  if (!p || typeof p !== "object" || Array.isArray(p)) p = {};
+  p.v = 1;
+  p.items = p.items && typeof p.items === "object" ? p.items : {};
+  p.pairs = p.pairs && typeof p.pairs === "object" ? p.pairs : {};
+  p.recent = Array.isArray(p.recent) ? p.recent : [];
+  p.banned = p.banned && typeof p.banned === "object" ? p.banned : {};
+  p.exposure = p.exposure && typeof p.exposure === "object" ? p.exposure : {};
+  p.likedKeys = p.likedKeys && typeof p.likedKeys === "object" ? p.likedKeys : {};
+  return p;
+}
+function composerSavePrefs(p) {
+  if (p.recent.length > 600) p.recent = p.recent.slice(-600);
+  var mx = 0;
+  Object.keys(p.exposure).forEach(function (k) { if (p.exposure[k] > mx) mx = p.exposure[k]; });
+  if (mx > 400) Object.keys(p.exposure).forEach(function (k) { p.exposure[k] = Math.floor(p.exposure[k] / 2); });
+  try { store.set(COMPOSER_PREFS_KEY, p); } catch (e) {}
+}
+/* Weights the deck deals with: the on-device verdicts, plus every
+   liked closet look in the synced looks collection that this device
+   has not already counted. */
+function composerEffectivePrefs() {
+  var p = composerPrefs();
+  var eff = { items: Object.assign({}, p.items), pairs: Object.assign({}, p.pairs) };
+  try {
+    (typeof savedLooks !== "undefined" ? savedLooks : []).forEach(function (l) {
+      if (!l || l.verdict !== "like" || !l.fwPieces || !l.fwPieces.length) return;
+      var ids = l.fwPieces.map(function (x) { return x && x.id; }).filter(Boolean);
+      var key = window.WardrobeComposer.comboKey(ids);
+      if (p.likedKeys[key]) return;
+      window.WardrobeComposer.applyVerdict(eff, ids, "like");
+    });
+  } catch (e) {}
+  return eff;
+}
+function composerLookIds(look) {
+  return ((look && look.fwPieces) || []).map(function (x) { return x && x.id; }).filter(Boolean);
+}
+/* A look was put on screen: it joins the seen-recently ring (never
+   dealt again while recent) and its pieces' exposure counts rise,
+   which is what lets the least-shown — and newest — pieces lead. */
+function composerMarkSeen(looks) {
+  var p = composerPrefs(), changed = false;
+  (looks || []).forEach(function (look) {
+    if (!look || !look.composer || !look.composerKey) return;
+    if (p.recent[p.recent.length - 1] === look.composerKey) return;
+    var at = p.recent.indexOf(look.composerKey);
+    if (at !== -1) p.recent.splice(at, 1);
+    p.recent.push(look.composerKey);
+    composerLookIds(look).forEach(function (id) { p.exposure[id] = (p.exposure[id] || 0) + 1; });
+    changed = true;
+  });
+  if (changed) composerSavePrefs(p);
+}
+function composerVerdict(look, verdict) {
+  if (!look || !look.composer) return;
+  var p = composerPrefs();
+  var ids = composerLookIds(look);
+  window.WardrobeComposer.applyVerdict(p, ids, verdict);
+  if (verdict === "dislike") p.banned[look.composerKey] = Date.now();
+  if (verdict === "like") p.likedKeys[look.composerKey] = Date.now();
+  composerSavePrefs(p);
+}
+var COMPOSER_NOUN = { Tees: "Tee", Polos: "Polo", Sweaters: "Knit", Shirts: "Shirt", "Button downs": "Shirt", Trousers: "Trousers", Jeans: "Jeans", Shorts: "Shorts", "Bathing suits": "Swim Shorts", Blazers: "Blazer", Suits: "Suit", Jackets: "Jacket", Coats: "Coat", "Leather jackets": "Leather Jacket", Vests: "Vest", Shoes: "Shoes" };
+function composerNoun(item) {
+  var n = String(item.name || "").toLowerCase();
+  if (item.category === "Shirts" && /overshirt|waffle/.test(n)) return "Overshirt";
+  if (item.category === "Trousers") {
+    if (/chino/.test(n)) return "Chinos";
+    if (/linen/.test(n)) return "Linen Trousers";
+  }
+  return COMPOSER_NOUN[item.category] || "Piece";
+}
+function composerColour(item) {
+  var c = String(item.colourName || "").split("\u00b7")[0].trim();
+  if (!c) return "";
+  return c.split(/\s+/).map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(" ");
+}
+function composerPieceTitle(item) {
+  var c = composerColour(item), n = composerNoun(item);
+  if (c && c.toLowerCase().indexOf(n.toLowerCase()) !== -1) return c;
+  return (c ? c + " " : "") + n;
+}
+function composerOutfitToLook(o, i, renderPairs) {
+  var byId = {};
+  (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).forEach(function (it) { byId[it.id] = it; });
+  var order = [o.layer, o.top, o.bottom, o.shoes, o.acc].filter(Boolean);
+  var pieces = order.map(function (p) { return byId[p.id]; }).filter(Boolean);
+  var upper = o.layer ? byId[o.layer.id] : byId[o.top.id];
+  var bottom = byId[o.bottom.id];
+  var title = composerPieceTitle(upper) + " & " + composerPieceTitle(bottom);
+  var swatches = [], seenHex = {};
+  pieces.forEach(function (p) {
+    if (p.colourHex && !seenHex[p.colourHex]) {
+      seenHex[p.colourHex] = 1;
+      swatches.push({ name: composerColour(p) || ((typeof nearestWada === "function") ? nearestWada(p.colourHex).name : "Colour"), hex: p.colourHex, role: composerNoun(p) });
+    }
+  });
+  var fwRender = null;
+  var names = pieces.map(function (p) { return p.name; });
+  var bit = 0;
+  for (var L = 7; L >= 1; L--) if (o.mask & (1 << L)) { bit = L; break; }
+  return {
+    id: (typeof newLookId === "function") ? newLookId() : ("look-" + Date.now() + "-" + i),
+    title: title,
+    meta: "From your closet",
+    desc: names.join(" with "),
+    iconId: null, blendId: null, basis: "both", version: i + 1, plate: null, paletteName: null,
+    img: null,
+    fwRender: fwRender,
+    imgAlt: names.join(", "),
+    swatches: swatches,
+    flatlay: pieces.map(function (p) { return { hex: p.colourHex, label: composerNoun(p), detail: composerColour(p).toLowerCase() }; }),
+    notes: [],
+    source: "wardrobe",
+    anchorNames: names.slice(0, 4),
+    fwPieces: pieces.map(function (p) { return { id: p.id, name: p.name, photo: p.photo || null, colourHex: p.colourHex || null, category: p.category }; }),
+    suggestedBottom: null,
+    composer: true,
+    composerKey: o.key,
+    composerLevel: bit
+  };
+}
+/* Deal composed looks. opts: count, level (null = any outfit type;
+   undefined = the app-wide outfit type), temp. */
+function composerLooks(opts) {
+  opts = opts || {};
+  if (!window.WardrobeComposer) return [];
+  var deck = composerDeck();
+  var level = opts.level === undefined ? ((typeof formalityLevel !== "undefined") ? formalityLevel : 4) : opts.level;
+  var p = composerPrefs();
+  var recent = p.recent.slice();
+  if (opts.exclude) recent = recent.concat(opts.exclude);
+  var outs = deck.deal(opts.count || 6, {
+    level: level,
+    temp: typeof opts.temp === "number" ? opts.temp : null,
+    prefs: composerEffectivePrefs(),
+    exposure: p.exposure,
+    recent: recent,
+    banned: p.banned
+  });
+  return outs.map(function (o, i) { return composerOutfitToLook(o, i, null); });
+}
+
+    </script>
+    <script type="wardrobe/app">
 "use strict";
 /* ================= Data ================= */
 var COLORS = window.WADA.colors.map(function (c) { return { name: c[0], hex: c[1] }; });
@@ -6147,7 +6764,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.72";
+var WARDROBE_BUILD = "2026-11-18.73";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -13897,6 +14514,12 @@ function dedupeLooksByPhoto56(list) {
 }
 function lookPicturedImg(look) {
   if (!look) return "";
+  /* Build .73: a composed closet look has no photograph of its own
+     — its identity is its combination. Without this, every walk
+     that falls back to lookImg() saw the first piece's photo: two
+     looks sharing a blazer deduped into one, and a data: photo read
+     as a worn selfie. */
+  if (look.composer && look.composerKey) return "composer:" + look.composerKey;
   if (look.swapPhoto && (look.swapPieces || look.swapComboId)) return look.swapPhoto;
   if (look.fwRender) return (typeof fwRenderSrc === "function" ? fwRenderSrc(look) : null) || look.fwRender;
   return look.img || "";
@@ -13992,6 +14615,7 @@ function displayTitleForLook(look, picturedImg) {
     return "My outfit";
   }
   if (look.refLook || look.iconSpec) return look.title || "";
+  if (look.composer && look.title) return look.title; /* build .73: a composed look names its own pieces */
   var img = picturedImg || lookPicturedImg(look) || "";
   if (look.swapPieces || look.swapComboId) {
     var sr = img ? renderByImg(canonicalImg(img)) : null;
@@ -18817,6 +19441,14 @@ function downweightRecentCombos(combos) {
 }
 function buildClosetLooks(opts) {
   var wx = (opts && typeof opts.temp === "number") ? { temp: opts.temp, rainy: !!opts.rainy } : null;
+  /* Build .73: the closet composer deals every closet outfit —
+     any piece in the closet, newest included, at the chosen
+     outfit type, never a recently seen combination. The verified
+     render-pair path below only runs if the composer is absent. */
+  if (typeof composerLooks === "function" && window.WardrobeComposer) {
+    var composed73 = composerLooks({ count: (opts && opts.count) || 6, temp: wx ? wx.temp : undefined });
+    if (composed73 && composed73.length) return composed73;
+  }
   var avail = wardrobeItems.filter(function (i) { return !i.laundry; });
   var tops = avail.filter(function (i) { return ["Coats", "Leather jackets", "Sweaters", "Polos", "Shirts", "Button downs", "Tees", "Blazers", "Jackets", "Suits"].indexOf(i.category) !== -1; });
   var bottoms = avail.filter(function (i) { return ["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(i.category) !== -1; });
@@ -33473,6 +34105,291 @@ function analyzeFilePiece(card, job, ix) {
   } catch (err) {
     try { console.warn("[Wardrobe repair .53] failed", err); } catch (e) {}
   }
+})();
+
+    </script>
+    <script type="wardrobe/app">
+/* ================= Build .73 — endless closet outfits: app glue =================
+   Ideas: in Wardrobe mode the grid IS the endless closet feed
+   (infinite scroll, Shuffle, Like / Dislike per card); in Combo
+   mode the same feed runs under the six combo takes; Inspo mode
+   never shows closet pieces. Home: Wardrobe mode deals the outfit
+   of the day from the composer (buildClosetLooks hands off to it),
+   shown as a flat-lay of his own cleaned item photos with the
+   watch. Verdicts feed the composer's weights. */
+(function closetComposer73() {
+  if (!window.WardrobeComposer || typeof composerLooks !== "function") return;
+
+  /* Piece photos are never "looks": a verdict path that resolves a
+     closet look to its first piece photo must not ban that photo
+     (it would hide the item's own picture app-wide). */
+  if (typeof recordDislike === "function") {
+    var _recordDislike73 = recordDislike;
+    recordDislike = function (img) {
+      if (typeof img === "string" && (img.indexOf("data:") === 0 || img.indexOf("blob:") === 0 || img.indexOf("idb:") === 0)) img = null;
+      return _recordDislike73(img);
+    };
+  }
+  if (typeof likeLook === "function") {
+    var _likeLook73 = likeLook;
+    likeLook = function (look) {
+      var ok = _likeLook73(look);
+      if (ok && look && look.composer) composerVerdict(look, "like");
+      return ok;
+    };
+  }
+
+  function watchFor(look) {
+    try {
+      var r = (typeof resolveWatch === "function") ? resolveWatch(look) : null;
+      return r && r.state === "watch" && r.watch ? r.watch : null;
+    } catch (e) { return null; }
+  }
+  function itemPhoto(p) {
+    var it = (typeof closetItemById === "function" && p.id) ? closetItemById(p.id) : null;
+    return (it && it.photo) || p.photo || null;
+  }
+  /* The flat-lay: every piece's own cleaned photograph on cream,
+     outer layer first, then top, bottom, shoes, the watch last. */
+  function flatlayHTML(look, withWatch) {
+    var cells = (look.fwPieces || []).map(function (p) {
+      var ph = itemPhoto(p);
+      if (ph && !/^(idb:|blob:[0-9a-f]{16,})/.test(ph)) return '<span class="fl-cell"><img src="' + esc(ph) + '" alt="' + esc(p.name || "") + '" loading="lazy" decoding="async" /></span>';
+      return '<span class="fl-cell fl-swatch" style="background:' + esc(p.colourHex || "#d9cfbd") + '" role="img" aria-label="' + esc(p.name || "") + '"></span>';
+    });
+    var w = withWatch ? watchFor(look) : null;
+    if (w && w.photo) cells.push('<span class="fl-cell fl-watch"><img src="' + esc(w.photo) + '" alt="' + esc(w.name || "") + '" loading="lazy" decoding="async" /></span>');
+    return '<span class="flatlay fl-n' + cells.length + '">' + cells.join("") + "</span>";
+  }
+  window.composerFlatlayHTML = flatlayHTML;
+
+  /* The look layer: a composed look's media is its flat-lay, never
+     its first piece standing in for the outfit. */
+  if (typeof lookCardHTML === "function") {
+    var _lookCardHTML73 = lookCardHTML;
+    lookCardHTML = function (look) {
+      var html = _lookCardHTML73.apply(this, arguments);
+      if (!look || !look.composer || look.fwRender) return html;
+      var m = html.indexOf("look-media");
+      if (m === -1) return html;
+      var a = html.indexOf("<img ", m);
+      if (a === -1) return html;
+      var b = html.indexOf(">", a);
+      if (b === -1) return html;
+      return html.slice(0, a) + '<span class="cf-media layer-flatlay">' + flatlayHTML(look, true) + "</span>" + html.slice(b + 1);
+    };
+  }
+
+  /* ---------- Home ---------- */
+  if (typeof renderToday === "function") {
+    var _renderToday73 = renderToday;
+    renderToday = function () {
+      _renderToday73();
+      if (!todayLook || !todayLook.composer || todayLook.fwRender) {
+        var c0 = document.getElementById("today-collage");
+        if (c0) c0.classList.remove("flatlay-host");
+        return;
+      }
+      var img = document.getElementById("today-img");
+      var collage = document.getElementById("today-collage");
+      if (img) img.hidden = true;
+      if (collage) {
+        collage.innerHTML = flatlayHTML(todayLook, true);
+        collage.classList.add("flatlay-host");
+        collage.hidden = false;
+      }
+      composerMarkSeen([todayLook]);
+    };
+  }
+  /* Hero Dislike on a closet look: the pairing is dropped from the
+     composer and the next look deals — no photo ban, no Recently
+     removed entry carrying piece photos. */
+  var heroDislike = document.getElementById("today-dislike");
+  if (heroDislike) heroDislike.addEventListener("click", function (e) {
+    if (!todayLook || !todayLook.composer) return;
+    e.stopImmediatePropagation();
+    composerVerdict(todayLook, "dislike");
+    if (typeof dealAnotherToday === "function") dealAnotherToday();
+  }, true);
+  /* Verdicts inside the look layer. */
+  document.addEventListener("click", function (e) {
+    var v = e.target.closest ? e.target.closest("[data-verdict]") : null;
+    if (!v || typeof currentLook === "undefined" || !currentLook || !currentLook.composer) return;
+    composerVerdict(currentLook, v.getAttribute("data-verdict") === "dislike" ? "dislike" : "like");
+  }, true);
+
+  /* ---------- Ideas feed ---------- */
+  var result = document.getElementById("look-result");
+  if (!result) return;
+  var feed = document.createElement("section");
+  feed.className = "closet-feed";
+  feed.id = "closet-feed";
+  feed.hidden = true;
+  feed.setAttribute("aria-label", "From your closet");
+  feed.innerHTML = '<div class="cf-head"><h3 class="fav-head">From your closet</h3><button type="button" class="btn-ghost" id="cf-shuffle">Shuffle</button></div>' +
+    '<div class="options-grid cf-grid" id="cf-grid" role="list"></div><div class="cf-sentinel" id="cf-sentinel" aria-hidden="true"></div>';
+  result.parentNode.insertBefore(feed, result.nextSibling);
+  var grid = feed.querySelector("#cf-grid");
+  var sentinel = feed.querySelector("#cf-sentinel");
+  var feedLooks = [];
+  var feedSig = null;
+  function feedLevel() { return (typeof studioTypeAny !== "undefined" && studioTypeAny) ? null : ((typeof formalityLevel !== "undefined") ? formalityLevel : 4); }
+  function feedWanted() {
+    var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
+    return src === "wardrobe" || src === "combo";
+  }
+  function stateSig() { return [studioSource, feedLevel(), composerDeckCache.sig ? composerDeckCache.sig.length : 0, (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0)].join("/"); }
+  function cardHTML(look, idx) {
+    return '<article class="card option-card cf-card" role="listitem" data-cf-idx="' + idx + '">' +
+      '<button type="button" class="cf-media" data-cf-open="' + idx + '" aria-label="' + esc(look.title) + '">' + flatlayHTML(look, true) + "</button>" +
+      '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span></span>" +
+      '<span class="cf-actions"><button type="button" class="chip" data-cf-like="' + idx + '" aria-pressed="' + (look.verdict === "like" ? "true" : "false") + '">Like</button>' +
+      '<button type="button" class="chip" data-cf-dislike="' + idx + '" aria-pressed="false">Dislike</button></span>' +
+      "</article>";
+  }
+  function appendLooks(n) {
+    var exclude = feedLooks.map(function (l) { return l.composerKey; });
+    var looks = composerLooks({ count: n, level: feedLevel(), exclude: exclude, temp: (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : undefined });
+    if (!looks.length) return 0;
+    var html = "";
+    looks.forEach(function (l) { html += cardHTML(l, feedLooks.length); feedLooks.push(l); });
+    grid.insertAdjacentHTML("beforeend", html);
+    composerMarkSeen(looks);
+    return looks.length;
+  }
+  function resetFeed() {
+    feedLooks = [];
+    grid.innerHTML = "";
+    feedSig = stateSig();
+    appendLooks(12);
+  }
+  function syncFeed(force) {
+    var want = feedWanted();
+    feed.hidden = !want;
+    var wardrobeMode = (typeof studioSource !== "undefined" && studioSource === "wardrobe");
+    feed.classList.toggle("cf-solo", wardrobeMode);
+    result.classList.toggle("cf-replaced", wardrobeMode);
+    if (!want) return;
+    var panel = document.getElementById("panel-studio");
+    if (panel && panel.hidden && !force) return;
+    if (force || !feedLooks.length || feedSig !== stateSig()) resetFeed();
+  }
+  window.composerSyncFeed = syncFeed;
+  feed.querySelector("#cf-shuffle").addEventListener("click", function () { resetFeed(); feed.scrollIntoView({ block: "start", behavior: "smooth" }); });
+  grid.addEventListener("click", function (e) {
+    var like = e.target.closest("[data-cf-like]");
+    if (like) {
+      var lk = feedLooks[parseInt(like.getAttribute("data-cf-like"), 10)];
+      if (!lk) return;
+      if (lk.verdict === "like") return;
+      if (likeLook(lk)) {
+        like.setAttribute("aria-pressed", "true");
+        toast("Liked — saved to " + (typeof savedHomeName === "function" ? savedHomeName(lk) : "My Outfits") + ".");
+      }
+      return;
+    }
+    var dis = e.target.closest("[data-cf-dislike]");
+    if (dis) {
+      var di = parseInt(dis.getAttribute("data-cf-dislike"), 10);
+      var dl = feedLooks[di];
+      if (!dl) return;
+      composerVerdict(dl, "dislike");
+      var card = dis.closest(".cf-card");
+      var exclude = feedLooks.map(function (l) { return l.composerKey; });
+      var rep = composerLooks({ count: 1, level: feedLevel(), exclude: exclude })[0];
+      if (rep && card) {
+        feedLooks[di] = rep;
+        card.outerHTML = cardHTML(rep, di);
+        composerMarkSeen([rep]);
+      } else if (card) { card.remove(); }
+      return;
+    }
+    var open = e.target.closest("[data-cf-open]");
+    if (open) {
+      var ol = feedLooks[parseInt(open.getAttribute("data-cf-open"), 10)];
+      if (ol && typeof openLookLayer === "function") openLookLayer(ol);
+    }
+  });
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting || feed.hidden || !feedLooks.length) return;
+      appendLooks(8);
+    }, { rootMargin: "900px 0px" }).observe(sentinel);
+  } else {
+    window.addEventListener("scroll", function () {
+      if (feed.hidden || !feedLooks.length) return;
+      if (sentinel.getBoundingClientRect().top < window.innerHeight + 900) appendLooks(8);
+    }, { passive: true });
+  }
+
+  /* Wardrobe mode: Give me ideas / Six more ideas / a source tap
+     shuffle the endless feed instead of dealing six renders. */
+  if (typeof dealWardrobeSix === "function") {
+    dealWardrobeSix = function () {
+      if (!composerLooks({ count: 1 }).length) return false;
+      syncFeed(true);
+      return true;
+    };
+  }
+  if (typeof window.setSource === "function") {
+    var _setSource73 = window.setSource;
+    window.setSource = function (s) { _setSource73(s); syncFeed(false); };
+    try { setSource = window.setSource; } catch (e) {}
+  }
+  if (typeof setFormality === "function") {
+    var _setFormality73 = setFormality;
+    setFormality = function (level, o) { var r = _setFormality73(level, o); setTimeout(function () { syncFeed(false); }, 0); return r; };
+  }
+  document.addEventListener("click", function (e) {
+    if (e.target.closest && e.target.closest("[data-studio-type-any], [data-studio-type]")) setTimeout(function () { syncFeed(false); }, 0);
+  });
+  if (typeof window.switchTab === "function") {
+    var _switchTab73 = window.switchTab;
+    window.switchTab = function (name, o) { _switchTab73(name, o); if (name === "studio") syncFeed(false); };
+    try { switchTab = window.switchTab; } catch (e) {}
+  }
+
+  /* Saved closet looks (My Outfits) show their flat-lay too —
+     named pieces = pictured pieces. */
+  function decorateSaved(root) {
+    if (!root) return;
+    root.querySelectorAll("article.saved-card").forEach(function (card) {
+      if (card.getAttribute("data-fl73")) return;
+      var ref = card.querySelector("[data-open-look], [data-fav-open], [data-delete-look]");
+      if (!ref) return;
+      var id = ref.getAttribute("data-open-look") || ref.getAttribute("data-fav-open") || ref.getAttribute("data-delete-look");
+      var look = null;
+      [savedLooks, (typeof queueLooks !== "undefined" ? queueLooks : [])].forEach(function (arr) { arr.forEach(function (l) { if (!look && l.id === id) look = l; }); });
+      if (!look || !look.composer) return;
+      var img = card.querySelector(":scope > img");
+      if (!img) return;
+      var wrap = document.createElement("div");
+      wrap.className = "cf-media saved-flatlay";
+      wrap.setAttribute("data-open-look", id);
+      wrap.innerHTML = flatlayHTML(look, true);
+      img.replaceWith(wrap);
+      card.setAttribute("data-fl73", "1");
+    });
+  }
+  ["saved-grid", "outfit-ideas-grid"].forEach(function (gid) {
+    var g = document.getElementById(gid);
+    if (!g) return;
+    decorateSaved(g);
+    new MutationObserver(function () { decorateSaved(g); }).observe(g, { childList: true });
+  });
+
+  /* Boot: Home was dealt before this block ran — re-render so a
+     closet look shows as its flat-lay; the Ideas feed fills the
+     first time Ideas is open. */
+  try {
+    if (todayLook && todayLook.composer) renderToday();
+    else if (todayLook && studioSource === "wardrobe" && todayLook.source !== "wardrobe" && !todayTouched && typeof planLookForDate === "function" && !planLookForDate(localTodayISO())) {
+      var fresh = buildClosetLooks(currentWeather ? { temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() } : undefined);
+      if (fresh && fresh.length) { todayLook = fresh[0]; persistOpeningLook(todayLook); renderToday(); }
+    }
+  } catch (e) {}
+  syncFeed(false);
+  window.WARDROBE_COMPOSER_READY = true;
 })();
 
     </script>

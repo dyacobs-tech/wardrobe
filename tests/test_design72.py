@@ -16,7 +16,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-18.72"
+BUILD = "2026-11-18.73"
 BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 PAGES = [
     ("home", ["#tab-today"]),
