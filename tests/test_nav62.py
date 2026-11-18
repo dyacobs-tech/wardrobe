@@ -103,8 +103,8 @@ def main() -> int:
                 home = bbox(page)
                 expected_h = 68 + inset
                 check(
-                    f"{name}: build is .68",
-                    home and home.get("build") == "2026-11-18.68",
+                    f"{name}: build is .69",
+                    home and home.get("build") == "2026-11-18.69",
                     str(home and home.get("build")),
                 )
                 anchored = home and (
@@ -153,31 +153,32 @@ def main() -> int:
                     """() => {
                       const el = document.getElementById('nav-diag');
                       const st = document.getElementById('build-stamp');
+                      const cs = el ? getComputedStyle(el) : null;
                       return {
                         stamp: st ? st.textContent : null,
+                        stampDisplay: st ? getComputedStyle(st).display : null,
                         diag: el ? el.textContent : null,
+                        diagHiddenAttr: !!(el && el.hidden),
+                        diagDisplay: cs ? cs.display : null,
+                        diagVisible: !!(el && cs && cs.display !== 'none' && cs.visibility !== 'hidden' && (el.offsetWidth || el.offsetHeight)),
                         pcloudShown: !!(document.getElementById('panel-pcloud') && !document.getElementById('panel-pcloud').hidden),
                       };
                     }"""
                 )
-                text = (diag or {}).get("diag") or ""
                 check(
-                    f"{name}: Cloud & backup shows build stamp .68",
-                    diag and "2026-11-18.68" in (diag.get("stamp") or ""),
+                    f"{name}: Cloud & backup shows build stamp .69",
+                    diag and "2026-11-18.69" in (diag.get("stamp") or ""),
                     str(diag),
                 )
                 check(
-                    f"{name}: diagnostic includes Home at launch and now",
-                    "Home at launch:" in text and "\nnow:" in text or "now:" in text,
-                    text[:400],
+                    f"{name}: Cloud & backup build stamp is visible",
+                    diag and diag.get("stampDisplay") not in (None, "none"),
+                    str(diag),
                 )
                 check(
-                    f"{name}: diagnostic includes innerH, vvH, standalone, nav rect, safe-bottom, viewport units, clientH",
-                    all(s in text for s in (
-                        "innerH", "vvH", "standalone", "nav top/bottom/h", "safe-bottom",
-                        "100vh/svh/lvh/dvh", "clientH",
-                    )),
-                    text[:500],
+                    f"{name}: diagnostic line is hidden",
+                    diag and (diag.get("diagHiddenAttr") or diag.get("diagDisplay") == "none") and not diag.get("diagVisible"),
+                    str(diag),
                 )
                 # Screenshot bottoms for the report
                 out = Path("/tmp/wardrobe-nav62")

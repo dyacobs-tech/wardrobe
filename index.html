@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.68" />
+    <meta name="wardrobe-build" content="2026-11-18.69" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -3442,6 +3442,7 @@
       }
       #build-stamp { margin: 14px 0 0; font-size: 11px; letter-spacing: .06em; color: var(--dim); }
       #nav-diag {
+        display: none;
         margin: 6px 0 0;
         font-size: 10px;
         line-height: 1.4;
@@ -4759,8 +4760,8 @@
           </div>
           <p id="data-status" style="margin:0"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.68</p>
-        <p class="form-note" id="nav-diag"></p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.69</p>
+        <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
       <!-- ================= WATCHES ================= -->
@@ -5584,7 +5585,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.68";
+var WARDROBE_BUILD = "2026-11-18.69";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;

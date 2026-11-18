@@ -1,4 +1,4 @@
-"""Build .67 nav contract, re-checked on .68 (Home build-chip removed):
+"""Build .67 nav contract, re-checked on .69 (Cloud diagnostics hidden):
 every phone page's document is at least screen-tall,
 and the bottom nav is flush and identical on short and long pages.
 
@@ -123,8 +123,8 @@ def main() -> int:
                     page.wait_for_timeout(80)
                     info = page.evaluate(INSPECT)
                     check(
-                        f"{tag} {slug}: build is .68",
-                        info and info.get("build") == "2026-11-18.68",
+                        f"{tag} {slug}: build is .69",
+                        info and info.get("build") == "2026-11-18.69",
                         str(info and info.get("build")),
                     )
                     check(
@@ -184,7 +184,7 @@ def main() -> int:
         for f in failures:
             print(" -", f)
         return 1
-    print("\nAll .68 nav/document-height checks passed (chip removed; nav unchanged from .67).")
+    print("\nAll .69 nav/document-height checks passed (Cloud diagnostics hidden; nav unchanged from .67).")
     return 0
 
 
