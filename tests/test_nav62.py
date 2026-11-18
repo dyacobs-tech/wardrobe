@@ -103,8 +103,8 @@ def main() -> int:
                 home = bbox(page)
                 expected_h = 68 + inset
                 check(
-                    f"{name}: build is .65",
-                    home and home.get("build") == "2026-11-18.65",
+                    f"{name}: build is .66",
+                    home and home.get("build") == "2026-11-18.66",
                     str(home and home.get("build")),
                 )
                 anchored = home and (
@@ -162,8 +162,8 @@ def main() -> int:
                 )
                 text = (diag or {}).get("diag") or ""
                 check(
-                    f"{name}: Cloud & backup shows build stamp .65",
-                    diag and "2026-11-18.65" in (diag.get("stamp") or ""),
+                    f"{name}: Cloud & backup shows build stamp .66",
+                    diag and "2026-11-18.66" in (diag.get("stamp") or ""),
                     str(diag),
                 )
                 check(

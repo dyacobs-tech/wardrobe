@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.65" />
+    <meta name="wardrobe-build" content="2026-11-18.66" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -3453,52 +3453,26 @@
       }
     </style>
     <style>
-      /* ================= Build .65 — 100lvh nav slot; .64 pin removed =================
-         David's 10:34am ET Ideas → My Inspo shot (iPhone 16 Pro, 402×874
-         @3x) showed two bugs at once: "MY IN" and its active pill clipped
-         at the right edge of the subnav, and the bottom bar lifted ~61 CSS
-         px with a dark strip of page background below it — the same lift
-         previously seen on Home, and confirmed again at 10:41am ET on Calendar — the lift is global.
+      /* ================= Build .66 — bar stays at ICB bottom; fill the gap =================
+         David's 12:09pm ET Calendar shot is the same as the 11:26
+         .64 overshoot in the app and nav (bar top 772 CSS px /
+         905/1024, labels cut off). The only pixel diffs are in the
+         iOS status-bar clock (y 76–119). Either the phone was still
+         on .64 (stale sw.js: GitHub Pages max-age=600 and register
+         lacked updateViaCache:'none'), or .65's 100lvh slot placed
+         the bar at the full-screen bottom while the paintable/clip
+         edge is the short ICB — the same overshoot.
 
-         Subnav: phone labels shorten (My Inspo → Inspo, Outfit Ideas /
-         My Outfits → Outfits, Shop the look → Shop, Sale items → Sale,
-         Profile info → Info, Cloud & backup → Cloud), type and padding
-         tighten so a five-tab Ideas row fits at 375–430px. Rows that
-         still overflow (Shop's seven) stay a horizontal scroller; the
-         active tab is scrolled fully into view with end padding so the
-         last pill is never cut. Profile's .58 reserved × slot is
-         unchanged. Desktop (≥1024px) keeps the full labels.
-
-         Bottom bar (.65): the .64 visualViewport pin is gone. On
-         David's 11:26am ET Calendar shot (1206×2622 @3x, 402×874)
-         it had overshot: bar top at 772 CSS px (905/1024) vs 710
-         (832/1024) in the earlier lifted shots — a ~62px downward
-         shift, the same size as the lift — so only the icons sat
-         on screen and the labels were cut off. Correct Closet
-         labels sit at ~830 CSS px (973/1024).
-
-         viewport-fit=cover and black-translucent are already set;
-         the viewport meta has no height=device-height or minimal-ui.
-         html,body stay height:auto / min-height:100% with overflow
-         visible and no -webkit-fill-available and no 100vh/svh, so
-         they are not a shorter containing block. The remaining iOS
-         standalone quirk is that position:fixed; bottom:0 can still
-         anchor to a layout viewport ~59–62px shorter than the
-         screen (the top safe area). A JS shift toward
-         screen.height is not safe: that region may be clipped, and
-         the same shortfall can be applied even when the bar is
-         already at or past the visual bottom.
-
-         The robust pattern is a position:fixed frame sized with
-         the stable large viewport unit (100lvh, which is ≥ the
-         ICB and does not shrink with toolbars) and the nav
-         position:absolute; bottom:0 inside it, with
-         pointer-events only on the nav. If 100lvh equals the
-         ICB, this is identical to bottom:0 (no overshoot). If
-         100lvh is the full screen, the bar sits on the true
-         bottom without any signed heuristic. Desktop and the
-         900–1023px pill are unchanged (the slot is
-         display:contents there). */
+         Safe rule: the bar is again position:fixed; bottom:0, so
+         its box (icons and labels) is always inside the ICB and
+         cannot be clipped. If the ICB is short, a 100px box-shadow
+         in --bg fills the gap visually. In standalone, when
+         screen.height - innerHeight > 40, padding-bottom is 8px
+         (the home indicator is then outside the ICB); that only
+         shrinks padding, it never moves the bar off-screen. The
+         100lvh slot is gone. register() uses updateViaCache:'none'
+         and registration.update() runs on load and visibilitychange.
+         Temporary #build-chip on Home shows ".66". */
       .subtab-short { display: none; }
       html, body {
         height: auto !important;
@@ -3543,9 +3517,24 @@
         }
         #subnav-me #profile-close { padding: 0 8px; }
       }
-      /* The slot is a no-op on desktop / the 900–1023px floating pill
-         (display:contents). On the phone it becomes the fixed frame. */
-      #bottombar-slot { display: contents; }
+      /* Temporary Home-screen build marker so screenshots show the
+         running build. Remove later. */
+      #build-chip {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 0px) + 52px);
+        right: 12px;
+        z-index: 42;
+        margin: 0;
+        padding: 0;
+        font-family: var(--font-ui);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        line-height: 1;
+        color: var(--dim);
+        opacity: .4;
+        pointer-events: none;
+      }
       @media (max-width: 899px) {
         html, body,
         body:has(> main > #panel-today:not([hidden])) {
@@ -3560,27 +3549,8 @@
           will-change: auto !important;
           isolation: auto !important;
         }
-        #bottombar-slot {
-          display: block !important;
-          position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          bottom: auto !important;
-          width: auto !important;
-          height: 100lvh !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          border: 0 !important;
-          background: transparent !important;
-          transform: none !important;
-          filter: none !important;
-          contain: none !important;
-          pointer-events: none;
-          z-index: 45;
-        }
         #bottombar.bottombar {
-          position: absolute !important;
+          position: fixed !important;
           left: 0 !important;
           right: 0 !important;
           bottom: 0 !important;
@@ -3592,8 +3562,15 @@
           padding: 0 !important;
           padding-bottom: env(safe-area-inset-bottom, 0px) !important;
           box-sizing: border-box !important;
-          pointer-events: auto;
           z-index: 45;
+          /* Extend only the BACKGROUND into any short-ICB gap below
+             the bar. Shadows and ::after painting do not move the
+             labels or the bar's box, so nothing can clip off-screen. */
+          box-shadow: 0 100px 0 0 var(--bg);
+        }
+        html.bb-short-icb { --bb-h: 76px; }
+        html.bb-short-icb #bottombar.bottombar {
+          padding-bottom: 8px !important;
         }
       }
       @media (min-width: 1024px) {
@@ -3633,6 +3610,8 @@
         <div class="rule-double" aria-hidden="true"></div>
       </div>
     </header>
+    <!-- Temporary: faint build id on Home so screenshots show the running build. Remove later. -->
+    <div id="build-chip" aria-hidden="true">.66</div>
 
     <div class="navstack">
       <!-- The four section buttons live in the bottom bar (after
@@ -4790,7 +4769,7 @@
           </div>
           <p id="data-status" style="margin:0"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.65</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.66</p>
         <p class="form-note" id="nav-diag"></p>
       </section>
 
@@ -4861,12 +4840,8 @@
       </section>
     </main>
 
-    <!-- Bottom nav slot: a direct child of body, outside main.
-         On the phone it is position:fixed; top:0; height:100lvh;
-         the nav is absolutely pinned to its bottom. At ≥900px the
-         slot is display:contents so the pill / desktop top nav
-         are unchanged. -->
-    <div id="bottombar-slot">
+    <!-- Bottom nav: a direct child of body, outside main.
+         position:fixed; bottom:0 — the ICB bottom, always visible. -->
     <nav class="bottombar" id="bottombar" aria-label="Wardrobe sections">
       <button type="button" class="navbtn" id="tab-today" data-tab="today" data-section="today" aria-controls="panel-today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><span>Home</span></button>
       <button type="button" class="navbtn" id="section-closet" data-section="closet"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7.2a2 2 0 1 0-2-2"/><path d="M12 7.2v1.6L3.6 14.6a1.4 1.4 0 0 0 .8 2.6h15.2a1.4 1.4 0 0 0 .8-2.6L12 8.8"/></svg><span>Closet</span></button>
@@ -4874,7 +4849,31 @@
       <button type="button" class="navbtn" id="tab-find" data-tab="find" data-section="find" aria-controls="panel-find"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Shop</span></button>
       <button type="button" class="navbtn" id="section-calendar" data-section="calendar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Calendar</span></button>
     </nav>
-    </div>
+    <script>
+      /* Build .66: if the ICB is short in standalone, the home
+         indicator sits outside it, so the bar only needs a small
+         padding-bottom. Never changes bottom:0. */
+      (function () {
+        function apply() {
+          try {
+            if (window.matchMedia && window.matchMedia("(min-width: 900px)").matches) {
+              document.documentElement.classList.remove("bb-short-icb");
+              return;
+            }
+            var standalone = false;
+            try {
+              standalone = !!(window.navigator.standalone || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches));
+            } catch (e2) {}
+            var short = !!(standalone && window.screen && (screen.height - window.innerHeight > 40));
+            document.documentElement.classList.toggle("bb-short-icb", short);
+          } catch (e) {}
+        }
+        apply();
+        window.addEventListener("resize", apply);
+        window.addEventListener("pageshow", apply);
+        window.addEventListener("orientationchange", apply);
+      })();
+    </script>
     <script>
       /* Build .62 on-device nav diagnostic. Does not write styles to
          the bar, --bb-h, or body. Captures the first Home measurement
@@ -5620,7 +5619,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.65";
+var WARDROBE_BUILD = "2026-11-18.66";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -33078,7 +33077,7 @@ function analyzeFilePiece(card, job, ix) {
             location.reload();
           });
           window.addEventListener("load", function () {
-            navigator.serviceWorker.register("sw.js").then(function (reg) {
+            navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) {
               try { if (reg && reg.update) reg.update(); } catch (e) {}
             }).catch(function () {});
           });
