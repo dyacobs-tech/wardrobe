@@ -184,8 +184,8 @@ def main() -> int:
                 ctx, page = new_page(vw, vh, dsf)
                 home = nav_bbox(page)
                 check(
-                    f"{name}: build is .63",
-                    home and home.get("build") == "2026-11-18.63",
+                    f"{name}: build is .64",
+                    home and home.get("build") == "2026-11-18.64",
                     str(home and home.get("build")),
                 )
                 check(
@@ -347,8 +347,8 @@ def main() -> int:
             open_ideas(page)
             desk = page.evaluate(ROW_JS)
             check(
-                "1280x800: build is .63",
-                desk and desk.get("build") == "2026-11-18.63",
+                "1280x800: build is .64",
+                desk and desk.get("build") == "2026-11-18.64",
                 str(desk and desk.get("build")),
             )
             check(

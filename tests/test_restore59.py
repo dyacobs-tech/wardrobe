@@ -1,4 +1,4 @@
-"""Build .59 restore + Home chevron + bottom-nav geometry (build stamp .63).
+"""Build .59 restore + Home chevron + bottom-nav geometry (build stamp .64).
 
 A local mock implements the client's /sync protocol. Requests to
 *.workers.dev are intercepted here and never leave the machine.
@@ -319,7 +319,7 @@ def run() -> int:
             page.wait_for_timeout(300)
             st = closet_state(page)
             expected_ids = sorted(f"item-{ITEM_TS + i}" for i in range(N_SERVER))
-            check("build is .63", st["build"] == "2026-11-18.63", st["build"])
+            check("build is .64", st["build"] == "2026-11-18.64", st["build"])
             check("all 83 server items reappear in memory", st["userCount"] == N_SERVER, f"got {st['userCount']}")
             check("all 83 persisted to wardrobe.items", st["storedUserCount"] == N_SERVER, f"got {st['storedUserCount']}")
             check("restored ids match the mock server", st["storedIds"] == expected_ids, f"got {len(st['storedIds'])} ids")
