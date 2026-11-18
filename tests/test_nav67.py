@@ -1,4 +1,5 @@
-"""Build .67: every phone page's document is at least screen-tall,
+"""Build .67 nav contract, re-checked on .68 (Home build-chip removed):
+every phone page's document is at least screen-tall,
 and the bottom nav is flush and identical on short and long pages.
 
     PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 /tmp/pwvenv/bin/python tests/test_nav67.py
@@ -122,8 +123,8 @@ def main() -> int:
                     page.wait_for_timeout(80)
                     info = page.evaluate(INSPECT)
                     check(
-                        f"{tag} {slug}: build is .67",
-                        info and info.get("build") == "2026-11-18.67",
+                        f"{tag} {slug}: build is .68",
+                        info and info.get("build") == "2026-11-18.68",
                         str(info and info.get("build")),
                     )
                     check(
@@ -147,8 +148,8 @@ def main() -> int:
                     if baseline is None:
                         baseline = info
                         check(
-                            f"{tag}: faint build chip shows .67",
-                            ".67" in (info.get("chip") or ""),
+                            f"{tag}: Home has no build-chip",
+                            not (info.get("chip") or ""),
                             repr(info.get("chip")),
                         )
                     else:
@@ -183,7 +184,7 @@ def main() -> int:
         for f in failures:
             print(" -", f)
         return 1
-    print("\nAll .67 nav/document-height checks passed.")
+    print("\nAll .68 nav/document-height checks passed (chip removed; nav unchanged from .67).")
     return 0
 
 
