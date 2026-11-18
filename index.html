@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.55" />
+    <meta name="wardrobe-build" content="2026-11-17.56" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2529,6 +2529,13 @@
         min-height: 36px; padding: 0 14px; font: inherit; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 12px;
       }
       .sync-note .sync-note-x { border: none; min-height: 36px; padding: 0 8px; font-size: 17px; font-weight: 400; letter-spacing: 0; text-transform: none; }
+      /* Build .56 verification fix: on phone widths the note's
+         144px offset landed exactly on the hero's second control
+         row (watch / outfit type / source), covering controls
+         that must stay tappable. It now uses the same 76px
+         offset as wide screens — the dead band between the hero
+         controls and the bottom bar. */
+      @media (max-width: 899px) { .sync-note { bottom: 76px; } }
 </style>
 <style>
       /* ================= Dead-space audit — build 2026-11-16.13 =================
@@ -3128,6 +3135,101 @@
         #panel-today .today-hero .today-collage { flex: 1 1 auto; height: auto; min-height: 0; }
       }
     </style>
+    <style>
+      /* ================= Build .56 =================
+         Item 7 — every transient popup is a slim DARK bar in both
+         colour schemes. The toast family keyed its surface off
+         --ink-btn, which is cream in dark mode, and the sync /
+         update notes paired that cream surface with --accent-ink
+         (white) text — white on cream, unreadable. All of them now
+         sit on one fixed dark surface with light text; behaviour,
+         triggers and timing are unchanged. */
+      .toast, .undo-toast, .sync-note, .update-bar, .ptr {
+        background: #211c15; color: #f0e7d3; border: 1px solid #4a3f2c;
+        box-shadow: 0 6px 24px rgba(0,0,0,.38);
+      }
+      .sync-note button, .update-bar button { color: #f0e7d3; border-color: #a3937b; background: transparent; }
+      .sync-note .sync-note-x { color: #f0e7d3; }
+      .undo-toast button { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+
+      /* Item 6(a) — sub-nav rows fit on ONE line at phone widths.
+         Closet: "Wearing Today" is labelled "Today" and no subtab
+         wraps. Ideas: five pages get five columns (the grid said
+         four, so My Inspo wrapped to a second row). Shop: seven
+         pages lay out as a 4 + 3 grid of equal cells instead of a
+         sideways-scrolling strip. Desktop (≥1024px) keeps the
+         build .44 horizontal nav. */
+      @media (max-width: 1023px) {
+        .subtab { white-space: nowrap; }
+        #subnav-closet #tab-wearing { white-space: nowrap; line-height: 1.2; padding: 4px 2px; }
+        #subnav-ideas { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+        #subnav-find:not([hidden]) { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; overflow: visible; }
+        #subnav-find .subtab { flex: none; width: auto; padding: 4px 2px; }
+        #subnav-me { grid-template-columns: repeat(3, minmax(0, 1fr)) auto; }
+      }
+
+      /* Item 6(c) — the Today image band is capped: it still flexes
+         and yields exactly as build .55 plumbed it (border-box
+         column, min-height: 0 chain — the caption and controls are
+         never clipped by the bottom bar), but it may no longer
+         grow past min(58dvh, 600px), so the controls row keeps
+         real clearance above the bar at phone heights. */
+      @media (max-width: 899px) {
+        #panel-today .today-hero img#today-img { max-height: min(58dvh, 600px); }
+        #panel-today .today-hero .today-collage { max-height: min(58dvh, 600px); }
+      }
+
+      /* Item 5 — Purchased: one card per purchase on its own Shop
+         page — image, title and meta lines, the price in the meta,
+         and the action on its own full-width line. Nothing can
+         overflow: every cell may shrink and text wraps inside the
+         card. */
+      #shop-purchased { display: grid; gap: 10px; }
+      #shop-purchased[hidden] { display: none; }
+      .purchase-card { display: flex; flex-wrap: wrap; gap: 10px 12px; padding: 12px 14px; align-items: flex-start; min-width: 0; }
+      .purchase-card img.shop-thumb { width: 54px; height: 72px; object-fit: cover; flex: none; }
+      .purchase-card .shop-thumb-ph { width: 54px; height: 72px; flex: none; }
+      .purchase-card .pc-main { flex: 1 1 0; min-width: 0; display: grid; gap: 2px; align-content: start; }
+      .purchase-card .pc-name { font-size: 15px; font-weight: 600; line-height: 1.25; color: var(--text); overflow-wrap: break-word; }
+      .purchase-card .pc-meta { font-size: 12.5px; color: var(--dim); line-height: 1.4; overflow-wrap: break-word; }
+      .purchase-card .pc-actions { flex: 1 1 100%; display: flex; gap: 8px; min-width: 0; }
+      .purchase-card .pc-actions .btn-ghost { flex: none; }
+      /* Receipts: the confirm cards stack in one column at phone
+         widths and their fields may shrink — no sideways spill. */
+      #panel-receipts #receipts-list { grid-template-columns: minmax(0, 1fr); }
+      #panel-receipts .receipt-item { min-width: 0; }
+      #panel-receipts .receipt-item input, #panel-receipts .receipt-item select { min-width: 0; }
+      #panel-receipts .analyze-item-actions { flex-wrap: wrap; }
+
+      /* Item 4(b) — an upload still being processed shows as ONE
+         slim notification, never as image cards. */
+      .processing-note {
+        grid-column: 1 / -1; display: flex; align-items: center; gap: 10px;
+        padding: 12px 14px; font-size: 13.5px; line-height: 1.4; color: var(--text);
+      }
+      .processing-note .analyze-spin { flex: none; }
+    </style>
+    <style>
+      /* ================= Build .56 verification fix — hero clearance =================
+         Measured at 390×844 / 402×874 with a 47px top inset: with the
+         look the app deals by default, the min(58dvh, 600px) image cap
+         leaves free space under the caption and the selector row
+         clears the bottom bar by 34.5px / 46.4px. But with a longer
+         look title (caption ~206px instead of ~183px) the image band
+         drops just below the cap, the free space vanishes, and the
+         clearance collapsed to the caption's 12px bottom padding —
+         12.0px at 390×844, under the required 20px. The guarantee is
+         now structural: at phone widths the caption carries 24px of
+         bottom padding, so the worst case (no free space at all) is
+         a 24px clearance, and when the cap does leave free space the
+         total is unchanged (the image band flexes 12px shorter and
+         the free space shrinks by the same 12px). Nothing else moves:
+         the band cap, the flex chain and every control size are as
+         build .55/.56 left them. */
+      @media (max-width: 899px) {
+        #panel-today .today-caption { padding-bottom: 24px; }
+      }
+    </style>
   </head>
   <body>
     <header class="masthead">
@@ -3148,7 +3250,7 @@
             <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
             <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks">My Outfits</button>
             <button class="subtab" role="tab" id="tab-watches" aria-selected="false" aria-controls="panel-watches" data-tab="watches">Watches</button>
-            <button class="subtab" role="tab" id="tab-wearing" aria-selected="false" aria-controls="panel-wearing" data-tab="wearing">Wearing Today</button>
+            <button class="subtab" role="tab" id="tab-wearing" aria-selected="false" aria-controls="panel-wearing" data-tab="wearing">Today</button>
           </div>
           <div class="subnav-group" id="subnav-ideas" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Ideas</button>
@@ -3162,6 +3264,8 @@
             <button class="subtab" role="tab" id="tab-brands" aria-selected="false" aria-controls="panel-brands" data-tab="brands">Brands <span class="count" id="brand-count">53</span></button>
             <button class="subtab" role="tab" id="tab-sale" aria-selected="false" aria-controls="panel-sale" data-tab="sale">Sale items</button>
             <button class="subtab" role="tab" id="tab-shopwish" aria-selected="false" aria-controls="panel-shopwish" data-tab="shopwish">Wishlist</button>
+            <button class="subtab" role="tab" id="tab-purchased" aria-selected="false" aria-controls="panel-purchased" data-tab="purchased">Purchased</button>
+            <button class="subtab" role="tab" id="tab-receipts" aria-selected="false" aria-controls="panel-receipts" data-tab="receipts">Receipts <span class="count" id="receipts-tab-count"></span></button>
             <button class="subtab" role="tab" id="tab-search" aria-selected="false" aria-controls="panel-search" data-tab="search">Search</button>
           </div>
           <div class="subnav-group" id="subnav-me" role="tablist" hidden>
@@ -4072,7 +4176,7 @@
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Shop the look" data-info-text="The look on Today, piece by piece, with catalogue matches at your price tier — every piece carries its own Price tier and Search controls at its top. Mark purchased files a piece into Purchased below and into your Closet. Free-form briefs live under Search." aria-label="About Shop the look">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Shop the look" data-info-text="The look on Today, piece by piece, with catalogue matches at your price tier — every piece carries its own Price tier and Search controls at its top. Mark purchased files a piece into Purchased and into your Closet. Free-form briefs live under Search." aria-label="About Shop the look">i</button></div>
         <div class="card link-card" id="link-card">
           <label class="field" for="link-url">Paste a product link</label>
           <div class="link-row"><input type="url" id="link-url" placeholder="https://…" autocomplete="off" /><button type="button" class="btn-accent" id="link-go">Check it</button></div>
@@ -4081,13 +4185,22 @@
         </div>
         <div id="find-look-mode" hidden></div>
         <div id="shop-receipts" class="shop-purchased shop-receipts"><h3>Receipts</h3><p>Turn on sync to import receipts from your order emails</p></div>
-        <div id="shop-purchased" hidden></div>
         <p class="meta" id="find-nolook">Open a look and tap Shop the look — its pieces and matches land here.</p>
 
       </section>
-      <!-- ================= RECEIPTS — ORDER-EMAIL IMPORT (sub-page, build .41) ================= -->
+      <!-- ================= PURCHASED — own Shop sub page (build .56) =================
+           Supersedes the build .51 merge: Purchased lives here, on
+           its own page, one card per purchase. Receipts keep their
+           own page below; neither is pinned inside the other. -->
+      <section id="panel-purchased" role="tabpanel" aria-labelledby="tab-purchased" hidden>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Purchased" data-info-text="Everything you've marked purchased from Shop the look, Sale items, the Wishlist or a confirmed receipt — each purchase is also catalogued into your Closet. Un-marking a purchase removes it here; a piece you've worn stays in the Closet as an ordinary piece." aria-label="About Purchased">i</button></div>
+        <h3 class="fav-head">Purchased</h3>
+        <div id="shop-purchased"></div>
+      </section>
+      <!-- ================= RECEIPTS — ORDER-EMAIL IMPORT (own Shop sub page, build .41; housing .56) ================= -->
       <section id="panel-receipts" role="tabpanel" aria-label="Receipts" hidden>
-        <button type="button" class="btn-ghost subpage-back" id="receipts-back">← Shop</button>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Receipts" data-info-text="Order-email line items waiting for your word. Confirming files the piece into your Closet and records it in Purchased; dismissing takes it off the list. Nothing files without a tap." aria-label="About Receipts">i</button></div>
+        <h3 class="fav-head">Receipts</h3>
         <div id="receipts-list"></div>
       </section>
       <!-- ================= SEARCH — free-form briefs (own sub tab, build .28) ================= -->
@@ -4431,7 +4544,7 @@
         <img id="upload-preview" alt="Your uploaded look" hidden />
         <div class="upload-sec">
           <label class="field" for="upload-name">Name</label>
-          <input type="text" id="upload-name" value="Uploaded look" autocomplete="off" />
+          <input type="text" id="upload-name" value="" placeholder="Name — optional; untitled uploads are named from their pieces" autocomplete="off" />
         </div>
         <div class="upload-sec">
           <label class="field">Tag the pieces — optional</label>
@@ -4989,7 +5102,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.55";
+var WARDROBE_BUILD = "2026-11-17.56";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -12584,7 +12697,14 @@ function photoScore(swatches, s) {
   return score;
 }
 function rankedPhotoLooks(swatches) {
-  var pool53 = RENDER_POOL.filter(function (s) { return !isQuarantinedImg(s.img); });
+  /* Build .56 verification fix: disliked photographs leave the
+     ranking too, canonically — the ban list may hold the -watch
+     variant of a pool photo while the pool holds the base form,
+     and a colour match must never hand the banned photo back
+     through buildLook / lookImg. isDislikedImg is hoisted and
+     guards the not-yet-initialised list, so this is safe at any
+     call time. */
+  var pool53 = RENDER_POOL.filter(function (s) { return !isQuarantinedImg(s.img) && !isDislikedImg(s.img); });
   if (!swatches || !swatches.length) return pool53.slice();
   return pool53.map(function (s) { return { s: s, score: photoScore(swatches, s) }; })
     .sort(function (a, b) { return a.score - b.score; })
@@ -12593,7 +12713,19 @@ function rankedPhotoLooks(swatches) {
 function nearestPhotoLook(swatches, exclude) {
   var ranked = rankedPhotoLooks(swatches);
   if (exclude) {
-    for (var i = 0; i < ranked.length; i++) { if (!exclude[ranked[i].img]) return ranked[i]; }
+    /* Exclusions match canonically: an exclude map keyed by one
+       file form of a photo excludes the photo in every form. */
+    var exKeys = Object.keys(exclude).filter(function (k) { return exclude[k]; });
+    for (var i = 0; i < ranked.length; i++) {
+      var hit = false;
+      for (var j = 0; j < exKeys.length; j++) { if (imgsEquivalent(exKeys[j], ranked[i].img)) { hit = true; break; } }
+      if (!hit) return ranked[i];
+    }
+    /* Every ranked photo is excluded by a soft exclusion (saved,
+       on screen, caller-passed): the standing valve returns the
+       top colour match anyway. It can never be a banned photo —
+       the ranking itself already removed those canonically. */
+    return ranked[0] || null;
   }
   return ranked[0] || null;
 }
@@ -12681,6 +12813,37 @@ function isDislikedImg(img) {
   for (var i = 0; i < dislikedImgs.length; i++) { if (imgsEquivalent(dislikedImgs[i], img)) return true; }
   return false;
 }
+/* Build .56: the canonical ban test for a whole look — the base
+   render path AND the watch-variant photograph the look actually
+   pictures. Dealers use this (or isDislikedImg directly on the
+   pictured image); the exact-string dislikedImgs.indexOf test is
+   gone from dealing, because the ban list holds whichever file
+   form a surface happened to store. */
+function lookPhotoBanned56(look) {
+  if (!look) return false;
+  if (isDislikedImg(look.img)) return true;
+  var pic = (typeof lookPicturedImg === "function") ? lookPicturedImg(look) : "";
+  return pic ? isDislikedImg(pic) : false;
+}
+/* Build .56: cross-collection render dedupe. The saved grids
+   merge savedLooks + SEED_LOOKS + queuedOnly; the same photo may
+   sit in more than one list, and without this pass it rendered
+   once per list ("Olive & Cream" ×2). First occurrence wins —
+   savedLooks leads the merge, so the user's own save is the copy
+   that renders. Looks with no pictured image are never treated
+   as duplicates of each other (empty canonical keys are skipped). */
+function dedupeLooksByPhoto56(list) {
+  var seen = {};
+  return (list || []).filter(function (l) {
+    if (!l) return false;
+    var key = "";
+    try { key = canonicalImg(lookPicturedImg(l) || ""); } catch (e) { key = ""; }
+    if (!key) return true;
+    if (seen[key]) return false;
+    seen[key] = true;
+    return true;
+  });
+}
 function lookPicturedImg(look) {
   if (!look) return "";
   if (look.swapPhoto && (look.swapPieces || look.swapComboId)) return look.swapPhoto;
@@ -12737,9 +12900,46 @@ function swapSpecTitle(look) {
   if (tp) return cap(pn(tp));
   return cap(pn(bp));
 }
+/* Build .56: an uploaded look's title derives from its cataloged
+   pieces — colour + garment of the first two distinct garment
+   kinds, in the derive-at-display style (the boxes photo titles
+   from the Loro Piana oatmeal blazer outfit it catalogues, not
+   "Uploaded look"). With no cataloged pieces it falls back to
+   what IS known — the detected colours and garment types carried
+   in the look's swatches. The literal "Uploaded look" is never a
+   title. */
+function uploadedTitle56(look) {
+  if (!look) return "";
+  var parts = [], seenRole = {};
+  function pushPiece(colour, garment) {
+    colour = (colour || "").split("·")[0].trim();
+    garment = (garment || "").trim();
+    if (!garment || seenRole[garment.toLowerCase()]) return;
+    seenRole[garment.toLowerCase()] = true;
+    parts.push(colour ? cap(colour) + " " + cap(garment) : cap(garment));
+  }
+  (look.swatches || []).forEach(function (s) { if (s) pushPiece(s.name, s.role); });
+  if (!parts.length) {
+    (look.taggedPieces || []).forEach(function (tp) {
+      if (!tp) return;
+      var it = null;
+      try { it = tp.id ? closetItemById(tp.id) : null; } catch (e) {}
+      pushPiece(it ? (it.colourName || "") : "", (typeof CLOSET_GARMENT !== "undefined" && CLOSET_GARMENT[tp.category]) || tp.category || "");
+    });
+  }
+  if (parts.length > 2) parts = parts.slice(0, 2);
+  if (parts.length === 2) return parts[0] + " & " + parts[1];
+  if (parts.length === 1) return parts[0];
+  return "";
+}
 function displayTitleForLook(look, picturedImg) {
   if (!look) return "";
-  if (look.source === "uploaded") return look.title || "Uploaded look";
+  if (look.source === "uploaded") {
+    var derived56 = uploadedTitle56(look);
+    if (derived56) return derived56;
+    if (look.title && look.title !== "Uploaded look") return look.title;
+    return "My outfit";
+  }
   if (look.refLook || look.iconSpec) return look.title || "";
   var img = picturedImg || lookPicturedImg(look) || "";
   if (look.swapPieces || look.swapComboId) {
@@ -12823,6 +13023,19 @@ function pickDealt(candidates) {
   });
   return best[Math.floor(Math.random() * best.length)];
 }
+/* The dealer's last resort when no clean photograph exists in
+   any pool: a generated combination (whose photograph comes
+   from the canonically clean ranking), or — if generation has
+   nothing to draw on — the top clean ranked photograph as a
+   look. Never a banned photograph. Returns null only when the
+   baked icon/plate library itself is empty. */
+function dealerLookSafe56(opts) {
+  var g = generateComboLook({ version: (opts && opts.version) || 1, iconId: (opts && opts.iconId) || null });
+  if (g) return g;
+  var clean = rankedPhotoLooks([])[0];
+  if (clean) { var l = renderAsLook(clean); l.id = newLookId(); l.version = (opts && opts.version) || 1; return l; }
+  return null;
+}
 function dealerLook(opts) {
   opts = opts || {};
   /* The dealer draws on the WHOLE photograph library — every render,
@@ -12832,7 +13045,13 @@ function dealerLook(opts) {
      deal is a genuinely new outfit, not a reshuffle of the last. */
   var pool = opts.pool && opts.pool.length ? opts.pool : DEAL_POOL;
   function notExcluded(l) { return !(opts.excludeImgs && opts.excludeImgs[l.img]); }
-  var usable = pool.filter(notExcluded);
+  /* Build .56 verification fix: DEAL_POOL is built once at load,
+     before the ban list is read, so it can hold photographs that
+     are banned canonically (either file form). The dealer drops
+     banned and quarantined photographs at deal time, from any
+     pool — a caller-passed pool is dealt as chosen EXCEPT for
+     the ban, which no caller can deal around. */
+  var usable = pool.filter(notExcluded).filter(function (l) { return !isDislikedImg(l.img) && !isQuarantinedImg(l.img); });
   /* Free dealer's-choice deals (no caller pool) also drop
      graduated (liked) photographs; a caller-passed pool is dealt
      as chosen. The usable→pool fallback below stays as the valve. */
@@ -12843,7 +13062,20 @@ function dealerLook(opts) {
     var genLook = generateComboLook({ version: opts.version || 1, iconId: opts.iconId || null });
     if (genLook) return genLook;
   }
-  var pick = pickDealt(usable.length ? usable : pool);
+  var cleanPool = pool.filter(function (l) { return !isDislikedImg(l.img) && !isQuarantinedImg(l.img); });
+  /* No clean photograph left in the pool: generate a fresh
+     combination instead of dealing a banned one — a banned
+     photograph is never dealt, in either file form, full stop.
+     Generation draws its photograph from the canonically clean
+     ranking, so its look is clean by construction; the final
+     guard exists only so an impossible empty generation can
+     never crash the dealer. */
+  if (!usable.length && !cleanPool.length) {
+    var gen56 = generateComboLook({ version: opts.version || 1, iconId: opts.iconId || null });
+    if (gen56) return gen56;
+    return dealerLookSafe56(opts);
+  }
+  var pick = pickDealt(usable.length ? usable : cleanPool);
   var clone = JSON.parse(JSON.stringify(pick));
   clone.id = newLookId();
   clone.desc = "A surprise pick from the book";
@@ -13091,6 +13323,17 @@ function generateComboLook(opts) {
    daily look) leaves disliked photographs out from then on.
    A removed look is never dealt again. */
 var dislikedImgs = (store.get("dislikedImgs", []) || []).filter(function (img) { return typeof img === "string"; });
+/* Build .56 verification fix: lifting a ban matches canonically
+   too — the stored entry may be the -watch variant of the photo
+   whose base form the undo path holds (or vice versa), and an
+   exact-string indexOf would leave the ban in force. */
+function removeDislike56(img) {
+  if (!img || typeof dislikedImgs === "undefined" || !dislikedImgs) return false;
+  var before = dislikedImgs.length;
+  dislikedImgs = dislikedImgs.filter(function (x) { return !imgsEquivalent(x, img); });
+  if (dislikedImgs.length !== before) { store.set("dislikedImgs", dislikedImgs); return true; }
+  return false;
+}
 function recordDislike(img) {
   if (img && dislikedImgs.indexOf(img) === -1) {
     dislikedImgs.push(img);
@@ -13098,6 +13341,21 @@ function recordDislike(img) {
   }
   /* Build .53: the verdict evicts saved copies on the spot. */
   evictDislikedFromSaved();
+  /* Build .56: if the photograph on the hero right now is the one
+     just banned, it does not stay on screen. Deferred one tick so
+     a caller that deals its own replacement (the hero Dislike
+     button) is not double-dealt: by the time this runs, the hero
+     either still shows the banned photo (deal) or it doesn't. */
+  try {
+    if (typeof todayLook !== "undefined" && todayLook && typeof dealAnotherToday === "function" &&
+        isDislikedImg(lookPicturedImg(todayLook) || todayLook.img || "")) {
+      setTimeout(function () {
+        try {
+          if (todayLook && isDislikedImg(lookPicturedImg(todayLook) || todayLook.img || "")) dealAnotherToday();
+        } catch (e) {}
+      }, 0);
+    }
+  } catch (e) {}
 }
 /* Like-graduation (build 2026-11-16.10; build .38, item 2.8 —
    user-approved Nov 17): a liked look graduates out of the
@@ -13213,10 +13471,10 @@ function dealFromDeck(need, opts) {
   Object.keys(graduatedImgs()).forEach(function (img) { exclude[img] = true; });
   var cards = [];
   RENDER_POOL.forEach(function (r) {
-    if (!exclude[r.img] && !isQuarantinedImg(r.img)) cards.push({ img: r.img, level: formalityOf(r.img), render: r });
+    if (!exclude[r.img] && !isDislikedImg(r.img) && !isQuarantinedImg(r.img)) cards.push({ img: r.img, level: formalityOf(r.img), render: r });
   });
   ICON_IDEAS.forEach(function (idea) {
-    if (!exclude[idea.img]) cards.push({ img: idea.img, level: idea.level, idea: idea });
+    if (!exclude[idea.img] && !isDislikedImg(idea.img)) cards.push({ img: idea.img, level: idea.level, idea: idea });
   });
   /* Undealt cards only, ordered by formality band: cards at the
      meter's level come first, then a level away, and so on.
@@ -15938,9 +16196,16 @@ function buildCardHTML(look, idx) {
 function renderBuildResults(keepScroll) {
   var el = document.getElementById("look-result");
   if (!el || !buildCtx) return;
+  /* Build .56: an upload still being processed shows as ONE
+     notification — no placeholder image cards, and never the
+     same in-flight upload as several duplicate cards. When the
+     renders land, the ordinary cards replace the note. */
+  var hasUpload56 = buildResults.some(function (l) { return l && l.buildUpload; });
   el.innerHTML = '<div class="options-head"><span class="oc-label">Built around: ' + esc(buildCtx.label) + '</span>' +
     '<button type="button" class="btn-ghost" data-build-more>Six more ideas</button></div>' +
-    '<div class="options-grid" role="list">' + buildResults.map(function (look, idx) { return buildCardHTML(look, idx); }).join("") + "</div>";
+    '<div class="options-grid" role="list">' +
+    (hasUpload56 ? '<div class="card processing-note"><span class="analyze-spin" aria-hidden="true"></span><span>Images are being processed — looks inspired by this piece are on their way.</span></div>' : "") +
+    buildResults.map(function (look, idx) { return (look && look.buildUpload) ? "" : buildCardHTML(look, idx); }).join("") + "</div>";
   if (!keepScroll) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
   startBuildWatch();
 }
@@ -16712,9 +16977,9 @@ function strictFormalityPass(looks, baseOpts) {
     if (matches(l)) return l;
     var gradImgs = graduatedImgs();
     var cands = RENDER_POOL.filter(function (r) {
-      return formalityOf(r.img) === lvl && !used[r.img] && !excl[r.img] && dislikedImgs.indexOf(r.img) === -1 && !gradImgs[r.img] && !usedTitles[titleForRender(r)] && !isQuarantinedImg(r.img);
+      return formalityOf(r.img) === lvl && !used[r.img] && !excl[r.img] && !isDislikedImg(r.img) && !gradImgs[r.img] && !usedTitles[titleForRender(r)] && !isQuarantinedImg(r.img);
     });
-    if (!cands.length) cands = RENDER_POOL.filter(function (r) { return formalityOf(r.img) === lvl && !used[r.img] && dislikedImgs.indexOf(r.img) === -1 && !gradImgs[r.img] && !isQuarantinedImg(r.img); });
+    if (!cands.length) cands = RENDER_POOL.filter(function (r) { return formalityOf(r.img) === lvl && !used[r.img] && !isDislikedImg(r.img) && !gradImgs[r.img] && !isQuarantinedImg(r.img); });
     if (!cands.length) return l;
     cands.sort(function (a, b) { return dealtBucket(a.img) - dealtBucket(b.img); });
     var nl = renderAsLook(cands[0]);
@@ -17059,6 +17324,10 @@ function normalizeTakeTitles(looks) {
 }
 function renderOptions(looks, request) {
   if (!looks || !looks.length) return;
+  /* Build .56: a fresh deal pushes the outgoing six onto the
+     Ideas go-back stack (a re-render of the same six does not). */
+  if (typeof currentOptions !== "undefined" && currentOptions && currentOptions.length &&
+      (currentOptions[0] || {}).img !== (looks[0] || {}).img) ideasPushHistory56(currentOptions);
   /* Last-resort guard (build .47): normalize before the hand is
      set and recorded, so recordCards / recordLookCombos /
      recordTitles below store the FINAL (img, title) pairs. */
@@ -17700,14 +17969,18 @@ function buildLook(desc, occasion, season, opts) {
   if (basis === "icon") opts.palette = null;
   if (/dealer|surprise/i.test(desc) && !opts.palette) {
     var dl = dealerLook({ version: opts.version, iconId: icon ? icon.id : null, blendId: blend ? blend.id : null });
+    if (dl) {
     /* Never deal the exact outfit already on screen — re-deal once. */
     if (currentLook && dl.img && dl.img === currentLook.img) {
       var dl2 = dealerLook({ version: opts.version, iconId: icon ? icon.id : null, blendId: blend ? blend.id : null });
-      if (dl2.img !== dl.img) dl = dl2;
+      if (dl2 && dl2.img !== dl.img) dl = dl2;
     }
     if (basis === "palette") { dl.iconId = null; dl.blendId = null; }
     dl.basis = basis;
     return dl;
+    }
+    /* dl is null only when no clean look can be dealt at all —
+       fall through and build one from the brief instead. */
   }
   var parsed = parseDescription(desc);
   /* In an icon's direction, a vague request is completed with that icon's
@@ -17886,7 +18159,15 @@ function buildLook(desc, occasion, season, opts) {
   savedLooks.forEach(function (l) { if (l.img) usedImgs[l.img] = true; });
   if (currentLook && currentLook.img) usedImgs[currentLook.img] = true;
   if (opts.excludeImgs) Object.keys(opts.excludeImgs).forEach(function (k) { usedImgs[k] = true; });
-  if (typeof dislikedImgs !== "undefined") dislikedImgs.forEach(function (img) { usedImgs[img] = true; });
+  if (typeof dislikedImgs !== "undefined") dislikedImgs.forEach(function (img) {
+    /* Both file forms are marked used: the ban may be stored as
+       the -watch variant while the pool holds the base render. */
+    usedImgs[img] = true;
+    var base56 = canonicalImg(img);
+    if (base56) usedImgs[base56] = true;
+    if (base56 && base56 !== img) { /* already the variant */ }
+    else if (base56) usedImgs[base56.replace(/(\.(?:jpe?g|webp|png))$/i, "-watch$1")] = true;
+  });
   var photoLook = nearestPhotoLook(swatches, usedImgs);
   /* The dealt history is a PREFERENCE, never an exclusion. It used
      to be folded into the exclusions above — and because it
@@ -17955,7 +18236,9 @@ function buildLook(desc, occasion, season, opts) {
     }
     if (atLevel) photoLook = atLevel;
   }
-  var finalImg = /taupe/i.test(desc) ? TAUPE_RENDER : (photoLook ? photoLook.img : "assets/photos/316150a1e65e.webp");
+  /* The taupe correction never overrides a ban: a disliked taupe
+     render is not forced back in by its own rule. */
+  var finalImg = (/taupe/i.test(desc) && !isDislikedImg(TAUPE_RENDER)) ? TAUPE_RENDER : (photoLook ? photoLook.img : "assets/photos/316150a1e65e.webp");
   var finalRender = renderByImg(finalImg);
   return {
     id: newLookId(),
@@ -20647,11 +20930,19 @@ renderPlates();
    queues it, most recent first. The copies used to be maintained
    three times and had already drifted apart. */
 function addToSavedTop(look) {
-  /* Build .53: a verdict or quarantined image is never (re-)saved. */
-  var pim53 = look ? (lookPicturedImg(look) || look.img || "") : "";
-  if (pim53 && (isDislikedImg(pim53) || isQuarantinedImg(pim53))) return;
+  /* Build .53: a verdict or quarantined image is never (re-)saved.
+     Build .56: the refusal is no longer silent — the function
+     reports it (false), and every caller says so. The stored copy
+     is stamped with its save time so the newest save is the
+     keeper in every dedupe. */
+  if (!look) return false;
+  var pim53 = lookPicturedImg(look) || look.img || "";
+  if (pim53 && (isDislikedImg(pim53) || isQuarantinedImg(pim53))) return false;
   savedLooks = savedLooks.filter(function (l) { return l.id !== look.id; });
-  savedLooks.unshift(JSON.parse(JSON.stringify(look)));
+  var copy56 = JSON.parse(JSON.stringify(look));
+  copy56.savedAt = Date.now();
+  savedLooks.unshift(copy56);
+  return true;
 }
 function addToQueueTop(look) {
   queueLooks = queueLooks.filter(function (x) { return x.id !== look.id; });
@@ -20661,10 +20952,13 @@ function addToQueueTop(look) {
 function likeLook(look) {
   look.verdict = "like";
   look.likedAt = Date.now(); /* build .38 (2.8): the 14-day cooldown clock starts at the like */
-  addToSavedTop(look);
+  look.savedAt = Date.now(); /* build .56: the save stamp the dedupe keeper rule reads */
+  var saved56 = addToSavedTop(look);
+  if (!saved56) return false; /* refused (banned/quarantined photo): nothing queued, nothing persisted as a save */
   addToQueueTop(look);
   persistAll();
   renderSaved();
+  return true;
 }
 function saveLook(look) {
   /* Build .53: a look whose pictured image carries a Not for me
@@ -20686,6 +20980,7 @@ function saveLook(look) {
     return;
   }
   if (savedLooks.some(function (l) { return l.id === look.id; })) look.id = newLookId();
+  look.savedAt = Date.now(); /* build .56: stamp the save */
   savedLooks.unshift(look);
   renderSaved();
   var keptLook = persistAll();
@@ -20723,7 +21018,7 @@ function renderSaved() {
      photograph from the grid. */
   var removedSeedIds = {};
   (typeof recentlyRemoved !== "undefined" && recentlyRemoved ? recentlyRemoved : []).forEach(function (r) { if (r._seed) removedSeedIds[r.id] = true; });
-  var all = savedLooks.concat(SEED_LOOKS.filter(function (s) { return dislikedImgs.indexOf(s.img) === -1 && !removedSeedIds[s.id]; }));
+  var all = savedLooks.concat(SEED_LOOKS.filter(function (s) { return !isDislikedImg(s.img) && !removedSeedIds[s.id]; }));
   /* Search (by title, colours, notes or comment) and the worn
      filter narrow what the grid shows; the catalogue underneath
      is untouched. */
@@ -20741,7 +21036,7 @@ function renderSaved() {
       !SEED_LOOKS.some(function (s) { return s.id === q.id; });
   });
   queuedOnly.forEach(function (q) { if (q.fwRender) assigned[q.id] = fwRenderSrc(q); else if (q.img) assigned[q.id] = q.img; });
-  var universe = all.concat(queuedOnly);
+  var universe = dedupeLooksByPhoto56(all.concat(queuedOnly));
   /* Build .50: this panel is My Outfits — only looks with at
      least one mapped owned piece render here. Zero-owned saved
      looks render in Ideas → Outfit Ideas (renderOutfitIdeas,
@@ -20885,7 +21180,7 @@ function renderOutfitIdeas() {
   if (!grid) return;
   var removedSeedIds = {};
   (typeof recentlyRemoved !== "undefined" && recentlyRemoved ? recentlyRemoved : []).forEach(function (r) { if (r._seed) removedSeedIds[r.id] = true; });
-  var all = savedLooks.concat(SEED_LOOKS.filter(function (s) { return dislikedImgs.indexOf(s.img) === -1 && !removedSeedIds[s.id]; }));
+  var all = savedLooks.concat(SEED_LOOKS.filter(function (s) { return !isDislikedImg(s.img) && !removedSeedIds[s.id]; }));
   var queueIds = {};
   queueLooks.forEach(function (q) { queueIds[q.id] = true; });
   var queuedOnly = queueLooks.filter(function (q) {
@@ -20893,7 +21188,7 @@ function renderOutfitIdeas() {
       !SEED_LOOKS.some(function (s) { return s.id === q.id; });
   });
   queuedOnly.forEach(function (q) { if (q.fwRender) gridImgById[q.id] = fwRenderSrc(q); else if (q.img) gridImgById[q.id] = q.img; });
-  var universe = all.concat(queuedOnly).filter(function (l) { return savedLookHome(l) === "ideas"; });
+  var universe = dedupeLooksByPhoto56(all.concat(queuedOnly)).filter(function (l) { return savedLookHome(l) === "ideas"; });
   /* Build .53: quarantined renders and verdict images never display in Outfit Ideas. */
   universe = universe.filter(function (l) { var im = lookPicturedImg(l) || l.img || ""; return !(im && (isQuarantinedImg(im) || isDislikedImg(im))); });
   var searchEl = document.getElementById("oi-search");
@@ -22482,12 +22777,15 @@ function dailyLook() {
   var casual = ["squarzi", "mcqueen", "lauren"];
   var gradDaily = graduatedImgs();
   var pool = SEED_LOOKS.filter(function (l) {
-    if (dislikedImgs.indexOf(l.img) !== -1) return false;
+    if (isDislikedImg(l.img)) return false;
     if (gradDaily[l.img]) return false;
     return weekend ? casual.indexOf(l.iconId) !== -1 : casual.indexOf(l.iconId) === -1;
   });
-  if (!pool.length) pool = SEED_LOOKS.filter(function (l) { return dislikedImgs.indexOf(l.img) === -1; });
-  if (!pool.length) pool = SEED_LOOKS;
+  if (!pool.length) pool = SEED_LOOKS.filter(function (l) { return !isDislikedImg(l.img); });
+  /* Build .56: the last-resort tier is canonically guarded too —
+     a banned photograph (either file form) is never dealt. */
+  if (!pool.length) pool = SEED_LOOKS.filter(function (l) { return !isDislikedImg(l.img) && !isQuarantinedImg(l.img); });
+  if (!pool.length) return null;
   var pick = pool[doy % pool.length];
   todaySeedId = pick.id;
   var clone = JSON.parse(JSON.stringify(pick));
@@ -22525,7 +22823,7 @@ function sessionOpeningLook() {
     if (look.fwPieces && look.fwPieces.length && look.source === "wardrobe") return look;
     if (!look.img) return null;
     if (!RENDER_POOL.some(function (r) { return r.img === look.img; })) return null;
-    if (typeof dislikedImgs !== "undefined" && dislikedImgs.indexOf(look.img) !== -1) return null;
+    if (isDislikedImg(look.img)) return null;
     /* Build .53: quarantined renders and real photos never open the day. */
     if (isQuarantinedImg(look.img)) return null;
     if (look.source === "uploaded" || look.selfie || isRealPhotoImg(look.img)) return null;
@@ -22610,7 +22908,7 @@ function openingLook() {
       /* Graduated (liked) closet looks are not dealt on a fresh
          open; the unfiltered list is the fallback so the hero
          never comes up blank. */
-      var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l); });
+      var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned56(l); });
       var clwDeal = clwFresh.length ? clwFresh : clw;
       todaySeedId = clwDeal[0].id;
       /* Build .38 (2.1): the dealt closet look is persisted as
@@ -22634,7 +22932,7 @@ function openingLook() {
   var plock = store.get("todayOpeningPool", null);
   if (plock && plock.date === localTodayISO() && plock.img && plock.source === savedSrc) {
     var lockedPick = pool.filter(function (l) { return l.img === plock.img; })[0];
-    if (lockedPick && dislikedImgs.indexOf(lockedPick.img) === -1 && !gradOpen[lockedPick.img]) {
+    if (lockedPick && !isDislikedImg(lockedPick.img) && !gradOpen[lockedPick.img]) {
       todaySeedId = lockedPick.id;
       var lclone = JSON.parse(JSON.stringify(lockedPick));
       lclone.id = "look-" + Date.now();
@@ -22648,10 +22946,15 @@ function openingLook() {
       return lclone;
     }
   }
-  var candidates = pool.filter(function (l) { return l.img !== prevImg && dislikedImgs.indexOf(l.img) === -1 && !gradOpen[l.img]; });
-  if (!candidates.length) candidates = pool.filter(function (l) { return dislikedImgs.indexOf(l.img) === -1 && !gradOpen[l.img]; });
-  if (!candidates.length) candidates = pool.filter(function (l) { return l.img !== prevImg; });
-  if (!candidates.length) candidates = pool;
+  var candidates = pool.filter(function (l) { return l.img !== prevImg && !isDislikedImg(l.img) && !gradOpen[l.img]; });
+  if (!candidates.length) candidates = pool.filter(function (l) { return !isDislikedImg(l.img) && !gradOpen[l.img]; });
+  /* Build .56: the last-resort tiers are canonically guarded —
+     they may repeat the previous photograph or a graduated one,
+     but never a banned one (DEAL_POOL already excludes banned
+     and quarantined photographs canonically; the filter states
+     it outright so no future pool change can deal one). */
+  if (!candidates.length) candidates = pool.filter(function (l) { return l.img !== prevImg && !isDislikedImg(l.img); });
+  if (!candidates.length) candidates = pool.filter(function (l) { return !isDislikedImg(l.img); });
   var undealt = candidates.filter(function (l) { return dealtImgHistory.indexOf(l.img) === -1; });
   var pickPool = undealt.length ? undealt : candidates;
   var pick = pickDealt(pickPool) || pickPool[0];
@@ -23159,6 +23462,7 @@ function applyWeatherToToday() {
   }
   var t = currentWeather.temp;
   function swapToSeed(cand) {
+    heroPushHistory56();
     todaySeedId = cand.id;
     var keepId = todayLook.id;
     todayLook = JSON.parse(JSON.stringify(cand));
@@ -23180,7 +23484,7 @@ function applyWeatherToToday() {
      todayTouched and planned-day guards above already returned. */
   if (wxBannedText(lookWxText(todayLook), t)) {
     var banCand = SEED_LOOKS.filter(function (l) {
-      return !wxBannedText(lookWxText(l), t) && dislikedImgs.indexOf(l.img) === -1 && !isGraduatedLook(l);
+      return !wxBannedText(lookWxText(l), t) && !isDislikedImg(l.img) && !isGraduatedLook(l);
     })[0];
     if (banCand && banCand.id !== todaySeedId) swapToSeed(banCand);
     return;
@@ -23197,7 +23501,7 @@ function applyWeatherToToday() {
   var cand = null;
   for (var si = 0; si < swapIds.length; si++) {
     var c2 = SEED_LOOKS.filter(function (l) { return l.id === swapIds[si]; })[0];
-    if (c2 && dislikedImgs.indexOf(c2.img) === -1 && !isGraduatedLook(c2)) { cand = c2; break; }
+    if (c2 && !isDislikedImg(c2.img) && !isGraduatedLook(c2)) { cand = c2; break; }
   }
   if (!cand) return;
   swapToSeed(cand);
@@ -23330,7 +23634,7 @@ document.getElementById("loc-back-home").addEventListener("click", function () {
 });
 function initToday() {
   todayLook = openingLook();
-  recordDealt([todayLook.img]);
+  if (todayLook) recordDealt([todayLook.img]);
   renderToday();
   /* The Today selector shows the mode the hero was actually
      dealt in — the shared saved source mode, Combo by default. */
@@ -23350,7 +23654,62 @@ function initToday() {
    bottom); Only inspo deals a photograph with nothing pulled
    from the closet; Combo (the default) anchors the photograph
    in a piece he owns. */
+/* ================= Build .56 — go back over dealt looks ======
+   Swipe right returns to the look dealt before this one (swipe
+   left still deals another; gesture only — no button, per the
+   standing hero rule). One session stack per surface (hero,
+   Ideas), ten deep, held in memory only: dealt state is
+   device-local and never joins sync. An entry whose photograph
+   has since been banned — the canonical item-2 test — is skipped
+   when popped and never displayed again: going back is for
+   verdicts on looks swiped past, not a way around the ban, and a
+   disliked look stays under its cooldown rules regardless. */
+var heroHistory56 = [];
+function heroPushHistory56() {
+  try {
+    if (typeof todayLook === "undefined" || !todayLook || !todayLook.img) return;
+    var key = canonicalImg(lookPicturedImg(todayLook) || todayLook.img || "");
+    var top = heroHistory56[heroHistory56.length - 1];
+    if (top && key && canonicalImg(lookPicturedImg(top) || top.img || "") === key) return;
+    heroHistory56.push(JSON.parse(JSON.stringify(todayLook)));
+    if (heroHistory56.length > 10) heroHistory56 = heroHistory56.slice(heroHistory56.length - 10);
+  } catch (e) {}
+}
+function heroGoBack56() {
+  while (heroHistory56.length) {
+    var prev = heroHistory56.pop();
+    if (!prev || !prev.img) continue;
+    if (lookPhotoBanned56(prev)) continue;
+    if (isQuarantinedImg(lookPicturedImg(prev) || prev.img || "")) continue;
+    todayLook = prev;
+    todayTouched = true;
+    try { store.set("lastOpeningImg", todayLook.img); } catch (e) {}
+    persistOpeningLook(todayLook);
+    renderToday();
+    return true;
+  }
+  return false;
+}
+var ideasHistory56 = [];
+function ideasPushHistory56(prevOptions) {
+  if (!prevOptions || !prevOptions.length) return;
+  ideasHistory56.push(prevOptions.slice());
+  if (ideasHistory56.length > 10) ideasHistory56 = ideasHistory56.slice(ideasHistory56.length - 10);
+}
+function ideasGoBack56() {
+  while (ideasHistory56.length) {
+    var prevSet = ideasHistory56.pop();
+    var clean = (prevSet || []).filter(function (l) { return l && !lookPhotoBanned56(l); });
+    if (!clean.length) continue;
+    currentOptions = clean;
+    currentLook = clean[0];
+    rerenderOptions();
+    return true;
+  }
+  return false;
+}
 function dealHeroForSource() {
+  heroPushHistory56();
   var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
   if (src === "wardrobe" && typeof buildClosetLooks === "function") {
     /* Each deal in a session steps the rotation on by one. With a
@@ -23365,7 +23724,7 @@ function dealHeroForSource() {
       /* Graduated (liked) closet looks are not dealt again; if
          every closet look has graduated, deal from the full list
          rather than leave the hero blank. */
-      var clFresh = cl.filter(function (l) { return !isGraduatedLook(l); });
+      var clFresh = cl.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned56(l); });
       var dealList = clFresh.length ? clFresh : cl;
       var curTitle = todayLook && todayLook.title;
       var pickW = null;
@@ -23381,7 +23740,7 @@ function dealHeroForSource() {
   var pool = DEAL_POOL.slice();
   var currentImg = todayLook && todayLook.img;
   var gradHero = graduatedImgs();
-  var candidates = pool.filter(function (l) { return l.img !== currentImg && dislikedImgs.indexOf(l.img) === -1 && !gradHero[l.img]; });
+  var candidates = pool.filter(function (l) { return l.img !== currentImg && !isDislikedImg(l.img) && !gradHero[l.img]; });
   /* Build .38 (2.3): a fresh deal honours the hard weather ban
      too when the weather is known — tweed cannot be dealt at
      74°F by any path. If the ban would empty the deck, the
@@ -23390,7 +23749,29 @@ function dealHeroForSource() {
     var wxSafe = candidates.filter(function (l) { return !wxBannedText(lookWxText(l), currentWeather.temp); });
     if (wxSafe.length) candidates = wxSafe;
   }
-  var pick = pickDealt(candidates.length ? candidates : pool);
+  /* Build .56 verification fix: the exhausted-candidates valve
+     deals from the ban-free pool; when no ban-free photograph
+     exists at all, a generated combination takes the hero
+     instead of a banned photograph. */
+  var cleanHeroPool = pool.filter(function (l) { return !isDislikedImg(l.img); });
+  var pick = candidates.length ? pickDealt(candidates) : (cleanHeroPool.length ? pickDealt(cleanHeroPool) : null);
+  if (!pick) {
+    var genHero56 = generateComboLook({ version: 1 });
+    if (genHero56 && !isDislikedImg(genHero56.img)) {
+      todaySeedId = genHero56.id;
+      todayLook = genHero56;
+      todayLook.source = src === "wardrobe" ? "combo" : src;
+      recordDealt([todayLook.img]);
+      store.set("lastOpeningImg", todayLook.img);
+      persistOpeningLook(todayLook);
+      renderToday();
+      return;
+    }
+    /* No clean photograph and no clean generation: deal nothing
+       — the hero keeps the look it already shows rather than
+       dealing a banned photograph in either file form. */
+    return;
+  }
   todaySeedId = pick.id;
   todayLook = JSON.parse(JSON.stringify(pick));
   todayLook.id = "look-" + Date.now();
@@ -25964,10 +26345,16 @@ function refreshShopBuyButtons() {
 function renderPurchased() {
   var box = document.getElementById("shop-purchased");
   if (!box) return;
-  if (!shopPurchases.length) { box.hidden = true; box.innerHTML = ""; return; }
+  /* Build .56: Purchased is its own Shop sub page (the panel
+     carries the heading) and renders the standard card system —
+     one purchase per card: image, title, meta lines, and the
+     action on its own line. An empty list says so on the page
+     instead of the section vanishing. */
   box.hidden = false;
-  box.className = "shop-purchased";
-  var html = "<h3>Purchased</h3>";
+  if (!shopPurchases.length) {
+    box.innerHTML = '<p class="meta">Nothing purchased yet — mark a piece purchased from Shop the look, Sale items or the Wishlist and it lands here, catalogued into your Closet.</p>';
+    return;
+  }
   /* Purchased lists by type, then name A–Z (build .28) — a
      display copy; the stored order is untouched. */
   var shownPurchases = shopPurchases.slice().sort(function (a, b) {
@@ -25975,15 +26362,19 @@ function renderPurchased() {
     if (c) return c;
     return String(a.name || "").localeCompare(String(b.name || ""));
   });
-  html += shownPurchases.map(function (p) {
+  box.innerHTML = shownPurchases.map(function (p) {
     var thumb = p.img ? '<img class="shop-thumb" src="' + esc(p.img) + '" alt="" loading="lazy" />' : '<span class="shop-thumb shop-thumb-ph" aria-hidden="true"></span>';
-    return '<div class="shop-row">' + thumb +
-      '<span class="shop-main"><span class="shop-name">' + esc(p.brand) + " — " + esc(p.name) + '</span>' +
-      '<span class="shop-sub">' + esc(p.retailer || "") + (p.dateMarked ? " · Marked " + esc(fmtDateShort(p.dateMarked)) : "") + " · In your Closet" + (p.orderNo ? " · Order " + esc(p.orderNo) : "") + "</span></span>" +
-      '<span class="shop-price">$' + Number(p.price).toLocaleString("en-US") + "</span>" +
-      '<button type="button" class="btn-ghost shop-buy" data-unmark-purchase="' + esc(p.key) + '">Un-mark purchase</button></div>';
+    var meta = [];
+    if (p.retailer) meta.push(esc(p.retailer));
+    if (p.dateMarked) meta.push("Marked " + esc(fmtDateShort(p.dateMarked)));
+    meta.push("In your Closet");
+    if (p.orderNo) meta.push("Order " + esc(p.orderNo));
+    if (p.price !== undefined && p.price !== null && p.price !== "") meta.push("$" + Number(p.price).toLocaleString("en-US"));
+    return '<article class="card purchase-card">' + thumb +
+      '<span class="pc-main"><span class="pc-name">' + esc(p.brand) + " — " + esc(p.name) + '</span>' +
+      '<span class="pc-meta">' + meta.join(" · ") + "</span></span>" +
+      '<span class="pc-actions"><button type="button" class="btn-ghost" data-unmark-purchase="' + esc(p.key) + '">Un-mark purchase</button></span></article>';
   }).join("");
-  box.innerHTML = html;
 }
 function toggleShopPurchase(e, pc) {
   var key = shopEntryKey(e);
@@ -26113,6 +26504,11 @@ function renderReceiptsSection() {
     html += "<p>Turn on sync to import receipts from your order emails</p>";
   }
   box.innerHTML = html;
+  /* Build .56: the Receipts sub tab carries the waiting count —
+     the weekly scan's "new receipts" state surfaces on the Shop
+     nav as well as on this landing line. */
+  var rtc = document.getElementById("receipts-tab-count");
+  if (rtc) rtc.textContent = n > 0 ? "(" + n + ")" : "";
 }
 function receiptDefaultHex(name) {
   var n = String(name || "").trim().toLowerCase();
@@ -26853,7 +27249,7 @@ function renderFindLookMode() {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "purchased", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -26878,7 +27274,7 @@ var SECTIONS = {
   closet: ["wardrobe", "add", "gaps", "analyze", "looks", "watches", "wearing"],
   calendar: ["calendar"],
   ideas: ["studio", "outfitideas", "icons", "emulate", "palettes", "myinspo"],
-  find: ["find", "receipts", "search", "brands", "brand", "sale", "shopwish"],
+  find: ["find", "receipts", "purchased", "search", "brands", "brand", "sale", "shopwish"],
   me: ["pinfo", "plocation", "pcloud"]
 };
 var sectionHome = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo", calendar: "calendar" };
@@ -26966,6 +27362,7 @@ function switchTab(name, opts) {
   if (name === "gaps" && typeof renderWishlist === "function") renderWishlist();
   if (name === "analyze" && typeof renderAnalyzeSheet === "function") renderAnalyzeSheet();
   if (name === "receipts" && typeof renderReceipts === "function") renderReceipts();
+  if (name === "purchased" && typeof renderPurchased === "function") renderPurchased();
   if (name === "emulate" && typeof renderEmulate === "function") renderEmulate();
   if (name === "find" && typeof renderReceiptsSection === "function") renderReceiptsSection();
   if ((name === "wardrobe" || name === "add") && typeof analyzeRefreshUI === "function") analyzeRefreshUI();
@@ -27314,8 +27711,7 @@ function restoreRemoved(id) {
   recentlyRemoved = recentlyRemoved.filter(function (r) { return r.id !== id; });
   store.set("recentlyRemoved", recentlyRemoved);
   var img = snap._img || snap.img;
-  var ix = img ? dislikedImgs.indexOf(img) : -1;
-  if (ix !== -1) { dislikedImgs.splice(ix, 1); store.set("dislikedImgs", dislikedImgs); }
+  if (img && typeof removeDislike56 === "function") removeDislike56(img);
   var isSeed = SEED_LOOKS.some(function (s) { return s.id === id; });
   if (!isSeed && !savedLooks.some(function (l) { return l.id === id; })) {
     var copy = JSON.parse(JSON.stringify(snap));
@@ -27332,8 +27728,7 @@ function showDislikeUndo(look) {
   if (!look) return;
   var img = look.img, id = look.id;
   showUndoToast("Not for you — " + (look.title || "look") + ".", function () {
-    var ix = img ? dislikedImgs.indexOf(img) : -1;
-    if (ix !== -1) { dislikedImgs.splice(ix, 1); store.set("dislikedImgs", dislikedImgs); }
+    if (img && typeof removeDislike56 === "function") removeDislike56(img);
     if (currentLook && currentLook.id === id) {
       currentLook.verdict = null;
       persistLookFeedback(currentLook);
@@ -27644,8 +28039,17 @@ function likeToday() {
   /* Most recently liked sits FIRST in My Looks, in the Queued
      state — the shared likeLook path. */
   var likedId = todayLook.id;
-  likeLook(todayLook);
+  var savedOk56 = likeLook(todayLook);
   syncTodayVerdict();
+  if (!savedOk56) {
+    /* Build .56: no false "saved" toast — the save was refused
+       because this photograph is on the not-for-me list (its twin
+       file form was dealt before the dealers went canonical).
+       The hero's like state is rolled back to match. */
+    todayLook.verdict = null; todayLook.likedAt = null; syncTodayVerdict();
+    toast("That photo is on your not-for-me list — not saved.");
+    return;
+  }
   /* Build .38 (2.8): the like toast carries Undo — one tap
      restores the look to the rotation immediately. */
   showUndoToast("Liked — saved to " + savedHomeName(todayLook) + "; it sits out for 14 days.", function () {
@@ -27706,7 +28110,29 @@ function woreToday() {
       sx = null;
       if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
       if (dx < 0) { dealAnotherToday(); }
-      else likeToday();
+      /* Build .56 (amendment): swipe right goes BACK to the look
+         dealt before this one — for the verdict the user meant
+         to give it. Like keeps its button. At the bottom of the
+         stack the gesture does nothing. */
+      else if (typeof heroGoBack56 === "function") { heroGoBack56(); }
+    }, { passive: true });
+  }
+  /* Build .56 (amendment): the same swipe-right go-back on the
+     Ideas deal surface — back to the previous six dealt. */
+  var lrEl = document.getElementById("look-result");
+  if (lrEl) {
+    var lx = null, ly = null;
+    lrEl.addEventListener("touchstart", function (e) {
+      if (e.touches.length !== 1) { lx = null; return; }
+      lx = e.touches[0].clientX; ly = e.touches[0].clientY;
+    }, { passive: true });
+    lrEl.addEventListener("touchend", function (e) {
+      if (lx === null || !e.changedTouches.length) return;
+      var dx2 = e.changedTouches[0].clientX - lx;
+      var dy2 = e.changedTouches[0].clientY - ly;
+      lx = null;
+      if (dx2 < 60 || Math.abs(dx2) < Math.abs(dy2) * 1.4) return;
+      if (typeof ideasGoBack56 === "function") ideasGoBack56();
     }, { passive: true });
   }
   /* Outfit type in the old Location slot: the pills carry
@@ -29283,7 +29709,18 @@ function renderMyInspo() {
     return;
   }
   if (empty) empty.innerHTML = "";
-  grid.innerHTML = inspoImages.map(function (en) {
+  /* Build .56: the same photograph added twice shows once. */
+  var seenMi56 = {};
+  var entriesMi56 = inspoImages.filter(function (en) {
+    if (!en || !en.img) return true;
+    var k = "";
+    try { k = canonicalImg(en.img); } catch (e) { k = ""; }
+    if (!k || String(en.img).indexOf("data:") === 0) return true;
+    if (seenMi56[k]) return false;
+    seenMi56[k] = true;
+    return true;
+  });
+  grid.innerHTML = entriesMi56.map(function (en) {
     return '<article class="card myinspo-card">' +
       '<button type="button" class="myinspo-imgbtn" data-myinspo-style="' + en.id + '" aria-label="Style this look"><img src="' + en.img + '" alt="' + esc(en.desc || "Your uploaded inspiration") + '" loading="lazy" /></button>' +
       '<div class="mi-body">' + (en.desc ? '<p class="mi-desc">' + esc(en.desc) + "</p>" : "") +
@@ -29403,7 +29840,7 @@ function openUploadConfirm() {
   var prev = document.getElementById("upload-preview");
   if (prev && uploadPhotoDataUrl) { prev.src = uploadPhotoDataUrl; prev.hidden = false; }
   var nameEl = document.getElementById("upload-name");
-  if (nameEl) nameEl.value = "Uploaded look";
+  if (nameEl) nameEl.value = "";
   resetUploadRows();
   var sheet = document.getElementById("upload-confirm-sheet");
   if (sheet) sheet.hidden = false;
@@ -29483,7 +29920,10 @@ if (uploadAddRowBtn) uploadAddRowBtn.addEventListener("click", function () {
 function saveUploadedLook(withTags) {
   if (!uploadPhotoDataUrl) { closeUploadConfirm(); return; }
   var nameEl = document.getElementById("upload-name");
-  var name = ((nameEl && nameEl.value) || "").trim() || "Uploaded look";
+  /* Build .56: the generic placeholder is not a name — an unnamed
+     upload titles from its cataloged pieces below. */
+  var name = ((nameEl && nameEl.value) || "").trim();
+  if (name === "Uploaded look") name = "";
   var tagged = [];
   if (withTags) {
     Array.prototype.slice.call(document.querySelectorAll("#upload-rows .wr-pick")).forEach(function (pick) {
@@ -29517,6 +29957,8 @@ function saveUploadedLook(withTags) {
     if (p && p.slot && !sp[p.slot]) sp[p.slot] = p.id;
   });
   if (Object.keys(sp).length) look.swapPieces = sp;
+  if (!look.title) { look.title = uploadedTitle56(look) || "My outfit"; look.imgAlt = look.title; }
+  look.savedAt = Date.now(); /* build .56: stamp the save */
   savedLooks.unshift(look);
   var kept = persistAll();
   renderSaved();
@@ -29646,8 +30088,8 @@ function dealFromWardrobe() {
   /* Graduated (liked) closet looks leave the From wardrobe
      rotation; if every look has graduated, show the full list —
      graduation never blanks the section. */
-  var fwFresh = looks.filter(function (l) { return !isGraduatedLook(l); });
-  fwLooks = fwFresh.length ? fwFresh : looks;
+  var fwFresh = looks.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned56(l); });
+  fwLooks = fwFresh.length ? fwFresh : looks.filter(function (l) { return !lookPhotoBanned56(l); });
   if (empty) empty.hidden = true;
   if (more) more.hidden = false;
   grid.innerHTML = fwLooks.map(function (look, idx) { return fwCardHTML(look, idx); }).join("");
@@ -29669,8 +30111,8 @@ function dealFromWardrobe() {
 function wardrobeSixLooks() {
   var cl = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
   if (!cl || !cl.length) return null;
-  var fresh = cl.filter(function (l) { return !isGraduatedLook(l); });
-  var pool = fresh.length ? fresh : cl;
+  var fresh = cl.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned56(l); });
+  var pool = fresh.length ? fresh : cl.filter(function (l) { return !lookPhotoBanned56(l); });
   function dealt(l) {
     return (l.fwRender && dealtImgHistory.indexOf(l.fwRender) !== -1) ||
       (l.img && dealtImgHistory.indexOf(l.img) !== -1) ||
@@ -29726,8 +30168,8 @@ function dealWardrobeSix() {
     if (fwLike) {
       var lk = fwLooks[parseInt(fwLike.getAttribute("data-fw-like"), 10)];
       if (lk) {
-        likeLook(lk);
-        toast("Liked — saved and queued in My Outfits.");
+        if (likeLook(lk)) toast("Liked — saved and queued in My Outfits.");
+        else toast("That photo is on your not-for-me list — not saved.");
       }
       return;
     }
@@ -29853,6 +30295,7 @@ function syBlank() {
   SY_COLLS.forEach(function (c) { o.snap[c] = {}; o.st[c] = {}; o.tomb[c] = {}; o.dirty[c] = {}; });
   o.snap.m = ""; o.st.m = 0; o.dirty.m = 0;
   o.mf = {}; o.rej = 0;
+  o.quar = []; /* build .56: remote records that failed to apply, quarantined per record */
   return o;
 }
 var SY = null;
@@ -29873,6 +30316,7 @@ else {
   if (!("acct" in SY)) SY.acct = null;
   if (!SY.mf || typeof SY.mf !== "object") SY.mf = {};
   if (typeof SY.rej !== "number") SY.rej = 0;
+  if (!Array.isArray(SY.quar)) SY.quar = [];
 }
 function saveSY() { try { localStorage.setItem("wardrobe.sync", JSON.stringify(SY)); } catch (e) {} }
 function syHsh(x) {
@@ -30044,7 +30488,10 @@ function schedSync() { clearTimeout(_syT); _syT = setTimeout(function () { syncN
 function syncStatusHTML() {
   return "<div><b>" + esc(SY.status) + "</b></div>" +
     '<p class="meta" style="margin:0">' + (SY.lastOk ? "Last synced " + new Date(SY.lastOk).toLocaleString() : "Never synced") +
-    (SY.acct ? " · account " + esc(String(SY.acct).slice(0, 8)) : "") + "</p>";
+    (SY.acct ? " · account " + esc(String(SY.acct).slice(0, 8)) : "") + "</p>" +
+    /* Build .56: the quarantine count lives here and only here —
+       never a popup. */
+    ((SY.quar && SY.quar.length) ? '<p class="meta" style="margin:0">' + SY.quar.length + (SY.quar.length === 1 ? " synced record" : " synced records") + " couldn't be read and were skipped — everything else synced normally.</p>" : "");
 }
 function syShowRejected() {
   var b = document.getElementById("sync-new-acct");
@@ -30390,6 +30837,64 @@ function syRefresh() {
   var kf = document.getElementById("sync-key");
   if (kf) kf.value = SY.key || "(created on first sync)";
 }
+/* Build .56: one downloaded record, applied on its own. A record
+   that throws (or arrives malformed — data that is not an object,
+   no usable id) is quarantined into SY.quar and the pass moves on:
+   a single bad record must never fail a whole sync again. The
+   quarantine is surfaced only in Profile's sync status. */
+function syQuarantine56(x, err) {
+  try {
+    if (!Array.isArray(SY.quar)) SY.quar = [];
+    var key = (x && x.coll ? x.coll : "?") + "|" + (x && x.id ? x.id : "?");
+    for (var i = 0; i < SY.quar.length; i++) { if (SY.quar[i] && SY.quar[i].k === key) return; }
+    SY.quar.push({ k: key, at: Date.now(), err: String(err && err.message ? err.message : (err || "")).slice(0, 120) });
+    if (SY.quar.length > 200) SY.quar = SY.quar.slice(SY.quar.length - 200);
+  } catch (e) {}
+}
+function syApplyDownload56(j) {
+  var res = { down: 0, changedAny: false, changedLooks: false, count: 0 };
+  if (!j) return res;
+  var recs = Array.isArray(j.recs) ? j.recs : [];
+  res.count = recs.length;
+  _syApplying = true;
+  try {
+    recs.forEach(function (x) {
+      try {
+        if (!x || SY_COLLS.indexOf(x.coll) === -1) return;
+        var loc = SY.st[x.coll][x.id] || SY.tomb[x.coll][x.id] || 0;
+        if (!(x.updatedAt > loc)) return;
+        if (x.deleted) {
+          syRemoveLocal(x.coll, x.id);
+          SY.tomb[x.coll][x.id] = x.updatedAt;
+          delete SY.snap[x.coll][x.id]; delete SY.st[x.coll][x.id];
+          delete SY.dirty[x.coll][x.id];
+          res.changedAny = true; res.down++; if (x.coll === "looks") res.changedLooks = true;
+        } else if (x.data) {
+          if (typeof x.data !== "object" || Array.isArray(x.data)) { syQuarantine56(x, "record data is not an object"); return; }
+          var _xrid = null;
+          try { _xrid = syRecId(x.coll, x.data); } catch (e) { _xrid = null; }
+          if (!_xrid) { syQuarantine56(x, "record has no usable id"); return; }
+          sanitizeIncoming(x.data, "");
+          syPutLocal(x.coll, x.data);
+          SY.snap[x.coll][x.id] = syHsh(syWireRec(x.coll, x.data));
+          SY.st[x.coll][x.id] = x.updatedAt;
+          delete SY.tomb[x.coll][x.id];
+          delete SY.dirty[x.coll][x.id];
+          res.changedAny = true; res.down++; if (x.coll === "looks") res.changedLooks = true;
+        } else {
+          /* Build .56 verification fix: a non-deleted record with
+             no usable payload (data missing, null, or a scalar
+             that is not an object) is malformed — quarantine it
+             explicitly instead of dropping it silently, so the
+             skip is visible in Profile's sync status. */
+          syQuarantine56(x, "record has no usable data");
+        }
+      } catch (e) { syQuarantine56(x, e); }
+    });
+    try { if (syApplyMeta(j.meta)) res.changedAny = true; } catch (e) {}
+  } finally { _syApplying = false; }
+  return res;
+}
 function syncNow(isRetry, force) {
   /* Asked to sync while a sync is running: remember it, and go
      again as soon as this one finishes — otherwise an edit made
@@ -30469,6 +30974,53 @@ function syncNow(isRetry, force) {
       }
       syTrackChanges();
       setSyncStatus("Syncing…");
+      /* Build .56: PAGED DOWNLOAD. The old pass took the whole
+         backlog in ONE response (~13.5 MB); it timed out (~60 s)
+         before the position marker was ever persisted, so every
+         sync restarted from zero and the pending note never
+         cleared. An established account now downloads FIRST, in
+         bounded pages (200 records per request, successive
+         since-windows), and the position marker AND the applied
+         state are saved after EACH page — an interrupted pass
+         resumes where it stopped. Uploads then run exactly as
+         before; their responses carry only what is newer than
+         the position just saved. A first sync (no completed pass
+         yet) keeps the standing rule: uploads before any download
+         is applied. If the worker ignores the page limit, the
+         first page may still be large — per-page persistence is
+         the guarantee this client can make. */
+      var down56 = 0, changedAny56 = false, changedLooks56 = false;
+      if (SY.lastOk) {
+        var _pg56 = 0;
+        while (_pg56 < 80) {
+          _pg56++;
+          var _pr56 = null;
+          try {
+            _pr56 = await syFetch(SYNC_URL + "/sync", {
+              method: "POST",
+              headers: { "authorization": "Bearer " + SY.key, "content-type": "application/json" },
+              body: JSON.stringify({ since: SY.last, changes: [], meta: null, limit: 200 })
+            }, 60000);
+          } catch (e) { break; }
+          if (_pr56.status === 401) {
+            SY.rej = (SY.rej || 0) + 1;
+            setSyncStatus("Sync paused — the server didn't accept this device's sync key. Nothing on this device was changed.");
+            return;
+          }
+          if (!_pr56.ok) break;
+          var _pj56 = null;
+          try { _pj56 = await _pr56.json(); } catch (e) { break; }
+          if (!_pj56 || typeof _pj56.now !== "number") break;
+          var _prev56 = SY.last;
+          var _pa56 = syApplyDownload56(_pj56);
+          down56 += _pa56.down; if (_pa56.changedAny) changedAny56 = true; if (_pa56.changedLooks) changedLooks56 = true;
+          SY.last = _pj56.now;
+          saveSY();
+          if (_pa56.count === 0) break;
+          if (_pj56.now === _prev56) break;
+          if (_pa56.count < 200) break;
+        }
+      }
       var changes = [], held = 0;
       var vaultGaps = !!(window.photoVault && window.photoVault.missing);
       /* Build .55 (3.2e): with the lazy vault, a record can still
@@ -30568,8 +31120,8 @@ function syncNow(isRetry, force) {
         if (window.photoVault && window.photoVault.enabled) metaData = syWire(metaData);
         metaOut = { updatedAt: SY.st.m || Date.now(), data: metaData };
       }
-      var since = SY.last, lastNow = null, sent = 0, down = 0;
-      var changedAny = false, changedLooks = false;
+      var since = SY.last, lastNow = null, sent = 0, down = down56;
+      var changedAny = changedAny56, changedLooks = changedLooks56;
       for (var bi = 0; bi < batches.length; bi++) {
         var batch = batches[bi];
         var isLast = bi === batches.length - 1;
@@ -30617,38 +31169,14 @@ function syncNow(isRetry, force) {
         });
         if (body.meta && (SY.st.m || 0) <= body.meta.updatedAt) SY.dirty.m = 0;
         sent += batch.length;
-        _syApplying = true;
-        try {
-          (j.recs || []).forEach(function (x) {
-            if (!x || SY_COLLS.indexOf(x.coll) === -1) return;
-            var loc = SY.st[x.coll][x.id] || SY.tomb[x.coll][x.id] || 0;
-            if (!(x.updatedAt > loc)) return;
-            if (x.deleted) {
-              syRemoveLocal(x.coll, x.id);
-              SY.tomb[x.coll][x.id] = x.updatedAt;
-              delete SY.snap[x.coll][x.id]; delete SY.st[x.coll][x.id];
-              delete SY.dirty[x.coll][x.id];
-              changedAny = true; down++; if (x.coll === "looks") changedLooks = true;
-            } else if (x.data) {
-              /* Build .55 (3.8): a malformed record is skipped —
-                 its valid siblings in the same response still
-                 apply. */
-              if (typeof x.data !== "object" || Array.isArray(x.data)) return;
-              var _xrid = null;
-              try { _xrid = syRecId(x.coll, x.data); } catch (e) { _xrid = null; }
-              if (!_xrid) return;
-              sanitizeIncoming(x.data, "");
-              syPutLocal(x.coll, x.data);
-              SY.snap[x.coll][x.id] = syHsh(syWireRec(x.coll, x.data));
-              SY.st[x.coll][x.id] = x.updatedAt;
-              delete SY.tomb[x.coll][x.id];
-              delete SY.dirty[x.coll][x.id];
-              changedAny = true; down++; if (x.coll === "looks") changedLooks = true;
-            }
-          });
-          if (syApplyMeta(j.meta)) changedAny = true;
-        } finally { _syApplying = false; }
+        /* Build .56: records apply through the quarantining
+           helper, and the position marker is persisted after
+           EVERY batch — an interrupted pass resumes here instead
+           of restarting from zero. */
+        var _ar56 = syApplyDownload56(j);
+        down += _ar56.down; if (_ar56.changedAny) changedAny = true; if (_ar56.changedLooks) changedLooks = true;
         lastNow = j.now;
+        SY.last = j.now;
         saveSY();
       }
       if (changedLooks) sySortLooksByStamp();
@@ -31284,9 +31812,51 @@ function analyzeFilePiece(card, job, ix) {
       });
       return out;
     }
+    /* Build .56: JOINT dedupe across savedLooks and queueLooks.
+       The .53 walk deduped within each list only, so a photo
+       saved in one list and queued in the other survived twice
+       and resurfaced as a second grid card. Now one keeper per
+       canonical photo across BOTH lists: the entry with the
+       smallest real savedAt (the walk's standing keeper rule —
+       likes are stamped at save time since .56, so the freshly
+       liked copy carries a real stamp and is never the Infinity
+       entry that loses). An entry in the other list with the SAME
+       id is the same look in its second state (saved + queued),
+       not a duplicate, and stays. Empty pictured images are
+       never duplicates of anything. */
+    function jointDedupe56(counts) {
+      if (typeof savedLooks === "undefined" || typeof queueLooks === "undefined") return;
+      if (!Array.isArray(savedLooks) || !Array.isArray(queueLooks)) return;
+      var keeper = {};
+      function scan(list) {
+        list.forEach(function (e) {
+          if (!e || typeof e !== "object") return;
+          var k = canonicalImg(pictured(e) || "");
+          if (!k) return;
+          var st = saveStampOf(e);
+          if (!(k in keeper) || st < keeper[k].stamp) keeper[k] = { entry: e, stamp: st };
+        });
+      }
+      scan(savedLooks); scan(queueLooks);
+      function keepOnly(list) {
+        return list.filter(function (e) {
+          if (!e || typeof e !== "object") return true;
+          var k = canonicalImg(pictured(e) || "");
+          if (!k) return true;
+          var kp = keeper[k];
+          if (!kp || kp.entry === e) return true;
+          if (kp.entry.id && e.id && kp.entry.id === e.id) return true;
+          counts.dupesRemoved++;
+          return false;
+        });
+      }
+      savedLooks = keepOnly(savedLooks);
+      queueLooks = keepOnly(queueLooks);
+    }
     function walkCollections(counts) {
       if (typeof savedLooks !== "undefined") savedLooks = processCollection(savedLooks, counts);
       if (typeof queueLooks !== "undefined") queueLooks = processCollection(queueLooks, counts);
+      jointDedupe56(counts);
       if (typeof weekPlan !== "undefined" && Array.isArray(weekPlan)) {
         weekPlan = weekPlan.filter(function (e) {
           if (!e || !e.look) return !!e;
