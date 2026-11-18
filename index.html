@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.66" />
+    <meta name="wardrobe-build" content="2026-11-18.67" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -3453,30 +3453,33 @@
       }
     </style>
     <style>
-      /* ================= Build .66 — bar stays at ICB bottom; fill the gap =================
-         David's 12:09pm ET Calendar shot is the same as the 11:26
-         .64 overshoot in the app and nav (bar top 772 CSS px /
-         905/1024, labels cut off). The only pixel diffs are in the
-         iOS status-bar clock (y 76–119). Either the phone was still
-         on .64 (stale sw.js: GitHub Pages max-age=600 and register
-         lacked updateViaCache:'none'), or .65's 100lvh slot placed
-         the bar at the full-screen bottom while the paintable/clip
-         edge is the short ICB — the same overshoot.
+      /* ================= Build .67 — document always at least screen-tall =================
+         David's 1:01pm ET Calendar shot is on .66 (faint "66" visible).
+         Labels are back, but the bar is lifted ~61px again (top at
+         710 CSS px / 832/1024) and the box-shadow never painted the
+         gap. The lift is only on short pages (Calendar this week,
+         Home, Ideas → My Inspo with one item). Closet, a long
+         scrolling page, was already flush. On iOS standalone, when
+         the document is shorter than the screen, the fixed-position
+         containing block / paint area ends at the document height,
+         not the screen bottom.
 
-         Safe rule: the bar is again position:fixed; bottom:0, so
-         its box (icons and labels) is always inside the ICB and
-         cannot be clipped. If the ICB is short, a 100px box-shadow
-         in --bg fills the gap visually. In standalone, when
-         screen.height - innerHeight > 40, padding-bottom is 8px
-         (the home indicator is then outside the ICB); that only
-         shrinks padding, it never moves the bar off-screen. The
-         100lvh slot is gone. register() uses updateViaCache:'none'
-         and registration.update() runs on load and visibilitychange.
-         Temporary #build-chip on Home shows ".66". */
+         So every page's document must be at least screen-tall:
+         html { min-height: calc(100% + env(safe-area-inset-top)) }
+         (height:auto) and body { min-height: 100lvh } — including
+         Home, beating .62's min-height:0. The bar is plain
+         position:fixed; bottom:0 with the normal safe-area
+         padding-bottom. The .66 short-ICB padding hack and the
+         box-shadow fill are gone. Temporary #build-chip shows ".67". */
       .subtab-short { display: none; }
-      html, body {
+      html {
         height: auto !important;
-        min-height: 100% !important;
+        min-height: calc(100% + env(safe-area-inset-top, 0px)) !important;
+        max-height: none !important;
+      }
+      body {
+        height: auto !important;
+        min-height: 100lvh !important;
         max-height: none !important;
       }
       @media (max-width: 1023px) {
@@ -3536,10 +3539,9 @@
         pointer-events: none;
       }
       @media (max-width: 899px) {
-        html, body,
-        body:has(> main > #panel-today:not([hidden])) {
+        html {
           height: auto !important;
-          min-height: 100% !important;
+          min-height: calc(100% + env(safe-area-inset-top, 0px)) !important;
           max-height: none !important;
           overflow: visible !important;
           transform: none !important;
@@ -3548,6 +3550,22 @@
           contain: none !important;
           will-change: auto !important;
           isolation: auto !important;
+        }
+        body,
+        body:has(> main > #panel-today:not([hidden])) {
+          display: block !important;
+          position: static !important;
+          height: auto !important;
+          min-height: 100lvh !important;
+          max-height: none !important;
+          overflow: visible !important;
+          transform: none !important;
+          filter: none !important;
+          perspective: none !important;
+          contain: none !important;
+          will-change: auto !important;
+          isolation: auto !important;
+          padding-bottom: var(--bb-h) !important;
         }
         #bottombar.bottombar {
           position: fixed !important;
@@ -3563,14 +3581,7 @@
           padding-bottom: env(safe-area-inset-bottom, 0px) !important;
           box-sizing: border-box !important;
           z-index: 45;
-          /* Extend only the BACKGROUND into any short-ICB gap below
-             the bar. Shadows and ::after painting do not move the
-             labels or the bar's box, so nothing can clip off-screen. */
-          box-shadow: 0 100px 0 0 var(--bg);
-        }
-        html.bb-short-icb { --bb-h: 76px; }
-        html.bb-short-icb #bottombar.bottombar {
-          padding-bottom: 8px !important;
+          box-shadow: none;
         }
       }
       @media (min-width: 1024px) {
@@ -3611,7 +3622,7 @@
       </div>
     </header>
     <!-- Temporary: faint build id on Home so screenshots show the running build. Remove later. -->
-    <div id="build-chip" aria-hidden="true">.66</div>
+    <div id="build-chip" aria-hidden="true">.67</div>
 
     <div class="navstack">
       <!-- The four section buttons live in the bottom bar (after
@@ -4769,7 +4780,7 @@
           </div>
           <p id="data-status" style="margin:0"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.66</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.67</p>
         <p class="form-note" id="nav-diag"></p>
       </section>
 
@@ -4849,31 +4860,6 @@
       <button type="button" class="navbtn" id="tab-find" data-tab="find" data-section="find" aria-controls="panel-find"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Shop</span></button>
       <button type="button" class="navbtn" id="section-calendar" data-section="calendar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Calendar</span></button>
     </nav>
-    <script>
-      /* Build .66: if the ICB is short in standalone, the home
-         indicator sits outside it, so the bar only needs a small
-         padding-bottom. Never changes bottom:0. */
-      (function () {
-        function apply() {
-          try {
-            if (window.matchMedia && window.matchMedia("(min-width: 900px)").matches) {
-              document.documentElement.classList.remove("bb-short-icb");
-              return;
-            }
-            var standalone = false;
-            try {
-              standalone = !!(window.navigator.standalone || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches));
-            } catch (e2) {}
-            var short = !!(standalone && window.screen && (screen.height - window.innerHeight > 40));
-            document.documentElement.classList.toggle("bb-short-icb", short);
-          } catch (e) {}
-        }
-        apply();
-        window.addEventListener("resize", apply);
-        window.addEventListener("pageshow", apply);
-        window.addEventListener("orientationchange", apply);
-      })();
-    </script>
     <script>
       /* Build .62 on-device nav diagnostic. Does not write styles to
          the bar, --bb-h, or body. Captures the first Home measurement
@@ -5619,7 +5605,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.66";
+var WARDROBE_BUILD = "2026-11-18.67";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
