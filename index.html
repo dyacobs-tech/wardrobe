@@ -3129,7 +3129,7 @@
       @media (max-width: 899px) {
         body:has(> main > #panel-today:not([hidden])) { box-sizing: border-box; height: 100dvh; max-height: 100dvh; }
         main:has(> #panel-today:not([hidden])) { min-height: 0; }
-        #panel-today { min-height: 0; }
+        #panel-today { min-height: 0; box-sizing: border-box; }
         #panel-today:not([hidden]) .today-hero { min-height: 0; }
         #panel-today .today-hero img#today-img { flex: 1 1 auto; height: auto; min-height: 0; }
         #panel-today .today-hero .today-collage { flex: 1 1 auto; height: auto; min-height: 0; }
@@ -26657,8 +26657,6 @@ function receiptDismiss(rec) {
   if (sec) sec.addEventListener("click", function (e) {
     if (e.target.closest && e.target.closest("[data-receipts-review]")) switchTab("receipts");
   });
-  var back = document.getElementById("receipts-back");
-  if (back) back.addEventListener("click", function () { switchTab("find"); });
   renderReceiptsSection();
   /* SY is initialized later in the script; re-render once the
      whole script has run so the sync-key line reads correctly. */
@@ -30538,6 +30536,24 @@ function syPendingCount() {
   SY_COLLS.forEach(function (c) { n += Object.keys(SY.dirty[c]).length; });
   return n;
 }
+/* Build .56 defect fix — the fixed sync / data notes sit at
+   bottom:76px on phone widths and would cover the Today hero's
+   selector row. While either note is visible, pad #panel-today
+   (border-box at phone widths, hero band flexes) so the caption
+   and selector row rise clear of the note; when both notes hide,
+   the padding clears and the hero returns to its exact geometry. */
+function todayNotePad() {
+  var panel = document.getElementById("panel-today");
+  if (!panel) return;
+  if (window.innerWidth > 899) { panel.style.paddingBottom = ""; return; }
+  var max = 0;
+  ["sync-note", "data-alert"].forEach(function (id) {
+    var n = document.getElementById(id);
+    if (n && !n.hidden) max = Math.max(max, n.offsetHeight);
+  });
+  panel.style.paddingBottom = max ? (max + 8) + "px" : "";
+}
+window.addEventListener("resize", todayNotePad);
 function syNoteRender() {
   var el = document.getElementById("sync-note");
   if (!el) return;
@@ -30550,6 +30566,7 @@ function syNoteRender() {
       ? "Sync paused — this device's key wasn't accepted. Your looks are safe on this device."
       : "Couldn't sync — " + pending + (pending === 1 ? " change is" : " changes are") + " still on this device.";
   }
+  todayNotePad();
 }
 /* The data alert: two guards share one slim note (never a popup).
    1) A stored list couldn't be read (poisoned key): its raw value
@@ -30571,6 +30588,7 @@ function dataNoteRender() {
     el.hidden = false;
     if (tx) tx.textContent = "This list couldn't be read — " + poisoned.join(", ") + ". The unreadable copy is kept safe on this device and nothing from it will be uploaded. Restore from " + (SY && SY.key ? "your synced copy?" : "a backup?");
     if (btn) btn.textContent = "Restore";
+    todayNotePad();
     return;
   }
   if (!_dataNoteOff && _syMassHold) {
@@ -30578,10 +30596,12 @@ function dataNoteRender() {
     el.hidden = false;
     if (tx) tx.textContent = "Sync wants to delete " + _syMassHold.deletions + " of " + _syMassHold.live + " in one list. Delete them everywhere?";
     if (btn) btn.textContent = "Delete them";
+    todayNotePad();
     return;
   }
   _dataNoteMode = "";
   el.hidden = true;
+  todayNotePad();
 }
 function dataAlertAction() {
   if (_dataNoteMode === "mass") {
