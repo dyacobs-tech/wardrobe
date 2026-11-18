@@ -4850,7 +4850,8 @@ var store = (function () {
     return v;
   }
   function replacer(_k, v) {
-    if ((V.enabled || (V.hasDb && V.hasDb())) && typeof v === "string" && v.length > 2048 && v.indexOf("data:image/") === 0) {
+    /* Every data:image string is vaulted regardless of size — a length threshold previously let small photos escape into localStorage raw. */
+    if ((V.enabled || (V.hasDb && V.hasDb())) && typeof v === "string" && v.indexOf("data:image/") === 0) {
       var pk = V.keyOf(v);
       if (inlinePhoto[pk]) return v;
       V.put(pk, v);
