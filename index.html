@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.54" />
+    <meta name="wardrobe-build" content="2026-11-17.55" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -3106,6 +3106,27 @@
       .iconic figcaption button:first-of-type { margin-top: auto; }
       .shop-thumb { width: 54px; height: 72px; object-fit: cover; flex: none; }
       .shop-thumb-ph { display: inline-block; background: var(--surface-alt); border: 1px solid var(--border); }
+
+      /* ---------- Build .55 (Item 0) — Today hero clears the bottom bar ----------
+         At phone widths the bar is a fixed 68px strip at bottom:0 and
+         the body already carries padding-bottom:68px, but the Today
+         flex column was sized by min-height alone and the hero's
+         image band was flex:none at a fixed 62dvh height — a taller
+         caption (wrapped title/weather, the watch pill in the row)
+         then pushed the caption's selector row under the bar. Now
+         the column is exactly the viewport tall (border-box, so the
+         68px clearance is inside it), every link in the flex chain
+         may shrink, and the image band flexes and absorbs the
+         difference — contain-fit full frame throughout, caption,
+         action pills and selector row at their existing sizes. */
+      @media (max-width: 899px) {
+        body:has(> main > #panel-today:not([hidden])) { box-sizing: border-box; height: 100dvh; max-height: 100dvh; }
+        main:has(> #panel-today:not([hidden])) { min-height: 0; }
+        #panel-today { min-height: 0; }
+        #panel-today:not([hidden]) .today-hero { min-height: 0; }
+        #panel-today .today-hero img#today-img { flex: 1 1 auto; height: auto; min-height: 0; }
+        #panel-today .today-hero .today-collage { flex: 1 1 auto; height: auto; min-height: 0; }
+      }
     </style>
   </head>
   <body>
@@ -4579,15 +4600,56 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
     }
     return h1.toString(36) + "-" + h2.toString(36) + "-" + n.toString(36);
   };
+  /* Build .55 (3.4): pending vault writes, counted per put
+     transaction, so an import can wait for the photos it just
+     wrote before reloading; and (3.2) single-photo fetches for
+     the lazy vault, deduped per key while in flight. */
+  var _pending = 0, _flushWaiters = [], _fetching = {};
   V.put = function (k, s) {
     if (cache[k] !== undefined) return;
     cache[k] = s;
     if (!db) return;
+    _pending++;
+    var _decDone = false;
+    function dec() {
+      if (_decDone) return;
+      _decDone = true;
+      _pending = Math.max(0, _pending - 1);
+      if (!_pending) { var ws = _flushWaiters; _flushWaiters = []; ws.forEach(function (w) { w(true); }); }
+    }
     try {
       var tx = db.transaction("p", "readwrite");
       tx.objectStore("p").put(s, k);
-      tx.onabort = tx.onerror = function () { if (V.onFail) V.onFail(k); };
-    } catch (e) { if (V.onFail) V.onFail(k); }
+      tx.oncomplete = dec;
+      tx.onabort = tx.onerror = function () { dec(); if (V.onFail) V.onFail(k); };
+    } catch (e) { dec(); if (V.onFail) V.onFail(k); }
+  };
+  V.hasDb = function () { return !!db; };
+  V.fetch = function (key, cb) {
+    if (cache[key] !== undefined) { cb(cache[key]); return; }
+    if (_fetching[key]) { _fetching[key].push(cb); return; }
+    if (!db) { cb(null); return; }
+    _fetching[key] = [cb];
+    function doneFetch(val) {
+      var cbs = _fetching[key] || [];
+      delete _fetching[key];
+      cbs.forEach(function (f) { f(val); });
+    }
+    try {
+      var rq = db.transaction("p").objectStore("p").get(key);
+      rq.onsuccess = function () {
+        var val = rq.result === undefined ? null : rq.result;
+        if (val !== null) cache[key] = val;
+        doneFetch(val);
+      };
+      rq.onerror = function () { doneFetch(null); };
+    } catch (e) { doneFetch(null); }
+  };
+  V.flush = function (done) {
+    if (!_pending) { done(true); return; }
+    var called = false;
+    var ft = setTimeout(function () { if (called) return; called = true; done(false); }, 10000);
+    _flushWaiters.push(function (ok) { if (called) return; called = true; clearTimeout(ft); done(ok); });
   };
   /* Small named values kept beside the photos: a copy of anything
      unreadable, and the state an import replaced. */
@@ -4621,6 +4683,40 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
     } catch (e) {}
     return dead.length;
   };
+  /* Build .55 (3.2d): lazy image hydration. Photos are no longer
+     preloaded at boot, so an <img> can be rendered pointing at an
+     "idb:<key>" reference; fetch that one blob and swap it in —
+     on the img itself and on any element whose pop-out target is
+     the same reference. A resolved src no longer starts with
+     "idb:", so the observer never loops on its own writes. */
+  function hydrateResolve(ref, data) {
+    document.querySelectorAll("img").forEach(function (im) { if (im.getAttribute("src") === ref) im.src = data; });
+    document.querySelectorAll("[data-popout]").forEach(function (el) { if (el.getAttribute("data-popout") === ref) el.setAttribute("data-popout", data); });
+  }
+  function hydrateCheck(img) {
+    if (!img || img.tagName !== "IMG") return;
+    var s = img.getAttribute("src");
+    if (s && s.indexOf("idb:") === 0) {
+      var ref = s;
+      V.fetch(s.slice(4), function (data) { if (data) hydrateResolve(ref, data); });
+    }
+  }
+  function hydrateScan(root) {
+    if (!root) return;
+    if (root.tagName === "IMG") hydrateCheck(root);
+    if (root.querySelectorAll) root.querySelectorAll("img").forEach(hydrateCheck);
+  }
+  function startHydration() {
+    hydrateScan(document);
+    if (typeof MutationObserver === "undefined") return;
+    var mo = new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        if (m.type === "attributes") hydrateCheck(m.target);
+        else for (var i = 0; i < m.addedNodes.length; i++) { var n = m.addedNodes[i]; if (n.nodeType === 1) hydrateScan(n); }
+      });
+    });
+    mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
+  }
   function runApp() {
     var list = document.querySelectorAll('script[type="wardrobe/app"]');
     for (var i = 0; i < list.length; i++) {
@@ -4628,6 +4724,7 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
       s.text = list[i].text;
       list[i].parentNode.replaceChild(s, list[i]);
     }
+    try { startHydration(); } catch (e) {}
     try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); } catch (e) {}
   }
   function boot() {
@@ -4649,11 +4746,11 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
     rq.onsuccess = function () {
       var d = rq.result;
       try {
-        var cur = d.transaction("p").objectStore("p").openCursor();
+        var cur = d.transaction("p").objectStore("p").openKeyCursor();
         cur.onerror = giveUp;
         cur.onsuccess = function () {
           var c = cur.result;
-          if (c) { cache[c.key] = c.value; bootKeys[c.key] = 1; c.continue(); return; }
+          if (c) { bootKeys[c.key] = 1; c.continue(); return; }
           db = d;
           /* If the timer already let the app boot without the
              vault, stay in that mode for this session: references
@@ -4753,7 +4850,7 @@ var store = (function () {
     return v;
   }
   function replacer(_k, v) {
-    if (V.enabled && typeof v === "string" && v.length > 2048 && v.indexOf("data:image/") === 0) {
+    if ((V.enabled || (V.hasDb && V.hasDb())) && typeof v === "string" && v.length > 2048 && v.indexOf("data:image/") === 0) {
       var pk = V.keyOf(v);
       if (inlinePhoto[pk]) return v;
       V.put(pk, v);
@@ -4891,7 +4988,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.54";
+var WARDROBE_BUILD = "2026-11-17.55";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -6445,7 +6542,7 @@ function renderInspoImages() {
   var active = activeInspoId ? inspoImageById(activeInspoId) : null;
   if (!active) { bar.hidden = true; bar.innerHTML = ""; return; }
   bar.hidden = false;
-  bar.innerHTML = '<img src="' + esc(active.img) + '" alt="" />' +
+  bar.innerHTML = '<img src="' + esc(active.img) + '" alt="" loading="lazy" />' +
     '<span class="ia-main"><strong>Building from your image</strong>' + esc(active.desc || "Your uploaded inspiration — tap Give me ideas.") + "</span>" +
     '<button type="button" class="btn-ghost" data-inspo-clear>Clear</button>' +
     '<button type="button" class="btn-ghost" data-inspo-delete="' + active.id + '">Delete</button>';
@@ -14103,7 +14200,7 @@ function openFindSheet(look) {
      one — the picture he is finding pieces for, tappable to full
      size like every other photo of him. Looks read out of a
      caption carry no photograph and simply go without. */
-  var sheetPhoto = look.img ? '<img class="find-sheet-photo" src="' + esc(lookImg(look)) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(lookImg(look)) + '" />' : "";
+  var sheetPhoto = look.img ? '<img class="find-sheet-photo" src="' + esc(lookImg(look)) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(lookImg(look)) + '" loading="lazy" />' : "";
   document.getElementById("find-sheet-pieces").innerHTML = sheetPhoto + '<div class="find-pieces bare" style="border-top:none;margin-top:0;padding-top:0">' + findSheetRowsHTML(look) + "</div>";
   var sheet = document.getElementById("find-sheet");
   sheet.hidden = false;
@@ -15819,7 +15916,7 @@ function buildAroundShopEntry(e) {
 function buildCardHTML(look, idx) {
   if (look.buildUpload) {
     return '<button type="button" class="card option-card" data-build-idx="' + idx + '" role="listitem">' +
-      '<span class="pane" style="position:relative;display:block;aspect-ratio:3/4"><img src="' + esc(look.img) + '" alt="' + esc(look.imgAlt || "") + '" style="width:100%;height:100%;object-fit:cover;display:block" />' +
+      '<span class="pane" style="position:relative;display:block;aspect-ratio:3/4"><img src="' + esc(look.img) + '" alt="' + esc(look.imgAlt || "") + '" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" />' +
       '<span class="build-combo-tag">The combination — renders aren\u2019t available for uploads yet</span></span>' +
       '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
       cardStripHTML(look.swatches) + "</span></button>";
@@ -16093,7 +16190,7 @@ function lookCardHTML(look, opts) {
   var lcState = swapCardState(look);
   var lcWaiting = lcState === "rendering" || lcState === "pending" || lcState === "failed" || lcState === "nosync";
   var mediaPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + esc(cardImg) + '"';
-  var media = '<div class="look-media single"><div class="pane' + (lcState === "rendering" ? " swap-rendering" : "") + '"><img src="' + esc(cardImg) + '" alt="' + esc(look.imgAlt || "") + '"' + mediaPop + ' />' + refTag + (lcWaiting ? '<div class="swap-render-line">' + esc(swapCardLine(look)) + "</div>" : "") + "</div></div>";
+  var media = '<div class="look-media single"><div class="pane' + (lcState === "rendering" ? " swap-rendering" : "") + '"><img src="' + esc(cardImg) + '" alt="' + esc(look.imgAlt || "") + '"' + mediaPop + ' loading="lazy" />' + refTag + (lcWaiting ? '<div class="swap-render-line">' + esc(swapCardLine(look)) + "</div>" : "") + "</div></div>";
   var cardIcon = look.iconId ? iconById(look.iconId) : null;
   var cardBlend = look.blendId ? iconById(look.blendId) : null;
   var dirLine = cardIcon ? '<p class="dir-line">In the direction of <strong>' + esc(cardIcon.name) + "</strong> — " + esc(cardIcon.lane) + (cardBlend ? ', blended with <strong>' + esc(cardBlend.name) + "</strong> — " + esc(cardBlend.lane) : "") + "</p>" : "";
@@ -19918,12 +20015,18 @@ document.getElementById("item-grid").addEventListener("click", function (e) {
     if (it) {
       /* One worn store: the piece's counter and the worn log
          entry are written together by recordWorn. */
-      recordWorn({ date: localTodayISO(), title: it.name, img: it.photo || "", pieces: [it.name], pieceIds: [it.id] });
+      var _we = recordWorn({ date: localTodayISO(), title: it.name, img: it.photo || "", pieces: [it.name], pieceIds: [it.id] });
+      if (!_we) { toast("Already logged as worn today — " + it.name + "."); return; }
       persistAll();
       renderWardrobe();
       renderWornLog();
       if (detailItemId === it.id) renderItemDetail();
-      toast("Marked worn — " + it.name + ".");
+      showUndoToast("Marked worn — " + it.name + ".", function () {
+        removeWornEntryById(_we.id);
+        renderWardrobe();
+        renderWornLog();
+        if (detailItemId === it.id) renderItemDetail();
+      });
     }
   }
 });
@@ -20169,10 +20272,14 @@ document.getElementById("item-detail").addEventListener("click", function (e) {
   }
   if (act === "close") { detailItemId = null; renderItemDetail(); return; }
   if (act === "wore") {
-    recordWorn({ date: localTodayISO(), title: it.name, img: it.photo || "", pieces: [it.name], pieceIds: [it.id] });
+    var _we2 = recordWorn({ date: localTodayISO(), title: it.name, img: it.photo || "", pieces: [it.name], pieceIds: [it.id] });
+    if (!_we2) { toast("Already logged as worn today — " + it.name + "."); return; }
     persistAll();
     renderWardrobe(); renderItemDetail(); renderWornLog();
-    toast("Marked worn — " + it.name + ".");
+    showUndoToast("Marked worn — " + it.name + ".", function () {
+      removeWornEntryById(_we2.id);
+      renderWardrobe(); renderItemDetail(); renderWornLog();
+    });
     return;
   }
   if (act === "style") {
@@ -21281,7 +21388,7 @@ function wristHTML(look, bare) {
     ? watches.filter(function (w) { return w.id === wristPickId && !w.sold; })[0] : null;
   if (forced && (!rec.watch || rec.watch.id !== forced.id)) {
     var fpick = '<div class="w-pick">' +
-      (forced.photo ? '<img src="' + esc(forced.photo) + '" alt="" />' : "") +
+      (forced.photo ? '<img src="' + esc(forced.photo) + '" alt="" loading="lazy" />' : "") +
       '<div><div class="w-name">' + esc(forced.name) + '</div>' +
       '<div class="w-sub">' + esc(forced.metal) + " · " + esc(forced.dialName) + (forced.strap === "Not recorded" ? "" : " · " + esc(forced.strap)) + "</div></div></div>";
     var finner = fpick + "<ul>" +
@@ -21292,7 +21399,7 @@ function wristHTML(look, bare) {
   }
   if (!rec.watch) return "";
   var pick = '<div class="w-pick">' +
-    (rec.watch.photo ? '<img src="' + esc(rec.watch.photo) + '" alt="" />' : "") +
+    (rec.watch.photo ? '<img src="' + esc(rec.watch.photo) + '" alt="" loading="lazy" />' : "") +
     '<div><div class="w-name">' + esc(rec.watch.name) + '</div>' +
     '<div class="w-sub">' + esc(rec.watch.metal) + " · " + esc(rec.watch.dialName) + (rec.watch.strap === "Not recorded" ? "" : " · " + esc(rec.watch.strap)) + "</div></div></div>";
   var inner = pick +
@@ -21353,7 +21460,7 @@ function shadesHTML(look, bare) {
   var pick = "";
   if (rec.item) {
     pick = '<div class="w-pick">' +
-      (rec.item.photo ? '<img src="' + rec.item.photo + '" alt="" />' : "") +
+      (rec.item.photo ? '<img src="' + rec.item.photo + '" alt="" loading="lazy" />' : "") +
       '<div><div class="w-name">' + esc(rec.item.name) + '</div>' +
       '<div class="w-sub">' + esc((rec.item.colourName || "").split("·")[0].trim()) + " · From your closet</div></div></div>";
   }
@@ -22883,7 +22990,7 @@ function renderToday() {
        their names. */
     img.hidden = true;
     if (collage) {
-      collage.innerHTML = heroPieces.slice(0, 3).map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" />'; }).join("");
+      collage.innerHTML = heroPieces.slice(0, 3).map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" />'; }).join("");
       collage.hidden = false;
     }
   } else {
@@ -23101,7 +23208,7 @@ function fetchWeather(attempt) {
   var url = "https://api.open-meteo.com/v1/forecast?latitude=" + currentLoc.lat + "&longitude=" + currentLoc.lon +
     "&current=temperature_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&temperature_unit=fahrenheit&past_days=7&forecast_days=16&timezone=auto";
   var askedLat = currentLoc.lat, askedLon = currentLoc.lon;
-  fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+  syFetch(url, {}, 8000).then(function (r) { return r.json(); }).then(function (data) {
     if (currentLoc.lat !== askedLat || currentLoc.lon !== askedLon) return;
     if (!data || !data.current || typeof data.current.temperature_2m !== "number") { weatherFailed(attempt); return; }
     /* The daily arrays now span past + forecast days, so today
@@ -23453,14 +23560,17 @@ function readBackupFile(text) {
   BACKUP_ARRAY_KEYS.forEach(function (k) { if (k in data && data[k] !== null && !Array.isArray(data[k])) throw new Error("not-backup"); });
   BACKUP_OBJECT_KEYS.forEach(function (k) { if (k in data && data[k] !== null && (typeof data[k] !== "object" || Array.isArray(data[k]))) throw new Error("not-backup"); });
   sanitizeIncoming(data, "");
-  return { data: data, known: known };
+  var exportedAt = null;
+  if (typeof payload.exportedAt === "number" && isFinite(payload.exportedAt)) exportedAt = payload.exportedAt;
+  else if (typeof payload.exportedAt === "string") { var _ea = Date.parse(payload.exportedAt); exportedAt = isNaN(_ea) ? null : _ea; }
+  return { data: data, known: known, exportedAt: exportedAt };
 }
 function currentBackupPayload() {
   var data = {};
   DATA_KEYS.forEach(function (k) { var v = store.get(k, null); if (v !== null) data[k] = v; });
   return { app: "Wardrobe", kind: "wardrobe-backup", version: BACKUP_VERSION, exportedAt: new Date().toISOString(), data: data };
 }
-function applyBackupData(data) {
+function applyBackupData(data, opts) {
   /* Import REPLACES: a key absent from the file is cleared, so it
      can't leave newer on-device state silently in force. Exact
      prior text is held so a failed write restores it. */
@@ -23469,10 +23579,68 @@ function applyBackupData(data) {
   DATA_KEYS.forEach(function (k) { store.clearPoison(k); });
   var before = {}, failed = [];
   DATA_KEYS.forEach(function (k) { before[k] = store.raw(k); });
+  /* Build .55 (3.6): on a confirmed import while sync is on, the
+     caller passes the backup's exportedAt and records newer than
+     the backup are protected — a local record the backup doesn't
+     know about survives when its sync stamp (or its own date
+     field) is later than the backup, and a whole key absent from
+     the file survives when its newest local stamp is. With no
+     exportedAt (sync off, or the Undo restore), the exact
+     replace semantics below are unchanged. */
+  var exportedAt = opts && typeof opts.exportedAt === "number" ? opts.exportedAt : null;
+  function recIdFor(k, r) {
+    var coll = (typeof SY_KEY_COLL !== "undefined") ? SY_KEY_COLL[k] : null;
+    if (coll && typeof syRecId === "function") { try { var rid = syRecId(coll, r); if (rid) return rid; } catch (e) {} }
+    return r && (r.id || r.key) || null;
+  }
+  function recStampFor(k, r, id) {
+    var coll = (typeof SY_KEY_COLL !== "undefined") ? SY_KEY_COLL[k] : null;
+    if (coll && typeof SY !== "undefined" && SY && SY.st && SY.st[coll] && id && typeof SY.st[coll][id] === "number") return SY.st[coll][id];
+    if (r && typeof r === "object") {
+      var flds = [r.savedAt, r.addedISO, r.date];
+      for (var fi = 0; fi < flds.length; fi++) {
+        var fv = flds[fi];
+        if (typeof fv === "number" && isFinite(fv)) return fv;
+        if (typeof fv === "string") { var fp = Date.parse(fv); if (!isNaN(fp)) return fp; }
+      }
+    }
+    return null;
+  }
+  function newestLocalStamp(k) {
+    var best = null;
+    var coll = (typeof SY_KEY_COLL !== "undefined") ? SY_KEY_COLL[k] : null;
+    if (typeof SY !== "undefined" && SY) {
+      if (coll && SY.st && SY.st[coll]) Object.keys(SY.st[coll]).forEach(function (id) { var s = SY.st[coll][id]; if (typeof s === "number" && (best === null || s > best)) best = s; });
+      var mfField = { profile: "profile", deletedIds: "deletedIds", overrides: "overrides", dislikedImgs: "dislikedImgs", recentlyRemoved: "recentlyRemoved", findBudget: "findBudget", shopTier: "shopTier", homeLocation: "homeLocation", currentLocation: "currentLocation", formality: "formality", studioSettings: "studioSettings", lastOpeningImg: "lastOpeningImg" }[k];
+      if (mfField && SY.mf && SY.mf[mfField] && typeof SY.mf[mfField].t === "number" && (best === null || SY.mf[mfField].t > best)) best = SY.mf[mfField].t;
+    }
+    return best;
+  }
   DATA_KEYS.forEach(function (k) {
     if (failed.length) return;
-    if (k in data && data[k] !== null && data[k] !== undefined) { if (!store.set(k, data[k])) failed.push(k); }
-    else store.remove(k);
+    if (k in data && data[k] !== null && data[k] !== undefined) {
+      var val = data[k];
+      if (exportedAt !== null && Array.isArray(val)) {
+        var localVal = null;
+        try { localVal = store.get(k, null); } catch (e) { localVal = null; }
+        if (Array.isArray(localVal)) {
+          var inBackup = {};
+          val.forEach(function (r) { var rid2 = (r && typeof r === "object") ? recIdFor(k, r) : (typeof r === "string" ? r : null); if (rid2) inBackup[rid2] = 1; });
+          var kept = localVal.filter(function (r) {
+            var rid3 = (r && typeof r === "object") ? recIdFor(k, r) : (typeof r === "string" ? r : null);
+            if (!rid3 || inBackup[rid3]) return false;
+            var st = recStampFor(k, r, rid3);
+            return st !== null && st > exportedAt;
+          });
+          if (kept.length) val = val.concat(kept);
+        }
+      }
+      if (!store.set(k, val)) failed.push(k);
+    }
+    else {
+      if (exportedAt !== null) { var ns = newestLocalStamp(k); if (ns !== null && ns > exportedAt) return; }
+      store.remove(k);
+    }
   });
   if (failed.length) {
     DATA_KEYS.forEach(function (k) { store.putRaw(k, before[k]); });
@@ -23492,10 +23660,15 @@ function refreshUndoImport() {
     if (v && v.at) b.textContent = "Undo last import (" + new Date(v.at).toLocaleDateString() + ")";
   });
 }
+/* Build .55 (3.6): while sync is on, the first selection of a
+   backup only warns — nothing is written; choosing the same
+   file again is the confirmation. */
+var _importWarnKey = null;
 document.getElementById("data-import-file").addEventListener("change", function () {
   var file = this.files && this.files[0];
   if (!file) return;
   var input = this;
+  var fileKey = file.name + "|" + file.size + "|" + (file.lastModified || 0);
   var reader = new FileReader();
   reader.onerror = function () {
     importStatus("That file couldn't be read — nothing was changed.");
@@ -23512,13 +23685,22 @@ document.getElementById("data-import-file").addEventListener("change", function 
       input.value = "";
       return;
     }
+    var syncOn = false;
+    try { syncOn = (typeof SY !== "undefined" && !!SY && !!SY.key); } catch (e) { syncOn = false; }
+    if (syncOn && _importWarnKey !== fileKey) {
+      _importWarnKey = fileKey;
+      importStatus("Sync is on for this device. Importing replaces this device's data with the backup, and the result syncs to your other devices. Records on this device that are newer than the backup are kept. Choose the same file again to continue — or do nothing to cancel. Nothing has been changed yet.");
+      input.value = "";
+      return;
+    }
+    _importWarnKey = null;
     /* Copy aside what is here now, then replace. The copy carries
        its photographs inline, so it stays whole even after the
        vault is tidied. */
     var prior = null;
     try { prior = JSON.stringify(currentBackupPayload()); } catch (e) { prior = null; }
     var go = function () {
-      var failed = applyBackupData(parsed.data);
+      var failed = applyBackupData(parsed.data, syncOn && parsed.exportedAt ? { exportedAt: parsed.exportedAt } : null);
       if (failed) {
         importStatus("The backup didn't fit on this device (stopped at: " + failed.join(", ") + "). Everything was put back — nothing was changed.");
         toast("Import stopped — nothing was changed.");
@@ -23526,7 +23708,10 @@ document.getElementById("data-import-file").addEventListener("change", function 
         return;
       }
       toast("Backup imported — reloading your Wardrobe…");
-      setTimeout(function () { location.reload(); }, 600);
+      /* Build .55 (3.4): wait for the vault writes the import
+         just made before reloading, instead of a blind timer. */
+      if (window.photoVault && typeof window.photoVault.flush === "function") window.photoVault.flush(function () { location.reload(); });
+      else setTimeout(function () { location.reload(); }, 600);
     };
     if (prior && window.photoVault && window.photoVault.enabled) window.photoVault.keep("pre-import", { at: Date.now(), payload: prior }, go);
     else go();
@@ -23548,7 +23733,8 @@ document.getElementById("data-import-file").addEventListener("change", function 
       if (failed) { importStatus("That didn't fit on this device — nothing was changed."); return; }
       window.photoVault.keep("pre-import", null, function () {
         toast("Restored — reloading your Wardrobe…");
-        setTimeout(function () { location.reload(); }, 600);
+        if (window.photoVault && typeof window.photoVault.flush === "function") window.photoVault.flush(function () { location.reload(); });
+        else setTimeout(function () { location.reload(); }, 600);
       });
     });
   });
@@ -26547,7 +26733,7 @@ function renderFindLookMode() {
   ensureShopData({ pieces: shopPiecesForLook(findLookMode) });
   var look = findLookMode;
   var img = lookImg(look);
-  var html = '<div class="shop-look-head"><img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" />' +
+  var html = '<div class="shop-look-head"><img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" loading="lazy" />' +
     '<div class="shop-look-titlerow"><h3>' + esc(look.title || "Untitled") + '</h3><button type="button" class="btn-ghost shop-clear" id="shop-clear-look">✕ Clear look</button></div>' +
     '<p class="shop-honest">Catalogue prices checked ' + SHOP_CATALOGUE_CHECKED + " — tap through for the live price.</p>" +
     "</div>";
@@ -27113,8 +27299,9 @@ function registerRemoved(look, img) {
   snap._seed = !savedLooks.some(function (l) { return l.id === snap.id; }) && SEED_LOOKS.some(function (s) { return s.id === snap.id; });
   recentlyRemoved = recentlyRemoved.filter(function (r) { return r.id !== snap.id; });
   recentlyRemoved.unshift(snap);
-  /* The FULL removal history is kept — an old accidental removal
-     stays recoverable for as long as it matters. */
+  /* Capped at 50 (build .55): the newest removals stay
+     recoverable; older snapshots drop off the end. */
+  if (recentlyRemoved.length > 50) recentlyRemoved.length = 50;
   store.set("recentlyRemoved", recentlyRemoved);
   renderRecentlyRemoved();
   var id = snap.id;
@@ -27338,8 +27525,15 @@ function recordWorn(entry) {
   var pids = (entry.pieceIds || []).map(function (p) {
     return (p && typeof p === "object") ? p.id : p;
   }).filter(function (p) { return !!p; });
+  /* Build .55 (3.7): the id is deterministic when the caller
+     doesn't supply one — date + look (or pieces) + title — so
+     two devices logging the same wear on the same day produce
+     the same id and sync merges them into one entry; a second
+     log of the same wear on this device is a duplicate. */
+  var _wid = entry.id || ("worn-" + syHsh(date + "|" + (entry.lookId || pids.join("+") || "") + "|" + (entry.title || "")));
+  if (wornLog.some(function (en) { return en.id === _wid; })) return null;
   var e = {
-    id: entry.id || ("worn-" + Date.now() + "-" + Math.floor(Math.random() * 1e6)),
+    id: _wid,
     date: date,
     title: entry.title || "Logged outfit",
     img: entry.img || "",
@@ -27399,6 +27593,15 @@ function rollbackWornCredits(removedEntries) {
     else if (it.wearCount === 0) it.lastWorn = null;
     if (it.id.indexOf("seed-") === 0) saveEntryEdit("items", it);
   });
+}
+function removeWornEntryById(id) {
+  var entry = wornLog.filter(function (en) { return en.id === id; })[0];
+  if (!entry) return null;
+  wornLog = wornLog.filter(function (en) { return en.id !== id; });
+  store.set("wornLog", wornLog);
+  rollbackWornCredits([entry]);
+  persistAll();
+  return entry;
 }
 function removeWornForLook(lookId, date) {
   var removed = wornLog.filter(function (en) { return en.lookId === lookId && (!date || en.date === date); });
@@ -28340,7 +28543,7 @@ function openPlanSheet(iso) {
   } else {
     if (planned) {
       var pimg = lookImg(planned);
-      html += '<div class="wp-current"><img src="' + esc(pimg) + '" alt="" data-popout="' + esc(pimg) + '" data-popout-alt="' + esc(planned.imgAlt || planned.title) + '" />' +
+      html += '<div class="wp-current"><img src="' + esc(pimg) + '" alt="" data-popout="' + esc(pimg) + '" data-popout-alt="' + esc(planned.imgAlt || planned.title) + '" loading="lazy" />' +
         '<span class="wp-current-main"><span class="wp-current-name">' + esc(planned.title) + '</span><span class="wp-current-sub">Planned</span></span>' +
         '<button type="button" class="btn-ghost" data-plan-clear>Remove</button></div>';
     }
@@ -29677,6 +29880,58 @@ function syHsh(x) {
   for (var i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0;
   return h.toString(36) + t.length;
 }
+/* Build .55: the wire form of a sync value. A long data:image
+   string is represented by its vault reference ("idb:<key>") —
+   the key is content-derived (photoVault.keyOf is pure), so two
+   devices holding the same photo hash identically without the
+   hash ever touching the photo bytes. When the vault is live
+   the blob is also put into it, so the reference is guaranteed
+   resolvable on this device. Hashing always uses the wire form;
+   upload payloads use it only where the brief says so. */
+function syWire(v) {
+  if (typeof v === "string") {
+    if (v.length > 2048 && v.indexOf("data:image/") === 0) {
+      var pv = window.photoVault;
+      if (pv && pv.keyOf) {
+        var key = pv.keyOf(v);
+        if (pv.enabled && pv.put) { try { pv.put(key, v); } catch (e) {} }
+        return "idb:" + key;
+      }
+    }
+    return v;
+  }
+  if (Array.isArray(v)) return v.map(function (x) { return syWire(x); });
+  if (v && typeof v === "object") {
+    var out = {};
+    Object.keys(v).forEach(function (k) { out[k] = syWire(v[k]); });
+    return out;
+  }
+  return v;
+}
+/* The inverse for incoming data, mirroring the store reviver:
+   a short "idb:<key>" string resolves from the vault cache when
+   the blob is on this device; when it is not, the reference
+   itself is kept (so a later save writes it back unchanged) and
+   the miss is counted. */
+function syUnwire(v) {
+  if (typeof v === "string") {
+    if (v.length < 80 && v.indexOf("idb:") === 0) {
+      var pv2 = window.photoVault;
+      var hit = pv2 && pv2.cache ? pv2.cache[v.slice(4)] : undefined;
+      if (hit !== undefined) return hit;
+      if (pv2) pv2.missing = (pv2.missing || 0) + 1;
+    }
+    return v;
+  }
+  if (Array.isArray(v)) return v.map(function (x) { return syUnwire(x); });
+  if (v && typeof v === "object") {
+    var out2 = {};
+    Object.keys(v).forEach(function (k) { out2[k] = syUnwire(v[k]); });
+    return out2;
+  }
+  return v;
+}
+function syWireRec(c, r) { return syWire(syRecData(c, r)); }
 /* Record identity + access, per the wiring brief's mapping. Seed
    items/watches are static site content and never sync. */
 function syWornId(en) { return en.id || ("worn-" + syHsh(en.date + "|" + en.title)); }
@@ -29724,10 +29979,6 @@ function syMetaOf() {
     overrides: entryOverrides,
     dislikedImgs: dislikedImgs,
     recentlyRemoved: recentlyRemoved,
-    dealtImgs: dealtImgHistory,
-    dealtTitles: dealtTitles,
-    dealtCombos: dealtCombos,
-    dealtCards: dealtCardHistory,
     findBudget: budgetLevel,
     shopTier: shopTier,
     homeLocation: homeLoc,
@@ -29744,9 +29995,9 @@ function syMetaOf() {
    and at the start of every sync, so no write path is missed. */
 var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops" };
 var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox", shopwish: "shopWishlist", pricedrops: "priceDrops" };
-var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, dealtImgs: 1, dealtTitles: 1, dealtCombos: 1, dealtCards: 1, findBudget: 1, shopTier: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
+var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
 function syTrackChanges(onlyColl) {
-  var now = Date.now(), ch = false;
+  var now = Date.now(), ch = false, mig = false;
   var colls = onlyColl ? [onlyColl] : SY_COLLS;
   colls.forEach(function (c) {
     /* Poisoned store key: the in-memory list is a fallback, not
@@ -29758,8 +30009,16 @@ function syTrackChanges(onlyColl) {
       var id = syRecId(c, r);
       if (!id) return;
       seen[id] = true;
-      var h = syHsh(syRecData(c, r));
-      if (SY.snap[c][id] !== h) { SY.snap[c][id] = h; SY.st[c][id] = now; SY.dirty[c][id] = 1; delete SY.tomb[c][id]; ch = true; }
+      var h = syHsh(syWireRec(c, r));
+      if (SY.snap[c][id] !== h) {
+        /* Silent migration (build .55): a snapshot taken by an
+           older build holds the OLD raw hash of this same record.
+           Rewriting it to the wire hash is not a change — no
+           dirty flag, no new stamp — or an upgrade would
+           re-upload the whole library once. */
+        if (SY.snap[c][id] !== undefined && SY.snap[c][id] === syHsh(syRecData(c, r))) { SY.snap[c][id] = h; mig = true; }
+        else { SY.snap[c][id] = h; SY.st[c][id] = now; SY.dirty[c][id] = 1; delete SY.tomb[c][id]; ch = true; }
+      }
     });
     Object.keys(SY.snap[c]).forEach(function (id) {
       if (!seen[id]) { delete SY.snap[c][id]; delete SY.st[c][id]; SY.tomb[c][id] = now; SY.dirty[c][id] = 1; ch = true; }
@@ -29771,12 +30030,12 @@ function syTrackChanges(onlyColl) {
   var meta = syMetaOf(), mch = false;
   Object.keys(meta).forEach(function (f) {
     if (store.poisoned(f) || _syMetaRestore[f]) return; /* fallback value — never tracked, never uploaded */
-    var h = syHsh(meta[f]), cur = SY.mf[f];
+    var h = syHsh(syWire(meta[f])), cur = SY.mf[f];
     if (!cur) { SY.mf[f] = { h: h, t: SY.st.m || 0 }; ch = true; }
     else if (cur.h !== h) { cur.h = h; cur.t = now; mch = true; }
   });
   if (mch) { SY.st.m = now; SY.dirty.m = 1; ch = true; }
-  if (ch) saveSY();
+  if (ch || mig) saveSY();
   return ch;
 }
 var _syT = null, _syBusy = false, _syApplying = false, _syAgain = false;
@@ -29935,6 +30194,7 @@ function syFetch(url, opts, ms) {
   });
 }
 function syPutLocal(c, data) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return;
   var id = syRecId(c, data);
   if (!id) return;
   function put(arr) {
@@ -30019,6 +30279,22 @@ function sySyncProfileForm() {
     if (el) el.value = profile[f] || "";
   });
 }
+function syValidMetaField(f, v) {
+  function plain(o) { return !!o && typeof o === "object" && !Array.isArray(o); }
+  switch (f) {
+    case "profile": case "overrides": return plain(v);
+    case "deletedIds": case "dislikedImgs":
+      return Array.isArray(v) && v.every(function (x) { return typeof x === "string"; });
+    case "recentlyRemoved":
+      return Array.isArray(v) && v.every(function (x) { return plain(x) && typeof x.id === "string"; });
+    case "findBudget": case "shopTier": case "formality":
+      return typeof v === "string" || typeof v === "number";
+    case "homeLocation": case "currentLocation": case "studioSettings":
+      return v === null || plain(v);
+    case "lastOpeningImg": return v === null || typeof v === "string";
+  }
+  return true;
+}
 function syApplyMeta(meta) {
   if (!meta || !meta.data || typeof meta.data !== "object") return false;
   var d = sanitizeIncoming(meta.data, "");
@@ -30035,25 +30311,54 @@ function syApplyMeta(meta) {
     if (lt > rt) localNewer = true;
     return 0;
   }
-  function stamp(f, t, v) { SY.mf[f] = { h: syHsh(v), t: t }; }
+  function stamp(f, t, v) { SY.mf[f] = { h: syHsh(syWire(v)), t: t }; }
+  /* Build .55 (3.8): a malformed field is skipped entirely —
+     not applied, not stamped, not counted — before take() ever
+     sees it. Fields an older peer still sends that this build
+     no longer syncs (the dealt* history) have no branch below
+     and are ignored. */
+  function ok(f) { return (f in d) && syValidMetaField(f, d[f]); }
   var t, seedState = false;
-  if ((t = take("profile"))) { profile = d.profile; store.set("profile", profile); sySyncProfileForm(); if (typeof syncFindSize === "function") syncFindSize(); stamp("profile", t, profile); }
-  if ((t = take("deletedIds"))) { deletedIds = d.deletedIds; store.set("deletedIds", deletedIds); stamp("deletedIds", t, deletedIds); seedState = true; }
-  if ((t = take("overrides"))) { entryOverrides = d.overrides; store.set("overrides", entryOverrides); stamp("overrides", t, entryOverrides); seedState = true; }
+  if (ok("profile") && (t = take("profile"))) { profile = syUnwire(d.profile); store.set("profile", profile); sySyncProfileForm(); if (typeof syncFindSize === "function") syncFindSize(); stamp("profile", t, profile); }
+  if (ok("deletedIds") && (t = take("deletedIds"))) {
+    /* Build .55 (3.5): union, never replace — a deletion made on
+       either device survives the merge. */
+    var incDel = syUnwire(d.deletedIds);
+    var mergedDel = deletedIds.slice();
+    incDel.forEach(function (id) { if (mergedDel.indexOf(id) === -1) mergedDel.push(id); });
+    deletedIds = mergedDel; store.set("deletedIds", deletedIds); stamp("deletedIds", t, deletedIds); seedState = true;
+  }
+  if (ok("overrides") && (t = take("overrides"))) {
+    /* Build .55 (3.5): per-key merge — incoming keys overlay,
+       keys held only locally survive. */
+    entryOverrides = Object.assign({}, entryOverrides, syUnwire(d.overrides)); store.set("overrides", entryOverrides); stamp("overrides", t, entryOverrides); seedState = true;
+  }
   if (seedState) syRebuildSeedLists();
-  if ((t = take("dislikedImgs"))) { dislikedImgs = d.dislikedImgs; store.set("dislikedImgs", dislikedImgs); stamp("dislikedImgs", t, dislikedImgs); }
-  if ((t = take("recentlyRemoved"))) { recentlyRemoved = d.recentlyRemoved; store.set("recentlyRemoved", recentlyRemoved); stamp("recentlyRemoved", t, recentlyRemoved); }
-  if ((t = take("dealtImgs"))) { dealtImgHistory = d.dealtImgs; store.set("dealtImgs", dealtImgHistory); stamp("dealtImgs", t, dealtImgHistory); }
-  if ((t = take("dealtTitles"))) { dealtTitles = d.dealtTitles; store.set("dealtTitles", dealtTitles); stamp("dealtTitles", t, dealtTitles); }
-  if ((t = take("dealtCombos"))) { dealtCombos = d.dealtCombos; store.set("dealtCombos", dealtCombos); stamp("dealtCombos", t, dealtCombos); }
-  if ((t = take("dealtCards"))) { dealtCardHistory = d.dealtCards; store.set("dealtCards", dealtCardHistory); stamp("dealtCards", t, dealtCardHistory); }
-  if ((t = take("findBudget"))) { budgetLevel = d.findBudget; store.set("findBudget", budgetLevel); if (typeof renderBudget === "function") renderBudget(); stamp("findBudget", t, budgetLevel); }
-  if ((t = take("shopTier"))) { shopTier = d.shopTier; store.set("shopTier", shopTier); if (typeof renderShopTier === "function") renderShopTier(); stamp("shopTier", t, shopTier); }
-  if ((t = take("homeLocation"))) { homeLoc = d.homeLocation; store.set("homeLocation", homeLoc); stamp("homeLocation", t, homeLoc); }
-  if ((t = take("currentLocation"))) { currentLoc = d.currentLocation; store.set("currentLocation", currentLoc); stamp("currentLocation", t, currentLoc); }
-  if ((t = take("formality"))) { formalityLevel = d.formality; store.set("formality", formalityLevel); if (typeof renderFormality === "function") renderFormality(); stamp("formality", t, formalityLevel); }
-  if ((t = take("studioSettings"))) { store.set("studioSettings", d.studioSettings); stamp("studioSettings", t, d.studioSettings); }
-  if ((t = take("lastOpeningImg"))) { store.set("lastOpeningImg", d.lastOpeningImg); stamp("lastOpeningImg", t, d.lastOpeningImg); }
+  if (ok("dislikedImgs") && (t = take("dislikedImgs"))) { dislikedImgs = syUnwire(d.dislikedImgs); store.set("dislikedImgs", dislikedImgs); stamp("dislikedImgs", t, dislikedImgs); }
+  if (ok("recentlyRemoved") && (t = take("recentlyRemoved"))) {
+    /* Build .55 (3.5): merge by snapshot id — when both sides
+       hold the same id the later removal wins; the merged list
+       is capped at 50, newest first. */
+    var incRR = syUnwire(d.recentlyRemoved);
+    var rrById = {}, rrOrder = [];
+    function rrPut(snap) {
+      var ex = rrById[snap.id];
+      if (!ex) { rrById[snap.id] = snap; rrOrder.push(snap.id); }
+      else if ((snap._removedAt || 0) > (ex._removedAt || 0)) rrById[snap.id] = snap;
+    }
+    recentlyRemoved.forEach(rrPut);
+    incRR.forEach(rrPut);
+    var mergedRR = rrOrder.map(function (id) { return rrById[id]; });
+    mergedRR.sort(function (a, b) { return (b._removedAt || 0) - (a._removedAt || 0); });
+    recentlyRemoved = mergedRR.slice(0, 50); store.set("recentlyRemoved", recentlyRemoved); stamp("recentlyRemoved", t, recentlyRemoved);
+  }
+  if (ok("findBudget") && (t = take("findBudget"))) { budgetLevel = syUnwire(d.findBudget); store.set("findBudget", budgetLevel); if (typeof renderBudget === "function") renderBudget(); stamp("findBudget", t, budgetLevel); }
+  if (ok("shopTier") && (t = take("shopTier"))) { shopTier = syUnwire(d.shopTier); store.set("shopTier", shopTier); if (typeof renderShopTier === "function") renderShopTier(); stamp("shopTier", t, shopTier); }
+  if (ok("homeLocation") && (t = take("homeLocation"))) { homeLoc = syUnwire(d.homeLocation); store.set("homeLocation", homeLoc); stamp("homeLocation", t, homeLoc); }
+  if (ok("currentLocation") && (t = take("currentLocation"))) { currentLoc = syUnwire(d.currentLocation); store.set("currentLocation", currentLoc); stamp("currentLocation", t, currentLoc); }
+  if (ok("formality") && (t = take("formality"))) { formalityLevel = syUnwire(d.formality); store.set("formality", formalityLevel); if (typeof renderFormality === "function") renderFormality(); stamp("formality", t, formalityLevel); }
+  if (ok("studioSettings") && (t = take("studioSettings"))) { var ssVal = syUnwire(d.studioSettings); store.set("studioSettings", ssVal); stamp("studioSettings", t, ssVal); }
+  if (ok("lastOpeningImg") && (t = take("lastOpeningImg"))) { var loVal = syUnwire(d.lastOpeningImg); store.set("lastOpeningImg", loVal); stamp("lastOpeningImg", t, loVal); }
   /* This device holds something newer than the server's copy:
      send the merged document back up. */
   if (localNewer) { SY.dirty.m = 1; if (!SY.st.m) SY.st.m = Date.now(); }
@@ -30165,16 +30470,56 @@ function syncNow(isRetry, force) {
       setSyncStatus("Syncing…");
       var changes = [], held = 0;
       var vaultGaps = !!(window.photoVault && window.photoVault.missing);
+      /* Build .55 (3.2e): with the lazy vault, a record can still
+         hold "idb:" references at upload time. Resolve each one
+         from the vault into a COPY of the record for the payload;
+         a reference this device cannot resolve holds the record
+         back, exactly as the vault-gap rule below always has. */
+      var _resMap = {};
+      await (async function () {
+        var jobs = [];
+        SY_COLLS.forEach(function (c) {
+          Object.keys(SY.dirty[c]).forEach(function (id) {
+            var rec = null;
+            syCollGet(c).forEach(function (r) { if (syRecId(c, r) === id) rec = r; });
+            if (!rec) return;
+            var data0 = syRecData(c, rec);
+            var js = JSON.stringify(data0);
+            if (js.indexOf("idb:") === -1) return;
+            var keys = [], mm, re = /idb:([a-z0-9-]+)/g;
+            while ((mm = re.exec(js))) { if (keys.indexOf(mm[1]) === -1) keys.push(mm[1]); }
+            if (!keys.length) return;
+            jobs.push({ k: c + "|" + id, js: js, keys: keys });
+          });
+        });
+        for (var ji = 0; ji < jobs.length; ji++) {
+          var job = jobs[ji], resolved = {}, allOk = true;
+          for (var ki = 0; ki < job.keys.length; ki++) {
+            var kk = job.keys[ki];
+            var val = await new Promise(function (res) {
+              if (window.photoVault && typeof window.photoVault.fetch === "function") window.photoVault.fetch(kk, function (dv) { res(dv); });
+              else res(null);
+            });
+            if (typeof val === "string") resolved[kk] = val; else { allOk = false; break; }
+          }
+          _resMap[job.k] = allOk ? JSON.parse(job.js.replace(/idb:([a-z0-9-]+)/g, function (m, k) { return resolved[k]; })) : null;
+        }
+      })();
       SY_COLLS.forEach(function (c) {
         Object.keys(SY.dirty[c]).forEach(function (id) {
           var rec = null;
           syCollGet(c).forEach(function (r) { if (syRecId(c, r) === id) rec = r; });
           if (rec) {
             var data = syRecData(c, rec);
+            var _rk = c + "|" + id;
+            if (_rk in _resMap) {
+              if (!_resMap[_rk]) { held++; return; }
+              data = _resMap[_rk];
+            }
             /* A record whose photograph is not on this device right
                now is held back: uploading it would replace the good
                copy on the server with a dangling reference. */
-            if (vaultGaps && JSON.stringify(data).indexOf('"idb:') !== -1) { held++; return; }
+            else if (vaultGaps && JSON.stringify(data).indexOf('"idb:') !== -1) { held++; return; }
             changes.push({ coll: c, id: id, updatedAt: SY.st[c][id] || Date.now(), data: data });
           }
           else if (SY.tomb[c][id]) changes.push({ coll: c, id: id, updatedAt: SY.tomb[c][id], deleted: true });
@@ -30216,6 +30561,10 @@ function syncNow(isRetry, force) {
            value in syMetaOf — leave it out of the upload entirely
            so the server's good copy survives. */
         Object.keys(metaData).forEach(function (f) { if (f !== "_ft" && (store.poisoned(f) || _syMetaRestore[f])) delete metaData[f]; });
+        /* Build .55: photos ride as vault references when the
+           vault is live on this device; without it the payload
+           stays raw, exactly as before. */
+        if (window.photoVault && window.photoVault.enabled) metaData = syWire(metaData);
         metaOut = { updatedAt: SY.st.m || Date.now(), data: metaData };
       }
       var since = SY.last, lastNow = null, sent = 0, down = 0;
@@ -30280,9 +30629,16 @@ function syncNow(isRetry, force) {
               delete SY.dirty[x.coll][x.id];
               changedAny = true; down++; if (x.coll === "looks") changedLooks = true;
             } else if (x.data) {
+              /* Build .55 (3.8): a malformed record is skipped —
+                 its valid siblings in the same response still
+                 apply. */
+              if (typeof x.data !== "object" || Array.isArray(x.data)) return;
+              var _xrid = null;
+              try { _xrid = syRecId(x.coll, x.data); } catch (e) { _xrid = null; }
+              if (!_xrid) return;
               sanitizeIncoming(x.data, "");
               syPutLocal(x.coll, x.data);
-              SY.snap[x.coll][x.id] = syHsh(syRecData(x.coll, x.data));
+              SY.snap[x.coll][x.id] = syHsh(syWireRec(x.coll, x.data));
               SY.st[x.coll][x.id] = x.updatedAt;
               delete SY.tomb[x.coll][x.id];
               delete SY.dirty[x.coll][x.id];
@@ -30410,7 +30766,7 @@ function linkSyncKey() {
   store.set = function (k, v) {
     var ok = origSet.call(store, k, v);
     if (ok && !_syApplying && (SY_KEY_COLL[k] || SY_META_KEYS[k])) {
-      try { syTrackChanges(SY_KEY_COLL[k] || null); schedSync(); } catch (e) {}
+      try { if (syTrackChanges(SY_KEY_COLL[k] || null)) schedSync(); } catch (e) {}
     }
     return ok;
   };

@@ -12,9 +12,18 @@
 //    network copy is served (and re-cached) whenever it answers, and
 //    the cache is only the offline fallback. Web fonts keep
 //    stale-while-revalidate: their URLs are versioned by the provider.
+//
+// Build .55 (handover 3.9): only the app shell itself (a navigation, the
+// directory root, or index.html) maps to the shell key — any other .html
+// file is an ordinary asset, so a future terms.html can never overwrite
+// the cached app. Cache-buster URLs (?r=…) are stored and matched under
+// their clean URL, and activate prunes buster entries cached by older
+// builds, so ASSET_CACHE no longer grows one entry per buster.
+// Cross-origin requests (the sync worker included) are never cached:
+// the fetch handler returns early for any origin but this one.
 const SHELL_CACHE = 'wardrobe-shell-3';
 const PHOTO_CACHE = 'wardrobe-photos-1';
-const ASSET_CACHE = 'wardrobe-assets-1';
+const ASSET_CACHE = 'wardrobe-assets-2';
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png'];
@@ -35,22 +44,39 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
       keys.filter((k) => keep.indexOf(k) === -1).map((k) => caches.delete(k))
-    )).then(() => self.clients.claim())
+    )).then(() => caches.open(ASSET_CACHE)).then((cache) =>
+      // Prune ?r= cache-buster entries an older build may have stored.
+      cache.keys().then((reqs) => Promise.all(
+        reqs.filter((r) => new URL(r.url).searchParams.has('r'))
+          .map((r) => cache.delete(r))
+      ))
+    ).then(() => self.clients.claim())
   );
 });
 
+// The cache identity of an asset request: its URL without the ?r=
+// cache-buster, so a busted request reads and refreshes the one
+// canonical entry instead of adding a new one every time.
+function assetKey(req) {
+  const url = new URL(req.url);
+  if (!url.searchParams.has('r')) return req;
+  url.searchParams.delete('r');
+  return url.toString();
+}
+
 function networkFirst(event, cacheName) {
   const req = event.request;
+  const key = assetKey(req);
   event.respondWith(
     fetch(req, { cache: 'no-cache' }).then((res) => {
       // Opaque (cross-origin) responses report status 0; keep those too.
       if (res && (res.status === 200 || res.type === 'opaque')) {
         const copy = res.clone();
-        event.waitUntil(caches.open(cacheName).then((cache) => cache.put(req, copy)));
+        event.waitUntil(caches.open(cacheName).then((cache) => cache.put(key, copy)));
       }
       return res;
     }).catch(() =>
-      caches.open(cacheName).then((cache) => cache.match(req)).then((hit) => {
+      caches.open(cacheName).then((cache) => cache.match(key)).then((hit) => {
         if (hit) return hit;
         throw new Error('offline and not cached: ' + req.url);
       })
@@ -103,7 +129,8 @@ self.addEventListener('fetch', (event) => {
   }
 
   // The page: network-first with a deadline; cache as the fallback.
-  const isShell = req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('.html');
+  // Only the shell itself maps to the shell key (build .55 / 3.9).
+  const isShell = req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('/index.html');
   if (isShell) {
     event.respondWith(
       caches.open(SHELL_CACHE).then((cache) => {
