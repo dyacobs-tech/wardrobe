@@ -17,7 +17,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-SHOTS = Path("/workspace/wardrobe-audit/build-70")
+SHOTS = Path("/workspace/wardrobe-audit/build-71")
 BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 VIEWPORTS = ((402, 874, 3), (390, 844, 2), (375, 667, 2))
 
@@ -129,6 +129,75 @@ SHOP_JS = """() => {
 }"""
 
 
+SHOP_COMPACT_JS = """() => {
+  const inp = document.getElementById('link-url');
+  const btn = document.getElementById('link-go');
+  const img = document.querySelector('#panel-find .shop-look-head img, #find-look-mode .shop-look-head img, .shop-look-head img');
+  const titleRow = document.querySelector('.shop-look-titlerow');
+  const label = document.querySelector('#link-card label, #panel-find label.field');
+  const ir = inp ? inp.getBoundingClientRect() : null;
+  const br = btn ? btn.getBoundingClientRect() : null;
+  const lr = label ? label.getBoundingClientRect() : null;
+  const im = img ? img.getBoundingClientRect() : null;
+  const tr = titleRow ? titleRow.getBoundingClientRect() : null;
+  const csI = inp ? getComputedStyle(inp) : null;
+  const infoBtns = [...document.querySelectorAll('.info-btn, #info-pop, #icons-info-pop, .page-info-row')];
+  const visibleInfo = infoBtns.filter(el => {
+    const cs = getComputedStyle(el);
+    return cs.display !== 'none' && cs.visibility !== 'hidden' && el.getAttribute('hidden') === null;
+  });
+  return {
+    inputH: ir ? Math.round(ir.height * 10) / 10 : null,
+    btnH: br ? Math.round(br.height * 10) / 10 : null,
+    sameRow: !!(ir && br && Math.abs(ir.top - br.top) <= 4),
+    labelH: lr ? Math.round(lr.height * 10) / 10 : null,
+    imgH: im ? Math.round(im.height * 10) / 10 : null,
+    imgMax: img ? getComputedStyle(img).maxHeight : null,
+    imgFit: img ? getComputedStyle(img).objectFit : null,
+    titleOneLine: !!(tr && titleRow && (titleRow.scrollHeight - tr.height) <= 4),
+    visibleInfo: visibleInfo.map(el => el.id || el.className),
+  };
+}"""
+
+CENTER_JS = """() => {
+  const group = document.querySelector('.subnav-group:not([hidden])');
+  const subnav = document.getElementById('subnav');
+  if (!group || !subnav || subnav.hidden) return { error: 'no group' };
+  const wrap = subnav.querySelector('.wrap') || subnav;
+  const wr = wrap.getBoundingClientRect();
+  const cs = getComputedStyle(wrap);
+  const padL = parseFloat(cs.paddingLeft) || 0;
+  const padR = parseFloat(cs.paddingRight) || 0;
+  const tabs = [...group.querySelectorAll('.subtab')].filter(t => t.id !== 'profile-close');
+  const rects = tabs.map(t => t.getBoundingClientRect());
+  if (!rects.length) return { error: 'no tabs' };
+  const tops = rects.map(r => r.top);
+  const oneRow = (Math.max(...tops) - Math.min(...tops)) <= 2;
+  const first = rects[0], last = rects[rects.length - 1];
+  // Centered in the wrap's content box (back-chevron padding is intentional).
+  const leftGap = first.left - (wr.left + padL);
+  const rightGap = (wr.right - padR) - last.right;
+  const gaps = [];
+  for (let i = 1; i < rects.length; i++) gaps.push(rects[i].left - rects[i-1].right);
+  const mean = gaps.length ? gaps.reduce((a,b)=>a+b,0)/gaps.length : 0;
+  const even = gaps.every(g => Math.abs(g - mean) <= 6);
+  const centered = Math.abs(leftGap - rightGap) <= 8;
+  const clipped = rects.some(r => r.left < wr.left - 1 || r.right > wr.right + 1);
+  return {
+    group: group.id,
+    count: rects.length,
+    oneRow,
+    even,
+    centered,
+    clipped,
+    leftGap: Math.round(leftGap*10)/10,
+    rightGap: Math.round(rightGap*10)/10,
+    gaps: gaps.map(g => Math.round(g*10)/10),
+    texts: tabs.map(t => (t.innerText||'').replace(/\\s+/g,' ').trim()),
+  };
+}"""
+
+
 def start_static_server():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
@@ -189,8 +258,8 @@ def main() -> int:
 
                 info = page.evaluate(HOME_JS)
                 check(
-                    f"{name}: build is .70",
-                    info and info.get("build") == "2026-11-18.70",
+                    f"{name}: build is .71",
+                    info and info.get("build") == "2026-11-18.71",
                     str(info and info.get("build")),
                 )
                 check(
@@ -256,8 +325,43 @@ def main() -> int:
                     shop and shop.get("findShown") and not shop.get("hasTeaserEl") and not shop.get("findHasReceiptsHeading"),
                     str(shop),
                 )
-                if vw == 390:
-                    page.screenshot(path=str(SHOTS / f"{name}-shop-landing.png"), full_page=False)
+                compact = page.evaluate(SHOP_COMPACT_JS)
+                check(
+                    f"{name}: no visible info buttons or help popovers",
+                    compact and compact.get("visibleInfo") == [],
+                    str(compact and compact.get("visibleInfo")),
+                )
+                check(
+                    f"{name}: paste-link input and CHECK IT are compact and on one row",
+                    compact
+                    and compact.get("sameRow")
+                    and compact.get("inputH") is not None and 32 <= compact["inputH"] <= 42
+                    and compact.get("btnH") is not None and 32 <= compact["btnH"] <= 42,
+                    str(compact),
+                )
+                if compact and compact.get("imgH") is not None:
+                    check(
+                        f"{name}: look photo is contained and at most ~40vh",
+                        compact.get("imgFit") == "contain" and compact["imgH"] <= vh * 0.42 + 2,
+                        str(compact),
+                    )
+                    check(
+                        f"{name}: look title and CLEAR LOOK share one line",
+                        compact.get("titleOneLine") is True,
+                        str(compact),
+                    )
+                center = page.evaluate(CENTER_JS)
+                check(
+                    f"{name}: Shop subnav tabs are centered, even, on one unclipped row",
+                    center
+                    and center.get("oneRow")
+                    and center.get("even")
+                    and center.get("centered")
+                    and not center.get("clipped")
+                    and center.get("count", 0) >= 5,
+                    str(center),
+                )
+                page.screenshot(path=str(SHOTS / f"{name}-shop-landing.png"), full_page=False)
                 page.locator("#tab-receipts").click()
                 page.wait_for_timeout(250)
                 rec = page.evaluate(SHOP_JS)
@@ -291,7 +395,7 @@ def main() -> int:
         for f in failures:
             print(" -", f)
         return 1
-    print("\nAll .70 Home-fit / Closet-gaps / Shop-receipts checks passed.")
+    print("\nAll .71 Home-fit / Closet-gaps / Shop-receipts checks passed.")
     print(f"Screenshots: {SHOTS}")
     return 0
 

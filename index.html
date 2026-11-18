@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.70" />
+    <meta name="wardrobe-build" content="2026-11-18.71" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -3687,6 +3687,145 @@
         }
       }
     </style>
+
+    <style>
+      /* ================= Build .71 — no help chrome; compact Shop; centered rows =================
+         Info buttons, help popovers and instructional blurbs are gone.
+         Shop's paste-a-link row and look photo are compact. Subnav tabs
+         and control rows are centered with even spacing. The .67 nav
+         fix, the .70 Home one-screen fit, and the five Closet tabs
+         are unchanged. */
+      /* Shop landing — compact paste row + capped look photo */
+      #panel-find #link-card {
+        gap: 4px;
+        margin-bottom: 8px;
+        padding: 8px 10px;
+      }
+      #panel-find #link-card label.field {
+        font-size: 10px;
+        letter-spacing: .14em;
+        margin: 0;
+      }
+      #panel-find .link-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      #panel-find #link-url {
+        flex: 1;
+        min-width: 0;
+        min-height: 38px;
+        height: 38px;
+        padding: 4px 10px;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+      #panel-find #link-go {
+        flex: none;
+        min-height: 38px;
+        height: 38px;
+        padding: 0 12px;
+        font-size: 11px;
+        letter-spacing: .1em;
+        box-sizing: border-box;
+      }
+      #panel-find .shop-look-head img,
+      .shop-look-head img {
+        width: 100%;
+        max-height: 40vh;
+        object-fit: contain;
+        object-position: center top;
+        display: block;
+        background: var(--surface, #f4eee3);
+      }
+      #panel-find .shop-look-titlerow,
+      .shop-look-titlerow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      #panel-find .shop-look-titlerow h3,
+      .shop-look-titlerow h3 {
+        font-size: clamp(20px, 5vw, 24px);
+        margin: 0;
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #panel-find .shop-honest,
+      .shop-honest { margin-top: 4px; font-size: 11px; }
+      @media (min-width: 900px) {
+        #find-look-mode .shop-look-head img {
+          max-height: 40vh;
+          width: 100%;
+        }
+      }
+      /* Center subnav tabs with even spacing on every section. */
+      .subnav .wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .subnav-group:not([hidden]) {
+        justify-content: space-evenly;
+        width: 100%;
+      }
+      .subnav-group .subtab {
+        text-align: center;
+        justify-content: center;
+      }
+      @media (max-width: 1023px) {
+        #subnav-closet:not([hidden]),
+        #subnav-ideas:not([hidden]),
+        #subnav-find:not([hidden]) {
+          display: grid !important;
+          gap: 0;
+          overflow: hidden;
+          width: 100%;
+        }
+        #subnav-closet:not([hidden]) { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+        #subnav-ideas:not([hidden]) { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+        #subnav-find:not([hidden]) { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+        #subnav-closet .subtab,
+        #subnav-ideas .subtab,
+        #subnav-find .subtab {
+          flex: none;
+          width: auto;
+          min-width: 0;
+          padding: 0 2px;
+          text-align: center;
+          justify-content: center;
+          white-space: nowrap;
+        }
+        #subnav-find .subtab { font-size: 10px; letter-spacing: .01em; padding: 0 1px; }
+        #subnav-me .subnav-scroll {
+          justify-content: space-evenly;
+        }
+      }
+      /* Center icon / chip / action rows. Masthead profile and back stay put. */
+      .hero-icon-row,
+      .hero-controls,
+      .filter-row,
+      .fb-chips,
+      .closet-top3,
+      .source-seg,
+      .cal-subtabs,
+      .formality-chips,
+      .loc-actions,
+      .today-actions,
+      .look-actions,
+      .wearing-actions,
+      .brief-chips,
+      .ideas-actions,
+      #ideas-source-seg,
+      .watch-subtabs {
+        justify-content: center;
+      }
+    </style>
   </head>
   <body>
     <header class="masthead">
@@ -3821,7 +3960,6 @@
 
       <!-- ================= STUDIO ================= -->
       <section id="panel-studio" role="tabpanel" aria-labelledby="tab-studio" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Ideas" data-info-text="Six takes at a time, dealt from the source you pick — Wardrobe, Inspo, or Combo. Wardrobe deals the verified renders of you in your own pieces, each completed with a suggested bottom until your own bottoms are catalogued; Inspo deals from the book; Combo mixes both. Nothing repeats: every photograph dealt is remembered and never dealt again." aria-label="About: Ideas">i</button></div>
         <div class="studio-grid">
           <div>
             <div class="source-seg" id="ideas-source-seg" role="group" aria-label="Source — Wardrobe, Inspo or Combo">
@@ -3895,7 +4033,7 @@
                 <textarea id="desc" name="desc" placeholder=""></textarea>
               </div>
               <div>
-                <div class="label-row"><label class="field">Base the outfit on</label><button type="button" class="info-btn sm" id="basis-info" data-info-title="Base the outfit on" data-info-text="The icon leads. The palette brings only colour combinations that fit the icon's own world — it never recolours the icon's decisions." aria-label="About: base the outfit on">i</button></div>
+                <div class="label-row"><label class="field">Base the outfit on</label></div>
                 <div class="basis-row" id="basis-row" role="group" aria-label="Base the outfit on">
                   <button type="button" class="basis-btn" data-basis="icon" aria-pressed="false">Icon<small>Who you're dressing as</small></button>
                   <button type="button" class="basis-btn" data-basis="palette" aria-pressed="false">Palette<small>Colour combinations lead</small></button>
@@ -3918,7 +4056,7 @@
                 </div>
               </div>
               <div id="inspo-pick-field">
-                <div class="label-row"><label class="field">Inspo — pick an icon to dress from</label><button type="button" class="info-btn sm" data-info-title="Inspo" data-info-text="Tap an icon and the look is built in their direction — their signature outfit, their colours, their shoe, their rules. Auto leaves it to the outfit itself." aria-label="About: inspo icons">i</button></div>
+                <div class="label-row"><label class="field">Inspo — pick an icon to dress from</label></div>
                 <div class="inspo-pick" id="inspo-pick" role="group" aria-label="Pick an icon to use as inspo"></div>
               </div>
               <!-- Your own inspo images live in Inspiration → My Inspo;
@@ -3991,7 +4129,6 @@
            here — the inspo library and the Icons lookboard keep
            their own surfaces. -->
       <section id="panel-outfitideas" role="tabpanel" aria-labelledby="tab-outfitideas" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Outfit Ideas" data-info-text="Complete outfits you saved that use none of your own pieces — dealt ideas, emulated looks and outfit photographs you uploaded — filtered by the chips above. Removing a look only un-saves it." aria-label="About: Outfit Ideas">i</button></div>
         <h3 class="fav-head">Outfit Ideas</h3>
         <div class="looks-tools">
           <input type="search" id="oi-search" class="ward-search" aria-label="Search your outfit ideas" placeholder="Search your outfit ideas — a colour, a piece, a note" autocomplete="off" />
@@ -4008,7 +4145,6 @@
 
       <!-- ================= WARDROBE ================= -->
       <section id="panel-wardrobe" role="tabpanel" aria-labelledby="tab-wardrobe" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Closet" data-info-text="Everything you own, photographed. AI-cleaned photos are for browsing; your originals stay underneath as the record. Mark worn keeps the wear counts honest — they feed cost per wear on each piece's page." aria-label="About: Closet">i</button></div>
         <button type="button" class="analyze-banner" id="closet-analyze-banner" hidden></button>
         <div id="item-detail"></div>
         <div class="ward-grid">
@@ -4106,7 +4242,6 @@
 
       <!-- ================= PALETTES ================= -->
       <section id="panel-palettes" role="tabpanel" aria-labelledby="tab-palettes" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Palettes" data-info-text="Sanzo Wada's 348 colour plates (Volume 1). Tap a plate to feature it; Use this palette deals six takes in its colours from the Studio. Below the grid, the colour index filters plates by a single colour." aria-label="About: Palettes">i</button></div>
         <div class="drop pal-drop">
           <button type="button" class="drop-toggle" data-drop-toggle aria-expanded="false" aria-controls="drop-palette-form"><span>New palette</span><span class="tt-chev" aria-hidden="true">▾</span></button>
           <div class="drop-body" id="drop-palette-form" hidden>
@@ -4168,14 +4303,12 @@
 
         <div class="colour-index">
           <h3 class="fav-head" id="colour-index-head">The colours</h3>
-          <p class="meta" style="margin:0 0 10px">Every colour named across the 348 plates — tap one to filter the plates to those that use it.</p>
           <div class="colour-grid" id="colour-grid"></div>
         </div>
       </section>
 
       <!-- ================= LOOKS ================= -->
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="My Outfits" data-info-text="Outfits you saved that are built from your own pieces — wardrobe looks and combinations anchored in them — filtered by the chips above. Removing an outfit only un-saves it; the Recently removed chip keeps every removal, restorable, for as long as you need. The Wishlist chip shows the same wishlist as Shop — one list, two doors." aria-label="About: My Outfits">i</button></div>
         <div class="looks-tools">
           <input type="search" id="looks-search" class="ward-search" aria-label="Search your looks" placeholder="Search your looks — a colour, a piece, a note" autocomplete="off" />
           <div class="fb-chips" role="group" aria-label="Filter looks">
@@ -4193,7 +4326,6 @@
 
       <!-- ================= CALENDAR ================= -->
       <section id="panel-calendar" role="tabpanel" aria-labelledby="section-calendar" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Calendar" data-info-text="This week plans the seven days ahead — a planned look becomes that day's Home hero. Trips holds a capsule and packing checklist per trip, built from your closet. What I wore lists every worn outfit under its exact date, newest first." aria-label="About: Calendar">i</button></div>
         <div class="cal-subtabs" role="group" aria-label="Calendar pages">
           <button type="button" class="cal-subtab" data-calview="week" aria-pressed="true">This week</button>
           <button type="button" class="cal-subtab" data-calview="trips" aria-pressed="false">Trips</button>
@@ -4247,7 +4379,6 @@
 
       <!-- ================= WHAT I'M WEARING TODAY — SELFIE LOG ================= -->
       <section id="panel-wearing" role="tabpanel" aria-labelledby="tab-wearing" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Wearing Today" data-info-text="Log today's outfit with a photo and confirm the pieces — new pieces are catalogued into the Closet as you go. The full record of what you wore lives in Calendar, under What I wore, listed by exact date." aria-label="About: Wearing Today">i</button></div>
         <div class="card add-form wearing-form">
           <img id="wearing-preview" alt="Your outfit photo" hidden />
           <div class="wearing-photo-btns">
@@ -4277,7 +4408,6 @@
 
       <!-- ================= BRANDS — SHOPS TO SHOP ================= -->
       <section id="panel-brands" role="tabpanel" aria-labelledby="tab-brands" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Brands" data-info-text="The houses and shops worth shopping — quiet luxury and craft-led menswear from your Fashion Brands list: no visible logos, fabric and cut over branding. Tap a name to see its pieces from the catalogue, right here in the app." aria-label="About Brands">i</button></div>
         <div class="brand-search">
           <label class="field" for="brand-search">Search brands</label>
           <input type="search" id="brand-search" placeholder="Name, place, knitwear, tailoring…" autocomplete="off" />
@@ -4486,7 +4616,6 @@
 
       <!-- ================= MY INSPO — YOUR UPLOADED INSPIRATION ================= -->
       <section id="panel-myinspo" role="tabpanel" aria-labelledby="tab-myinspo" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="My Inspo" data-info-text="Your own inspiration photographs. Tap one to style six takes from it — the first take is the photograph itself, the rest are built from its outfit." aria-label="About: My Inspo">i</button></div>
         <div class="card add-form myinspo-form">
           <label class="photo-drop" for="myinspo-photo"><span class="pd-title">Add a photo or screenshot</span><input type="file" id="myinspo-photo" accept="image/*" /></label>
           <div>
@@ -4500,9 +4629,6 @@
 
       <!-- ================= STYLE ICONS ================= -->
       <section id="panel-icons" role="tabpanel" aria-labelledby="tab-icons" hidden>
-        <div class="page-info-row">
-          <button type="button" class="info-btn" id="icons-info-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="icons-info-pop" aria-label="About the House Rules — the description behind these icons" title="House Rules">i</button>
-        </div>
 
         <div class="card add-form icon-tools" id="icon-search-card" style="margin-bottom:8px">
           <button type="button" class="tools-toggle" id="icon-search-toggle" aria-expanded="false" aria-controls="icon-search-body"><span>Search for an icon</span><span class="tt-chev" aria-hidden="true">▾</span></button>
@@ -4516,9 +4642,8 @@
         </div>
 
         <form class="card add-form icon-tools" id="icon-form" style="margin-bottom:12px">
-          <div style="display:flex;align-items:center;gap:8px"><button type="button" class="tools-toggle" id="icon-form-toggle" aria-expanded="false" aria-controls="icon-form-body" style="flex:1"><span>Add your own icon</span><span class="tt-chev" aria-hidden="true">▾</span></button><button type="button" class="info-btn sm" data-info-from="icon-form-note" data-info-title="Add your own icon" aria-label="About: add your own icon">i</button></div>
+          <div style="display:flex;align-items:center;gap:8px"><button type="button" class="tools-toggle" id="icon-form-toggle" aria-expanded="false" aria-controls="icon-form-body" style="flex:1"><span>Add your own icon</span><span class="tt-chev" aria-hidden="true">▾</span></button></div>
           <div class="tools-body" id="icon-form-body" hidden>
-          <p class="form-note" id="icon-form-note" hidden>For someone search can't find — a friend, your dad, anyone whose style you know first-hand. Build their profile from your own description and the engine styles from it the same way.</p>
           <div class="form-row">
             <div>
               <label class="field" for="icon-name">Name</label>
@@ -4606,25 +4731,6 @@
 
         <div id="icon-detail" hidden></div>
 
-        <div class="info-pop-backdrop" id="icons-info-pop" hidden>
-        <div class="card principles" id="icon-principles" role="dialog" aria-modal="true" aria-labelledby="icon-principles-title">
-          <div class="principles-head">
-            <h3 id="icon-principles-title">The House Rules — what the engine enforces</h3>
-            <button type="button" class="info-pop-close" id="icons-info-close" aria-label="Close House Rules">&times;</button>
-          </div>
-          <p style="margin:0;color:var(--dim)">Distilled from the canon — and from every icon you add yourself. Every look the Studio builds is checked against these before it reaches you.</p>
-          <ol>
-            <li><span class="n">01</span><span><strong>Fit before everything</strong>Sleeve length, trouser break, a nipped waist. Kraft's rule: get the details right and even an off-the-peg suit looks bespoke; get them wrong and a $7,000 suit looks borrowed.</span></li>
-            <li><span class="n">02</span><span><strong>Three colours, maximum</strong>Squarzi's discipline — navy, olive, white, brown and one accent at most. A fourth colour is a decision, not an accident.</span></li>
-            <li><span class="n">03</span><span><strong>Icons and palettes are separate layers</strong>An icon's own colours are never recoloured to fit a plate — Kraft is mostly neutrals, and the engine respects that absolutely. A palette brought in beside an icon only offers colour combinations that already fit the icon's world; the icon leads, the palette supports.</span></li>
-            <li><span class="n">04</span><span><strong>One tailored piece anchors casual</strong>A blazer over denim, Oxfords with white jeans — Squarzi and Agnelli both build street looks around a single dressed element.</span></li>
-            <li><span class="n">05</span><span><strong>Worn-in beats box-fresh</strong>Clothes should look lived in, never costumed. Vintage drape, soft shoulders, suede over polished leather when the day allows.</span></li>
-            <li><span class="n">06</span><span><strong>Dress for the occasion in front of you</strong>Kraft again: if the invitation says black tie, it means black tie. The engine reads the occasion field literally.</span></li>
-            <li><span class="n">07</span><span><strong>Buy once, buy quality</strong>Natural fibres, real construction, pieces kept for years. No trend is copied slavishly — fashion inspires, it doesn't instruct.</span></li>
-            <li><span class="n">08</span><span><strong>Know your trademark</strong>Every icon carries one — Grant's high collars, Agnelli's watch over the cuff, and whatever signature your own icons bring. When a colour or cut works for you, the engine returns to it instead of reinventing you weekly.</span></li>
-          </ol>
-        </div>
-        </div>
       </section>
 
       <!-- ================= EMULATE — ICON LOOKBOARD ONLY (sub-page, build .43) ================= -->
@@ -4634,7 +4740,6 @@
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Shop the look" data-info-text="The look on Today, piece by piece, with catalogue matches at your price tier — every piece carries its own Price tier and Search controls at its top. Mark purchased files a piece into Purchased and into your Closet. Free-form briefs live under Search." aria-label="About Shop the look">i</button></div>
         <div class="card link-card" id="link-card">
           <label class="field" for="link-url">Paste a product link</label>
           <div class="link-row"><input type="url" id="link-url" placeholder="https://…" autocomplete="off" /><button type="button" class="btn-accent" id="link-go">Check it</button></div>
@@ -4642,7 +4747,7 @@
           <div id="link-result"></div>
         </div>
         <div id="find-look-mode" hidden></div>
-        <p class="meta" id="find-nolook">Open a look and tap Shop the look — its pieces and matches land here.</p>
+        <p class="meta" id="find-nolook">No look selected.</p>
 
       </section>
       <!-- ================= PURCHASED — own Shop sub page (build .56) =================
@@ -4650,19 +4755,16 @@
            its own page, one card per purchase. Receipts keep their
            own page below; neither is pinned inside the other. -->
       <section id="panel-purchased" role="tabpanel" aria-labelledby="tab-purchased" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Purchased" data-info-text="Everything you've marked purchased from Shop the look, Sale items, the Wishlist or a confirmed receipt — each purchase is also catalogued into your Closet. Un-marking a purchase removes it here; a piece you've worn stays in the Closet as an ordinary piece." aria-label="About Purchased">i</button></div>
         <h3 class="fav-head">Purchased</h3>
         <div id="shop-purchased"></div>
       </section>
       <!-- ================= RECEIPTS — ORDER-EMAIL IMPORT (own Shop sub page, build .41; housing .56) ================= -->
       <section id="panel-receipts" role="tabpanel" aria-label="Receipts" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Receipts" data-info-text="Order-email line items waiting for your word. Confirming files the piece into your Closet and records it in Purchased; dismissing takes it off the list. Nothing files without a tap." aria-label="About Receipts">i</button></div>
         <h3 class="fav-head">Receipts</h3>
         <div id="receipts-list"></div>
       </section>
       <!-- ================= SEARCH — free-form briefs (own sub tab, build .28) ================= -->
       <section id="panel-search" role="tabpanel" aria-labelledby="tab-search" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Search" data-info-text="Describe what you are after, pick a price tier — Affordable, Accessible, Luxury or Price insensitive — and keep the brief here with live search links in your size. Briefs from your closet gaps land here prefilled. Nothing is bought — you review and buy yourself." aria-label="About Search">i</button></div>
 <div class="ward-grid">
           <div>
             <div class="find-grid" id="find-grid"></div>
@@ -4700,25 +4802,22 @@
               <input type="text" id="find-colour" placeholder="e.g. navy, tan, any" autocomplete="off" />
             </div>
             <div>
-              <div class="label-row"><label class="field" for="find-icon">Inspo icon — optional</label><button type="button" class="info-btn sm" data-info-from="find-icon-note" data-info-title="Inspo icon" aria-label="About: inspo icon shops">i</button></div>
+              <div class="label-row"><label class="field" for="find-icon">Inspo icon — optional</label></div>
               <select id="find-icon">
                 <option value="">No icon</option>
               </select>
-              <p class="form-note" id="find-icon-note" hidden>If the icon has their own shop — Fortela for Squarzi, Alexander Kraft Monte Carlo for Kraft — the brief searches their store too, in your size.</p>
             </div>
             <div>
               <label class="field" for="find-details">Details — brand, material, must-haves, things to avoid</label>
               <textarea id="find-details" placeholder="e.g. Italian suede if possible, no logos, rubber sole" style="min-height:64px"></textarea>
             </div>
-            <div class="label-row"><button type="submit" class="btn-accent">Add &amp; search</button><button type="button" class="info-btn sm" data-info-from="find-note" data-info-title="Shop the look briefs" aria-label="About: find me briefs">i</button></div>
-            <p class="form-note" id="find-note" hidden>Each brief gets live search links in your size. Nothing is bought — you review and buy yourself.</p>
+            <div class="label-row"><button type="submit" class="btn-accent">Add &amp; search</button></div>
           </form>
         </div>
       </section>
 
       <!-- ================= SALE ITEMS ================= -->
       <section id="panel-sale" role="tabpanel" aria-labelledby="tab-sale" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Sale items" data-info-text="Current sale picks from your brands and the stores you shop — gathered by sweep, with the was-price alongside. Tap through to the retailer to buy; add anything to the Wishlist to keep it here." aria-label="About Sale items">i</button></div>
         <div class="sale-tools">
           <label class="field" for="sale-cat">Category</label>
           <select id="sale-cat"></select>
@@ -4734,7 +4833,6 @@
            used to trail My Outfits (renderWishlist / #wishlist-list,
            moved here unchanged). -->
       <section id="panel-shopwish" role="tabpanel" aria-labelledby="tab-shopwish" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Wishlist" data-info-text="Products you've saved from Shop the look matches and Sale items, and the pieces your saved looks are still missing. Mark a saved product purchased and it moves to Purchased and is catalogued into your Closet automatically." aria-label="About Wishlist">i</button></div>
         <h3 class="fav-head">Saved items</h3>
         <div id="shopwish-list"></div>
         <div id="wishlist-wrap">
@@ -4785,12 +4883,12 @@
       <section id="panel-plocation" role="tabpanel" aria-labelledby="tab-plocation" hidden>
         <div class="card loc-card" id="loc-card" style="margin-top:0;margin-bottom:22px">
           <div>
-            <div class="card-head-info"><h3>Location &amp; weather</h3><button type="button" class="info-btn sm" data-info-from="loc-note" data-info-title="Location &amp; weather" aria-label="About: location and weather">i</button></div>
+            <div class="card-head-info"><h3>Location &amp; weather</h3></div>
             <div class="loc-now" style="margin-top:8px">
               <span class="loc-name" id="loc-current-name"></span>
               <span class="loc-kind" id="loc-current-kind">Home — default</span>
             </div>
-            <p class="loc-weather" id="loc-weather" style="margin-top:6px">Set your home city — search above, or pick a city below.</p>
+            <p class="loc-weather" id="loc-weather" style="margin-top:6px">Set your home city.</p>
             <p class="loc-rec" id="loc-rec"></p>
           </div>
           <div>
@@ -4806,7 +4904,6 @@
             <button type="button" class="btn-ghost" id="loc-set-home">Make this my home</button>
             <button type="button" class="btn-ghost" id="loc-back-home" hidden>Back to home</button>
           </div>
-          <p class="form-note" id="loc-note" hidden>Home is the default. Pick another place while you travel and the outfit of the day — and looks with no season chosen — follow the weather there. Come back home with one tap.</p>
         </div>
       </section>
       <section id="panel-pcloud" role="tabpanel" aria-labelledby="tab-pcloud" hidden>
@@ -4840,8 +4937,7 @@
           </div>
         </div>
         <div class="card data-card" id="data-card">
-          <div class="card-head-info"><h3>Backup</h3><button type="button" class="info-btn sm" data-info-from="data-note" data-info-title="Backup" aria-label="About: backup and restore">i</button></div>
-          <p id="data-note" hidden>Everything Wardrobe keeps — closet, watches, looks, palettes, icons, finds, profile — lives on this device. Export a backup file and keep it somewhere safe; import it on a new phone and everything comes back exactly as it was.</p>
+          <div class="card-head-info"><h3>Backup</h3></div>
           <div class="loc-actions">
             <button type="button" class="btn-ink" id="data-export">Export backup</button>
             <label class="btn-ghost" for="data-import-file" style="display:inline-grid;place-items:center;cursor:pointer">Import backup</label>
@@ -4850,13 +4946,12 @@
           </div>
           <p id="data-status" style="margin:0"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.70</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.71</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
       <!-- ================= WATCHES ================= -->
       <section id="panel-watches" role="tabpanel" aria-labelledby="tab-watches" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Watches" data-info-text="The Watch Box — your collection, what's sold, and what you're hunting. Pairs with today's look opens the outfit with that watch on the wrist." aria-label="About: Watches">i</button></div>
         <div class="filter-row" id="watch-subtabs" role="group" aria-label="Watch lists">
           <button type="button" class="chip" data-watch-list="collection" aria-pressed="true">Collection <span class="count" id="watch-count-collection"></span></button>
           <button type="button" class="chip" data-watch-list="sold" aria-pressed="false">Sold <span class="count" id="watch-count-sold"></span></button>
@@ -5059,15 +5154,6 @@
     </script>
 
     <div class="ptr" id="ptr"    <div class="ptr" id="ptr" aria-hidden="true">Pull to refresh</div>
-    <div class="info-pop-backdrop" id="info-pop" hidden>
-      <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="info-pop-title">
-        <div class="principles-head">
-          <h3 id="info-pop-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">About</h3>
-          <button type="button" class="info-pop-close" id="info-pop-close" aria-label="Close description">&times;</button>
-        </div>
-        <p id="info-pop-body"></p>
-      </div>
-    </div>
     <div class="info-pop-backdrop" id="find-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="find-sheet-title">
         <div class="principles-head">
@@ -5175,7 +5261,6 @@
           <h3 id="build-sheet-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">Build a look</h3>
           <button type="button" class="info-pop-close" id="build-sheet-close" aria-label="Close build a look">&times;</button>
         </div>
-        <p class="meta" style="margin:0 0 12px">Style an outfit around one piece — yours, one you're eyeing, or one you upload.</p>
         <button type="button" class="build-door" data-build-door="wardrobe"><span class="bd-main"><span class="bd-name">From my wardrobe</span><span class="bd-sub">A piece from your Closet</span></span><span class="bd-chev" aria-hidden="true">›</span></button>
         <button type="button" class="build-door" data-build-door="shop"><span class="bd-main"><span class="bd-name">Shop items</span><span class="bd-sub">The catalogue, sale items and your wishlist</span></span><span class="bd-chev" aria-hidden="true">›</span></button>
         <button type="button" class="build-door" data-build-door="upload"><span class="bd-main"><span class="bd-name">Upload new item</span><span class="bd-sub">A photo of a piece you love</span></span><span class="bd-chev" aria-hidden="true">›</span></button>
@@ -5187,7 +5272,6 @@
           <h3 id="build-wardrobe-title" style="font-family:var(--font-display);font-size:26px;font-weight:600">From my wardrobe</h3>
           <button type="button" class="info-pop-close" id="build-wardrobe-close" aria-label="Close wardrobe picker">&times;</button>
         </div>
-        <p class="meta" style="margin:0 0 12px">Tap the piece to build around.</p>
         <div class="brand-search">
           <label class="field" for="build-wardrobe-search">Search your closet</label>
           <input type="search" id="build-wardrobe-search" placeholder="Name, brand or category…" autocomplete="off" />
@@ -5703,7 +5787,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.70";
+var WARDROBE_BUILD = "2026-11-18.71";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -7183,7 +7267,7 @@ function renderDirectionPreview() {
   if (blend && primary && blend.id === primary.id) blend = null;
   if (!primary && !blend) {
     el.innerHTML = '<p class="dp-kicker">Style direction</p>' +
-      '<div class="info-inline-row"><p class="dp-name">Auto — let the outfit decide</p><button type="button" class="info-btn sm" data-info-title="Style direction" data-info-text="No fixed icon: the engine reads the outfit itself. Pick an icon — or add your own in the Icons tab — and its signature outfit, its own colours, its shoe and its rules take over." aria-label="About: style direction">i</button></div>' +
+      '<div class="info-inline-row"><p class="dp-name">Auto — let the outfit decide</p></div>' +
       '<div class="swatch-strip sm">' + ["#1f2a44", "#f1e7cf", "#7c4226", "#6b6f3f"].map(function (h) { return '<div style="background:' + h + '"></div>'; }).join("") + "</div>";
     return;
   }
@@ -7192,7 +7276,7 @@ function renderDirectionPreview() {
   var stripCols = main.palette.map(function (h) { return { name: h, hex: h }; });
   if (partner) stripCols = stripCols.concat(partner.palette.map(function (h) { return { name: h, hex: h }; }));
   el.innerHTML = '<p class="dp-kicker">Style direction' + (main.custom ? " — your icon" : "") + "</p>" +
-    '<div class="info-inline-row"><p class="dp-name">' + esc(main.name) + (partner ? " × " + esc(partner.name) : "") + '</p><button type="button" class="info-btn sm" data-info-title="' + esc(main.name) + '" data-info-text="' + esc(main.rules[0] + (partner ? " " + partner.rules[0] : "")) + '" aria-label="About: ' + esc(main.name) + '">i</button></div>' +
+    '<div class="info-inline-row"><p class="dp-name">' + esc(main.name) + (partner ? " × " + esc(partner.name) : "") + '</p></div>' +
     '<p class="dp-lane">' + esc(main.lane) + (partner ? " · blended with " + esc(partner.lane) : "") + "</p>" +
     stripHTML(stripCols, "sm");
 }
@@ -7353,12 +7437,6 @@ function setBasis(b) {
   document.querySelectorAll("[data-basis]").forEach(function (x) {
     x.setAttribute("aria-pressed", x.getAttribute("data-basis") === b ? "true" : "false");
   });
-  var infoBtn = document.getElementById("basis-info");
-  if (infoBtn) infoBtn.setAttribute("data-info-text", b === "icon"
-    ? "The icon leads alone — their outfit, their own colours, their shoe, their rules. No palette touches it."
-    : b === "palette"
-    ? "Colour leads — a Wada plate, or one of your saved palettes, builds the look. No icon is consulted."
-    : "The icon leads. The palette brings only colour combinations that fit the icon's own world — it never recolours the icon's decisions.");
 }
 document.getElementById("basis-row").addEventListener("click", function (e) {
   var b = e.target.closest("[data-basis]");
@@ -14472,7 +14550,7 @@ function inspoHTML(look, bare) {
   if (!ic || !ic.looks || !ic.looks.length) return "";
   if (bare) return '<div class="inspo bare">' + iconicRowHTML(ic, 6) + "</div>";
   var inspoInfo = "The photographs this direction is drawn from. Build straight from one and the engine works from the photograph's own outfit." + (ic.looks.length > 6 ? " The full library — " + ic.looks.length + " reference photographs — lives in " + ic.name + "'s page in the Icons tab." : "");
-  return '<div class="inspo"><div class="info-inline-row"><h4>The reference — ' + esc(ic.name) + '</h4><button type="button" class="info-btn sm" data-info-title="The reference" data-info-text="' + esc(inspoInfo) + '" aria-label="About: the reference photographs">i</button></div>' +
+  return '<div class="inspo"><div class="info-inline-row"><h4>The reference — ' + esc(ic.name) + '</h4></div>' +
     iconicRowHTML(ic, 6) + "</div>";
 }
 function styleFromIconic(ic, lk) {
@@ -15032,7 +15110,7 @@ function findPiecesHTML(look, bare) {
         '<button type="button" class="btn-accent" data-find-piece="' + i + '">Shop the look</button></div>';
     }).join("");
   if (bare) return '<div class="find-pieces bare">' + rows + "</div>";
-  return '<div class="find-pieces"><div class="info-inline-row"><h4>Shop the look</h4><button type="button" class="info-btn sm" data-info-title="Shop the look" data-info-text="Pick any item and it goes to Shop the look — in your size, with the search opened." aria-label="About: find a piece">i</button></div>' + rows + "</div>";
+  return '<div class="find-pieces"><div class="info-inline-row"><h4>Shop the look</h4></div>' + rows + "</div>";
 }
 function sendPieceToFind(look, idx) {
   /* One behaviour for every Shop the look door: open the tab in
@@ -16893,7 +16971,7 @@ function renderBuildShopList() {
   });
   var total = entries.length;
   var shown = entries.slice(0, 80);
-  list.innerHTML = (total > 80 ? '<p class="meta" style="margin:0 0 8px">Showing 80 of ' + total + " — keep typing to narrow it down.</p>" : "") +
+  list.innerHTML = (total > 80 ? '<p class="meta" style="margin:0 0 8px">Showing 80 of ' + total + ".</p>" : "") +
     (shown.length ? shown.map(function (e) {
       var sub = esc(e.retailer) + (e.price != null && e.price !== "" ? " · $" + Number(e.price).toLocaleString("en-US") : "") + (e.tier ? " · " + esc(shopTierInfo(e.tier).name) : "");
       if (!e.img) {
@@ -17082,9 +17160,9 @@ function lookCardHTML(look, opts) {
   var mappedNames = mappedClosetPieces(look).map(function (m) { return m.name; });
   var yoursNames = (look.anchorNames || []).filter(function (n) { return mappedNames.indexOf(n) !== -1; });
   var yoursSeg = yoursNames.length ? '<span>Yours: <span class="own">' + esc(yoursNames.join(", ")) + "</span></span>" : "";
-  if (look.source === "wardrobe") sourceLine = '<p class="source-line"><strong>Only my wardrobe</strong>' + yoursSeg + '<button type="button" class="info-btn sm" data-info-title="Only my wardrobe" data-info-text="Built only from pieces you own — your top and your shoes, with a suggested bottom completing it until your own bottoms are catalogued." aria-label="About: only my wardrobe looks">i</button></p>';
-  else if (look.source === "combo") sourceLine = '<p class="source-line"><strong>Combo</strong>' + yoursSeg + '<button type="button" class="info-btn sm" data-info-title="Combo" data-info-text="Anchored in pieces you own; the other pieces are inspo to buy to complete it — use Shop the look on any of them." aria-label="About: combo looks">i</button></p>';
-  else if (look.source === "inspo") sourceLine = '<p class="source-line"><strong>' + (look.inspoSeed ? "Inspo · " + esc(look.inspoSeed) : "Only inspo") + '</strong><button type="button" class="info-btn sm" data-info-title="Only inspo" data-info-text="Built entirely outside your wardrobe — fresh inspo, nothing pulled from your closet." aria-label="About: only inspo looks">i</button></p>';
+  if (look.source === "wardrobe") sourceLine = '<p class="source-line"><strong>Only my wardrobe</strong>' + yoursSeg + '</p>';
+  else if (look.source === "combo") sourceLine = '<p class="source-line"><strong>Combo</strong>' + yoursSeg + '</p>';
+  else if (look.source === "inspo") sourceLine = '<p class="source-line"><strong>' + (look.inspoSeed ? "Inspo · " + esc(look.inspoSeed) : "Only inspo") + '</strong></p>';
   /* The direction line lives in the Customize form's live
      preview; the card doesn't repeat it. */
   var builtLine = look.builtAround ? '<p class="source-line"><strong>Built around:</strong> ' + esc(look.builtAround) + "</p>" : "";
@@ -21614,7 +21692,7 @@ function renderSaved() {
       return '<div class="removed-row" style="grid-column:1/-1">' + (r._img || r.img ? '<img src="' + esc(r._img || r.img) + '" alt="" loading="lazy" data-popout="' + esc(r._img || r.img) + '" />' : "") +
         '<span class="r-name">' + esc(r.title || "Look") + '</span>' +
         '<button type="button" class="btn-ghost" data-restore-removed="' + r.id + '">Restore</button></div>';
-    }).join("") : '<p class="meta" style="grid-column:1/-1">Nothing removed — anything you remove lands here, so you can bring it back.</p>';
+    }).join("") : '<p class="meta" style="grid-column:1/-1">Nothing removed.</p>';
     if (typeof renderOutfitIdeas === "function") renderOutfitIdeas();
     return;
   }
@@ -21622,7 +21700,7 @@ function renderSaved() {
     var wishList = (typeof shopWishlist !== "undefined" && shopWishlist) ? shopWishlist : [];
     grid.innerHTML = wishList.length && typeof shopWishRowHTML === "function"
       ? '<div class="wish-list" style="grid-column:1/-1">' + shopWishlistSorted().map(shopWishRowHTML).join("") + "</div>"
-      : '<p class="meta" style="grid-column:1/-1">Nothing wishlisted yet — save pieces from Shop the look or Sale items and they wait for you here.</p>';
+      : '<p class="meta" style="grid-column:1/-1">Nothing wishlisted yet.</p>';
     if (typeof renderOutfitIdeas === "function") renderOutfitIdeas();
     return;
   }
@@ -22583,7 +22661,7 @@ function iconDetailHTML(ic) {
     '<article class="card icon-card icon-detail-card">' +
     (ic.custom ? '<span class="your-badge">Your icon</span>' : "") +
     '<p class="lane">' + esc(ic.lane) + "</p>" +
-    '<div class="card-head-info"><h3>' + esc(ic.name) + '</h3><button type="button" class="info-btn sm" data-info-title="' + esc(ic.name) + '" data-info-text="' + esc(ic.blurb) + '" aria-label="About ' + esc(ic.name) + '">i</button></div>' +
+    '<div class="card-head-info"><h3>' + esc(ic.name) + '</h3></div>' +
     stripHTML(pal, "sm") +
     "<h5>Signature outfit</h5>" +
     '<p class="blurb" style="font-family:var(--font-display);font-style:italic;font-size:17px">' + esc(ic.signatureDesc) + "</p>" +
@@ -22667,74 +22745,6 @@ document.getElementById("icon-search-toggle").addEventListener("click", function
 });
 document.getElementById("icon-form-toggle").addEventListener("click", function () {
   setToolsOpen("form", document.getElementById("icon-form-body").hidden);
-});
-/* Generic description pop-up — every description in the app lives
-   behind a small (i) button: data-info-text carries the text directly,
-   data-info-from points at a hidden element whose current text is
-   shown (Studio's basis / source notes update as choices change). */
-var lastInfoBtn = null;
-function openInfoPop(title, text, btn) {
-  var pop = document.getElementById("info-pop");
-  if (!pop) return;
-  document.getElementById("info-pop-title").textContent = title || "About";
-  document.getElementById("info-pop-body").textContent = text || "";
-  pop.hidden = false;
-  lastInfoBtn = btn || null;
-  if (lastInfoBtn) lastInfoBtn.setAttribute("aria-expanded", "true");
-  var c = document.getElementById("info-pop-close");
-  if (c) c.focus();
-}
-function closeInfoPop() {
-  var pop = document.getElementById("info-pop");
-  if (!pop || pop.hidden) return;
-  pop.hidden = true;
-  if (lastInfoBtn) { lastInfoBtn.setAttribute("aria-expanded", "false"); lastInfoBtn.focus(); lastInfoBtn = null; }
-}
-document.addEventListener("click", function (e) {
-  var b = e.target.closest ? e.target.closest("[data-info-text],[data-info-from]") : null;
-  if (!b) return;
-  var text = b.getAttribute("data-info-text");
-  if (!text) {
-    var src = document.getElementById(b.getAttribute("data-info-from"));
-    text = src ? src.textContent : "";
-  }
-  openInfoPop(b.getAttribute("data-info-title") || "About", text, b);
-});
-document.getElementById("info-pop-close").addEventListener("click", closeInfoPop);
-document.getElementById("info-pop").addEventListener("click", function (e) {
-  if (e.target === this) closeInfoPop();
-});
-document.addEventListener("keydown", function (e) {
-  if (e.key === "Escape") closeInfoPop();
-});
-/* House Rules pop-up — the description that used to sit at the bottom
-   of the Icons tab now lives behind the small info button in the
-   section's top margin, and pops up only when tapped. */
-function setIconsInfoOpen(open) {
-  var pop = document.getElementById("icons-info-pop");
-  var btn = document.getElementById("icons-info-btn");
-  if (!pop || !btn) return;
-  pop.hidden = !open;
-  btn.setAttribute("aria-expanded", open ? "true" : "false");
-  if (open) {
-    var closeBtn = document.getElementById("icons-info-close");
-    if (closeBtn) closeBtn.focus();
-  } else {
-    btn.focus();
-  }
-}
-document.getElementById("icons-info-btn").addEventListener("click", function () {
-  setIconsInfoOpen(document.getElementById("icons-info-pop").hidden);
-});
-document.getElementById("icons-info-close").addEventListener("click", function () {
-  setIconsInfoOpen(false);
-});
-document.getElementById("icons-info-pop").addEventListener("click", function (e) {
-  if (e.target === this) setIconsInfoOpen(false);
-});
-document.addEventListener("keydown", function (e) {
-  var pop = document.getElementById("icons-info-pop");
-  if (e.key === "Escape" && pop && !pop.hidden) setIconsInfoOpen(false);
 });
 renderIcons();
 document.getElementById("panel-icons").addEventListener("click", function (e) {
@@ -23171,8 +23181,6 @@ function setSource(s) {
   document.querySelectorAll("[data-source]").forEach(function (x) {
     x.setAttribute("aria-pressed", x.getAttribute("data-source") === s ? "true" : "false");
   });
-  var infoBtn = document.getElementById("source-info");
-  if (infoBtn) infoBtn.setAttribute("data-info-text", SOURCE_NOTES[s]);
 }
 /* The Customize form's own Build-from row is deleted — two
    synced controls remain (Today's row, the Ideas boxes), each
@@ -24033,7 +24041,7 @@ function renderLoc() {
   var badge = travelling ? ' <span class="travel-badge">Traveling</span>' : "";
   document.getElementById("today-loc").innerHTML = "<strong>" + esc(currentLoc.name) + "</strong><span>" + esc(currentWeather ? Math.round(currentWeather.temp) + "°F · " + currentWeather.label : "") + "</span>" + badge;
   if (locUnset && !currentWeather) {
-    document.getElementById("loc-weather").textContent = "Set your home city — search above, or pick a city below.";
+    document.getElementById("loc-weather").textContent = "Set your home city.";
     document.getElementById("loc-rec").textContent = "";
   } else if (currentWeather) {
     document.getElementById("loc-weather").textContent = Math.round(currentWeather.temp) + "°F now" +
@@ -24129,7 +24137,7 @@ function fetchWeather(attempt) {
      Tell the user to set a home city — do not leave "Checking…". */
   if (!currentLoc.lat && !currentLoc.lon) {
     var el0 = document.getElementById("loc-weather");
-    if (el0 && !currentWeather) el0.textContent = "Set your home city — search above, or pick a city below.";
+    if (el0 && !currentWeather) el0.textContent = "Set your home city.";
     return;
   }
   var url = "https://api.open-meteo.com/v1/forecast?latitude=" + currentLoc.lat + "&longitude=" + currentLoc.lon +
@@ -24781,11 +24789,6 @@ function renderBudget() {
   if (sRange) sRange.value = budgetLevel;
   var sNm = document.getElementById("shop-budget-name");
   if (sNm) sNm.textContent = info.name;
-  var ds = document.getElementById("find-budget-info");
-  if (ds) {
-    ds.setAttribute("data-info-title", "Budget — " + info.name);
-    ds.setAttribute("data-info-text", info.name + " — " + info.desc);
-  }
 }
 var budgetRangeEl = document.getElementById("find-budget-range");
 if (budgetRangeEl) budgetRangeEl.addEventListener("input", function () {
@@ -26252,7 +26255,7 @@ function renderBrandView() {
   var entries = catalogueForBrand(name);
   var html = '<div class="brand-view-head"><h3>' + esc(name) + "</h3>" +
     (meta ? '<p class="bv-meta">' + esc(meta) + "</p>" : "") +
-    (entries.length ? '<p class="bv-meta">' + entries.length + " piece" + (entries.length === 1 ? "" : "s") + " in the catalogue · prices checked " + SHOP_CATALOGUE_CHECKED + " — tap through for the live price.</p>" : "") +
+    (entries.length ? '<p class="bv-meta">' + entries.length + " piece" + (entries.length === 1 ? "" : "s") + " in the catalogue · prices checked " + SHOP_CATALOGUE_CHECKED + ".</p>" : "") +
     (url ? '<a class="brand-store-link" target="_blank" rel="noopener" href="' + esc(url) + '">Visit the ' + esc(name) + " store ↗</a>" : "") +
     "</div>";
   html += entries.length
@@ -26977,7 +26980,7 @@ function renderPurchased() {
      instead of the section vanishing. */
   box.hidden = false;
   if (!shopPurchases.length) {
-    box.innerHTML = '<p class="meta">Nothing purchased yet — mark a piece purchased from Shop the look, Sale items or the Wishlist and it lands here, catalogued into your Closet.</p>';
+    box.innerHTML = '<p class="meta">Nothing purchased yet.</p>';
     return;
   }
   /* Purchased lists by type, then name A–Z (build .28) — a
@@ -27396,7 +27399,7 @@ function renderShopWishlist() {
   var box = document.getElementById("shopwish-list");
   if (!box) return;
   if (!shopWishlist.length) {
-    box.innerHTML = '<p class="meta">Nothing saved yet — add products from Shop the look matches or Sale items and they wait here.</p>';
+    box.innerHTML = '<p class="meta">Nothing saved yet.</p>';
     syncLooksWishView();
     return;
   }
@@ -27592,7 +27595,7 @@ function renderSaleItems() {
     }).join("");
   }
   if (!SALE_ITEMS.length) {
-    list.innerHTML = '<p class="meta">Sale items are being gathered — the first sweep lands here soon.</p>';
+    list.innerHTML = '<p class="meta">No sale items yet.</p>';
     if (count) count.textContent = "";
     updateSaleRail();
     return;
@@ -27612,7 +27615,7 @@ function renderSaleItems() {
   });
   if (count) count.textContent = items.length + (items.length === 1 ? " item" : " items");
   if (!items.length) {
-    list.innerHTML = '<p class="meta">Nothing on sale in this category right now.</p>';
+    list.innerHTML = '<p class="meta">Nothing on sale.</p>';
     updateSaleRail();
     return;
   }
@@ -27738,7 +27741,7 @@ function renderFindLookMode() {
   var img = lookImg(look);
   var html = '<div class="shop-look-head"><img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" loading="lazy" />' +
     '<div class="shop-look-titlerow"><h3>' + esc(look.title || "Untitled") + '</h3><button type="button" class="btn-ghost shop-clear" id="shop-clear-look">✕ Clear look</button></div>' +
-    '<p class="shop-honest">Catalogue prices checked ' + SHOP_CATALOGUE_CHECKED + " — tap through for the live price.</p>" +
+    '<p class="shop-honest">Prices checked ' + SHOP_CATALOGUE_CHECKED + ".</p>" +
     "</div>";
   /* Build .42: every piece block carries its OWN price tier
      and its OWN selected product (shopPieceState — see the
@@ -28843,7 +28846,7 @@ function renderWornLog() {
   var entries = mergedWornEntries(null);
   entries.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
   if (!entries.length) {
-    list.innerHTML = '<p class="meta">Nothing worn yet \u2014 tap \u201cWore this today\u201d on Today, or Mark worn on a look.</p>';
+    list.innerHTML = '<p class="meta">Nothing worn yet.</p>';
     return;
   }
   /* Grouped by EXACT DATE (build .28) \u2014 "Monday \u00b7 Nov 16" \u2014
@@ -29056,7 +29059,7 @@ function renderWishlist() {
   (currentOptions || []).forEach(consider);
   lastWishlist = order.map(function (k) { return agg[k]; }).sort(function (a, b) { return b.count - a.count; }).slice(0, 12);
   if (!lastWishlist.length) {
-    list.innerHTML = '<p class="meta">Nothing missing — every piece in your looks is covered by your closet.</p>';
+    list.innerHTML = '<p class="meta">Nothing missing.</p>';
     renderGapList();
     return;
   }
@@ -29078,7 +29081,7 @@ function renderGapList() {
   if (!wrap || !list) return;
   var ce = document.getElementById("closet-gaps-count");
   if (ce) ce.textContent = lastWishlist.length ? "(" + Math.min(8, lastWishlist.length) + ")" : "";
-  if (!lastWishlist.length) { wrap.hidden = false; list.innerHTML = '<p class="meta">Nothing missing — every piece in your looks is covered by your closet.</p>'; return; }
+  if (!lastWishlist.length) { wrap.hidden = false; list.innerHTML = '<p class="meta">Nothing missing.</p>'; return; }
   wrap.hidden = false;
   list.innerHTML = lastWishlist.slice(0, 8).map(function (w, i) {
     return '<div class="wish-row"><span class="cdot" style="background:' + (w.hex || "transparent") + '"></span>' +
@@ -29519,7 +29522,7 @@ function renderWeekPlan() {
     var imgTitle = wornImg ? worn[0].title : (look ? look.title : "");
     var aria = esc(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) +
       (worn.length ? " — wore: " + esc(worn.map(function (w) { return w.title; }).join(", ")) : "") +
-      (look ? " — planned: " + esc(look.title) : (worn.length ? "" : " — tap to plan"));
+      (look ? " — planned: " + esc(look.title) : "");
     html += '<div class="' + cls + '" data-plan-day="' + iso + '" role="button" tabindex="0" aria-label="' + aria + '">' +
       (worn.length > 1 ? '<span class="wp-worn-count">' + worn.length + '</span>' : "") +
       '<span class="wp-dow">' + esc(d.toLocaleDateString(undefined, { weekday: "short" })) + '</span>' +
@@ -29803,11 +29806,6 @@ document.addEventListener("click", function (e) {
       if (dy > 70) close();
     }, { passive: true });
   }
-  wire(document.querySelector("#info-pop .info-pop-card"), function () { closeInfoPop(); });
-  wire(document.querySelector("#icons-info-pop .principles"), function () {
-    var c = document.getElementById("icons-info-close");
-    if (c) c.click();
-  });
 })();
 
 /* ---------- Individual image — one compact row, expands on tap (16) ---------- */
