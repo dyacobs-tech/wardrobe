@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.53" />
+    <meta name="wardrobe-build" content="2026-11-17.54" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -1373,6 +1373,10 @@
       body:has(> main > #panel-today:not([hidden])) .masthead .brand { font-size: clamp(24px, 5vw, 32px); }
       body:has(> main > #panel-today:not([hidden])) footer { margin-top: 0; }
       #panel-today { flex: 1 1 auto; display: flex; flex-direction: column; }
+      /* Build .54: the ID rule above outranks section[hidden], which
+         left the hero laid out at the top of every other page —
+         restore the hide for Today alone. */
+      #panel-today[hidden] { display: none; }
       #panel-today .today-hero {
         flex: 1 1 auto; height: auto; min-height: 0; max-height: none;
         border: none; border-radius: 0;
@@ -3602,10 +3606,6 @@
           </div>
         </div>
         <div class="saved-grid" id="saved-grid"></div>
-        <div id="wishlist-wrap">
-          <h3 class="fav-head">Wishlist — pieces your looks are missing</h3>
-          <div id="wishlist-list"></div>
-        </div>
       </section>
 
       <!-- ================= CALENDAR ================= -->
@@ -4136,10 +4136,20 @@
         <div id="sale-list"></div>
       </section>
 
-      <!-- ================= SHOP WISHLIST — PRODUCTS TO BUY ================= -->
+      <!-- ================= SHOP WISHLIST — SAVED ITEMS + MISSING PIECES =================
+           Build .54: the Wishlist is its own Shop sub page, holding
+           both halves — the saved products (shopwish, with the .45
+           price-drop markers) and the missing-pieces gap list that
+           used to trail My Outfits (renderWishlist / #wishlist-list,
+           moved here unchanged). -->
       <section id="panel-shopwish" role="tabpanel" aria-labelledby="tab-shopwish" hidden>
-        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Wishlist" data-info-text="Products you've saved from Shop the look matches and Sale items. Mark one purchased and it moves to Purchased and is catalogued into your Closet automatically." aria-label="About Wishlist">i</button></div>
+        <div class="page-info-row"><button type="button" class="info-btn" data-info-title="Wishlist" data-info-text="Products you've saved from Shop the look matches and Sale items, and the pieces your saved looks are still missing. Mark a saved product purchased and it moves to Purchased and is catalogued into your Closet automatically." aria-label="About Wishlist">i</button></div>
+        <h3 class="fav-head">Saved items</h3>
         <div id="shopwish-list"></div>
+        <div id="wishlist-wrap">
+          <h3 class="fav-head">Missing pieces</h3>
+          <div id="wishlist-list"></div>
+        </div>
       </section>
 
       <!-- ================= PROFILE ================= -->
@@ -4881,7 +4891,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.53";
+var WARDROBE_BUILD = "2026-11-17.54";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -16497,7 +16507,7 @@ function freshRenderFor(others) {
   /* Freshness is by photograph only (build .47): titles are a
      function of the photograph, so a title check here could veto
      the one honest caption a fresh photograph carries. */
-  var cands = RENDER_POOL.filter(function (r) { return !usedImg[r.img] && !isQuarantinedImg(r.img); });
+  var cands = RENDER_POOL.filter(function (r) { return !usedImg[r.img] && !isQuarantinedImg(r.img) && !isDislikedImg(r.img); });
   if (!cands.length) return null;
   /* Freshest first: nothing from the most recent deal while
      anything older remains, and among those, the oldest bucket —
@@ -26718,6 +26728,9 @@ function switchTab(name, opts) {
      states and filters inside My Looks now — old links and stored
      tabs land there. */
   if (name === "queue" || name === "favourites") name = "looks";
+  /* Build .54: the Wishlist left My Outfits for its own Shop sub
+     page — the old name lands there, never on a dead end. */
+  if (name === "wishlist") name = "shopwish";
   /* Profile is three sub pages now (build .28) — the old
      single-page name lands on Profile info, the default. */
   if (name === "profile") name = "pinfo";
@@ -26761,6 +26774,7 @@ function switchTab(name, opts) {
   if ((name === "looks" || name === "outfitideas") && typeof renderSaved === "function") renderSaved();
   if (name === "sale" && typeof renderSaleItems === "function") renderSaleItems();
   if (name === "shopwish" && typeof renderShopWishlist === "function") renderShopWishlist();
+  if (name === "shopwish" && typeof renderWishlist === "function") renderWishlist();
   if (name === "search" && typeof renderFinds === "function") renderFinds();
   if (name === "gaps" && typeof renderWishlist === "function") renderWishlist();
   if (name === "analyze" && typeof renderAnalyzeSheet === "function") renderAnalyzeSheet();
@@ -26874,6 +26888,11 @@ function tabFromHash() {
   try { h = (location.hash || "").replace(/^#\/?/, ""); } catch (e) { return null; }
   if (!h) return null;
   var parts = h.split("/");
+  /* Build .54: a link naming the old wishlist location (#wishlist —
+     the section that trailed My Outfits) lands on the Shop
+     Wishlist page, its new home. Checked before the TABS gate:
+     "wishlist" itself is not a tab name. */
+  if (parts[0] === "wishlist") return { tab: "shopwish", icon: null };
   if (TABS.indexOf(parts[0]) === -1) return null;
   /* Closet sub-pages are reached in-app only: a boot, refresh or
      deep link naming one lands on the Closet landing instead. */
