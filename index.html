@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.59" />
+    <meta name="wardrobe-build" content="2026-11-18.60" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -1366,19 +1366,21 @@
       .new-badge { display: inline-block; border: 1px solid var(--brass); color: var(--brass); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 1px 5px; border-radius: 2px; margin-left: 6px; vertical-align: middle; }
 
       /* ---------- Today — full-screen hero, compact content ----------
-         The hero fills the whole screen: full-bleed, edge to edge,
-         stretching from under the tab bar to the bottom of the
-         viewport, so there is no compressed box and no empty space
-         below it. The page becomes a flex column exactly as tall as
-         the viewport while Today is open, and the hero takes all
-         the room under the header. Everything INSIDE the hero —
-         title, dots, action buttons, location chips, formality
-         chips — stays small and tight, as does the wordmark. */
-      body:has(> main > #panel-today:not([hidden])) { display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; }
-      main:has(> #panel-today:not([hidden])) { max-width: none; margin: 0; padding: 0; flex: 1 1 auto; display: flex; flex-direction: column; }
+         The hero fills the space under the masthead down to the top
+         of the fixed bottom bar. Build .60: the body is no longer a
+         flex / 100svh container while Today is open. That lock made
+         iOS treat the body as the containing block for the
+         position:fixed bar, so the bar sat --bb-h above the
+         viewport bottom (the empty dark strip on Home). The bar
+         stays position:fixed; bottom:0 on the viewport, identical
+         on every page. Phone sizing of the panel itself is in the
+         max-width:899px block below; desktop keeps the flex column
+         on body inside the min-width:1024px layout. Everything
+         INSIDE the hero stays small and tight, as does the wordmark. */
       body:has(> main > #panel-today:not([hidden])) .masthead .brand { font-size: clamp(24px, 5vw, 32px); }
       body:has(> main > #panel-today:not([hidden])) footer { margin-top: 0; }
-      #panel-today { flex: 1 1 auto; display: flex; flex-direction: column; }
+      main:has(> #panel-today:not([hidden])) { max-width: none; margin: 0; padding: 0; }
+      #panel-today { display: flex; flex-direction: column; }
       /* Build .54: the ID rule above outranks section[hidden], which
          left the hero laid out at the top of every other page —
          restore the hide for Today alone. */
@@ -2901,10 +2903,15 @@
 
         /* ----- Frame: room for the fixed header; no bottom bar ----- */
         body { padding-top: var(--hdr-h); padding-bottom: 48px; }
-        body:has(> main > #panel-today:not([hidden])) { padding-bottom: 0; }
+        body:has(> main > #panel-today:not([hidden])) {
+          display: flex; flex-direction: column;
+          min-height: 100vh; min-height: 100svh;
+          padding-bottom: 0;
+        }
         .wrap { max-width: var(--desk-max); padding: 0 var(--desk-pad); }
         main { padding: 30px 0 56px; }
-        main:has(> #panel-today:not([hidden])) { max-width: none; padding: 0; }
+        main:has(> #panel-today:not([hidden])) { max-width: none; padding: 0; flex: 1 1 auto; display: flex; flex-direction: column; }
+        #panel-today { flex: 1 1 auto; }
 
         /* ----- Top bar, row 1: wordmark left, Profile right ----- */
         .masthead {
@@ -3121,22 +3128,29 @@
       .shop-thumb { width: 54px; height: 72px; object-fit: cover; flex: none; }
       .shop-thumb-ph { display: inline-block; background: var(--surface-alt); border: 1px solid var(--border); }
 
-      /* ---------- Build .55 (Item 0) — Today hero clears the bottom bar ----------
-         At phone widths the bar is a fixed 68px strip at bottom:0 and
-         the body already carries padding-bottom:68px, but the Today
-         flex column was sized by min-height alone and the hero's
-         image band was flex:none at a fixed 62dvh height — a taller
-         caption (wrapped title/weather, the watch pill in the row)
-         then pushed the caption's selector row under the bar. Now
-         the column is exactly the viewport tall (border-box, so the
-         68px clearance is inside it), every link in the flex chain
-         may shrink, and the image band flexes and absorbs the
-         difference — contain-fit full frame throughout, caption,
-         action pills and selector row at their existing sizes. */
+      /* ---------- Build .55 / .60 — Today hero clears the bottom bar ----------
+         At phone widths the bar is a fixed strip at bottom:0
+         (height: var(--bb-h)). Build .55 sized the BODY to 100svh
+         (border-box, padding-bottom inside it) so the hero flex
+         chain could shrink and keep the caption above the bar.
+         On iOS that body lock became the containing block for the
+         position:fixed bar, so the bar sat --bb-h above the
+         viewport bottom — the empty dark strip on Home only.
+         Build .60 sizes the Today PANEL instead, and leaves the
+         body as an ordinary block (same as every other page).
+         --chrome-top is the in-flow masthead: the capped top
+         safe-area inset plus the 33px wordmark row and the 1px
+         navstack border (subnav is hidden on Home). The image
+         band still flexes and absorbs leftover height. */
       @media (max-width: 899px) {
-        body:has(> main > #panel-today:not([hidden])) { box-sizing: border-box; height: 100vh; height: 100svh; max-height: 100vh; max-height: 100svh; }
-        main:has(> #panel-today:not([hidden])) { min-height: 0; }
-        #panel-today { min-height: 0; box-sizing: border-box; }
+        :root { --chrome-top: calc(min(env(safe-area-inset-top, 0px), 59px) + 34px); }
+        #panel-today:not([hidden]) {
+          box-sizing: border-box;
+          display: flex; flex-direction: column;
+          min-height: 0;
+          height: calc(100svh - var(--bb-h) - var(--chrome-top));
+          max-height: calc(100svh - var(--bb-h) - var(--chrome-top));
+        }
         #panel-today:not([hidden]) .today-hero { min-height: 0; }
         #panel-today .today-hero img#today-img { flex: 1 1 auto; height: auto; min-height: 0; }
         #panel-today .today-hero .today-collage { flex: 1 1 auto; height: auto; min-height: 0; }
@@ -5190,7 +5204,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.59";
+var WARDROBE_BUILD = "2026-11-18.60";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
