@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-17.56" />
+    <meta name="wardrobe-build" content="2026-11-17.57" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -4960,6 +4960,22 @@ var store = (function () {
          later save writes it back unchanged instead of erasing it. */
       V.missing = (V.missing || 0) + 1;
     }
+    /* Build .57: a "blob:<sha256>" sync reference resolves from
+       the blob store when the bytes are on this device; when they
+       are not, the reference itself is kept (exactly like an
+       unresolved "idb:" ref) and the miss is counted. blobStore
+       is defined later in this script (before the sync section),
+       so every access is guarded. */
+    if (typeof v === "string" && v.length < 80 && v.indexOf("blob:") === 0) {
+      try {
+        var bs = window.blobStore;
+        if (bs && bs.cache) {
+          var bhit = bs.cache[v.slice(5)];
+          if (bhit !== undefined) return bhit;
+          bs.missing = (bs.missing || 0) + 1;
+        }
+      } catch (e) {}
+    }
     return v;
   }
   function replacer(_k, v) {
@@ -4977,7 +4993,7 @@ var store = (function () {
       var raw = null;
       try { raw = localStorage.getItem("wardrobe." + k); } catch (e) { return fallback; }
       if (!raw) return fallback;
-      try { return raw.indexOf('"idb:') === -1 ? JSON.parse(raw) : JSON.parse(raw, reviver); }
+      try { return (raw.indexOf('"idb:') === -1 && raw.indexOf('"blob:') === -1) ? JSON.parse(raw) : JSON.parse(raw, reviver); }
       catch (e) { storeNoteCorrupt(k, raw); return fallback; }
     },
     set: function (k, v) {
@@ -5102,7 +5118,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-17.56";
+var WARDROBE_BUILD = "2026-11-17.57";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -11356,7 +11372,7 @@ var EXTRA_RENDERS = [
     ]
   },
   {
-    img: "assets/photos/858626ddfaa8.webp",
+    img: "assets/photos/d05b1ef24e9c.webp",
     title: "Navy Breton Stripe Polo & Stone Suede Penny Loafer",
     imgAlt: "You wearing Navy Tailored Shorts, Brunello Cucinelli Navy Breton Stripe Polo and Stone Suede Penny Loafer",
     watchId: "seed-ap-25594ba",
@@ -12545,7 +12561,7 @@ var RENDER_FORMALITY = {
   "assets/photos/61470af13e97.webp": 3,
   "assets/photos/0664843013c6.webp": 3,
   "assets/photos/2e603a85542d.webp": 3,
-  "assets/photos/858626ddfaa8.webp": 3,
+  "assets/photos/d05b1ef24e9c.webp": 3,
   "assets/photos/d84ee3de6ed3.webp": 3,
   "assets/photos/5a2e0c8d373a.webp": 3,
   "assets/photos/dd6936f919c8.webp": 3,
@@ -12654,7 +12670,7 @@ function renderAsLook(r) {
    declared HERE, before DEAL_POOL is built: the assignment must
    execute before any pool filter runs, or the filter silently
    matches nothing and the render stays dealable. */
-var QUARANTINED_IMG = "assets/photos/858626ddfaa8.webp";
+var QUARANTINED_IMG = "";
 var DEAL_POOL = RENDER_POOL.filter(function (r) { return !isQuarantinedImg(r.img) && !isDislikedImg(r.img); }).map(renderAsLook);
 function renderFormality() {
   var info = formalityInfo(formalityLevel);
@@ -12807,7 +12823,7 @@ function imgsEquivalent(a, b) {
   if (!a || !b) return false;
   return a === b || canonicalImg(a) === canonicalImg(b);
 }
-function isQuarantinedImg(img) { return !!img && canonicalImg(img) === "assets/photos/858626ddfaa8.webp"; }
+function isQuarantinedImg(img) { return !!img && !!QUARANTINED_IMG && canonicalImg(img) === QUARANTINED_IMG; }
 function isDislikedImg(img) {
   if (!img || typeof dislikedImgs === "undefined" || !dislikedImgs) return false;
   for (var i = 0; i < dislikedImgs.length; i++) { if (imgsEquivalent(dislikedImgs[i], img)) return true; }
@@ -30258,6 +30274,145 @@ function dealWardrobeSix() {
 })();
 renderMyInspo();
 
+/* ================= Blob store (build .57) =================
+   Sync photo offload: photo bytes travel as their own "blobs"
+   records, keyed by the SHA-256 of the data URI; synced records
+   carry only a short "blob:<hash>" reference. The bytes live
+   here — an in-memory cache backed by their own IndexedDB
+   database ("wardrobe-blobs", store "b") — mirroring the photo
+   vault's patterns. If IndexedDB is unavailable or fails, the
+   store runs cache-only for the session and never throws. A
+   blob that is not on this device yet is left as-is in the DOM
+   (no error, no placeholder swap) until it arrives; when it
+   arrives, the sync apply path's fillIn swaps it in. */
+window.blobStore = (function () {
+  "use strict";
+  var cache = {};
+  var db = null;
+  var _fetching = {};
+  var B = { cache: cache, missing: 0 };
+  B.put = function (hash, uri) {
+    if (!hash || typeof uri !== "string") return;
+    cache[hash] = uri;
+    if (!db) return;
+    try {
+      var tx = db.transaction("b", "readwrite");
+      tx.objectStore("b").put(uri, hash);
+    } catch (e) {}
+  };
+  B.fetch = function (hash, cb) {
+    if (cache[hash] !== undefined) { cb(cache[hash]); return; }
+    if (_fetching[hash]) { _fetching[hash].push(cb); return; }
+    if (!db) { cb(null); return; }
+    _fetching[hash] = [cb];
+    function doneFetch(val) {
+      var cbs = _fetching[hash] || [];
+      delete _fetching[hash];
+      cbs.forEach(function (f) { try { f(val); } catch (e) {} });
+    }
+    try {
+      var rq = db.transaction("b").objectStore("b").get(hash);
+      rq.onsuccess = function () {
+        var val = rq.result === undefined ? null : rq.result;
+        if (val !== null) cache[hash] = val;
+        doneFetch(val);
+      };
+      rq.onerror = function () { doneFetch(null); };
+    } catch (e) { doneFetch(null); }
+  };
+  B.fillIn = function (hash, uri) {
+    if (!hash || typeof uri !== "string") return;
+    var ref = "blob:" + hash;
+    try {
+      document.querySelectorAll("img").forEach(function (im) { if (im.getAttribute("src") === ref) im.src = uri; });
+      document.querySelectorAll("[data-popout]").forEach(function (el) { if (el.getAttribute("data-popout") === ref) el.setAttribute("data-popout", uri); });
+    } catch (e) {}
+  };
+  B.sha256 = function (str) {
+    try {
+      if (typeof crypto === "undefined" || !crypto.subtle || !crypto.subtle.digest || typeof TextEncoder === "undefined") return Promise.resolve(null);
+      return crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(str))).then(function (buf) {
+        var bytes = new Uint8Array(buf), hex = "";
+        for (var i = 0; i < bytes.length; i++) { var h = bytes[i].toString(16); hex += (h.length === 1 ? "0" : "") + h; }
+        return hex;
+      }).catch(function () { return null; });
+    } catch (e) { return Promise.resolve(null); }
+  };
+  function resolveRef(ref) {
+    if (!ref || ref.indexOf("blob:") !== 0) return;
+    var hash = ref.slice(5);
+    if (!/^[0-9a-f]{64}$/.test(hash)) return;
+    if (cache[hash] !== undefined) { B.fillIn(hash, cache[hash]); return; }
+    B.fetch(hash, function (uri) { if (uri) B.fillIn(hash, uri); });
+  }
+  function checkImg(img) {
+    if (!img || img.tagName !== "IMG") return;
+    var s = null;
+    try { s = img.getAttribute("src"); } catch (e) {}
+    if (s && s.indexOf("blob:") === 0) resolveRef(s);
+  }
+  function checkPopout(el) {
+    if (!el || !el.getAttribute) return;
+    var s = null;
+    try { s = el.getAttribute("data-popout"); } catch (e) {}
+    if (s && s.indexOf("blob:") === 0) resolveRef(s);
+  }
+  function scan(root) {
+    if (!root) return;
+    try {
+      if (root.tagName === "IMG") checkImg(root);
+      checkPopout(root);
+      if (root.querySelectorAll) {
+        root.querySelectorAll("img").forEach(checkImg);
+        root.querySelectorAll("[data-popout]").forEach(checkPopout);
+      }
+    } catch (e) {}
+  }
+  function startObserver() {
+    scan(document);
+    if (typeof MutationObserver === "undefined") return;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        muts.forEach(function (m) {
+          if (m.type === "attributes") { checkImg(m.target); checkPopout(m.target); }
+          else for (var i = 0; i < m.addedNodes.length; i++) { var n = m.addedNodes[i]; if (n.nodeType === 1) scan(n); }
+        });
+      });
+      mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
+    } catch (e) {}
+  }
+  try {
+    if (typeof indexedDB !== "undefined") {
+      var rq = indexedDB.open("wardrobe-blobs", 1);
+      rq.onupgradeneeded = function () {
+        var d = rq.result;
+        if (!d.objectStoreNames.contains("b")) d.createObjectStore("b");
+      };
+      rq.onerror = function () {};
+      rq.onblocked = function () {};
+      rq.onsuccess = function () {
+        db = rq.result;
+        try {
+          var cur = db.transaction("b").objectStore("b").openCursor();
+          cur.onerror = function () {};
+          cur.onsuccess = function () {
+            var c = cur.result;
+            if (c) { if (typeof c.value === "string") cache[c.key] = c.value; c.continue(); return; }
+            /* Every stored entry is in cache now: give any
+               "blob:" image already on the page its bytes. */
+            try { scan(document); } catch (e) {}
+          };
+        } catch (e) {}
+      };
+    }
+  } catch (e) { db = null; }
+  try {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startObserver);
+    else startObserver();
+  } catch (e) {}
+  return B;
+})();
+
 /* ================= Cloud sync =================
    Wardrobe's state, synced through the wardrobe-sync service —
    a deliberate twin of Padel Log's sync: same contract, same
@@ -30287,13 +30442,15 @@ renderMyInspo();
      one just because it dealt a look more recently. */
 var SYNC_URL = "https://wardrobe-sync.dyacobs.workers.dev";
 try { SYNC_URL = localStorage.getItem("wardrobe.syncurl") || SYNC_URL; } catch (e) {}
-var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed", "receipts", "shopwish", "pricedrops"];
+var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed", "receipts", "shopwish", "pricedrops", "blobs"];
 function syBlank() {
   var o = { key: null, acct: null, last: 0, snap: {}, st: {}, tomb: {}, dirty: {}, status: "Not synced yet", lastOk: 0 };
   SY_COLLS.forEach(function (c) { o.snap[c] = {}; o.st[c] = {}; o.tomb[c] = {}; o.dirty[c] = {}; });
   o.snap.m = ""; o.st.m = 0; o.dirty.m = 0;
   o.mf = {}; o.rej = 0;
   o.quar = []; /* build .56: remote records that failed to apply, quarantined per record */
+  o.bp = {}; /* build .57: hashes of blobs this device has pushed */
+  o.mig57 = ""; /* build .57: account key the one-time blob migration ran for */
   return o;
 }
 var SY = null;
@@ -30315,6 +30472,8 @@ else {
   if (!SY.mf || typeof SY.mf !== "object") SY.mf = {};
   if (typeof SY.rej !== "number") SY.rej = 0;
   if (!Array.isArray(SY.quar)) SY.quar = [];
+  if (!SY.bp || typeof SY.bp !== "object" || Array.isArray(SY.bp)) SY.bp = {};
+  if (typeof SY.mig57 !== "string") SY.mig57 = "";
 }
 function saveSY() { try { localStorage.setItem("wardrobe.sync", JSON.stringify(SY)); } catch (e) {} }
 function syHsh(x) {
@@ -30412,6 +30571,7 @@ function syCollGet(c) {
     case "receipts": return receiptInbox;
     case "shopwish": return shopWishlist;
     case "pricedrops": return priceDrops;
+    case "blobs": return [];
   }
   return [];
 }
@@ -30880,6 +31040,22 @@ function syApplyDownload56(j) {
   try {
     recs.forEach(function (x) {
       try {
+        /* Build .57 (B4): blob records are photo bytes, not
+           collection records — they land in the blob store and
+           are swapped into the page, never in syPutLocal, and
+           SY.snap.blobs is never set (the differ stays blind to
+           them). A deleted blob record is ignored. */
+        if (x && x.coll === "blobs") {
+          if (x.deleted) return;
+          if (!/^[0-9a-f]{64}$/.test(x.id || "") || !x.data || typeof x.data !== "object" || Array.isArray(x.data) || typeof x.data.photo !== "string" || x.data.photo.indexOf("data:image/") !== 0) { syQuarantine56(x, "invalid blob record"); return; }
+          try { if (window.blobStore) { window.blobStore.put(x.id, x.data.photo); window.blobStore.fillIn(x.id, x.data.photo); } } catch (e) {}
+          if (!SY.st.blobs || typeof SY.st.blobs !== "object") SY.st.blobs = {};
+          if (!SY.dirty.blobs || typeof SY.dirty.blobs !== "object") SY.dirty.blobs = {};
+          SY.st.blobs[x.id] = x.updatedAt || 1;
+          delete SY.dirty.blobs[x.id];
+          res.down++; res.changedAny = true;
+          return;
+        }
         if (!x || SY_COLLS.indexOf(x.coll) === -1) return;
         var loc = SY.st[x.coll][x.id] || SY.tomb[x.coll][x.id] || 0;
         if (!(x.updatedAt > loc)) return;
@@ -30993,6 +31169,29 @@ function syncNow(isRetry, force) {
         }
       }
       syTrackChanges();
+      /* Build .57 (B7): one-time migration, once per account per
+         device (keyed on SY.key, so linked accounts run it too).
+         The flag is set FIRST, then every closet item still
+         holding a photo (inline or as a vault reference) is
+         re-stamped dirty, so this pass re-uploads the closet in
+         blob form through the B5 transform. No other collection
+         is force-migrated — their photos blob-ify on their next
+         ordinary push. */
+      try {
+        if (SY.key && SY.mig57 !== SY.key) {
+          SY.mig57 = SY.key;
+          try {
+            syCollGet("items").forEach(function (r) {
+              var ph = r && r.photo;
+              if (typeof ph === "string" && (ph.indexOf("data:image/") === 0 || ph.indexOf("idb:") === 0)) {
+                var rid = syRecId("items", r);
+                if (rid) { SY.st.items[rid] = Date.now(); SY.dirty.items[rid] = 1; delete SY.tomb.items[rid]; }
+              }
+            });
+          } catch (e) {}
+          saveSY();
+        }
+      } catch (e) {}
       setSyncStatus("Syncing…");
       /* Build .56: PAGED DOWNLOAD. The old pass took the whole
          backlog in ONE response (~13.5 MB); it timed out (~60 s)
@@ -31116,6 +31315,72 @@ function syncNow(isRetry, force) {
         });
         if (_syMassHold) { saveSY(); try { dataNoteRender(); } catch (e) {} }
       }
+      /* Build .57 (B5): sync photo offload. Each non-deleted
+         change's data is replaced with a transformed COPY (a deep
+         walk in the syWire style — live record objects are never
+         mutated): a data:image string longer than 2048 chars
+         becomes "blob:<sha256>", and the photo bytes ride as one
+         "blobs" change per distinct photo. A blob change is
+         included only when this device has not pushed that hash
+         before (SY.bp) — except the insurance rule: a record
+         referencing "blob:<hash>" (arrived from another device)
+         whose bytes this device holds is included too when
+         SY.bp lacks the hash; the server skips true duplicates
+         by last-writer-wins. If SHA-256 is unavailable, the
+         transform is skipped entirely for this pass and records
+         upload inline exactly as before. */
+      try {
+        var _bs57 = window.blobStore;
+        var _probe57 = null;
+        if (_bs57 && typeof _bs57.sha256 === "function") { try { _probe57 = await _bs57.sha256(""); } catch (e) { _probe57 = null; } }
+        if (_bs57 && typeof _probe57 === "string" && /^[0-9a-f]{64}$/.test(_probe57)) {
+          if (!SY.bp || typeof SY.bp !== "object" || Array.isArray(SY.bp)) SY.bp = {};
+          var _blobChanges57 = [], _blobSeen57 = {};
+          var _collectBlob57 = function (hash, uri) {
+            if (!hash || typeof uri !== "string" || _blobSeen57[hash]) return;
+            _blobSeen57[hash] = 1;
+            if (SY.bp[hash]) return;
+            _blobChanges57.push({ coll: "blobs", id: hash, updatedAt: 1, data: { photo: uri } });
+          };
+          var _walkBlob57 = async function (v) {
+            if (typeof v === "string") {
+              if (v.length > 2048 && v.indexOf("data:image/") === 0) {
+                var _h57 = null;
+                try { _h57 = await _bs57.sha256(v); } catch (e) { _h57 = null; }
+                if (typeof _h57 === "string" && /^[0-9a-f]{64}$/.test(_h57)) { _collectBlob57(_h57, v); return "blob:" + _h57; }
+                return v;
+              }
+              if (/^blob:[0-9a-f]{64}$/.test(v)) {
+                var _bh57 = v.slice(5);
+                if (!SY.bp[_bh57] && !_blobSeen57[_bh57]) {
+                  var _buri57 = (_bs57.cache && _bs57.cache[_bh57]) || null;
+                  if (!_buri57 && typeof _bs57.fetch === "function") {
+                    _buri57 = await new Promise(function (res) { try { _bs57.fetch(_bh57, function (dv) { res(dv); }); } catch (e) { res(null); } });
+                  }
+                  if (typeof _buri57 === "string" && _buri57.indexOf("data:image/") === 0) _collectBlob57(_bh57, _buri57);
+                }
+                return v;
+              }
+              return v;
+            }
+            if (Array.isArray(v)) {
+              var _arr57 = [];
+              for (var _ai57 = 0; _ai57 < v.length; _ai57++) _arr57.push(await _walkBlob57(v[_ai57]));
+              return _arr57;
+            }
+            if (v && typeof v === "object") {
+              var _obj57 = {}, _keys57 = Object.keys(v);
+              for (var _ki57 = 0; _ki57 < _keys57.length; _ki57++) _obj57[_keys57[_ki57]] = await _walkBlob57(v[_keys57[_ki57]]);
+              return _obj57;
+            }
+            return v;
+          };
+          for (var _ci57 = 0; _ci57 < changes.length; _ci57++) {
+            if (!changes[_ci57].deleted && changes[_ci57].data) changes[_ci57].data = await _walkBlob57(changes[_ci57].data);
+          }
+          _blobChanges57.forEach(function (bc) { changes.push(bc); });
+        }
+      } catch (e) {}
       /* Uploads go in batches of about 900 KB, so a first sync
          full of photographs is not one enormous request that
          fails as a whole. Settings ride on the last batch. */
@@ -31186,6 +31451,16 @@ function syncNow(isRetry, force) {
         batch.forEach(function (ch) {
           var cur = ch.deleted ? SY.tomb[ch.coll][ch.id] : SY.st[ch.coll][ch.id];
           if (cur === undefined || cur === ch.updatedAt) delete SY.dirty[ch.coll][ch.id];
+        });
+        /* Build .57 (B5): blobs carried in a batch the server
+           accepted are marked as pushed by this device, so later
+           passes do not re-include them. Failed batches mark
+           nothing; their blobs are re-included next pass. */
+        batch.forEach(function (ch) {
+          if (ch.coll === "blobs") {
+            if (!SY.bp || typeof SY.bp !== "object" || Array.isArray(SY.bp)) SY.bp = {};
+            SY.bp[ch.id] = 1;
+          }
         });
         if (body.meta && (SY.st.m || 0) <= body.meta.updatedAt) SY.dirty.m = 0;
         sent += batch.length;
