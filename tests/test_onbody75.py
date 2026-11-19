@@ -11,7 +11,7 @@ Headless WebKit, iPhone size, all *.workers.dev traffic aborted.
 3. Outfits > Mine: the "From your closet" feed shows on-body renders.
 4. A closet with no rendered outfits falls back to a flat-lay of real
    photos: no on-body image and no colour-swatch cells.
-5. The service worker caches renders cache-first in wardrobe-onbody-v1,
+5. The service worker caches renders cache-first in wardrobe-onbody-v3,
    kept across builds; the manifest is not in that cache.
 
 Usage: PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 python tests/test_onbody75.py [base_url]
@@ -123,14 +123,14 @@ def main():
         pg.wait_for_timeout(3000)
         sw = pg.evaluate("""async () => {
           const ctl = !!navigator.serviceWorker.controller;
-          const has = await caches.has('wardrobe-onbody-v1');
+          const has = await caches.has('wardrobe-onbody-v3');
           let webp = 0, man = 0;
-          if (has) { const k = await (await caches.open('wardrobe-onbody-v1')).keys();
+          if (has) { const k = await (await caches.open('wardrobe-onbody-v3')).keys();
             webp = k.filter(r => r.url.includes('/assets/onbody/') && r.url.endsWith('.webp')).length;
             man = k.filter(r => r.url.endsWith('manifest.json')).length; }
           return { ctl, has, webp, man };
         }""")
-        check(sw["ctl"] and sw["has"] and sw["webp"] > 0, "SW caches renders in wardrobe-onbody-v1 (%d)" % sw["webp"])
+        check(sw["ctl"] and sw["has"] and sw["webp"] > 0, "SW caches renders in wardrobe-onbody-v3 (%d)" % sw["webp"])
         check(sw["man"] == 0, "manifest is not cache-first")
         swsrc = (ROOT / "sw.js").read_text()
         check("ONBODY_CACHE" in swsrc and "keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE" in swsrc, "render cache survives activate")

@@ -33,10 +33,11 @@ const WARDROBE_BUILD = '2026-11-19.80.11';
 const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
-// On-body renders (assets/onbody/<content-hash>.webp) are immutable, so
-// their cache is versioned on its own and survives build updates; bump
-// ONBODY_CACHE only if the render format changes.
-const ONBODY_CACHE = 'wardrobe-onbody-v2';
+// On-body renders and cut-outs are cache-first. The cache is versioned
+// on its own and survives build updates; bump ONBODY_CACHE when a file
+// at the same URL changes (the cut-outs are not content-hashed). v3
+// drops the v2 copies whose left shoe was faded out of the matte.
+const ONBODY_CACHE = 'wardrobe-onbody-v3';
 // Build .79.3: the JSON manifests (renders, cut-outs, inspo, the Edit
 // catalogue, the cut-out placeholders) are stale-while-revalidate in a
 // cache that survives builds, so a reopen never waits on them; a change
