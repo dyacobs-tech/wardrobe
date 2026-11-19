@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.22" />
+    <meta name="wardrobe-build" content="2026-11-19.80.23" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -7332,7 +7332,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.22</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.23</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9142,7 +9142,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.22";
+var WARDROBE_BUILD = "2026-11-19.80.23";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -30390,7 +30390,18 @@ function sellerLabel(e) {
    shirt, blazer, suit, jacket, trousers, jeans, shorts, swim,
    loafer, sneaker, boot, shoe (other shoe), tie, belt — or null
    when the text names no determinable type. */
+/* .80.23 (audit P1.11): garment types are memoised — Shop the look scores
+   the whole catalogue per piece on every open (~90ms of 220 at 4x CPU) */
+var _gtMemo823 = new Map();
 function garmentTypeFromText(t, cat) {
+  var k = cat + "|" + t, v = _gtMemo823.get(k);
+  if (v !== undefined) return v;
+  v = garmentTypeFromText0(t, cat);
+  if (_gtMemo823.size > 20000) _gtMemo823.clear();
+  _gtMemo823.set(k, v);
+  return v;
+}
+function garmentTypeFromText0(t, cat) {
   var s = " " + String(t || "").toLowerCase().replace(/-/g, " ").replace(/polo ralph lauren/g, " ralph lauren") + " ";
   if (cat !== "shoes") {
     if (/swim|bathing|\btrunks?\b/.test(s)) return "swim";
@@ -30448,6 +30459,14 @@ function entryAttrWords(e) {
   });
   return set;
 }
+var _etWeak823 = typeof WeakMap === "function" ? new WeakMap() : null;
+function entryGarmentType823(e) {
+  var n = e.name || "", ks = e.keys || [], c = _etWeak823 && _etWeak823.get(e);
+  if (c && c.n === n && c.k === ks && c.l === ks.length && c.c === e.cat) return c.t;
+  var t = garmentTypeFromText(n + " " + ks.join(" "), e.cat);
+  if (_etWeak823) _etWeak823.set(e, { n: n, k: ks, l: ks.length, c: e.cat, t: t });
+  return t;
+}
 function catalogueScored(pc, applyCeiling, tierKey) {
   var cat = catalogueCatForPiece(pc);
   if (!cat) return [];
@@ -30482,7 +30501,7 @@ function catalogueScored(pc, applyCeiling, tierKey) {
     if (applyCeiling && shopTierRank(e.tier) > ceiling) return;
     if (applyCeiling && !priceOK(e)) return; /* .78.4 price range */
     if (subjType) {
-      var eType = garmentTypeFromText((e.name || "") + " " + (e.keys || []).join(" "), e.cat);
+      var eType = entryGarmentType823(e);
       if (eType !== subjType) return;
     }
     var eColours = e.keys.filter(function (k) { return SHOP_COLOUR_KEYS[k.toLowerCase()]; });
@@ -41357,7 +41376,10 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
 (function () {
   "use strict";
   var ver = 1;
-  var IGN = /^wardrobe\.(tab|editView|hero793|lq793|navDiag\.|dealtImgs|todayOpening|scroll|perf)/;
+  /* .80.23 (audit P1.11): findLook too — opening The Edit re-syncs Shop the
+     look to the hero and renders that block itself, so it is no reason to
+     rebuild the whole Edit on the next open */
+  var IGN = /^wardrobe\.(tab|editView|hero793|lq793|navDiag\.|dealtImgs|todayOpening|scroll|perf|findLook)/;
   var _set = Storage.prototype.setItem, _rm = Storage.prototype.removeItem, _clr = Storage.prototype.clear;
   Storage.prototype.setItem = function (k) { if (this === window.localStorage && !IGN.test(String(k))) ver++; return _set.apply(this, arguments); };
   Storage.prototype.removeItem = function (k) { if (this === window.localStorage && !IGN.test(String(k))) ver++; return _rm.apply(this, arguments); };
@@ -41594,6 +41616,24 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   };
   var st = document.getElementById("panel-studio");
   if (st && window.MutationObserver) new MutationObserver(function () { if (!st.hidden) giveBack(); }).observe(st, { attributes: true, attributeFilter: ["hidden"] });
+})();
+</script>
+<script>
+/* .80.23 (audit P1.11): garment types of the whole shop catalogue are
+   worked out in idle slices after boot, so the first Shop the look / Edit
+   open does not pay for them inside the tap */
+(function () {
+  var ric = window.requestIdleCallback ? function (f) { window.requestIdleCallback(f, { timeout: 5000 }); } : function (f) { setTimeout(function () { f({ timeRemaining: function () { return 8; } }); }, 200); };
+  function warm() {
+    if (typeof shopCatalogueAll !== "function" || typeof entryGarmentType823 !== "function") return;
+    var all; try { all = shopCatalogueAll(); } catch (e) { return; }
+    var i = 0;
+    (function slice(dl) {
+      while (i < all.length && dl.timeRemaining() > 2) { try { if (all[i] && all[i].cat) entryGarmentType823(all[i]); } catch (e) {} i++; }
+      if (i < all.length) ric(slice);
+    })({ timeRemaining: function () { return 0; } });
+  }
+  setTimeout(function () { (window.afterLookahead803 || function (f) { f(); })(function () { (window.lazyAll802 || function (f) { f(); })(function () { ric(warm); }); }); }, 0);
 })();
 </script>
 </body>
