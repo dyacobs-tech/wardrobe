@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.8a" />
+    <meta name="wardrobe-build" content="2026-11-19.78.8b" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -6498,7 +6498,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.8a</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.8b</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8052,7 +8052,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.8a";
+var WARDROBE_BUILD = "2026-11-19.78.8b";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -39234,7 +39234,10 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var bd = backdrop(src);
     if (bd && CUT.placeholder && !bg.style.backgroundImage) { bg.style.backgroundImage = "url(\"" + CUT.placeholder + "\")"; bg.style.backgroundSize = "cover"; bg.style.backgroundPosition = "center"; }
     bg.classList.toggle("bd-custom", !!bd);
-    if (!bd && src) { edgeOf(src, function (u) { paintBg(bg, u); }); return; }
+    /* .78.8a: only the latest request paints — a slow edge sample from an
+       earlier render must never land over the closet backdrop */
+    var tok = bg.__tok = (bg.__tok || 0) + 1;
+    if (!bd && src) { edgeOf(src, function (u) { if (bg.__tok === tok) paintBg(bg, u); }); return; }
     paintBg(bg, bd || src);
   }
   function paintBg(bg, want) {
@@ -39263,10 +39266,10 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   window.setHeroBackdrop = function (url) {
     try { if (url) localStorage.setItem(BD_KEY, url); else localStorage.removeItem(BD_KEY); } catch (e) {}
     var im = document.getElementById("today-img"), h = document.getElementById("today-hero");
-    if (h && im) setBg(im.getAttribute("src"), h);
+    if (h && im) setBg(im.getAttribute("data-render") || im.getAttribute("src"), h);
   };
   var h0 = document.getElementById("today-hero"), i0 = document.getElementById("today-img");
-  if (h0 && i0 && h0.classList.contains("hero-solo")) setBg(i0.getAttribute("src"), h0);
+  if (h0 && i0 && h0.classList.contains("hero-solo")) setBg(i0.getAttribute("data-render") || i0.getAttribute("src"), h0);
 
   /* ---- Shop the look syncs when it is opened, not on every Next ---- */
   if (typeof window.syncShopLookToToday === "function") {
