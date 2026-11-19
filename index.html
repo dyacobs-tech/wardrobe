@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.9" />
+    <meta name="wardrobe-build" content="2026-11-19.78.9a" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -6498,7 +6498,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.9</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.9a</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8052,7 +8052,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.9";
+var WARDROBE_BUILD = "2026-11-19.78.9a";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -36285,6 +36285,16 @@ function analyzeFilePiece(card, job, ix) {
           window.addEventListener("load", function () {
             navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) {
               try { if (reg && reg.update) reg.update(); } catch (e) {}
+              /* .78.9a: an installed PWA resumed from the background never
+                 reloads, so it re-checks for a new build each time it comes
+                 back (at most once a minute); the new worker's skipWaiting +
+                 claim then fires controllerchange, which reloads once */
+              var lastCheck = Date.now();
+              document.addEventListener("visibilitychange", function () {
+                if (document.hidden || Date.now() - lastCheck < 60000) return;
+                lastCheck = Date.now();
+                try { if (reg && reg.update) reg.update(); } catch (e) {}
+              });
             }).catch(function () {});
           });
         } catch (e) {}
@@ -38888,7 +38898,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       var sig = keys.length + "/" + (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0) + "/" + (typeof dislikedImgs !== "undefined" ? dislikedImgs.length : 0);
       if (rcache.sig === sig) return rcache.v;
       var own = {}; (wardrobeItems || []).forEach(function (i) { own[i.id] = 1; });
-      var v = keys.some(function (k) { var src = ONBODY.map[k]; return k.split("|").every(function (id) { return own[id]; }) && !(typeof isDislikedImg === "function" && isDislikedImg(src)); });
+      var v = keys.some(function (k) { var src = ONBODY.map[k]; return k.split("|").every(function (id) { return own[id]; }) && !(typeof isDislikedImg === "function" && isDislikedImg(src)) && !(typeof window.cutFor784 === "function" && !window.cutFor784(src)); });
       rcache = { sig: sig, v: v }; return v;
     } catch (e) { return true; }
   }
@@ -38935,6 +38945,8 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     if (guestMode782() && guestHero782()) return;
     if (typeof todayLook === "undefined" || !todayLook) return;
     var src = renderFor(todayLook);
+    /* .78.9a: Home only deals a render that has its cut-out */
+    if (src && typeof window.cutFor784 === "function" && !window.cutFor784(src)) src = null;
     /* .78.2c: a render he gave a thumbs-down never comes back */
     if (src && typeof isDislikedImg === "function" && isDislikedImg(src)) src = null;
     if (!src) {
@@ -39170,13 +39182,24 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     return bg;
   }
   /* ---- cut-outs + the closet backdrop (assets/onbody-cut/manifest.json) ---- */
-  var CUT = { map: null, backdrop: "", placeholder: "" };
+  /* .78.9a: the closet backdrop is Home's default from the first paint —
+     it never waits on the manifest — and every render's cut-out sits at
+     assets/onbody-cut/<same name> until the manifest says otherwise */
+  var CUT = { map: null, backdrop: "assets/backdrops/closet-walnut.webp", placeholder: "assets/backdrops/closet-walnut-tiny.webp" }, BADCUT = {};
   function idOf(src) { var m = String(src || "").match(/\/onbody\/([^\/?#]+?)\.(webp|png|jpe?g)/i); return m ? m[1] : ""; }
   window.cutFor784 = function (src) {
-    if (!CUT.map || !src) return "";
-    var id = idOf(src); if (!id) return "";
-    return CUT.map[id] || "";
+    if (!src) return "";
+    var id = idOf(src); if (!id || BADCUT[id]) return "";
+    if (CUT.map) return CUT.map[id] || "";
+    return "assets/onbody-cut/" + id + ".webp";
   };
+  /* a cut-out that fails to load is dropped and Home re-deals */
+  document.addEventListener("error", function (e) {
+    var t = e.target; if (!t || t.tagName !== "IMG") return;
+    var m = String(t.getAttribute("src") || "").match(/onbody-cut\/([^\/?#]+?)\.(webp|png)/i); if (!m) return;
+    if (BADCUT[m[1]]) return; BADCUT[m[1]] = 1;
+    if (t.id === "today-img" && typeof renderToday === "function") setTimeout(function () { try { renderToday(); } catch (x) {} }, 0);
+  }, true);
   function ingestCut(j) {
     if (!j || typeof j !== "object") return false;
     var map = j.r || j.map || j.cuts || j.cutouts || j.renders || null, bd = j.backdrop, ph = j.placeholder || j.backdropPlaceholder;
@@ -39188,7 +39211,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       if (typeof v !== "string" || !v) return;
       clean[idOf(k) || k.replace(/\.(webp|png|jpe?g)$/i, "").replace(/^.*\//, "")] = v;
     });
-    CUT.map = clean; CUT.backdrop = typeof bd === "string" ? bd : ""; CUT.placeholder = typeof ph === "string" ? ph : "";
+    CUT.map = clean; if (typeof bd === "string" && bd) CUT.backdrop = bd; if (typeof ph === "string" && ph) CUT.placeholder = ph;
     return true;
   }
   function loadCuts() {
