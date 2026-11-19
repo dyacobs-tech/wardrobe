@@ -3,7 +3,7 @@
 
   A. A Not for me verdict (recordDislike) never deletes saved looks or
      queued looks: they are hidden from My Outfits, and lifting the ban
-     brings them back. The boot repair (enforceSavedInvariants53) keeps
+     brings them back. The boot repair (enforceSavedInvariants) keeps
      them too. Nothing from the verdict is tombstoned.
   B. For EVERY synced user collection: a record that vanishes without a
      deliberate delete is NOT tombstoned (no delete marker, nothing sent);
@@ -94,12 +94,12 @@ def main():
             tombQueue: !!(SY.tomb.queue && SY.tomb.queue['tA-q-1']),
             hidden: isDislikedLookAny(look)
           };
-          window.enforceSavedInvariants53 && window.enforceSavedInvariants53();
+          window.enforceSavedInvariants && window.enforceSavedInvariants();
           syTrackChanges();
           r.afterRepairSaved = savedLooks.some(l => l.id === 'tA-look-1'); r.afterRepairQueue = queueLooks.some(l => l.id === 'tA-q-1');
           r.afterRepairKept = r.afterRepairSaved && r.afterRepairQueue;
           r.afterRepairTomb = !!(SY.tomb.looks && SY.tomb.looks['tA-look-1']);
-          removeDislike56(img); removeDislike56(img2);
+          removeDislike(img); removeDislike(img2);
           r.unbanned = !isDislikedLookAny(look) && savedLooks.some(l => l.id === 'tA-look-1');
           return r;
         }""")
@@ -164,6 +164,15 @@ def main():
         accidental = {r["id1"] for r in res.values() if "id1" in r} | {"tA-look-1", "tA-q-1"}
         dels = [ch["id"] for body in sent for ch in (body.get("changes") or []) if ch.get("deleted")]
         check("no accidental delete was ever sent", not (set(dels) & accidental), sorted(set(dels) & accidental))
+        # ---------- D. consolidated helpers (Nov 19): one esc, stable names + aliases ----------
+        d = pg.evaluate(r"""() => ({
+          esc: esc('<a href="x">&\'') === '&lt;a href=&quot;x&quot;&gt;&amp;&#39;' && esc(null) === '' && esc(undefined) === '' && esc(0) === '0',
+          aliases: window.cutFor784 === window.cutoutFor && window.cutManifest784 === window.cutoutManifest && window.removeDislike56 === removeDislike
+                   && window.lookPhotoBanned56 === lookPhotoBanned && window.syQuarantine56 === syQuarantine && window.enforceSavedInvariants53 === window.enforceSavedInvariants,
+          stable: typeof window.cutoutFor === 'function' && typeof lookPhotoBanned === 'function'
+        })""")
+        check("D: one esc helper, null-safe", d["esc"], d)
+        check("D: stable helper names, old names alias them", d["aliases"] and d["stable"], d)
         check("no page errors", not errors, errors)
         b.close()
     httpd.shutdown()

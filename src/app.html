@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.24" />
+    <meta name="wardrobe-build" content="2026-11-19.80.25" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5123,6 +5123,12 @@
         opacity: 1; transition: opacity .18s linear; z-index: 2; background: transparent; will-change: opacity;
       }
       #panel-today .today-hero.hero-solo .hero-xfade.out { opacity: 0; }
+      /* Nov 19: the swapped-in hero (already decoded) settles in with a short
+         fade — no double exposure, no blank frame. */
+      @keyframes heroIn1119 { from { opacity: .85; } to { opacity: 1; } }
+      #panel-today .hero-next { transition: none !important; }
+      #panel-today .hero-next.hero-in { animation: heroIn1119 .18s ease-out both; }
+      @media (prefers-reduced-motion: reduce) { #panel-today .hero-next.hero-in { animation: none; } }
       @media (prefers-reduced-motion: reduce) { #panel-today .today-hero.hero-solo .hero-xfade { transition: none; } }
       #panel-today .today-hero.hero-solo .hero-corner { z-index: 2; }
       /* the dark panel runs on behind the floating nav: no bare band */
@@ -6121,7 +6127,7 @@
               var P = HTMLImageElement.prototype, D = Object.getOwnPropertyDescriptor(P, "src"), SA = Element.prototype.setAttribute;
               function cutOf(v) {
                 var m = String(v || "").match(/(^|\/)assets\/onbody\/([0-9a-f]{8,})\.webp(\?.*)?$/i); if (!m) return v;
-                var c = typeof window.cutFor784 === "function" ? window.cutFor784("assets/onbody/" + m[2] + ".webp") : "assets/onbody-cut/" + m[2] + ".webp";
+                var c = typeof window.cutoutFor === "function" ? window.cutoutFor("assets/onbody/" + m[2] + ".webp") : "assets/onbody-cut/" + m[2] + ".webp";
                 return c || v;
               }
               im.setAttribute = function (n, v) { return SA.call(this, n, String(n).toLowerCase() === "src" ? cutOf(v) : v); };
@@ -7332,7 +7338,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.24</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.25</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7523,11 +7529,16 @@
         function fit() {
           var panel = document.getElementById("panel-today");
           if (!panel || panel.hidden) return;
-          var mast = document.querySelector(".masthead");
-          var stack = document.querySelector(".navstack");
-          var sub = document.getElementById("subnav");
-          var h = mast ? mast.getBoundingClientRect().height : 0;
-          if (stack && sub && !sub.hidden) h += stack.getBoundingClientRect().height;
+          /* Nov 19: measure where the Home column really starts instead of
+             adding up the masthead (it no longer sits in flow above Home,
+             which left a dead ~36px band between the caption and the nav).
+             The lvh−svh difference is added back so the column is sized to
+             the small viewport and never slides under a browser toolbar. */
+          var h = Math.max(0, panel.getBoundingClientRect().top + (window.scrollY || 0));
+          var pr = document.getElementById("vh-probe1119");
+          if (!pr) { pr = document.createElement("div"); pr.id = "vh-probe1119"; pr.setAttribute("aria-hidden", "true"); pr.style.cssText = "position:absolute;left:-9999px;top:0;width:1px;height:100lvh;visibility:hidden;pointer-events:none"; document.body.appendChild(pr); }
+          var lv = pr.offsetHeight; pr.style.height = "100svh"; var sv = pr.offsetHeight; pr.style.height = "100lvh";
+          if (lv > sv) h += lv - sv;
           document.documentElement.style.setProperty("--home-chrome", (Math.round(h * 10) / 10) + "px");
         }
         window.__wardrobeFitToday = fit;
@@ -8930,8 +8941,10 @@ function contrastInk(hex) {
   var cDark = (Math.max(L, 0.07) + 0.05) / (Math.min(L, 0.07) + 0.05);
   return cLight >= cDark ? "#F6F1E8" : "#1A1612";
 }
+/* The ONE HTML-escape helper (Nov 19: the three local copies in the Edit,
+   Ask and on-body modules now use this). null/undefined escape to "". */
 function esc(s) {
-  return String(s).replace(/[&<>"']/g, function (ch) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function (ch) {
     return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
   });
 }
@@ -9142,7 +9155,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.24";
+var WARDROBE_BUILD = "2026-11-19.80.25";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -16224,8 +16237,8 @@ function studioImgForLook(look) {
     if (typeof onbodyForLook === "function") {
       var ob = onbodyForLook(look);
       if (ob && !isCameraSelfieImg(ob)) {
-        if (typeof window.cutFor784 === "function") {
-          var cut = window.cutFor784(ob);
+        if (typeof window.cutoutFor === "function") {
+          var cut = window.cutoutFor(ob);
           if (cut) return cut;
         }
         return ob;
@@ -17032,7 +17045,7 @@ function isDislikedImg(img) {
    pictured image); the exact-string dislikedImgs.indexOf test is
    gone from dealing, because the ban list holds whichever file
    form a surface happened to store. */
-function lookPhotoBanned56(look) {
+function lookPhotoBanned(look) {
   if (!look) return false;
   if (isDislikedImg(look.img)) return true;
   var pic = (typeof lookPicturedImg === "function") ? lookPicturedImg(look) : "";
@@ -17554,7 +17567,7 @@ var dislikedImgs = (store.get("dislikedImgs", []) || []).filter(function (img) {
    too — the stored entry may be the -watch variant of the photo
    whose base form the undo path holds (or vice versa), and an
    exact-string indexOf would leave the ban in force. */
-function removeDislike56(img) {
+function removeDislike(img) {
   if (!img || typeof dislikedImgs === "undefined" || !dislikedImgs) return false;
   var before = dislikedImgs.length;
   dislikedImgs = dislikedImgs.filter(function (x) { return !imgsEquivalent(x, img); });
@@ -27338,7 +27351,7 @@ function openingLook() {
   }
   if (typeof lookIsMine === "function") clw = clw.filter(lookIsMine);
   if (clw && clw.length) {
-    var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned56(l); });
+    var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned(l); });
     var clwDeal = clwFresh.length ? clwFresh : clw;
     var openPick = clwDeal[0];
     openPick.source = "wardrobe";
@@ -28083,7 +28096,7 @@ function heroGoBack56() {
   while (heroHistory56.length) {
     var prev = heroHistory56.pop();
     if (!prev || !prev.img) continue;
-    if (lookPhotoBanned56(prev)) continue;
+    if (lookPhotoBanned(prev)) continue;
     if (isQuarantinedImg(lookPicturedImg(prev) || prev.img || "")) continue;
     todayLook = prev;
     todayTouched = true;
@@ -28103,7 +28116,7 @@ function ideasPushHistory56(prevOptions) {
 function ideasGoBack56() {
   while (ideasHistory56.length) {
     var prevSet = ideasHistory56.pop();
-    var clean = (prevSet || []).filter(function (l) { return l && !lookPhotoBanned56(l); });
+    var clean = (prevSet || []).filter(function (l) { return l && !lookPhotoBanned(l); });
     if (!clean.length) continue;
     currentOptions = clean;
     currentLook = clean[0];
@@ -28146,7 +28159,7 @@ function dealHeroForSource() {
       /* Graduated (liked) closet looks are not dealt again; if
          every closet look has graduated, deal from the full list
          rather than leave the hero blank. */
-      var clFresh = cl.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned56(l); });
+      var clFresh = cl.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned(l); });
       var dealList = clFresh.length ? clFresh : cl;
       var curTitle = todayLook && todayLook.title;
       var pickW = null;
@@ -31773,9 +31786,9 @@ function renderFindLookMode() {
   var img = lookImg(look);
   var cut = "";
   try {
-    if (typeof window.cutFor784 === "function") {
-      cut = window.cutFor784(img) || "";
-      if (!cut && typeof onbodyForLook === "function") cut = window.cutFor784(onbodyForLook(look) || "") || "";
+    if (typeof window.cutoutFor === "function") {
+      cut = window.cutoutFor(img) || "";
+      if (!cut && typeof onbodyForLook === "function") cut = window.cutoutFor(onbodyForLook(look) || "") || "";
     }
   } catch (eCut) {}
   var shown = cut || img;
@@ -32469,7 +32482,7 @@ function restoreRemoved(id) {
   recentlyRemoved = recentlyRemoved.filter(function (r) { return r.id !== id; });
   store.set("recentlyRemoved", recentlyRemoved);
   var img = snap._img || snap.img;
-  if (img && typeof removeDislike56 === "function") removeDislike56(img);
+  if (img && typeof removeDislike === "function") removeDislike(img);
   var isSeed = SEED_LOOKS.some(function (s) { return s.id === id; });
   if (!isSeed && !savedLooks.some(function (l) { return l.id === id; })) {
     var copy = JSON.parse(JSON.stringify(snap));
@@ -32486,7 +32499,7 @@ function showDislikeUndo(look) {
   if (!look) return;
   var img = look.img, id = look.id;
   showUndoToast("Not for you — " + (look.title || "look") + ".", function () {
-    if (img && typeof removeDislike56 === "function") removeDislike56(img);
+    if (img && typeof removeDislike === "function") removeDislike(img);
     try { if (typeof renderSaved === "function") renderSaved(); } catch (e) {}
     if (currentLook && currentLook.id === id) {
       currentLook.verdict = null;
@@ -34871,8 +34884,8 @@ function dealFromWardrobe() {
   /* Graduated (liked) closet looks leave the From wardrobe
      rotation; if every look has graduated, show the full list —
      graduation never blanks the section. */
-  var fwFresh = looks.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned56(l); });
-  fwLooks = fwFresh.length ? fwFresh : looks.filter(function (l) { return !lookPhotoBanned56(l); });
+  var fwFresh = looks.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned(l); });
+  fwLooks = fwFresh.length ? fwFresh : looks.filter(function (l) { return !lookPhotoBanned(l); });
   if (empty) empty.hidden = true;
   if (more) more.hidden = false;
   grid.innerHTML = fwLooks.map(function (look, idx) { return fwCardHTML(look, idx); }).join("");
@@ -34894,8 +34907,8 @@ function dealFromWardrobe() {
 function wardrobeSixLooks() {
   var cl = (typeof buildClosetLooks === "function") ? buildClosetLooks() : null;
   if (!cl || !cl.length) return null;
-  var fresh = cl.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned56(l); });
-  var pool = fresh.length ? fresh : cl.filter(function (l) { return !lookPhotoBanned56(l); });
+  var fresh = cl.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned(l); });
+  var pool = fresh.length ? fresh : cl.filter(function (l) { return !lookPhotoBanned(l); });
   function dealt(l) {
     return (l.fwRender && dealtImgHistory.indexOf(l.fwRender) !== -1) ||
       (l.img && dealtImgHistory.indexOf(l.img) !== -1) ||
@@ -35857,7 +35870,7 @@ function syRefresh() {
    no usable id) is quarantined into SY.quar and the pass moves on:
    a single bad record must never fail a whole sync again. The
    quarantine is surfaced only in Profile's sync status. */
-function syQuarantine56(x, err) {
+function syQuarantine(x, err) {
   try {
     if (!Array.isArray(SY.quar)) SY.quar = [];
     var key = (x && x.coll ? x.coll : "?") + "|" + (x && x.id ? x.id : "?");
@@ -35907,7 +35920,7 @@ function syApplyDownload56(j) {
            them). A deleted blob record is ignored. */
         if (x && x.coll === "blobs") {
           if (x.deleted) return;
-          if (!/^[0-9a-f]{64}$/.test(x.id || "") || !x.data || typeof x.data !== "object" || Array.isArray(x.data) || typeof x.data.photo !== "string" || x.data.photo.indexOf("data:image/") !== 0) { syQuarantine56(x, "invalid blob record"); return; }
+          if (!/^[0-9a-f]{64}$/.test(x.id || "") || !x.data || typeof x.data !== "object" || Array.isArray(x.data) || typeof x.data.photo !== "string" || x.data.photo.indexOf("data:image/") !== 0) { syQuarantine(x, "invalid blob record"); return; }
           try { if (window.blobStore) { window.blobStore.put(x.id, x.data.photo); window.blobStore.fillIn(x.id, x.data.photo); } } catch (e) {}
           if (!SY.st.blobs || typeof SY.st.blobs !== "object") SY.st.blobs = {};
           if (!SY.dirty.blobs || typeof SY.dirty.blobs !== "object") SY.dirty.blobs = {};
@@ -35944,10 +35957,10 @@ function syApplyDownload56(j) {
                were already honoured above. */
             if (!(_syForcePhotoPull741 && (x.coll === "items" || x.coll === "watches"))) return;
           }
-          if (typeof x.data !== "object" || Array.isArray(x.data)) { syQuarantine56(x, "record data is not an object"); return; }
+          if (typeof x.data !== "object" || Array.isArray(x.data)) { syQuarantine(x, "record data is not an object"); return; }
           var _xrid = null;
           try { _xrid = syRecId(x.coll, x.data); } catch (e) { _xrid = null; }
-          if (!_xrid) { syQuarantine56(x, "record has no usable id"); return; }
+          if (!_xrid) { syQuarantine(x, "record has no usable id"); return; }
           sanitizeIncoming(x.data, "");
           syPutLocal(x.coll, x.data);
           SY.snap[x.coll][x.id] = syHsh(syWireRec(x.coll, x.data));
@@ -35968,9 +35981,9 @@ function syApplyDownload56(j) {
              that is not an object) is malformed — quarantine it
              explicitly instead of dropping it silently, so the
              skip is visible in Profile's sync status. */
-          syQuarantine56(x, "record has no usable data");
+          syQuarantine(x, "record has no usable data");
         }
-      } catch (e) { syQuarantine56(x, e); }
+      } catch (e) { syQuarantine(x, e); }
     });
     try { if (syApplyMeta(j.meta)) res.changedAny = true; } catch (e) {}
   } finally { _syApplying = false; }
@@ -36423,7 +36436,7 @@ function syncNow(isRetry, force) {
         saveSY();
       }
       if (changedLooks) sySortLooksByStamp();
-      if (changedLooks && window.enforceSavedInvariants53) window.enforceSavedInvariants53();
+      if (changedLooks && window.enforceSavedInvariants) window.enforceSavedInvariants();
       if (lastNow !== null) SY.last = lastNow;
       SY.lastOk = Date.now();
       SY.rej = 0;
@@ -37042,7 +37055,7 @@ function analyzeFilePiece(card, job, ix) {
 /* ================= Build .53 — data repair =================
    The saved-collection invariants are enforced on EVERY boot —
    and again after any sync pull that changes the looks, via
-   window.enforceSavedInvariants53 — so a stale copy restored by
+   window.enforceSavedInvariants — so a stale copy restored by
    sync is re-cleaned in the same pass and corrupt entries never
    resurrect: the saved collections, the render queue's saved
    references and the week plan are walked, titles recomputed
@@ -37205,7 +37218,7 @@ function analyzeFilePiece(card, job, ix) {
        stale looks can be re-cleaned in the same pass (syncNow
        calls this when the looks changed). Persists only when
        the walk actually changed something. */
-    function enforceSavedInvariants53() {
+    function enforceSavedInvariants() {
       var counts = freshCounts();
       var before = collectionsSnapshot();
       walkCollections(counts);
@@ -37213,8 +37226,8 @@ function analyzeFilePiece(card, job, ix) {
       if (counts.changed) persistRepair();
       return counts;
     }
-    try { window.enforceSavedInvariants53 = enforceSavedInvariants53; } catch (e) {}
-    var counts = enforceSavedInvariants53();
+    try { window.enforceSavedInvariants = enforceSavedInvariants; } catch (e) {}
+    var counts = enforceSavedInvariants();
     if (firstRun) {
     /* ---- Closet: dedupe, junk-name cleanup, colour audit ---- */
     function normTokens(name) {
@@ -37451,7 +37464,7 @@ function analyzeFilePiece(card, job, ix) {
          .80.11: prefer the transparent cut-out so the card sits on
          cream, not a grey studio box. */
       var shown = ob;
-      try { if (typeof window.cutFor784 === "function") { var cut = window.cutFor784(ob); if (cut) shown = cut; } } catch (e) {}
+      try { if (typeof window.cutoutFor === "function") { var cut = window.cutoutFor(ob); if (cut) shown = cut; } } catch (e) {}
       var side = cells.filter(function (c) { return c.indexOf("fl-swatch") === -1; }).slice(0, 4);
       return '<span class="flatlay onbody-split ob-n' + side.length + '"><span class="ob-figure"><img src="' + esc(shown) + '" alt="' + esc((look.title || "Outfit") + " on David") + '" data-onbody="1" decoding="async" /></span>' +
         '<span class="ob-pieces">' + side.join("") + "</span></span>";
@@ -39601,7 +39614,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   if (!Array.isArray(askThread)) askThread = [];
   /* a reply that never landed (closed mid-wait) is not left spinning */
   askThread.forEach(function (t) { if (t && t.state === "pending") { t.state = "error"; t.msg = "That one didn't come through."; } });
-  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  /* esc: the one shared helper (global) — Nov 19 consolidation */
   function saveThread() { askThread = askThread.slice(-ASK_MAX_TURNS); store.set("ask.thread", askThread); publish(); }
   function saveLists() { store.set("ask.liked", askLiked.slice(0, 500)); store.set("ask.disliked", askDisliked.slice(0, 500)); publish(); }
 
@@ -39983,7 +39996,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
 (function () {
   var BULK_CONC = 3, BULK_MAX = 60;
   var rows = [], running = 0, seq = 0;
-  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  /* esc: the one shared helper (global) — Nov 19 consolidation */
   function cats() { return typeof CATEGORIES !== "undefined" && CATEGORIES.length ? CATEGORIES.filter(function (c) { return c !== "All"; }) : ["Shoes", "Shirts", "Tees", "Polos", "Jeans", "Shorts", "Bathing suits", "Trousers", "Button downs", "Suits", "Blazers", "Scarves", "Jackets", "Coats", "Leather jackets", "Hats", "Sunglasses", "Sweaters", "Socks", "Belts", "Gloves", "Vests", "Ties"]; }
 
   /* ---------- colour: snap the model's hex onto a real photo colour ---------- */
@@ -40337,7 +40350,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
    brand) — a piece opens its item page. Outfits cards show the render
    alone too; their pieces live in the look's detail. */
 (function () {
-  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  /* esc: the one shared helper (global) — Nov 19 consolidation */
   var hero = document.getElementById("today-hero"), img = document.getElementById("today-img"), collage = document.getElementById("today-collage");
   if (!hero || !img) return;
 
@@ -40397,6 +40410,58 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
 
   /* ---------- the hero ---------- */
   var skip = 0, prevSrc = null;
+  /* Nov 19 (no flutter): a new hero image is fetched and DECODED off-screen
+     while the current one stays exactly where it is; only then is it
+     swapped in, in one frame, with a short fade-in of the new figure (no
+     double-exposure crossfade, no blank frame, no layout change: the img box
+     keeps its size). A newer deal cancels an older pending swap. */
+  var swapTok = 0;
+  function heroDecoded(el) {
+    if (el.complete && el.naturalWidth > 0) return el.decode ? el.decode().catch(function () {}) : Promise.resolve();
+    return new Promise(function (r) { el.addEventListener("load", r, { once: true }); el.addEventListener("error", r, { once: true }); }).then(function () { return el.decode ? el.decode().catch(function () {}) : null; });
+  }
+  function swapHero(shown) {
+    var cur = img.getAttribute("src") || "";
+    var tok = ++swapTok;
+    var cancel = function () { return tok !== swapTok; };
+    /* drop copies still loading for an older deal; a copy already on
+       screen stays until the next figure replaces it */
+    hero.querySelectorAll(".hero-next").forEach(function (x) { if (x.style.opacity === "0") x.remove(); });
+    var showing = hero.querySelector(".hero-next");
+    var finish = function () {
+      Promise.all([heroDecoded(img), new Promise(function (r) { setTimeout(r, 200); })]).then(function () {
+        requestAnimationFrame(function () {
+          if (cancel()) return;
+          img.style.visibility = "";
+          hero.querySelectorAll(".hero-next").forEach(function (x) { x.remove(); });
+        });
+      });
+    };
+    if (cur === shown) { if (img.style.visibility === "hidden") finish(); return; }
+    var curReady = !!showing || (cur && !/^data:/.test(cur) && img.complete && img.naturalWidth > 0);
+    if (!curReady) { img.style.visibility = ""; img.setAttribute("src", shown); return; }
+    /* the incoming figure loads in its own <img>, laid out exactly like the
+       hero (same rules as the old crossfade copy), invisible until decoded */
+    var nx = document.createElement("img");
+    nx.className = "hero-xfade hero-next"; nx.alt = ""; nx.setAttribute("aria-hidden", "true"); nx.decoding = "async";
+    nx.style.top = img.offsetTop + "px"; nx.style.height = img.offsetHeight + "px"; nx.style.opacity = "0";
+    nx.src = shown;
+    img.parentNode.insertBefore(nx, img.nextSibling);
+    heroDecoded(nx).then(function () {
+      if (cancel()) { nx.remove(); return; }
+      requestAnimationFrame(function () {
+        if (cancel()) { nx.remove(); return; }
+        /* one frame: old figure off, new figure on (never both: cut-outs are
+           transparent, so overlapping them would double-expose) */
+        hero.querySelectorAll(".hero-next").forEach(function (x) { if (x !== nx) x.remove(); });
+        img.style.visibility = "hidden";
+        nx.style.opacity = "";
+        if (!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) nx.classList.add("hero-in");
+        img.setAttribute("src", shown);
+        finish();
+      });
+    });
+  }
   function crossfade(prev) {
     if (!prev || prev === img.getAttribute("src")) return;
     var old = hero.querySelector(".hero-xfade");
@@ -40426,7 +40491,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       var sig = keys.length + "/" + (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0) + "/" + (typeof dislikedImgs !== "undefined" ? dislikedImgs.length : 0);
       if (rcache.sig === sig) return rcache.v;
       var own = {}; (wardrobeItems || []).forEach(function (i) { own[i.id] = 1; });
-      var v = keys.some(function (k) { var src = ONBODY.map[k]; return k.split("|").every(function (id) { return own[id]; }) && !(typeof isDislikedImg === "function" && isDislikedImg(src)) && !(typeof window.cutFor784 === "function" && !window.cutFor784(src)); });
+      var v = keys.some(function (k) { var src = ONBODY.map[k]; return k.split("|").every(function (id) { return own[id]; }) && !(typeof isDislikedImg === "function" && isDislikedImg(src)) && !(typeof window.cutoutFor === "function" && !window.cutoutFor(src)); });
       rcache = { sig: sig, v: v }; return v;
     } catch (e) { return true; }
   }
@@ -40442,17 +40507,17 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   }
   var gOff782 = 0;
   function guestSrc782() {
-    var C = typeof window.cutManifest784 === "function" ? window.cutManifest784() : null;
+    var C = typeof window.cutoutManifest === "function" ? window.cutoutManifest() : null;
     var keys = C && C.map ? Object.keys(C.map).sort() : [];
     var day = typeof localTodayISO === "function" ? localTodayISO() : new Date().toISOString().slice(0, 10), h = 0;
     for (var i = 0; i < day.length; i++) h = (h * 31 + day.charCodeAt(i)) >>> 0;
     h += gOff782;
-    keys = keys.filter(function (k) { return window.cutFor784("assets/onbody/" + k + ".webp"); });
+    keys = keys.filter(function (k) { return window.cutoutFor("assets/onbody/" + k + ".webp"); });
     if (keys.length) { var k = keys[h % keys.length]; return { cut: C.map[k], render: "assets/onbody/" + k + ".webp" }; }
     var rs = typeof ONBODY !== "undefined" && ONBODY.map ? Object.keys(ONBODY.map).sort().map(function (x) { return ONBODY.map[x]; }) : [];
     /* .78.9e: only ever a cut-out — never the plain studio render */
-    rs = rs.filter(function (r) { return typeof window.cutFor784 === "function" && window.cutFor784(r); });
-    return rs.length ? { cut: window.cutFor784(rs[h % rs.length]), render: rs[h % rs.length] } : null;
+    rs = rs.filter(function (r) { return typeof window.cutoutFor === "function" && window.cutoutFor(r); });
+    return rs.length ? { cut: window.cutoutFor(rs[h % rs.length]), render: rs[h % rs.length] } : null;
   }
   function guestHero782(forceTitle) {
     if (userDeal782) { gOff782++; userDeal782 = false; }
@@ -40463,11 +40528,10 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     hero.classList.toggle("has-cut", !!g.cut);
     hero.classList.add("hero-solo", "hero-guest");
     img.setAttribute("data-render", g.render);
-    if (img.getAttribute("src") !== shown) img.setAttribute("src", shown);
+    swapHero(shown);
     img.hidden = false; img.alt = "David in a look from his closet";
     var nm = document.getElementById("today-name"); if (nm && (forceTitle || !nm.textContent.trim())) nm.textContent = "From your closet";
     sampleBg(g.render, hero); placeHero();
-    if (before && before !== shown && !/^data:/.test(before)) crossfade(before);
     return true;
   }
   window.guestHero782 = function () { try { if (guestMode782()) return guestHero782(); } catch (e) {} return false; };
@@ -40477,7 +40541,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     if (typeof todayLook === "undefined" || !todayLook) return;
     var src = renderFor(todayLook);
     /* .78.9a: Home only deals a render that has its cut-out */
-    if (src && typeof window.cutFor784 === "function" && !window.cutFor784(src)) src = null;
+    if (src && typeof window.cutoutFor === "function" && !window.cutoutFor(src)) src = null;
     /* .78.2c: a render he gave a thumbs-down never comes back */
     if (src && typeof isDislikedImg === "function" && isDislikedImg(src)) src = null;
     if (!src) {
@@ -40512,23 +40576,29 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var prev = prevSrc; prevSrc = null;
     if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
     /* .78.5b: his cut-out on the closet backdrop when one exists */
-    var shown = (typeof window.cutFor784 === "function" && window.cutFor784(src)) || src;
+    var shown = (typeof window.cutoutFor === "function" && window.cutoutFor(src)) || src;
     hero.classList.toggle("has-cut", shown !== src);
     img.setAttribute("data-render", src);
-    if (img.getAttribute("src") !== shown) img.setAttribute("src", shown);
+    swapHero(shown);
     img.hidden = false;
     img.alt = (todayLook.title || "Outfit") + " on David";
     hero.classList.add("hero-solo");
     sampleBg(src, hero);
     placeHero();
-    crossfade(prev && prev !== shown ? prev : null);
     if (ovOpen) fillView(); else if (typeof prewarmView === "function") prewarmView();
   }
   if (typeof renderToday === "function") {
     var _rt782 = renderToday;
     renderToday = function () {
       prevSrc = hero.classList.contains("hero-solo") ? img.getAttribute("src") : null;
-      var out = _rt782.apply(this, arguments); try { soloHero(); } catch (e) {} try { if (typeof watchdog === "function") watchdog(); } catch (e) {} return out;
+      var prevReady = !!(prevSrc && !/^data:/.test(prevSrc) && img.complete && img.naturalWidth > 0);
+      var out = _rt782.apply(this, arguments);
+      /* Nov 19 (no flutter): the base renderToday points the hero at the raw
+         studio render, which the cut-out guard hides — a blank frame on every
+         deal. Put the on-screen cut-out back in the same task (nothing has
+         painted yet); soloHero then swaps to the new one once it is decoded. */
+      if (prevReady && img.getAttribute("src") !== prevSrc) { img.setAttribute("src", prevSrc); img.hidden = false; }
+      try { soloHero(); } catch (e) {} try { if (typeof watchdog === "function") watchdog(); } catch (e) {} return out;
     };
   }
   /* .79.2: the hero shows only a genuine cut-out — checked in JS (never
@@ -40538,7 +40608,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   function isCutSrc(u) {
     u = String(u || ""); if (!u || /^data:/.test(u)) return false;
     if (/\/onbody-cut(-hq)?\/[^\/?#]+\.(webp|png)/i.test(u) || /^assets\/onbody-cut(-hq)?\//.test(u)) return true;
-    try { var C = window.cutManifest784 && window.cutManifest784(); if (C && C.map) for (var k in C.map) if (u.indexOf(C.map[k]) !== -1) return true; } catch (e) {}
+    try { var C = window.cutoutManifest && window.cutoutManifest(); if (C && C.map) for (var k in C.map) if (u.indexOf(C.map[k]) !== -1) return true; } catch (e) {}
     return false;
   }
   function guard(el) {
@@ -40674,7 +40744,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var look = ovFromHome && typeof todayLook !== "undefined" ? todayLook : ovLook;
     if (!look) return;
     var src0 = renderFor(look) || (typeof lookImg === "function" ? lookImg(look) : "");
-    var src = (typeof window.cutFor784 === "function" && window.cutFor784(src0)) || src0;
+    var src = (typeof window.cutoutFor === "function" && window.cutoutFor(src0)) || src0;
     var fig0 = document.getElementById("ov-figure"); if (fig0) fig0.classList.toggle("has-cut", src !== src0);
     var im = document.getElementById("ov-img"), prev = im.getAttribute("src");
     if (prev !== src) {
@@ -40908,7 +40978,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
      assets/onbody-cut/<same name> until the manifest says otherwise */
   var CUT = { map: null, backdrop: "assets/backdrops/closet-walnut.webp", placeholder: "assets/backdrops/closet-walnut-tiny.webp" }, BADCUT = {};
   function idOf(src) { var m = String(src || "").match(/\/onbody\/([^\/?#]+?)\.(webp|png|jpe?g)/i); return m ? m[1] : ""; }
-  window.cutFor784 = function (src) {
+  window.cutoutFor = function (src) {
     if (!src) return "";
     var id = idOf(src); if (!id || BADCUT[id]) return "";
     if (CUT.map) return CUT.map[id] || "";
@@ -40944,7 +41014,19 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       }).catch(function () {});
     } catch (e) {}
   }
-  window.cutManifest784 = function () { return CUT; };
+  window.cutoutManifest = function () { return CUT; };
+
+  /* Nov 19: stable names for helpers that used to carry build numbers.
+     The old names stay as aliases so nothing that still calls them breaks. */
+  try {
+    if (typeof lookPhotoBanned === "function") window.lookPhotoBanned56 = lookPhotoBanned;
+    if (typeof removeDislike === "function") window.removeDislike56 = removeDislike;
+    if (typeof syQuarantine === "function") window.syQuarantine56 = syQuarantine;
+    if (typeof window.enforceSavedInvariants === "function") window.enforceSavedInvariants53 = window.enforceSavedInvariants;
+    if (typeof window.cutoutFor === "function") window.cutFor784 = window.cutoutFor;
+    if (typeof window.cutoutManifest === "function") window.cutManifest784 = window.cutoutManifest;
+  } catch (e) {}
+
   window.ingestCut784 = ingestCut;
   setTimeout(loadCuts, 0);
   setTimeout(function () { if (typeof window.guestHero782 === "function") window.guestHero782(); }, 0);
@@ -40952,7 +41034,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   function backdrop(src) {
     var o = ""; try { o = localStorage.getItem(BD_KEY) || ""; } catch (e) {}
     if (o) return o;
-    return src && CUT.backdrop && window.cutFor784(src) ? CUT.backdrop : "";
+    return src && CUT.backdrop && window.cutoutFor(src) ? CUT.backdrop : "";
   }
   /* the blurred layer is built once per render from the render's own outer
      columns (stretched across, then blurred), so it continues the studio
@@ -41061,7 +41143,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   var ric2 = window.requestIdleCallback || function (f) { return setTimeout(f, 300); };
   var warmP = [];
   function warmOne(src, hi) {
-    var cut = window.cutFor784 && window.cutFor784(src); if (cut) src = cut;
+    var cut = window.cutoutFor && window.cutoutFor(src); if (cut) src = cut;
     if (!src || warm[src]) return src; warm[src] = 1;
     var im = new Image(); im.decoding = "async"; if (hi) try { im.fetchPriority = "high"; } catch (e) {} im.src = src;
     warmP.push(im.decode ? im.decode().catch(function () {}) : new Promise(function (r) { im.onload = im.onerror = r; }));
@@ -41079,9 +41161,9 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     try {
       if (typeof lookIsMine === "function" && !lookIsMine(l)) return false;
       if (typeof isGraduatedLook === "function" && isGraduatedLook(l)) return false;
-      if (typeof lookPhotoBanned56 === "function" && lookPhotoBanned56(l)) return false;
+      if (typeof lookPhotoBanned === "function" && lookPhotoBanned(l)) return false;
       var r = window.renderFor782 ? window.renderFor782(l) : null;
-      return !!(r && window.cutFor784 && window.cutFor784(r) && !(typeof isDislikedImg === "function" && isDislikedImg(r)));
+      return !!(r && window.cutoutFor && window.cutoutFor(r) && !(typeof isDislikedImg === "function" && isDislikedImg(r)));
     } catch (e) { return false; }
   }
   if (typeof homeComposerLooks75 === "function" && typeof dealHeroForSource === "function") {
@@ -41124,7 +41206,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       ric2(function () {
         try {
           var look = typeof todayLook !== "undefined" ? todayLook : null, r4 = window.renderFor782, urls = [];
-          var cur = look && r4 ? r4(look) : null; if (cur && window.cutFor784 && window.cutFor784(cur)) urls.push(window.cutFor784(cur));
+          var cur = look && r4 ? r4(look) : null; if (cur && window.cutoutFor && window.cutoutFor(cur)) urls.push(window.cutoutFor(cur));
           if (look && typeof _hcl === "function") {
             var keepQ = Q && Q.sig === qsig() && Q.list.filter(dealable).length >= 4;
             var list = keepQ ? Q.list : (_hcl(8) || []);
@@ -41144,7 +41226,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
             if (!keepQ) Q = { sig: qsig(), list: good.concat(rest) };
             var nx = good.filter(function (l) { return l.title !== look.title; });
             /* .80.3: the next three at high priority, ahead of any background download */
-            nx.slice(0, 5).forEach(function (l, i) { var u = r4(l); if (!u) return; var c = window.cutFor784(u); if (c) urls.push(c); if (i < 3) warmOne(u, true); });
+            nx.slice(0, 5).forEach(function (l, i) { var u = r4(l); if (!u) return; var c = window.cutoutFor(u); if (c) urls.push(c); if (i < 3) warmOne(u, true); });
             if (window.lqRemember793) window.lqRemember793(urls.map(function (u) { var m = u.match(/onbody-cut\/([^\/?#]+?)\./); return m ? m[1] : ""; }));
           }
           var sw = navigator.serviceWorker && navigator.serviceWorker.controller;
