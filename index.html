@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.7" />
+    <meta name="wardrobe-build" content="2026-11-19.78.7a" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5100,8 +5100,8 @@
       .outfit-view .ov-top .cdd-menu { top: 100%; bottom: auto; right: 0; left: auto; }
       /* Outfits cards: the same thumbs */
       .cf-actions { display: flex; gap: 8px; }
-      .cf-actions [data-cf-like], .cf-actions [data-cf-dislike] {
-        font-size: 0 !important; width: 44px; min-width: 44px; height: 34px; padding: 0 !important; display: inline-flex !important; align-items: center; justify-content: center;
+      #cf-grid .cf-actions [data-cf-like], #cf-grid .cf-actions [data-cf-dislike], .cf-actions [data-cf-like], .cf-actions [data-cf-dislike] {
+        font-size: 0 !important; letter-spacing: 0 !important; color: inherit; width: 44px; min-width: 44px; height: 34px; padding: 0 !important; display: inline-flex !important; align-items: center; justify-content: center;
       }
       .cf-actions [data-cf-like]::before, .cf-actions [data-cf-dislike]::before {
         content: ""; width: 17px; height: 17px; display: block; background: currentColor;
@@ -5149,6 +5149,106 @@
         padding: 2% 0 3.5% !important; box-sizing: border-box !important;
         filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .30));
       }
+      /* ================= Build .78.6b — sheets: one way to pop out =================
+         Every pop-out is a bottom sheet (or the full-screen outfit view /
+         look layer): rounded top corners, a drag handle, its own scroll
+         (contained), a sticky close at the top right below the status bar,
+         swipe down to close, the page behind locked in place and the nav
+         tucked away while it is open. */
+      html.sheet-lock body:is(body, #lock782#lock782#lock782#lock782) {
+        position: fixed !important; top: var(--lock-top, 0px) !important; left: 0 !important; right: 0 !important;
+        width: 100% !important; overflow: hidden !important;
+      }
+      html.sheet-lock #bottombar.bottombar { transform: translate3d(0, calc(100% + 12px), 0) !important; pointer-events: none; }
+      .info-pop-backdrop .info-pop-card, .info-pop-backdrop .principles,
+      #item-detail > .item-detail-card, #icon-detail.sheet782-on > .icon-detail-card {
+        -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+      }
+      @media (max-width: 899px) {
+        .info-pop-backdrop:not(#price-sheet):not(#shop-plus-sheet):not(#find-sheet) .info-pop-card,
+        .info-pop-backdrop:not(#price-sheet):not(#shop-plus-sheet):not(#find-sheet) .principles {
+          border-radius: 20px 20px 0 0 !important; max-width: none !important;
+          max-height: calc(100dvh - min(env(safe-area-inset-top, 0px), 59px) - 12px) !important;
+          padding-top: 22px !important; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px) !important;
+          position: relative; animation: sheet782 250ms cubic-bezier(.2, .8, .2, 1) !important;
+        }
+        .info-pop-backdrop:not(#price-sheet):not(#shop-plus-sheet):not(#find-sheet) .principles-head {
+          position: sticky; top: -22px; z-index: 3; margin: -22px -22px 6px; padding: 22px 22px 8px;
+          background: inherit; background-color: var(--surface);
+        }
+        .info-pop-backdrop .info-pop-card::before, .info-pop-backdrop .principles::before,
+        #item-detail > .item-detail-card::before, #icon-detail.sheet782-on > .icon-detail-card::before {
+          content: ""; position: absolute; top: 8px; left: 50%; width: 38px; height: 5px; margin-left: -19px;
+          border-radius: 3px; background: var(--border-strong, rgba(0,0,0,.25)); opacity: .7; z-index: 4;
+        }
+        /* Closet item Details: a sheet, not a panel that pushes the page */
+        #item-detail:not(:empty) {
+          position: fixed; inset: 0; z-index: 210; display: flex; align-items: flex-end; justify-content: center;
+          background: rgba(26, 22, 18, .46); margin: 0 !important; padding: 0 !important;
+        }
+        html[data-theme="dark"] #item-detail:not(:empty) { background: rgba(0, 0, 0, .62); }
+        #item-detail > .item-detail-card {
+          position: relative; width: 100%; max-width: none; margin: 0 !important;
+          max-height: calc(100dvh - min(env(safe-area-inset-top, 0px), 59px) - 12px); overflow-y: auto;
+          border-radius: 20px 20px 0 0 !important; padding: 26px 18px calc(env(safe-area-inset-bottom, 0px) + 20px) !important;
+          animation: sheet782 250ms cubic-bezier(.2, .8, .2, 1);
+        }
+        #item-detail > .item-detail-card .item-actions [data-item-act="close"] {
+          position: sticky; top: 0;
+        }
+        #item-detail .sheet-x, #icon-detail .sheet-x, .cdd-menu .sheet-x {
+          position: sticky; top: 0; z-index: 5; margin: -14px -6px 4px auto; justify-self: end; align-self: end; flex: none; order: -1;
+          width: 38px; height: 38px; min-height: 38px; border-radius: 50%; padding: 0;
+          border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 22px; line-height: 1;
+          display: grid; place-items: center;
+        }
+        /* Icons: the icon opens as a sheet over the list */
+        #icon-detail.sheet782-on {
+          position: fixed; inset: 0; z-index: 210; display: flex; flex-direction: column; justify-content: flex-end;
+          background: rgba(26, 22, 18, .46); margin: 0 !important; padding: 0 !important;
+        }
+        html[data-theme="dark"] #icon-detail.sheet782-on { background: rgba(0, 0, 0, .62); }
+        #icon-detail.sheet782-on > .icon-back { display: none !important; }
+        #icon-detail.sheet782-on > .icon-detail-card {
+          position: relative; margin: 0 !important; width: 100%; max-height: calc(100dvh - min(env(safe-area-inset-top, 0px), 59px) - 12px); overflow-y: auto;
+          border-radius: 20px 20px 0 0 !important; padding-top: 26px !important; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px) !important;
+          animation: sheet782 250ms cubic-bezier(.2, .8, .2, 1);
+        }
+        /* Small menus (occasion, watch, source, •••) rise as bottom sheets */
+        .cdd-menu:not([hidden]) {
+          position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important; top: auto !important;
+          width: auto !important; min-width: 0 !important; max-width: none !important; z-index: 230 !important;
+          max-height: 70dvh; overflow-y: auto; overscroll-behavior: contain;
+          border-radius: 20px 20px 0 0 !important; padding: 26px 10px calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
+          box-shadow: 0 0 0 100vmax rgba(20, 17, 13, .46) !important;
+          animation: sheet782 250ms cubic-bezier(.2, .8, .2, 1);
+        }
+        .cdd-menu:not([hidden])::before {
+          content: ""; position: absolute; top: 9px; left: 50%; width: 38px; height: 5px; margin-left: -19px;
+          border-radius: 3px; background: var(--border-strong, rgba(0,0,0,.25)); opacity: .7;
+        }
+        .cdd-menu:not([hidden]) .cdd-opt { min-height: 46px; font-size: 15px; }
+        .cdd-menu:not([hidden]) { display: flex !important; flex-direction: column; }
+        .cdd-menu .sheet-x { position: absolute !important; top: 10px; right: 12px; margin: 0 !important; }
+        .cdd-menu:not([hidden]) { padding-top: 54px !important; }
+        /* outfit view: × at the top right, the look's ••• at the left */
+        .outfit-view .ov-close { left: auto !important; right: 8px !important; top: calc(min(env(safe-area-inset-top, 0px), 59px) + 4px) !important; bottom: auto !important; }
+        .outfit-view .ov-top { padding-top: min(env(safe-area-inset-top, 0px), 59px) !important; }
+        .outfit-view .ov-top .hero-corner { top: calc(min(env(safe-area-inset-top, 0px), 59px) + 4px) !important; bottom: auto !important; }
+        .outfit-view .ov-top .hero-corner { right: auto !important; left: 8px !important; }
+        .outfit-view .ov-top .cdd-menu { left: 0 !important; right: 0 !important; }
+        #look-layer { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+        #look-layer .look-layer-bar .sheet-x { margin-left: auto; width: 38px; height: 38px; min-height: 38px; border-radius: 50%; padding: 0; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 22px; line-height: 1; display: grid; place-items: center; flex: none; }
+        #look-layer .look-layer-bar { display: flex; align-items: center; gap: 8px; }
+        /* the outfit view / look layer: close sits below the status bar */
+        #look-layer .look-layer-bar { position: sticky; top: 0; z-index: 5; padding-top: calc(min(env(safe-area-inset-top, 0px), 59px) + 6px); background: var(--bg); }
+      }
+      @keyframes sheet782 { from { transform: translateY(40px); opacity: .3; } to { transform: none; opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .info-pop-card, .principles, .item-detail-card, .cdd-menu { animation: none !important; } }
+      .sheet-drag { transition: none !important; }
+      .sheet-snap { transition: transform 250ms cubic-bezier(.2, .8, .2, 1) !important; }
+      /* Undo sits above whatever action row it follows, above any sheet, for ~4s */
+      .undo-toast { z-index: 260 !important; }
     </style>
 
   </head>
@@ -6368,7 +6468,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.7</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.7a</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7922,7 +8022,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.7";
+var WARDROBE_BUILD = "2026-11-19.78.7a";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -25098,7 +25198,7 @@ function openIconDetail(id, opts) {
   document.getElementById("icon-detail").innerHTML = iconDetailHTML(ic);
   showIconDetail();
   if (typeof persistTab === "function" && typeof currentTab !== "undefined" && currentTab === "icons") persistTab();
-  if (!(opts && opts.restore)) document.getElementById("panel-icons").scrollIntoView({ behavior: "smooth", block: "start" });
+  /* .78.6b: the icon opens as a sheet over the list — no page jump */
 }
 function closeIconDetail() {
   openIconId = null;
@@ -30869,7 +30969,9 @@ document.addEventListener("visibilitychange", function () { if (document.visibil
        here was the Nov 17 bug: scrolling inside an open look
        pulled past 92px, reloaded the app, and dropped the user
        back on the home page. */
-    if (t.closest && (t.closest(".look-layer, .info-pop-backdrop, .popout"))) return;
+    if (t.closest && (t.closest(".look-layer, .info-pop-backdrop, .popout, .outfit-view, #item-detail, #icon-detail, .cdd-menu"))) return;
+    /* .78.6b: any open sheet locks the page (scrollY reads 0) — never a refresh */
+    if (document.documentElement.classList.contains("sheet-lock")) return;
     /* Anchored results (Style this / Build a look) live in
        #look-result and exist only in memory — a refresh there
        throws the user back to the section home, so pulls
@@ -39124,6 +39226,114 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     window.renderToday = function () { var o = _rt.apply(this, arguments); prefetch(); return o; };
   }
   setTimeout(prefetch, 1500);
+})();
+    </script>
+    <script type="wardrobe/app">
+/* Build .78.6b — one sheet manager. Watches every pop-out; while any is
+   open the page behind is locked (body fixed at its scroll offset, put
+   back exactly on close) and the nav is tucked away. Swipe down on a
+   sheet whose content is at the top closes it. Listeners are passive;
+   the drag only writes a transform. */
+(function () {
+  var root = document.documentElement, lockedY = null;
+  function itemOpen() { var d = document.getElementById("item-detail"); return !!(d && d.firstElementChild); }
+  function iconOpen() { var d = document.getElementById("icon-detail"); return !!(d && !d.hidden && d.firstElementChild && document.getElementById("panel-icons") && !document.getElementById("panel-icons").hidden); }
+  function sheets() {
+    var out = [];
+    document.querySelectorAll(".info-pop-backdrop:not([hidden])").forEach(function (b) { out.push({ el: b.querySelector(".info-pop-card, .principles") || b, close: function () { var x = b.querySelector(".info-pop-close"); if (x) x.click(); else b.hidden = true; } }); });
+    var ll = document.getElementById("look-layer"); if (ll && !ll.hidden) out.push({ el: ll, close: function () { var x = document.getElementById("look-layer-close"); if (x) x.click(); } });
+    var ov = document.getElementById("outfit-view"); if (ov && !ov.hidden) out.push({ el: document.getElementById("ov-scroll") || ov, close: function () { var x = document.getElementById("ov-close"); if (x) x.click(); } });
+    if (itemOpen()) out.push({ el: document.querySelector("#item-detail > .item-detail-card"), close: function () { var x = document.querySelector('#item-detail [data-item-act="close"]'); if (x) x.click(); } });
+    if (iconOpen()) out.push({ el: document.querySelector("#icon-detail > .icon-detail-card"), close: function () { var x = document.querySelector("#icon-detail [data-back-icons]"); if (x) x.click(); } });
+    document.querySelectorAll(".cdd-menu:not([hidden])").forEach(function (m) { out.push({ el: m, close: function () { if (typeof closeAllCdd === "function") closeAllCdd(); else m.hidden = true; } }); });
+    /* only sheets actually on screen — an item sheet left open on a tab
+       the user has switched away from must not keep the page locked */
+    return out.filter(function (x) { return x.el && x.el.getClientRects().length > 0; });
+  }
+  window.openSheets782 = sheets;
+  function lock() {
+    if (lockedY !== null) return;
+    lockedY = window.scrollY || 0;
+    root.style.setProperty("--lock-top", (-lockedY) + "px");
+    root.classList.add("sheet-lock");
+  }
+  function unlock() {
+    if (lockedY === null) return;
+    var y = lockedY; lockedY = null;
+    root.classList.remove("sheet-lock"); root.style.removeProperty("--lock-top");
+    window.scrollTo(0, y);
+    requestAnimationFrame(function () { if (Math.abs((window.scrollY || 0) - y) > 2 && lockedY === null) window.scrollTo(0, y); });
+    if (typeof window.__navShow === "function") window.__navShow();
+  }
+  window.sheetLockedY782 = function () { return lockedY; };
+  function decorate() {
+    /* a sticky × on the item and icon sheets (their own Close / back stay too) */
+    var card = document.querySelector("#item-detail > .item-detail-card");
+    if (card && !card.querySelector(".sheet-x")) card.insertAdjacentHTML("afterbegin", '<button type="button" class="sheet-x" data-item-act="close" aria-label="Close">&times;</button>');
+    var llb = document.querySelector("#look-layer .look-layer-bar");
+    if (llb && !llb.querySelector(".sheet-x")) {
+      llb.insertAdjacentHTML("beforeend", '<button type="button" class="sheet-x" aria-label="Close">&times;</button>');
+      llb.querySelector(".sheet-x").addEventListener("click", function () { var b = document.getElementById("look-layer-close"); if (b) b.click(); });
+    }
+    document.querySelectorAll(".cdd-menu:not([hidden])").forEach(function (m) {
+      if (m.querySelector(":scope > .sheet-x")) return;
+      m.insertAdjacentHTML("afterbegin", '<button type="button" class="sheet-x cdd-x" aria-label="Close">&times;</button>');
+    });
+    var ic = document.getElementById("icon-detail");
+    if (ic) {
+      var on = iconOpen(); ic.classList.toggle("sheet782-on", on);
+      var icard = ic.querySelector(".icon-detail-card");
+      if (on && icard && !icard.querySelector(".sheet-x")) {
+        icard.insertAdjacentHTML("afterbegin", '<button type="button" class="sheet-x" aria-label="Close">&times;</button>');
+        icard.querySelector(".sheet-x").addEventListener("click", function () { var b = ic.querySelector("[data-back-icons]"); if (b) b.click(); });
+      }
+      /* the list stays behind the sheet */
+      if (on) ["icon-list-view", "icon-search-card", "icon-form"].forEach(function (id) { var e = document.getElementById(id); if (e) e.hidden = false; });
+    }
+  }
+  var pending = false;
+  function sync() {
+    pending = false;
+    decorate();
+    if (sheets().length) lock(); else unlock();
+  }
+  function soon() { if (!pending) { pending = true; Promise.resolve().then(sync); } }
+  new MutationObserver(soon).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["hidden"], childList: true });
+  /* tap on the dim backdrop of the item / icon sheet closes it */
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (t && t.closest && t.closest(".cdd-x")) { e.stopPropagation(); if (typeof closeAllCdd === "function") closeAllCdd(); return; }
+    if (t && (t.id === "item-detail" || (t.id === "icon-detail" && t.classList.contains("sheet782-on")))) {
+      var x = t.querySelector('[data-item-act="close"], [data-back-icons]'); if (x) x.click();
+    }
+  });
+  /* swipe down to close */
+  var drag = null;
+  document.addEventListener("touchstart", function (e) {
+    if (e.touches.length !== 1) return;
+    var list = sheets(); if (!list.length) return;
+    var top = list[list.length - 1], el = top.el;
+    if (!el.contains(e.target)) return;
+    var sc = e.target.closest ? e.target.closest("[data-sheet-scroll], .ov-scroll, .look-layer-body") : null;
+    if ((el.scrollTop || 0) > 0 || (sc && sc.scrollTop > 0)) return;
+    drag = { el: el, y0: e.touches[0].clientY, dy: 0, close: top.close };
+  }, { passive: true });
+  document.addEventListener("touchmove", function (e) {
+    if (!drag) return;
+    drag.dy = Math.max(0, e.touches[0].clientY - drag.y0);
+    if (drag.dy > 6) { drag.el.classList.add("sheet-drag"); drag.el.style.transform = "translate3d(0," + drag.dy + "px,0)"; }
+  }, { passive: true });
+  function end() {
+    if (!drag) return;
+    var d = drag; drag = null;
+    d.el.classList.remove("sheet-drag");
+    if (d.dy > 90) { d.el.style.transform = ""; d.close(); return; }
+    if (d.dy > 6) { d.el.classList.add("sheet-snap"); d.el.style.transform = ""; setTimeout(function () { d.el.classList.remove("sheet-snap"); }, 260); }
+  }
+  document.addEventListener("touchend", end, { passive: true });
+  document.addEventListener("touchcancel", end, { passive: true });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { var l = sheets(); if (l.length) l[l.length - 1].close(); } });
+  sync();
 })();
     </script>
   </body>
