@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.74.1" />
+    <meta name="wardrobe-build" content="2026-11-18.74.2" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5344,7 +5344,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.74.1</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.74.2</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -5801,8 +5801,8 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
       var tx = db.transaction("p", "readwrite");
       tx.objectStore("p").put(s, k);
       tx.oncomplete = dec;
-      tx.onabort = tx.onerror = function () { dec(); if (V.onFail) V.onFail(k); };
-    } catch (e) { dec(); if (V.onFail) V.onFail(k); }
+      tx.onabort = tx.onerror = function () { V.fails = (V.fails || 0) + 1; dec(); if (V.onFail) V.onFail(k); };
+    } catch (e) { V.fails = (V.fails || 0) + 1; dec(); if (V.onFail) V.onFail(k); }
   };
   V.hasDb = function () { return !!db; };
   V.fetch = function (key, cb) {
@@ -6376,17 +6376,40 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
    in the on-device "composerPrefs" key, and liked closet looks in
    the synced "looks" collection feed the weighting on every device. */
 var COMPOSER_PREFS_KEY = "composerPrefs";
-var composerDeckCache = { sig: null, deck: null };
+var composerDeckCache = {};
 function composerClosetSig(list) {
   return list.map(function (i) { return [i.id, i.category, i.name, i.colourName, i.colourHex, i.laundry ? 1 : 0].join("~"); }).join("\n");
 }
-function composerDeck() {
+function composerDeck(only) {
   var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
+  if (only) list = only;
   var sig = composerClosetSig(list);
-  if (composerDeckCache.sig !== sig || !composerDeckCache.deck) {
-    composerDeckCache = { sig: sig, deck: window.WardrobeComposer.build(list) };
+  var slot = only ? "home" : "all";
+  var c = composerDeckCache[slot] || {};
+  if (c.sig !== sig || !c.deck) {
+    c = { sig: sig, deck: window.WardrobeComposer.build(list) };
+    composerDeckCache[slot] = c;
   }
-  return composerDeckCache.deck;
+  return c.deck;
+}
+/* Build .74.2: the outfit of the day is built ONLY from his own
+   synced closet pieces that carry a photograph — never a built-in
+   (seed) library piece with a shipped photo, never a photo-less
+   piece that would paint a colour block. Built-ins with photos are
+   the fallback only if his own pieces cannot make an outfit. */
+function homeOwnedPhotoPieces742() {
+  var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
+  var withPhoto = list.filter(function (i) { return i && i.photo && typeof i.photo === "string"; });
+  var own = withPhoto.filter(function (i) { return String(i.id || "").indexOf("seed-") !== 0; });
+  return { own: own, withPhoto: withPhoto };
+}
+function homeLookOk742(look) {
+  if (!look || !look.fwPieces || !look.fwPieces.length) return true;
+  var pools = homeOwnedPhotoPieces742();
+  var pool = pools.own.length >= 3 ? pools.own : pools.withPhoto;
+  var ok = {};
+  pool.forEach(function (i) { ok[i.id] = 1; });
+  return look.fwPieces.every(function (p) { return p && ok[p.id]; });
 }
 function composerPrefs() {
   var p = null;
@@ -6518,7 +6541,7 @@ function composerOutfitToLook(o, i, renderPairs) {
 function composerLooks(opts) {
   opts = opts || {};
   if (!window.WardrobeComposer) return [];
-  var deck = composerDeck();
+  var deck = composerDeck(opts.only || null);
   var level = opts.level === undefined ? ((typeof formalityLevel !== "undefined") ? formalityLevel : 4) : opts.level;
   var p = composerPrefs();
   var recent = p.recent.slice();
@@ -6776,7 +6799,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.74.1";
+var WARDROBE_BUILD = "2026-11-18.74.2";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -19458,7 +19481,9 @@ function buildClosetLooks(opts) {
      outfit type, never a recently seen combination. The verified
      render-pair path below only runs if the composer is absent. */
   if (typeof composerLooks === "function" && window.WardrobeComposer) {
-    var composed73 = composerLooks({ count: (opts && opts.count) || 6, temp: wx ? wx.temp : undefined });
+    var pools742 = homeOwnedPhotoPieces742();
+    var composed73 = pools742.own.length >= 3 ? composerLooks({ count: (opts && opts.count) || 6, temp: wx ? wx.temp : undefined, only: pools742.own }) : [];
+    if (!composed73 || !composed73.length) composed73 = composerLooks({ count: (opts && opts.count) || 6, temp: wx ? wx.temp : undefined, only: pools742.withPhoto });
     if (composed73 && composed73.length) return composed73;
   }
   var avail = wardrobeItems.filter(function (i) { return !i.laundry; });
@@ -24487,6 +24512,9 @@ function openingLook() {
   /* A stored closet-built look only restores while Today is
      still in Only-my-wardrobe mode; another mode deals its own. */
   if (sess && sess.fwPieces && sess.fwPieces.length && !sess.img && studioSource !== "wardrobe") sess = null;
+  /* Build .74.2: a look saved earlier today with built-in or
+     photo-less pieces is not restored — a fresh deal replaces it. */
+  if (sess && sess.fwPieces && sess.fwPieces.length && !homeLookOk742(sess)) sess = null;
   /* In-session refresh: restore this session's opening look. When
      the navigation type cannot be read at all, a session look on
      record is treated the same way — staying put is the safe
@@ -24522,7 +24550,7 @@ function openingLook() {
   var savedSrc = studioSource;
   if (savedSrc === "wardrobe") {
     var dur = store.get("todayOpeningCloset", null);
-    if (dur && dur.date === localTodayISO() && dur.look && dur.look.source === "wardrobe" && dur.look.fwPieces && dur.look.fwPieces.length && dur.look.swatches && dur.look.swatches.length) {
+    if (dur && dur.date === localTodayISO() && dur.look && dur.look.source === "wardrobe" && dur.look.fwPieces && dur.look.fwPieces.length && dur.look.swatches && dur.look.swatches.length && homeLookOk742(dur.look)) {
       todaySeedId = dur.look.id;
       return JSON.parse(JSON.stringify(dur.look));
     }
@@ -32086,6 +32114,7 @@ function syBlank() {
   o.mig57 = ""; /* build .57: account key the one-time blob migration ran for */
   o.restore59 = ""; /* build .59: account key the one-time tomb-restore re-download completed for */
   o.photoPull741 = ""; /* build .74.1: one-time photo re-pull after cursor-ahead-of-persist */
+  o.photoPull742 = ""; /* build .74.2: the same re-pull, marked done only after the photo vault confirms its writes */
   return o;
 }
 var SY = null;
@@ -32912,12 +32941,13 @@ function syncNow(isRetry, force) {
          uploads before any download. The restore59 flag is set
          only after the pages finish and wardrobe.items persists. */
       var needRestore59 = !!(SY.key && SY.restore59 !== SY.key && (SY.lastOk || syHasUnsentTombs()));
-      var needPhotoPull741 = !!(SY.key && SY.photoPull741 !== SY.key && (SY.lastOk || SY.last || needRestore59));
+      var needPhotoPull741 = !!(SY.key && SY.photoPull742 !== SY.key && (SY.lastOk || SY.last || needRestore59));
       var restoreFailed59 = false;
       if (SY.lastOk || needRestore59 || needPhotoPull741) {
         var _pg56 = 0;
         var _dlSince = (needRestore59 || needPhotoPull741) ? 0 : SY.last;
         _syForcePhotoPull741 = !!needPhotoPull741;
+        var _vaultFails742 = (window.photoVault && window.photoVault.fails) || 0;
         while (_pg56 < 80) {
           _pg56++;
           var _pr56 = null;
@@ -32961,9 +32991,21 @@ function syncNow(isRetry, force) {
         if ((needRestore59 || needPhotoPull741) && !restoreFailed59) {
           var _persisted59 = true;
           try { _persisted59 = persistAll() !== false; } catch (e) { _persisted59 = false; }
+          /* Build .74.2: the photo vault writes asynchronously. The
+             re-pull is only marked done once every photo write has
+             landed in IndexedDB — a failed or slow write leaves the
+             flag unset, so the next open pulls again. */
+          var _vaultOk742 = true;
+          if (_persisted59 && needPhotoPull741) {
+            var _pv742 = window.photoVault;
+            if (_pv742 && _pv742.flush && _pv742.hasDb && _pv742.hasDb()) {
+              _vaultOk742 = await new Promise(function (res) { try { _pv742.flush(function (ok) { res(ok !== false); }); } catch (e) { res(false); } });
+            }
+            if (_pv742 && (_pv742.fails || 0) > _vaultFails742) _vaultOk742 = false;
+          }
           if (_persisted59) {
             if (needRestore59) SY.restore59 = SY.key;
-            if (needPhotoPull741) SY.photoPull741 = SY.key;
+            if (needPhotoPull741 && _vaultOk742) { SY.photoPull741 = SY.key; SY.photoPull742 = SY.key; }
             saveSY();
           }
           if (_syMassHold) {
@@ -34204,7 +34246,24 @@ function analyzeFilePiece(card, job, ix) {
   function flatlayHTML(look, withWatch) {
     var cells = (look.fwPieces || []).map(function (p) {
       var ph = itemPhoto(p);
-      if (ph && !/^(idb:|blob:[0-9a-f]{16,})/.test(ph)) return '<span class="fl-cell"><img src="' + esc(ph) + '" alt="' + esc(p.name || "") + '" loading="lazy" decoding="async" /></span>';
+      /* Build .74.2: every synced closet photo is held as a vault
+         reference ("idb:<key>", or a "blob:<sha>" sync ref) after a
+         reload. Those used to fall through to a colour block, so
+         his studio photos never reached Home. Resolve from memory
+         when cached; otherwise emit the reference — the vault and
+         blob observers swap the bytes in, exactly as the Closet
+         grid does. */
+      if (ph && ph.indexOf("idb:") === 0) {
+        var pvh = window.photoVault;
+        var hit = pvh && pvh.cache ? pvh.cache[ph.slice(4)] : undefined;
+        if (hit) ph = hit;
+        else if (pvh && pvh.fetch) { try { pvh.fetch(ph.slice(4), function () {}); } catch (e) {} }
+      } else if (ph && /^blob:[0-9a-f]{16,}/.test(ph)) {
+        var bsh = window.blobStore;
+        var bhit = bsh && bsh.cache ? bsh.cache[ph.slice(5)] : undefined;
+        if (bhit) ph = bhit;
+      }
+      if (ph) return '<span class="fl-cell"><img src="' + esc(ph) + '" alt="' + esc(p.name || "") + '" decoding="async" /></span>';
       return '<span class="fl-cell fl-swatch" style="background:' + esc(p.colourHex || "#d9cfbd") + '" role="img" aria-label="' + esc(p.name || "") + '"></span>';
     });
     var w = withWatch ? watchFor(look) : null;

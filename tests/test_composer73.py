@@ -30,7 +30,10 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-18.74"
+BUILD = "2026-11-18.74.2"
+# Build .74.2: Home deals only pieces that carry a photo, so each fixture
+# piece gets a tiny valid one (the fixture itself stays photo-free).
+FIXTURE_PHOTO = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 FIXTURE = json.loads((Path(__file__).resolve().parent / "fixture_closet83.json").read_text())
 BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 STANDALONE_INIT = """
@@ -121,7 +124,7 @@ def main() -> int:
             ctx = browser.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2,
                                       is_mobile=True, has_touch=True, service_workers="block")
             ctx.add_init_script(STANDALONE_INIT)
-            seed = {"items": [dict(i, addedISO="2026-11-17") for i in FIXTURE], "todaySource": "wardrobe", "formality": 4}
+            seed = {"items": [dict(i, addedISO="2026-11-17", photo=FIXTURE_PHOTO) for i in FIXTURE], "todaySource": "wardrobe", "formality": 4}
             ctx.add_init_script("(() => { if (localStorage.getItem('wardrobe.items')) return; const S = %s;"
                                 " for (const k in S) localStorage.setItem('wardrobe.' + k, JSON.stringify(S[k])); })();" % json.dumps(seed))
             ctx.route(BLOCK, lambda r: r.abort())

@@ -25,7 +25,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-18.74.1"
+BUILD = "2026-11-18.74.2"
 SYNC_HOST = "https://wardrobe-sync.dyacobs.workers.dev"
 KEY = "test-key-fix741"
 ACCT = "test-acct-741"
@@ -399,7 +399,7 @@ def run() -> int:
                 if last.get("photoPull741") == KEY and last.get("stuckStoKind") == "NEW":
                     break
                 page.wait_for_timeout(250)
-            check("build is .74.1", last and last["build"] == BUILD, last and last["build"])
+            check("build is .74.2", last and last["build"] == BUILD, last and last["build"])
             check("no page errors", not errors, "; ".join(errors[:3]))
             check("forced re-pull ran (since=0)", mock.since0 >= 1, f"since0={mock.since0} reqs={mock.requests}")
             check(
@@ -446,7 +446,7 @@ def run() -> int:
             rel = None
             while time.time() < deadline:
                 rel = state(page)
-                if rel.get("stuckKind") == "NEW" and rel.get("stuckStoKind") == "NEW":
+                if rel.get("stuckKind") == "NEW" and rel.get("stuckStoKind") == "NEW" and (rel.get("userCount") or 0) > 0 and rel.get("memDirtyName"):
                     break
                 page.wait_for_timeout(250)
             check(
