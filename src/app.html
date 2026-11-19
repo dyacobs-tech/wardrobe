@@ -37,7 +37,7 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
-    <meta name="theme-color" content="#F3EEE4" />
+    <meta name="theme-color" content="#F6F2EA" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.10" />
+    <meta name="wardrobe-build" content="2026-11-19.80.11" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -93,7 +93,7 @@
       }
       :root {
         color-scheme: light;
-        --bg: #F3EEE4;
+        --bg: #F6F2EA;
         --bg-deep: #EBE4D6;
         --surface: #FFFBF4;
         --surface-alt: #F7F1E6;
@@ -4709,7 +4709,7 @@
       .shop-honest { display: none !important; }
       /* On-body render + the pieces beside it */
       .flatlay.onbody-split { display: grid !important; grid-template-columns: 44% 1fr !important; grid-template-rows: 1fr !important; gap: 4px !important; width: 100%; height: 100%; padding: 0 !important; }
-      .onbody-split .ob-figure { display: block; height: 100%; min-height: 0; background: linear-gradient(#9d9996, #bdb9b3); overflow: hidden; border-radius: 12px; }
+      .onbody-split .ob-figure { display: block; height: 100%; min-height: 0; background: #F6F2EA; overflow: hidden; border-radius: 12px; }
       .onbody-split .ob-figure img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
       .onbody-split .ob-pieces { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 4px; min-height: 0; }
       .onbody-split.ob-n1 .ob-pieces, .onbody-split.ob-n2 .ob-pieces { grid-template-columns: 1fr; }
@@ -4799,7 +4799,7 @@
       @media (min-width: 760px) { #panel-onyou .ion-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
       @media (min-width: 1100px) { #panel-onyou .ion-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
       #panel-onyou .ion-card { display: grid; grid-template-columns: 38% minmax(0, 1fr); gap: 14px; padding: 12px; border-radius: 18px; }
-      #panel-onyou .ion-fig { border-radius: 12px; overflow: hidden; background: linear-gradient(#9d9996, #bdb9b3); aspect-ratio: 386 / 1100; }
+      #panel-onyou .ion-fig { border-radius: 12px; overflow: hidden; background: #F6F2EA; aspect-ratio: 386 / 1100; }
       #panel-onyou .ion-fig img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; cursor: zoom-in; }
       #panel-onyou .ion-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
       #panel-onyou .ion-kick { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
@@ -5037,7 +5037,7 @@
       #panel-find .edit-sm .edit-price { font-size: 13px; margin-top: 2px; }
       #panel-find .edit-cta { display: flex; justify-content: center; gap: 8px; margin: 16px 0; }
       #panel-find .edit-on { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; padding: 12px !important; margin: 0 0 8px; }
-      #panel-find .edit-on-fig { border-radius: 14px; overflow: hidden; background: linear-gradient(#9d9996, #bdb9b3); aspect-ratio: 3 / 5; display: flex; align-items: center; justify-content: center; }
+      #panel-find .edit-on-fig { border-radius: 14px; overflow: hidden; background: #F6F2EA; aspect-ratio: 3 / 5; display: flex; align-items: center; justify-content: center; }
       #panel-find .edit-on-fig img { width: 100%; height: 100%; object-fit: cover; object-position: center top; cursor: zoom-in; }
       #panel-find .edit-on-side { display: flex; flex-direction: column; gap: 10px; justify-content: center; min-width: 0; }
       #panel-find .edit-on-side h3 { margin: 0; font: 600 18px/1.2 var(--font-display); }
@@ -5898,6 +5898,63 @@
         #bottombar.bottombar { transition: none !important; }
       }
     </style>
+    <style>
+      /* ================= Build .80.11 — audit P1 polish =================
+         Seamless off-white, no grey studio boxes behind him, chips that
+         don't wrap, hidden buttons that stay hidden, watch names on two
+         lines, and item Details as a sheet on desktop too. */
+      .outfits-toggle .chip, .theme-toggle .chip, .cal-subtab {
+        white-space: nowrap !important;
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+        min-width: 112px !important;
+      }
+      #item-detail .sheet-x {
+        position: absolute !important; top: 12px; right: 12px; z-index: 5;
+        width: 38px; height: 38px; min-height: 38px; margin: 0 !important;
+        border-radius: 50%; padding: 0;
+        border: 1px solid var(--border-strong); background: var(--surface);
+        color: var(--text); font-size: 22px; line-height: 1;
+        display: grid; place-items: center; flex: none;
+      }
+      #item-detail > .item-detail-card { position: relative; }
+      #shuffle-btn, #panel-palettes .look-actions .btn-ink,
+      #panel-palettes .look-actions .btn-ghost,
+      #panel-today #today-type-btn, #panel-today .hero-cdd-btn {
+        white-space: nowrap !important;
+      }
+      #watch-cancel-edit[hidden],
+      #data-undo-import[hidden],
+      .btn-ghost[hidden],
+      .btn-ink[hidden],
+      button[hidden] {
+        display: none !important;
+      }
+      #panel-watches .item-card h4,
+      #panel-watches .item-card h4.item-name {
+        white-space: normal !important;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        line-height: 1.25 !important;
+      }
+      #myinspo-desc { font-size: 14px; }
+      /* Desktop: Details opens as a centred sheet, not a panel buried at the top of Closet */
+      @media (min-width: 900px) {
+        #item-detail:not(:empty) {
+          position: fixed; inset: 0; z-index: 210;
+          display: flex; align-items: center; justify-content: center;
+          background: rgba(26, 22, 18, .46); margin: 0 !important; padding: 24px !important;
+        }
+        html[data-theme="dark"] #item-detail:not(:empty) { background: rgba(0, 0, 0, .62); }
+        #item-detail > .item-detail-card {
+          position: relative; width: min(640px, 92vw); max-height: min(88vh, 920px);
+          overflow-y: auto; margin: 0 !important; border-radius: 20px !important;
+        }
+      }
+    </style>
+
 
   </head>
   <body data-page="today">
@@ -6768,7 +6825,7 @@
           <label class="photo-drop" for="myinspo-photo"><span class="pd-title">Add a photo or screenshot</span><input type="file" id="myinspo-photo" accept="image/*" /></label>
           <div>
             <label class="field" for="myinspo-desc">What is in the image? — colours, pieces (optional)</label>
-            <input type="text" id="myinspo-desc" placeholder="e.g. Navy blazer with cream trousers and brown loafers" autocomplete="off" />
+            <input type="text" id="myinspo-desc" placeholder="e.g. Navy blazer, cream trousers…" autocomplete="off" />
           </div>
         </div>
         <div class="myinspo-grid" id="myinspo-grid"></div>
@@ -7145,7 +7202,7 @@
           <div>
             <label class="field" for="sync-regcode">Registration code — new devices only</label>
             <div class="loc-search-row">
-              <input type="text" id="sync-regcode" placeholder="Code for creating an account" autocomplete="off" />
+              <input type="text" id="sync-regcode" placeholder="Registration code" autocomplete="off" />
               <button type="button" class="btn-ink" id="sync-regcode-btn">Save code</button>
             </div>
             <p class="form-note" id="sync-regcode-note"></p>
@@ -7169,7 +7226,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.10</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.11</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8933,7 +8990,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.10";
+var WARDROBE_BUILD = "2026-11-19.80.11";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -8946,7 +9003,7 @@ function applyTheme(t, persist) {
   var scheme = document.querySelector('meta[name="color-scheme"]');
   if (scheme) scheme.setAttribute("content", t);
   var meta = document.querySelector('meta[name="theme-color"]:not([media])');
-  if (meta) meta.setAttribute("content", t === "dark" ? "#14110E" : "#F3EEE4");
+  if (meta) meta.setAttribute("content", t === "dark" ? "#14110E" : "#F6F2EA");
   var light = document.getElementById("theme-light");
   var dark = document.getElementById("theme-dark");
   if (light) light.setAttribute("aria-pressed", t === "light" ? "true" : "false");
@@ -37059,9 +37116,13 @@ function analyzeFilePiece(card, job, ix) {
     var w = withWatch ? watchFor(look) : null;
     if (w && w.photo) cells.push('<span class="fl-cell fl-watch"><img src="' + esc(w.photo) + '" alt="' + esc(w.name || "") + '" loading="lazy" decoding="async" /></span>');
     if (ob) {
-      /* Build .75: David wearing it, with the pieces beside him. */
+      /* Build .75: David wearing it, with the pieces beside him.
+         .80.11: prefer the transparent cut-out so the card sits on
+         cream, not a grey studio box. */
+      var shown = ob;
+      try { if (typeof window.cutFor784 === "function") { var cut = window.cutFor784(ob); if (cut) shown = cut; } } catch (e) {}
       var side = cells.filter(function (c) { return c.indexOf("fl-swatch") === -1; }).slice(0, 4);
-      return '<span class="flatlay onbody-split ob-n' + side.length + '"><span class="ob-figure"><img src="' + esc(ob) + '" alt="' + esc((look.title || "Outfit") + " on David") + '" data-onbody="1" decoding="async" /></span>' +
+      return '<span class="flatlay onbody-split ob-n' + side.length + '"><span class="ob-figure"><img src="' + esc(shown) + '" alt="' + esc((look.title || "Outfit") + " on David") + '" data-onbody="1" decoding="async" /></span>' +
         '<span class="ob-pieces">' + side.join("") + "</span></span>";
     }
     return '<span class="flatlay fl-n' + cells.length + '">' + cells.join("") + "</span>";
