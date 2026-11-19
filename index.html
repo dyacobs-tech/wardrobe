@@ -4702,6 +4702,9 @@
       #panel-find .edit-sec h3 { margin: 0; font: 600 20px/1.2 var(--font-display); text-transform: none; letter-spacing: -0.01em; }
       #panel-find .edit-meta { color: var(--dim); font-size: 12.5px; margin: 2px 0 0; }
       #panel-find .edit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      #panel-find .edit-hrow { display: flex; gap: 12px; overflow-x: auto; margin: 0 -16px 18px; padding: 0 16px 2px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+      #panel-find .edit-hrow::-webkit-scrollbar { display: none; }
+      #panel-find .edit-hrow > .edit-pc { flex: 0 0 calc((100% - 12px) / 2.15); max-width: 230px; scroll-snap-align: start; }
       @media (min-width: 760px) { #panel-find .edit-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
       @media (min-width: 1100px) { #panel-find .edit-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
       #panel-find .edit-pc { position: relative; display: flex; flex-direction: column; padding: 0 !important; overflow: hidden; margin: 0; }
@@ -5706,6 +5709,7 @@
         </div>
         <div id="edit-v-searches" hidden>
           <form id="edit-search-form" role="search" autocomplete="off"><input type="search" id="edit-search-q" aria-label="Search the stores" placeholder="Search the stores" enterkeyhint="search" autocomplete="off" /></form>
+          <div id="edit-gapcards"></div>
           <div id="edit-search-out"></div>
           <div id="edit-gaps"></div>
           <div id="edit-list"></div>
@@ -36233,6 +36237,7 @@ document.addEventListener("keydown", function (e) {
         (res.length > shown.length ? '<div class="edit-more"><button type="button" class="btn-ghost" data-edit-more>Show more</button></div>' : "");
       if (gapsHost) gapsHost.hidden = true;
       if (lookHost) lookHost.hidden = true;
+      var gch = document.getElementById("edit-gapcards"); if (gch) gch.hidden = true;
       return;
     }
     editState.results = []; editState._resFor = null; editState.more = false;
@@ -36249,6 +36254,7 @@ document.addEventListener("keydown", function (e) {
     }).join("") : "";
     if (gapsHost) gapsHost.hidden = false;
     if (lookHost) lookHost.hidden = false;
+    var gcs = document.getElementById("edit-gapcards"); if (gcs) gcs.hidden = false;
     renderGaps();
   }
   /* ---------- closet gaps: the verified gap fillers, trousers first ---------- */
@@ -36291,7 +36297,7 @@ document.addEventListener("keydown", function (e) {
   window.editGapPicks = function (o) { return gapPicks(o).map(snap); };
   function gapMix(n) {
     /* trousers lead; the rest of the row is one of each other gap */
-    var all = gapPicks({ unsaved: true }), tr = all.filter(function (e) { return e.cat === "trousers"; }), rest = [], cats = {};
+    var all = gapPicks(), tr = all.filter(function (e) { return e.cat === "trousers"; }), rest = [], cats = {};
     all.forEach(function (e) { if (e.cat !== "trousers" && !cats[e.cat]) { cats[e.cat] = 1; rest.push(e); } });
     var k = Math.max(Math.ceil(n / 2), n - rest.length);
     return tr.slice(0, k).concat(rest).slice(0, n);
@@ -36306,9 +36312,9 @@ document.addEventListener("keydown", function (e) {
     editSearches.forEach(function (s) { have[String(s.q).toLowerCase()] = 1; });
     var gapQ = EDIT_CATALOG.some(function (e) { return e.gap; }) ? GAP_SUGGEST : [];
     var sug = gapQ.concat(gaps, DEFAULT_SUGGEST).filter(function (q, i, a) { return a.indexOf(q) === i && !have[q.toLowerCase()]; }).slice(0, 9);
-    var picks = gapMix(4);
-    host.innerHTML = (picks.length ? '<div class="edit-sec" id="edit-closet-gaps"><h3>Closet gaps</h3></div><div class="edit-grid">' + picks.map(function (e) { return cardHTML(snap(e), "gap"); }).join("") + "</div>" : "") +
-      (sug.length ? '<div class="edit-sec"><h3>Try</h3></div><div class="edit-sug">' + sug.map(function (q) {
+    var picks = gapMix(8), gc = document.getElementById("edit-gapcards");
+    if (gc) gc.innerHTML = picks.length ? '<div class="edit-sec" id="edit-closet-gaps"><h3>Closet gaps</h3></div><div class="edit-hrow">' + picks.map(function (e) { return cardHTML(snap(e), "gap"); }).join("") + "</div>" : "";
+    host.innerHTML = (sug.length ? '<div class="edit-sec"><h3>Try</h3></div><div class="edit-sug">' + sug.map(function (q) {
       return '<button type="button" class="chip" data-edit-suggest="' + esc(q) + '">' + esc(q) + "</button>";
     }).join("") + "</div>" : "");
   }

@@ -287,7 +287,7 @@ def main():
         pg.click("#edit-tab-searches"); pg.wait_for_timeout(400)
         if pg.locator("[data-edit-close-search]").count():
             pg.click("[data-edit-close-search]"); pg.wait_for_timeout(300)
-        gk = pg.locator("#edit-gaps .edit-pc .edit-body h3").all_inner_texts()
+        gk = pg.locator("#edit-gapcards .edit-pc .edit-body h3").all_inner_texts()
         check("Closet gaps shows gap fillers", pg.locator("#edit-closet-gaps").count() == 1 and len(gk) >= 3, gk)
         chips = pg.locator("#edit-gaps [data-edit-suggest]").all_inner_texts()
         check("Try starts with Trousers", chips[:1] == ["Trousers"], chips)
