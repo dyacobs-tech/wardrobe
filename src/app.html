@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.20" />
+    <meta name="wardrobe-build" content="2026-11-19.80.21" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -6031,6 +6031,14 @@
       #panel-looks .looks-filter { margin: 6px 0 12px !important; justify-content: center; }
       #panel-looks .looks-filter .cal-subtab { min-width: 84px !important; }
       @media (max-width: 380px) { #panel-looks .outfits-row { gap: 4px; } #panel-looks .outfits-row .outfits-toggle .chip { width: 58px !important; } #panel-looks .outfits-row .outfits-toggle .chip, #panel-looks .outfits-row > button { padding-left: 10px !important; padding-right: 10px !important; } }
+
+      /* .80.21 (audit P1.9): Palettes sub-pages and six looks in place */
+      #panel-palettes .pal-subtabs { margin: 8px 0 12px !important; }
+      #panel-palettes #pal-colours-view[hidden], #panel-palettes #pal-plates-view[hidden] { display: none !important; }
+      #featured .look-actions { display: flex !important; flex-wrap: wrap !important; gap: 8px !important; }
+      #featured .look-actions > button { flex: 1 1 calc(50% - 4px) !important; min-width: 0 !important; white-space: nowrap; }
+      #pal-six-host:empty { display: none; }
+      #pal-six-host { margin: 12px 0 18px; }
 </style>
 
 
@@ -6520,6 +6528,12 @@
 
       <!-- ================= PALETTES ================= -->
       <section id="panel-palettes" role="tabpanel" aria-labelledby="tab-palettes" hidden>
+        <!-- .80.21 (audit P1.9): Plates / Colours sub-pages -->
+        <div class="cal-subtabs pal-subtabs" role="group" aria-label="Palettes pages">
+          <button type="button" class="cal-subtab" data-pal-view="plates" aria-pressed="true">Plates</button>
+          <button type="button" class="cal-subtab" data-pal-view="colours" aria-pressed="false">Colours</button>
+        </div>
+        <div id="pal-plates-view">
         <div class="drop pal-drop">
           <button type="button" class="drop-toggle" data-drop-toggle aria-expanded="false" aria-controls="drop-palette-form"><span>New palette</span><span class="tt-chev" aria-hidden="true">▾</span></button>
           <div class="drop-body" id="drop-palette-form" hidden>
@@ -6574,12 +6588,14 @@
         </div>
 
         <div class="card featured" id="featured"></div>
+        <div id="pal-six-host"></div>
 
         <p id="plate-count" class="form-note"></p>
         <div class="plate-grid" id="plate-grid"></div>
         <div id="plate-empty"></div>
+        </div>
 
-        <div class="colour-index">
+        <div class="colour-index" id="pal-colours-view" hidden>
           <h3 class="fav-head" id="colour-index-head">The colours</h3>
           <div class="colour-grid" id="colour-grid"></div>
         </div>
@@ -7313,7 +7329,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.20</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.21</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9123,7 +9139,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.20";
+var WARDROBE_BUILD = "2026-11-19.80.21";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -25258,10 +25274,12 @@ function renderFeatured() {
     stripHTML(p.colors, "lg") + legendHTML(p.colors) +
     '<div class="look-actions">' +
     '<button type="button" class="btn-accent" id="use-plate-btn">Use it</button>' +
+    '<button type="button" class="btn-ghost" id="six-plate-btn">Show six looks</button>' +
     '<button type="button" class="btn-ghost" id="find-plate-btn">Shop it</button>' +
     '<button type="button" class="btn-ghost" id="next-plate-btn">Next</button>' +
     "</div>";
   document.getElementById("use-plate-btn").addEventListener("click", function () { usePlateInStudio(p); });
+  document.getElementById("six-plate-btn").addEventListener("click", function () { if (typeof window.plateSixInPlace === "function") window.plateSixInPlace(p); });
   document.getElementById("find-plate-btn").addEventListener("click", function () { openFindSheet(plateFindLook(p)); });
   document.getElementById("next-plate-btn").addEventListener("click", function () {
     featuredPlate = PLATES[p.plate % PLATES.length];
@@ -41517,6 +41535,52 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
 (function () {
   var mv = document.getElementById("outfits-mine-view"), lf = document.querySelector("#outfits-mine-view .looks-filter");
   if (mv && lf && mv.firstChild !== lf) mv.insertBefore(lf, mv.firstChild);
+})();
+</script>
+<script>
+/* .80.21 (audit P1.9): Palettes Plates / Colours, and six looks in place */
+(function () {
+  function palView(v) {
+    var pv = document.getElementById("pal-plates-view"), cv = document.getElementById("pal-colours-view");
+    if (pv) pv.hidden = v !== "plates";
+    if (cv) cv.hidden = v !== "colours";
+    document.querySelectorAll("[data-pal-view]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-pal-view") === v ? "true" : "false"); });
+  }
+  window.palView821 = palView;
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-pal-view]");
+    if (b) { palView(b.getAttribute("data-pal-view")); try { window.scrollTo(0, 0); } catch (x) {} }
+  });
+  var cg = document.getElementById("colour-grid");
+  if (cg) cg.addEventListener("click", function (e) {
+    if (!(e.target.closest && e.target.closest("[data-colour]"))) return;
+    palView("plates");
+    requestAnimationFrame(function () { var g = document.getElementById("plate-grid"); if (g) g.scrollIntoView({ block: "start" }); });
+  });
+  /* the studio's own six (Save, thumbs, Render me and all) are dealt under
+     the featured plate; the result block goes back when Ideas opens */
+  var lr = document.getElementById("look-result");
+  var home = lr ? lr.parentNode : null, homeNext = lr ? lr.nextSibling : null;
+  function giveBack() {
+    lr = document.getElementById("look-result");
+    if (lr && home && lr.parentNode !== home) home.insertBefore(lr, homeNext && homeNext.parentNode === home ? homeNext : null);
+  }
+  window.plateSixInPlace = function (p) {
+    var host = document.getElementById("pal-six-host");
+    lr = document.getElementById("look-result");
+    if (!host || !lr || !p) return;
+    host.appendChild(lr);
+    lr.classList.remove("cf-replaced");
+    var names = p.colors.map(function (c) { return c.name.toLowerCase(); }).join(" and ");
+    var d = document.getElementById("desc"); if (d) d.value = "An outfit in " + names + " (Wada Plate " + p.plate + ")";
+    if (typeof setBasis === "function") setBasis("palette");
+    var pdesc = sourceDescFor(studioSource, d ? d.value : names);
+    var popts = { basis: "palette", plate: p, source: studioSource };
+    renderOptions(buildSixLooks(pdesc, "", "", popts), { desc: pdesc, occasion: "", season: "", opts: popts });
+    toast("Six takes on Plate " + p.plate + ".");
+  };
+  var st = document.getElementById("panel-studio");
+  if (st && window.MutationObserver) new MutationObserver(function () { if (!st.hidden) giveBack(); }).observe(st, { attributes: true, attributeFilter: ["hidden"] });
 })();
 </script>
 </body>
