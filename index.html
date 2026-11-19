@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.79.3" />
+    <meta name="wardrobe-build" content="2026-11-19.79.4" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5253,6 +5253,33 @@
       }
       #panel-wardrobe .closet-row789.cs-open .cdd { display: none !important; }
       #panel-wardrobe .closet-row789.cs-open .closet-search789 { flex-basis: 100%; }
+      /* ================= Build .79.4 — smooth: no stutter =================
+         Off-screen cards skip style/layout/paint until scrolled near
+         (content-visibility), the phone drops the costly backdrop blurs and
+         image drop-shadow filters, and the outfit view slides in on
+         transform + opacity only. */
+      .item-card, .cf-card, .option-card, .sale-card, .find-card, .saved-card, .plate-card, .plate, .icon-card, .myinspo-card, .watch-card, #panel-looks .card,
+      #plate-grid > *, #colour-grid > *, #inspo-host .card, .edit-card, .product-card {
+        content-visibility: auto; contain-intrinsic-size: auto 300px;
+      }
+      @media (max-width: 899px) {
+        html body .masthead, html body .masthead::before, html body .navstack, html body .subnav, html body #bottombar.bottombar, html body .update-bar, html body .toast {
+          -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+        }
+        body[data-page="today"] #panel-today #today-hero.hero-solo.has-cut img#today-img, body[data-page="today"] #panel-today #today-hero.hero-solo.has-cut .hero-xfade,
+        #panel-today .today-hero.hero-solo.has-cut img#today-img, #panel-today .today-hero.hero-solo.has-cut .hero-xfade, .outfit-view .ov-figure.has-cut > img#ov-img { filter: none !important; }
+      }
+      /* card shadows off on the phone (cards keep their hairline border):
+         a shadow on each of the ~180 closet cards cut WebKit scrolling from
+         ~45 to ~28 fps */
+      @media (max-width: 899px) {
+        :root { --shadow-card: none !important; }
+        html[data-theme="dark"] { --shadow-card: none !important; }
+      }
+      #panel-today .today-hero:not(.lq-show) img.hero-lq { visibility: hidden !important; transition: opacity .35s ease, visibility 0s linear .35s !important; }
+      .outfit-view.ov-in { animation: ovIn793 .24s cubic-bezier(.2, .8, .2, 1) both; will-change: transform, opacity; }
+      @keyframes ovIn793 { from { opacity: 0; transform: translate3d(0, 22px, 0); } to { opacity: 1; transform: none; } }
+      @media (prefers-reduced-motion: reduce) { .outfit-view.ov-in { animation: none; } }
       /* ================= Build .79.3 — the hero is never blank =================
          A ~1KB blurred placeholder of his silhouette sits exactly where the
          cut-out draws and shows until the cut-out has loaded, then fades. */
@@ -6710,7 +6737,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.79.3</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.79.4</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8318,7 +8345,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.79.3";
+var WARDROBE_BUILD = "2026-11-19.79.4";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -36637,7 +36664,10 @@ function analyzeFilePiece(card, job, ix) {
     } else {
       showInspoView(window.inspoView || "icons");
     }
-    if (typeof composerSyncFeed === "function") composerSyncFeed(true);
+    /* .79.4: switching to Outfits (or Mine/Inspo) keeps the feed it already
+       built — it is rebuilt only when the closet, level or source changed
+       (Shuffle still deals a fresh one) */
+    if (typeof composerSyncFeed === "function") composerSyncFeed(false);
   };
   window.inspoView = "icons";
   window.showInspoView = function (v) {
@@ -39280,7 +39310,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     sampleBg(src, hero);
     placeHero();
     crossfade(prev && prev !== shown ? prev : null);
-    if (ovOpen) fillView();
+    if (ovOpen) fillView(); else if (typeof prewarmView === "function") prewarmView();
   }
   if (typeof renderToday === "function") {
     var _rt782 = renderToday;
@@ -39449,12 +39479,64 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     document.getElementById("ov-like").setAttribute("aria-pressed", lk ? lk.getAttribute("aria-pressed") || "false" : "false");
     document.getElementById("ov-acts").hidden = !ovFromHome;
   }
+  var ovKey = "";
+  function viewKey() { var look = ovFromHome && typeof todayLook !== "undefined" ? todayLook : ovLook; return look ? (look.composerKey || look.id || look.title || "") + "|" + ovFromHome : ""; }
   function openView(look, fromHome) {
     ovFromHome = fromHome !== false; ovLook = look || null;
-    ovOpen = true; fillView();
-    ov.hidden = false; document.body.classList.add("ov-open");
-    var sc = document.getElementById("ov-scroll"); if (sc) sc.scrollTop = 0;
-    var c = document.getElementById("ov-close"); if (c) try { c.focus({ preventScroll: true }); } catch (e) {}
+    ovOpen = true;
+    /* .79.4: the view was pre-built (and its images decoded) on idle after
+       the hero painted — opening only unhides it and slides it in */
+    if (ovKey !== viewKey()) fillView(); else { var lk = document.getElementById("today-like"); document.getElementById("ov-like").setAttribute("aria-pressed", lk ? lk.getAttribute("aria-pressed") || "false" : "false"); }
+    ovKey = "";
+    ov.classList.remove("ov-in"); ov.hidden = false;
+    ov.classList.add("ov-in");
+    /* reading scrollTop would force a layout of the whole view: only a view
+       he scrolled last time is put back to the top */
+    var sc = document.getElementById("ov-scroll"); if (sc && sc.__scrolled) { sc.scrollTop = 0; sc.__scrolled = false; }
+    if (sc && !sc.__wired) { sc.__wired = true; sc.addEventListener("scroll", function () { sc.__scrolled = true; }, { passive: true }); }
+    /* page-level class + focus after the first frame is on screen */
+    requestAnimationFrame(function () { setTimeout(function () {
+      if (!ovOpen) return; document.body.classList.add("ov-open");
+      var c = document.getElementById("ov-close"); if (c) try { c.focus({ preventScroll: true }); } catch (e) {}
+    }, 260); });
+  }
+  ov.addEventListener("animationend", function () { ov.classList.remove("ov-in"); });
+  /* pre-build the outfit view for the look on Home, off-screen, on idle */
+  var pwT = null;
+  function prewarmView() {
+    clearTimeout(pwT);
+    pwT = setTimeout(function () {
+      (window.requestIdleCallback || function (f) { return setTimeout(f, 200); })(function () {
+        try {
+          if (ovOpen || typeof todayLook === "undefined" || !todayLook) return;
+          var keep = ovFromHome; ovFromHome = true;
+          if (ovKey !== viewKey()) { fillView(); ovKey = viewKey(); }
+          ovFromHome = keep;
+          var im = document.getElementById("ov-img"), src = im.getAttribute("src") || "";
+          var hq = /\/onbody-cut\//.test(src) || /^assets\/onbody-cut\//.test(src) ? src.replace("onbody-cut/", "onbody-cut-hq/") : "";
+          if (hq) { var t = new Image(); t.decoding = "async"; t.src = hq; (t.decode ? t.decode() : Promise.resolve()).then(function () { if (!ovOpen && im.getAttribute("src") === src) im.setAttribute("src", hq); }).catch(function () {}); }
+          if (im.decode) im.decode().catch(function () {});
+          document.querySelectorAll("#ov-pieces img").forEach(function (x) { x.decoding = "async"; if (x.decode) x.decode().catch(function () {}); });
+        } catch (e) {}
+      }, { timeout: 1500 });
+    }, 400);
+  }
+  window.prewarmOutfitView794 = prewarmView;
+  /* .79.4: the Outfits feed is built once on idle a few seconds after the
+     hero, so the first visit to Outfits only shows it */
+  setTimeout(function () {
+    (window.requestIdleCallback || function (f) { return setTimeout(f, 300); })(function () {
+      try {
+        var g = document.getElementById("cf-grid");
+        if (g && !g.children.length && typeof window.composerSyncFeed === "function" && !(typeof currentTab !== "undefined" && currentTab === "looks")) window.composerSyncFeed(true);
+      } catch (e) {}
+    }, { timeout: 4000 });
+  }, 3500);
+  /* .79.4: every image the app writes decodes off the main thread */
+  if ("MutationObserver" in window) {
+    var asyncImgs = function (root) { if (root.tagName === "IMG") { if (!root.hasAttribute("decoding")) root.decoding = "async"; return; } if (root.querySelectorAll) root.querySelectorAll("img:not([decoding])").forEach(function (x) { x.decoding = "async"; }); };
+    asyncImgs(document.body);
+    new MutationObserver(function (ms) { for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) asyncImgs(a[j]); } }).observe(document.body, { childList: true, subtree: true });
   }
   function closeView() { if (!ovOpen) return; ovOpen = false; ov.hidden = true; document.body.classList.remove("ov-open"); }
   window.openOutfitView = openView; window.closeOutfitView = closeView;
@@ -39885,12 +39967,22 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     }
   }
   var pending = false;
+  /* .79.4: checked once per frame (not on every DOM change in a microtask,
+     which forced a layout mid-update); the full-screen outfit view locks
+     the page only after its slide-in, so the open frame never re-lays
+     out the whole page */
+  var lockT = null;
   function sync() {
     pending = false;
     decorate();
-    if (sheets().length) lock(); else unlock();
+    var list = sheets();
+    if (list.length) {
+      var ovOnly = list.every(function (x) { return x.el && x.el.closest && x.el.closest("#outfit-view"); });
+      if (ovOnly && lockedY === null) { clearTimeout(lockT); lockT = setTimeout(function () { if (sheets().length) lock(); }, 320); }
+      else { clearTimeout(lockT); lock(); }
+    } else { clearTimeout(lockT); unlock(); }
   }
-  function soon() { if (!pending) { pending = true; Promise.resolve().then(sync); } }
+  function soon() { if (!pending) { pending = true; requestAnimationFrame(sync); } }
   new MutationObserver(soon).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["hidden"], childList: true });
   /* tap on the dim backdrop of the item / icon sheet closes it */
   document.addEventListener("click", function (e) {
