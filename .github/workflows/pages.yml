@@ -43,5 +43,9 @@ jobs:
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with: { path: _site }
+      # A ~600 MB artifact is not visible to deploy-pages in the same second
+      # it finishes uploading (the merge deploy found zero artifacts).
+      - name: Wait until the Pages artifact is listed
+        run: sleep 20
       - id: deployment
         uses: actions/deploy-pages@v4
