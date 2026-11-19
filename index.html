@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.5" />
+    <meta name="wardrobe-build" content="2026-11-19.78.5a" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5024,11 +5024,11 @@
         display: block !important; position: relative !important; inset: auto !important; flex: 1 1 auto !important;
         width: 100% !important; height: auto !important; min-height: 0 !important; max-height: none !important;
         object-fit: contain !important; object-position: center bottom !important;
-        background: var(--hero-bg, linear-gradient(#b9b6b1, #cfccc7)) !important; cursor: pointer; transition: none;
+        background: transparent !important; cursor: pointer; transition: none; z-index: 1;
       }
       #panel-today .today-hero.hero-solo .hero-xfade {
         position: absolute; left: 0; width: 100%; object-fit: contain; object-position: center bottom; pointer-events: none;
-        opacity: 1; transition: opacity .45s ease; z-index: 1; background: var(--hero-bg, transparent);
+        opacity: 1; transition: opacity .45s ease; z-index: 2; background: transparent; will-change: opacity;
       }
       #panel-today .today-hero.hero-solo .hero-xfade.out { opacity: 0; }
       @media (prefers-reduced-motion: reduce) { #panel-today .today-hero.hero-solo .hero-xfade { transition: none; } }
@@ -5099,6 +5099,39 @@
         -webkit-mask: var(--thumb-up) center / contain no-repeat; mask: var(--thumb-up) center / contain no-repeat;
       }
       .cf-actions [data-cf-dislike]::before { -webkit-mask-image: var(--thumb-down); mask-image: var(--thumb-down); }
+      /* ================= Build .78.4b — Home hero: two layers =================
+         Background layer (#hero-bg): today the same render, full-bleed,
+         blurred once and scaled past its blurred edges; replaceable by a
+         fixed backdrop (setHeroBackdrop) — e.g. a closet photo he will be
+         cut out onto. Foreground layer (#today-img): the sharp full-length
+         render, transparent-safe (a PNG/WebP cutout works as is). Only
+         opacity animates. */
+      #panel-today .today-hero.hero-solo { background: #8f8a84 !important; isolation: isolate; }
+      html[data-theme="dark"] #panel-today .today-hero.hero-solo { background: #2a2622 !important; }
+      #panel-today .today-hero.hero-solo .today-shade { display: none !important; }
+      #panel-today .today-hero.hero-solo { --hero-bg: transparent !important; }
+      .hero-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; contain: strict; }
+      .hero-bg img {
+        position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill;
+        filter: blur(40px); transform: scale(1.15) translateZ(0);
+        opacity: 0; transition: opacity .45s ease; will-change: opacity; -webkit-backface-visibility: hidden; backface-visibility: hidden;
+      }
+      .hero-bg img.on { opacity: 1; }
+      .hero-bg.bd-custom img { filter: none; transform: none; object-position: center; }
+      /* the sharp render's side edges feather into the layer behind */
+      #panel-today .today-hero.hero-solo img#today-img, #panel-today .today-hero.hero-solo .hero-xfade, .outfit-view .ov-figure > img#ov-img {
+        -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--feather, 0%), #000 calc(100% - var(--feather, 0%)), transparent 100%);
+        mask-image: linear-gradient(to right, transparent 0, #000 var(--feather, 0%), #000 calc(100% - var(--feather, 0%)), transparent 100%);
+      }
+      #panel-today .today-hero.hero-solo .today-caption { position: relative; z-index: 3; }
+      .undo-toast { z-index: 260 !important; }
+      #panel-today .today-hero.hero-solo .hero-corner { z-index: 4; }
+      @media (prefers-reduced-motion: reduce) { .hero-bg img { transition: none; } }
+      /* the outfit view uses the same two layers */
+      .outfit-view .ov-figure { position: relative; background: #8f8a84 !important; isolation: isolate; }
+      html[data-theme="dark"] .outfit-view .ov-figure { background: #2a2622 !important; }
+      .outfit-view .ov-figure .hero-bg { z-index: 0; }
+      .outfit-view .ov-figure > img#ov-img { position: relative; z-index: 1; background: transparent !important; }
     </style>
 
   </head>
@@ -6318,7 +6351,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.5</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.5a</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -6496,7 +6529,7 @@
           visualViewport.addEventListener("resize", run);
           visualViewport.addEventListener("scroll", run);
         }
-        document.addEventListener("click", function () { setTimeout(run, 0); }, true);
+        document.addEventListener("click", function () { var nd = document.getElementById("nav-diag"); if (nd && nd.hidden) return; setTimeout(run, 0); }, true); /* .78.4b: no layout probes on every tap */
       })();
     </script>
 
@@ -6523,7 +6556,7 @@
         window.addEventListener("load", run);
         window.addEventListener("resize", run);
         window.addEventListener("pageshow", run);
-        document.addEventListener("click", function () { setTimeout(run, 0); }, true);
+        document.addEventListener("click", function () { var nd = document.getElementById("nav-diag"); if (nd && nd.hidden) return; setTimeout(run, 0); }, true); /* .78.4b: no layout probes on every tap */
       })();
     </script>
 
@@ -7872,7 +7905,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.5";
+var WARDROBE_BUILD = "2026-11-19.78.5a";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -30863,7 +30896,8 @@ function showUndoToast(msg, action) {
   pendingUndo = action;
   box.hidden = false;
   clearTimeout(undoTimer);
-  undoTimer = setTimeout(function () { box.hidden = true; pendingUndo = null; }, 6500);
+  undoTimer = setTimeout(function () { box.hidden = true; pendingUndo = null; }, 4000);
+  try { if (typeof window.placeUndo782 === "function") window.placeUndo782(box); } catch (e) {}
 }
 document.getElementById("undo-btn").addEventListener("click", function () {
   var box = document.getElementById("undo-toast");
@@ -38560,7 +38594,8 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
 
   /* the render's own studio colour behind it, so contain never shows a band */
   var bgCache = {};
-  function sampleBg(src, el) {
+  function sampleBg(src, el) { if (window.heroBgSet784) window.heroBgSet784(src, el); }
+  function sampleBgOld(src, el) {
     if (!src || !el) return;
     if (bgCache[src]) { el.style.setProperty("--hero-bg", bgCache[src]); return; }
     var im = new Image();
@@ -38818,6 +38853,162 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       });
     }, 0);
   }, true);
+})();
+    </script>
+    <script type="wardrobe/app">
+/* Build .78.4b — Home hero background layer + a smooth Next.
+   The lag on Next/swipe was the main thread: each deal re-ran Shop the
+   look's catalogue matching for the new look (renderFindLookMode →
+   catalogueScored/garmentTypeFromText, ~75% of the time) even though
+   that page is not on screen, plus a canvas getImageData colour sample
+   per render and a layout probe on every tap. Now Shop the look syncs
+   when it is opened (or in idle time), the background is one blurred
+   layer, and the next renders are fetched and decoded ahead. */
+(function () {
+  /* ---- background layer ---- */
+  var BD_KEY = "wardrobe.heroBackdrop";
+  function layerFor(el) {
+    if (!el) return null;
+    var bg = el.querySelector(":scope > .hero-bg");
+    if (!bg) {
+      bg = document.createElement("div"); bg.className = "hero-bg"; bg.setAttribute("aria-hidden", "true");
+      bg.innerHTML = '<img alt="" decoding="async" /><img alt="" decoding="async" />';
+      el.insertBefore(bg, el.firstChild);
+    }
+    return bg;
+  }
+  function backdrop() { try { return localStorage.getItem(BD_KEY) || ""; } catch (e) { return ""; } }
+  /* the blurred layer is built once per render from the render's own outer
+     columns (stretched across, then blurred), so it continues the studio
+     backdrop seamlessly at the render's edges — no panel, no band */
+  var edgeCache = {};
+  function edgeOf(src, cb) {
+    if (edgeCache[src]) return cb(edgeCache[src]);
+    var im = new Image(); im.decoding = "async";
+    im.onload = function () {
+      try {
+        var W = im.naturalWidth, H = im.naturalHeight, R = 96, cv = document.createElement("canvas"); cv.width = 2; cv.height = R;
+        var cx = cv.getContext("2d"), sw = Math.max(2, Math.round(W * 0.02));
+        cx.drawImage(im, 0, 0, sw, H, 0, 0, 1, R);
+        cx.drawImage(im, W - sw, 0, sw, H, 1, 0, 1, R);
+        var d = cx.getImageData(0, 0, 2, R).data, col = [[], []];
+        for (var y = 0; y < R; y++) for (var c = 0; c < 2; c++) { var k = (y * 2 + c) * 4; col[c].push([d[k], d[k + 1], d[k + 2]]); }
+        /* rows where an arm, a hand or a shadow reaches the edge are not
+           backdrop: replace them with the nearest clean backdrop row */
+        var both = col[0].concat(col[1]).map(function (p) { return p[0] * .3 + p[1] * .59 + p[2] * .11; }).sort(function (a, b) { return a - b; });
+        var med = both[both.length >> 1];
+        var out = document.createElement("canvas"); out.width = 48; out.height = R;
+        var ox = out.getContext("2d"), od = ox.createImageData(48, R);
+        for (c = 0; c < 2; c++) {
+          var ok = col[c].map(function (p) { return Math.abs(p[0] * .3 + p[1] * .59 + p[2] * .11 - med) < 14; });
+          for (y = 0; y < R; y++) {
+            var yy = y; if (!ok[y]) { for (var dd = 1; dd < R; dd++) { if (y - dd >= 0 && ok[y - dd]) { yy = y - dd; break; } if (y + dd < R && ok[y + dd]) { yy = y + dd; break; } } }
+            var px = ok[yy] ? col[c][yy] : [med, med, med];
+            for (var x = 0; x < 24; x++) { var o = (y * 48 + c * 24 + x) * 4; od.data[o] = px[0]; od.data[o + 1] = px[1]; od.data[o + 2] = px[2]; od.data[o + 3] = 255; }
+          }
+        }
+        ox.putImageData(od, 0, 0);
+        edgeCache[src] = out.toDataURL("image/jpeg", 0.85);
+      } catch (e) { edgeCache[src] = src; }
+      cb(edgeCache[src]);
+    };
+    im.onerror = function () { cb(src); };
+    im.src = src;
+  }
+  function setBg(src, el) {
+    var bg = layerFor(el); if (!bg) return;
+    var bd = backdrop();
+    bg.classList.toggle("bd-custom", !!bd);
+    if (!bd && src) { edgeOf(src, function (u) { paintBg(bg, u); }); return; }
+    paintBg(bg, bd || src);
+  }
+  function paintBg(bg, want) {
+    if (!want) return;
+    var imgs = bg.querySelectorAll("img"), on = bg.querySelector("img.on");
+    if (on && on.getAttribute("src") === want) return;
+    var next = on === imgs[0] ? imgs[1] : imgs[0];
+    function show() { next.classList.add("on"); if (on && on !== next) on.classList.remove("on"); }
+    next.setAttribute("src", want);
+    if (next.decode) next.decode().then(show, show); else show();
+  }
+  window.heroBgSet784 = function (src, el) {
+    setBg(src, el);
+    /* feather only the render's own edges: its drawn width inside the full-width box */
+    try {
+      var im = el && el.querySelector("img#today-img, img#ov-img");
+      if (im) {
+        var set = function () { var r = im.getBoundingClientRect(), nw = im.naturalWidth, nh = im.naturalHeight; if (!r.width || !nw) return;
+          var dw = Math.min(r.width, r.height * nw / nh), pad = (r.width - dw) / 2, f = Math.max(0, pad + dw * 0.16);
+          im.style.setProperty("--feather", Math.round(f) + "px"); el.style.setProperty("--feather", Math.round(f) + "px"); };
+        if (im.complete && im.naturalWidth) set(); else im.addEventListener("load", set, { once: true });
+      }
+    } catch (e) {}
+  };
+  /* swap the background for a fixed backdrop image (null = the blurred render) */
+  window.setHeroBackdrop = function (url) {
+    try { if (url) localStorage.setItem(BD_KEY, url); else localStorage.removeItem(BD_KEY); } catch (e) {}
+    var im = document.getElementById("today-img"), h = document.getElementById("today-hero");
+    if (h && im) setBg(im.getAttribute("src"), h);
+  };
+  var h0 = document.getElementById("today-hero"), i0 = document.getElementById("today-img");
+  if (h0 && i0 && h0.classList.contains("hero-solo")) setBg(i0.getAttribute("src"), h0);
+
+  /* ---- Shop the look syncs when it is opened, not on every Next ---- */
+  if (typeof window.syncShopLookToToday === "function") {
+    var _ss = window.syncShopLookToToday, dirty = false;
+    function runNow() { dirty = false; try { _ss(); } catch (e) {} }
+    window.syncShopLookToToday = function () {
+      var pf = document.getElementById("panel-find");
+      if (pf && !pf.hidden) return runNow();
+      dirty = true; /* runs the moment Shop the look opens */
+    };
+    if (typeof window.switchTab === "function") {
+      var _st = window.switchTab;
+      window.switchTab = function (name) { if (name === "find" && dirty) runNow(); return _st.apply(this, arguments); };
+    }
+  }
+
+  /* ---- fetch + decode the next renders ahead ---- */
+  var warm = {}, warmQ = [];
+  function warmOne(src) {
+    if (!src || warm[src]) return; warm[src] = 1;
+    var im = new Image(); im.decoding = "async"; im.src = src;
+    if (im.decode) im.decode().catch(function () {});
+    warmQ.push(im); if (warmQ.length > 12) warmQ.shift();
+  }
+  var ric2 = window.requestIdleCallback || function (f) { return setTimeout(f, 300); };
+  function prefetch() {
+    ric2(function () {
+      try {
+        var look = typeof todayLook !== "undefined" ? todayLook : null;
+        var r4 = window.renderFor782;
+        var next = typeof homeComposerLooks75 === "function" ? homeComposerLooks75(4) : [];
+        var n = 0;
+        next.forEach(function (l) { var s = r4 ? r4(l) : null; if (s && n < 3 && !(typeof isDislikedImg === "function" && isDislikedImg(s))) { warmOne(s); n++; } });
+        /* and a few more of his rendered looks so any deal lands warm */
+        if (typeof ONBODY !== "undefined" && ONBODY.map && typeof wardrobeItems !== "undefined") {
+          var own = {}; wardrobeItems.forEach(function (i) { own[i.id] = 1; });
+          var keys = Object.keys(ONBODY.map).filter(function (k) { return !warm[ONBODY.map[k]] && k.split("|").every(function (id) { return own[id]; }); });
+          for (var j = 0; j < 3 && keys.length; j++) warmOne(ONBODY.map[keys.splice(Math.floor(Math.random() * keys.length), 1)[0]]);
+        }
+      } catch (e) {}
+    }, { timeout: 2000 });
+  }
+  window.heroPrefetch784 = prefetch;
+  /* Undo sits just above the action row it belongs to, never over it */
+  window.placeUndo782 = function (box) {
+    var row = null, ov = document.getElementById("outfit-view");
+    if (ov && !ov.hidden) row = document.getElementById("ov-acts");
+    else { var pt = document.getElementById("panel-today"); if (pt && !pt.hidden) row = document.getElementById("today-simple-actions"); }
+    var r = row && row.getBoundingClientRect();
+    if (r && r.height && r.top > 0 && r.top < window.innerHeight) box.style.setProperty("bottom", Math.max(12, Math.round(window.innerHeight - r.top + 10)) + "px", "important");
+    else box.style.removeProperty("bottom");
+  };
+  if (typeof window.renderToday === "function") {
+    var _rt = window.renderToday;
+    window.renderToday = function () { var o = _rt.apply(this, arguments); prefetch(); return o; };
+  }
+  setTimeout(prefetch, 1500);
 })();
     </script>
   </body>

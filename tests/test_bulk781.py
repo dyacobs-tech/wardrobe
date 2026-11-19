@@ -28,7 +28,7 @@ exec(compile(_src.split("\ndef main():")[0], "test_edit77_helpers", "exec"), _g)
 png_uri, wait_js, start_server, CLOSET, TRY = (_g[k] for k in ("png_uri", "wait_js", "start_server", "CLOSET", "TRY"))
 
 HERE = Path(__file__).resolve().parent
-BUILD = "2026-11-19.78.5"
+BUILD = "2026-11-19.78.5a"
 REC = json.loads((HERE / "fixtures78/identify_recorded.json").read_text())
 KEYS = list(REC["answers"].keys())
 fails: list[str] = []
