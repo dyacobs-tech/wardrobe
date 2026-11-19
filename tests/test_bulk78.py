@@ -202,8 +202,7 @@ def main():
         check("item page shows that piece", next(i["name"] for i in CLOSET if i["id"] == iid) in pg.inner_text("#item-detail"))
 
         # ---------- 4. Save look without a render ----------
-        # (sync is aborted in this test, so its "Couldn't sync" note would cover the page foot)
-        pg.add_style_tag(content="#sync-note{display:none!important}")
+        # sync is aborted here, so the "Couldn't sync" note shows: the page must still scroll its foot clear of it
         pg.evaluate("switchTab('find')"); pg.wait_for_timeout(300)
         pg.evaluate("editShow('build')"); pg.wait_for_timeout(300)
         tops = [i["id"] for i in CLOSET if i["category"] in ("Polos",)][:1]
@@ -218,6 +217,9 @@ def main():
         ml = pg.evaluate("savedLooks.filter(l => l.id.indexOf('look-e77-') === 0)[0]")
         check("Mine look carries the nearest render when one exists", (ml["img"] or "") == (lk.get("img") or ""), (ml.get("img"), lk.get("img")))
         cta = pg.evaluate("""(() => { const bs = [...document.querySelectorAll('#panel-find .edit-cta button')].map(b => b.getBoundingClientRect()); return { n: bs.length, top: [...new Set(bs.map(r => Math.round(r.top)))].length, l: Math.min(...bs.map(r => r.left)), r: Math.max(...bs.map(r => r.right)) }; })()""")
+        pg.locator("#edit-save-board").evaluate("e => e.scrollIntoView({block: 'end'})"); pg.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)"); pg.wait_for_timeout(200)
+        cl = pg.evaluate("""(() => { const s = document.getElementById('sync-note'), b = document.getElementById('edit-save-board').getBoundingClientRect(); if (s.hidden) return { hidden: true }; const r = s.getBoundingClientRect(); return { ok: b.bottom <= r.top || b.top >= r.bottom, b: b.bottom, n: r.top }; })()""")
+        check("page foot scrolls clear of the sync note", cl.get("hidden") or cl.get("ok"), cl)
         check("board buttons fit on one row at 390", cta["n"] == 3 and cta["top"] == 1 and cta["l"] >= 0 and cta["r"] <= 390, cta)
         # with a shop piece -> inspo record; no render at all near -> still saves
         pg.evaluate("editLoadOutfit([], [%s])" % json.dumps({"sku": trousers[1]["sku"], "key": trousers[1]["sku"], "brand": trousers[1]["brand"], "name": trousers[1]["name"], "cat": "trousers", "img": "x.jpg", "price": 100, "hex": "#555555"})); pg.wait_for_timeout(300)

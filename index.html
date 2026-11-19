@@ -2608,6 +2608,9 @@
          offset as wide screens — the dead band between the hero
          controls and the bottom bar. */
       @media (max-width: 899px) { .sync-note { bottom: 76px; } }
+      /* Build .78: while the note shows, every page (Home pads itself
+         in todayNotePad) can scroll its last row clear of it. */
+      body.sync-note-on [role=tabpanel]:not(#panel-today) { margin-bottom: 64px; }
 </style>
 <style>
       /* ================= Dead-space audit — build 2026-11-16.13 =================
@@ -33289,6 +33292,7 @@ function syNoteRender() {
   var pending = syPendingCount();
   var show = !_syNoteOff && (!!SY.rej || (_syFailed && pending > 0));
   el.hidden = !show;
+  if (document.body) document.body.classList.toggle("sync-note-on", show);
   if (show) {
     var tx = document.getElementById("sync-note-text");
     if (tx) tx.textContent = SY.rej
