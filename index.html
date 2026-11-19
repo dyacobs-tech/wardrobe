@@ -4790,6 +4790,31 @@
       /* ================= Build .76 — The Edit: Saved / Searches / Build ================= */
       #panel-find .edit-tabs { margin: 8px 0 14px !important; }
       #panel-find .edit-tabs .chip .n { opacity: .6; font-weight: 500; margin-left: 4px; }
+      /* Build .78.4 — Price range pill + sheet */
+      #panel-find .edit-tabs { gap: 4px !important; justify-content: center; }
+      #panel-find .edit-tabs .chip { padding-left: 9px !important; padding-right: 9px !important; font-size: 13px !important; letter-spacing: 0 !important; white-space: nowrap; flex: 0 1 auto !important; }
+      #panel-find .edit-tabs .chip .n { margin-left: 3px !important; }
+      #panel-find .edit-tabs .price-pill { white-space: nowrap; }
+      /* the masthead + (paste a link / receipts) reads as an icon like Profile, not a black disc */
+      .masthead #shop-plus { background: transparent !important; color: var(--ink, currentColor) !important; border: 0 !important; box-shadow: none !important; font-size: 28px !important; font-weight: 300 !important; line-height: 1 !important; }
+      #panel-find .edit-tabs .price-pill[aria-pressed="true"] { background: var(--ink, #222); color: var(--paper, #fff); border-color: var(--ink, #222); }
+      #price-sheet .info-pop-card { max-width: 440px; width: calc(100vw - 32px); }
+      #price-sheet .principles-head { position: relative; justify-content: center; }
+      #price-sheet .principles-head h3 { text-align: center; flex: 1; margin: 0; }
+      #price-sheet .principles-head .info-pop-close { position: absolute; right: 0; top: 0; }
+      .pr-val { text-align: center; font-weight: 600; margin: 10px 0 4px; }
+      .pr-slider { position: relative; height: 34px; margin: 4px 6px 0; }
+      .pr-track { position: absolute; left: 0; right: 0; top: 15px; height: 4px; border-radius: 2px; background: var(--border, #ddd); }
+      .pr-track span { position: absolute; top: 0; bottom: 0; background: var(--ink, #222); border-radius: 2px; }
+      .pr-slider input[type=range] { position: absolute; left: 0; top: 0; width: 100%; height: 34px; margin: 0; background: none; pointer-events: none; -webkit-appearance: none; appearance: none; }
+      .pr-slider input[type=range]::-webkit-slider-runnable-track { background: none; height: 34px; }
+      .pr-slider input[type=range]::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 26px; height: 26px; margin-top: 4px; border-radius: 50%; background: var(--paper, #fff); border: 2px solid var(--ink, #222); box-shadow: 0 1px 3px rgba(0,0,0,.2); cursor: pointer; }
+      .pr-slider input[type=range]::-moz-range-thumb { pointer-events: auto; width: 22px; height: 22px; border-radius: 50%; background: var(--paper, #fff); border: 2px solid var(--ink, #222); cursor: pointer; }
+      .pr-slider input[type=range]::-moz-range-track { background: none; }
+      .pr-ends { display: flex; justify-content: space-between; font-size: 12px; opacity: .65; margin: 0 4px 12px; }
+      .pr-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0 0 12px; }
+      .pr-chips .chip { min-width: 0 !important; }
+      .pr-done { display: block; width: 100%; margin-top: 4px; }
       #panel-find .edit-tabs .chip .n:empty { display: none; }
       #find-nolook, #edit-list { display: none !important; }
       #panel-find .edit-q, #panel-find #edit-search-q { display: block; width: 100%; box-sizing: border-box; height: 40px; border-radius: 999px; border: var(--ctl-border, 1px solid var(--border)); background: var(--surface); color: var(--text); padding: 0 16px; font: 16px var(--font-ui); margin: 0 0 12px; -webkit-appearance: none; appearance: none; }
@@ -5850,6 +5875,7 @@
           <button type="button" class="chip" id="edit-tab-searches" data-edit-view="searches" aria-pressed="false">Searches<span class="n" id="edit-n-search"></span></button>
           <button type="button" class="chip" id="edit-tab-build" data-edit-view="build" aria-pressed="false">Build</button>
           <button type="button" class="chip" id="edit-tab-ask" data-edit-view="ask" aria-pressed="false">Ask</button>
+          <button type="button" class="chip price-pill" id="price-pill" aria-haspopup="dialog" aria-pressed="false">Price</button>
         </div>
         <div id="edit-v-saved">
           <input type="search" id="edit-saved-q" class="edit-q" aria-label="Search everything you've saved" placeholder="Search everything you've saved" autocomplete="off" />
@@ -5884,6 +5910,22 @@
           <form id="ask-form" autocomplete="off"><input type="text" id="ask-q" aria-label="Ask Vesper" placeholder="Ask Vesper…" maxlength="1000" enterkeyhint="send" autocomplete="off" /><button type="submit" id="ask-send" aria-label="Send" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>
         </div>
       </section>
+      <div class="info-pop-backdrop" id="price-sheet" hidden>
+        <div class="card info-pop-card price-card" role="dialog" aria-modal="true" aria-labelledby="price-title">
+          <div class="principles-head">
+            <h3 id="price-title" class="type-title">Price</h3>
+            <button type="button" class="info-pop-close" id="price-close" aria-label="Close">&times;</button>
+          </div>
+          <p class="pr-val" id="price-val">Any price</p>
+          <div class="pr-slider"><div class="pr-track"><span id="price-fill"></span></div>
+            <input type="range" id="price-lo" min="0" max="5000" step="50" value="0" aria-label="Lowest price" />
+            <input type="range" id="price-hi" min="0" max="5000" step="50" value="5000" aria-label="Highest price" /></div>
+          <div class="pr-ends"><span>$0</span><span>$5,000+</span></div>
+          <div class="pr-chips" id="price-chips"></div>
+          <div class="pr-chips" id="price-sort"></div>
+          <button type="button" class="btn-ink pr-done" id="price-done">Done</button>
+        </div>
+      </div>
       <div class="info-pop-backdrop" id="shop-plus-sheet" hidden>
         <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="shop-plus-title">
           <div class="principles-head">
@@ -16582,6 +16624,7 @@ function emulateExactFor(pc) {
   var out = [], seen = {};
   emulateEntryPool().forEach(function (e) {
     if (!e.iconGarment || e.iconGarment !== pc.iconGarment) return;
+    if (!priceOK(e)) return;
     var k = shopEntryKey(e);
     if (seen[k]) return;
     seen[k] = 1;
@@ -16896,7 +16939,7 @@ function emulateEditPick(pc, cat, list) {
   var best = null, bs = 1e9;
   (list || []).forEach(function (p) {
     var pcat = { chinos: "trousers", chino: "trousers", pants: "trousers", polo: "knitwear" }[String(p.cat || "").toLowerCase()] || String(p.cat || "").toLowerCase();
-    if (pcat !== cat) return;
+    if (pcat !== cat || !priceOK(p)) return;
     var d = hexDist76(p.hex, pc.hex);
     if (pc.hex && p.hex && d > 110) return;
     var hay = ((p.name || "") + " " + (p.subcat || "") + " " + (p.keys || []).join(" ")).toLowerCase(), ov = 0;
@@ -23790,7 +23833,7 @@ function renderSaved() {
   if (looksFilter === "wishlist") {
     var wishList = (typeof shopWishlist !== "undefined" && shopWishlist) ? shopWishlist : [];
     grid.innerHTML = wishList.length && typeof shopWishRowHTML === "function"
-      ? '<div class="wish-list span-all">' + shopWishlistSorted().map(shopWishRowHTML).join("") + "</div>"
+      ? '<div class="wish-list span-all">' + priceFilterSort(shopWishlistSorted()).map(shopWishRowHTML).join("") + "</div>"
       : '<p class="meta span-all">Nothing wishlisted yet.</p>';
     if (typeof renderOutfitIdeas === "function") renderOutfitIdeas();
     return;
@@ -26619,7 +26662,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches", "editBoard", "editView"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "priceRange", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches", "editBoard", "editView"];
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
@@ -26706,7 +26749,7 @@ function applyBackupData(data, opts) {
     var coll = (typeof SY_KEY_COLL !== "undefined") ? SY_KEY_COLL[k] : null;
     if (typeof SY !== "undefined" && SY) {
       if (coll && SY.st && SY.st[coll]) Object.keys(SY.st[coll]).forEach(function (id) { var s = SY.st[coll][id]; if (typeof s === "number" && (best === null || s > best)) best = s; });
-      var mfField = { profile: "profile", deletedIds: "deletedIds", overrides: "overrides", dislikedImgs: "dislikedImgs", recentlyRemoved: "recentlyRemoved", findBudget: "findBudget", shopTier: "shopTier", homeLocation: "homeLocation", currentLocation: "currentLocation", formality: "formality", studioSettings: "studioSettings", lastOpeningImg: "lastOpeningImg" }[k];
+      var mfField = { profile: "profile", deletedIds: "deletedIds", overrides: "overrides", dislikedImgs: "dislikedImgs", recentlyRemoved: "recentlyRemoved", findBudget: "findBudget", shopTier: "shopTier", priceRange: "priceRange", homeLocation: "homeLocation", currentLocation: "currentLocation", formality: "formality", studioSettings: "studioSettings", lastOpeningImg: "lastOpeningImg" }[k];
       if (mfField && SY.mf && SY.mf[mfField] && typeof SY.mf[mfField].t === "number" && (best === null || SY.mf[mfField].t > best)) best = SY.mf[mfField].t;
     }
     return best;
@@ -27210,6 +27253,171 @@ function setShopTier(key) {
      afterwards stamp the new tier. */
   if (typeof findLookMode !== "undefined" && findLookMode && typeof renderFindLookMode === "function") renderFindLookMode();
 }
+/* ================= Build .78.4 — Price range, one setting app-wide =================
+   One synced setting ("priceRange", a settings field like shopTier):
+   "any" | "r:LO-HI" (HI empty = no top) | "t:<tier>", plus an
+   optional "|asc" / "|desc" price sort. Every shop list reads
+   priceOK / priceSort: The Edit (Saved, Searches, Build pickers,
+   gap fillers, Ask), Shop the look and Emulate matches, Render me's
+   shop choice, Inspo To buy, Sale, brand pages and the wishlist.
+   A product without a price shows only while the range is Any. */
+var PR_MAX = 5000;
+var PR_CHIPS = [["any", "Any"], ["r:0-150", "Under $150"], ["r:150-500", "$150\u2013500"], ["r:500-1500", "$500\u20131,500"], ["r:1500-", "$1,500+"]];
+var PR_TIER_CHIPS = ["affordable", "accessible", "luxury"];
+var PR_TIER_BANDS = { affordable: [0, 150], accessible: [150, 500], luxury: [500, 1500], insensitive: [1500, null] };
+var priceRange = store.get("priceRange", "any");
+if (typeof priceRange !== "string") priceRange = "any";
+function prParse(v) {
+  var parts = String(v || "any").split("|");
+  var r = { key: parts[0] || "any", sort: (parts[1] === "asc" || parts[1] === "desc") ? parts[1] : "", lo: 0, hi: null, tier: null };
+  var m = /^r:(\d+)-(\d*)$/.exec(r.key);
+  if (m) {
+    r.lo = parseInt(m[1], 10); r.hi = m[2] === "" ? null : parseInt(m[2], 10);
+    if (r.hi != null && r.hi >= PR_MAX) r.hi = null;
+    if (r.lo <= 0 && r.hi == null) r.key = "any";
+  } else if (/^t:/.test(r.key) && PR_TIER_BANDS[r.key.slice(2)]) r.tier = r.key.slice(2);
+  else r.key = "any";
+  return r;
+}
+function prState() { return prParse(priceRange); }
+function priceRangeActive() { return prState().key !== "any"; }
+function prNum(p) {
+  if (typeof p === "number") return isFinite(p) && p > 0 ? p : null;
+  if (typeof p === "string" && p) { var n = parseFloat(p.replace(/[^0-9.]/g, "")); return isFinite(n) && n > 0 ? n : null; }
+  return null;
+}
+function priceOK(e) {
+  var st = prState();
+  if (st.key === "any") return true;
+  if (!e) return false;
+  var p = prNum(e.price);
+  if (st.tier) {
+    if (e.tier && PR_TIER_BANDS[e.tier]) return e.tier === st.tier;
+    var b = PR_TIER_BANDS[st.tier];
+    return p != null && p >= b[0] && (b[1] == null || p < b[1]);
+  }
+  return p != null && p >= st.lo && (st.hi == null || p <= st.hi);
+}
+/* Sorted copy by price when a price sort is chosen; otherwise the
+   list as given. get(x) returns the price-bearing record. */
+function priceSort(list, get) {
+  var st = prState();
+  if (!st.sort || !list) return list;
+  var dir = st.sort === "asc" ? 1 : -1;
+  return list.map(function (x, i) { var r = get ? get(x) : x; return { x: x, i: i, p: prNum(r && r.price) }; }).sort(function (a, b) {
+    if (a.p == null && b.p == null) return a.i - b.i;
+    if (a.p == null) return 1;
+    if (b.p == null) return -1;
+    return (a.p - b.p) * dir || a.i - b.i;
+  }).map(function (o) { return o.x; });
+}
+function priceFilterSort(list, get) {
+  return priceSort((list || []).filter(function (x) { return priceOK(get ? get(x) : x); }), get);
+}
+function prMoney(n) { return "$" + Number(n).toLocaleString("en-US"); }
+function priceRangeLabel(st) {
+  st = st || prState();
+  if (st.key === "any") return "Price";
+  if (st.tier) return shopTierInfo(st.tier).name;
+  if (st.hi == null) return prMoney(st.lo) + "+";
+  if (st.lo <= 0) return "Under " + prMoney(st.hi);
+  return prMoney(st.lo) + "\u2013" + Number(st.hi).toLocaleString("en-US");
+}
+/* The pill's compact form: <$150, $150–500, $500–1.5k, $1.5k+ */
+function priceRangeShort(st) {
+  st = st || prState();
+  function k(n) { return n >= 1000 ? (Math.round(n / 100) / 10) + "k" : String(n); }
+  if (st.key === "any" || st.tier) return priceRangeLabel(st);
+  if (st.hi == null) return "$" + k(st.lo) + "+";
+  if (st.lo <= 0) return "<$" + k(st.hi);
+  return "$" + k(st.lo) + "\u2013" + k(st.hi);
+}
+function setPriceRange(key, sort) {
+  var cur = prState();
+  var st = prParse((key == null ? cur.key : key) + "|" + (sort == null ? cur.sort : sort));
+  var v = st.key + (st.sort ? "|" + st.sort : "");
+  if (v === priceRange) { priceRangeRefresh(); return; }
+  priceRange = v;
+  store.set("priceRange", priceRange);
+  priceRangeRefresh();
+}
+var _prRefreshT = null;
+function priceRangeRefresh() {
+  var pill = document.getElementById("price-pill");
+  if (pill) { pill.textContent = priceRangeShort(); pill.setAttribute("aria-pressed", priceRangeActive() ? "true" : "false"); }
+  clearTimeout(_prRefreshT);
+  _prRefreshT = setTimeout(function () {
+    function tryr(f) { try { f(); } catch (e) {} }
+    var tab = (typeof currentTab !== "undefined") ? currentTab : "";
+    if (typeof window.editRefreshPrice === "function") tryr(window.editRefreshPrice);
+    if (tab === "emulate" && typeof renderEmulate === "function") tryr(renderEmulate);
+    if (typeof findLookMode !== "undefined" && findLookMode && typeof renderFindLookMode === "function") tryr(renderFindLookMode);
+    if (typeof renderSaleItems === "function") tryr(renderSaleItems);
+    if (typeof brandViewState !== "undefined" && brandViewState && typeof renderBrandView === "function") tryr(renderBrandView);
+    if (typeof renderInspoOnYou === "function") tryr(renderInspoOnYou);
+    if (typeof renderSaved === "function" && typeof looksFilter !== "undefined" && looksFilter === "wishlist") tryr(renderSaved);
+  }, 30);
+}
+function priceSheetSync() {
+  var st = prState();
+  var lo = document.getElementById("price-lo"), hi = document.getElementById("price-hi");
+  var a = st.tier ? PR_TIER_BANDS[st.tier][0] : st.lo, b = st.tier ? PR_TIER_BANDS[st.tier][1] : st.hi;
+  if (lo) lo.value = String(a || 0);
+  if (hi) hi.value = String(b == null ? PR_MAX : b);
+  priceSheetFill();
+  var val = document.getElementById("price-val");
+  if (val) val.textContent = st.key === "any" ? "Any price" : (st.tier ? shopTierInfo(st.tier).name : priceRangeLabel(st));
+  var chips = document.getElementById("price-chips");
+  if (chips) chips.innerHTML = PR_CHIPS.map(function (c) {
+    return '<button type="button" class="chip" data-pr-key="' + c[0] + '" aria-pressed="' + (prParse(c[0]).key === st.key ? "true" : "false") + '">' + c[1] + "</button>";
+  }).join("") + PR_TIER_CHIPS.map(function (t) {
+    return '<button type="button" class="chip" data-pr-key="t:' + t + '" aria-pressed="' + (st.tier === t ? "true" : "false") + '">' + esc(shopTierInfo(t).name) + "</button>";
+  }).join("");
+  var so = document.getElementById("price-sort");
+  if (so) so.innerHTML = [["", "Best match"], ["asc", "Price low\u2013high"], ["desc", "Price high\u2013low"]].map(function (c) {
+    return '<button type="button" class="chip" data-pr-sort="' + c[0] + '" aria-pressed="' + (st.sort === c[0] ? "true" : "false") + '">' + c[1] + "</button>";
+  }).join("");
+}
+function priceSheetFill() {
+  var lo = document.getElementById("price-lo"), hi = document.getElementById("price-hi"), f = document.getElementById("price-fill");
+  if (!lo || !hi || !f) return;
+  var a = +lo.value, b = +hi.value;
+  f.style.left = (a / PR_MAX * 100) + "%";
+  f.style.right = (100 - b / PR_MAX * 100) + "%";
+}
+function openPriceSheet() { priceSheetSync(); var s = document.getElementById("price-sheet"); if (s) s.hidden = false; }
+function closePriceSheet() { var s = document.getElementById("price-sheet"); if (s) s.hidden = true; }
+(function () {
+  var sheet = document.getElementById("price-sheet");
+  var pill = document.getElementById("price-pill");
+  if (pill) pill.addEventListener("click", function (e) { e.stopPropagation(); openPriceSheet(); });
+  if (!sheet) return;
+  function fromSlider(which) {
+    var lo = document.getElementById("price-lo"), hi = document.getElementById("price-hi");
+    var a = +lo.value, b = +hi.value;
+    if (a > b - 50) { if (which === "lo") { a = Math.max(0, b - 50); lo.value = a; } else { b = Math.min(PR_MAX, a + 50); hi.value = b; } }
+    priceSheetFill();
+    var val = document.getElementById("price-val");
+    var key = "r:" + a + "-" + (b >= PR_MAX ? "" : b);
+    if (val) val.textContent = prParse(key).key === "any" ? "Any price" : priceRangeLabel(prParse(key));
+    return key;
+  }
+  ["lo", "hi"].forEach(function (w) {
+    var el = document.getElementById("price-" + w);
+    if (!el) return;
+    el.addEventListener("input", function () { fromSlider(w); });
+    el.addEventListener("change", function () { setPriceRange(fromSlider(w)); priceSheetSync(); });
+  });
+  sheet.addEventListener("click", function (e) {
+    if (e.target === sheet || (e.target.closest && (e.target.closest("#price-close") || e.target.closest("#price-done")))) { closePriceSheet(); return; }
+    var k = e.target.closest ? e.target.closest("[data-pr-key]") : null;
+    if (k) { setPriceRange(k.getAttribute("data-pr-key")); priceSheetSync(); return; }
+    var so = e.target.closest ? e.target.closest("[data-pr-sort]") : null;
+    if (so) { setPriceRange(null, so.getAttribute("data-pr-sort")); priceSheetSync(); }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sheet.hidden) closePriceSheet(); });
+  priceRangeRefresh();
+})();
 function closeShopTierSels() {
   document.querySelectorAll("[data-shop-tier-opts]").forEach(function (o) { o.hidden = true; });
   document.querySelectorAll("[data-shop-tier-toggle]").forEach(function (t) { t.setAttribute("aria-expanded", "false"); });
@@ -28335,7 +28543,7 @@ function renderBrandView() {
   var box = document.getElementById("brand-view");
   if (!box || !brandViewState) return;
   var name = brandViewState.name, url = brandViewState.url, meta = brandViewState.meta;
-  var entries = catalogueForBrand(name);
+  var entries = priceFilterSort(catalogueForBrand(name));
   var html = '<div class="brand-view-head"><h3>' + esc(name) + "</h3>" +
     (meta ? '<p class="bv-meta">' + esc(meta) + "</p>" : "") +
     (entries.length ? '<p class="bv-meta">' + entries.length + " piece" + (entries.length === 1 ? "" : "s") + " in the catalogue · prices checked " + SHOP_CATALOGUE_CHECKED + ".</p>" : "") +
@@ -28590,6 +28798,7 @@ function catalogueScored(pc, applyCeiling, tierKey) {
   shopCatalogueAll().forEach(function (e) {
     if (e.cat !== cat) return;
     if (applyCeiling && shopTierRank(e.tier) > ceiling) return;
+    if (applyCeiling && !priceOK(e)) return; /* .78.4 price range */
     if (subjType) {
       var eType = garmentTypeFromText((e.name || "") + " " + (e.keys || []).join(" "), e.cat);
       if (eType !== subjType) return;
@@ -29700,7 +29909,7 @@ function renderSaleItems() {
     return;
   }
   var items = SALE_ITEMS.map(function (it, i) { return { it: it, i: i }; }).filter(function (x) {
-    return saleCatFilter === "All" || (x.it.category || "Other") === saleCatFilter;
+    return (saleCatFilter === "All" || (x.it.category || "Other") === saleCatFilter) && priceOK(x.it);
   });
   /* Sale items list by type, then brand A–Z, then name A–Z
      (build .28) — the stored sweep order is untouched, and the
@@ -29712,6 +29921,7 @@ function renderSaleItems() {
     if (br) return br;
     return String(a.it.name || "").localeCompare(String(b.it.name || ""));
   });
+  items = priceSort(items, function (x) { return x.it; });
   if (count) count.textContent = items.length + (items.length === 1 ? " item" : " items");
   if (!items.length) {
     list.innerHTML = '<p class="meta">Nothing on sale.</p>';
@@ -33335,6 +33545,7 @@ function syMetaOf() {
     recentlyRemoved: recentlyRemoved,
     findBudget: budgetLevel,
     shopTier: shopTier,
+    priceRange: (typeof priceRange === "string" ? priceRange : "any"),
     homeLocation: homeLoc,
     currentLocation: currentLoc,
     formality: formalityLevel,
@@ -33349,7 +33560,7 @@ function syMetaOf() {
    and at the start of every sync, so no write path is missed. */
 var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops", editMeta: "edits", editSearches: "searches", askSync: "ask" };
 var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox", shopwish: "shopWishlist", pricedrops: "priceDrops", edits: "editMeta", searches: "editSearches", ask: "askSync" };
-var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
+var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, priceRange: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
 function syTrackChanges(onlyColl) {
   var now = Date.now(), ch = false, mig = false;
   var colls = onlyColl ? [onlyColl] : SY_COLLS;
@@ -33696,6 +33907,7 @@ function syValidMetaField(f, v) {
       return Array.isArray(v) && v.every(function (x) { return plain(x) && typeof x.id === "string"; });
     case "findBudget": case "shopTier": case "formality":
       return typeof v === "string" || typeof v === "number";
+    case "priceRange": return typeof v === "string" && v.length <= 40;
     case "homeLocation": case "currentLocation": case "studioSettings":
       return v === null || plain(v);
     case "lastOpeningImg": return v === null || typeof v === "string";
@@ -33761,6 +33973,7 @@ function syApplyMeta(meta) {
   }
   if (ok("findBudget") && (t = take("findBudget"))) { budgetLevel = syUnwire(d.findBudget); store.set("findBudget", budgetLevel); if (typeof renderBudget === "function") renderBudget(); stamp("findBudget", t, budgetLevel); }
   if (ok("shopTier") && (t = take("shopTier"))) { shopTier = syUnwire(d.shopTier); store.set("shopTier", shopTier); if (typeof renderShopTier === "function") renderShopTier(); stamp("shopTier", t, shopTier); }
+  if (ok("priceRange") && (t = take("priceRange"))) { priceRange = String(syUnwire(d.priceRange) || "any"); store.set("priceRange", priceRange); if (typeof priceRangeRefresh === "function") priceRangeRefresh(); stamp("priceRange", t, priceRange); }
   if (ok("homeLocation") && (t = take("homeLocation"))) { homeLoc = syUnwire(d.homeLocation); store.set("homeLocation", homeLoc); stamp("homeLocation", t, homeLoc); }
   if (ok("currentLocation") && (t = take("currentLocation"))) { currentLoc = syUnwire(d.currentLocation); store.set("currentLocation", currentLoc); stamp("currentLocation", t, currentLoc); }
   if (ok("formality") && (t = take("formality"))) { formalityLevel = syUnwire(d.formality); store.set("formality", formalityLevel); if (typeof renderFormality === "function") renderFormality(); stamp("formality", t, formalityLevel); }
@@ -36260,7 +36473,7 @@ document.addEventListener("keydown", function (e) {
     if (nm) nm = nm.charAt(0).toUpperCase() + nm.slice(1);
     return { key: key, brand: e.brand || "", name: nm, price: (typeof e.price === "number" ? e.price : parseFloat(e.price) || null),
       url: e.url || "", img: e.img || "", store: storeName(e), cat: c, colour: cap(colourOf(e)), hex: hex || "",
-      cur: e.cur || e.currency || "", pd: e.pd || e.priceDisplay || "", gap: e.gap ? 1 : 0 };
+      cur: e.cur || e.currency || "", pd: e.pd || e.priceDisplay || "", gap: e.gap ? 1 : 0, tier: e.tier || "" };
   }
   function pool() {
     var base = (typeof shopCatalogueAll === "function") ? shopCatalogueAll() : [];
@@ -36498,6 +36711,7 @@ document.addEventListener("keydown", function (e) {
     var q = editState.q;
     var list = all.filter(function (sn) {
       var m = metaFor(sn.key);
+      if (typeof priceOK === "function" && !priceOK(sn)) return false;
       if (editState.starred && !(m && m.star)) return false;
       if (!q) return true;
       return (sn.brand + " " + sn.name + " " + sn.colour + " " + (CAT_LABEL[sn.cat] || "") + " " + sn.store + " " + groupName(sn, "Search")).toLowerCase().indexOf(q) !== -1;
@@ -36511,11 +36725,11 @@ document.addEventListener("keydown", function (e) {
     var names = Object.keys(groups);
     if (g === "Price") names.sort(function (a, b) { return BAND_ORDER.indexOf(a) - BAND_ORDER.indexOf(b); });
     else names.sort(function (a, b) { return groups[b].length - groups[a].length || a.localeCompare(b); });
-    names.forEach(function (n) { groups[n].sort(function (a, b) { var ma = metaFor(a.key), mb = metaFor(b.key); return ((mb && mb.star) ? 1 : 0) - ((ma && ma.star) ? 1 : 0); }); });
+    names.forEach(function (n) { groups[n].sort(function (a, b) { var ma = metaFor(a.key), mb = metaFor(b.key); return ((mb && mb.star) ? 1 : 0) - ((ma && ma.star) ? 1 : 0); }); if (typeof priceSort === "function") groups[n] = priceSort(groups[n]); });
     out.innerHTML = names.length ? names.map(function (n) {
       return '<div class="edit-sec"><h3>' + esc(n) + '</h3><span class="edit-meta">' + groups[n].length + (groups[n].length === 1 ? " piece" : " pieces") + "</span></div>" +
         '<div class="edit-grid">' + groups[n].map(function (sn) { return cardHTML(sn, "saved"); }).join("") + "</div>";
-    }).join("") : '<p class="empty">Nothing saved matches.</p>';
+    }).join("") : '<p class="empty">' + ((typeof priceRangeActive === "function" && priceRangeActive()) ? "Nothing saved in " + esc(priceRangeLabel()) + "." : "Nothing saved matches.") + "</p>";
   }
 
   /* ---------- Searches ---------- */
@@ -36548,10 +36762,12 @@ document.addEventListener("keydown", function (e) {
         res = editSearchCatalog(open.q).filter(function (e) { var m = metaFor(snap(e).key); return !(m && m.pass); });
         editState.results = res; editState._resFor = open.id;
       }
+      if (typeof priceFilterSort === "function") res = priceFilterSort(res);
       var shown = res.slice(0, editState.more ? 96 : 48);
+      var slShown = (typeof priceFilterSort === "function") ? priceFilterSort(open.shortlist || []) : (open.shortlist || []);
       out.innerHTML = '<div class="edit-open-h"><div><h3>' + esc(open.q) + '</h3><span class="edit-meta">' + res.length + (res.length === 1 ? " result" : " results") + " · " + (open.shortlist || []).length + " shortlisted</span></div>" +
         '<button type="button" class="chip" data-edit-close-search aria-label="Close search">Done</button></div>' +
-        ((open.shortlist || []).length ? '<div class="edit-strip">' + open.shortlist.map(thumbHTML).join("") + "</div>" : "") +
+        (slShown.length ? '<div class="edit-strip">' + slShown.map(thumbHTML).join("") + "</div>" : "") +
         (shown.length ? '<div class="edit-grid">' + shown.map(function (e) { return cardHTML(snap(e), "search"); }).join("") + "</div>" : '<p class="empty">No matches in the stores yet.</p>') +
         (res.length > shown.length ? '<div class="edit-more"><button type="button" class="btn-ghost" data-edit-more>Show more</button></div>' : "");
       if (gapsHost) gapsHost.hidden = true;
@@ -36562,7 +36778,7 @@ document.addEventListener("keydown", function (e) {
     editState.results = []; editState._resFor = null; editState.more = false;
     var list = allSearches();
     out.innerHTML = list.length ? list.map(function (s) {
-      var sl = s.shortlist || [];
+      var sl = (typeof priceFilterSort === "function") ? priceFilterSort(s.shortlist || []) : (s.shortlist || []);
       var range = (typeof s.lo === "number" && typeof s.hi === "number") ? " · " + money(s.lo) + "–" + money(s.hi) : "";
       var seen = typeof s.seen === "number" ? sl.length + " shortlisted of " + s.seen : (sl.length ? sl.length + " shortlisted" : "");
       var meta = [when(s.last || s.at), seen].filter(Boolean).join(" · ") + range;
@@ -36589,6 +36805,7 @@ document.addEventListener("keydown", function (e) {
     var out = EDIT_CATALOG.filter(function (e) {
       if (!e.gap || !e.img || seen[e.url]) return false;
       seen[e.url] = 1;
+      if (typeof priceOK === "function" && !priceOK(e)) return false;
       if (opts.slot && slotOfCat(e.cat) !== opts.slot) return false;
       if (opts.cat && e.cat !== opts.cat) return false;
       var sn = snap(e), m = metaFor(sn.key);
@@ -36665,7 +36882,7 @@ document.addEventListener("keydown", function (e) {
   function slotOptions(slot) {
     var opts = optionalSlot(slot) ? [null] : [];
     (closetPool()[slot] || []).forEach(function (it) { opts.push({ t: "c", id: it.id }); });
-    savedList().forEach(function (sn) { if (slotOfCat(sn.cat) === slot) opts.push({ t: "p", p: sn }); });
+    savedList().forEach(function (sn) { if (slotOfCat(sn.cat) === slot && (typeof priceOK !== "function" || priceOK(sn))) opts.push({ t: "p", p: sn }); });
     gapPicks({ slot: slot, ids: boardIds() }).slice(0, 6).forEach(function (e) {
       var sn = snap(e);
       if (!opts.some(function (o) { return o && o.t === "p" && o.p.key === sn.key; })) opts.push({ t: "p", p: sn });
@@ -36935,6 +37152,12 @@ document.addEventListener("keydown", function (e) {
     if (!card) return null;
     return SNAPS[card.getAttribute("data-edit-key")] || null;
   }
+  window.editRefreshPrice = function () {
+    if (typeof currentTab !== "undefined" && currentTab !== "find") return;
+    editState.results = []; editState._resFor = null;
+    if (editState.view === "ask") { if (typeof renderAsk === "function") renderAsk(false); } else rerender();
+    if (editState.view === "searches" && !editState.openSearch && typeof renderGaps === "function") renderGaps();
+  };
   function rerender() { if (editState.view === "saved") renderSaved(); else if (editState.view === "searches") renderSearches(); else if (editState.view === "build") renderBuild(); updateCounts(); }
   document.addEventListener("click", function (e) {
     var t = e.target;
@@ -37090,6 +37313,7 @@ function ionOwnHTML(ids) {
   return th.length ? '<div class="ion-kick">Yours</div><div class="ion-own">' + th.join("") + "</div>" : "";
 }
 function ionShopHTML(list) {
+  if (typeof priceFilterSort === "function") list = priceFilterSort(list || []);
   return list.map(function (p) {
     return '<div class="ion-shop"><span class="ion-sph">' + (p.img ? '<img src="' + ionEsc(p.img) + '" alt="" loading="lazy" />' : "") + "</span>" +
       '<div><b>' + ionEsc(p.brand) + '</b><span class="ion-nm">' + ionEsc(p.name) + "</span></div>" +
@@ -37293,7 +37517,8 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     if (!k) { turn.state = "error"; turn.msg = "Sign in to sync first."; saveThread(); renderAsk(true); return; }
     askBusy = true;
     renderAsk(true);
-    var body = { query: q, closet: closetPayload(), history: historyPayload(idx), liked: askLiked.slice(0, 500), disliked: askDisliked.slice(0, 500) };
+    var prq = (typeof priceRangeActive === "function" && priceRangeActive()) ? " (Budget per piece: " + (function () { var st = prState(); return st.tier ? shopTierInfo(st.tier).name.toLowerCase() + " price tier" : priceRangeLabel(st).replace("\u2013", " to $"); })() + ")" : "";
+    var body = { query: q + prq, closet: closetPayload(), history: historyPayload(idx), liked: askLiked.slice(0, 500), disliked: askDisliked.slice(0, 500) };
     var ctl = typeof AbortController === "function" ? new AbortController() : null;
     var to = setTimeout(function () { if (ctl) ctl.abort(); }, 45000);
     fetch(TRYON_URL + "/ask", { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + k }, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined })
@@ -37321,6 +37546,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var e = entryOf(p.product) || catBySku(p.sku);
     if (!e) return "";
     var pr = p.product || {};
+    if (typeof priceOK === "function" && !priceOK({ price: (typeof e.price === "number" ? e.price : pr.price), tier: e.tier || pr.tier || "" })) return "";
     var hex = pr.hex || e.hex || "";
     var owns = (p.pairsWith || []).map(function (id) { return typeof closetItemById === "function" ? closetItemById(id) : null; }).filter(Boolean).slice(0, 3);
     var star = isLiked(p.sku), added = askAdded[t.id + "|" + p.sku];
@@ -37344,7 +37570,9 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     if (t.state === "error") return h + '<p class="ask-a ask-msg">' + esc(t.msg || "That one didn't come through.") + "</p>" +
       (t.code === 429 || t.code === 401 ? "" : '<button type="button" class="chip ask-retry" data-ask-retry="' + esc(t.id) + '">Try again</button>') + "</div>";
     var cards = (t.picks || []).filter(function (p) { return !isDisliked(p.sku); }).map(function (p) { return cardHTML(t, p); }).join("");
+    var prHid = !cards && (t.picks || []).length && typeof priceRangeActive === "function" && priceRangeActive();
     return h + '<p class="ask-a">' + esc(t.answer) + "</p>" + (cards ? '<div class="ask-deck">' + cards + "</div>" : "") +
+      (prHid ? '<p class="ask-a ask-msg">No picks in ' + esc(priceRangeLabel()) + ".</p>" : "") +
       (t.outfit ? '<button type="button" class="btn-ink ask-build" data-ask-build="' + esc(t.id) + '">Build this look</button>' : "") + "</div>";
   }
   function syncSend() {
