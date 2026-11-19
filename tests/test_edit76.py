@@ -39,7 +39,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).resolve().parent
-BUILD = "2026-11-19.78.9b"
+BUILD = "2026-11-19.78.9c"
 TRY = "https://wardrobe-tryon.dyacobs.workers.dev"
 PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
 FX = json.loads((HERE / "fixture_edit76.json").read_text())

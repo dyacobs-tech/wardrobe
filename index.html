@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.9b" />
+    <meta name="wardrobe-build" content="2026-11-19.78.9c" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5179,6 +5179,51 @@
       }
       /* the closet backdrop arrives pre-blurred; shown as is, never re-sharpened */
       #panel-today .today-hero.hero-solo.has-cut .hero-bg img, .outfit-view .ov-figure.has-cut .hero-bg img { filter: none; transform: none; object-position: center 85%; object-fit: cover; }
+      /* ================= Build .78.9c — Home is one seamless off-white =================
+         One soft background, top to bottom: the masthead, behind him, and
+         the caption / controls all sit on the same continuous tone (base
+         #F6F2EA, a lighter glow behind his upper body, a faintly darker
+         floor at his feet, a soft contact shadow). Ink text and outlined
+         ink buttons. Dark mode: the same in a deep warm charcoal. The nav
+         is left as it is. Replaces the walnut closet. */
+      html:has(body[data-page="today"]) { --ow-base: #F6F2EA; --ow-glow: #FDFBF7; --ow-floor: #E9E2D5; --ow-ink: #1F1A15; --ow-sub: #7A6C5B; --ow-line: rgba(31, 26, 21, .55); --ow-shadow: rgba(70, 52, 30, .30); }
+      html[data-theme="dark"]:has(body[data-page="today"]) { --ow-base: #1E1A17; --ow-glow: #2C2722; --ow-floor: #161310; --ow-ink: #F2ECE2; --ow-sub: #B4A792; --ow-line: rgba(242, 236, 226, .5); --ow-shadow: rgba(0, 0, 0, .55); }
+      html:has(body[data-page="today"]) { background: var(--ow-base) !important; }
+      body[data-page="today"] { background: radial-gradient(ellipse 80% 40% at 50% 33%, var(--ow-glow) 0%, transparent 100%) no-repeat, var(--ow-base) !important; background-attachment: fixed !important; min-height: 100vh; }
+      body[data-page="today"] .masthead, body[data-page="today"] .masthead::before, body[data-page="today"] .masthead::after { background: transparent !important; background-color: transparent !important; box-shadow: none !important; border-color: transparent !important; }
+      body[data-page="today"] .masthead, body[data-page="today"] .masthead h1, body[data-page="today"] .masthead .page-title, body[data-page="today"] .masthead button { color: var(--ow-ink) !important; }
+      body[data-page="today"] #panel-today #today-hero.today-hero.hero-solo { background: transparent !important; background-color: transparent !important; }
+      body[data-page="today"] #panel-today #today-hero.hero-solo .hero-bg {
+        background-color: transparent !important;
+        background-image:
+          linear-gradient(to bottom, transparent calc(var(--fig-top, 0px) + var(--fig-h, 520px) * .80), var(--ow-floor) calc(var(--fig-top, 0px) + var(--fig-h, 520px) * .96), transparent calc(var(--fig-top, 0px) + var(--fig-h, 520px) + 70px)) !important;
+        background-size: 100% 100% !important; background-repeat: no-repeat !important; contain: none;
+      }
+      body[data-page="today"] #panel-today #today-hero.hero-solo .hero-bg img { display: none !important; }
+      body[data-page="today"] #panel-today #today-hero.hero-solo .hero-bg::after {
+        content: ""; position: absolute; left: 50%; width: 44%; height: 30px; transform: translateX(-50%);
+        top: calc(var(--fig-top, 0px) + var(--fig-h, 520px) * .955 - 15px) !important; bottom: auto !important;
+        background: radial-gradient(closest-side, var(--ow-shadow), transparent) !important; pointer-events: none; z-index: 1;
+      }
+      body[data-page="today"] #panel-today #today-hero.hero-solo:not(.has-cut) .hero-bg::after { display: none; }
+      body[data-page="today"] #panel-today #today-hero.hero-solo.has-cut img#today-img, body[data-page="today"] #panel-today #today-hero.hero-solo.has-cut .hero-xfade { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .10)); }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption { background: transparent !important; background-image: none !important; color: var(--ow-ink) !important; box-shadow: none !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption::before, body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption::after { display: none !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-kicker { color: var(--ow-sub) !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo #today-name, body[data-page="today"] #panel-today .today-hero.hero-solo .today-loc, body[data-page="today"] #panel-today .today-hero.hero-solo .today-loc * { color: var(--ow-ink) !important; text-shadow: none !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-loc span { color: var(--ow-sub) !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption .hero-icon-btn,
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption .hero-cdd-btn,
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption .cdd-btn {
+        background: transparent !important; background-color: transparent !important; color: var(--ow-ink) !important;
+        border: 1.5px solid var(--ow-line) !important; box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+      }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption .thumb-btn[aria-pressed="true"] { background: var(--ow-ink) !important; color: var(--ow-base) !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .hero-corner-btn { color: var(--ow-ink) !important; background: transparent !important; text-shadow: none !important; }
+      /* the outfit view: the same off-white behind him */
+      .outfit-view .ov-figure, html[data-theme="dark"] .outfit-view .ov-figure { background: var(--ow-base, #F6F2EA) !important; }
+      .outfit-view .ov-figure .hero-bg img { display: none !important; }
+      .outfit-view .ov-figure .hero-bg { background: radial-gradient(ellipse 58% 40% at 50% 30%, var(--ow-glow, #FDFBF7), transparent), linear-gradient(to bottom, transparent 80%, var(--ow-floor, #E9E2D5) 96%, transparent 100%) !important; }
       /* ================= Build .78.6b — sheets: one way to pop out =================
          Every pop-out is a bottom sheet (or the full-screen outfit view /
          look layer): rounded top corners, a drag handle, its own scroll
@@ -6498,7 +6543,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.9b</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.9c</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8106,7 +8151,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.9b";
+var WARDROBE_BUILD = "2026-11-19.78.9c";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -39347,6 +39392,9 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   }
   function setBg(src, el) {
     var bg = layerFor(el); if (!bg) return;
+    /* .78.9c: Home and the outfit view are the seamless off-white — no
+       backdrop image, no blurred-render sampling (cheaper, too) */
+    if (!(function () { try { return localStorage.getItem(BD_KEY); } catch (e) { return ""; } })()) { bg.style.backgroundImage = ""; return; }
     var bd = backdrop(src);
     if (bd && CUT.placeholder && !bg.style.backgroundImage) { bg.style.backgroundImage = "url(\"" + CUT.placeholder + "\")"; bg.style.backgroundSize = "cover"; bg.style.backgroundPosition = "center"; }
     bg.classList.toggle("bd-custom", !!bd);
@@ -39373,7 +39421,8 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       if (im) {
         var set = function () { var r = im.getBoundingClientRect(), nw = im.naturalWidth, nh = im.naturalHeight; if (!r.width || !nw) return;
           var dw = Math.min(r.width, r.height * nw / nh), pad = (r.width - dw) / 2, f = Math.max(0, pad + dw * 0.16);
-          im.style.setProperty("--feather", Math.round(f) + "px"); el.style.setProperty("--feather", Math.round(f) + "px"); };
+          im.style.setProperty("--feather", Math.round(f) + "px"); el.style.setProperty("--feather", Math.round(f) + "px");
+          el.style.setProperty("--fig-h", Math.round(im.offsetHeight) + "px"); el.style.setProperty("--fig-top", Math.round(im.offsetTop) + "px"); };
         if (im.complete && im.naturalWidth) set(); else im.addEventListener("load", set, { once: true });
       }
     } catch (e) {}

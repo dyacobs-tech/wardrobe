@@ -25,7 +25,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-19.78.9b"
+BUILD = "2026-11-19.78.9c"
 PH = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 FIXTURE = json.loads((Path(__file__).resolve().parent / "fixture_closet83.json").read_text())
 EXTRA = [
