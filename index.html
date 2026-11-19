@@ -587,6 +587,7 @@
       .emulate-render { border-top: 1px solid var(--border); margin-top: 18px; padding-top: 14px; }
       .emulate-render img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top center; display: block; margin-top: 10px; }
       .emulate-render .btn-accent { width: 100%; }
+      .emulate-render img.emulate-onme { aspect-ratio: auto; height: auto; object-fit: contain; background: var(--surface, transparent); }
       .emulate-note { color: var(--dim); font-size: 13.5px; margin: 8px 0 0; }
       .inspo { border-top: 1px solid var(--border); margin-top: 20px; padding-top: 18px; }
       .inspo h4 { font-family: var(--font-display); font-size: 22px; font-weight: 600; margin: 0 0 4px; }
@@ -16724,11 +16725,22 @@ function emulateRenderHTML(ic, lk, fl) {
   } else if (saved && saved.swapState) {
     html += '<p class="emulate-note">' + esc(swapCardLine(saved)) + " — the render lives in " + savedHomeName(saved) + ".</p>";
   }
-  if (!core) {
-    html += '<button type="button" class="btn-accent" disabled>Render me in this look</button>' +
-      '<p class="emulate-note">This look\u2019s pieces don\u2019t map to the render library yet</p>';
-  } else if (!done && !(saved && saved.swapState)) {
+  /* Build .78.3: with no pre-rendered match, Render me in this look
+     dresses him on demand (wardrobe-tryon / FASHN, his standing
+     studio template) — owned matches first, else the top shop match
+     per slot. The result is cached per photograph and never re-renders. */
+  var onme = emulateOnMeFor(lk);
+  if (onme && onme.u) {
+    html += '<img class="emulate-onme" src="' + esc(onme.u) + '" alt="You, in this look" />' +
+      (onme.names && onme.names.length ? '<p class="emulate-note">' + esc(onme.names.join(" \u00b7 ")) + "</p>" : "") +
+      '<button type="button" class="btn-accent" data-emulate-onme-save>' + (emulateOnMeSaved(lk) ? "Saved to Outfits" : "Save look") + "</button>";
+  } else if (core && !done && !(saved && saved.swapState) && lazyRenders[emulateComboFor(fl)]) {
     html += '<button type="button" class="btn-accent" data-emulate-render>Render me in this look</button>';
+  } else if (!done) {
+    var st = (emulateOnMeRun && emulateOnMeRun.key === lk.img) ? emulateOnMeRun : null;
+    var busy = !!(st && st.state === "loading");
+    html += '<button type="button" class="btn-accent" data-emulate-onme' + (busy ? " disabled" : "") + ">" + esc(busy ? (st.text || "Dressing you\u2026") : "Render me in this look") + "</button>";
+    if (st && st.state === "error") html += '<p class="emulate-note">' + esc(st.text || "Couldn\u2019t render that right now.") + "</p>";
   }
   return html + "</div>";
 }
@@ -16799,6 +16811,155 @@ function emulateDoRender() {
   renderEmulate();
   if (look.swapState === "rendering") emulateWatchRender(comboId);
 }
+/* ---- Build .78.3: Render me in this look, on demand ---- */
+var emulateOnMeRun = null;
+var emulateOnMeCache = {};
+try { emulateOnMeCache = JSON.parse(localStorage.getItem("wardrobe.emulateOnMe") || "{}") || {}; } catch (e) { emulateOnMeCache = {}; }
+function emulateOnMeFor(lk) { return lk && lk.img ? emulateOnMeCache[lk.img] || null : null; }
+function emulateOnMeSaved(lk) {
+  var id = "look-em-" + tryonHash(String(lk.img));
+  return (typeof savedLooks !== "undefined" && savedLooks || []).some(function (l) { return l && l.id === id; });
+}
+function emulateComboFor(fl) {
+  var map = fl ? swapMapForLook(fl) : null;
+  if (!map) return "";
+  var ids = Object.keys(map).map(function (s) { return map[s].piece.id; });
+  return swapComboId(ids, swapWatchIdFor(fl));
+}
+/* One garment per slot (top, outer, bottom, shoes): his owned,
+   photographed match first, else the first shop match with a photo
+   (exact, then closest) — the same matches the breakdown lists. */
+function emulateOnMePlan(fl, editCat) {
+  var by = {}, order = [], want = {};
+  (fl ? lookPieces(fl) : []).forEach(function (pc) {
+    var cat = catalogueCatForPiece(pc);
+    var m = cat && typeof BUILD_CAT_MAP !== "undefined" ? BUILD_CAT_MAP[cat] : null;
+    var slot = m ? TRYON_SLOT[m[1]] : null;
+    var suitLeg = cat === "suit" && /trouser|pant/i.test(pc.garment || "");
+    if (suitLeg) slot = "bottom";
+    if (!slot || slot === "accessory" || by[slot]) return;
+    if (!want[slot]) want[slot] = pc.hex || "#888888";
+    if (suitLeg) return;
+    var own = emulateOwnPick(pc, slot, false);
+    var ownImg = own ? (own.photo || own.originalPhoto) : null;
+    if (own && ownImg) { by[slot] = { slot: slot, img: ownImg, name: String(own.name || pc.garment).slice(0, 120), own: own }; order.push(slot); return; }
+    var cands = emulateExactFor(pc).filter(function (e) { return !!e.img; });
+    if (!cands.length && cat) cands = catalogueMatches(pc).filter(function (e) {
+      if (e.cat !== cat || !e.img) return false;
+      var eh = (typeof buildShopColour === "function") ? buildShopColour(e).hex : null;
+      return !eh || !pc.hex || hexDist76(eh, pc.hex) <= 150;
+    });
+    if (!cands.length && cat) cands = emulateEditPick(pc, cat, editCat);
+    if (cands[0]) { by[slot] = { slot: slot, img: cands[0].img, name: tryonEntryName(cands[0]), shop: cands[0] }; order.push(slot); }
+  });
+  /* A slot the look wears but nothing matched with a photo: his own
+     photographed piece in that slot nearest the look's colour. */
+  Object.keys(want).forEach(function (slot) {
+    if (by[slot]) return;
+    var best = emulateOwnPick(want[slot], slot, true);
+    if (best) { by[slot] = { slot: slot, img: best.photo || best.originalPhoto, name: String(best.name || "").slice(0, 120), own: best }; order.push(slot); }
+  });
+  return order.map(function (s) { return by[s]; }).sort(function (a, b) { return (TRYON_ORDER[a.slot] || 0) - (TRYON_ORDER[b.slot] || 0); });
+}
+/* His own photographed piece for a look piece: same slot, close in
+   colour, garment words shared (tassel, suede, loafer…). loose: the
+   nearest colour in the slot, whatever it is. */
+function emulateOwnPick(pc, slot, loose) {
+  pc = pc || {};
+  var hex = typeof pc === "string" ? pc : pc.hex;
+  var words = String(pc.garment || "").toLowerCase().split(/[^a-z]+/).filter(function (w) { return w.length > 3; });
+  var pool = tryonClosetPool(), best = null, bs = 1e9;
+  (pool[slot === "outer" ? "layer" : slot] || []).forEach(function (it) {
+    if (!(it.photo || it.originalPhoto)) return;
+    var nm = ((it.name || "") + " " + (it.category || "")).toLowerCase();
+    if (slot === "outer" && /vest|gilet|cardigan/.test(nm)) return;
+    var d = hexDist76(it.colourHex, hex), ov = 0;
+    words.forEach(function (w) { if (nm.indexOf(w.replace(/s$/, "")) !== -1) ov++; });
+    if (loose ? d > 150 : !(d <= 70 || (ov && d <= 130))) return;
+    var sc = d - 45 * ov;
+    if (sc < bs) { bs = sc; best = it; }
+  });
+  return best;
+}
+/* The verified Edit catalogue (every SKU photographed): same
+   category, close in colour, most garment words shared. */
+var emulateEditCat = null;
+function emulateEditCatalog() {
+  if (emulateEditCat) return Promise.resolve(emulateEditCat);
+  return fetch("assets/edit-catalog.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    emulateEditCat = (j && Array.isArray(j.products)) ? j.products.filter(function (p) { return p && p.img && p.url; }) : [];
+    return emulateEditCat;
+  }).catch(function () { return []; });
+}
+function emulateEditPick(pc, cat, list) {
+  var words = String(pc.garment || "").toLowerCase().split(/[^a-z]+/).filter(function (w) { return w.length > 3; });
+  var best = null, bs = 1e9;
+  (list || []).forEach(function (p) {
+    var pcat = { chinos: "trousers", chino: "trousers", pants: "trousers", polo: "knitwear" }[String(p.cat || "").toLowerCase()] || String(p.cat || "").toLowerCase();
+    if (pcat !== cat) return;
+    var d = hexDist76(p.hex, pc.hex);
+    if (pc.hex && p.hex && d > 110) return;
+    var hay = ((p.name || "") + " " + (p.subcat || "") + " " + (p.keys || []).join(" ")).toLowerCase(), ov = 0;
+    words.forEach(function (w) { if (hay.indexOf(w.replace(/s$/, "")) !== -1) ov++; });
+    var sc = d - 40 * ov;
+    if (sc < bs) { bs = sc; best = p; }
+  });
+  return best ? [best] : [];
+}
+function emulateOnMeBtn(text, busy) {
+  var b = document.querySelector("#emulate-view [data-emulate-onme]");
+  if (!b) return;
+  b.textContent = text;
+  b.disabled = !!busy;
+}
+function emulateOnMeStart() {
+  var t = emulateResolve();
+  if (!t) return;
+  var ic = t.ic, lk = t.lk;
+  if (emulateOnMeFor(lk)) { renderEmulate(); return; }
+  if (emulateOnMeRun && emulateOnMeRun.state === "loading") return;
+  var fl = iconSpecLook(ic, lk, boardCaption(ic, lk));
+  var plan = [];
+  var run = emulateOnMeRun = { key: lk.img, state: "loading", text: "Getting your pieces\u2026" };
+  emulateOnMeBtn(run.text, true);
+  var items = emulateEditCatalog().then(function (cat) {
+    plan = emulateOnMePlan(fl, cat);
+    return Promise.all(plan.map(function (p) { return tryonImageRef(p.img); }));
+  }).then(function (refs) {
+    var out = [];
+    refs.forEach(function (ref, i) { if (ref) out.push({ slot: plan[i].slot, image: ref, name: plan[i].name }); });
+    if (!out.length) return [];
+    return out;
+  });
+  tryonJob(items, function (state, text, url) {
+    if (state === "done") {
+      emulateOnMeCache[lk.img] = { u: url, t: Date.now(), title: ic.name + " \u2014 " + boardCaption(ic, lk),
+        names: plan.map(function (p) { return p.name; }),
+        own: plan.filter(function (p) { return p.own; }).map(function (p) { return { id: p.own.id, name: p.own.name || "", category: p.own.category || "", hex: p.own.colourHex || "" }; }),
+        shop: plan.filter(function (p) { return p.shop; }).map(function (p) { return { brand: p.shop.brand || "", name: p.shop.name || "", url: p.shop.url || "", price: p.shop.price || null, img: p.shop.img || "" }; }) };
+      try { localStorage.setItem("wardrobe.emulateOnMe", JSON.stringify(emulateOnMeCache)); } catch (e) {}
+      emulateOnMeRun = null;
+      if (typeof currentTab === "undefined" || currentTab === "emulate") renderEmulate();
+      return;
+    }
+    run.state = state; run.text = text;
+    if (state === "error") { if (typeof currentTab === "undefined" || currentTab === "emulate") renderEmulate(); return; }
+    emulateOnMeBtn(text || "Dressing you\u2026", true);
+  }, function () { return emulateOnMeRun === run; });
+}
+function emulateOnMeSave() {
+  var t = emulateResolve();
+  if (!t) return;
+  var c = emulateOnMeFor(t.lk);
+  if (!c || !c.u || typeof saveLook !== "function") return;
+  if (emulateOnMeSaved(t.lk)) { toast("Already saved \u2014 it's in Outfits \u2192 Mine."); return; }
+  saveLook({ id: "look-em-" + tryonHash(String(t.lk.img)), title: c.title || "Emulated look", imgAlt: c.title || "", img: c.u,
+    source: "tryon", onMe: true, refPhoto: t.lk.img, createdAt: Date.now(),
+    fwPieces: (c.own || []).map(function (o) { return { id: o.id, itemId: o.id, name: o.name, category: o.category, hex: o.hex }; }),
+    shopPieces: c.shop || [],
+    swatches: (c.own || []).map(function (o) { return { name: o.name, hex: o.hex || "#888888", role: o.category || "Piece" }; }) });
+  renderEmulate();
+}
 function renderEmulate() {
   var box = document.getElementById("emulate-view");
   if (!box) return;
@@ -16853,6 +17014,8 @@ document.addEventListener("click", function (e) {
     return;
   }
   if (e.target.closest("[data-emulate-render]")) { emulateDoRender(); return; }
+  if (e.target.closest("[data-emulate-onme]")) { emulateOnMeStart(); return; }
+  if (e.target.closest("[data-emulate-onme-save]")) { emulateOnMeSave(); return; }
   if (e.target.closest("[data-emulate-icons]")) { switchTab("icons"); return; }
 });
 /* The purchase / wishlist handlers are scoped to their own
@@ -17639,7 +17802,7 @@ function savedLookHome(look) {
   if (sig !== _homeCacheSig) { _homeCache = {}; _homeCacheSig = sig; }
   var key = look && look.id ? look.id + "|" + (look.img || "") + "|" + (look.swapComboId || "") + "|" + ((look.fwPieces || []).length) : null;
   if (key && _homeCache[key] !== undefined) return _homeCache[key];
-  var home = mappedClosetPieces(look).length >= 1 ? "outfits" : "ideas";
+  var home = (look && look.onMe) || mappedClosetPieces(look).length >= 1 ? "outfits" : "ideas";
   if (key) _homeCache[key] = home;
   return home;
 }
@@ -26234,6 +26397,7 @@ function lookIsMine(l) {
   if (l.suggestedBottom) return false;
   if (l.source === "inspo" || l.source === "combo") return false;
   if (l.refLook) return false;
+  if (l.onMe) return true; /* .78.3: rendered on him from Render me in this look */
   if (l.fwPieces && l.fwPieces.length) {
     return l.fwPieces.every(function (p) {
       return p && p.id && typeof closetItemById === "function" && !!closetItemById(p.id);
