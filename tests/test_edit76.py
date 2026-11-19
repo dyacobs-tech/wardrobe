@@ -217,7 +217,10 @@ def main():
         check("piece in its slot", st.get("shoes", {}).get("t") == "p" and st["shoes"]["p"]["key"] == skey, st.get("shoes"))
         check("tagged Saved", "saved" in pg.inner_text('[data-edit-slot="shoes"] .edit-tag').lower(), pg.inner_text('[data-edit-slot="shoes"]'))
         buy = pg.locator("#edit-buy-out a.edit-buy")
-        check("To buy lists it with a Buy link", buy.count() == 1 and buy.first.get_attribute("href").startswith("http"), buy.count())
+        np = sum(1 for v in st.values() if isinstance(v, dict) and v.get("t") == "p")
+        hrefs = [buy.nth(i).get_attribute("href") or "" for i in range(buy.count())]
+        check("To buy lists it with a Buy link", buy.count() == np and np >= 1 and all(h.startswith("http") for h in hrefs)
+              and st["shoes"]["p"].get("url") in hrefs, (buy.count(), np))
         check("To buy total", "$" in pg.inner_text("#edit-buy-out .edit-total"))
         before = pg.evaluate("JSON.stringify(editBoardState().top)")
         pg.click('[data-edit-step="1"][data-slot="top"]'); pg.wait_for_timeout(200)
