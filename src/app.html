@@ -64,8 +64,8 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Donna" />
-    <meta property="og:title" content="Donna" />
+    <meta name="apple-mobile-web-app-title" content="DONNA" />
+    <meta property="og:title" content="DONNA" />
     <meta property="og:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://dyacobs-tech.github.io/wardrobe/" />
@@ -73,10 +73,10 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Donna" />
+    <meta name="twitter:title" content="DONNA" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.27" />
+    <meta name="wardrobe-build" content="2026-11-19.80.28" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -84,7 +84,7 @@
     <link rel="icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="icon" sizes="512x512" href="assets/icon-512.png" />
     <link rel="manifest" href="manifest.webmanifest" />
-    <title>Donna</title>
+    <title>DONNA</title>
     <style>
       /* .80.6: metric-matched stand-ins (Arial/Georgia, or their metric
          clones), sized to Inter/Fraunces so text keeps its box when the
@@ -5420,15 +5420,10 @@
       /* Nov 19 (David, 4:00 PM): no page titles on the main tabs — the
          bottom nav shows where you are and each tab's own toggle row is the
          context. The h1 stays for screen readers (visually hidden) and the
-         top band is reclaimed on Closet and Calendar. Outfits (its one
-         full-width row would run under the back/profile buttons), The Edit,
-         Profile and sub-pages keep a small quiet label instead. */
+         top band is reclaimed on Closet and Calendar. On Outfits, The Edit,
+         Profile and sub-pages the band stays only to hold the back / + /
+         profile buttons (their own top rows are full width). */
       body:not([data-page="today"]) .masthead h1.brand {
-        font-family: var(--font-body, inherit) !important; font-size: 12px !important; font-weight: 600 !important;
-        letter-spacing: .2em !important; text-indent: .2em !important; text-transform: uppercase !important;
-        color: var(--dim) !important; opacity: .9;
-      }
-      body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead h1.brand {
         position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important;
         overflow: hidden !important; clip: rect(0 0 0 0) !important; clip-path: inset(50%) !important; white-space: nowrap !important; border: 0 !important;
       }
@@ -7373,7 +7368,8 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.27</p>
+        <p class="form-note about-name">Donna</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.28</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9190,7 +9186,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.27";
+var WARDROBE_BUILD = "2026-11-19.80.28";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
