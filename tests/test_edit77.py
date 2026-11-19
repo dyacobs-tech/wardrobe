@@ -161,10 +161,10 @@ def main():
         # 1. four tabs
         pg.click("#tab-find"); pg.wait_for_timeout(500)
         tabs = pg.evaluate("""() => [...document.querySelectorAll('#panel-find .edit-tabs .chip')].filter(b => !b.hidden).map(b => { const r = b.getBoundingClientRect(); return { t: b.textContent.replace(/\\d+/g,'').trim(), l: r.left, r: r.right, top: r.top }; })""")
-        check("four tabs Saved/Searches/Build/Ask", [t["t"] for t in tabs] == ["Saved", "Searches", "Build", "Ask"], tabs)
-        if len(tabs) == 4:
-            mid = (tabs[0]["l"] + tabs[3]["r"]) / 2
-            check("tabs centred on one row", abs(mid - 195) <= 2 and len({round(t["top"]) for t in tabs}) == 1 and tabs[0]["l"] >= 8 and tabs[3]["r"] <= 382, tabs)
+        check("four tabs Saved/Searches/Build/Ask (+ Price pill, .78.4)", [t["t"] for t in tabs][:4] == ["Saved", "Searches", "Build", "Ask"] and len(tabs) == 5, tabs)
+        if len(tabs) == 5:
+            mid = (tabs[0]["l"] + tabs[-1]["r"]) / 2
+            check("tabs centred on one row", abs(mid - 195) <= 2 and len({round(t["top"]) for t in tabs}) == 1 and tabs[0]["l"] >= 8 and tabs[-1]["r"] <= 382, tabs)
 
         # 2. Ask
         pg.click("#edit-tab-ask"); pg.wait_for_timeout(400)

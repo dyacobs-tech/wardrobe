@@ -4796,8 +4796,8 @@
       #panel-find .edit-tabs .chip .n { margin-left: 3px !important; }
       #panel-find .edit-tabs .price-pill { white-space: nowrap; }
       /* the masthead + (paste a link / receipts) reads as an icon like Profile, not a black disc */
-      .masthead #shop-plus { background: transparent !important; color: var(--ink, currentColor) !important; border: 0 !important; box-shadow: none !important; font-size: 28px !important; font-weight: 300 !important; line-height: 1 !important; }
-      #panel-find .edit-tabs .price-pill[aria-pressed="true"] { background: var(--ink, #222); color: var(--paper, #fff); border-color: var(--ink, #222); }
+      .masthead #shop-plus { background: transparent !important; color: var(--text) !important; border: 0 !important; box-shadow: none !important; font-size: 28px !important; font-weight: 300 !important; line-height: 1 !important; }
+      #panel-find .edit-tabs .price-pill[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
       #price-sheet .info-pop-card { max-width: 440px; width: calc(100vw - 32px); }
       #price-sheet .principles-head { position: relative; justify-content: center; }
       #price-sheet .principles-head h3 { text-align: center; flex: 1; margin: 0; }
@@ -4805,16 +4805,101 @@
       .pr-val { text-align: center; font-weight: 600; margin: 10px 0 4px; }
       .pr-slider { position: relative; height: 34px; margin: 4px 6px 0; }
       .pr-track { position: absolute; left: 0; right: 0; top: 15px; height: 4px; border-radius: 2px; background: var(--border, #ddd); }
-      .pr-track span { position: absolute; top: 0; bottom: 0; background: var(--ink, #222); border-radius: 2px; }
+      .pr-track span { position: absolute; top: 0; bottom: 0; background: var(--accent); border-radius: 2px; }
       .pr-slider input[type=range] { position: absolute; left: 0; top: 0; width: 100%; height: 34px; margin: 0; background: none; pointer-events: none; -webkit-appearance: none; appearance: none; }
       .pr-slider input[type=range]::-webkit-slider-runnable-track { background: none; height: 34px; }
-      .pr-slider input[type=range]::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 26px; height: 26px; margin-top: 4px; border-radius: 50%; background: var(--paper, #fff); border: 2px solid var(--ink, #222); box-shadow: 0 1px 3px rgba(0,0,0,.2); cursor: pointer; }
-      .pr-slider input[type=range]::-moz-range-thumb { pointer-events: auto; width: 22px; height: 22px; border-radius: 50%; background: var(--paper, #fff); border: 2px solid var(--ink, #222); cursor: pointer; }
+      .pr-slider input[type=range]::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 26px; height: 26px; margin-top: 4px; border-radius: 50%; background: var(--accent-ink); border: 2px solid var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.2); cursor: pointer; }
+      .pr-slider input[type=range]::-moz-range-thumb { pointer-events: auto; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-ink); border: 2px solid var(--accent); cursor: pointer; }
       .pr-slider input[type=range]::-moz-range-track { background: none; }
       .pr-ends { display: flex; justify-content: space-between; font-size: 12px; opacity: .65; margin: 0 4px 12px; }
       .pr-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0 0 12px; }
       .pr-chips .chip { min-width: 0 !important; }
       .pr-done { display: block; width: 100%; margin-top: 4px; }
+      /* Build .78.5 — one product card (vp-card) + product sheet + Shop the look */
+      .vp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .vp-row { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 12px) / 2.25); gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 16px 6px; margin: 0 -16px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      .vp-row::-webkit-scrollbar { display: none; }
+      .vp-card { scroll-snap-align: start; scroll-margin-left: 16px; display: flex; flex-direction: column; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+      .vp-card.is-picked { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+      .vp-ph { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; margin: 0; border: 0; border-radius: 0; background: #F4EEE3; cursor: pointer; overflow: hidden; }
+      html[data-theme="dark"] .vp-ph { background: #EDE6DA; }
+      .vp-ph img { width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }
+      .vp-noimg { display: grid; place-items: center; height: 100%; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #6E6456; }
+      .vp-tag, .vp-picked { position: absolute; left: 8px; top: 8px; display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 600; letter-spacing: .04em; padding: 3px 8px; border-radius: 999px; background: rgba(255,251,244,.92); color: #1A1612; }
+      .vp-picked { background: #1A1612; color: #F6F1E8; }
+      .vp-picked svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; }
+      .vp-body { display: flex; flex-direction: column; gap: 2px; padding: 10px 10px 4px; cursor: pointer; min-width: 0; text-align: left; }
+      .vp-brand { font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .vp-name { font-size: 13.5px; line-height: 1.3; font-weight: 500; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em; }
+      .vp-price { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 2px; }
+      .vp-ret { font-size: 11.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .vp-acts { display: flex; justify-content: space-between; align-items: center; padding: 2px 4px 6px; margin-top: auto; }
+      .vp-ico { display: inline-grid; place-items: center; width: 32px; height: 32px; min-width: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text); cursor: pointer; text-decoration: none; box-shadow: none; }
+      .vp-ico svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+      .vp-ico .vp-chk, .vp-act .vp-chk { opacity: 0; }
+      .vp-media { position: relative; }
+      .vp-look { position: absolute; right: 8px; top: 8px; min-width: 0; min-height: 0 !important; height: auto; line-height: 1.3; padding: 4px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; border: 0; background: rgba(255,251,244,.92); color: #1A1612; box-shadow: none; letter-spacing: 0; text-transform: none; }
+      .vp-look.on { background: #1A1612; color: #F6F1E8; }
+      .vp-card.is-star .vp-brand::after { content: " \2605"; color: var(--brass); }
+      .vp-sh-more { display: flex; justify-content: center; gap: 6px; padding: 12px 14px 0; flex-wrap: wrap; }
+      .vp-sh-buy { text-decoration: none !important; }
+      [data-vp-wish][aria-pressed="true"] svg { fill: currentColor; }
+      #panel-find[data-stl="1"] #edit-gapcards, #panel-find[data-stl="1"] #edit-gaps { display: none !important; }
+      [data-vp-act="wish"][aria-pressed="true"] svg { fill: currentColor; }
+      [data-vp-act="bought"][aria-pressed="true"] .vp-chk { opacity: 1; }
+      [data-vp-act="bought"][aria-pressed="true"] svg path:first-child { fill: currentColor; fill-opacity: .12; }
+      .vp-ico:active { background: var(--surface-alt); }
+      #vp-sheet .info-pop-card { position: relative; max-width: 520px; width: 100%; padding: 0 0 calc(18px + env(safe-area-inset-bottom, 0px)); }
+      .vp-sheet-x { position: absolute; right: 12px; top: 12px; z-index: 2; background: rgba(255,251,244,.92) !important; }
+      .vp-sh-ph { background: #F4EEE3; aspect-ratio: 1 / 1; max-height: 46vh; display: grid; place-items: center; overflow: hidden; }
+      .vp-sh-ph img { max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+      .vp-sh-info { padding: 16px 20px 6px; text-align: center; }
+      .vp-sh-name { font-family: var(--font-display); font-size: 21px; line-height: 1.25; margin: 4px 0 6px; text-align: center; }
+      .vp-sh-price { font-size: 17px; font-weight: 600; }
+      .vp-sh-sub { font-size: 12.5px; color: var(--dim); margin: 4px 0 0; }
+      .vp-sh-note { font-size: 12.5px; color: var(--dim); margin: 8px 0 0; text-align: left; }
+      .vp-sh-buy, .vp-sh-pick { display: block; width: calc(100% - 40px); margin: 12px 20px 0; text-align: center; box-sizing: border-box; }
+      .vp-sh-acts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 14px 14px 0; }
+      .vp-act { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font-size: 11.5px; font-weight: 500; min-width: 0; box-shadow: none; text-transform: none; letter-spacing: 0; }
+      .vp-act svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+      .vp-act[aria-pressed="true"] { border-color: var(--accent); }
+      .vp-onme { padding: 14px 20px 0; text-align: center; }
+      .stl-sub { margin: -6px 0 10px 18px; font-size: 12.5px; color: var(--dim); }
+      .vp-withmine { display: block; margin: 10px auto 0; }
+      .vp-withmine[hidden] { display: none; }
+      .vp-onme-st { font-size: 13px; color: var(--dim); margin: 0; }
+      .vp-onme img { width: 100%; height: auto; border-radius: 12px; display: block; }
+      #find-look-mode .shop-look-titlerow { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+      #find-look-mode .shop-look-titlerow h3 { text-align: center; margin: 10px 0 0; }
+      .stl-clear { border: 0; background: none; padding: 4px 8px; font-size: 12.5px; color: var(--dim); text-decoration: underline; text-underline-offset: 3px; box-shadow: none; min-width: 0; }
+      #find-look-mode .shop-honest { text-align: center; }
+      .stl-summary { margin: 14px 0 6px; }
+      .stl-summary:empty { display: none; }
+      .stl-sum-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+      .stl-sum-h h4 { margin: 0; font-family: var(--font-display); font-size: 18px; }
+      .stl-total { font-size: 13px; font-weight: 600; }
+      .stl-missing { margin-top: 8px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); padding: 0 12px; }
+      .stl-missing summary { list-style: none; cursor: pointer; padding: 11px 0; font-size: 13.5px; font-weight: 600; display: flex; justify-content: space-between; }
+      .stl-missing summary::-webkit-details-marker { display: none; }
+      .stl-missing summary::after { content: "\203A"; transform: rotate(90deg); opacity: .5; }
+      .stl-missing[open] summary::after { transform: rotate(-90deg); }
+      .stl-buy { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); font-size: 13px; }
+      .stl-buy-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+      .stl-buy-main b { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+      .stl-buy-main span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .stl-buy-pr { font-weight: 600; white-space: nowrap; }
+      .stl-buy.is-bought .stl-buy-pr { color: var(--dim); font-weight: 500; }
+      .vp-done svg { stroke-width: 2; }
+      .stl-piece { margin: 22px 0 6px; }
+      .stl-head { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+      .stl-head .cdot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 12px; border: 1px solid rgba(26,22,18,.15); }
+      .stl-name { margin: 0; flex: 1; min-width: 0; font-family: var(--font-display); font-size: 17px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+      .stl-n { font-size: 12px; color: var(--dim); white-space: nowrap; }
+      .stl-none { font-size: 13px; color: var(--dim); margin: 0; }
+      .stl-links { display: flex; flex-direction: column; padding: 6px 20px 0; }
+      .stl-link { display: flex; justify-content: space-between; align-items: center; padding: 13px 2px; border-top: 1px solid var(--border); color: var(--text); text-decoration: none; font-size: 14.5px; }
+      .stl-link svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+      #vp-sheet .vp-sh-info:first-child { padding-top: 26px; }
       #panel-find .edit-tabs .chip .n:empty { display: none; }
       #find-nolook, #edit-list { display: none !important; }
       #panel-find .edit-q, #panel-find #edit-search-q { display: block; width: 100%; box-sizing: border-box; height: 40px; border-radius: 999px; border: var(--ctl-border, 1px solid var(--border)); background: var(--surface); color: var(--text); padding: 0 16px; font: 16px var(--font-ui); margin: 0 0 12px; -webkit-appearance: none; appearance: none; }
@@ -5992,6 +6077,13 @@
           <form id="ask-form" autocomplete="off"><input type="text" id="ask-q" aria-label="Ask Vesper" placeholder="Ask Vesper…" maxlength="1000" enterkeyhint="send" autocomplete="off" /><button type="submit" id="ask-send" aria-label="Send" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>
         </div>
       </section>
+      <div class="info-pop-backdrop" id="vp-sheet" hidden>
+        <div class="card info-pop-card vp-sheet-card" role="dialog" aria-modal="true" aria-label="Product">
+          <button type="button" class="info-pop-close vp-sheet-x" id="vp-sheet-close" aria-label="Close">&times;</button>
+          <div id="vp-sheet-body"></div>
+          <div class="vp-onme" id="vp-onme" hidden><p class="vp-onme-st" id="vp-onme-st" role="status"></p><img id="vp-onme-img" alt="You wearing this" hidden /><button type="button" class="chip vp-withmine" data-vp-act="withmine" hidden>Wear it with my closet</button></div>
+        </div>
+      </div>
       <div class="info-pop-backdrop" id="price-sheet" hidden>
         <div class="card info-pop-card price-card" role="dialog" aria-modal="true" aria-labelledby="price-title">
           <div class="principles-head">
@@ -16780,6 +16872,25 @@ function emulateRowHTML(e, pc, tag) {
       '<button type="button" class="btn-ghost shop-buy tryon-btn" data-tryon-shop="' + esc(shopEntryKey(e)) + '">See it on me</button>' : "") + "</div>";
 }
 function emulatePieceHTML(pc) {
+  /* Build .78.5: the shared product card — a clean header and a swipe
+     row (exact matches, then up to four closest in the price range). */
+  if (typeof vpRowHTML === "function") {
+    var ex = emulateExactFor(pc), seenK = {}, list = [];
+    ex.forEach(function (e) { var k = shopEntryKey(e); if (!seenK[k]) { seenK[k] = 1; list.push({ e: e, tag: "Exact match" }); } });
+    var catC = catalogueCatForPiece(pc), nC = 0;
+    if (catC) catalogueMatches(pc).forEach(function (e) {
+      if (nC >= 4 || e.cat !== catC) return;
+      var k = shopEntryKey(e); if (seenK[k]) return;
+      seenK[k] = 1; nC++; list.push({ e: e, tag: ex.length ? "" : (nC === 1 ? "Closest match" : "") });
+    });
+    var head = String(pc.garment || ""); head = head.charAt(0).toUpperCase() + head.slice(1);
+    var sub = [pc.colourName, pc.detail].filter(Boolean).join(" \u00b7 ");
+    return '<section class="emulate-piece stl-piece"><div class="stl-head"><span class="cdot" style="background:' + esc(pc.hex || "transparent") + '"></span>' +
+      '<h4 class="stl-name">' + esc(head) + "</h4>" + (list.length ? '<span class="stl-n">' + list.length + (list.length === 1 ? " option" : " options") + "</span>" : "") + "</div>" +
+      (sub ? '<p class="stl-sub">' + esc(sub) + "</p>" : "") +
+      (list.length ? vpRowHTML(list.map(function (x) { return x.e; }), function (e, i) { return { pc: pc, tag: list[i].tag }; }) : '<p class="emulate-none stl-none">No match in the catalogue yet</p>') +
+      "</section>";
+  }
   var row = '<div class="piece-row"><span class="cdot" style="background:' + (pc.hex || "transparent") + '"></span>' +
     '<span class="p-main"><span class="p-name">' + esc(pc.garment) + '</span>' +
     '<span class="p-sub">' + esc([pc.colourName, pc.detail].filter(Boolean).join(" · ")) + "</span></span></div>";
@@ -30114,10 +30225,14 @@ var shopModeData = [];
 function renderFindLookMode() {
   var box = document.getElementById("find-look-mode");
   if (!box) return;
+  /* The product card module loads in a later app script; a look
+     restored at startup waits for it. */
+  if (findLookMode && typeof VP_ICON === "undefined") { window.stlPending = true; return; }
   var grid = document.querySelector("#panel-find .ward-grid");
   var info = document.querySelector("#panel-find .page-info-row");
   var nl = document.getElementById("find-nolook");
   if (!findLookMode) {
+    var pf78n = document.getElementById("panel-find"); if (pf78n) pf78n.removeAttribute("data-stl");
     box.hidden = true; box.innerHTML = "";
     if (grid) grid.hidden = false;
     if (info) info.hidden = false;
@@ -30125,6 +30240,7 @@ function renderFindLookMode() {
     return;
   }
   box.hidden = false;
+  var pf78 = document.getElementById("panel-find"); if (pf78) pf78.setAttribute("data-stl", "1");
   if (grid) grid.hidden = true;
   if (info) info.hidden = true;
   if (nl) nl.hidden = true;
@@ -30132,7 +30248,7 @@ function renderFindLookMode() {
   var look = findLookMode;
   var img = lookImg(look);
   var html = '<div class="shop-look-head"><img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" loading="lazy" />' +
-    '<div class="shop-look-titlerow"><h3>' + esc(look.title || "Untitled") + '</h3><button type="button" class="btn-ghost shop-clear" id="shop-clear-look">✕ Clear look</button></div>' +
+    '<div class="shop-look-titlerow"><h3>' + esc(look.title || "Untitled") + '</h3><button type="button" class="stl-clear" id="shop-clear-look">Clear look</button></div>' +
     '<p class="shop-honest">Prices checked ' + SHOP_CATALOGUE_CHECKED + ".</p>" +
     "</div>";
   /* Build .42: every piece block carries its OWN price tier
@@ -30143,43 +30259,88 @@ function renderFindLookMode() {
      another's. Under the controls, the section shows the
      piece's alternatives — the best match at each price band —
      instead of the old single ceiling-filtered list. */
+  /* Build .78.5 — Vesper layout: each piece is a header (colour dot,
+     name, search icon) over a swipe row of product cards; tapping a
+     card opens the product sheet (Pick for this look, Buy, wishlist,
+     purchased, style this, see it on me). The per-piece tier and
+     Search dropdowns gave way to the global Price pill and the
+     section's search icon; the piece state (its pick) is unchanged. */
   shopModeData = shopPiecesForLook(look).map(function (pc, idx) {
     var alt = catalogueAlternatives(pc);
     var st = pieceStateFor(look, idx);
-    var d = { pc: pc, desc: pieceDescription(pc), alts: alt.alts, bestOverall: alt.bestOverall, total: catalogueMatchTotal(pc), tierKey: st.tier };
-    d.selKey = st.sel && alt.alts.some(function (e) { return shopEntryKey(e) === st.sel; }) ? st.sel : pieceDefaultSel(d, st.tier);
-    /* The section's action handlers resolve their entry inside
-       this list by key, as they always have. */
-    d.matches = alt.alts;
+    var seen = {}, cands = [];
+    function add(e) { var k = shopEntryKey(e); if (seen[k] || !priceOK(e)) return; seen[k] = 1; cands.push(e); }
+    alt.alts.forEach(add);
+    catalogueScored(pc, false).forEach(function (sc) { if (cands.length < 10) add(sc.e); });
+    cands = priceSort(cands);
+    var d = { pc: pc, desc: pieceDescription(pc), alts: cands, bestOverall: alt.bestOverall, total: catalogueMatchTotal(pc), tierKey: st.tier };
+    var inList = function (k) { return k && cands.some(function (e) { return shopEntryKey(e) === k; }); };
+    var def = pieceDefaultSel({ alts: cands, bestOverall: alt.bestOverall && priceOK(alt.bestOverall) ? alt.bestOverall : null }, st.tier);
+    d.selKey = inList(st.sel) ? st.sel : (inList(def) ? def : (cands[0] ? shopEntryKey(cands[0]) : ""));
+    /* the pick leads its row */
+    var pi = -1; cands.forEach(function (e, i) { if (shopEntryKey(e) === d.selKey) pi = i; });
+    if (pi > 0) { cands.unshift(cands.splice(pi, 1)[0]); }
+    d.matches = cands;
     return d;
   });
+  html += '<div class="stl-summary" id="stl-summary"></div>';
   shopModeData.forEach(function (d, idx) {
-    var desc = d.desc;
-    html += '<div class="shop-piece"><h4>' + esc(desc) + "</h4>";
-    /* Controls at the TOP of the section (build .28): Price
-       tier + Search, two equal boxes, before the alternatives.
-       The tier box is THIS piece's own selector (build .42).
-       Search is ONE grouped action menu: eBay — vintage, then
-       this piece's brands at THIS piece's tier, each going
-       DIRECTLY to the brand's own site search or store
-       (build .38 — no search-engine links). Picking a
-       destination opens that search at once; the box itself
-       just reads "Search". */
-    var eq = encodeURIComponent("men's " + desc + " vintage");
-    var brands = shopTierBrands(d.tierKey);
-    html += '<div class="shop-ctl-row"><div class="shop-ctl-cell">' + shopTierSelectorHTML(d.tierKey, idx) + '</div>' +
-      '<div class="shop-ctl-cell shop-search-dd"><button type="button" class="sel-row shop-search-toggle" aria-expanded="false"><span class="sel-name">Search</span><span class="sel-val"></span><span class="sel-chev" aria-hidden="true">▾</span></button>' +
-      '<div class="opt-list shop-search-list" hidden>' +
-      '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + eq + '">eBay — vintage</a>' +
-      (brands.length ? '<p class="shop-search-group">Brands</p>' + brands.map(function (b) {
-        return '<a class="opt-item shop-search-item" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">' + esc(b) + "</a>";
-      }).join("") : "") +
-      "</div></div></div>";
-    html += '<div class="shop-matches" data-matches="' + idx + '">' + shopMatchesHTML(d, idx) + "</div>";
-    html += "</div>";
+    var pc = d.pc;
+    var head = String(pc.garment || d.desc);
+    html += '<section class="stl-piece"><div class="stl-head"><span class="cdot" style="background:' + esc(pc.hex || "transparent") + '"></span>' +
+      '<h4 class="stl-name">' + esc(head.charAt(0).toUpperCase() + head.slice(1)) + "</h4>" +
+      '<span class="stl-n">' + (d.alts.length ? d.alts.length + (d.alts.length === 1 ? " option" : " options") : "") + "</span>" +
+      '<button type="button" class="vp-ico stl-search" data-stl-search="' + idx + '" aria-label="Search the stores for ' + esc(head) + '">' + VP_ICON.search + "</button></div>";
+    if (!d.alts.length) {
+      html += '<p class="stl-none">' + (d.total && priceRangeActive() ? "Nothing in " + esc(priceRangeLabel()) + " for this piece." : "No match in the catalogue yet.") + "</p>";
+    } else {
+      html += vpRowHTML(d.alts, function (e) {
+        var exact = pc.iconGarment && e.iconGarment && e.iconGarment === pc.iconGarment;
+        return { pc: pc, picked: shopEntryKey(e) === d.selKey, pick: { idx: idx }, tag: exact ? "Exact match" : "" };
+      });
+    }
+    html += "</section>";
   });
   box.innerHTML = html;
+  stlRenderSummary();
 }
+/* Shop the look total + Buy missing pieces: each piece's pick, the
+   ones already purchased marked, the rest summed with a link out. */
+function stlRenderSummary() {
+  if (typeof VP_ICON === "undefined") return;
+  var host = document.getElementById("stl-summary");
+  if (!host || !findLookMode) return;
+  var rows = [], total = 0, n = 0;
+  shopModeData.forEach(function (d, idx) {
+    var e = null;
+    d.alts.forEach(function (x) { if (shopEntryKey(x) === d.selKey) e = x; });
+    if (!e) return;
+    var bought = isShopPurchased(e), p = prNum(e.price);
+    if (!bought && p) { total += p; n++; }
+    rows.push('<div class="stl-buy' + (bought ? " is-bought" : "") + '"><span class="cdot" style="background:' + esc(d.pc.hex || "transparent") + '"></span>' +
+      '<span class="stl-buy-main"><b>' + esc(e.brand || "") + "</b><span>" + esc(vpName(e)) + "</span></span>" +
+      '<span class="stl-buy-pr">' + (bought ? "Purchased" : esc(vpPrice(e))) + "</span>" +
+      (e.url && !bought ? '<a class="vp-ico" href="' + esc(e.url) + '" target="_blank" rel="noopener" aria-label="Buy at ' + esc(vpRetailer(e) || "the store") + '">' + VP_ICON.ext + "</a>" : '<span class="vp-ico vp-done">' + VP_ICON.check + "</span>") + "</div>");
+  });
+  host.innerHTML = rows.length ? '<div class="stl-sum-h"><h4>Shop the look</h4><span class="stl-total">' + (n ? "$" + Math.round(total).toLocaleString("en-US") + " \u00b7 " + n + (n === 1 ? " piece" : " pieces") + " to buy" : "All purchased") + "</span></div>" +
+    '<details class="stl-missing"><summary>Buy missing pieces</summary>' + rows.join("") + "</details>" : "";
+}
+function stlSearchOpen(idx) {
+  var d = shopModeData[idx], sheet = document.getElementById("vp-sheet"), body = document.getElementById("vp-sheet-body");
+  if (!d || !sheet || !body) return;
+  var desc = d.desc, head = String(d.pc.garment || desc);
+  var eq = encodeURIComponent("men's " + desc + " vintage");
+  var brands = shopTierBrands(d.tierKey);
+  sheet.removeAttribute("data-vp-key");
+  body.innerHTML = '<div class="vp-sh-info"><span class="vp-brand">Search the stores</span><h3 class="vp-sh-name">' + esc(head.charAt(0).toUpperCase() + head.slice(1)) + "</h3></div>" +
+    '<div class="stl-links"><a class="stl-link" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=' + eq + '">eBay \u2014 vintage' + VP_ICON.ext + "</a>" +
+    brands.map(function (b) { return '<a class="stl-link" target="_blank" rel="noopener" href="' + esc(brandSearchURL(b, desc)) + '">' + esc(b) + VP_ICON.ext + "</a>"; }).join("") + "</div>";
+  sheet.hidden = false;
+}
+document.addEventListener("click", function (e) {
+  var b = e.target && e.target.closest ? e.target.closest("[data-stl-search]") : null;
+  if (b) { e.preventDefault(); stlSearchOpen(parseInt(b.getAttribute("data-stl-search"), 10)); }
+});
 /* Restore the carried look after a refresh — exactly what was
    on screen, image included. No carried look: the tab opens in
    its free-form search state, never a blank. */
@@ -36483,6 +36644,212 @@ document.addEventListener("keydown", function (e) {
 });
     </script>
     <script type="wardrobe/app">
+/* ================= Build .78.5 — Shop, Vesper style: one product card + one product sheet =================
+   vpCardHTML(e, opts) is the single product card: cream studio image,
+   brand in small caps, a two-line name, price, one muted retailer line
+   and a compact icon row (wishlist, purchased, style this, see it on
+   me, buy). Tapping the card opens #vp-sheet — the big image, the
+   details, Buy at the retailer and the same actions with labels, plus
+   See it on me rendered inline. Every action calls the app's existing
+   functions (toggleWishlistItem, toggleShopPurchase,
+   buildAroundShopEntry, tryonJob), and every card for the same product
+   updates at once. */
+var VP = {};
+var VP_ICON = {
+  heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2s-7.6-4.6-9.3-9.2C1.6 7.8 3.7 4.6 7 4.6c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.3 0 5.4 3.2 4.3 6.4-1.7 4.6-9.3 9.2-9.3 9.2z"/></svg>',
+  bag: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12.2H6z"/><path d="M8.6 8V6.8a3.4 3.4 0 0 1 6.8 0V8"/><path class="vp-chk" d="M9.2 14.2l2 2 3.8-4"/></svg>',
+  hanger: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.4V7.6a2.1 2.1 0 1 0-2.1-2.1"/><path d="M12 8.4l-8.6 6.4c-.9.7-.4 2.1.7 2.1h15.8c1.1 0 1.6-1.4.7-2.1z"/></svg>',
+  person: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.2" r="3.2"/><path d="M5.2 20.4c.6-4 3.3-6.4 6.8-6.4s6.2 2.4 6.8 6.4"/></svg>',
+  ext: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 4.5h6v6"/><path d="M19.5 4.5l-8.2 8.2"/><path d="M17.5 13.6v4.4a1.5 1.5 0 0 1-1.5 1.5H6a1.5 1.5 0 0 1-1.5-1.5V8a1.5 1.5 0 0 1 1.5-1.5h4.4"/></svg>',
+  search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.1"/><path d="M15.2 15.2l4.6 4.6"/></svg>',
+  check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg>'
+};
+function vpKey(e) { return e ? (e.key || shopEntryKey(e)) : ""; }
+function vpName(e) {
+  var nm = String((e && e.name) || ""), br = String((e && e.brand) || "");
+  if (br && nm.toLowerCase().indexOf(br.toLowerCase()) === 0 && nm.length > br.length + 3) nm = nm.slice(br.length).replace(/^[\s\-\u2013\u2014:|,]+/, "");
+  return nm ? nm.charAt(0).toUpperCase() + nm.slice(1) : "";
+}
+function vpPrice(e) {
+  if (e && e.pd) return String(e.pd);
+  var p = (typeof prNum === "function") ? prNum(e && e.price) : (e && e.price);
+  return p ? "$" + Number(p).toLocaleString("en-US", { minimumFractionDigits: p % 1 ? 2 : 0, maximumFractionDigits: p % 1 ? 2 : 0 }) : "";
+}
+function vpRetailer(e) { return String((e && (e.retailer || e.store)) || ""); }
+/* A snap whose name was tidied keeps its original key; the app's
+   shop functions key by brand|name|url, so hand them that shape. */
+function vpEntryFor(e) {
+  if (!e || !e.key || shopEntryKey(e) === e.key) return e;
+  var parts = String(e.key).split("|");
+  if (parts.length < 3) return e;
+  return Object.assign({}, e, { brand: parts[0], name: parts.slice(1, -1).join("|"), url: parts[parts.length - 1], retailer: e.retailer || e.store || "" });
+}
+function vpWished(e) { return typeof wishlistFor === "function" && !!wishlistFor(vpKey(e)); }
+function vpBought(e) { return typeof shopPurchaseFor === "function" && !!shopPurchaseFor(vpKey(e)); }
+/* opts: { pc, tag, picked, pick: { idx }, edit, overlay } — pick makes
+   the card a choice for a Shop the look piece; edit makes it The
+   Edit's card (heart = Save with its shortlist, + Look on the photo,
+   Star / Not for me in the sheet), worked by The Edit's own handlers. */
+function vpCardHTML(e, opts) {
+  if (!e) return "";
+  opts = opts || {};
+  var key = vpKey(e);
+  VP[key] = { e: e, pc: opts.pc || null, pick: opts.pick || null, tag: opts.tag || "", edit: !!opts.edit };
+  var w = vpWished(e), b = vpBought(e), img = e.img || "";
+  return '<article class="vp-card' + (opts.picked ? " is-picked" : "") + (opts.cls ? " " + opts.cls : "") + '" data-vp-key="' + esc(key) + '"' + (opts.edit ? ' data-edit-key="' + esc(key) + '"' : "") + (opts.pick ? ' data-vp-pick="' + opts.pick.idx + '"' : "") + ">" +
+    '<div class="vp-media"><button type="button" class="vp-ph" data-vp-open aria-label="' + esc((e.brand ? e.brand + " " : "") + vpName(e)) + '">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" decoding="async" />' : '<span class="vp-noimg">' + esc(e.brand || "") + "</span>") + "</button>" +
+    (opts.picked ? '<span class="vp-picked">' + VP_ICON.check + "Picked</span>" : (opts.tag ? '<span class="vp-tag">' + esc(opts.tag) + "</span>" : "")) + (opts.overlay || "") + "</div>" +
+    '<div class="vp-body" data-vp-open><span class="vp-brand">' + esc(e.brand || "") + '</span><span class="vp-name">' + esc(vpName(e)) + "</span>" +
+    '<span class="vp-price">' + esc(vpPrice(e)) + '</span><span class="vp-ret">' + esc(vpRetailer(e)) + "</span></div>" +
+    '<div class="vp-acts">' +
+    (opts.edit ? '<button type="button" class="vp-ico" data-edit-save data-vp-wish aria-pressed="' + w + '" aria-label="' + (w ? "Saved" : "Save") + '">' + VP_ICON.heart + "</button>" +
+      '<span hidden><button type="button" data-edit-star></button><button type="button" data-edit-pass></button></span>'
+      : '<button type="button" class="vp-ico" data-vp-act="wish" data-vp-wish aria-pressed="' + w + '" aria-label="Wishlist">' + VP_ICON.heart + "</button>") +
+    '<button type="button" class="vp-ico" data-vp-act="bought" aria-pressed="' + b + '" aria-label="Purchased">' + VP_ICON.bag + "</button>" +
+    (img ? '<button type="button" class="vp-ico" data-vp-act="style" aria-label="Style this">' + VP_ICON.hanger + "</button>" +
+      '<button type="button" class="vp-ico" data-vp-act="onme" aria-label="See it on me">' + VP_ICON.person + "</button>" : "") +
+    (e.url ? '<a class="vp-ico" data-vp-act="buy" href="' + esc(e.url) + '" target="_blank" rel="noopener" aria-label="Buy at ' + esc(vpRetailer(e) || "the store") + '">' + VP_ICON.ext + "</a>" : "") +
+    "</div></article>";
+}
+function vpRowHTML(list, opts) {
+  opts = opts || {};
+  return '<div class="vp-row">' + list.map(function (e, i) { return vpCardHTML(e, typeof opts === "function" ? opts(e, i) : opts); }).join("") + "</div>";
+}
+function vpGridHTML(list, opts) {
+  opts = opts || {};
+  return '<div class="vp-grid">' + list.map(function (e, i) { return vpCardHTML(e, typeof opts === "function" ? opts(e, i) : opts); }).join("") + "</div>";
+}
+/* Wishlist / purchased state on every card and the open sheet. */
+function vpRefreshStates() {
+  document.querySelectorAll(".vp-card[data-vp-key], #vp-sheet[data-vp-key]").forEach(function (c) {
+    var r = VP[c.getAttribute("data-vp-key")];
+    if (!r) return;
+    var w = c.querySelector("[data-vp-wish]"), b = c.querySelector('[data-vp-act="bought"]');
+    if (w) w.setAttribute("aria-pressed", String(vpWished(r.e)));
+    if (b) b.setAttribute("aria-pressed", String(vpBought(r.e)));
+    var wl = c.querySelector('[data-vp-act="wish"] .vp-lbl'), bl = c.querySelector('[data-vp-act="bought"] .vp-lbl');
+    if (wl) wl.textContent = vpWished(r.e) ? "In wishlist" : "Wishlist";
+    if (bl) bl.textContent = vpBought(r.e) ? "Purchased" : "Mark purchased";
+  });
+  if (typeof stlRenderSummary === "function") try { stlRenderSummary(); } catch (e) {}
+}
+(function () {
+  if (typeof refreshWishButtons === "function") {
+    var rwb = refreshWishButtons;
+    refreshWishButtons = function () { rwb.apply(this, arguments); vpRefreshStates(); };
+  }
+  if (typeof saveShopWishlist === "function") {
+    var ssw = saveShopWishlist;
+    saveShopWishlist = function () { var r = ssw.apply(this, arguments); setTimeout(vpRefreshStates, 0); return r; };
+  }
+})();
+var vpRun = 0;
+function vpOpen(key, mode) {
+  var r = VP[key], sheet = document.getElementById("vp-sheet");
+  if (!r || !sheet) return;
+  var e = r.e, run = ++vpRun;
+  sheet.setAttribute("data-vp-key", key);
+  var tier = e.tier && typeof shopTierInfo === "function" ? shopTierInfo(e.tier).name : "";
+  var sell = typeof sellerLabel === "function" ? sellerLabel(e) : "";
+  var sub = [vpRetailer(e), tier, sell].filter(Boolean).join(" \u00b7 ");
+  var body = document.getElementById("vp-sheet-body");
+  body.innerHTML = (e.img ? '<div class="vp-sh-ph"><img src="' + esc(e.img) + '" alt="" /></div>' : "") +
+    '<div class="vp-sh-info"><span class="vp-brand">' + esc(e.brand || "") + '</span><h3 class="vp-sh-name">' + esc(vpName(e)) + "</h3>" +
+    '<div class="vp-sh-price">' + esc(vpPrice(e)) + "</div>" + (sub ? '<p class="vp-sh-sub">' + esc(sub) + "</p>" : "") +
+    (r.tag ? '<p class="vp-sh-sub">' + esc(r.tag) + "</p>" : "") + (e.matchNote ? '<p class="vp-sh-note">' + esc(e.matchNote) + "</p>" : "") + "</div>" +
+    (e.url ? '<a class="btn-ink vp-sh-buy" href="' + esc(e.url) + '" target="_blank" rel="noopener">Buy at ' + esc(vpRetailer(e) || "the store") + "</a>" : "") +
+    (r.pick ? '<button type="button" class="btn-ghost vp-sh-pick" data-vp-act="pick">' + (document.querySelector('.vp-card.is-picked[data-vp-key="' + cssEsc(key) + '"]') ? "Picked for this look" : "Pick for this look") + "</button>" : "") +
+    '<div class="vp-sh-acts">' +
+    '<button type="button" class="vp-act" data-vp-act="wish" data-vp-wish aria-pressed="' + vpWished(e) + '">' + VP_ICON.heart + '<span class="vp-lbl">' + (vpWished(e) ? "In wishlist" : "Wishlist") + "</span></button>" +
+    '<button type="button" class="vp-act" data-vp-act="bought" aria-pressed="' + vpBought(e) + '">' + VP_ICON.bag + '<span class="vp-lbl">' + (vpBought(e) ? "Purchased" : "Mark purchased") + "</span></button>" +
+    (e.img ? '<button type="button" class="vp-act" data-vp-act="style">' + VP_ICON.hanger + '<span class="vp-lbl">Style this</span></button>' +
+      '<button type="button" class="vp-act" data-vp-act="onme">' + VP_ICON.person + '<span class="vp-lbl">See it on me</span></button>' : "") +
+    "</div>" +
+    (r.edit ? '<div class="vp-sh-more"><button type="button" class="chip" data-vp-act="star" aria-pressed="' + vpStarred(key) + '">\u2606 Star</button><button type="button" class="chip" data-vp-act="pass">Not for me</button><button type="button" class="chip" data-vp-act="look">+ Look</button></div>' : "") +
+    "";
+  /* the On me area is static markup below the body; reset it */
+  var om = document.getElementById("vp-onme"), omi = document.getElementById("vp-onme-img"), wm = sheet.querySelector(".vp-withmine");
+  if (om) om.hidden = true; if (omi) { omi.hidden = true; omi.removeAttribute("src"); } if (wm) wm.hidden = true;
+  sheet.hidden = false;
+  var card = sheet.querySelector(".info-pop-card"); if (card) card.scrollTop = 0;
+  if (mode === "onme") vpOnMe(key, run);
+}
+function vpStarred(key) { var c = document.querySelector('.vp-card[data-edit-key="' + cssEsc(key) + '"].is-star'); return !!c; }
+/* The Edit's own handler does the work: click its button on the card. */
+function vpProxy(key, sel) {
+  var c = document.querySelector('#panel-find .vp-card[data-edit-key="' + cssEsc(key) + '"]');
+  var b = c ? c.querySelector(sel) : null;
+  if (b) { b.click(); return true; }
+  return false;
+}
+function cssEsc(s) { return String(s).replace(/(["\\])/g, "\\$1"); }
+function vpClose() { vpRun++; var s = document.getElementById("vp-sheet"); if (s) { s.hidden = true; s.removeAttribute("data-vp-key"); } }
+/* See it on me, inline in the sheet — the same try-on job as the
+   On you sheet (tryonJob: device cache, worker cache, cap). */
+function vpOnMe(key, run) {
+  var r = VP[key];
+  if (!r || typeof tryonJob !== "function") return;
+  var box = document.getElementById("vp-onme"), st = document.getElementById("vp-onme-st"), img = document.getElementById("vp-onme-img");
+  if (!box) return;
+  box.hidden = false; img.hidden = true; st.hidden = false; st.textContent = "Getting ready\u2026";
+  setTimeout(function () { try { box.scrollIntoView({ block: "nearest", behavior: "smooth" }); } catch (e) {} }, 50);
+  tryonJob(tryonEntryItems(vpEntryFor(r.e)), function (state, text, url) {
+    if (state === "done") {
+      img.onload = function () { if (run === vpRun) { st.hidden = true; img.hidden = false; try { img.scrollIntoView({ block: "nearest", behavior: "smooth" }); } catch (e) {} } };
+      img.onerror = function () { if (run === vpRun) st.textContent = "The render finished but couldn't load. Try again."; };
+      img.src = url;
+      var wm = document.querySelector("#vp-onme .vp-withmine"); if (wm) wm.hidden = false;
+      return;
+    }
+    st.textContent = text || (state === "error" ? "Couldn't render that right now." : "Putting it on you\u2026");
+  }, function () { return run === vpRun; });
+}
+function vpAct(act, key, el) {
+  var r = VP[key];
+  if (!r) return;
+  var e = vpEntryFor(r.e);
+  if (r.edit && act === "wish") { vpProxy(key, "[data-edit-save]"); setTimeout(vpRefreshStates, 0); return; }
+  if (r.edit && act === "star") { vpProxy(key, "[data-edit-star]"); vpClose(); return; }
+  if (r.edit && act === "pass") { vpProxy(key, "[data-edit-pass]"); vpClose(); return; }
+  if (r.edit && act === "look") { vpProxy(key, "[data-edit-look]"); vpClose(); return; }
+  if (act === "wish") { toggleWishlistItem(e, r.pc); vpRefreshStates(); if (typeof window.editOnSync === "function") try { window.editOnSync(); } catch (x) {} return; }
+  if (act === "bought") {
+    toggleShopPurchase(e, r.pc);
+    vpRefreshStates();
+    return;
+  }
+  if (act === "style") { vpClose(); if (typeof buildAroundShopEntry === "function") buildAroundShopEntry(e); return; }
+  if (act === "onme") {
+    var sheet = document.getElementById("vp-sheet");
+    if (!sheet || sheet.hidden || sheet.getAttribute("data-vp-key") !== key) vpOpen(key, "onme");
+    else vpOnMe(key, vpRun);
+    return;
+  }
+  if (act === "withmine") { vpClose(); if (typeof tryonForEntry === "function") tryonForEntry(Object.assign({ retailer: e.store || e.retailer }, e), true); return; }
+  if (act === "pick" && r.pick && typeof setPieceSelection === "function") { setPieceSelection(r.pick.idx, key); vpClose(); return; }
+}
+document.addEventListener("click", function (ev) {
+  var t = ev.target;
+  if (!t || !t.closest) return;
+  var sheet = document.getElementById("vp-sheet");
+  if (sheet && !sheet.hidden && (t === sheet || t.closest("#vp-sheet-close"))) { vpClose(); return; }
+  var host = t.closest(".vp-card[data-vp-key], #vp-sheet[data-vp-key]");
+  if (!host) return;
+  var key = host.getAttribute("data-vp-key");
+  var a = t.closest("[data-vp-act]");
+  if (a) {
+    var act = a.getAttribute("data-vp-act");
+    if (act === "buy") return; /* plain link out */
+    ev.preventDefault(); ev.stopPropagation();
+    vpAct(act, key, a);
+    return;
+  }
+  if (host.id !== "vp-sheet" && t.closest("[data-vp-open]")) { ev.preventDefault(); vpOpen(key); }
+});
+document.addEventListener("keydown", function (e) { var s = document.getElementById("vp-sheet"); if (e.key === "Escape" && s && !s.hidden) vpClose(); });
+if (window.stlPending) { window.stlPending = false; try { renderFindLookMode(); } catch (e) {} }
+    </script>
+    <script type="wardrobe/app">
 /* ================= Build .76 — The Edit: Saved / Searches / Build =================
    Saved      everything he has saved (the wishlist), searchable and
               grouped by category, colour, search, brand, store or
@@ -36751,17 +37118,12 @@ document.addEventListener("keydown", function (e) {
   function remember(sn) { SNAPS[sn.key] = sn; return sn; }
   function cardHTML(sn, ctx) {
     remember(sn);
-    var saved = isSaved(sn.key), m = metaFor(sn.key), inLook = boardHasKey(sn.key);
-    return '<article class="card edit-pc' + (m && m.star ? " is-star" : "") + '" data-edit-key="' + esc(sn.key) + '">' +
-      '<div class="edit-ph"><img src="' + esc(sn.img) + '" alt="" loading="lazy" decoding="async" /></div>' +
-      '<button type="button" class="edit-heart" data-edit-save aria-pressed="' + (saved ? "true" : "false") + '" aria-label="' + (saved ? "Saved" : "Save") + '">' + EDIT_HEART + "</button>" +
-      '<button type="button" class="edit-add' + (inLook ? " on" : "") + '" data-edit-look>' + (inLook ? "In look" : "+ Look") + "</button>" +
-      '<div class="edit-body"><span class="edit-kick">' + esc(sn.brand) + "</span><h3>" + esc(sn.name) + "</h3>" +
-      '<div class="edit-row"><span class="edit-price">' + priceText(sn) + '</span><span class="edit-store">' + esc(sn.store) + "</span></div>" +
-      '<div class="edit-acts"><button type="button" class="edit-ico" data-edit-star aria-pressed="' + (m && m.star ? "true" : "false") + '" aria-label="Star">' + EDIT_STAR + "</button>" +
-      '<button type="button" class="edit-ico" data-edit-pass aria-label="Not for me">' + EDIT_DOWN + "</button>" +
-      '<button type="button" class="edit-onme" data-edit-onme>On me</button></div>' +
-      "</div></article>";
+    /* Build .78.5: the shared product card (vpCardHTML), worked by the
+       handlers below — heart = Save, + Look on the photo, Star and Not
+       for me in the product sheet. */
+    var m = metaFor(sn.key), inLook = boardHasKey(sn.key);
+    return vpCardHTML(sn, { edit: true, cls: (m && m.star) ? "is-star edit-pc" : "edit-pc",
+      overlay: '<button type="button" class="vp-look' + (inLook ? " on" : "") + '" data-edit-look>' + (inLook ? "In look" : "+ Look") + "</button>" });
   }
 
   /* ---------- Saved ---------- */

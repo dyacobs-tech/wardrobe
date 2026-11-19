@@ -46,7 +46,7 @@ def run(mode):
         pg.wait_for_timeout(2500)
         pg.click("#tab-find")
         pg.wait_for_timeout(800)
-        btn = pg.locator("[data-tryon-shop], [data-tryon-sale], [data-tryon-wish], [data-edit-onme]").locator("visible=true")
+        btn = pg.locator("[data-tryon-shop], [data-tryon-sale], [data-tryon-wish], [data-edit-onme], .vp-card [data-vp-act=onme]").locator("visible=true")
         n = btn.count()
         if n == 0:
             # Sale view renders its cards on demand
@@ -54,7 +54,24 @@ def run(mode):
             n = btn.count()
         assert n > 0, "no See it on me buttons on Shop"
         btn.first.scroll_into_view_if_needed()
+        vp = btn.first.get_attribute("data-vp-act") == "onme"
         btn.first.click()
+        if vp:
+            # Build .78.5: the product card's person icon renders inline in the product sheet
+            assert pg.locator("#vp-sheet").is_visible() and pg.locator("#vp-onme").is_visible(), "product sheet did not open"
+            if mode == "unconfigured":
+                pg.wait_for_timeout(1500)
+                t = pg.locator("#vp-onme-st").inner_text()
+                assert t.strip() and "\u2026" not in t[-1:], t
+            else:
+                pg.wait_for_selector("#vp-onme-img:not([hidden])", timeout=15000)
+                assert seen["post"] and seen["post"]["items"][0]["slot"] in ("top", "outer", "bottom", "shoes", "accessory")
+            pg.click("#vp-sheet-close")
+            assert not pg.locator("#vp-sheet").is_visible()
+            assert not errors, errors
+            b.close()
+            print("PASS", mode, "buttons:", n, "polls:", seen["polls"])
+            return
         assert pg.locator("#tryon-sheet").is_visible(), "sheet did not open"
         if mode == "unconfigured":
             pg.wait_for_timeout(1500)
