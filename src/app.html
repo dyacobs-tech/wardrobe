@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.11" />
+    <meta name="wardrobe-build" content="2026-11-19.80.12" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -7226,7 +7226,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.11</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.12</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8990,7 +8990,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.11";
+var WARDROBE_BUILD = "2026-11-19.80.12";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -10647,6 +10647,7 @@ if (imageInspoField) imageInspoField.addEventListener("click", function (e) {
   if (e.target.closest("[data-inspo-clear]")) { activeInspoId = null; renderInspoImages(); return; }
   var del = e.target.closest("[data-inspo-delete]");
   if (del) {
+    syDeliberateDelete("inspo", del.getAttribute("data-inspo-delete"));
     inspoImages = inspoImages.filter(function (x) { return x.id !== del.getAttribute("data-inspo-delete"); });
     if (activeInspoId === del.getAttribute("data-inspo-delete")) activeInspoId = null;
     saveInspoImages();
@@ -17044,24 +17045,31 @@ function lookIsRealPhoto(look, picturedImg) {
    saved entry picturing that image (watch variants included) from
    My Outfits and Outfit Ideas, immediately, at verdict time. */
 function evictDislikedFromSaved() {
+  /* Safety (Nov 19): a Not for me verdict NEVER deletes saved
+     looks any more. Deleting them here tombstoned them on every
+     device, and the verdict's Undo only lifted the ban. Disliked
+     photographs are now hidden by the view filters (renderSaved,
+     Outfit Ideas, dealing and the plan all test isDislikedImg),
+     so lifting the ban brings every saved copy straight back.
+     Returns the titles that are now hidden, for callers that
+     report it. */
   if (typeof savedLooks === "undefined" || !savedLooks) return [];
-  var removed = [];
-  function keep(l) {
-    if (!l) return false;
+  var hidden = [];
+  savedLooks.concat(typeof queueLooks !== "undefined" && queueLooks ? queueLooks : []).forEach(function (l) {
+    if (!l) return;
     var imgs = [lookPicturedImg(l), l.img, l.swapPhoto, l.fwRender ? ((typeof fwRenderSrc === "function" ? fwRenderSrc(l) : null) || l.fwRender) : null];
     for (var i = 0; i < imgs.length; i++) {
-      if (imgs[i] && isDislikedImg(imgs[i])) { removed.push(displayTitleForLook(l) || l.title || "Look"); return false; }
+      if (imgs[i] && isDislikedImg(imgs[i])) { hidden.push(displayTitleForLook(l) || l.title || "Look"); return; }
     }
-    return true;
-  }
-  savedLooks = savedLooks.filter(keep);
-  if (typeof queueLooks !== "undefined" && queueLooks) queueLooks = queueLooks.filter(keep);
-  if (removed.length) {
-    if (typeof saveQueue === "function") saveQueue();
-    if (typeof persistAll === "function") persistAll();
-    if (typeof renderSaved === "function") renderSaved();
-  }
-  return removed;
+  });
+  if (hidden.length && typeof renderSaved === "function") renderSaved();
+  return hidden;
+}
+function isDislikedLookAny(l) {
+  if (!l) return false;
+  var imgs = [lookPicturedImg(l), l.img, l.swapPhoto, l.fwRender ? ((typeof fwRenderSrc === "function" ? fwRenderSrc(l) : null) || l.fwRender) : null];
+  for (var i = 0; i < imgs.length; i++) { if (imgs[i] && isDislikedImg(imgs[i])) return true; }
+  return false;
 }
 
 /* Pick from candidates by level band, freshness inside the band:
@@ -17729,6 +17737,7 @@ function setPlanForDate(iso, look) {
 }
 function clearPlanForDate(iso) {
   var before = weekPlan.length;
+  syDeliberateDelete("plan", weekPlan.filter(function (x) { return x && x.date === iso; }));
   weekPlan = weekPlan.filter(function (x) { return x && x.date !== iso; });
   if (weekPlan.length !== before) saveWeekPlan();
 }
@@ -23028,10 +23037,12 @@ function onLookResultClick(e) {
        the explicit Don't like it bans a photograph. */
     if (typeof registerRemoved === "function") registerRemoved(victim, victim.img);
     if (savedLooks.some(function (l) { return l.id === victim.id; })) {
+      syDeliberateDelete("looks", victim.id);
       savedLooks = savedLooks.filter(function (l) { return l.id !== victim.id; });
       renderSaved();
       persistAll();
     }
+    syDeliberateDelete("queue", victim.id);
     queueLooks = queueLooks.filter(function (x) { return x.id !== victim.id; });
     saveQueue();
     toast("Removed from " + savedHomeName(victim) + ".");
@@ -23323,6 +23334,7 @@ document.getElementById("custom-grid").addEventListener("click", function (e) {
     var palIx = -1;
     customPalettes.forEach(function (x, i) { if (x.id === palId) palIx = i; });
     var palGone = palIx >= 0 ? customPalettes[palIx] : null;
+    syDeliberateDelete("palettes", palId);
     customPalettes = customPalettes.filter(function (x) { return x.id !== palId; });
     renderCustomPalettes();
     syncPaletteSelect();
@@ -25411,6 +25423,7 @@ function onSavedGridClick(e) {
        The photograph stays dealable; only the explicit Don't
        like it bans a photo. Recently removed keeps the snapshot. */
     if (dlLook && typeof registerRemoved === "function") registerRemoved(dlLook, dlLook.img);
+    syDeliberateDelete("looks", dlId);
     savedLooks = savedLooks.filter(function (x) { return x.id !== dlId; });
     renderSaved();
     persistAll();
@@ -25588,6 +25601,7 @@ function toggleWorn(id) {
       var copy = JSON.parse(JSON.stringify(look));
       savedLooks.unshift(copy);
     }
+    syDeliberateDelete("queue", id);
     queueLooks = queueLooks.filter(function (x) { return x.id !== id; });
     saveQueue();
     persistAll();
@@ -25622,6 +25636,7 @@ document.addEventListener("click", function (e) {
   if (wt) { toggleWorn(wt.getAttribute("data-worn-toggle")); return; }
   var qr = e.target.closest("[data-queue-remove]");
   if (qr) {
+    syDeliberateDelete("queue", qr.getAttribute("data-queue-remove"));
     queueLooks = queueLooks.filter(function (x) { return x.id !== qr.getAttribute("data-queue-remove"); });
     saveQueue();
     toast("Taken off the queue.");
@@ -26348,6 +26363,7 @@ document.getElementById("panel-icons").addEventListener("click", function (e) {
   if (delBtn) {
     var did = delBtn.getAttribute("data-delete-icon");
     var dIc = iconById(did);
+    syDeliberateDelete("icons", did);
     customIcons = customIcons.filter(function (x) { return x.id !== did; });
     var pSel = document.getElementById("style-direction");
     var bSel = document.getElementById("blend-direction");
@@ -28503,6 +28519,7 @@ document.getElementById("find-grid").addEventListener("click", function (e) {
   }
   var del = e.target.closest("[data-delete-find]");
   if (del) {
+    syDeliberateDelete("finds", finds.filter(function (f) { return f.id === del.getAttribute("data-delete-find"); }));
     finds = finds.filter(function (f) { return f.id !== del.getAttribute("data-delete-find"); });
     store.set("finds", finds);
     renderFinds();
@@ -31094,6 +31111,7 @@ function refreshWishButtons() {
 function toggleWishlistItem(e, pc) {
   var key = shopEntryKey(e);
   if (wishlistFor(key)) {
+    syDeliberateDelete("shopwish", key);
     shopWishlist = shopWishlist.filter(function (w) { return w.key !== key; });
   } else {
     shopWishlist.unshift({
@@ -31115,6 +31133,7 @@ function removeWishlistItem(key) {
   var wIx = -1;
   shopWishlist.forEach(function (w, i) { if (w.key === key) wIx = i; });
   var wGone = wIx >= 0 ? shopWishlist[wIx] : null;
+  syDeliberateDelete("shopwish", key);
   shopWishlist = shopWishlist.filter(function (w) { return w.key !== key; });
   saveShopWishlist();
   refreshWishButtons();
@@ -32233,6 +32252,7 @@ function showDislikeUndo(look) {
   var img = look.img, id = look.id;
   showUndoToast("Not for you — " + (look.title || "look") + ".", function () {
     if (img && typeof removeDislike56 === "function") removeDislike56(img);
+    try { if (typeof renderSaved === "function") renderSaved(); } catch (e) {}
     if (currentLook && currentLook.id === id) {
       currentLook.verdict = null;
       persistLookFeedback(currentLook);
@@ -32497,6 +32517,7 @@ function rollbackWornCredits(removedEntries) {
 function removeWornEntryById(id) {
   var entry = wornLog.filter(function (en) { return en.id === id; })[0];
   if (!entry) return null;
+  syDeliberateDelete("worn", entry);
   wornLog = wornLog.filter(function (en) { return en.id !== id; });
   store.set("wornLog", wornLog);
   rollbackWornCredits([entry]);
@@ -32506,6 +32527,7 @@ function removeWornEntryById(id) {
 function removeWornForLook(lookId, date) {
   var removed = wornLog.filter(function (en) { return en.lookId === lookId && (!date || en.date === date); });
   if (!removed.length) return;
+  syDeliberateDelete("worn", removed);
   wornLog = wornLog.filter(function (en) { return !(en.lookId === lookId && (!date || en.date === date)); });
   store.set("wornLog", wornLog);
   rollbackWornCredits(removed);
@@ -32533,6 +32555,7 @@ function unlikeLookById(id) {
   savedLooks.forEach(function (l) {
     if (l.id === id && l.verdict === "like") { l.verdict = null; l.likedAt = null; }
   });
+  syDeliberateDelete("queue", id);
   queueLooks = queueLooks.filter(function (x) { return x.id !== id; });
   saveQueue();
   persistAll();
@@ -32587,6 +32610,7 @@ function woreToday() {
   var wornEntry = { date: today, title: todayLook.title, img: lookImg(todayLook), pieces: wornNames, pieceIds: wornIds, lookId: todayLook.id };
   if (wres.state === "watch" && wres.watch) { wornEntry.watch = wres.watch.name; wornEntry.watchId = wres.watch.id; }
   var entry = recordWorn(wornEntry);
+  syDeliberateDelete("queue", todayLook.id);
   queueLooks = queueLooks.filter(function (x) { return x.id !== todayLook.id; });
   saveQueue();
   persistAll();
@@ -32828,6 +32852,7 @@ function saveWornEdit() {
 function removeWornEdit() {
   var en = wornEntryById(wornEditId);
   if (!en) return;
+  syDeliberateDelete("worn", en);
   wornLog = wornLog.filter(function (x) { return x.id !== en.id; });
   store.set("wornLog", wornLog);
   rollbackWornCredits([en]); /* build .38 (2.5): un-marking rolls the piece credits back too */
@@ -33062,7 +33087,7 @@ function packIsOn(key, label) { return packedItems.some(function (p) { return p.
 function packToggle(key, label) {
   var ix = -1;
   packedItems.forEach(function (p, i) { if (p.trip === key && p.label === label) ix = i; });
-  if (ix >= 0) packedItems.splice(ix, 1); else packedItems.push({ id: key + "|" + label, trip: key, label: label });
+  if (ix >= 0) { syDeliberateDelete("packed", packedItems[ix]); packedItems.splice(ix, 1); } else packedItems.push({ id: key + "|" + label, trip: key, label: label });
   savePacked();
 }
 var currentCapsule = null;
@@ -33859,6 +33884,7 @@ if (dislikeBtn) dislikeBtn.addEventListener("click", function () {
   look.verdict = "dislike";
   recordDislike(lookImg(look));
   registerRemoved(look, lookImg(look));
+  syDeliberateDelete("looks", look.id); syDeliberateDelete("queue", look.id);
   savedLooks = savedLooks.filter(function (l) { return l.id !== look.id; });
   queueLooks = queueLooks.filter(function (x) { return x.id !== look.id; });
   saveQueue();
@@ -34292,6 +34318,7 @@ if (myInspoPanel) myInspoPanel.addEventListener("click", function (e) {
     var delIx = -1;
     inspoImages.forEach(function (x, i) { if (x.id === delId) delIx = i; });
     var delEntry = delIx >= 0 ? inspoImages[delIx] : null;
+    syDeliberateDelete("inspo", delId);
     inspoImages = inspoImages.filter(function (x) { return x.id !== delId; });
     if (activeInspoId === delId) activeInspoId = null;
     saveInspoImages();
@@ -35145,10 +35172,20 @@ function syTrackChanges(onlyColl) {
            a half-written store) is NEVER tombstoned — that would delete
            a real piece on every device. Forget the snapshot entry and
            re-download everything once, so the server copy comes back. */
-        if ((c === "items" || c === "watches") && id.indexOf("seed-") !== 0 &&
+        /* Safety (Nov 19): the same rule now covers EVERY synced
+           collection (looks, queue, worn, inspo, finds, palettes,
+           icons, plan, anchors, trips, packed, receipts, shopwish,
+           pricedrops, edits, searches, ask): only a deliberate
+           delete (syDeliberateDelete) becomes a tombstone. Closet
+           and watches also re-download once so the server copy
+           comes back; other collections just forget the snapshot
+           (no re-download loop for boot repairs / caps). */
+        if (id.indexOf("seed-") !== 0 &&
             !(typeof _sySessionDeletes !== "undefined" && _sySessionDeletes[c] && _sySessionDeletes[c][id])) {
           delete SY.snap[c][id]; delete SY.st[c][id]; delete SY.dirty[c][id];
-          SY.restore59 = null; SY.lost77 = (SY.lost77 || 0) + 1; ch = true;
+          if (c === "items" || c === "watches") { SY.restore59 = null; SY.lost77 = (SY.lost77 || 0) + 1; }
+          else { SY.vanished1119 = (SY.vanished1119 || 0) + 1; }
+          ch = true;
           return;
         }
         delete SY.snap[c][id]; delete SY.st[c][id]; SY.tomb[c][id] = now; SY.dirty[c][id] = 1; ch = true;
@@ -35216,6 +35253,24 @@ var _syMassHold = null, _syMassOkUntil = 0, _syMassDenied = {};
    single such delete (not a mass batch) may block a live server
    record. Leftover unsent tombs are not in this map. */
 var _sySessionDeletes = {};
+/* Safety (Nov 19): the ONE way a record may become a delete marker.
+   Every user-initiated delete path calls this with the collection
+   and record id(s) BEFORE the store write. A record that vanishes
+   from a collection without this mark (boot repair, dedupe, cap,
+   cache wipe, migration, failed load, eviction) is never
+   tombstoned — the server copy stays and other devices keep it. */
+function syDeliberateDelete(coll, ids) {
+  try {
+    if (!coll) return;
+    if (!Array.isArray(ids)) ids = [ids];
+    if (!_sySessionDeletes[coll]) _sySessionDeletes[coll] = {};
+    ids.forEach(function (r) {
+      var id = (r && typeof r === "object") ? (typeof syRecId === "function" ? syRecId(coll, r) : r.id) : r;
+      if (id && String(id).indexOf("seed-") !== 0) _sySessionDeletes[coll][id] = 1;
+    });
+  } catch (e) {}
+}
+try { window.syDeliberateDelete = syDeliberateDelete; } catch (e) {}
 /* Ids restored from a live server record over an unsent tomb —
    never uploaded as a delete, even if trackChanges re-arms one. */
 var _syRestoredIds = {};
@@ -36784,7 +36839,9 @@ function analyzeFilePiece(card, job, ix) {
         counts.scanned++;
         var img = pictured(l);
         if (img && isQuarantinedImg(img)) { counts.quarantinedRemoved++; return; }
-        if (img && isDislikedImg(img)) { counts.verdictEvictions.push(displayTitleForLook(l, img) || l.title || "Look"); return; }
+        /* Safety (Nov 19): disliked entries are KEPT (the views hide
+           them); the boot repair no longer deletes them. */
+        if (img && isDislikedImg(img)) { counts.verdictHidden = (counts.verdictHidden || 0) + 1; out.push(l); return; }
         var wornPhoto = lookIsRealPhoto(l, img);
         if (wornPhoto && !(l.source === "uploaded" && !l.selfie)) {
           ensureWorn(img, l.title || "Logged outfit", l.wornDate || null);
@@ -36846,8 +36903,10 @@ function analyzeFilePiece(card, job, ix) {
         weekPlan = weekPlan.filter(function (e) {
           if (!e || !e.look) return !!e;
           var im = pictured(e.look);
-          if (im && (isQuarantinedImg(im) || isDislikedImg(im))) return false;
-          if (!planLookValid(e.look)) return false;
+          if (im && isQuarantinedImg(im)) return false;
+          /* Safety (Nov 19): a disliked plan entry is kept (planLookValid
+             hides it); lifting the ban brings it back. */
+          if (!planLookValid(e.look) && !(im && isDislikedImg(im))) return false;
           var nt = displayTitleForLook(e.look, im);
           if (nt && nt !== e.look.title) { e.look.title = nt; counts.titlesCorrected++; }
           return true;
@@ -37599,8 +37658,9 @@ function analyzeFilePiece(card, job, ix) {
       var kind = arch.getAttribute("data-edit-kind");
       var id = arch.getAttribute("data-edit-archive");
       if (kind === "wishlist") {
-        if (typeof shopWishlist !== "undefined") { shopWishlist = []; if (typeof saveShopWishlist === "function") saveShopWishlist(); }
+        if (typeof shopWishlist !== "undefined") { syDeliberateDelete("shopwish", shopWishlist.slice()); shopWishlist = []; if (typeof saveShopWishlist === "function") saveShopWishlist(); }
       } else {
+        syDeliberateDelete("finds", (finds || []).filter(function (x) { return x.id === id; }));
         finds = (finds || []).filter(function (x) { return x.id !== id; });
         if (typeof store !== "undefined") store.set("finds", finds);
       }
@@ -38381,6 +38441,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     if (typeof refreshWishButtons === "function") refreshWishButtons();
   }
   function unsaveProduct(key) {
+    syDeliberateDelete("shopwish", key);
     shopWishlist = shopWishlist.filter(function (w) { return w.key !== key; });
     saveShopWishlist();
     if (typeof refreshWishButtons === "function") refreshWishButtons();
@@ -39067,6 +39128,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     if ((b = t.closest("[data-edit-del-search]"))) {
       var id = b.getAttribute("data-edit-del-search");
       var gone = searchById(id), ix = editSearches.indexOf(gone);
+      syDeliberateDelete("searches", id);
       editSearches = editSearches.filter(function (x) { return x.id !== id; });
       store.set("editSearches", editSearches);
       renderSearches(); updateCounts();
@@ -39268,6 +39330,12 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       recs.push(old && old.v === prefs[k].v ? old : { id: "p-" + String(k).slice(0, 160), kind: "pref", sku: k, v: prefs[k].v, at: prefs[k].at });
     });
     if (JSON.stringify(recs) === JSON.stringify(askSync)) return;
+    /* Ask records dropped by this rebuild are the user's own un-pref /
+       un-save actions: deliberate. */
+    try {
+      var keep1119 = {}; recs.forEach(function (r) { if (r && r.id) keep1119[r.id] = 1; });
+      if (typeof syDeliberateDelete === "function") syDeliberateDelete("ask", (askSync || []).filter(function (r) { return r && r.id && !keep1119[r.id]; }).map(function (r) { return r.id; }));
+    } catch (e) {}
     askSync = recs;
     store.set("askSync", askSync);
   }
