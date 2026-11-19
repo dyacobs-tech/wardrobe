@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.75" />
+    <meta name="wardrobe-build" content="2026-11-18.75.1" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -4651,7 +4651,7 @@
       .onbody-split .ob-pieces { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 4px; min-height: 0; }
       .onbody-split.ob-n1 .ob-pieces, .onbody-split.ob-n2 .ob-pieces { grid-template-columns: 1fr; }
       .onbody-split.ob-n3 .ob-pieces { grid-template-columns: 1fr; }
-      .onbody-split .ob-pieces .fl-cell { min-height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+      .onbody-split .ob-pieces .fl-cell { min-height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #f6f2ea !important; }
       .onbody-split .ob-pieces .fl-cell img { width: 100%; height: 100%; object-fit: contain; }
       .outfits-build-row { display: flex; justify-content: center; gap: 8px; margin: 0 0 14px; }
       #panel-looks .outfits-build-row [hidden] { display: none !important; }
@@ -5822,7 +5822,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.75</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.75.1</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7354,7 +7354,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.75";
+var WARDROBE_BUILD = "2026-11-18.75.1";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
