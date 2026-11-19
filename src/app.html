@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.9" />
+    <meta name="wardrobe-build" content="2026-11-19.80.10" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -4893,7 +4893,15 @@
       .vp-sh-more { display: flex; justify-content: center; gap: 6px; padding: 12px 14px 0; flex-wrap: wrap; }
       .vp-sh-buy { text-decoration: none !important; }
       [data-vp-wish][aria-pressed="true"] svg { fill: currentColor; }
-      #panel-find[data-stl="1"] #edit-gapcards, #panel-find[data-stl="1"] #edit-gaps { display: none !important; }
+      #panel-find[data-stl="1"] #edit-gapcards,
+      #panel-find[data-stl="1"] #edit-gaps,
+      #panel-find[data-stl="1"] #edit-search-form,
+      #panel-find[data-stl="1"] #edit-search-out,
+      #panel-find[data-stl="1"] #edit-list,
+      #panel-find[data-stl="1"] #edit-v-saved,
+      #panel-find[data-stl="1"] #edit-v-searches,
+      #panel-find[data-stl="1"] #edit-v-build,
+      #panel-find[data-stl="1"] #edit-v-ask { display: none !important; }
       [data-vp-act="wish"][aria-pressed="true"] svg { fill: currentColor; }
       [data-vp-act="bought"][aria-pressed="true"] .vp-chk { opacity: 1; }
       [data-vp-act="bought"][aria-pressed="true"] svg path:first-child { fill: currentColor; fill-opacity: .12; }
@@ -5776,6 +5784,116 @@
           pointer-events: none;
         }
       }
+
+      /* Build .80.10 — The Edit phone pills, Closet gaps, shop-look cut-out */
+      @media (max-width: 899px) {
+        #panel-find .edit-tabs.outfits-toggle,
+        #panel-find .edit-tabs {
+          display: flex !important;
+          justify-content: stretch !important;
+          align-items: stretch !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+          gap: 0 !important;
+          padding: 2px !important;
+          margin: 4px 0 14px !important;
+          border: var(--ctl-border, 1px solid var(--border));
+          border-radius: 999px;
+          background: var(--surface, #FFFBF4);
+          overflow: hidden;
+        }
+        #panel-find .edit-tabs.outfits-toggle .chip,
+        #panel-find .edit-tabs .chip,
+        #panel-find .edit-tabs .price-pill {
+          flex: 1 1 0 !important;
+          min-width: 0 !important;
+          width: auto !important;
+          max-width: none !important;
+          height: 30px !important;
+          padding: 0 3px !important;
+          margin: 0 !important;
+          font-size: 11px !important;
+          letter-spacing: 0 !important;
+          border: 0 !important;
+          border-radius: 999px !important;
+          box-shadow: none !important;
+          justify-content: center !important;
+          box-sizing: border-box !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis;
+          white-space: nowrap !important;
+        }
+        #panel-find .edit-tabs .chip .n {
+          margin-left: 2px !important;
+          font-size: 10px !important;
+        }
+        #panel-find .edit-hrow {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr !important;
+          gap: 12px !important;
+          overflow: visible !important;
+          margin: 0 0 18px !important;
+          padding: 0 !important;
+          scroll-snap-type: none !important;
+        }
+        #panel-find .edit-hrow > .edit-pc {
+          flex: none !important;
+          width: auto !important;
+          max-width: none !important;
+          min-width: 0 !important;
+          scroll-snap-align: unset !important;
+        }
+        #find-look-mode .vp-row,
+        #panel-find .stl-piece .vp-row {
+          display: flex !important;
+          grid-auto-columns: unset !important;
+          grid-template-columns: none !important;
+          overflow-x: auto !important;
+          gap: 12px !important;
+          margin: 0 !important;
+          padding: 2px 0 6px !important;
+          scroll-snap-type: x mandatory;
+        }
+        #find-look-mode .vp-row > .vp-card,
+        #panel-find .stl-piece .vp-row > .vp-card {
+          flex: 0 0 calc((100% - 12px) / 2) !important;
+          width: calc((100% - 12px) / 2) !important;
+          max-width: none !important;
+          min-width: 0 !important;
+          scroll-snap-align: start;
+        }
+      }
+      #find-look-mode .shop-look-head,
+      #panel-find .shop-look-head {
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+      }
+      #find-look-mode .shop-look-head img,
+      #panel-find .shop-look-head img,
+      .shop-look-head img {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        object-fit: contain !important;
+        object-position: top center !important;
+      }
+      body:has(#find-look-mode:not([hidden])),
+      html:has(#find-look-mode:not([hidden])) {
+        background: #F6F2EA !important;
+      }
+      html[data-theme="dark"]:has(#find-look-mode:not([hidden])),
+      html[data-theme="dark"]:has(#find-look-mode:not([hidden])) body {
+        background: #1E1A17 !important;
+      }
+      #panel-find:has(#find-look-mode:not([hidden])),
+      #find-look-mode,
+      #find-look-mode .shop-look-head.has-cut {
+        background: transparent !important;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         #bottombar.bottombar { transition: none !important; }
       }
@@ -6788,10 +6906,6 @@
           <div id="edit-search-out"></div>
           <div id="edit-gaps"></div>
           <div id="edit-list"></div>
-          <div class="edit-today" id="edit-today-look">
-            <div id="find-look-mode" hidden></div>
-          </div>
-          <p class="meta" id="find-nolook" hidden>No look selected.</p>
         </div>
         <div id="edit-v-build" hidden>
           <div class="edit-board" id="edit-board"></div>
@@ -6809,6 +6923,10 @@
           <div class="ask-sugs" id="ask-sugs"></div>
           <form id="ask-form" autocomplete="off"><input type="text" id="ask-q" aria-label="Ask Vesper" placeholder="Ask Vesper…" maxlength="1000" enterkeyhint="send" autocomplete="off" /><button type="submit" id="ask-send" aria-label="Send" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>
         </div>
+          <div class="edit-today" id="edit-today-look">
+            <div id="find-look-mode" hidden></div>
+          </div>
+          <p class="meta" id="find-nolook" hidden>No look selected.</p>
       </section>
       <div class="info-pop-backdrop" id="vp-sheet" hidden>
         <div class="card info-pop-card vp-sheet-card" role="dialog" aria-modal="true" aria-label="Product">
@@ -7051,7 +7169,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.9</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.10</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8815,7 +8933,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.9";
+var WARDROBE_BUILD = "2026-11-19.80.10";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -30459,6 +30577,11 @@ function openFindLookMode(look) {
   store.set("findLook", look);
   renderFindLookMode();
   switchTab("find");
+  try {
+    var pf = document.getElementById("panel-find"); if (pf) pf.setAttribute("data-stl", "1");
+    var box2 = document.getElementById("find-look-mode"); if (box2) box2.hidden = false;
+    var lh = document.getElementById("edit-today-look"); if (lh) lh.hidden = false;
+  } catch (eOpenStl) {}
 }
 function clearFindLookMode() {
   findLookMode = null;
@@ -31343,8 +31466,18 @@ function renderFindLookMode() {
   ensureShopData({ pieces: shopPiecesForLook(findLookMode) });
   var look = findLookMode;
   var img = lookImg(look);
-  var html = '<div class="shop-look-head">' + (img ? '<img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" loading="lazy" />' : "") +
-    '<div class="shop-look-titlerow"><h3>' + esc(look.title || "Untitled") + '</h3><button type="button" class="stl-clear" id="shop-clear-look">Clear look</button></div>' +
+  var cut = "";
+  try {
+    if (typeof window.cutFor784 === "function") {
+      cut = window.cutFor784(img) || "";
+      if (!cut && typeof onbodyForLook === "function") cut = window.cutFor784(onbodyForLook(look) || "") || "";
+    }
+  } catch (eCut) {}
+  var shown = cut || img;
+  var title = look.title || "Untitled";
+  try { if (typeof displayTitleForLook === "function") title = displayTitleForLook(look, shown) || title; } catch (eTit) {}
+  var html = '<div class="shop-look-head' + (cut ? " has-cut" : "") + '">' + (shown ? '<img src="' + esc(shown) + '" alt="' + esc(look.imgAlt || title) + '" data-popout="' + esc(shown) + '" loading="lazy"' + (cut ? ' class="shop-look-cut"' : "") + " />" : "") +
+    '<div class="shop-look-titlerow"><h3>' + esc(title) + '</h3><button type="button" class="stl-clear" id="shop-clear-look">Clear look</button></div>' +
     '<p class="shop-honest">Prices checked ' + SHOP_CATALOGUE_CHECKED + ".</p>" +
     "</div>";
   /* Build .42: every piece block carries its OWN price tier
@@ -31399,6 +31532,21 @@ function renderFindLookMode() {
   });
   box.innerHTML = html;
   stlRenderSummary();
+  /* Shop the look lives inside #edit-v-searches; reveal it even if
+     Saved / Build / Ask was the last pill. */
+  try {
+    ["saved", "build", "ask"].forEach(function (n) {
+      var el = document.getElementById("edit-v-" + n);
+      if (el) el.hidden = true;
+    });
+    var searchesV = document.getElementById("edit-v-searches");
+    if (searchesV) searchesV.hidden = false;
+    var lookHost = document.getElementById("edit-today-look");
+    if (lookHost) lookHost.hidden = false;
+    document.querySelectorAll("#panel-find .edit-tabs [data-edit-view]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-view") === "searches"));
+    });
+  } catch (eReveal) {}
 }
 /* Shop the look total + Buy missing pieces: each piece's pick, the
    ones already purchased marked, the rest summed with a link out. */
@@ -38394,7 +38542,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
         (shown.length ? '<div class="edit-grid">' + shown.map(function (e) { return cardHTML(snap(e), "search"); }).join("") + "</div>" : '<p class="empty">No matches in the stores yet.</p>') +
         (res.length > shown.length ? '<div class="edit-more"><button type="button" class="btn-ghost" data-edit-more>Show more</button></div>' : "");
       if (gapsHost) gapsHost.hidden = true;
-      if (lookHost) lookHost.hidden = true;
+      if (lookHost && !(document.getElementById("panel-find") && document.getElementById("panel-find").getAttribute("data-stl") === "1")) lookHost.hidden = true;
       var gch = document.getElementById("edit-gapcards"); if (gch) gch.hidden = true;
       return;
     }
