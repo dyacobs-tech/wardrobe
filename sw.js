@@ -33,6 +33,10 @@ const WARDROBE_BUILD = '2026-11-18.75';
 const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
+// On-body renders (assets/onbody/<content-hash>.webp) are immutable, so
+// their cache is versioned on its own and survives build updates; bump
+// ONBODY_CACHE only if the render format changes.
+const ONBODY_CACHE = 'wardrobe-onbody-v1';
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
@@ -55,7 +59,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  const keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE];
+  const keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE];
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
       keys.filter((k) => keep.indexOf(k) === -1).map((k) => caches.delete(k))
@@ -126,6 +130,23 @@ self.addEventListener('fetch', (event) => {
   // Partial requests (the page's "is there a newer build?" probe) go straight
   // to the network and are never cached.
   if (req.headers.has('range')) return;
+
+  // On-body renders: content-hashed, cache-first in their own cache.
+  // The manifest beside them stays network-first (below).
+  if (url.pathname.includes('/assets/onbody/') && url.pathname.endsWith('.webp')) {
+    event.respondWith(
+      caches.open(ONBODY_CACHE).then((cache) =>
+        cache.match(req, { ignoreSearch: true }).then((hit) => {
+          if (hit) return hit;
+          return fetch(req).then((res) => {
+            if (res && res.status === 200) cache.put(req, res.clone());
+            return res;
+          });
+        })
+      )
+    );
+    return;
+  }
 
   // Photos: immutable, cache-first.
   if (url.pathname.includes('/assets/photos/')) {
