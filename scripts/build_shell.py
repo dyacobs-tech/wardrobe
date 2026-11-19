@@ -19,6 +19,9 @@ File names carry a content hash, so they are immutable.
 """
 import hashlib, json, os, re, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "scripts")); sys.path.insert(0, os.path.join(ROOT, "scripts", "vendor"))
+import jslit                      # JS data literal -> JSON
+import rjsmin, rcssmin            # vendored (Apache-2.0): comment/whitespace stripping only, no renaming
 SRC = os.path.join(ROOT, "src", "app.html")
 OUT = os.path.join(ROOT, "index.html")
 APP = os.path.join(ROOT, "app")
@@ -26,12 +29,95 @@ SW = os.path.join(ROOT, "sw.js")
 # parse-time inline scripts moved out as deferred files (matched by their first line)
 DEFER_HEADS = ("window.WADA=", "/* Build .75 — IA cuts", "/* ================= See it on me")
 LAZY_MARKUP = ("brand-list",)
-# top-level `var NAME = <literal>;` lines moved to their own file (code reads NAME_SRC)
-LAZY_DATA = (("ICON_SPECS", "icon-specs"),)
+# Big top-level `var NAME = <data literal>;` declarations moved to their own
+# app/<name>.<hash>.json. NAME becomes a getter on window: the first read
+# fetches the file synchronously (from the SW code cache once installed) and
+# parses it; after the first paint the files are fetched on idle, so in
+# practice nothing waits. Only names nothing reads while booting into Home
+# belong here; window.__lazyTrace802 lists every synchronous read (name, ms, stack).
+# (in the order they are fetched on idle)
+LAZY_DATA = ("STYLE_ICONS", "EXTRA_RENDERS", "SALE_ITEMS", "ICON_DIRECTORY", "SHOP_CATALOGUE", "ICON_SPECS")
+LAZY_LOADER = r"""<script>
+(function () {
+  var L = window.__lazy802 = {}, order = [];
+  function sync(e) {
+    /* a failed read (offline before the cache has it) is not retried on every access */
+    if (e.failedAt && Date.now() - e.failedAt < 3000) return;
+    Error.stackTraceLimit = 20;
+    try {
+      var x = new XMLHttpRequest(); x.open("GET", e.src, false); x.send(null);
+      if (x.status === 200 || (x.status === 0 && x.responseText)) { e.val = JSON.parse(x.responseText); e.done = true; fire(e); }
+    } catch (err) {}
+    if (!e.done) e.failedAt = Date.now();
+    (window.__lazyTrace802 = window.__lazyTrace802 || []).push([e.name, Math.round(performance.now()), String(new Error().stack || "").split("\n").slice(3, 14).join(" | ")]);
+  }
+  function fire(e) {
+    var cb = e.cbs.splice(0);
+    if (cb.length) setTimeout(function () { cb.forEach(function (f) { try { f(); } catch (err) { setTimeout(function () { throw err; }); } }); }, 0);
+    if (order.every(function (x) { return x.done; })) { var a = all.splice(0); if (a.length) setTimeout(function () { a.forEach(function (f) { try { f(); } catch (err) {} }); }, 0); }
+  }
+  var all = [];
+  /* lazyOn802(name, f): f runs once NAME's data is in (at once if it is) */
+  window.lazyOn802 = function (name, f) { var e = L[name]; if (!e || e.done) f(); else e.cbs.push(f); };
+  window.lazyAll802 = function (f) { if (order.every(function (x) { return x.done; })) f(); else all.push(f); };
+  window.lazyHas802 = function (name) { var e = L[name]; return !e || e.done; };
+  window.__lazyData802 = function (name, src, empty, rank) {
+    var e = L[name] = { name: name, src: src, done: false, val: undefined, empty: empty, cbs: [], rank: rank };
+    order.push(e); order.sort(function (a, b) { return a.rank - b.rank; });
+    Object.defineProperty(window, name, { configurable: true, enumerable: true,
+      get: function () { if (!e.done) sync(e); return e.done ? e.val : (e.empty === "[" ? [] : {}); },
+      set: function (v) { e.val = v; if (!e.done) { e.done = true; fire(e); } } });
+  };
+  function warm() {
+    if (window.__noWarm802) return;
+    var e = null;
+    for (var i = 0; i < order.length; i++) if (!order[i].done && !order[i].busy) { e = order[i]; break; }
+    if (!e) return;
+    e.busy = true;
+    fetch(e.src).then(function (r) { return r.ok ? r.text() : null; }).then(function (t) {
+      idle(function () { if (t && !e.done) { try { e.val = JSON.parse(t); e.done = true; fire(e); } catch (err) {} } e.busy = false; idle(warm); });
+    }, function () { e.busy = false; });
+  }
+  function idle(f) { (window.requestIdleCallback || function (g) { return setTimeout(g, 50); })(f, { timeout: 4000 }); }
+  /* A reopen (the service worker has them in its cache): read them all at
+     once, in the background, while the app boots — nothing then reads them
+     synchronously (a synchronous read can't use the worker's cache when
+     offline). A first open: after Home's hero and look-ahead
+     (src/app.html: afterLookahead803), one at a time, so they never take
+     the link from the hero. */
+  function now(e) {
+    e.busy = true;
+    fetch(e.src).then(function (r) { return r.ok ? r.json() : null; }).then(function (v) {
+      e.busy = false;
+      if (v != null && !e.done) { e.val = v; e.done = true; fire(e); }
+    }, function () { e.busy = false; });
+  }
+  @@LAZY_CALLS@@
+  var ctl = false;
+  try { ctl = !!(navigator.serviceWorker && navigator.serviceWorker.controller); } catch (err) {}
+  if (ctl) setTimeout(function () { order.forEach(function (e) { if (!e.done && !e.busy) now(e); }); }, 0);
+  /* (a first open installs the service worker at that point too, which
+     downloads these files into its cache: wait for it to take control, so
+     each file comes down once) */
+  function afterSw(f) {
+    var done = false, go = function () { if (!done) { done = true; f(); } };
+    try {
+      if (!navigator.serviceWorker || navigator.serviceWorker.controller) return go();
+      navigator.serviceWorker.addEventListener("controllerchange", function () { setTimeout(go, 500); });
+    } catch (err) { return go(); }
+    setTimeout(go, 12000);
+  }
+  window.addEventListener("load", function () { (window.afterLookahead803 || function (f) { setTimeout(f, 3500); })(function () { afterSw(function () { idle(warm); }); }); });
+})();
+</script>
+"""
 # The CSS stays inline for now: as a separate render-blocking file it cost a
 # round trip before the first paint on a cold open (measured 1.2s -> 2.5s on
 # Fast 3G). Set True once a critical-CSS subset is inlined instead.
 EXTERNAL_CSS = False
+# app scripts from this number on travel in one file (app/bundle.<hash>.js, which
+# only stores their texts); the vault loader runs each as its own <script>, in order
+BUNDLE_FROM = 3
 BANNER = "<!-- GENERATED by scripts/build_shell.py from src/app.html — edit src/app.html, then run python3 scripts/build_shell.py -->\n"
 
 def h(s):
@@ -69,6 +155,7 @@ def main():
     css = "\n".join(m.group(1) for m in styles)
     css = css.replace('url("assets/', 'url("../assets/').replace("url('assets/", "url('../assets/").replace("url(assets/", "url(../assets/")
     crit_css = critical_subset("\n".join(m.group(1) for m in styles), critical) if critical is not None else ""
+    css = rcssmin.cssmin(css)
     css_name = "app/app.%s.css" % h(css)
     if split_css: files[css_name] = css
     parts, last = [], 0
@@ -77,7 +164,7 @@ def main():
         if i == 0 and critical is not None:
             # Home's first-paint rules inline; the whole sheet right after the
             # first paint (the app scripts wait for it, see the vault loader)
-            parts.append("    <style>%s</style>\n" % crit_css)
+            parts.append("    <style>%s</style>\n" % rcssmin.cssmin(crit_css))
             parts.append('    <link rel="stylesheet" href="%s" media="print" data-full-css onload="this.media=\'all\';window.__cssFull=1;document.dispatchEvent(new Event(\'wardrobe-css\'))" />\n' % css_name)
             parts.append('    <noscript><link rel="stylesheet" href="%s" /></noscript>\n' % css_name)
         elif i == 0:
@@ -87,19 +174,25 @@ def main():
     parts.append(head[last:])
     head = "".join(parts)
     # 2. scripts in body
-    js_names, lazy_names, lazy_data = [], [], []
+    js_names, lazy_names, lazy_data, bundle, lazy_calls = [], [], [], [], []
     n = [0]
     def app_script(m):
         n[0] += 1
         code = m.group(1)
         # big data literals that only some views use: own file, loaded on demand
-        for var, fname in LAZY_DATA:
-            mm = re.search(r"^var %s = .*;$" % var, code, re.M)
-            if mm:
-                data = mm.group(0) + "\n"
-                dn = "app/%s.%s.js" % (fname, h(data))
+        for var in LAZY_DATA:
+            t = jslit.take_var(code, var)
+            if t:
+                st, en, val = t
+                data = json.dumps(val, ensure_ascii=False, separators=(",", ":"))
+                dn = "app/%s.%s.json" % (var.lower().replace("_", "-"), h(data))
                 files[dn] = data; lazy_data.append(dn)
-                code = code[:mm.start()] + "window.%s_SRC = %s;" % (var, json.dumps(dn)) + code[mm.end():]
+                lazy_calls.append("__lazyData802(%s, %s, %s, %d);" % (json.dumps(var), json.dumps(dn), json.dumps("[" if isinstance(val, list) else "{"), LAZY_DATA.index(var)))
+                code = code[:st] + "/* %s: lazy data, see the loader in <head> */" % var + code[en:]
+        code = rjsmin.jsmin(code)
+        if n[0] >= BUNDLE_FROM:
+            bundle.append(code + "\n//# sourceURL=app/%02d.js" % n[0])
+            return '<script type="wardrobe/app" data-bsrc="@@BUNDLE@@" data-bi="%d"></script>' % (len(bundle) - 1)
         name = "app/%02d.%s.js" % (n[0], h(code))
         files[name] = code; js_names.append(name)
         return '<script type="wardrobe/app" data-src="%s"></script>' % name
@@ -108,6 +201,7 @@ def main():
         if not code.lstrip().startswith(DEFER_HEADS):
             return m.group(0)
         n[0] += 1
+        code = rjsmin.jsmin(code)
         name = "app/%02d.%s.js" % (n[0], h(code))
         files[name] = code; js_names.append(name)
         return '<script src="%s" defer></script>' % name
@@ -128,14 +222,25 @@ def main():
     body = re.sub(r'<script type="wardrobe/app">(.*?)</script>', app_script, body, flags=re.S)
     body = re.sub(r"<script>(.*?)</script>", inline_script, body, flags=re.S)
     js_names = lazy_names + js_names
+    bundle_name = None
+    if bundle:
+        btxt = "(window.__bundle803 = window.__bundle803 || {})[document.currentScript.getAttribute(\"src\")] = %s;\n" % json.dumps(bundle, ensure_ascii=False, separators=(",", ":"))
+        bundle_name = "app/bundle.%s.js" % h(btxt)
+        files[bundle_name] = btxt
+        body = body.replace("@@BUNDLE@@", bundle_name)
     # HTML comments in the markup (not in scripts) are dropped from the shell
     chunks = re.split(r"(<script\b.*?</script>)", body, flags=re.S)
     body = "".join(c if c.startswith("<script") else re.sub(r"<!--.*?-->", "", c, flags=re.S) for c in chunks)
     hc = re.split(r"(<script\b.*?</script>)", head, flags=re.S)
     head = "".join(c if c.startswith("<script") else re.sub(r"<!--.*?-->", "", c, flags=re.S) for c in hc)
     pre = "".join('    <link rel="preload" as="script" href="%s" />\n' % j for j in js_names)
+    if bundle_name: pre += '    <link rel="preload" as="script" href="%s" />\n' % bundle_name
     if "@@PRELOADS@@" in head: head = head.replace("@@PRELOADS@@", pre)
     else: head = head.rstrip(" ") + pre.replace('as="script"', 'as="script" fetchpriority="low"') + "  "  # end of <head>: after the inline CSS has streamed
+    if lazy_data:
+        cs = head.index("<meta charset")
+        cs = head.index(">", cs) + 1
+        head = head[:cs] + "\n" + LAZY_LOADER.replace("@@LAZY_CALLS@@", "\n  ".join(lazy_calls)) + head[cs:]
     out = BANNER + head + body
     if EXTERNAL_CSS and critical is None and "<style>" in head:
         sys.exit("a <style> block was left in <head>")
@@ -151,12 +256,12 @@ def main():
     open(OUT, "w", encoding="utf-8").write(out)
     # 4. sw.js code list
     sw = open(SW, encoding="utf-8").read()
-    lst = "const CODE_FILES = [%s];" % ", ".join("'./%s'" % f for f in ([css_name] if split_css else []) + js_names + lazy_data)
+    lst = "const CODE_FILES = [%s];" % ", ".join("'./%s'" % f for f in ([css_name] if split_css else []) + js_names + ([bundle_name] if bundle_name else []) + lazy_data)
     sw2, k = re.subn(r"const CODE_FILES = \[.*?\];", lst, sw, flags=re.S)
     if not k: sys.exit("sw.js has no CODE_FILES line")
     if sw2 != sw: open(SW, "w", encoding="utf-8").write(sw2)
     print("index.html %d bytes (was %d in src/app.html); %d code files; css %d; js %d" % (
-        len(out.encode()), len(src.encode()), len(files), len(css.encode()), sum(len(files[j].encode()) for j in js_names)))
+        len(out.encode()), len(src.encode()), len(files), len(css.encode()), sum(len(files[j].encode()) for j in js_names + ([bundle_name] if bundle_name else []))))
 
 if __name__ == "__main__":
     main()

@@ -29,7 +29,7 @@
 // deadline is 30s — long enough for a 2.7MB index.html on a typical
 // phone connection — so a slow fetch is not replaced by a stale
 // cached shell after 4 seconds.
-const WARDROBE_BUILD = '2026-11-19.80.2';
+const WARDROBE_BUILD = '2026-11-19.80.3';
 const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
@@ -51,13 +51,13 @@ const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
 // Those files are immutable: cache-first in CODE_CACHE, which survives
 // builds (activate drops files no longer listed), precached on install.
 const CODE_CACHE = 'wardrobe-code-v1';
-const CODE_RE = /\/app\/[^\/]+\.[0-9a-f]{10}\.(js|css)$/;
-const CODE_FILES = ['./app/app.2d1f129201.css', './app/00-brand-list.27a288fac9.js', './app/01.ab91153ec5.js', './app/02.15e637f020.js', './app/03.d4e3059653.js', './app/04.c4cfb49d5c.js', './app/05.cff0fa010c.js', './app/06.42d6e07f14.js', './app/07.04dec0898b.js', './app/08.cc3ef1bc8a.js', './app/09.ecc4e31b72.js', './app/10.90a8bc4648.js', './app/11.88e48d4d6e.js', './app/12.abd5366cfd.js', './app/13.41a8f6ad22.js', './app/14.00fa301ab8.js', './app/15.74f041d55a.js', './app/16.8ab17cfb36.js', './app/17.d77feb95bb.js', './app/18.31b8f560f5.js', './app/19.5cbe945a2e.js', './app/20.059504fb55.js', './app/21.d81e147bdc.js', './app/22.734213addb.js', './app/23.e443f34154.js', './app/icon-specs.59d039a17a.js'];
+const CODE_RE = /\/app\/[^\/]+\.[0-9a-f]{10}\.(js|css|json)$/;
+const CODE_FILES = ['./app/app.dd0780382e.css', './app/00-brand-list.27a288fac9.js', './app/01.8e77662400.js', './app/02.a934b86087.js', './app/21.318a5abe99.js', './app/22.84718ddeae.js', './app/23.7505b30a4e.js', './app/bundle.7c2bca4b2f.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json'];
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
   './assets/fonts/Inter.var.woff2', './assets/fonts/Inter-Italic.var.woff2',
-  './assets/fonts/Fraunces.var.woff2', './assets/fonts/Fraunces-Italic.var.woff2'];
+  './assets/fonts/Fraunces.v803.woff2', './assets/fonts/Fraunces-Italic.v803.woff2'];
 // Build .80: the shell is small now — a reopen waits at most 0.4s (was 0.8s) for the
 // network (a 304 on a good link answers inside that); a slower link gets the
 // cached shell at once and the fresh one lands in the cache for the
@@ -83,13 +83,14 @@ self.addEventListener('install', (event) => {
         const files = own ? SHELL_FILES.filter((u) => u !== './index.html') : SHELL_FILES;
         return (own ? cache.put(SHELL_KEY, own) : Promise.resolve()).then(() => Promise.all(files.map((u) =>
           // fonts/icons already cached by an older build are copied, not refetched
-          caches.match(u).then((m) => m && u !== './index.html' ? cache.put(u, m) : cache.add(new Request(u, { cache: 'reload' })))
+          caches.match(u).then((m) => m && u !== './index.html' ? cache.put(u, m) : cache.add(new Request(u, { cache: 'reload', priority: 'low' })))
         )));
       }))
       .catch(() => {})
       .then(() => caches.open(CODE_CACHE).then((cc) => Promise.all(CODE_FILES.map((u) => {
         const key = new URL(u, self.registration.scope).toString();
-        return cc.match(key).then((hit) => hit || fetch(key).then((res) => { if (res && res.status === 200) return cc.put(key, res); }));
+        // .80.3: low priority, so Home's next cut-outs go first on a slow link
+        return cc.match(key).then((hit) => hit || fetch(key, { priority: 'low' }).then((res) => { if (res && res.status === 200) return cc.put(key, res); }));
       }))).catch(() => {}))
       .then(() => self.skipWaiting())
   );

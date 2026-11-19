@@ -10,6 +10,30 @@
         document.documentElement.setAttribute("data-theme", t);
         document.documentElement.style.colorScheme = t;
       })();
+      /* .80.3: Home's hero needs these three small files; start them now,
+         while the app's code downloads, instead of after it has run */
+      (function () {
+        var E = {};
+        try {
+          if (typeof fetch === "function") {
+            E.onbody = fetch("assets/onbody/manifest.json", { cache: "no-cache" });
+            E.cut = fetch("assets/onbody-cut/manifest.json", { cache: "no-cache" });
+            E.feet = fetch("assets/onbody-cut/feet.json");
+            Object.keys(E).forEach(function (k) { E[k].catch(function () {}); });
+          }
+        } catch (e) {}
+        /* each is handed out once; a later refresh fetches again */
+        window.__takeEarly803 = function (k) { var p = E[k]; delete E[k]; return p || null; };
+      })();
+      /* .80.3: background downloads (the service worker's install, the lazy
+         data files) wait until Home's hero and the next looks' cut-outs are
+         in, so on a slow link Next never waits behind them */
+      (function () {
+        var q = [], open = false;
+        window.afterLookahead803 = function (f) { if (open) f(); else q.push(f); };
+        window.openBg803 = function () { if (open) return; open = true; q.splice(0).forEach(function (f) { try { f(); } catch (e) {} }); };
+        setTimeout(window.openBg803, 15000);
+      })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
@@ -29,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.2" />
+    <meta name="wardrobe-build" content="2026-11-19.80.3" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -55,14 +79,14 @@
       }
       @font-face {
         font-family: "Fraunces";
-        src: url("assets/fonts/Fraunces.var.woff2") format("woff2");
+        src: url("assets/fonts/Fraunces.v803.woff2") format("woff2");
         font-weight: 100 900;
         font-style: normal;
         font-display: swap;
       }
       @font-face {
         font-family: "Fraunces";
-        src: url("assets/fonts/Fraunces-Italic.var.woff2") format("woff2");
+        src: url("assets/fonts/Fraunces-Italic.v803.woff2") format("woff2");
         font-weight: 100 900;
         font-style: italic;
         font-display: swap;
@@ -6816,7 +6840,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.2</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.3</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7401,17 +7425,59 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
     mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
   }
   function runApp() {
-    var list = document.querySelectorAll('script[type="wardrobe/app"]');
-    for (var i = 0; i < list.length; i++) {
-      var s = document.createElement("script");
-      /* Build .80: the shell carries only a reference (data-src) to each
-         app script; async=false keeps them running in document order */
-      var ext = list[i].getAttribute("data-src");
-      if (ext) { s.async = false; s.src = ext; } else s.text = list[i].text;
-      list[i].parentNode.replaceChild(s, list[i]);
+    var list = [].slice.call(document.querySelectorAll('script[type="wardrobe/app"]'));
+    /* Build .80: the shell carries only a reference (data-src) to each
+       app script; async=false keeps them running in document order.
+       .80.3: the smaller app scripts come in one file (data-bsrc: a script
+       that only stores their texts, one request instead of ~18); each still
+       runs as its own <script>, in order, after the files before it, one
+       task each. */
+    var pending = 0, waiters = [], bundles = {};
+    function extDone() { if (--pending === 0) { var w = waiters.splice(0); w.forEach(function (f) { f(); }); } }
+    function whenRun(f) { if (!pending) f(); else waiters.push(f); }
+    var mc = typeof MessageChannel === "function" ? new MessageChannel() : null, yq = [];
+    if (mc) mc.port1.onmessage = function () { var f = yq.shift(); if (f) f(); };
+    function yieldThen(f) { if (mc) { yq.push(f); mc.port2.postMessage(0); } else setTimeout(f, 0); }
+    var i = 0, first = true;
+    function step() {
+      for (; i < list.length; i++) {
+        var el = list[i], s = document.createElement("script");
+        var ext = el.getAttribute("data-src"), bs = el.getAttribute("data-bsrc");
+        if (ext) {
+          s.async = false; s.src = ext; pending++;
+          s.onload = s.onerror = extDone;
+          el.parentNode.replaceChild(s, el);
+          continue;
+        }
+        if (bs) {
+          if (!bundles[bs]) {
+            bundles[bs] = 1;
+            var bsc = document.createElement("script");
+            bsc.async = false; bsc.src = bs; pending++;
+            bsc.onload = bsc.onerror = extDone;
+            document.body.appendChild(bsc);
+          }
+          i++;
+          (function (el, s, bs, bi) {
+            whenRun(function () {
+              var arr = (window.__bundle803 || {})[bs];
+              if (arr) s.text = arr[bi];
+              el.parentNode.replaceChild(s, el);
+              yieldThen(step);
+            });
+          })(el, s, bs, +el.getAttribute("data-bi"));
+          break;
+        }
+        s.text = el.text;
+        el.parentNode.replaceChild(s, el);
+      }
+      if (first) {
+        first = false;
+        try { startHydration(); } catch (e) {}
+        try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); } catch (e) {}
+      }
     }
-    try { startHydration(); } catch (e) {}
-    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); } catch (e) {}
+    step();
   }
   /* Build .80: wait for DOMContentLoaded itself (not readyState), so the
      deferred parse-time scripts (colour data, IA cuts, try-on) have run */
@@ -8015,7 +8081,7 @@ function onbodyForLook(look) {
 function onbodyRefresh() {
   try {
     if (typeof fetch !== "function") return;
-    fetch("assets/onbody/manifest.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    ((window.__takeEarly803 && window.__takeEarly803("onbody")) || fetch("assets/onbody/manifest.json", { cache: "no-cache" })).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (!j || !j.r) return;
       var added = onbodyIngest(j);
       if (j.r.length > ONBODY_SEED.r.length) { try { localStorage.setItem("wardrobe.onbody", JSON.stringify(j)); } catch (e) {} }
@@ -8452,7 +8518,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.2";
+var WARDROBE_BUILD = "2026-11-19.80.3";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -9993,8 +10059,9 @@ function renderDirectionPreview() {
     '<p class="dp-lane">' + esc(main.lane) + (partner ? " · blended with " + esc(partner.lane) : "") + "</p>" +
     stripHTML(stripCols, "sm");
 }
-syncIconSelect();
-renderDirectionPreview();
+/* .80.3: the icon list (STYLE_ICONS) is lazy data in the built app — fill
+   the direction selects and icon pickers once it is in (at once unbuilt) */
+(window.lazyOn802 || function (n, f) { f(); })("STYLE_ICONS", function () { syncIconSelect(); renderDirectionPreview(); });
 document.getElementById("style-direction").addEventListener("change", renderDirectionPreview);
 document.getElementById("blend-direction").addEventListener("change", renderDirectionPreview);
 
@@ -10033,7 +10100,7 @@ document.getElementById("inspo-pick").addEventListener("click", function (e) {
   }
 });
 document.getElementById("style-direction").addEventListener("change", renderInspoPick);
-renderInspoPick();
+(window.lazyOn802 || function (n, f) { f(); })("STYLE_ICONS", renderInspoPick);
 
 /* ================= Individual image — the user's own inspo photo =================
    A fourth Studio source, alongside the wardrobe, the icons and the
@@ -15502,7 +15569,11 @@ var EXTRA_RENDERS = [
     ]
   }
 ];
-var RENDER_POOL = SEED_LOOKS.concat(EXTRA_RENDERS);
+/* .80.3: built on first use, so the pool's renders (lazy data) load only when needed */
+var _renderPool803 = null;
+Object.defineProperty(window, "RENDER_POOL", { configurable: true, enumerable: true,
+  get: function () { return _renderPool803 || (_renderPool803 = SEED_LOOKS.concat(EXTRA_RENDERS)); },
+  set: function (v) { _renderPool803 = v; } });
 
 /* ================= Formality — the meter =================
    Seven settings, swim to black tie. Every photograph in the pool
@@ -16059,7 +16130,47 @@ function renderAsLook(r) {
    execute before any pool filter runs, or the filter silently
    matches nothing and the render stays dealable. */
 var QUARANTINED_IMG = "";
-var DEAL_POOL = RENDER_POOL.filter(function (r) { return !isQuarantinedImg(r.img) && !isDislikedImg(r.img); }).map(renderAsLook);
+/* .80.3: a hidden view that needs lazy data renders when the data is in
+   or when its panel is shown, whichever comes first */
+function lazyRender803(name, panelId, f) {
+  if (!window.lazyHas802 || window.lazyHas802(name)) return f();
+  var p = document.getElementById(panelId);
+  if (p && !p.hidden && !p.closest("[hidden]")) return f();
+  var done = false;
+  function go() { if (done) return; done = true; f(); }
+  window.lazyOn802(name, go);
+  (window.__onShow803 = window.__onShow803 || []).push([panelId, go]);
+}
+/* .80.3: while its data is still loading, a list on a hidden page is not
+   built (the Outfits idle prebuild builds it once the data is in; opening
+   the page builds it at once) */
+function lazyGate803(fname, data, panelId) {
+  var f = window[fname];
+  if (typeof f !== "function") return;
+  window[fname] = function () {
+    if (window.lazyHas802 && !window.lazyHas802(data)) {
+      var p = document.getElementById(panelId);
+      if (!p || p.hidden || p.closest("[hidden]")) {
+        setTimeout(function () { if (typeof window.outfitsDirty796 === "function") window.outfitsDirty796(); }, 0);
+        return;
+      }
+    }
+    return f.apply(this, arguments);
+  };
+}
+lazyGate803("renderSaved", "EXTRA_RENDERS", "panel-looks");
+lazyGate803("renderIcons", "STYLE_ICONS", "panel-icons");
+lazyGate803("renderPlates", "STYLE_ICONS", "panel-palettes");
+function lazyShown803(panelId) {
+  var q = window.__onShow803;
+  if (!q || !q.length) return;
+  window.__onShow803 = q.filter(function (h) { if (h[0] === panelId) { h[1](); return false; } return true; });
+}
+/* .80.3: built on first use (the dealer filters bans again at deal time) */
+var _dealPool803 = null;
+Object.defineProperty(window, "DEAL_POOL", { configurable: true, enumerable: true,
+  get: function () { return _dealPool803 || (_dealPool803 = RENDER_POOL.filter(function (r) { return !isQuarantinedImg(r.img) && !isDislikedImg(r.img); }).map(renderAsLook)); },
+  set: function (v) { _dealPool803 = v; } });
 function renderFormality() {
   var info = formalityInfo(formalityLevel);
   [["formality-range", "formality-name", "formality-info"], ["today-formality-range", "today-formality-name", "today-formality-info"]].forEach(function (ids) {
@@ -16835,13 +16946,21 @@ function ideaFormality(idea) {
   if (/jeans|denim|tee|sneaker|truck(er)?|western shirt|military/.test(t)) return 3;
   return 4;
 }
-var ICON_IDEAS = [];
-STYLE_ICONS.forEach(function (ic) {
-  (ic.looks || []).forEach(function (lk, i) {
-    ICON_IDEAS.push({ iconId: ic.id, idx: i, img: lk.img, caption: lk.caption, desc: lk.desc });
-  });
-});
-ICON_IDEAS.forEach(function (idea) { idea.level = ideaFormality(idea); });
+/* .80.3: built on first use — STYLE_ICONS is lazy data in the built app */
+var _iconIdeas803 = null;
+Object.defineProperty(window, "ICON_IDEAS", { configurable: true, enumerable: true,
+  get: function () {
+    if (_iconIdeas803) return _iconIdeas803;
+    var out = [];
+    STYLE_ICONS.forEach(function (ic) {
+      (ic.looks || []).forEach(function (lk, i) {
+        out.push({ iconId: ic.id, idx: i, img: lk.img, caption: lk.caption, desc: lk.desc });
+      });
+    });
+    out.forEach(function (idea) { idea.level = ideaFormality(idea); });
+    return (_iconIdeas803 = out);
+  },
+  set: function (v) { _iconIdeas803 = v; } });
 function ideaAsLook(idea, version) {
   var ic = iconById(idea.iconId);
   var look = buildLook(idea.desc, "", "", { iconId: ic.id, basis: "icon", version: version || 1 });
@@ -17499,22 +17618,9 @@ function emulatePieceHTML(pc) {
 /* .80.2: ICON_SPECS (the icon photographs' garments, ~490KB) is its own
    file in the built app, loaded on idle after the hero; anything that
    needs it sooner reads it at once from the cache (synchronous, rare). */
-function ensureIconSpecs802() {
-  if (typeof ICON_SPECS !== "undefined" || !window.ICON_SPECS_SRC) return;
-  try {
-    var x = new XMLHttpRequest(); x.open("GET", window.ICON_SPECS_SRC, false); x.send(null);
-    if (x.status === 200 && typeof ICON_SPECS === "undefined") (0, eval)(x.responseText);
-  } catch (e) {}
-}
-(function () {
-  function load() {
-    if (typeof ICON_SPECS !== "undefined" || !window.ICON_SPECS_SRC) return;
-    var sc = document.createElement("script"); sc.src = window.ICON_SPECS_SRC; sc.async = true;
-    sc.onload = function () { if (typeof window.outfitsDirty796 === "function") window.outfitsDirty796(); };
-    document.head.appendChild(sc);
-  }
-  setTimeout(function () { (window.requestIdleCallback || function (f) { return setTimeout(f, 200); })(load, { timeout: 5000 }); }, 2500);
-})();
+/* .80.3: the build's lazy-data loader (scripts/build_shell.py) makes
+   ICON_SPECS a getter that reads its file on first use; nothing to do here. */
+function ensureIconSpecs802() {}
 function emulateAlsoInPhoto(ic, lk) {
   ensureIconSpecs802();
   if (typeof ICON_SPECS === "undefined" || !ICON_SPECS[ic.id]) return [];
@@ -23969,7 +24075,8 @@ var WARD_BRAND_SEED = ["Scott Fraser Collection", "Brunello Cucinelli", "Octobre
 var _wardBrandList = null;
 function wardBrandList() {
   if (_wardBrandList) return _wardBrandList;
-  var catReady = typeof SHOP_CATALOGUE !== "undefined" && !!SHOP_CATALOGUE;
+  /* .80.3: in the built app the catalogue arrives on idle — don't pull it in from Home's sort */
+  var catReady = (window.lazyHas802 ? window.lazyHas802("SHOP_CATALOGUE") : true) && typeof SHOP_CATALOGUE !== "undefined" && !!SHOP_CATALOGUE;
   var seen = {}, list = [];
   function add(b) { if (b && !seen[b]) { seen[b] = 1; list.push(b); } }
   WARD_BRAND_SEED.forEach(add);
@@ -24888,7 +24995,8 @@ if (oiPanelEl) oiPanelEl.addEventListener("click", function (e) {
   });
   renderOutfitIdeas();
 });
-renderSaved();
+/* .80.3: Outfits (hidden at boot) is built once the renders it matches against are in */
+(window.lazyOn802 || function (n, f) { f(); })("EXTRA_RENDERS", function () { renderSaved(); });
 
 /* ================= Queue & worn catalogue =================
    The Queue (Studio) holds looks the user means to wear or
@@ -27801,7 +27909,7 @@ function syncFindSize() {
 }
 document.getElementById("find-cat").addEventListener("change", syncFindSize);
 syncFindSize();
-fillFindIcons();
+(window.lazyOn802 || function (n, f) { f(); })("STYLE_ICONS", fillFindIcons);
 renderFinds();
 document.getElementById("find-form").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -28219,7 +28327,7 @@ function closePriceSheet() { var s = document.getElementById("price-sheet"); if 
   /* .80.2: the boot-time refresh re-renders lists that are not on screen
      (sale, The Edit, Inspo On you); run it once the app is idle */
   try { var pill0 = document.getElementById("price-pill"); if (pill0) { pill0.textContent = priceRangeShort(); pill0.setAttribute("aria-pressed", priceRangeActive() ? "true" : "false"); } } catch (e) {}
-  setTimeout(function () { (window.requestIdleCallback || function (f) { return setTimeout(f, 200); })(function () { priceRangeRefresh(); }, { timeout: 6000 }); }, 3000);
+  setTimeout(function () { (window.lazyAll802 || function (f) { f(); })(function () { (window.requestIdleCallback || function (f) { return setTimeout(f, 200); })(function () { priceRangeRefresh(); }, { timeout: 6000 }); }); }, 3000);
 })();
 function closeShopTierSels() {
   document.querySelectorAll("[data-shop-tier-opts]").forEach(function (o) { o.hidden = true; });
@@ -30968,7 +31076,7 @@ document.addEventListener("click", function (e) {
   try { saved = store.get("findLook", null); } catch (e) {}
   if (saved && shopPiecesForLook(saved).length) {
     findLookMode = saved;
-    renderFindLookMode();
+    lazyRender803("SHOP_CATALOGUE", "panel-find", renderFindLookMode);
   }
 })();
 (function () {
@@ -31150,6 +31258,7 @@ function switchTab(name, opts) {
     var panel = document.getElementById("panel-" + n);
     if (panel) panel.hidden = n !== name;
   });
+  lazyShown803("panel-" + name);
   var recInPlus = document.querySelector("#plus-receipts-host #panel-receipts");
   if (recInPlus) recInPlus.hidden = false;
 
@@ -33040,7 +33149,10 @@ document.addEventListener("click", function (e) {
 })();
 
 /* ---------- Icons — new looks surfacing (26) ---------- */
-(function iconNews() {
+/* .80.3: runs once the icon list (lazy data) is in; the badges are put
+   back after every rebuild of the icon list (the Outfits prebuild rebuilt
+   it after boot and dropped them) */
+(window.lazyOn802 || function (n, f) { f(); })("STYLE_ICONS", function iconNews() {
   if (typeof allIcons !== "function") return;
   var counts = {};
   allIcons().forEach(function (ic) { counts[ic.id] = (ic.looks || []).length; });
@@ -33060,6 +33172,8 @@ document.addEventListener("click", function (e) {
     });
   }
   badgeRows();
+  var ri803 = window.renderIcons;
+  if (typeof ri803 === "function") window.renderIcons = function () { var r = ri803.apply(this, arguments); try { badgeRows(); } catch (e) {} return r; };
   document.getElementById("panel-icons").addEventListener("click", function (e) {
     var o = e.target.closest("[data-open-icon]");
     if (!o) return;
@@ -33071,7 +33185,7 @@ document.addEventListener("click", function (e) {
     store.set("iconSeen", seenNow);
     freshIds = freshIds.filter(function (x) { return x !== id; });
   });
-})();
+});
 
 /* ---------- Init ---------- */
 restoreStudioSettings();
@@ -36706,7 +36820,7 @@ function analyzeFilePiece(card, job, ix) {
             swRefreshing = true;
             location.reload();
           });
-          window.addEventListener("load", function () {
+          window.addEventListener("load", function () { (window.afterLookahead803 || function (f) { f(); })(function () {
             navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) {
               try { if (reg && reg.update) reg.update(); } catch (e) {}
               /* .78.9a: an installed PWA resumed from the background never
@@ -36720,7 +36834,7 @@ function analyzeFilePiece(card, job, ix) {
                 try { if (reg && reg.update) reg.update(); } catch (e) {}
               });
             }).catch(function () {});
-          });
+          }); });
         } catch (e) {}
       }
       /* Notch / Dynamic Island: at rest the masthead's own top inset
@@ -37531,7 +37645,7 @@ document.addEventListener("click", function (ev) {
   if (host.id !== "vp-sheet" && t.closest("[data-vp-open]")) { ev.preventDefault(); vpOpen(key); }
 });
 document.addEventListener("keydown", function (e) { var s = document.getElementById("vp-sheet"); if (e.key === "Escape" && s && !s.hidden) vpClose(); });
-if (window.stlPending) { window.stlPending = false; try { renderFindLookMode(); } catch (e) {} }
+if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGUE", "panel-find", function () { try { renderFindLookMode(); } catch (e) {} }); }
     </script>
     <script type="wardrobe/app">
 /* ================= Build .76 — The Edit: Saved / Searches / Build =================
@@ -39850,7 +39964,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   }
   function loadCuts() {
     try {
-      fetch("assets/onbody-cut/manifest.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      ((window.__takeEarly803 && window.__takeEarly803("cut")) || fetch("assets/onbody-cut/manifest.json", { cache: "no-cache" })).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
         if (!ingestCut(j) || !Object.keys(CUT.map).length) return;
         if (typeof renderToday === "function" && typeof todayLook !== "undefined" && todayLook) try { renderToday(); } catch (e) {}
         if (typeof window.guestHero782 === "function") window.guestHero782();
@@ -39972,11 +40086,12 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
      five in Cache Storage. Nothing competes with the hero while it loads. */
   var warm = {}, warmQ = [], Q = null, dealing = false;
   var ric2 = window.requestIdleCallback || function (f) { return setTimeout(f, 300); };
+  var warmP = [];
   function warmOne(src, hi) {
     var cut = window.cutFor784 && window.cutFor784(src); if (cut) src = cut;
     if (!src || warm[src]) return src; warm[src] = 1;
     var im = new Image(); im.decoding = "async"; if (hi) try { im.fetchPriority = "high"; } catch (e) {} im.src = src;
-    if (im.decode) im.decode().catch(function () {});
+    warmP.push(im.decode ? im.decode().catch(function () {}) : new Promise(function (r) { im.onload = im.onerror = r; }));
     warmQ.push(im); if (warmQ.length > 12) warmQ.shift();
     return src;
   }
@@ -40002,7 +40117,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
        queue stays — the 8-look composition (~70ms, ~440ms at 6x CPU) runs
        again only when the queue is nearly used up or his closet, weather,
        level or dislikes changed */
-    var usedQ = null;
+    var usedQ = null, recentT = [];
     homeComposerLooks75 = function (count) {
       if (dealing && Q && Q.sig === qsig() && Q.list.length) { usedQ = Q; Q = null; return usedQ.list.slice(); }
       return _hcl.apply(this, arguments);
@@ -40013,6 +40128,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       finally {
         dealing = false;
         try {
+          if (typeof todayLook !== "undefined" && todayLook) { recentT.push(todayLook.title); if (recentT.length > 6) recentT.shift(); }
           if (usedQ && typeof todayLook !== "undefined" && todayLook) {
             var t = todayLook.title, rest = usedQ.list.filter(function (l) { return l && l.title !== t; });
             if (rest.length) Q = { sig: qsig(), list: rest, reused: (usedQ.reused || 0) + 1 };
@@ -40023,6 +40139,12 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     };
     window.homeLookahead793 = function () { return Q; };
   }
+  /* .80.3: the background downloads start once the look-ahead is in (at most 6s) */
+  function openBgWhenWarm() {
+    if (!window.openBg803) return;
+    var ps = warmP.splice(0);
+    Promise.race([Promise.all(ps), new Promise(function (r) { setTimeout(r, 6000); })]).then(function () { setTimeout(window.openBg803, 300); });
+  }
   function prefetch() {
     var him = document.getElementById("today-img");
     function run() {
@@ -40032,17 +40154,31 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
           var cur = look && r4 ? r4(look) : null; if (cur && window.cutFor784 && window.cutFor784(cur)) urls.push(window.cutFor784(cur));
           if (look && typeof _hcl === "function") {
             var keepQ = Q && Q.sig === qsig() && Q.list.filter(dealable).length >= 4;
-            var list = keepQ ? Q.list : (_hcl(8) || []), good = list.filter(dealable), rest = list.filter(function (l) { return !dealable(l); });
+            var list = keepQ ? Q.list : (_hcl(8) || []);
+            /* .80.3: a fresh queue keeps the looks still waiting in the old one
+               (same closet, weather and level) in front — their cut-outs are
+               already downloaded, so the next Next never waits for a new one */
+            if (!keepQ && Q && Q.sig === qsig()) {
+              var seenT = {}, merged = [];
+              Q.list.filter(dealable).concat(list).forEach(function (l) { if (l && !seenT[l.title]) { seenT[l.title] = 1; merged.push(l); } });
+              list = merged.slice(0, Math.max(8, Q.list.length));
+            }
+            /* and doesn't bring back a look from the last few Nexts */
+            var fresh = list.filter(function (l) { return l && recentT.indexOf(l.title) === -1; });
+            if (fresh.filter(dealable).length) list = fresh;
+            var good = list.filter(dealable), rest = list.filter(function (l) { return !dealable(l); });
             /* the queue the next deal takes: looks he can be seen in first */
             if (!keepQ) Q = { sig: qsig(), list: good.concat(rest) };
             var nx = good.filter(function (l) { return l.title !== look.title; });
-            nx.slice(0, 5).forEach(function (l, i) { var u = r4(l); if (!u) return; var c = window.cutFor784(u); if (c) urls.push(c); if (i < 3) warmOne(u, i === 0); });
+            /* .80.3: the next three at high priority, ahead of any background download */
+            nx.slice(0, 5).forEach(function (l, i) { var u = r4(l); if (!u) return; var c = window.cutFor784(u); if (c) urls.push(c); if (i < 3) warmOne(u, true); });
             if (window.lqRemember793) window.lqRemember793(urls.map(function (u) { var m = u.match(/onbody-cut\/([^\/?#]+?)\./); return m ? m[1] : ""; }));
           }
           var sw = navigator.serviceWorker && navigator.serviceWorker.controller;
           if (sw && urls.length) sw.postMessage({ type: "warm-cuts", urls: urls.slice(0, 6) });
         } catch (e) {}
-      }, { timeout: 1200 });
+        openBgWhenWarm();
+      }, { timeout: 600 });
     }
     /* never compete with the hero itself */
     if (him && !(him.complete && him.naturalWidth)) { var once = false, go = function () { if (once) return; once = true; run(); }; him.addEventListener("load", go, { once: true }); setTimeout(go, 6000); }
@@ -40344,7 +40480,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     if (!fresh(n)) build(n);
     ric(step, { timeout: 4000 });
   }
-  setTimeout(function () { ric(step, { timeout: 4000 }); }, 4500);
+  setTimeout(function () { (window.lazyAll802 || function (f) { f(); })(function () { ric(step, { timeout: 4000 }); }); }, 4500);
 })();
     </script>
     <script type="wardrobe/app">
@@ -40401,7 +40537,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
     fit();
   }
-  fetch("assets/onbody-cut/feet.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+  ((window.__takeEarly803 && window.__takeEarly803("feet")) || fetch("assets/onbody-cut/feet.json")).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
     if (j && j.feet) { FEET = j.feet; all(); }
   }).catch(function () {});
 })();
