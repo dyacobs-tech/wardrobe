@@ -23,7 +23,7 @@ from playwright.sync_api import sync_playwright
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = Path("/workspace/wardrobe-audit/build-78")
+OUT = Path(os.environ.get("AUDIT_OUT", "/workspace/wardrobe-audit/build-78"))
 REC78 = json.loads((Path(__file__).resolve().parent / "fixtures78/identify_recorded.json").read_text())
 BUILD = "2026-11-19.78.1"
 BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
