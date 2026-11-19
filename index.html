@@ -4864,6 +4864,9 @@
       .vp-act svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
       .vp-act[aria-pressed="true"] { border-color: var(--accent); }
       .vp-onme { padding: 14px 20px 0; text-align: center; }
+      .ion-side .vp-row { margin: 0 0 8px; padding: 2px 0 6px; grid-auto-columns: 86%; }
+      .ion-side .vp-card { scroll-margin-left: 0; }
+      @media (min-width: 700px) { .ion-side .vp-row { grid-auto-columns: calc((100% - 12px) / 2.25); } }
       .stl-sub { margin: -6px 0 10px 18px; font-size: 12.5px; color: var(--dim); }
       .vp-withmine { display: block; margin: 10px auto 0; }
       .vp-withmine[hidden] { display: none; }
@@ -37793,6 +37796,8 @@ function ionOwnHTML(ids) {
 }
 function ionShopHTML(list) {
   if (typeof priceFilterSort === "function") list = priceFilterSort(list || []);
+  /* Build .78.6: the shared product card in a swipe row. */
+  if (typeof vpRowHTML === "function" && typeof VP_ICON !== "undefined") return list.length ? vpRowHTML(list, { cls: "ion-pc" }) : "";
   return list.map(function (p) {
     return '<div class="ion-shop"><span class="ion-sph">' + (p.img ? '<img src="' + ionEsc(p.img) + '" alt="" loading="lazy" />' : "") + "</span>" +
       '<div><b>' + ionEsc(p.brand) + '</b><span class="ion-nm">' + ionEsc(p.name) + "</span></div>" +

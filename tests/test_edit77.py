@@ -305,7 +305,7 @@ def main():
         check("your shop build shows there too", pg.locator("#panel-onyou [data-ion-build]").count() >= 1)
         f0 = pg.locator("#panel-onyou [data-ion-look]").first
         check("render is the webp", (f0.locator(".ion-fig img").get_attribute("src") or "").startswith("assets/inspo/") and pg.evaluate("(() => { const i = document.querySelector('#panel-onyou [data-ion-look] .ion-fig img'); return i.complete && i.naturalWidth > 0; })()"))
-        shops = pg.eval_on_selector_all("#panel-onyou [data-ion-look] .ion-shop a", "e => e.map(x => x.href)")
+        shops = pg.eval_on_selector_all("#panel-onyou [data-ion-look] .ion-shop a, #panel-onyou [data-ion-look] .vp-card a[data-vp-act=buy]", "e => e.map(x => x.href)")
         check("shop-the-missing-pieces links", len(shops) >= 16 and all(h.startswith("http") for h in shops), len(shops))
         check("his pieces shown", pg.locator("#panel-onyou [data-ion-look] .ion-own span").count() >= 10)
         f0.locator("[data-ion-build-look]").click(); pg.wait_for_timeout(600)
