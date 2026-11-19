@@ -14,6 +14,8 @@ import threading
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))  # noqa: E402
+from buildinfo import CURRENT_BUILD
 
 ROOT = Path(__file__).resolve().parents[1]
 BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
@@ -112,7 +114,7 @@ def main() -> int:
                     info = page.evaluate(INSPECT)
                     check(
                         f"{tag} {slug}: build is .71",
-                        info and info.get("build") == "2026-11-19.80.5",
+                        info and info.get("build") == CURRENT_BUILD,
                         str(info and info.get("build")),
                     )
                     check(

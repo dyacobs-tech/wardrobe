@@ -21,6 +21,8 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))  # noqa: E402
+from buildinfo import CURRENT_BUILD
 
 _src = (Path(__file__).resolve().parent / "test_edit77.py").read_text()
 _g: dict = {"__file__": str(Path(__file__).resolve().parent / "test_edit77.py")}
@@ -28,7 +30,7 @@ exec(compile(_src.split("\ndef main():")[0], "test_edit77_helpers", "exec"), _g)
 png_uri, wait_js, start_server, CLOSET, TRY = (_g[k] for k in ("png_uri", "wait_js", "start_server", "CLOSET", "TRY"))
 
 HERE = Path(__file__).resolve().parent
-BUILD = "2026-11-19.80.5"
+BUILD = CURRENT_BUILD
 REC = json.loads((HERE / "fixtures78/identify_recorded.json").read_text())
 KEYS = list(REC["answers"].keys())
 fails: list[str] = []

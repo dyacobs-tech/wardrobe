@@ -21,11 +21,13 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 from PIL import Image, ImageDraw, ImageFont
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))  # noqa: E402
+from buildinfo import CURRENT_BUILD
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(os.environ.get("AUDIT_OUT", "/workspace/wardrobe-audit/build-78"))
 REC78 = json.loads((Path(__file__).resolve().parent / "fixtures78/identify_recorded.json").read_text())
-BUILD = "2026-11-19.80.5"
+BUILD = CURRENT_BUILD
 BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 EDIT_FX = json.loads((Path(__file__).resolve().parent / "fixture_edit76.json").read_text())
 _LIVE83 = Path("/workspace/wardrobe-audit/build-75/fixture_live83.json")
@@ -869,7 +871,7 @@ def page_pass(checks: list[dict], clicks: dict | None) -> bool:
 
 def write_table(rows: list[dict], path: Path) -> str:
     # rows: {viewport, theme, slug, label, pass, checks, clicks}
-    lines = ["# Build 2026-11-19.80.5 audit", "", "| Page | Viewport | Theme | Result | Failing checks |",
+    lines = ["# Build " + CURRENT_BUILD + " audit", "", "| Page | Viewport | Theme | Result | Failing checks |",
              "|---|---|---|---|---|"]
     for r in rows:
         fails = [c["check"] + (f" ({c['detail']})" if c.get("detail") else "") for c in r["checks"] if not c["pass"]]

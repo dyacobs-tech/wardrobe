@@ -20,6 +20,8 @@ from playwright.sync_api import sync_playwright
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from test_composer73 import BLOCK, BUILD, FIXTURE, FIXTURE_PHOTO, STANDALONE_INIT, start_server  # noqa: E402
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))  # noqa: E402
+from buildinfo import CURRENT_BUILD
 
 LOC = {"name": "Palm Beach, Florida", "lat": 26.70306, "lon": -80.03661, "admin": "Florida", "country": "United States"}
 WEATHER = {"current": {"time": "2026-11-18T12:00", "temperature_2m": 78.0, "apparent_temperature": 80.0, "weather_code": 1},
@@ -74,7 +76,7 @@ def main() -> int:
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.goto(url, wait_until="load")
             page.wait_for_timeout(1800)
-            check("build is .74", page.evaluate("window.WARDROBE_BUILD") == BUILD == "2026-11-19.80.5")
+            check("build is .74", page.evaluate("window.WARDROBE_BUILD") == BUILD == CURRENT_BUILD)
             check("no syFetch error at boot", not [e for e in errors if "syFetch" in e], errors[:3])
             check("weather loads at boot", page.evaluate("!!(window.currentWeather || (typeof currentWeather !== 'undefined' && currentWeather)) && currentWeather.temp === 78"))
 

@@ -17,6 +17,8 @@ import threading
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))  # noqa: E402
+from buildinfo import CURRENT_BUILD
 
 ROOT = Path(__file__).resolve().parents[1]
 AUDIT = Path("/workspace/wardrobe-audit")
@@ -156,7 +158,7 @@ def main() -> int:
                 home = nav_bbox(page)
                 check(
                     f"{name}: build is .71",
-                    home and home.get("build") == "2026-11-19.80.5",
+                    home and home.get("build") == CURRENT_BUILD,
                     str(home and home.get("build")),
                 )
                 check(

@@ -1,0 +1,47 @@
+name: Deploy Pages
+
+# Publishes ONLY the app files (scripts/assemble_site.py): tests/, fixtures,
+# src/, scripts/ and worker sources never reach the site. main is the live
+# site; the 'preview' branch is published at /wardrobe/preview/.
+on:
+  push:
+    branches: [main, preview]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out live (main)
+        uses: actions/checkout@v4
+        with: { ref: main, path: live, fetch-depth: 1 }
+      - name: Does a preview branch exist?
+        id: pv
+        run: |
+          if git ls-remote --exit-code --heads "https://github.com/${{ github.repository }}.git" preview >/dev/null; then echo "has=1" >> "$GITHUB_OUTPUT"; else echo "has=0" >> "$GITHUB_OUTPUT"; fi
+      - name: Check out preview
+        if: steps.pv.outputs.has == '1'
+        uses: actions/checkout@v4
+        with: { ref: preview, path: preview, fetch-depth: 1 }
+      - name: Assemble site
+        run: |
+          if [ -d preview ]; then python3 live/scripts/assemble_site.py live preview _site; else python3 live/scripts/assemble_site.py live _site; fi
+          test ! -e _site/tests && test ! -e _site/src && echo "no tests/src published"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: _site }
+      - id: deployment
+        uses: actions/deploy-pages@v4

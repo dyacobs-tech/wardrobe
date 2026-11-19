@@ -1,0 +1,43 @@
+name: Promote preview to live
+
+# Daily (04:00 ET) or on demand: fast-forward main to preview when preview
+# is ahead, its tests pass, and main has nothing preview lacks. Never a
+# force-push; a diverged main stops the promotion with an error.
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: promote
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-24.04
+    outputs:
+      promoted: ${{ steps.ff.outputs.promoted }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Fast-forward main to preview
+        id: ff
+        run: |
+          git fetch origin main preview
+          if [ "$(git rev-parse origin/main)" = "$(git rev-parse origin/preview)" ]; then echo "Nothing to promote."; echo "promoted=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if ! git merge-base --is-ancestor origin/main origin/preview; then echo "::error::main has commits preview lacks — rebase preview onto main first (no force-push)."; exit 1; fi
+          # the preview head must have a green test run
+          sha=$(git rev-parse origin/preview)
+          ok=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/commits/$sha/check-runs" | python3 -c 'import json,sys; d=json.load(sys.stdin); runs=[r for r in d.get("check_runs",[]) if r["name"] in ("smoke","tests")]; print("1" if runs and all(r["conclusion"]=="success" for r in runs) else "0")')
+          if [ "$ok" != "1" ]; then echo "::error::preview head $sha has no green smoke/tests run yet."; exit 1; fi
+          git push origin origin/preview:refs/heads/main
+          echo "promoted=1" >> "$GITHUB_OUTPUT"
+  deploy:
+    needs: promote
+    if: needs.promote.outputs.promoted == '1'
+    uses: ./.github/workflows/pages.yml

@@ -56,8 +56,11 @@ def start_server():
 
 def wait_until(pg, expr, tries=60, step=500):
     for _ in range(tries):
-        if pg.evaluate(expr):
-            return True
+        try:
+            if pg.evaluate(expr):
+                return True
+        except Exception:
+            pass  # the app may reload itself when a new worker takes over
         pg.wait_for_timeout(step)
     return False
 
@@ -126,6 +129,24 @@ def main():
         check("B: every code file precached", not missing, missing)
         check("C: code manifest written", bool(cache1["man"]) and cache1["man"]["build"] == build, cache1["man"])
 
+        # LRU cap: images carry size/time stamps; a trim to half the bytes drops the oldest
+        pg.reload(wait_until="load"); pg.wait_for_timeout(5000)
+        lru = pg.evaluate("""async () => {
+          const c = await caches.open('wardrobe-onbody-v2'); let ks = await c.keys();
+          const rs = await Promise.all(ks.map(k => c.match(k)));
+          const sizes = rs.map(r => +(r.headers.get('x-sw-size') || 0));
+          const total = sizes.reduce((a, b) => a + b, 0);
+          const before = ks.length;
+          const reg = await navigator.serviceWorker.getRegistration();
+          const done = new Promise(res => navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'trimmed') res(e.data.r); }));
+          reg.active.postMessage({ type: 'trim-images', max: Math.floor(total / 2) });
+          const r = await Promise.race([done, new Promise(res => setTimeout(() => res(null), 8000))]);
+          const after = (await c.keys()).length;
+          return { before, after, stamped: sizes.filter(x => x > 0).length, total, r };
+        }""")
+        check("LRU: cached images are size/time stamped", lru["before"] > 0 and lru["stamped"] == lru["before"], lru)
+        check("LRU: a trim below the cap drops the oldest images", lru["r"] is not None and lru["after"] < lru["before"], lru)
+
         # a broken update: one code file 404s
         set_mode("bad")
         r = pg.evaluate("""async () => { const reg = await navigator.serviceWorker.getRegistration(); try { await reg.update(); } catch (e) {}
@@ -140,6 +161,7 @@ def main():
         pg.evaluate("""() => { window.__ctl = 0; navigator.serviceWorker.addEventListener('controllerchange', () => window.__ctl++); }""")
         pg.evaluate("""async () => { const reg = await navigator.serviceWorker.getRegistration(); try { await reg.update(); } catch (e) {} }""")
         wait_until(pg, "async () => { const reg = await navigator.serviceWorker.getRegistration(); return !!(reg && reg.active && reg.active.state === 'activated' && !reg.installing && !reg.waiting && (await (await caches.open('wardrobe-code-v1')).match('https://wardrobe.invalid/__code-manifest__').then(m => m && m.json())).build.indexOf('-tgood') > 0); }", tries=40)
+        pg.wait_for_timeout(1500)
         man = pg.evaluate("""async () => { const c = await caches.open('wardrobe-code-v1'); const m = await c.match('https://wardrobe.invalid/__code-manifest__'); const ks = (await c.keys()).map(r => r.url); return { man: m ? await m.json() : null, ks }; }""")
         nb = build + "-tgood"
         check("B: a complete update takes over", man["man"] and man["man"]["build"] == nb, man["man"])

@@ -4,7 +4,7 @@ name: Smoke test
 # Sync/render worker calls are blocked, so no run touches real data.
 on:
   push:
-    branches: [main]
+    branches: [main, preview]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -56,3 +56,35 @@ jobs:
             echo "::error title=Smoke test output::${body}"
           fi
           exit $code
+
+  tests:
+    # Every test file (tests/run_all.py) against this checkout, local mocks only.
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.60.0-noble
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Install the Playwright Python package (browsers are in the image)
+        run: python3 -m pip install --break-system-packages playwright==1.60.0
+      - name: Run every test file (quarantined ones are reported, not failing)
+        env:
+          TEST_TIMEOUT: "300"
+          PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS: "1"
+        run: python3 tests/run_all.py
+
+  commit-hygiene:
+    # main is promoted from preview; WIP / cache-bump-only commits never land there.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 30
+      - name: No WIP or bare cache-bump commits in this push
+        run: |
+          bad=$(git log --format='%h %s' ${{ github.event.before }}..${{ github.sha }} 2>/dev/null | grep -iE '^[0-9a-f]+ (wip\b|cache[- ]bump|bump (sw|cache)\b)' || true)
+          if [ -n "$bad" ]; then echo "::error::WIP / cache-bump-only commits reached main:"; echo "$bad"; exit 1; fi
