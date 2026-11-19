@@ -132,8 +132,24 @@ def main() -> int:
                     f"(() => {{ const p = document.getElementById('{panel}');"
                     " return !!p && !p.hidden && p.offsetParent !== null; })()")
                 check(f"tab {sel} shows #{panel}", vis)
+                # .80.6: no page may be wider than the screen (a nowrap chip
+                # row once made a page 1,500px wide and pushed the nav off)
+                over = page.evaluate("document.documentElement.scrollWidth - innerWidth")
+                check(f"tab {sel} fits the screen width", over <= 1, f"{over}px wider")
             except Exception as e:  # noqa: BLE001
                 check(f"tab {sel} shows #{panel}", False, str(e)[:120])
+        # the sub-pages too (only those this build has)
+        for sel in ("#section-ideas", "#outfits-mine", "#outfits-inspo", "[data-inspo-view=onyou]", "#section-palettes",
+                    "#section-icons", "#section-watches", "#tab-find", "#edit-tab-build", "#section-profile", "#tab-profile"):
+            try:
+                if not page.locator(sel).count() or not page.locator(sel).first.is_visible():
+                    continue
+                page.locator(sel).first.click(timeout=3000)
+                page.wait_for_timeout(500)
+                over = page.evaluate("document.documentElement.scrollWidth - innerWidth")
+                check(f"page {sel} fits the screen width", over <= 1, f"{over}px wider")
+            except Exception as e:  # noqa: BLE001
+                check(f"page {sel} fits the screen width", False, str(e)[:120])
 
         # ---- closet: Mark worn was removed in .75 ---------------------------
         page.click("#section-closet")

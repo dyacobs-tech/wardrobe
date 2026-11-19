@@ -34,6 +34,29 @@
         window.openBg803 = function () { if (open) return; open = true; q.splice(0).forEach(function (f) { try { f(); } catch (e) {} }); };
         setTimeout(window.openBg803, 15000);
       })();
+      /* .80.6: the web fonts (134KB) no longer share the first open's
+         bandwidth with the app's code: on a first open they are added once
+         Home's hero and the next cut-outs are in (text shows meanwhile in
+         metric-matched stand-ins, so nothing moves); once they have loaded
+         here they are added at once on later opens (cached) */
+      (function () {
+        var done = false;
+        function add() {
+          if (done) return; done = true;
+          var st = document.createElement("style"); st.id = "webfonts806";
+          st.textContent = "@font-face { font-family: \"Inter\"; src: url(\"assets/fonts/Inter.var.woff2\") format(\"woff2\"); font-weight: 100 900; font-style: normal; font-display: swap; } @font-face { font-family: \"Inter\"; src: url(\"assets/fonts/Inter-Italic.var.woff2\") format(\"woff2\"); font-weight: 100 900; font-style: italic; font-display: swap; } @font-face { font-family: \"Fraunces\"; src: url(\"assets/fonts/Fraunces.v803.woff2\") format(\"woff2\"); font-weight: 100 900; font-style: normal; font-display: swap; } @font-face { font-family: \"Fraunces\"; src: url(\"assets/fonts/Fraunces-Italic.v803.woff2\") format(\"woff2\"); font-weight: 100 900; font-style: italic; font-display: swap; }";
+          document.head.appendChild(st);
+          try {
+            if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('600 12px "Inter"'), document.fonts.load('600 20px "Fraunces"')]).then(function () { try { localStorage.setItem("wardrobe.fonts806", "1"); } catch (e) {} }, function () {});
+          } catch (e) {}
+        }
+        window.addFonts806 = add;
+        var warm = false;
+        /* "loaded here before" (so in the cache), not just "has a service worker":
+           an uncached font must not compete with the hero */
+        try { warm = localStorage.getItem("wardrobe.fonts806") === "1"; } catch (e) {}
+        if (warm) add(); else window.afterLookahead803(add);
+      })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
@@ -53,7 +76,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.15" />
+    <meta name="wardrobe-build" content="2026-11-19.80.16" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -63,34 +86,17 @@
     <link rel="manifest" href="manifest.webmanifest" />
     <title>Wardrobe</title>
     <style>
-      @font-face {
-        font-family: "Inter";
-        src: url("assets/fonts/Inter.var.woff2") format("woff2");
-        font-weight: 100 900;
-        font-style: normal;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "Inter";
-        src: url("assets/fonts/Inter-Italic.var.woff2") format("woff2");
-        font-weight: 100 900;
-        font-style: italic;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "Fraunces";
-        src: url("assets/fonts/Fraunces.v803.woff2") format("woff2");
-        font-weight: 100 900;
-        font-style: normal;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "Fraunces";
-        src: url("assets/fonts/Fraunces-Italic.v803.woff2") format("woff2");
-        font-weight: 100 900;
-        font-style: italic;
-        font-display: swap;
-      }
+      /* .80.6: metric-matched stand-ins (Arial/Georgia, or their metric
+         clones), sized to Inter/Fraunces so text keeps its box when the
+         web fonts arrive; the web fonts themselves are added from <head> */
+      @font-face { font-family: "Inter Fallback"; font-style: normal; font-weight: 100 549; src: local("Arial"), local("ArialMT"), local("Arial"); size-adjust: 104.93%; ascent-override: 92.32%; descent-override: 22.99%; line-gap-override: 0%; }
+      @font-face { font-family: "Inter Fallback"; font-style: normal; font-weight: 550 900; src: local("Arial Bold"), local("Arial-BoldMT"), local("Arial"); size-adjust: 100.3%; ascent-override: 96.59%; descent-override: 24.05%; line-gap-override: 0%; }
+      @font-face { font-family: "Inter Fallback"; font-style: italic; font-weight: 100 549; src: local("Arial Italic"), local("Arial-ItalicMT"), local("Arial"); size-adjust: 106.33%; ascent-override: 91.11%; descent-override: 22.68%; line-gap-override: 0%; }
+      @font-face { font-family: "Inter Fallback"; font-style: italic; font-weight: 550 900; src: local("Arial Bold Italic"), local("Arial-BoldItalicMT"), local("Arial"); size-adjust: 100.99%; ascent-override: 95.93%; descent-override: 23.88%; line-gap-override: 0%; }
+      @font-face { font-family: "Fraunces Fallback"; font-style: normal; font-weight: 100 549; src: local("Georgia"); size-adjust: 106.44%; ascent-override: 91.88%; descent-override: 23.96%; line-gap-override: 0%; }
+      @font-face { font-family: "Fraunces Fallback"; font-style: normal; font-weight: 550 900; src: local("Georgia Bold"), local("Georgia-Bold"), local("Georgia"); size-adjust: 94.37%; ascent-override: 103.63%; descent-override: 27.02%; line-gap-override: 0%; }
+      @font-face { font-family: "Fraunces Fallback"; font-style: italic; font-weight: 100 549; src: local("Georgia Italic"), local("Georgia-Italic"), local("Georgia"); size-adjust: 98.29%; ascent-override: 99.51%; descent-override: 25.94%; line-gap-override: 0%; }
+      @font-face { font-family: "Fraunces Fallback"; font-style: italic; font-weight: 550 900; src: local("Georgia Bold Italic"), local("Georgia-BoldItalic"), local("Georgia"); size-adjust: 88.5%; ascent-override: 110.51%; descent-override: 28.81%; line-gap-override: 0%; }
       :root {
         color-scheme: light;
         --bg: #F6F2EA;
@@ -114,8 +120,8 @@
         --shadow-lift: 0 1px 2px rgba(26,22,18,.05), 0 12px 32px -12px rgba(26,22,18,.18);
         --shadow-card: 0 1px 0 rgba(26,22,18,.04), 0 10px 28px -16px rgba(26,22,18,.18);
         --shadow-nav: 0 8px 28px rgba(26,22,18,.28);
-        --font-display: "Fraunces", "Libre Baskerville", "Times New Roman", Georgia, serif;
-        --font-ui: "Inter", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+        --font-display: "Fraunces", "Fraunces Fallback", "Libre Baskerville", "Times New Roman", Georgia, serif;
+        --font-ui: "Inter", "Inter Fallback", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
         /* Build .59: bar height and body clearance are this static
            calc from the first rule, identical on every page. No JS,
            no dvh, no transitions. env() is the platform inset (0
@@ -7277,7 +7283,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.15</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.16</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7724,7 +7730,21 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
   /* Sampled content key: length + a hash over the head, the tail
      and a stride through the middle. Hashing every byte of every
      photo on every save would cost more than the save itself. */
+  /* .80.6: the key is pure, and the same photo strings are re-saved
+     several times during boot: remember them (bounded) */
+  var _keyMemo = typeof Map === "function" ? new Map() : null;
   V.keyOf = function (s) {
+    if (_keyMemo) {
+      var hit = _keyMemo.get(s);
+      if (hit !== undefined) return hit;
+      if (_keyMemo.size > 2000) _keyMemo.clear();
+      var k = keyOf0(s);
+      _keyMemo.set(s, k);
+      return k;
+    }
+    return keyOf0(s);
+  };
+  function keyOf0(s) {
     var n = s.length, h1 = 5381, h2 = 52711, i, c;
     var stride = n > 12000 ? Math.floor(n / 4000) : 1;
     for (i = 0; i < n; i += (i < 3000 || i > n - 3000) ? 1 : stride) {
@@ -7733,7 +7753,7 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
       h2 = ((h2 * 31) + c) >>> 0;
     }
     return h1.toString(36) + "-" + h2.toString(36) + "-" + n.toString(36);
-  };
+  }
   /* Build .55 (3.4): pending vault writes, counted per put
      transaction, so an import can wait for the photos it just
      wrote before reloading; and (3.2) single-photo fetches for
@@ -8294,9 +8314,8 @@ function lookOccasionOk(look, occasion) {
     var lo = Math.max(top.lo, bottom.lo, shoes.lo), hi = Math.min(top.hi, bottom.hi, shoes.hi);
     if (layer) { lo = Math.max(lo, layer.lo); hi = Math.min(hi, layer.hi); }
     if (lo > hi) return null;
-    var clothes = layer ? [layer, top, bottom] : [top, bottom];
-    var statements = 0, patterns = 0;
-    clothes.forEach(function (c) { if (!c.neutral) statements++; if (c.pattern) patterns++; });
+    var statements = (top.neutral ? 0 : 1) + (bottom.neutral ? 0 : 1), patterns = (top.pattern ? 1 : 0) + (bottom.pattern ? 1 : 0);
+    if (layer) { if (!layer.neutral) statements++; if (layer.pattern) patterns++; }
     if (statements > 1 || patterns > 1) return null;
     if (shoes.pattern && patterns > 0) return null;
     if (!shoes.neutral && statements > 0) return null;
@@ -8370,20 +8389,52 @@ function lookOccasionOk(look, occasion) {
     });
     this.tops = tops; this.bottoms = bottoms; this.shoes = shoes; this.layerOpts = layerOpts; this.accs = accs;
     var combos = [];
-    for (var a = 0; a < tops.length; a++) for (var b = 0; b < bottoms.length; b++) for (var c = 0; c < shoes.length; c++) for (var d = 0; d < layerOpts.length; d++) {
-      var t = tops[a], bt = bottoms[b], s = shoes[c], ly = layerOpts[d];
+    /* .80.6: whole branches that evaluate() would reject for every
+       shoe / layer are skipped (a layer only narrows the range and only
+       adds statements and patterns), so the deck and its order are
+       unchanged — ~4x fewer calls */
+    for (var a = 0; a < tops.length; a++) for (var b = 0; b < bottoms.length; b++) {
+      var t0 = tops[a], b0 = bottoms[b];
+      var plo = Math.max(t0.lo, b0.lo), phi = Math.min(t0.hi, b0.hi);
+      if (plo > phi) continue;
+      var pst = (t0.neutral ? 0 : 1) + (b0.neutral ? 0 : 1), ppt = (t0.pattern ? 1 : 0) + (b0.pattern ? 1 : 0);
+      if (pst > 1 || ppt > 1) continue;
+      if (b0.cat === "Jeans" && b0.fam === "blue" && t0.denim) continue;
+      for (var c = 0; c < shoes.length; c++) {
+      var s0 = shoes[c];
+      if (Math.max(plo, s0.lo) > Math.min(phi, s0.hi)) continue;
+      if (s0.pattern && ppt > 0) continue;
+      if (!s0.neutral && pst > 0) continue;
+      for (var d = 0; d < layerOpts.length; d++) {
+      var t = t0, bt = b0, s = s0, ly = layerOpts[d];
       if (ly && ly.id === t.id) continue;
       var ev = evaluate(t, bt, s, ly);
       if (!ev) continue;
       var mask = 0;
       for (var L = ev.lo; L <= ev.hi; L++) if (fitsLevel(L, t, bt, s, ly)) mask |= (1 << L);
       if (!mask) continue;
-      var cids = [t.id, bt.id, s.id].concat(ly ? [ly.id] : []);
+      var cids = ly ? [t.id, bt.id, s.id, ly.id] : [t.id, bt.id, s.id];
       combos.push({ t: t, b: bt, s: s, l: ly, mask: mask, score: ev.score, ids: cids, key: comboKey(cids) });
-    }
+    }}}
     this.combos = combos;
   }
-  function comboKey(ids) { return ids.slice().sort().join("|"); }
+  /* .80.6: the same key as ids.slice().sort().join("|") (string < is the
+     default sort's code-unit order), without the generic sort for 3-4 ids */
+  function comboKey(ids) {
+    var n = ids.length;
+    if (n > 6) return ids.slice().sort().join("|");
+    var a = new Array(n);
+    for (var i = 0; i < n; i++) {
+      var x = ids[i];
+      if (typeof x !== "string") return ids.slice().sort().join("|");
+      var j = i;
+      while (j > 0 && a[j - 1] > x) { a[j] = a[j - 1]; j--; }
+      a[j] = x;
+    }
+    var k = n ? a[0] : "";
+    for (var m = 1; m < n; m++) k += "|" + a[m];
+    return k;
+  }
   Deck.prototype.forLevel = function (level) {
     if (!level) return this.combos;
     var bit = 1 << level;
@@ -9041,7 +9092,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.15";
+var WARDROBE_BUILD = "2026-11-19.80.16";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -16726,12 +16777,15 @@ var QUARANTINED_IMG = "";
 /* .80.3: a hidden view that needs lazy data renders when the data is in
    or when its panel is shown, whichever comes first */
 function lazyRender803(name, panelId, f) {
-  if (!window.lazyHas802 || window.lazyHas802(name)) return f();
   var p = document.getElementById(panelId);
-  if (p && !p.hidden && !p.closest("[hidden]")) return f();
+  var shown = !p || (!p.hidden && !p.closest("[hidden]"));
+  if (shown && (!window.lazyHas802 || window.lazyHas802(name))) return f();
   var done = false;
   function go() { if (done) return; done = true; f(); }
-  window.lazyOn802(name, go);
+  /* .80.6: a page that is not on screen is built when it opens, even once
+     its data is in: building the hidden Shop the look at boot also pulled
+     the 668KB shop database (or the shop API) on every open */
+  if (shown) window.lazyOn802(name, go);
   (window.__onShow803 = window.__onShow803 || []).push([panelId, go]);
 }
 /* .80.3: while its data is still loading, a list on a hidden page is not
@@ -24825,6 +24879,25 @@ function renderWardrobe() {
   updateWardRail();
   renderStaleChip();
 }
+/* .80.6: during boot the hidden Closet grid is not built (it was built
+   twice before the hero, ~35ms each on a phone): it is built on idle once
+   Home's hero is in, or at once if the Closet opens first. After that,
+   every call renders as before. */
+(function () {
+  var real = renderWardrobe, boot = true, pending = false;
+  function hidden() { var p = document.getElementById("panel-wardrobe"); return !!p && (p.hidden || !!p.closest("[hidden]")); }
+  renderWardrobe = function () {
+    if (boot && hidden()) { pending = true; return; }
+    pending = false;
+    return real.apply(this, arguments);
+  };
+  function flush() { if (!boot) return; boot = false; if (pending) renderWardrobe(); }
+  window.flushCloset806 = flush;
+  (window.__onShow803 = window.__onShow803 || []).push(["panel-wardrobe", flush]);
+  (window.afterLookahead803 || function (f) { f(); })(function () {
+    if (window.requestIdleCallback) requestIdleCallback(flush, { timeout: 2000 }); else setTimeout(flush, 200);
+  });
+})();
 renderWardrobe();
 (function wireStaleChip() {
   var chip = document.getElementById("ward-stale-chip");
@@ -27887,6 +27960,13 @@ document.getElementById("loc-back-home").addEventListener("click", function () {
 function initToday() {
   todayLook = openingLook();
   if (todayLook) recordDealt([todayLook.img]);
+  /* .80.6: start the hero's cut-out download now, at high priority, while
+     the rest of the app's scripts run (Home sets the <img> once they have) */
+  try {
+    var r806 = todayLook && (todayLook.fwRender || (typeof onbodyForLook === "function" ? onbodyForLook(todayLook) : ""));
+    var m806 = r806 && String(r806).match(/(?:^|\/)onbody\/([0-9a-f]{8,})\.webp/i);
+    if (m806) { var pre806 = new Image(); try { pre806.fetchPriority = "high"; } catch (e) {} pre806.decoding = "async"; pre806.src = "assets/onbody-cut/" + m806[1] + ".webp"; window.__heroPre806 = pre806; }
+  } catch (e) {}
   renderToday();
   /* The Today selector shows the mode the hero was actually
      dealt in — the shared saved source mode, Combo by default. */
@@ -38501,10 +38581,14 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     });
     return out;
   };
-  window.editLoadCatalog = function () {
+  window.editLoadCatalog = function (tries) {
+    /* Build .80.6: a failed or empty fetch (a dropped connection on a
+       reopen) retries twice instead of leaving the Edit empty all session */
+    tries = tries || 0;
+    function again() { if (tries < 2 && !EDIT_CATALOG.length) setTimeout(function () { editLoadCatalog(tries + 1); }, tries ? 4000 : 1500); }
     try {
       fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) {
-        if (!j) return;
+        if (!j) { again(); return; }
         EDIT_CATALOG = editNormalizeCatalog(j);
         /* gap fillers (trousers above all) also lead Shop the look */
         var gu = {};
@@ -38512,8 +38596,8 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
         window.EDIT_GAP_URLS = gu;
         _textCache = null;
         if (typeof currentTab !== "undefined" && currentTab === "find") renderTheEdit();
-      }).catch(function () {});
-    } catch (e) {}
+      }).catch(again);
+    } catch (e) { again(); }
   };
   window.editCatalogCount = function () { return EDIT_CATALOG.length; };
 
@@ -40538,7 +40622,9 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   var pwT = null;
   function prewarmView() {
     clearTimeout(pwT);
-    pwT = setTimeout(function () {
+    /* .80.6: not before the hero and the next looks' cut-outs are in (its
+       full-size copy is ~100KB and competed with them on a first open) */
+    (window.afterLookahead803 || function (f) { f(); })(function () { clearTimeout(pwT); pwT = setTimeout(function () {
       (window.requestIdleCallback || function (f) { return setTimeout(f, 200); })(function () {
         try {
           if (ovOpen || typeof todayLook === "undefined" || !todayLook) return;
@@ -40552,7 +40638,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
           document.querySelectorAll("#ov-pieces img").forEach(function (x) { x.decoding = "async"; if (x.decode) x.decode().catch(function () {}); });
         } catch (e) {}
       }, { timeout: 1500 });
-    }, 400);
+    }, 400); });
   }
   window.prewarmOutfitView794 = prewarmView;
   /* .79.4: the Outfits feed is built once on idle a few seconds after the
