@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.8b" />
+    <meta name="wardrobe-build" content="2026-11-19.78.9" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -6498,7 +6498,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.8b</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.9</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8052,7 +8052,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.8b";
+var WARDROBE_BUILD = "2026-11-19.78.9";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -37032,6 +37032,17 @@ function vpOnMe(key, run) {
     st.textContent = text || (state === "error" ? "Couldn't render that right now." : "Putting it on you\u2026");
   }, function () { return run === vpRun; });
 }
+/* Is there already a render of him in this piece on this device?
+   (the try-on cache key is built from the same garment image ref) */
+var vpOnMeTok = 0;
+function vpHasRender(e) {
+  if (!e || !e.img || typeof tryonEntryItems !== "function" || typeof tryonCacheKey !== "function" || typeof tryonCache === "undefined") return Promise.resolve(false);
+  return Promise.resolve(tryonEntryItems(e)).then(function (items) {
+    if (!items || !items.length) return false;
+    var c = tryonCache[tryonCacheKey(items.slice(0, 6))];
+    return !!(c && c.u);
+  }).catch(function () { return false; });
+}
 function vpAct(act, key, el) {
   var r = VP[key];
   if (!r) return;
@@ -37049,8 +37060,16 @@ function vpAct(act, key, el) {
   if (act === "style") { vpClose(); if (typeof buildAroundShopEntry === "function") buildAroundShopEntry(e); return; }
   if (act === "onme") {
     var sheet = document.getElementById("vp-sheet");
-    if (!sheet || sheet.hidden || sheet.getAttribute("data-vp-key") !== key) vpOpen(key, "onme");
-    else vpOnMe(key, vpRun);
+    if (sheet && !sheet.hidden && sheet.getAttribute("data-vp-key") === key) { vpOnMe(key, vpRun); return; }
+    /* .78.9: from a card, a render he already has opens the try-on
+       straight away (served from the device cache, no new render);
+       otherwise the product sheet renders it inline. */
+    var tok = ++vpOnMeTok;
+    vpHasRender(e).then(function (has) {
+      if (tok !== vpOnMeTok) return;
+      if (has && typeof tryonForEntry === "function") { vpClose(); tryonForEntry(Object.assign({ retailer: e.store || e.retailer }, e), false); }
+      else vpOpen(key, "onme");
+    });
     return;
   }
   if (act === "withmine") { vpClose(); if (typeof tryonForEntry === "function") tryonForEntry(Object.assign({ retailer: e.store || e.retailer }, e), true); return; }

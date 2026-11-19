@@ -39,7 +39,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).resolve().parent
-BUILD = "2026-11-19.78.8b"
+BUILD = "2026-11-19.78.9"
 TRY = "https://wardrobe-tryon.dyacobs.workers.dev"
 PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
 FX = json.loads((HERE / "fixture_edit76.json").read_text())
@@ -246,6 +246,7 @@ def main():
         pg.click("#edit-tab-saved"); pg.wait_for_timeout(300)
         n2 = len(seen["posts"])
         pg.locator("#edit-saved-out .edit-pc").first.locator('[data-vp-act="onme"]').click()
+        pg.wait_for_selector("#vp-sheet:not([hidden])", timeout=5000)  # .78.9: checks for an existing render first
         check("product sheet opens with On me inline", pg.locator("#vp-sheet").is_visible() and pg.locator("#vp-onme").is_visible())
         pg.wait_for_selector("#vp-onme-img:not([hidden])", timeout=15000)
         check("On me posts one garment", len(seen["posts"]) == n2 + 1 and len(seen["posts"][-1]["items"]) == 1, len(seen["posts"]) - n2)

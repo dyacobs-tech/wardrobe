@@ -57,6 +57,7 @@ def run(mode):
         vp = btn.first.get_attribute("data-vp-act") == "onme"
         btn.first.click()
         if vp:
+            pg.wait_for_selector("#vp-sheet:not([hidden])", timeout=5000)  # .78.9: checks for an existing render first
             # Build .78.5: the product card's person icon renders inline in the product sheet
             assert pg.locator("#vp-sheet").is_visible() and pg.locator("#vp-onme").is_visible(), "product sheet did not open"
             if mode == "unconfigured":

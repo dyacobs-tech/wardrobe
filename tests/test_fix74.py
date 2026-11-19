@@ -74,7 +74,7 @@ def main() -> int:
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.goto(url, wait_until="load")
             page.wait_for_timeout(1800)
-            check("build is .74", page.evaluate("window.WARDROBE_BUILD") == BUILD == "2026-11-19.78.8b")
+            check("build is .74", page.evaluate("window.WARDROBE_BUILD") == BUILD == "2026-11-19.78.9")
             check("no syFetch error at boot", not [e for e in errors if "syFetch" in e], errors[:3])
             check("weather loads at boot", page.evaluate("!!(window.currentWeather || (typeof currentWeather !== 'undefined' && currentWeather)) && currentWeather.temp === 78"))
 
