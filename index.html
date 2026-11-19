@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.7b" />
+    <meta name="wardrobe-build" content="2026-11-19.78.8" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -4837,6 +4837,27 @@
       .vp-ico { display: inline-grid; place-items: center; width: 32px; height: 32px; min-width: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text); cursor: pointer; text-decoration: none; box-shadow: none; }
       .vp-ico svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
       .vp-acts .vp-ico { flex: 0 1 32px; min-width: 24px; width: auto; }
+      /* .78.8 — horizontal card (Build slots), Render me picks, Ask */
+      .vp-card.vp-h { display: grid; grid-template-columns: 84px minmax(0, 1fr); grid-template-rows: 1fr auto; flex: 1 1 auto; min-width: 0; align-self: stretch; }
+      .vp-h .vp-media { grid-row: 1 / span 2; }
+      .vp-h .vp-ph { height: 100%; aspect-ratio: auto; min-height: 105px; }
+      .vp-h .vp-body { padding: 8px 10px 0; }
+      .vp-h .vp-name { min-height: 0; }
+      .vp-h .vp-acts { padding: 0 6px 4px; justify-content: flex-start; gap: 4px; }
+      .rm-picks { margin: 12px 0 4px; text-align: left; }
+      .rm-h { font-size: 17px; margin: 0 0 8px; }
+      #panel-find .ask-card.vp-ask { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: none; }
+      #panel-find .ask-card.vp-ask.is-star { box-shadow: inset 0 0 0 2px var(--brass, #a8834a); }
+      #panel-find .vp-ask .ask-ph { height: auto; aspect-ratio: 4 / 5; max-height: 46vh; background: #F4EEE3; cursor: pointer; }
+      #panel-find .vp-ask .ask-body { padding: 12px 12px 12px; display: flex; flex-direction: column; gap: 3px; }
+      #panel-find .vp-ask .ask-name { font-family: var(--font-ui); font-size: 15px; font-weight: 500; min-height: 0; }
+      #panel-find .vp-ask .ask-pr b { font-size: 14.5px; }
+      #panel-find .vp-ask .ask-acts { padding: 6px 0 0; gap: 0; justify-content: space-between; }
+      #panel-find .vp-ask .ask-acts .vp-ico { margin: 0; border: 0 !important; background: transparent !important; color: var(--text) !important; height: 34px; padding: 0 !important; display: inline-grid; place-items: center; }
+      #panel-find .vp-ask .ask-star[aria-pressed="true"] svg { fill: var(--brass, #a8834a); stroke: var(--brass, #a8834a); }
+      #panel-find .vp-ask .ask-acts .vp-ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+      #panel-find .vp-ask .ask-add { margin-top: 8px; width: 100%; height: 38px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text); font-family: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; cursor: pointer; }
+      #panel-find .vp-ask .ask-add.on { background: var(--teal, #1B4A4C); color: #F4F7F4; border-color: transparent; }
       .vp-ico .vp-chk, .vp-act .vp-chk { opacity: 0; }
       .vp-media { position: relative; }
       .vp-look { position: absolute; right: 8px; top: 8px; min-width: 0; min-height: 0 !important; height: auto; line-height: 1.3; padding: 4px 9px; font-size: 11px; font-weight: 600; border-radius: 999px; border: 0; background: rgba(255,251,244,.92); color: #1A1612; box-shadow: none; letter-spacing: 0; text-transform: none; }
@@ -6477,7 +6498,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.7b</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.8</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8031,7 +8052,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.7b";
+var WARDROBE_BUILD = "2026-11-19.78.8";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -17126,8 +17147,14 @@ function emulateRenderHTML(ic, lk, fl) {
      per slot. The result is cached per photograph and never re-renders. */
   var onme = emulateOnMeFor(lk);
   if (onme && onme.u) {
+    var rmShop = (onme.shop || []).filter(function (p) { return p && p.img; });
+    var rmOwn = (onme.own || []).map(function (o) { return o.name; }).filter(Boolean);
     html += '<img class="emulate-onme" src="' + esc(onme.u) + '" alt="You, in this look" />' +
-      (onme.names && onme.names.length ? '<p class="emulate-note">' + esc(onme.names.join(" \u00b7 ")) + "</p>" : "") +
+      /* .78.8: the pieces in the render — his own named, shop picks on the shared card */
+      (rmShop.length && typeof vpRowHTML === "function"
+        ? (rmOwn.length ? '<p class="emulate-note">From your closet: ' + esc(rmOwn.join(" \u00b7 ")) + "</p>" : "") +
+          '<div class="rm-picks"><h4 class="stl-name rm-h">In this render</h4>' + vpRowHTML(rmShop.map(function (p) { return Object.assign({ retailer: p.retailer || "" }, p); }), { cls: "rm-pc" }) + "</div>"
+        : (onme.names && onme.names.length ? '<p class="emulate-note">' + esc(onme.names.join(" \u00b7 ")) + "</p>" : "")) +
       '<button type="button" class="btn-accent" data-emulate-onme-save>' + (emulateOnMeSaved(lk) ? "Saved to Outfits" : "Save look") + "</button>";
   } else if (core && !done && !(saved && saved.swapState) && lazyRenders[emulateComboFor(fl)]) {
     html += '<button type="button" class="btn-accent" data-emulate-render>Render me in this look</button>';
@@ -17331,7 +17358,7 @@ function emulateOnMeStart() {
       emulateOnMeCache[lk.img] = { u: url, t: Date.now(), title: ic.name + " \u2014 " + boardCaption(ic, lk),
         names: plan.map(function (p) { return p.name; }),
         own: plan.filter(function (p) { return p.own; }).map(function (p) { return { id: p.own.id, name: p.own.name || "", category: p.own.category || "", hex: p.own.colourHex || "" }; }),
-        shop: plan.filter(function (p) { return p.shop; }).map(function (p) { return { brand: p.shop.brand || "", name: p.shop.name || "", url: p.shop.url || "", price: p.shop.price || null, img: p.shop.img || "" }; }) };
+        shop: plan.filter(function (p) { return p.shop; }).map(function (p) { return { brand: p.shop.brand || "", name: p.shop.name || "", url: p.shop.url || "", price: p.shop.price || null, img: p.shop.img || "", retailer: p.shop.retailer || p.shop.store || "" }; }) };
       try { localStorage.setItem("wardrobe.emulateOnMe", JSON.stringify(emulateOnMeCache)); } catch (e) {}
       emulateOnMeRun = null;
       if (typeof currentTab === "undefined" || currentTab === "emulate") renderEmulate();
@@ -36884,6 +36911,7 @@ function vpCardHTML(e, opts) {
   if (ph !== e.img) e = Object.assign({}, e, { img: ph });
   var key = vpKey(e);
   VP[key] = { e: e, pc: opts.pc || null, pick: opts.pick || null, tag: opts.tag || "", edit: !!opts.edit };
+  if (opts.h) opts.cls = (opts.cls ? opts.cls + " " : "") + "vp-h";
   var w = vpWished(e), b = vpBought(e), img = e.img || "";
   return '<article class="vp-card' + (opts.picked ? " is-picked" : "") + (opts.cls ? " " + opts.cls : "") + '" data-vp-key="' + esc(key) + '"' + (opts.edit ? ' data-edit-key="' + esc(key) + '"' : "") + (opts.pick ? ' data-vp-pick="' + opts.pick.idx + '"' : "") + ">" +
     '<div class="vp-media"><button type="button" class="vp-ph" data-vp-open aria-label="' + esc((e.brand ? e.brand + " " : "") + vpName(e)) + '">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" decoding="async" />' : '<span class="vp-noimg">' + esc(e.brand || "") + "</span>") + "</button>" +
@@ -37583,6 +37611,13 @@ if (window.stlPending) { window.stlPending = false; try { renderFindLookMode(); 
     var ids = boardIds(), picks = gapPicks({ ids: ids }).filter(function (e) { var sl = slotOfCat(e.cat); return SLOTS.indexOf(sl) !== -1 && !boardHasKey(snap(e).key); });
     var tr = picks.filter(function (e) { return e.cat === "trousers"; }), rest = picks.filter(function (e) { return e.cat !== "trousers"; });
     picks = tr.slice(0, 6).concat(rest.slice(0, 4));
+    if (picks.length && typeof vpRowHTML === "function") {
+      /* .78.8: the shared product card; + Look puts it on the board */
+      host.innerHTML = '<div class="edit-sec"><h3>Fills a gap</h3></div>' + vpRowHTML(picks.map(function (e) { return remember(snap(e)); }), function (sn) {
+        return { edit: true, cls: "edit-pc", overlay: '<button type="button" class="vp-look" data-edit-gap-put="' + esc(sn.key) + '">+ Look</button>' };
+      });
+      return;
+    }
     host.innerHTML = picks.length ? '<div class="edit-sec"><h3>Fills a gap</h3></div><div class="edit-strip">' + picks.map(function (e) {
       var sn = remember(snap(e));
       return '<button type="button" class="edit-thumb" data-edit-gap-put="' + esc(sn.key) + '"><span class="edit-tph"><img src="' + esc(sn.img) + '" alt="" loading="lazy" decoding="async" /></span>' +
@@ -37602,7 +37637,8 @@ if (window.stlPending) { window.stlPending = false; try { renderFindLookMode(); 
       var tag = !x ? "" : x.own ? '<span class="edit-tag">Closet</span>' : (x.saved ? '<span class="edit-tag shop">Saved</span>' : '<span class="edit-tag shop">Shop</span>');
       return '<section class="card edit-slot" data-edit-slot="' + s + '"><div class="edit-slot-h"><span class="edit-kick">' + SLOT_LABEL[s] + "</span>" + tag + "</div>" +
         '<div class="edit-slot-row"><button type="button" class="edit-arrow" data-edit-step="-1" data-slot="' + s + '" aria-label="Previous ' + SLOT_LABEL[s] + '"' + (n < 2 ? " disabled" : "") + ">‹</button>" +
-        (x ? '<div class="edit-sph"><img src="' + esc(x.img) + '" alt="" decoding="async" /></div><div class="edit-sm"><span class="edit-kick">' + esc(x.own ? (x.it.colourName || "") : x.brand) + "</span><h3>" + esc(x.name) + "</h3>" +
+        (x && !x.own && typeof vpCardHTML === "function" && vpPhotoFor(x.p) ? vpCardHTML(x.p, { edit: true, h: true, cls: "edit-slot-pc" })
+          : x ? '<div class="edit-sph"><img src="' + esc(x.img) + '" alt="" decoding="async" /></div><div class="edit-sm"><span class="edit-kick">' + esc(x.own ? (x.it.colourName || "") : x.brand) + "</span><h3>" + esc(x.name) + "</h3>" +
           (x.own ? "" : '<div class="edit-price">' + priceText(x.p) + (x.p.store ? " · " + esc(x.p.store) : "") + "</div>") + "</div>"
           : '<div class="edit-sph edit-none"></div><div class="edit-sm"><h3>' + (s === "layer" ? "No layer" : optionalSlot(s) ? "None" : "Nothing yet") + "</h3></div>") +
         '<button type="button" class="edit-arrow" data-edit-step="1" data-slot="' + s + '" aria-label="Next ' + SLOT_LABEL[s] + '"' + (n < 2 ? " disabled" : "") + ">›</button></div></section>";
@@ -38208,19 +38244,30 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var hex = pr.hex || e.hex || "";
     var owns = (p.pairsWith || []).map(function (id) { return typeof closetItemById === "function" ? closetItemById(id) : null; }).filter(Boolean).slice(0, 3);
     var star = isLiked(p.sku), added = askAdded[t.id + "|" + p.sku];
-    return '<article class="card ask-card' + (star ? " is-star" : "") + '" data-ask-sku="' + esc(p.sku) + '" data-ask-turn="' + esc(t.id) + '">' +
-      '<div class="ask-ph"><img src="' + esc(e.img) + '" alt="" loading="lazy" decoding="async" /></div>' +
-      '<div class="ask-body"><span class="edit-kick">' + esc(e.brand) + "</span><h3>" + esc(e.name) + "</h3>" +
+    /* .78.8: the shared product card's look — cream studio photo,
+       brand in small caps, icon row (wishlist / star / not for me /
+       see it on me / shop) — with the deck, why line, Owns and Add to
+       Build kept. The photo opens the product sheet. */
+    var ve = Object.assign({}, e, { retailer: e.retailer || e.store || "" }), vk = "";
+    if (typeof vpKey === "function" && typeof VP !== "undefined") { vk = vpKey(ve); VP[vk] = { e: ve, pc: null, pick: null, tag: "", edit: false }; }
+    var I = (typeof VP_ICON !== "undefined") ? VP_ICON : {};
+    var w = vk && typeof vpWished === "function" ? vpWished(ve) : false;
+    return '<article class="card ask-card vp-card vp-ask' + (star ? " is-star" : "") + '" data-ask-sku="' + esc(p.sku) + '" data-ask-turn="' + esc(t.id) + '"' + (vk ? ' data-vp-key="' + esc(vk) + '"' : "") + ">" +
+      '<div class="ask-ph"' + (vk ? ' data-vp-open role="button" tabindex="0" aria-label="' + esc(e.brand + " " + e.name) + '"' : "") + '><img src="' + esc(e.img) + '" alt="" loading="lazy" decoding="async" /></div>' +
+      '<div class="ask-body"><span class="edit-kick vp-brand">' + esc(e.brand) + '</span><div class="vp-name ask-name" role="heading" aria-level="3">' + esc(e.name) + "</div>" +
       '<div class="ask-pr">' + (hex ? '<span class="ask-dot" style="background:' + esc(hex) + '"></span>' : "") + "<b>" + esc(money(e, pr)) + "</b><span>" + esc(pr.colourName || e.colour || "") + "</span></div>" +
       (p.why ? '<p class="ask-why">' + esc(p.why) + "</p>" : "") +
       (owns.length ? '<div class="ask-owns"><span>Owns</span>' + owns.map(function (it) {
         var src = typeof editItemSrc === "function" ? editItemSrc(it) : it.photo;
         return '<button type="button" data-ask-item="' + esc(it.id) + '" aria-label="' + esc(it.name) + '">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy" />' : "") + "</button>";
       }).join("") + "</div>" : "") +
-      '<div class="ask-acts"><button type="button" class="edit-ico" data-ask-star aria-pressed="' + (star ? "true" : "false") + '" aria-label="Star"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.8L12 16.6l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"/></svg></button>' +
-      '<button type="button" class="edit-ico" data-ask-down aria-label="Not for me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 4.5h9.2a1.6 1.6 0 0 1 1.6 1.4l1 7.1a1.6 1.6 0 0 1-1.6 1.8h-4.4l.7 3.4a1.7 1.7 0 0 1-3.1 1.2L7.5 14.5z"/><path d="M4 4.5h3.5v10H4z"/></svg></button>' +
-      '<button type="button" class="edit-onme' + (added ? " on" : "") + '" data-ask-add>' + (added ? "In Build" : "Add to Build") + "</button>" +
-      (e.url ? '<a class="edit-onme" href="' + esc(e.url) + '" target="_blank" rel="noopener">Shop</a>' : "") + "</div></div></article>";
+      '<div class="ask-acts vp-acts">' +
+      (vk ? '<button type="button" class="vp-ico" data-vp-act="wish" data-vp-wish aria-pressed="' + w + '" aria-label="Wishlist">' + (I.heart || "") + "</button>" : "") +
+      '<button type="button" class="vp-ico ask-star" data-ask-star aria-pressed="' + (star ? "true" : "false") + '" aria-label="Star"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.8L12 16.6l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"/></svg></button>' +
+      '<button type="button" class="vp-ico" data-ask-down aria-label="Not for me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 4.5h9.2a1.6 1.6 0 0 1 1.6 1.4l1 7.1a1.6 1.6 0 0 1-1.6 1.8h-4.4l.7 3.4a1.7 1.7 0 0 1-3.1 1.2L7.5 14.5z"/><path d="M4 4.5h3.5v10H4z"/></svg></button>' +
+      (vk && e.img ? '<button type="button" class="vp-ico" data-vp-act="onme" aria-label="See it on me">' + (I.person || "") + "</button>" : "") +
+      (e.url ? '<a class="edit-onme vp-ico" data-vp-act="buy" href="' + esc(e.url) + '" target="_blank" rel="noopener" aria-label="Shop at ' + esc(ve.retailer || "the store") + '">' + (I.ext || "Shop") + "</a>" : "") + "</div>" +
+      '<button type="button" class="ask-add' + (added ? " on" : "") + '" data-ask-add>' + (added ? "In Build" : "Add to Build") + "</button></div></article>";
   }
   function turnHTML(t) {
     var h = '<div class="ask-turn" data-ask-turn-id="' + esc(t.id) + '"><div class="ask-q">' + esc(t.q) + "</div>";

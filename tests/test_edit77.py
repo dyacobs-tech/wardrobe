@@ -35,7 +35,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).resolve().parent
-BUILD = "2026-11-19.78.7b"
+BUILD = "2026-11-19.78.8"
 TRY = "https://wardrobe-tryon.dyacobs.workers.dev"
 PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
 CLOSET = json.loads((HERE / "fixture_onbody.json").read_text())
@@ -199,6 +199,10 @@ def main():
         check("card: brand, name, price, dot, why, owns", c0.locator(".edit-kick").inner_text().strip() != "" and "$" in c0.locator(".ask-pr").inner_text()
               and c0.locator(".ask-dot").count() == 1 and "olive" in c0.locator(".ask-why").inner_text() and c0.locator(".ask-owns button").count() == 2, c0.inner_text()[:300])
         check("local catalogue image used", "assets/editimg/" in (c0.locator(".ask-ph img").get_attribute("src") or ""), c0.locator(".ask-ph img").get_attribute("src"))
+        check("Ask card in the shared card style (.78.8): icon row + photo opens the product sheet", c0.evaluate("e => e.classList.contains('vp-ask')") and c0.locator("[data-vp-act=wish]").count() == 1 and c0.locator("[data-vp-act=onme]").count() == 1)
+        c0.locator(".ask-ph").click(); pg.wait_for_timeout(300)
+        check("product sheet from an Ask card", pg.locator("#vp-sheet").is_visible() and pg.locator("#vp-sheet .vp-sh-buy").count() == 1)
+        pg.click("#vp-sheet-close"); pg.wait_for_timeout(200)
         check("Shop opens the product", (c0.locator("a.edit-onme").get_attribute("href") or "").startswith("http") and c0.locator("a.edit-onme").get_attribute("target") == "_blank")
         # star
         sku0 = c0.get_attribute("data-ask-sku")

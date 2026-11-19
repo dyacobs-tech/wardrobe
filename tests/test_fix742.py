@@ -36,7 +36,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-19.78.7b"
+BUILD = "2026-11-19.78.8"
 KEY = "test-key-fix742"
 ACCT = "test-acct-742"
 CURSOR = 603
