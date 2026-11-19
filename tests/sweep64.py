@@ -1,4 +1,4 @@
-"""Full UI sweep for build .64.
+"""Full UI sweep (build .64; pages updated to the .75/.76 IA).
 
 Visits every top-level page and sub-tab at 375×812, 390×844, 430×932
 and 1280×800. Records clipped tabs, horizontal overflow, overlaps,
@@ -27,23 +27,18 @@ BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 # (filename slug, click path). First click is a section/nav control;
 # optional second is a subtab.
 PAGES = [
+    # Build .76: the .75 IA (Home / Closet / Outfits / The Edit / Calendar,
+    # Profile in the masthead) — the old Ideas and Shop subtabs are gone.
     ("home", ["#tab-today"]),
     ("closet-closet", ["#section-closet", "#tab-wardrobe"]),
-    ("closet-outfits", ["#section-closet", "#tab-looks"]),
     ("closet-watches", ["#section-closet", "#tab-watches"]),
-    ("closet-today", ["#section-closet", "#tab-wearing"]),
-    ("ideas-ideas", ["#section-ideas", "#tab-studio"]),
-    ("ideas-outfits", ["#section-ideas", "#tab-outfitideas"]),
-    ("ideas-icons", ["#section-ideas", "#tab-icons"]),
-    ("ideas-palettes", ["#section-ideas", "#tab-palettes"]),
-    ("ideas-myinspo", ["#section-ideas", "#tab-myinspo"]),
-    ("shop-look", ["#tab-find", "#tab-shopmain"]),
-    ("shop-brands", ["#tab-find", "#tab-brands"]),
-    ("shop-sale", ["#tab-find", "#tab-sale"]),
-    ("shop-wishlist", ["#tab-find", "#tab-shopwish"]),
-    ("shop-purchased", ["#tab-find", "#tab-purchased"]),
-    ("shop-receipts", ["#tab-find", "#tab-receipts"]),
-    ("shop-search", ["#tab-find", "#tab-search"]),
+    ("outfits-mine", ["#section-ideas", "#outfits-mine"]),
+    ("outfits-icons", ["#section-ideas", "#outfits-inspo", '[data-inspo-view="icons"]']),
+    ("outfits-palettes", ["#section-ideas", "#outfits-inspo", '[data-inspo-view="palettes"]']),
+    ("outfits-myinspo", ["#section-ideas", "#outfits-inspo", '[data-inspo-view="myinspo"]']),
+    ("edit-saved", ["#tab-find", "#edit-tab-saved"]),
+    ("edit-searches", ["#tab-find", "#edit-tab-searches"]),
+    ("edit-build", ["#tab-find", "#edit-tab-build"]),
     ("calendar", ["#section-calendar"]),
     ("profile-info", ["#tab-profile", "#tab-pinfo"]),
     ("profile-location", ["#tab-profile", "#tab-plocation"]),
@@ -95,7 +90,8 @@ INSPECT_JS = """() => {
         }
       }
       const close = document.getElementById('profile-close');
-      if (close && group.id === 'subnav-me') {
+      // .75 IA: Profile closes from the bottom nav; the × is hidden (zero rect)
+      if (close && group.id === 'subnav-me' && close.getBoundingClientRect().width > 0) {
         const r = close.getBoundingClientRect();
         if (r.left < -0.5 || r.right > vw + 0.5) {
           issues.push({kind: 'clipped-tab', detail: 'profile-close cut off'});
@@ -280,11 +276,14 @@ def main() -> int:
 
                 baseline_nav = None
                 for slug, clicks in PAGES:
+                    missing = []
                     for sel in clicks:
                         loc = page.locator(sel)
-                        if loc.count():
-                            loc.first.click()
+                        try:
+                            loc.first.click(timeout=4000)
                             page.wait_for_timeout(180)
+                        except Exception:
+                            missing.append(sel)
                     page.wait_for_timeout(120)
                     if slug == "calendar":
                         page.evaluate(
@@ -311,6 +310,8 @@ def main() -> int:
                         )
                         page.wait_for_timeout(150)
                     info = page.evaluate(INSPECT_JS)
+                    for sel in missing:
+                        info["issues"].append({"kind": "control-missing", "detail": sel + " not clickable"})
                     nav = info.get("nav")
                     if vw <= 899:
                         if baseline_nav is None:
