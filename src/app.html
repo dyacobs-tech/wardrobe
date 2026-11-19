@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.17" />
+    <meta name="wardrobe-build" content="2026-11-19.80.18" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -1360,6 +1360,9 @@
       #panel-pinfo #data-card .card-head-info, #panel-plocation #data-card .card-head-info, #panel-pcloud #data-card .card-head-info { flex: none; }
       #panel-pinfo #data-card #data-status, #panel-plocation #data-card #data-status, #panel-pcloud #data-card #data-status { flex-basis: 100%; }
       #panel-watches .add-form { padding: 10px 12px; gap: 7px; }
+      /* .80.18 (audit P1.10): Add is its own sub-page — the form alone, one column */
+      #panel-watches .ward-grid.watch-add-mode { grid-template-columns: minmax(0, 560px); }
+      #panel-watches #watch-form[hidden], #panel-watches #watch-list-view[hidden] { display: none !important; }
       #panel-watches label.field { font-size: 12px; letter-spacing: .14em; margin-bottom: 3px; }
       #panel-watches input[type="text"], #panel-watches select, #panel-watches textarea { padding: 6px 9px; font-size: 14.5px; min-height: 34px; }
       #panel-watches .item-card { padding: 9px 10px; gap: 5px; }
@@ -7291,7 +7294,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.17</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.18</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7301,13 +7304,14 @@
           <button type="button" class="chip" data-watch-list="collection" aria-pressed="true">Collection <span class="count" id="watch-count-collection"></span></button>
           <button type="button" class="chip" data-watch-list="sold" aria-pressed="false">Sold <span class="count" id="watch-count-sold"></span></button>
           <button type="button" class="chip" data-watch-list="wants" aria-pressed="false">Wants <span class="count" id="watch-count-wants"></span></button>
+          <button type="button" class="chip" data-watch-list="add" aria-pressed="false" id="watch-add-tab">Add</button>
         </div>
-        <div class="ward-grid">
-          <div>
+        <div class="ward-grid" id="watch-ward-grid">
+          <div id="watch-list-view">
             <div class="item-grid" id="watch-grid"></div>
           </div>
-          <form class="card add-form" id="watch-form">
-            <h3 class="type-title">Add</h3>
+          <form class="card add-form" id="watch-form" hidden>
+            <h3 class="type-title" id="watch-form-title">Add</h3>
             <div>
               <label class="field" for="watch-name">Name</label>
               <input type="text" id="watch-name" placeholder="" required />
@@ -9100,7 +9104,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.17";
+var WARDROBE_BUILD = "2026-11-19.80.18";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -26199,12 +26203,20 @@ function renderWatches() {
   var owned = watches.filter(function (w) { return !w.sold; });
   var sold = watches.filter(function (w) { return w.sold; });
   var counts = { collection: owned.length, sold: sold.length, wants: WATCH_WANTS.length };
-  ["collection", "sold", "wants"].forEach(function (k) {
+  ["collection", "sold", "wants", "add"].forEach(function (k) {
     var c = document.getElementById("watch-count-" + k);
     if (c) c.textContent = counts[k];
     var b = document.querySelector('[data-watch-list="' + k + '"]');
     if (b) b.setAttribute("aria-pressed", watchListTab === k ? "true" : "false");
   });
+  /* .80.18 (audit P1.10): Add is its own sub-page: the form alone (photo included);
+     the lists show without it */
+  var addMode = watchListTab === "add";
+  var fm = document.getElementById("watch-form"), lv = document.getElementById("watch-list-view"), wg = document.getElementById("watch-ward-grid");
+  if (fm) fm.hidden = !addMode;
+  if (lv) lv.hidden = addMode;
+  if (wg) wg.classList.toggle("watch-add-mode", addMode);
+  if (addMode) return;
   if (watchListTab === "wants") {
     grid.innerHTML = WATCH_WANTS.map(function (w) {
       return '<article class="card item-card">' +
@@ -26299,6 +26311,7 @@ function endWatchEdit() {
   editingWatchId = null;
   document.getElementById("watch-submit").textContent = "Add";
   document.getElementById("watch-cancel-edit").hidden = true;
+  var t = document.getElementById("watch-form-title"); if (t) t.textContent = "Add";
 }
 function startWatchEdit(w) {
   editingWatchId = w.id;
@@ -26315,6 +26328,10 @@ function startWatchEdit(w) {
   else { prev.hidden = true; prev.removeAttribute("src"); }
   document.getElementById("watch-submit").textContent = "Save changes";
   document.getElementById("watch-cancel-edit").hidden = false;
+  var t = document.getElementById("watch-form-title"); if (t) t.textContent = "Edit";
+  /* .80.18 (audit P1.10): the form lives on the Add sub-page */
+  watchListTab = "add";
+  renderWatches();
   document.getElementById("watch-form").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 document.getElementById("watch-cancel-edit").addEventListener("click", function () {
@@ -26324,6 +26341,8 @@ document.getElementById("watch-cancel-edit").addEventListener("click", function 
   var prev = document.getElementById("watch-photo-preview");
   prev.hidden = true; prev.removeAttribute("src");
   endWatchEdit();
+  watchListTab = "collection";
+  renderWatches();
 });
 document.getElementById("watch-form").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -26367,7 +26386,10 @@ document.getElementById("watch-form").addEventListener("submit", function (e) {
   var prev = document.getElementById("watch-photo-preview");
   prev.hidden = true; prev.removeAttribute("src");
   document.getElementById("watch-photo-label").textContent = "Photo";
+  /* .80.18 (audit P1.10): after Add (or Save changes) the Collection shows, with it in */
+  watchListTab = "collection";
   renderWatches();
+  try { window.scrollTo(0, 0); } catch (e2) {}
 });
 
 /* ================= Style icons panel — A–Z name index =================
