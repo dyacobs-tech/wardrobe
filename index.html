@@ -30,7 +30,7 @@
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
     <meta name="wardrobe-build" content="2026-11-18.75.2" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
@@ -307,6 +307,15 @@
       .options-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; justify-content: space-between; margin-bottom: 14px; }
       /* .options-head h3/p styles deleted — renderOptions emits
          only the Six more button there. */
+      #tryon-sheet { z-index: 120; }
+      #tryon-sheet [hidden] { display: none !important; }
+      .tryon-wait { flex: 1; }
+      .tryon-card { width: 100%; max-width: 520px; max-height: 92dvh; overflow-y: auto; }
+      .tryon-stage { position: relative; display: flex; align-items: center; justify-content: center; min-height: 52vh; border-radius: 14px; background: var(--surface-2, rgba(127,127,127,0.08)); overflow: hidden; margin: 10px 0 12px; }
+      .tryon-stage img { display: block; width: 100%; max-height: 70vh; object-fit: contain; }
+      .tryon-wait { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 24px; color: var(--muted, inherit); }
+      .tryon-actions { justify-content: center; }
+      .look-layer-bar #tryon-look-btn { margin-left: auto; }
       .options-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 20px; }
       @media (min-width: 760px) { .options-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; } }
       .option-card { overflow: hidden; text-align: left; padding: 0; background: var(--surface); display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; width: 100%; height: 100%; margin: 0; vertical-align: top; }
@@ -6213,8 +6222,25 @@
       <img id="popout-img" alt="" />
       <button type="button" class="popout-close" id="popout-close" aria-label="Close full-size photo">&times;</button>
     </div>
+    <div class="info-pop-backdrop" id="tryon-sheet" hidden>
+      <div class="card info-pop-card tryon-card" role="dialog" aria-modal="true" aria-labelledby="tryon-title">
+        <div class="principles-head">
+          <h3 id="tryon-title" class="type-title">On you</h3>
+          <button type="button" class="info-pop-close" id="tryon-close" aria-label="Close try-on">&times;</button>
+        </div>
+        <p class="meta" id="tryon-sub"></p>
+        <div class="tryon-stage" id="tryon-stage">
+          <div class="tryon-wait" id="tryon-wait"><span class="analyze-spin" aria-hidden="true"></span><span id="tryon-status" role="status">Getting ready…</span></div>
+          <img id="tryon-img" alt="" hidden />
+        </div>
+        <div class="look-actions tryon-actions" id="tryon-actions" hidden>
+          <a class="btn-ghost" id="tryon-buy" target="_blank" rel="noopener" hidden>Buy</a>
+          <a class="btn-ghost" id="tryon-open" target="_blank" rel="noopener">Full size</a>
+        </div>
+      </div>
+    </div>
     <div class="look-layer" id="look-layer" hidden>
-      <div class="look-layer-bar"><button type="button" class="btn-ghost" id="look-layer-close">← Back</button></div>
+      <div class="look-layer-bar"><button type="button" class="btn-ghost" id="look-layer-close">← Back</button><button type="button" class="btn-ghost tryon-btn" id="tryon-look-btn" hidden>See it on me</button></div>
       <div class="look-layer-body" id="look-layer-body"></div>
     </div>
     <div class="look-layer fw-layer" id="fw-layer" hidden>
@@ -16349,7 +16375,8 @@ function emulateRowHTML(e, pc, tag) {
     '<span class="shop-price">$' + Number(e.price).toLocaleString("en-US") + "</span></a>" +
     '<button type="button" class="btn-ghost shop-buy" data-mark-purchase="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (bought ? "true" : "false") + '">' + (bought ? "Purchased — un-mark" : "Mark purchased") + "</button>" +
     '<button type="button" class="btn-ghost shop-buy" data-wish-toggle="' + esc(shopEntryKey(e)) + '" aria-pressed="' + (wished ? "true" : "false") + '">' + (wished ? "In wishlist — remove" : "Add to wishlist") + "</button>" +
-    (e.img ? '<button type="button" class="btn-ghost shop-buy" data-style-shop="' + esc(shopEntryKey(e)) + '">Style this</button>' : "") + "</div>";
+    (e.img ? '<button type="button" class="btn-ghost shop-buy" data-style-shop="' + esc(shopEntryKey(e)) + '">Style this</button>' +
+      '<button type="button" class="btn-ghost shop-buy tryon-btn" data-tryon-shop="' + esc(shopEntryKey(e)) + '">See it on me</button>' : "") + "</div>";
 }
 function emulatePieceHTML(pc) {
   var row = '<div class="piece-row"><span class="cdot" style="background:' + (pc.hex || "transparent") + '"></span>' +
@@ -18863,6 +18890,7 @@ function openLookLayer(look) {
   if (look && look.swapState === "rendering" && look.swapComboId && typeof startSwapPoll === "function") startSwapPoll(look);
   if (look && look.img) { recordDealt([look.img]); recordLookCombos([look]); }
   document.getElementById("look-layer-body").innerHTML = lookCardHTML(look);
+  if (typeof tryonSyncLookBtn === "function") tryonSyncLookBtn(look);
   var layer = document.getElementById("look-layer");
   layer.hidden = false;
   layer.scrollTop = 0;
@@ -28476,7 +28504,8 @@ function shopRowHTML(e, pc) {
     /* Style this (build .30): only where the SKU has a photo —
        a render must picture the anchor it names, so image-less
        rows are excluded rather than matched to a lookalike. */
-    (e.img ? '<button type="button" class="btn-ghost shop-buy" data-style-shop="' + esc(shopEntryKey(e)) + '">Style this</button>' : "") + "</div>";
+    (e.img ? '<button type="button" class="btn-ghost shop-buy" data-style-shop="' + esc(shopEntryKey(e)) + '">Style this</button>' +
+      '<button type="button" class="btn-ghost shop-buy tryon-btn" data-tryon-shop="' + esc(shopEntryKey(e)) + '">See it on me</button>' : "") + "</div>";
 }
 var findLookMode = null;
 function shopPiecesForLook(look) {
@@ -29003,7 +29032,8 @@ function shopWishRowHTML(w) {
     '<span class="shop-price">' + price + "</span></a>" +
     '<button type="button" class="btn-ghost shop-buy" data-wish-buy="' + esc(w.key) + '">Mark purchased</button>' +
     '<button type="button" class="btn-ghost shop-buy" data-wish-remove="' + esc(w.key) + '">Remove</button>' +
-    (w.img ? '<button type="button" class="btn-ghost shop-buy" data-style-wish="' + esc(w.key) + '">Style this</button>' : "") + "</div>";
+    (w.img ? '<button type="button" class="btn-ghost shop-buy" data-style-wish="' + esc(w.key) + '">Style this</button>' +
+    '<button type="button" class="btn-ghost shop-buy tryon-btn" data-tryon-wish="' + esc(w.key) + '">See it on me</button>' : "") + "</div>";
 }
 /* Every wishlist mutation funnels through renderShopWishlist —
    keep the My Looks Wishlist subtab in step when it is the view
@@ -29249,7 +29279,8 @@ function renderSaleItems() {
       '<span class="sale-actions">' +
       '<a class="btn-ghost shop-buy" target="_blank" rel="noopener" href="' + esc(it.url) + '">View</a>' +
       '<button type="button" class="btn-ghost shop-buy" data-sale-wish="' + x.i + '" aria-pressed="' + (wished ? "true" : "false") + '">' + (wished ? "In wishlist — remove" : "Add to wishlist") + "</button>" +
-      (it.img ? '<button type="button" class="btn-ghost shop-buy" data-style-sale="' + x.i + '">Style this</button>' : "") +
+      (it.img ? '<button type="button" class="btn-ghost shop-buy" data-style-sale="' + x.i + '">Style this</button>' +
+        '<button type="button" class="btn-ghost shop-buy tryon-btn" data-tryon-sale="' + x.i + '">See it on me</button>' : "") +
       "</span></div></article>";
   }).join("") + "</div>";
   updateSaleRail();
@@ -35347,5 +35378,191 @@ function analyzeFilePiece(card, job, ix) {
 })();
 </script>
 
+    <script>
+/* ================= See it on me — in-app try-on =================
+   Renders a product (or a whole built look) onto the user's own
+   template photo through the wardrobe-tryon worker (FASHN Try-On
+   Max; one garment per step, chained server-side). Same Bearer
+   sync key as wardrobe-sync; the worker keeps a per-account daily
+   cap and returns a cached render for an identical request. */
+var TRYON_URL = "https://wardrobe-tryon.dyacobs.workers.dev";
+try { TRYON_URL = localStorage.getItem("wardrobe.tryonurl") || TRYON_URL; } catch (e) {}
+var tryonRun = 0;
+var TRYON_SLOT = { top: "top", layer: "outer", bottom: "bottom", shoes: "shoes", accessory: "accessory" };
+function tryonKey() { try { return (typeof SY !== "undefined" && SY && SY.key) ? SY.key : null; } catch (e) { return null; } }
+function tryonEl(id) { return document.getElementById(id); }
+/* An image the worker can read: data URIs pass through, blob: URLs
+   are read in the page, everything else becomes an absolute https
+   URL (the app's own assets and retailer images). */
+function tryonImageRef(img) {
+  if (!img || typeof img !== "string") return Promise.resolve(null);
+  if (img.indexOf("data:image/") === 0) return Promise.resolve(img);
+  if (img.indexOf("idb:") === 0) return Promise.resolve(null);
+  function inPage(src) {
+    return fetch(src).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.blob(); }).then(function (b) {
+      return new Promise(function (res) { var fr = new FileReader(); fr.onload = function () { res(String(fr.result)); }; fr.onerror = function () { res(null); }; fr.readAsDataURL(b); });
+    }).catch(function () { return null; });
+  }
+  if (img.indexOf("blob:") === 0) return inPage(img);
+  try {
+    var u = new URL(img, location.href);
+    /* The app's own photos are read here and sent as data, so the
+       worker never needs to reach back into the app. */
+    if (u.origin === location.origin) return inPage(u.toString());
+    if (u.protocol !== "https:") return Promise.resolve(null);
+    return Promise.resolve(u.toString());
+  } catch (e) { return Promise.resolve(null); }
+}
+function tryonSlotForEntry(e) {
+  var pc = (typeof buildShopPiece === "function") ? buildShopPiece(e) : null;
+  if (pc && TRYON_SLOT[pc.slot]) return TRYON_SLOT[pc.slot];
+  var c = (typeof linkClassify === "function") ? linkClassify((e.name || "") + " " + (e.category || e.cat || "")) : ["", ""];
+  var cat = c[0];
+  if (cat === "blazer" || cat === "suit" || cat === "outerwear") return "outer";
+  if (cat === "trousers" || cat === "jeans" || cat === "shorts" || cat === "swim") return "bottom";
+  if (cat === "shoes") return "shoes";
+  if (cat === "belt" || cat === "tie") return "accessory";
+  return "top";
+}
+function tryonEntryItems(e) {
+  return tryonImageRef(e.img).then(function (ref) {
+    if (!ref) return [];
+    return [{ slot: tryonSlotForEntry(e), image: ref, name: ((e.brand ? e.brand + " " : "") + (e.name || "")).trim().slice(0, 120) }];
+  });
+}
+function tryonLookPieces(look) {
+  var out = [];
+  if (!look || !look.swapPieces || typeof PIECE_BY_ID === "undefined") return out;
+  var ids = Array.isArray(look.swapPieces) ? look.swapPieces : Object.keys(look.swapPieces).map(function (k) { return look.swapPieces[k]; });
+  ids.forEach(function (id) {
+    var pc = PIECE_BY_ID[id];
+    if (pc && pc.img && TRYON_SLOT[pc.slot]) out.push(pc);
+  });
+  return out;
+}
+function tryonSyncLookBtn(look) {
+  var b = tryonEl("tryon-look-btn");
+  if (b) b.hidden = !tryonLookPieces(look).length;
+}
+function tryonLookItems(look) {
+  var pcs = tryonLookPieces(look);
+  return Promise.all(pcs.map(function (pc) { return tryonImageRef(pc.img); })).then(function (refs) {
+    var items = [];
+    refs.forEach(function (ref, i) { if (ref) items.push({ slot: TRYON_SLOT[pcs[i].slot], image: ref, name: pcs[i].name || "" }); });
+    return items;
+  });
+}
+function tryonShow(state, text) {
+  var wait = tryonEl("tryon-wait"), img = tryonEl("tryon-img"), act = tryonEl("tryon-actions");
+  tryonEl("tryon-status").textContent = text || "";
+  var spin = wait.querySelector(".analyze-spin");
+  if (spin) spin.hidden = state !== "loading";
+  wait.hidden = state === "done";
+  img.hidden = state !== "done";
+  act.hidden = state !== "done";
+}
+function tryonClose() {
+  tryonRun++;
+  var s = tryonEl("tryon-sheet");
+  if (s) s.hidden = true;
+}
+function tryonErrorText(status, body) {
+  var err = body && body.error;
+  if (status === 401) return "Turn on sync in Profile first — try-on uses the same account.";
+  if (err === "not_configured") return "Try-on isn't switched on yet. It will work as soon as the render service is connected.";
+  if (err === "daily_cap") return "That's today's try-on limit. It resets overnight.";
+  if (err === "garment_image") return "Couldn't read that product's photo. Try another listing.";
+  if (body && body.message) return body.message;
+  return "Couldn't render that right now. Try again in a minute.";
+}
+function tryonStart(itemsPromise, title, buyUrl) {
+  var run = ++tryonRun;
+  var sheet = tryonEl("tryon-sheet");
+  tryonEl("tryon-title").textContent = "On you";
+  tryonEl("tryon-sub").textContent = title || "";
+  var buy = tryonEl("tryon-buy");
+  if (buyUrl) { buy.href = buyUrl; buy.hidden = false; } else { buy.hidden = true; buy.removeAttribute("href"); }
+  tryonEl("tryon-img").removeAttribute("src");
+  tryonShow("loading", "Getting ready…");
+  sheet.hidden = false;
+  var key = tryonKey();
+  if (!key) { tryonShow("error", tryonErrorText(401)); return; }
+  var headers = { "authorization": "Bearer " + key, "content-type": "application/json" };
+  var started = Date.now();
+  function stepText(j) {
+    if (!j || j.steps <= 1) return "Putting it on you… this takes about 20 seconds.";
+    return "Dressing you — piece " + Math.max(1, j.step) + " of " + j.steps + "…";
+  }
+  function finish(j) {
+    var img = tryonEl("tryon-img");
+    img.onload = function () { if (run === tryonRun) tryonShow("done"); };
+    img.onerror = function () { if (run === tryonRun) tryonShow("error", "The render finished but couldn't load. Try again."); };
+    img.alt = "You wearing " + (title || "this");
+    img.src = j.resultUrl;
+    tryonEl("tryon-open").href = j.resultUrl;
+  }
+  function poll(id) {
+    if (run !== tryonRun) return;
+    if (Date.now() - started > 8 * 60 * 1000) { tryonShow("error", "This one is taking too long. Try again later."); return; }
+    fetch(TRYON_URL + "/tryon/" + id, { headers: { "authorization": "Bearer " + key } })
+      .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+      .then(function (x) {
+        if (run !== tryonRun) return;
+        if (x.status !== 200) { tryonShow("error", tryonErrorText(x.status, x.body)); return; }
+        var j = x.body;
+        if (j.status === "done" && j.resultUrl) { finish(j); return; }
+        if (j.status === "failed") { tryonShow("error", j.note || "Couldn't render that one."); return; }
+        tryonShow("loading", stepText(j));
+        setTimeout(function () { poll(id); }, 3000);
+      })
+      .catch(function () { if (run === tryonRun) setTimeout(function () { poll(id); }, 5000); });
+  }
+  Promise.resolve(itemsPromise).then(function (items) {
+    if (run !== tryonRun) return;
+    if (!items || !items.length) { tryonShow("error", "There's no photo of this piece to try on yet."); return; }
+    return fetch(TRYON_URL + "/tryon", { method: "POST", headers: headers, body: JSON.stringify({ items: items.slice(0, 6) }) })
+      .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+      .then(function (x) {
+        if (run !== tryonRun) return;
+        if (x.status !== 200 && x.status !== 202) { tryonShow("error", tryonErrorText(x.status, x.body)); return; }
+        var j = x.body;
+        if (j.status === "done" && j.resultUrl) { finish(j); return; }
+        if (j.status === "failed") { tryonShow("error", j.note || "Couldn't render that one."); return; }
+        tryonShow("loading", stepText(j));
+        setTimeout(function () { poll(j.id); }, 2500);
+      });
+  }).catch(function () { if (run === tryonRun) tryonShow("error", "No connection — try again when you're online."); });
+}
+document.addEventListener("click", function (e) {
+  var t = e.target;
+  if (!t || !t.closest) return;
+  if (t.closest("#tryon-close") || t.id === "tryon-sheet") { tryonClose(); return; }
+  var b;
+  if ((b = t.closest("[data-tryon-shop]"))) {
+    var se = (typeof buildEntryByKey === "function") ? buildEntryByKey(b.getAttribute("data-tryon-shop")) : null;
+    if (se) tryonStart(tryonEntryItems(se), ((se.brand || "") + " " + (se.name || "")).trim(), se.url);
+    e.stopPropagation(); return;
+  }
+  if ((b = t.closest("[data-tryon-wish]"))) {
+    var we = (typeof wishlistFor === "function") ? wishlistFor(b.getAttribute("data-tryon-wish")) : null;
+    if (we) tryonStart(tryonEntryItems(we), ((we.brand || "") + " " + (we.name || "")).trim(), we.url);
+    e.stopPropagation(); return;
+  }
+  if ((b = t.closest("[data-tryon-sale]"))) {
+    var si = (typeof SALE_ITEMS !== "undefined") ? SALE_ITEMS[parseInt(b.getAttribute("data-tryon-sale"), 10)] : null;
+    if (si) tryonStart(tryonEntryItems(si), ((si.brand || "") + " " + (si.name || "")).trim(), si.url);
+    e.stopPropagation(); return;
+  }
+  if (t.closest("#tryon-look-btn")) {
+    var lk = (typeof currentLook !== "undefined") ? currentLook : null;
+    if (lk) tryonStart(tryonLookItems(lk), lk.title || "This look", null);
+    e.stopPropagation(); return;
+  }
+}, true);
+document.addEventListener("keydown", function (e) {
+  var s = tryonEl("tryon-sheet");
+  if (e.key === "Escape" && s && !s.hidden) tryonClose();
+});
+    </script>
   </body>
 </html>
