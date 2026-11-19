@@ -156,7 +156,7 @@ def main() -> int:
                 home = nav_bbox(page)
                 check(
                     f"{name}: build is .71",
-                    home and home.get("build") == "2026-11-19.78.9a",
+                    home and home.get("build") == "2026-11-19.78.9b",
                     str(home and home.get("build")),
                 )
                 check(

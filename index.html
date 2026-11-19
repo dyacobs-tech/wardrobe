@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.9a" />
+    <meta name="wardrobe-build" content="2026-11-19.78.9b" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -6498,7 +6498,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.9a</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.9b</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7120,6 +7120,56 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
 })();
     </script>
     <script type="wardrobe/app">
+/* ================= Build .78.8c — occasion-only pieces =================
+   A piece can carry occasionOnly (e.g. ["Pool"]): it is dealt ONLY in
+   looks of that occasion. Pool slides (any shoe whose name or subtype
+   says slide) are Pool-only by default: never with regular clothes.
+   Enforced in the composer (Home outfit of the day / Next, the Outfits
+   feed), the anchor / closet-look / combo / idea generators, the Build
+   board's first fill and Shuffle, and Ask's Owns row. */
+function itemOccasionOnly(item) {
+  if (!item) return null;
+  if (Array.isArray(item.occasionOnly) && item.occasionOnly.length) return item.occasionOnly;
+  if (item.occasionOnly === false) return null;
+  var cat = String(item.category || item.cat || "");
+  var t = (String(item.name || "") + " " + String(item.subtype || item.subcategory || item.type || "")).toLowerCase();
+  if ((cat === "Shoes" || /shoe|footwear|sandal|slide/i.test(cat)) && /\bslides?\b|pool slide|slide sandal/.test(t)) return ["Pool"];
+  return null;
+}
+function itemPoolOnly(item) { var o = itemOccasionOnly(item); return !!(o && o.some(function (x) { return /pool|beach|swim/i.test(String(x)); })); }
+function pieceIsSwim(item) {
+  if (!item) return false;
+  var cat = String(item.category || item.cat || "");
+  return cat === "Bathing suits" || /swim/i.test(cat) || (cat === "Shorts" && /swim|trunk/i.test(String(item.name || "")));
+}
+/* a look's pieces as closet items, whatever shape the look has */
+function lookItems788(look) {
+  if (!look) return [];
+  var out = [], seen = {};
+  function add(x) {
+    if (!x) return;
+    if (typeof x === "string") x = typeof closetItemById === "function" ? closetItemById(x) : null;
+    else if (x.id && !x.category && typeof closetItemById === "function") x = closetItemById(x.id) || x;
+    if (x && x.id && !seen[x.id]) { seen[x.id] = 1; out.push(x); }
+  }
+  (look.fwPieces || []).forEach(add);
+  (look.pieces || []).forEach(function (p) { add(p && (p.item || p)); });
+  (look.itemIds || look.ids || []).forEach(add);
+  if (look.composerKey && typeof look.composerKey === "string") look.composerKey.split("|").forEach(add);
+  return out;
+}
+function lookIsPoolCtx(look, occasion) {
+  if (occasion && /pool|beach|swim/i.test(String(occasion))) return true;
+  if (lookItems788(look).some(pieceIsSwim)) return true;
+  return false;
+}
+/* false when a Pool-only piece is in a look that is not a Pool look */
+function lookOccasionOk(look, occasion) {
+  var its = lookItems788(look);
+  if (!its.some(itemPoolOnly)) return true;
+  return lookIsPoolCtx(look, occasion);
+}
+/* Build .73 — Closet outfit composer (continued) */
 /* ================= Build .73 — Closet outfit composer =================
    Endless outfits from the live closet, on the device. A rules-based
    composer: every closet piece is profiled (role, formality range,
@@ -7211,6 +7261,8 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
     var hsl = hexToHsl(item.colourHex);
     var fc = familyOf(colourName + " " + name, hsl);
     var p = {
+      poolOnly: typeof itemPoolOnly === "function" ? itemPoolOnly(item) : false,
+      swim: typeof pieceIsSwim === "function" ? pieceIsSwim(item) : false,
       id: item.id, idx: idx, cat: cat, name: item.name || "", n: n,
       role: "none", lo: 3, hi: 4, kind: "",
       L: (function () { var nl = nameLightness(item.colourName); return nl === null ? hsl.l : nl; })(), fam: fc.fam, neutral: fc.neutral,
@@ -7332,6 +7384,8 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
     /* Shorts and swim stay casual; a smart shirt never meets swim. */
     if ((bottom.kind === "shorts" || bottom.kind === "swim") && top.kind === "knit") return null;
     if ((bottom.kind === "shorts" || bottom.kind === "swim") && (shoes.kind === "loafer" && shoes.hi >= 7)) return null;
+    /* .78.8c: Pool-only pieces (pool slides) only ever meet swim */
+    if ((shoes.poolOnly || top.poolOnly || (layer && layer.poolOnly)) && !(bottom.kind === "swim" || bottom.swim)) return null;
     var score = 0;
     var upper = layer || top;
     var dl = Math.abs(upper.L - bottom.L);
@@ -7559,7 +7613,7 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
 var COMPOSER_PREFS_KEY = "composerPrefs";
 var composerDeckCache = {};
 function composerClosetSig(list) {
-  return list.map(function (i) { return [i.id, i.category, i.name, i.colourName, i.colourHex, i.laundry ? 1 : 0].join("~"); }).join("\n");
+  return list.map(function (i) { return [i.id, i.category, i.name, i.colourName, i.colourHex, i.laundry ? 1 : 0, (i.occasionOnly || "") + ""].join("~"); }).join("\n");
 }
 function composerDeck(only, slotName) {
   var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
@@ -8052,7 +8106,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.9a";
+var WARDROBE_BUILD = "2026-11-19.78.9b";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -19933,7 +19987,7 @@ function closetAnchorItems() {
   }
   var tops = poolItems.filter(function (i) { return ["Coats", "Leather jackets", "Sweaters", "Polos", "Shirts", "Button downs", "Tees", "Blazers", "Jackets", "Suits"].indexOf(i.category) !== -1; });
   var bottoms = poolItems.filter(function (i) { return ["Trousers", "Jeans", "Shorts"].indexOf(i.category) !== -1; });
-  var shoes = poolItems.filter(function (i) { return i.category === "Shoes"; });
+  var shoes = poolItems.filter(function (i) { return i.category === "Shoes" && !itemPoolOnly(i); });
   var shades = poolItems.filter(function (i) { return i.category === "Sunglasses"; });
   var out = tops.concat(bottoms).concat(shoes).concat(shades);
   /* Build .45: stale pieces anchor first, so forgotten pieces lead earlier takes. */
@@ -20980,7 +21034,7 @@ function buildClosetLooks(opts) {
   var avail = wardrobeItems.filter(function (i) { return !i.laundry; });
   var tops = avail.filter(function (i) { return ["Coats", "Leather jackets", "Sweaters", "Polos", "Shirts", "Button downs", "Tees", "Blazers", "Jackets", "Suits"].indexOf(i.category) !== -1; });
   var bottoms = avail.filter(function (i) { return ["Trousers", "Jeans", "Shorts", "Bathing suits"].indexOf(i.category) !== -1; });
-  var shoes = avail.filter(function (i) { return i.category === "Shoes"; });
+  var shoes = avail.filter(function (i) { return i.category === "Shoes" && !itemPoolOnly(i); });
   var shades = avail.filter(function (i) { return i.category === "Sunglasses"; });
   if (!tops.length) return null;
   if (!bottoms.length && !shoes.length) return null;
@@ -37615,7 +37669,7 @@ if (window.stlPending) { window.stlPending = false; try { renderFindLookMode(); 
     /* First open: a whole outfit from his closet, with his newest
        saved piece already in its slot. */
     if (!Object.keys(board).length) {
-      WEAR_SLOTS.forEach(function (s) { var first = (pool[s] || [])[0]; if (first) board[s] = { t: "c", id: first.id }; });
+      WEAR_SLOTS.forEach(function (s) { var first = (pool[s] || []).filter(function (it) { return !itemPoolOnly(it); })[0]; if (first) board[s] = { t: "c", id: first.id }; });
       var nw = savedList().filter(function (sn) { return WEAR_SLOTS.indexOf(slotOfCat(sn.cat)) !== -1; })[0];
       if (nw) board[slotOfCat(nw.cat)] = { t: "p", p: nw };
       saveBoard();
@@ -37728,10 +37782,21 @@ if (window.stlPending) { window.stlPending = false; try { renderFindLookMode(); 
       syncOnMeCard();
     }, function () { return run === buildRun; });
   }
+  /* .78.8c: Pool-only closet pieces (pool slides) only on a swim board */
+  function poolOkRef(ref) {
+    if (!ref || ref.t !== "c") return true;
+    var it = closetItemById(ref.id); if (!it || !itemPoolOnly(it)) return true;
+    return SLOTS.some(function (s) { var r = board[s]; if (!r || r.t !== "c") return false; var x = closetItemById(r.id); return x && pieceIsSwim(x); });
+  }
   function shuffleBoard() {
     SLOTS.forEach(function (s) {
       var o = slotOptions(s);
       if (o.length) board[s] = o[Math.floor(Math.random() * o.length)];
+    });
+    SLOTS.forEach(function (s) {
+      if (poolOkRef(board[s])) return;
+      var o = slotOptions(s).filter(poolOkRef);
+      board[s] = o.length ? o[Math.floor(Math.random() * o.length)] : null;
     });
     saveBoard();
     renderBuild();
@@ -38217,7 +38282,8 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var out = [];
     (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).forEach(function (it) {
       if (!it || !it.id || out.length >= 400) return;
-      out.push({ id: it.id, name: it.name || "", cat: it.category || "", color: String(it.colourName || "").split("\u00b7")[0].trim(), hex: it.colourHex || "" });
+      var oo = typeof itemOccasionOnly === "function" ? itemOccasionOnly(it) : null;
+      out.push(Object.assign({ id: it.id, name: it.name || "", cat: it.category || "", color: String(it.colourName || "").split("\u00b7")[0].trim(), hex: it.colourHex || "" }, oo ? { occasionOnly: oo } : {}));
     });
     return out;
   }
@@ -38252,6 +38318,11 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
           turn.state = "done"; turn.answer = j.answer;
           turn.picks = (j.picks || []).filter(function (p) { return p && p.sku; }).map(function (p) { return { sku: p.sku, why: p.why || "", pairsWith: p.pairsWith || [], product: p.product || null }; });
           turn.outfit = j.outfit && ((j.outfit.ownedIds || []).length || (j.outfit.skuIds || []).length) ? { ownedIds: j.outfit.ownedIds || [], skuIds: j.outfit.skuIds || [] } : null;
+          /* .78.8c: drop a Pool-only piece from a non-swim outfit the server suggests */
+          if (turn.outfit && typeof itemPoolOnly === "function" && typeof closetItemById === "function") {
+            var oi = turn.outfit.ownedIds.map(closetItemById).filter(Boolean);
+            if (!oi.some(pieceIsSwim)) turn.outfit.ownedIds = turn.outfit.ownedIds.filter(function (id) { var x = closetItemById(id); return !(x && itemPoolOnly(x)); });
+          }
           turn.fallback = !!(j.meta && j.meta.fallback);
         } else {
           turn.state = "error";
@@ -38271,7 +38342,10 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var pr = p.product || {};
     if (typeof priceOK === "function" && !priceOK({ price: (typeof e.price === "number" ? e.price : pr.price), tier: e.tier || pr.tier || "" })) return "";
     var hex = pr.hex || e.hex || "";
-    var owns = (p.pairsWith || []).map(function (id) { return typeof closetItemById === "function" ? closetItemById(id) : null; }).filter(Boolean).slice(0, 3);
+    var owns = (p.pairsWith || []).map(function (id) { return typeof closetItemById === "function" ? closetItemById(id) : null; }).filter(Boolean);
+    /* .78.8c: Pool-only pieces pair only with a swim product */
+    var swimPick = /swim|bathing|trunk/i.test(String(e.cat || "") + " " + String(e.name || "") + " " + String(pr.name || ""));
+    owns = owns.filter(function (it) { return swimPick || !(typeof itemPoolOnly === "function" && itemPoolOnly(it)); }).slice(0, 3);
     var star = isLiked(p.sku), added = askAdded[t.id + "|" + p.sku];
     /* .78.8: the shared product card's look — cream studio photo,
        brand in small caps, icon row (wishlist / star / not for me /
@@ -39478,6 +39552,67 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   document.addEventListener("touchcancel", end, { passive: true });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") { var l = sheets(); if (l.length) l[l.length - 1].close(); } });
   sync();
+})();
+    </script>
+    <script type="wardrobe/app">
+/* ================= Build .78.8c — Pool-only pieces, the safety net =================
+   The composer and the closet pickers already keep Pool-only pieces
+   (pool slides) out of non-swim looks; every look generator is also
+   checked on the way out, so no path can deal slides with regular
+   clothes: lists are filtered, a single look is re-dealt or has the
+   Pool-only piece swapped for another of his shoes. */
+(function poolOnly788() {
+  if (typeof lookOccasionOk !== "function") return;
+  function altShoe(look) {
+    var have = {}; lookItems788(look).forEach(function (i) { have[i.id] = 1; });
+    var list = (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).filter(function (i) { return i && i.category === "Shoes" && !i.laundry && !itemPoolOnly(i) && !have[i.id]; });
+    list.sort(function (a, b) { return (b.photo ? 1 : 0) - (a.photo ? 1 : 0); });
+    return list[0] || null;
+  }
+  function repair(look) {
+    if (!look || lookOccasionOk(look)) return look;
+    var alt = altShoe(look), changed = false;
+    if (look.fwPieces) {
+      look.fwPieces = look.fwPieces.map(function (p) {
+        var it = p && (typeof closetItemById === "function" ? closetItemById(p.id) : null) || p;
+        if (!itemPoolOnly(it)) return p;
+        changed = true;
+        return alt ? { id: alt.id, name: alt.name, photo: alt.photo || null, colourHex: alt.colourHex || null, category: alt.category } : null;
+      }).filter(Boolean);
+    }
+    if (look.composerKey) { look.composerKey = (look.fwPieces || []).map(function (p) { return p.id; }).sort().join("|"); }
+    ["itemIds", "ids"].forEach(function (k) { if (Array.isArray(look[k])) look[k] = look[k].filter(function (id) { var x = typeof closetItemById === "function" ? closetItemById(id) : null; return !(x && itemPoolOnly(x)); }).concat(alt && changed ? [alt.id] : []); });
+    return look;
+  }
+  window.poolOnlyRepair788 = repair;
+  function wrapList(name) {
+    var f = window[name]; if (typeof f !== "function") return;
+    window[name] = function () {
+      var r = f.apply(this, arguments);
+      return Array.isArray(r) ? r.filter(function (l) { return !l || typeof l !== "object" || lookOccasionOk(l); }) : r;
+    };
+  }
+  function wrapOne(name) {
+    var f = window[name]; if (typeof f !== "function") return;
+    window[name] = function () {
+      var r = f.apply(this, arguments), n = 0;
+      if (Array.isArray(r)) return r.map(repair);
+      while (r && typeof r === "object" && !lookOccasionOk(r) && n++ < 4) r = f.apply(this, arguments);
+      return repair(r);
+    };
+  }
+  /* lists: the composer (Home OOTD / Next, Outfits feed), closet looks, six-look builds */
+  ["composerLooks", "homeComposerLooks75", "buildClosetLooks", "buildSixLooks"].forEach(wrapList);
+  /* single looks: the deals, combos, ideas, the day's look */
+  ["dealerLook", "dealerLookSafe56", "generateComboLook", "styleComboLook", "buildComboLook", "styleFwPairLook", "buildLook", "ideaAsLook", "dailyLook", "openingLook"].forEach(wrapOne);
+  /* a look already on Home (restored from yesterday's store) is checked too */
+  try { if (typeof todayLook !== "undefined" && todayLook && !lookOccasionOk(todayLook)) { repair(todayLook); if (typeof renderToday === "function") renderToday(); } } catch (e) {}
+  /* write the flag onto the pieces themselves, so it rides sync and backups */
+  try {
+    var changed = false;
+    (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).forEach(function (i) { if (i && !Array.isArray(i.occasionOnly) && i.occasionOnly !== false && itemOccasionOnly(i)) { i.occasionOnly = itemOccasionOnly(i); changed = true; } });
+    if (changed && typeof store !== "undefined" && !store.poisoned("items")) store.set("items", wardrobeItems.filter(function (i) { return String(i.id).indexOf("seed-") !== 0; }));
+  } catch (e) {}
 })();
     </script>
   </body>
