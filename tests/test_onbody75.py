@@ -29,7 +29,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-19.79.1"
+BUILD = "2026-11-19.79.3"
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:18975/"
 
 
@@ -133,7 +133,7 @@ def main():
         check(sw["ctl"] and sw["has"] and sw["webp"] > 0, "SW caches renders in wardrobe-onbody-v1 (%d)" % sw["webp"])
         check(sw["man"] == 0, "manifest is not cache-first")
         swsrc = (ROOT / "sw.js").read_text()
-        check("ONBODY_CACHE" in swsrc and "keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE]" in swsrc, "render cache survives activate")
+        check("ONBODY_CACHE" in swsrc and "keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE" in swsrc, "render cache survives activate")
         c.close()
 
         # 4: no renders for this closet -> photo flat-lay

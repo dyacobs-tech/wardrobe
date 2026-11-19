@@ -29,7 +29,7 @@
 // deadline is 30s — long enough for a 2.7MB index.html on a typical
 // phone connection — so a slow fetch is not replaced by a stale
 // cached shell after 4 seconds.
-const WARDROBE_BUILD = '2026-11-19.79.1';
+const WARDROBE_BUILD = '2026-11-19.79.3';
 const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
@@ -37,12 +37,26 @@ const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
 // their cache is versioned on its own and survives build updates; bump
 // ONBODY_CACHE only if the render format changes.
 const ONBODY_CACHE = 'wardrobe-onbody-v1';
+// Build .79.3: the JSON manifests (renders, cut-outs, inspo, the Edit
+// catalogue, the cut-out placeholders) are stale-while-revalidate in a
+// cache that survives builds, so a reopen never waits on them; a change
+// lands on the next open.
+const DATA_CACHE = 'wardrobe-data-v1';
+const DATA_RE = /\/assets\/(onbody\/manifest\.json|onbody-cut\/(manifest|lq)\.json|inspo\/manifest\.json|edit-catalog\.json)$/;
+// Cut-outs (assets/onbody-cut/, and the full-resolution zoom copies in
+// assets/onbody-cut-hq/) are immutable: cache-first in ONBODY_CACHE.
+const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
   './assets/fonts/Inter.var.woff2', './assets/fonts/Inter-Italic.var.woff2',
   './assets/fonts/Fraunces.var.woff2', './assets/fonts/Fraunces-Italic.var.woff2'];
-const SHELL_DEADLINE_MS = 30000;
+// Build .79.3: with a cached shell, a reopen waits at most 0.8s for the
+// network (a 304 on a good link answers inside that); a slower link gets the
+// cached shell at once and the fresh one lands in the cache for the
+// next open ("A newer build is ready" covers the rest). With no cached
+// shell it still waits for the network.
+const SHELL_DEADLINE_MS = 800;
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', (event) => {
@@ -51,15 +65,27 @@ self.addEventListener('install', (event) => {
     // hand a new worker the previous build's shell, and always skipWaiting —
     // even when a precache file fails — so an installed iOS PWA is never
     // left with the new worker stuck in "waiting" behind the old one.
+    // Build .79.3: the page that found this worker usually has just fetched
+    // this very build's shell (into the previous build's cache) — reuse that
+    // copy instead of downloading the 3MB shell a second time.
     caches.open(SHELL_CACHE)
-      .then((cache) => cache.addAll(SHELL_FILES.map((u) => new Request(u, { cache: 'reload' }))))
+      .then((cache) => caches.keys().then((keys) => Promise.all(keys.filter((k) => k.indexOf('wardrobe-shell-') === 0 && k !== SHELL_CACHE).map((k) =>
+        caches.open(k).then((c) => c.match(SHELL_KEY)).then((hit) => hit ? hit.clone().text().then((t) => (t.indexOf('content="' + WARDROBE_BUILD + '"') !== -1 ? hit : null)) : null)
+      ))).then((hits) => {
+        const own = hits.filter(Boolean)[0];
+        const files = own ? SHELL_FILES.filter((u) => u !== './index.html') : SHELL_FILES;
+        return (own ? cache.put(SHELL_KEY, own) : Promise.resolve()).then(() => Promise.all(files.map((u) =>
+          // fonts/icons already cached by an older build are copied, not refetched
+          caches.match(u).then((m) => m && u !== './index.html' ? cache.put(u, m) : cache.add(new Request(u, { cache: 'reload' })))
+        )));
+      }))
       .catch(() => {})
       .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
-  const keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE];
+  const keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE, DATA_CACHE];
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
       keys.filter((k) => keep.indexOf(k) === -1).map((k) => caches.delete(k))
@@ -131,6 +157,50 @@ self.addEventListener('fetch', (event) => {
   // to the network and are never cached.
   if (req.headers.has('range')) return;
 
+  // Cut-outs: immutable, cache-first (a ?r= retry reads the same entry).
+  if (CUT_RE.test(url.pathname)) {
+    event.respondWith(
+      caches.open(ONBODY_CACHE).then((cache) =>
+        cache.match(req, { ignoreSearch: true }).then((hit) => {
+          if (hit) return hit;
+          return fetch(req).then((res) => {
+            if (res && res.status === 200) cache.put(url.origin + url.pathname, res.clone());
+            return res;
+          });
+        })
+      )
+    );
+    return;
+  }
+  if (DATA_RE.test(url.pathname)) {
+    event.respondWith(
+      caches.open(DATA_CACHE).then((cache) =>
+        cache.match(req, { ignoreSearch: true }).then((hit) => {
+          const key = url.origin + url.pathname;
+          const refresh = () => fetch(req, { cache: 'no-cache' }).then((res) => {
+            if (res && res.status === 200) {
+              // remember when this copy was fetched, so reopens soon after skip the refresh
+              return res.clone().blob().then((body) => {
+                const h = new Headers(res.headers); h.set('x-sw-at', String(Date.now()));
+                return cache.put(key, new Response(body, { status: 200, headers: h }));
+              }).then(() => res);
+            }
+            return res;
+          });
+          if (hit) {
+            const at = +(hit.headers.get('x-sw-at') || 0);
+            // a fresh copy (under 15 min) is not refetched; an older one is
+            // refreshed in the background, after the first paint and first swipes
+            if (Date.now() - at > 15 * 60 * 1000) event.waitUntil(new Promise((r) => setTimeout(r, 6000)).then(refresh).catch(() => {}));
+            return hit;
+          }
+          return refresh();
+        })
+      )
+    );
+    return;
+  }
+
   // On-body renders: content-hashed, cache-first in their own cache.
   // The manifest beside them stays network-first (below).
   if ((url.pathname.includes('/assets/onbody/') || url.pathname.includes('/assets/inspo/')) && url.pathname.endsWith('.webp')) {
@@ -175,7 +245,7 @@ self.addEventListener('fetch', (event) => {
           if (res && res.status === 200) cache.put(SHELL_KEY, res.clone());
           return res;
         });
-        const deadline = new Promise((resolve) => setTimeout(resolve, SHELL_DEADLINE_MS, null));
+        const deadline = cached.then((hit) => hit ? new Promise((resolve) => setTimeout(resolve, SHELL_DEADLINE_MS, null)) : network.catch(() => null));
         return Promise.race([network.catch(() => null), deadline]).then((res) => {
           if (res && res.status === 200) return res;
           // Slow, offline, or an error page: use the cached shell if there is
@@ -192,4 +262,18 @@ self.addEventListener('fetch', (event) => {
   // the manifest): network-first, so a corrected file under an
   // unchanged name is what the next view actually shows.
   networkFirst(event, ASSET_CACHE);
+});
+
+// Build .79.3: the page names the cut-outs it will show next (the outfit
+// of the day and the queued looks); fetch any not yet cached so the next
+// open or Next paints from Cache Storage.
+self.addEventListener('message', (event) => {
+  const d = event.data || {};
+  if (d.type !== 'warm-cuts' || !Array.isArray(d.urls)) return;
+  event.waitUntil(caches.open(ONBODY_CACHE).then((cache) => Promise.all(d.urls.slice(0, 8).map((u) => {
+    let url; try { url = new URL(u, self.registration.scope); } catch (e) { return null; }
+    if (url.origin !== self.location.origin || !CUT_RE.test(url.pathname)) return null;
+    const key = url.origin + url.pathname;
+    return cache.match(key).then((hit) => hit || fetch(key).then((res) => { if (res && res.status === 200) return cache.put(key, res); }).catch(() => {}));
+  }))));
 });

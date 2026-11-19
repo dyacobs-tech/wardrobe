@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.79.1" />
+    <meta name="wardrobe-build" content="2026-11-19.79.3" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5253,15 +5253,67 @@
       }
       #panel-wardrobe .closet-row789.cs-open .cdd { display: none !important; }
       #panel-wardrobe .closet-row789.cs-open .closet-search789 { flex-basis: 100%; }
+      /* ================= Build .79.3 — the hero is never blank =================
+         A ~1KB blurred placeholder of his silhouette sits exactly where the
+         cut-out draws and shows until the cut-out has loaded, then fades. */
+      #panel-today .today-hero img.hero-lq {
+        position: absolute !important; left: 0; top: var(--lq-top, 0px); width: 100% !important; height: var(--lq-h, 74%) !important; inset: auto !important;
+        left: 0 !important; top: var(--lq-top, 0px) !important;
+        object-fit: contain !important; object-position: center bottom !important; padding: 3.2% 0 1.4% !important; box-sizing: border-box !important;
+        filter: blur(9px) saturate(.9); transform: translateZ(0); opacity: 0; transition: opacity .35s ease; pointer-events: none; z-index: 0 !important;
+        -webkit-mask-image: none !important; mask-image: none !important; visibility: visible !important;
+      }
+      #panel-today .today-hero.lq-show img.hero-lq { opacity: .9; transition: none; }
+      #panel-today .today-hero:not(.hero-solo) img.hero-lq { display: none !important; }
+      /* the full view's picture never scales past what the file holds without
+         smoothing: high-quality resampling, never pixelated */
+      .outfit-view .ov-figure > img#ov-img, #panel-today img#today-img { image-rendering: auto !important; }
+      /* ================= Build .79.2 — Home fixes =================
+         The occasion picker is a clean dropdown anchored to its button
+         (opens upward, above the nav): small rounded off-white menu, a
+         hairline border, a soft shadow, a check on the current type, no
+         scrim. Every other small menu stays a bottom sheet. */
+      #panel-today #today-simple-actions .hero-type-cell .cdd { position: relative !important; }
+      #panel-today .today-caption, #panel-today #today-simple-actions, #panel-today #today-simple-actions .hero-type-cell { overflow: visible !important; }
+      html body #panel-today #today-type-row.cdd-menu:not([hidden]) {
+        position: absolute !important; top: auto !important; bottom: calc(100% + 8px) !important; left: auto !important; right: 0 !important;
+        width: max-content !important; min-width: 184px !important; max-width: 240px !important; max-height: none !important; overflow: visible !important;
+        z-index: 240 !important; display: flex !important; flex-direction: column !important; gap: 0 !important;
+        padding: 6px !important; border-radius: 14px !important; border: 1px solid rgba(31, 26, 21, .14) !important;
+        background: #FBF8F2 !important; color: #1F1A15 !important;
+        box-shadow: 0 10px 30px rgba(60, 44, 24, .16), 0 2px 6px rgba(60, 44, 24, .08) !important;
+        animation: ddrop792 .16s ease-out !important; text-align: left !important;
+      }
+      html[data-theme="dark"] body #panel-today #today-type-row.cdd-menu:not([hidden]) { background: #2A2521 !important; color: #F2ECE2 !important; border-color: rgba(242, 236, 226, .14) !important; box-shadow: 0 10px 30px rgba(0, 0, 0, .5) !important; }
+      html body #panel-today #today-type-row.cdd-menu:not([hidden])::before { display: none !important; }
+      html body #panel-today #today-type-row.cdd-menu .sheet-x { display: none !important; }
+      html body #panel-today #today-type-row .cdd-opt {
+        display: flex !important; align-items: center !important; gap: 8px; min-height: 38px !important; height: auto !important; width: 100% !important;
+        padding: 0 12px 0 30px !important; position: relative; border: 0 !important; border-radius: 9px !important; background: transparent !important;
+        color: inherit !important; font-size: 14px !important; font-weight: 500 !important; justify-content: flex-start !important; text-align: left !important; box-shadow: none !important;
+      }
+      html body #panel-today #today-type-row .cdd-opt:hover, html body #panel-today #today-type-row .cdd-opt:focus-visible { background: rgba(31, 26, 21, .06) !important; }
+      html[data-theme="dark"] body #panel-today #today-type-row .cdd-opt:hover { background: rgba(242, 236, 226, .08) !important; }
+      html body #panel-today #today-type-row .cdd-opt[aria-pressed="true"]::before {
+        content: ""; position: absolute; left: 11px; top: 50%; width: 11px; height: 6px; margin-top: -5px;
+        border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg);
+      }
+      html body #panel-today #today-type-row .cdd-opt[aria-pressed="true"] { font-weight: 650 !important; }
+      html body #panel-today #today-type-row .cdd-opt[data-studio-type="7"] { display: none !important; }
+      @keyframes ddrop792 { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+      /* Home: no masthead paint at all (only the person icon), and the hero
+         starts below it — nothing can ever clip his head */
+      body[data-page="today"] .masthead { visibility: hidden !important; }
+      body[data-page="today"] .masthead #tab-profile { visibility: visible !important; }
       /* ================= Build .78.9e — the Home hero is only ever a cut-out =================
          Whatever path sets the hero image (boot, outfit of the day, a
          restored or liked look, the crossfade), anything that is not a
          transparent cut-out from assets/onbody-cut/ is never painted. */
-      #panel-today #today-img:not([src*="onbody-cut/"]), #panel-today .hero-xfade:not([src*="onbody-cut/"]) { visibility: hidden !important; }
+      #panel-today #today-img[data-nocut], #panel-today .hero-xfade[data-nocut] { visibility: hidden !important; }
       /* No 'Home' title on Home: the person icon stays, the hero rises */
       body[data-page="today"] .masthead h1.brand { visibility: hidden !important; }
-      body[data-page="today"] #panel-today .today-hero.hero-solo { margin-top: -40px !important; }
-      body[data-page="today"] #panel-today .today-hero.hero-solo .hero-corner { top: 46px !important; }
+      body[data-page="today"] .masthead-slot { height: calc(8px + min(env(safe-area-inset-top, 0px), 59px)) !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .hero-corner { top: 40px !important; }
       /* Home text centred: kicker, title, location, dots and the action row */
       body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption { text-align: center !important; align-items: center !important; }
       body[data-page="today"] #panel-today .today-hero.hero-solo .today-kicker,
@@ -5448,8 +5500,60 @@
       <!-- ================= TODAY — OUTFIT OF THE DAY ================= -->
       <section id="panel-today" role="tabpanel" aria-labelledby="tab-today">
         <div class="today-hero" id="today-hero">
+          <img class="hero-lq" id="today-lq" alt="" aria-hidden="true" src="data:image/webp;base64,UklGRnoBAABXRUJQVlA4WAoAAAAQAAAACwAAJwAAQUxQSJ0AAAART6CgbRs2VBL7fxERoH93+3I4sW3baS4dmZ7ISL7DMgQcFheLi0Wm59v+73gpY4jo/wRgsT5M1DgxMlqhBkxaAHXgAVdPyrgjyeI+uTwmQk0aPWlNIGVv1wwukONgJ/1n0mqSsnmSZNUFGcYMvvct4BrXAE5YAbiLrQBbmgtgC73KzJ0ntpjJAZObDNC5TbHxqb6gHnAT2OywiTAPAFZQOCC2AAAAEAUAnQEqDAAoAD8Rdq5SLCckIqqsAYAiCWQAnQSUBg32fWUEKtmFoicLvqVXnGCvAAD+GSPYO3YikQKEnQgoI1VsG/IYU+2AdFVN+9WYZYsB/yQoGlVlYQavNPpFbKaCPVu+u5XWkYSWifoQhNfaofxJSz8KdGRStmc07QKvBYMVv2MBiD4+LeptLrQuVicU89VN7XEEcQo3OGTNMahWV3z7qzJMzKqCK/Ylb3Tch3JhdVgAAAA=" />
           <img id="today-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" fetchpriority="high" decoding="async" />
+          <script>
+          /* Build .79.3 — instant first paint: the last hero he saw today (its
+             cut-out is in Cache Storage, served cache-first) paints before the
+             app has even parsed, over its blurred placeholder; the app swaps
+             to the dealt look if it differs */
+          (function () {
+            try {
+              var h = document.getElementById("today-hero"), im = document.getElementById("today-img"), lq = document.getElementById("today-lq");
+              h.classList.add("hero-solo", "has-cut", "lq-show");
+              /* a plain studio render handed to the hero is swapped for its cut-out
+                 before the browser fetches it (the hero never shows it anyway) */
+              var P = HTMLImageElement.prototype, D = Object.getOwnPropertyDescriptor(P, "src"), SA = Element.prototype.setAttribute;
+              function cutOf(v) {
+                var m = String(v || "").match(/(^|\/)assets\/onbody\/([0-9a-f]{8,})\.webp(\?.*)?$/i); if (!m) return v;
+                var c = typeof window.cutFor784 === "function" ? window.cutFor784("assets/onbody/" + m[2] + ".webp") : "assets/onbody-cut/" + m[2] + ".webp";
+                return c || v;
+              }
+              im.setAttribute = function (n, v) { return SA.call(this, n, String(n).toLowerCase() === "src" ? cutOf(v) : v); };
+              if (D && D.set) Object.defineProperty(im, "src", { configurable: true, get: function () { return D.get.call(this); }, set: function (v) { D.set.call(this, cutOf(v)); } });
+              /* the hero goes first on a slow link: the Edit catalogue and the
+                 inspiration manifest (not used on Home) wait until it has painted */
+              var F = window.fetch;
+              if (F) {
+                var waitHero = new Promise(function (res) { window.__heroReady793 = function () { setTimeout(res, 3000); }; setTimeout(res, 7000); });
+                window.fetch = function (u) {
+                  var a = arguments, self = this, url = typeof u === "string" ? u : (u && u.url) || "";
+                  if (/(edit-catalog\.json|inspo\/manifest\.json)/.test(url)) return waitHero.then(function () { return F.apply(self, a); });
+                  return F.apply(self, a);
+                };
+              }
+              var d = new Date(), day = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+              var j = JSON.parse(localStorage.getItem("wardrobe.hero793") || "null");
+              if (j && j.date === day && /^assets\/onbody-cut\/[\w-]+\.webp$/.test(j.cut || "")) {
+                if (j.lq) lq.src = j.lq;
+                im.setAttribute("data-render", j.render || "");
+                im.src = j.cut;
+                var nm = document.getElementById("today-name"); if (nm && j.title) nm.textContent = j.title;
+              }
+            } catch (e) {}
+          })();
+          </script>
           <div class="today-collage" id="today-collage" hidden></div>
+          <script>
+          /* Build .79.3: Home only ever shows the cut-out, so a studio render
+             written into the hidden collage is never fetched (it competed
+             with the hero on a slow link) */
+          (function () { try {
+            var c = document.getElementById("today-collage"), D = Object.getOwnPropertyDescriptor(Element.prototype, "innerHTML");
+            if (c && D && D.set) Object.defineProperty(c, "innerHTML", { configurable: true, get: function () { return D.get.call(this); },
+              set: function (v) { D.set.call(this, String(v).replace(/(<img\b[^>]*?)\ssrc=("|')([^"']*assets\/onbody\/[0-9a-f]+\.webp[^"']*)\2/gi, "$1 data-src=$2$3$2")); } });
+          } catch (e) {} })();
+          </script>
           <div class="today-shade" aria-hidden="true"></div>
           <!-- Build .38 (2.12): the two lookalike corner glyphs are
                ONE ••• button now — its menu carries the two actions
@@ -6606,7 +6710,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.79.1</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.79.3</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8214,7 +8318,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.79.1";
+var WARDROBE_BUILD = "2026-11-19.79.3";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -39182,9 +39286,117 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var _rt782 = renderToday;
     renderToday = function () {
       prevSrc = hero.classList.contains("hero-solo") ? img.getAttribute("src") : null;
-      var out = _rt782.apply(this, arguments); try { soloHero(); } catch (e) {} return out;
+      var out = _rt782.apply(this, arguments); try { soloHero(); } catch (e) {} try { if (typeof watchdog === "function") watchdog(); } catch (e) {} return out;
     };
   }
+  /* .79.2: the hero shows only a genuine cut-out — checked in JS (never
+     by URL substring alone), and a watchdog makes sure a dealt hero is
+     actually on screen: ~1.5s after a deal, a hero that has not loaded
+     is reloaded once, then replaced by a stand-in cut-out */
+  function isCutSrc(u) {
+    u = String(u || ""); if (!u || /^data:/.test(u)) return false;
+    if (/\/onbody-cut(-hq)?\/[^\/?#]+\.(webp|png)/i.test(u) || /^assets\/onbody-cut(-hq)?\//.test(u)) return true;
+    try { var C = window.cutManifest784 && window.cutManifest784(); if (C && C.map) for (var k in C.map) if (u.indexOf(C.map[k]) !== -1) return true; } catch (e) {}
+    return false;
+  }
+  function guard(el) {
+    if (!el) return;
+    var ok = isCutSrc(el.getAttribute("src")) || !hero.classList.contains("hero-solo");
+    if (ok) el.removeAttribute("data-nocut"); else el.setAttribute("data-nocut", "");
+  }
+  window.heroIsCut792 = isCutSrc;
+  if ("MutationObserver" in window) new MutationObserver(function (ms) {
+    ms.forEach(function (m) {
+      if (m.type === "attributes") guard(m.target);
+      else m.addedNodes.forEach(function (n) { if (n.tagName === "IMG") guard(n); });
+    });
+  }).observe(hero, { subtree: true, attributes: true, attributeFilter: ["src"], childList: true });
+  guard(img);
+  var wd = null, wdTries = 0;
+  function heroOnScreen() {
+    if (img.hidden || img.hasAttribute("data-nocut")) return false;
+    if (!(img.complete && img.naturalWidth > 0)) return false;
+    var cs = getComputedStyle(img); if (cs.visibility === "hidden" || cs.display === "none" || +cs.opacity < 0.5) return false;
+    return img.getBoundingClientRect().height > 60;
+  }
+  /* .79.3: a hero still downloading on a slow link is never restarted
+     (that only made a slow load slower): its blurred placeholder shows
+     meanwhile. Only a cut-out that failed — or is still nowhere after
+     12s — is replaced by a stand-in cut-out. */
+  var wdT0 = 0;
+  function watchdog() {
+    clearTimeout(wd); if (!wdT0) wdT0 = Date.now();
+    wd = setTimeout(function () {
+      if (!hero.classList.contains("hero-solo") || (typeof currentTab !== "undefined" && currentTab !== "today")) { wdT0 = 0; return; }
+      if (heroOnScreen()) { wdTries = 0; wdT0 = 0; hero.querySelectorAll(".hero-xfade").forEach(function (x) { if (x.classList.contains("out")) x.remove(); }); return; }
+      var src = img.getAttribute("src") || "", failed = img.complete && !img.naturalWidth && isCutSrc(src);
+      if (!failed && isCutSrc(src) && Date.now() - wdT0 < 12000) { watchdog(); return; }
+      wdTries = 0; wdT0 = 0;
+      if (typeof guestHero782 === "function" && guestHero782(true)) watchdog();
+    }, 1500);
+  }
+  /* ---- .79.3: the blurred placeholder + the last hero for a cold open ---- */
+  var lqEl = document.getElementById("today-lq"), LQ_GEN = lqEl ? lqEl.getAttribute("src") : "", LQMAP = null, LQ_KEY = "wardrobe.lq793";
+  function cutId(u) { var m = String(u || "").match(/onbody-cut(?:-hq)?\/([^\/?#]+?)\.(webp|png)/i); return m ? m[1] : ""; }
+  function lqLocal() { try { return JSON.parse(localStorage.getItem(LQ_KEY) || "{}") || {}; } catch (e) { return {}; } }
+  function lqFor(u) { var id = cutId(u); if (!id) return LQ_GEN; if (LQMAP && LQMAP[id]) return LQMAP[id]; var l = lqLocal(); return l[id] || LQ_GEN; }
+  function lqRemember(ids) {
+    if (!LQMAP) return; var l = lqLocal(), keys = Object.keys(l);
+    ids.forEach(function (id) { if (id && LQMAP[id] && !l[id]) { l[id] = LQMAP[id]; keys.push(id); } });
+    while (keys.length > 16) delete l[keys.shift()];
+    try { localStorage.setItem(LQ_KEY, JSON.stringify(l)); } catch (e) {}
+  }
+  window.lqRemember793 = lqRemember; window.lqFor793 = lqFor;
+  function lqPlace() {
+    if (!lqEl) return;
+    if (img.offsetHeight > 60) { hero.style.setProperty("--lq-top", img.offsetTop + "px"); hero.style.setProperty("--lq-h", img.offsetHeight + "px"); }
+  }
+  function lqSync() {
+    if (!lqEl) return;
+    var src = img.getAttribute("src") || "", ready = img.complete && img.naturalWidth > 0 && isCutSrc(src);
+    if (!ready) { var want = lqFor(src); if (lqEl.getAttribute("src") !== want) lqEl.setAttribute("src", want); lqPlace(); }
+    hero.classList.toggle("lq-show", !ready);
+  }
+  function heroLoaded() {
+    lqSync(); lqPlace();
+    var src = img.getAttribute("src") || "";
+    if (!(img.naturalWidth > 0 && isCutSrc(src))) return;
+    if (window.__heroReady793) try { window.__heroReady793(); } catch (e) {}
+    try {
+      var day = typeof localTodayISO === "function" ? localTodayISO() : "";
+      var nm = document.getElementById("today-name");
+      localStorage.setItem("wardrobe.hero793", JSON.stringify({ date: day, cut: src.replace(/[?#].*$/, ""), render: img.getAttribute("data-render") || "", title: nm ? nm.textContent : "", lq: lqFor(src) !== LQ_GEN ? lqFor(src) : "" }));
+    } catch (e) {}
+  }
+  img.addEventListener("load", heroLoaded); img.addEventListener("error", lqSync);
+  if ("MutationObserver" in window) new MutationObserver(lqSync).observe(img, { attributes: true, attributeFilter: ["src"] });
+  window.addEventListener("resize", lqPlace, { passive: true });
+  if (img.complete && img.naturalWidth) heroLoaded(); else lqSync();
+  /* every cut-out's placeholder (assets/onbody-cut/lq.json, ~1KB each) —
+     read after the hero, cached by the service worker */
+  function loadLq() {
+    fetch("assets/onbody-cut/lq.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (j && j.lq) { LQMAP = j.lq; lqRemember([cutId(img.getAttribute("src"))]); lqSync(); }
+    }).catch(function () {});
+  }
+  (function () { var done = false; function go() { if (done) return; done = true; (window.requestIdleCallback || setTimeout)(loadLq, { timeout: 3000 }); }
+    if (img.complete && img.naturalWidth) go(); else { img.addEventListener("load", go, { once: true }); setTimeout(go, 5000); } })();
+  window.heroWatchdog792 = watchdog;
+  /* the occasion dropdown: a tap outside only closes it (it never also
+     opens the look underneath); Esc closes it too */
+  function ddMenu() { return document.getElementById("today-type-row"); }
+  function ddClose() { var m = ddMenu(); if (!m || m.hidden) return; if (typeof closeAllCdd === "function") closeAllCdd(); else m.hidden = true; var b = document.getElementById("today-type-btn"); if (b) b.setAttribute("aria-expanded", "false"); }
+  ["pointerdown", "click"].forEach(function (ev) {
+    document.addEventListener(ev, function (e) {
+      var m = ddMenu(); if (!m || m.hidden) return;
+      if (e.target.closest && (e.target.closest("#today-type-row") || e.target.closest("#today-type-btn"))) return;
+      e.preventDefault(); e.stopPropagation();
+      if (ev === "click") ddClose();
+    }, true);
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") ddClose(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) watchdog(); });
+  window.addEventListener("pageshow", watchdog);
   window.addEventListener("resize", placeHero);
   if (collage && "MutationObserver" in window) new MutationObserver(function () {
     if (hero.classList.contains("hero-solo") && !collage.hidden) { collage.hidden = true; img.hidden = false; }
@@ -39222,6 +39434,14 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       else im.setAttribute("src", src);
     }
     im.alt = (look.title || "Outfit") + " on David";
+    /* .79.3: the full view swaps to the full-resolution cut-out (cut from
+       the original render, assets/onbody-cut-hq/) once it has loaded and
+       decoded — fetched only here, on demand */
+    if (src !== src0 && /\/onbody-cut\//.test(src) || /^assets\/onbody-cut\//.test(src)) {
+      var hq = src.replace("onbody-cut/", "onbody-cut-hq/"), t = new Image(); t.decoding = "async";
+      t.onload = function () { var p = t.decode ? t.decode() : Promise.resolve(); p.catch(function () {}).then(function () { var cur = im.getAttribute("src"); if (ovOpen && (cur === src || cur === null)) im.setAttribute("src", hq); }); };
+      t.src = hq;
+    }
     sampleBg(src0, document.getElementById("ov-figure"));
     document.getElementById("ov-title").textContent = look.title || "Outfit";
     document.getElementById("ov-pieces").innerHTML = pieceRows(look);
@@ -39407,7 +39627,6 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     try {
       fetch("assets/onbody-cut/manifest.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
         if (!ingestCut(j) || !Object.keys(CUT.map).length) return;
-        if (CUT.backdrop) { var b = new Image(); b.decoding = "async"; b.src = CUT.backdrop; }
         if (typeof renderToday === "function" && typeof todayLook !== "undefined" && todayLook) try { renderToday(); } catch (e) {}
         if (typeof window.guestHero782 === "function") window.guestHero782();
       }).catch(function () {});
@@ -39521,32 +39740,69 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     }
   }
 
-  /* ---- fetch + decode the next renders ahead ---- */
-  var warm = {}, warmQ = [];
-  function warmOne(src) {
+  /* ---- fetch + decode the next renders ahead ----
+     .79.3: Next is dealt from a look-ahead queue computed on idle, so the
+     cut-out warmed (fetched + decoded) is the one Next will actually show;
+     the service worker is told to keep the outfit of the day and the next
+     five in Cache Storage. Nothing competes with the hero while it loads. */
+  var warm = {}, warmQ = [], Q = null, dealing = false;
+  var ric2 = window.requestIdleCallback || function (f) { return setTimeout(f, 300); };
+  function warmOne(src, hi) {
     var cut = window.cutFor784 && window.cutFor784(src); if (cut) src = cut;
-    if (!src || warm[src]) return; warm[src] = 1;
-    var im = new Image(); im.decoding = "async"; im.src = src;
+    if (!src || warm[src]) return src; warm[src] = 1;
+    var im = new Image(); im.decoding = "async"; if (hi) try { im.fetchPriority = "high"; } catch (e) {} im.src = src;
     if (im.decode) im.decode().catch(function () {});
     warmQ.push(im); if (warmQ.length > 12) warmQ.shift();
+    return src;
   }
-  var ric2 = window.requestIdleCallback || function (f) { return setTimeout(f, 300); };
+  function qsig() {
+    try {
+      return [typeof formalityLevel !== "undefined" ? formalityLevel : "", typeof currentWeather !== "undefined" && currentWeather ? currentWeather.temp : "",
+        typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0, typeof dislikedImgs !== "undefined" && dislikedImgs ? dislikedImgs.length : 0,
+        typeof todayLook !== "undefined" && todayLook ? todayLook.title : ""].join("/");
+    } catch (e) { return String(Math.random()); }
+  }
+  function dealable(l) {
+    try {
+      if (typeof lookIsMine === "function" && !lookIsMine(l)) return false;
+      if (typeof isGraduatedLook === "function" && isGraduatedLook(l)) return false;
+      if (typeof lookPhotoBanned56 === "function" && lookPhotoBanned56(l)) return false;
+      var r = window.renderFor782 ? window.renderFor782(l) : null;
+      return !!(r && window.cutFor784 && window.cutFor784(r) && !(typeof isDislikedImg === "function" && isDislikedImg(r)));
+    } catch (e) { return false; }
+  }
+  if (typeof homeComposerLooks75 === "function" && typeof dealHeroForSource === "function") {
+    var _hcl = homeComposerLooks75, _dh = dealHeroForSource;
+    homeComposerLooks75 = function (count) {
+      if (dealing && Q && Q.sig === qsig() && Q.list.length) { var l = Q.list; Q = null; return l; }
+      return _hcl.apply(this, arguments);
+    };
+    dealHeroForSource = function () { dealing = true; try { return _dh.apply(this, arguments); } finally { dealing = false; } };
+    window.homeLookahead793 = function () { return Q; };
+  }
   function prefetch() {
-    ric2(function () {
-      try {
-        var look = typeof todayLook !== "undefined" ? todayLook : null;
-        var r4 = window.renderFor782;
-        var next = typeof homeComposerLooks75 === "function" ? homeComposerLooks75(4) : [];
-        var n = 0;
-        next.forEach(function (l) { var s = r4 ? r4(l) : null; if (s && n < 3 && !(typeof isDislikedImg === "function" && isDislikedImg(s))) { warmOne(s); n++; } });
-        /* and a few more of his rendered looks so any deal lands warm */
-        if (typeof ONBODY !== "undefined" && ONBODY.map && typeof wardrobeItems !== "undefined") {
-          var own = {}; wardrobeItems.forEach(function (i) { own[i.id] = 1; });
-          var keys = Object.keys(ONBODY.map).filter(function (k) { return !warm[ONBODY.map[k]] && k.split("|").every(function (id) { return own[id]; }); });
-          for (var j = 0; j < 3 && keys.length; j++) warmOne(ONBODY.map[keys.splice(Math.floor(Math.random() * keys.length), 1)[0]]);
-        }
-      } catch (e) {}
-    }, { timeout: 2000 });
+    var him = document.getElementById("today-img");
+    function run() {
+      ric2(function () {
+        try {
+          var look = typeof todayLook !== "undefined" ? todayLook : null, r4 = window.renderFor782, urls = [];
+          var cur = look && r4 ? r4(look) : null; if (cur && window.cutFor784 && window.cutFor784(cur)) urls.push(window.cutFor784(cur));
+          if (look && typeof _hcl === "function") {
+            var list = _hcl(8) || [], good = list.filter(dealable), rest = list.filter(function (l) { return !dealable(l); });
+            /* the queue the next deal takes: looks he can be seen in first */
+            Q = { sig: qsig(), list: good.concat(rest) };
+            var nx = good.filter(function (l) { return l.title !== look.title; });
+            nx.slice(0, 5).forEach(function (l, i) { var u = r4(l); if (!u) return; var c = window.cutFor784(u); if (c) urls.push(c); if (i < 3) warmOne(u, i === 0); });
+            if (window.lqRemember793) window.lqRemember793(urls.map(function (u) { var m = u.match(/onbody-cut\/([^\/?#]+?)\./); return m ? m[1] : ""; }));
+          }
+          var sw = navigator.serviceWorker && navigator.serviceWorker.controller;
+          if (sw && urls.length) sw.postMessage({ type: "warm-cuts", urls: urls.slice(0, 6) });
+        } catch (e) {}
+      }, { timeout: 1200 });
+    }
+    /* never compete with the hero itself */
+    if (him && !(him.complete && him.naturalWidth)) { var once = false, go = function () { if (once) return; once = true; run(); }; him.addEventListener("load", go, { once: true }); setTimeout(go, 6000); }
+    else run();
   }
   window.heroPrefetch784 = prefetch;
   /* Undo sits just above the action row it belongs to, never over it */
@@ -39582,7 +39838,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var ov = document.getElementById("outfit-view"); if (ov && !ov.hidden) out.push({ el: document.getElementById("ov-scroll") || ov, close: function () { var x = document.getElementById("ov-close"); if (x) x.click(); } });
     if (itemOpen()) out.push({ el: document.querySelector("#item-detail > .item-detail-card"), close: function () { var x = document.querySelector('#item-detail [data-item-act="close"]'); if (x) x.click(); } });
     if (iconOpen()) out.push({ el: document.querySelector("#icon-detail > .icon-detail-card"), close: function () { var x = document.querySelector("#icon-detail [data-back-icons]"); if (x) x.click(); } });
-    document.querySelectorAll(".cdd-menu:not([hidden])").forEach(function (m) { out.push({ el: m, close: function () { if (typeof closeAllCdd === "function") closeAllCdd(); else m.hidden = true; } }); });
+    document.querySelectorAll(".cdd-menu:not([hidden]):not(#today-type-row)").forEach(function (m) { out.push({ el: m, close: function () { if (typeof closeAllCdd === "function") closeAllCdd(); else m.hidden = true; } }); });
     /* only sheets actually on screen — an item sheet left open on a tab
        the user has switched away from must not keep the page locked */
     return out.filter(function (x) { return x.el && x.el.getClientRects().length > 0; });
@@ -39612,7 +39868,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       llb.insertAdjacentHTML("beforeend", '<button type="button" class="sheet-x" aria-label="Close">&times;</button>');
       llb.querySelector(".sheet-x").addEventListener("click", function () { var b = document.getElementById("look-layer-close"); if (b) b.click(); });
     }
-    document.querySelectorAll(".cdd-menu:not([hidden])").forEach(function (m) {
+    document.querySelectorAll(".cdd-menu:not([hidden]):not(#today-type-row)").forEach(function (m) {
       if (m.querySelector(":scope > .sheet-x")) return;
       m.insertAdjacentHTML("afterbegin", '<button type="button" class="sheet-x cdd-x" aria-label="Close">&times;</button>');
     });
