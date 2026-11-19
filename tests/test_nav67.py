@@ -112,7 +112,7 @@ def main() -> int:
                     info = page.evaluate(INSPECT)
                     check(
                         f"{tag} {slug}: build is .71",
-                        info and info.get("build") == "2026-11-19.78.9c",
+                        info and info.get("build") == "2026-11-19.78.9e",
                         str(info and info.get("build")),
                     )
                     check(

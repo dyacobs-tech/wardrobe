@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.9c" />
+    <meta name="wardrobe-build" content="2026-11-19.78.9e" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5191,7 +5191,8 @@
       html:has(body[data-page="today"]) { background: var(--ow-base) !important; }
       body[data-page="today"] { background: radial-gradient(ellipse 80% 40% at 50% 33%, var(--ow-glow) 0%, transparent 100%) no-repeat, var(--ow-base) !important; background-attachment: fixed !important; min-height: 100vh; }
       body[data-page="today"] .masthead, body[data-page="today"] .masthead::before, body[data-page="today"] .masthead::after { background: transparent !important; background-color: transparent !important; box-shadow: none !important; border-color: transparent !important; }
-      body[data-page="today"] .masthead, body[data-page="today"] .masthead h1, body[data-page="today"] .masthead .page-title, body[data-page="today"] .masthead button { color: var(--ow-ink) !important; }
+      body[data-page="today"] .masthead, body[data-page="today"] .masthead .page-title, body[data-page="today"] .masthead button { color: var(--ow-ink) !important; }
+      body[data-page="today"] .masthead h1, body[data-page="today"] .masthead h1.brand { color: var(--title-ink) !important; }
       body[data-page="today"] #panel-today #today-hero.today-hero.hero-solo { background: transparent !important; background-color: transparent !important; }
       body[data-page="today"] #panel-today #today-hero.hero-solo .hero-bg {
         background-color: transparent !important;
@@ -5224,6 +5225,25 @@
       .outfit-view .ov-figure, html[data-theme="dark"] .outfit-view .ov-figure { background: var(--ow-base, #F6F2EA) !important; }
       .outfit-view .ov-figure .hero-bg img { display: none !important; }
       .outfit-view .ov-figure .hero-bg { background: radial-gradient(ellipse 58% 40% at 50% 30%, var(--ow-glow, #FDFBF7), transparent), linear-gradient(to bottom, transparent 80%, var(--ow-floor, #E9E2D5) 96%, transparent 100%) !important; }
+      /* ================= Build .78.9e — the Home hero is only ever a cut-out =================
+         Whatever path sets the hero image (boot, outfit of the day, a
+         restored or liked look, the crossfade), anything that is not a
+         transparent cut-out from assets/onbody-cut/ is never painted. */
+      #panel-today #today-img:not([src*="onbody-cut/"]), #panel-today .hero-xfade:not([src*="onbody-cut/"]) { visibility: hidden !important; }
+      /* No 'Home' title on Home: the person icon stays, the hero rises */
+      body[data-page="today"] .masthead h1.brand { visibility: hidden !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo { margin-top: -40px !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .hero-corner { top: 46px !important; }
+      /* Home text centred: kicker, title, location, dots and the action row */
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption { text-align: center !important; align-items: center !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-kicker,
+      body[data-page="today"] #panel-today .today-hero.hero-solo #today-name,
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-loc,
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-suggest { text-align: center !important; margin-left: auto !important; margin-right: auto !important; justify-content: center !important; }
+      body[data-page="today"] #panel-today .today-hero.hero-solo .today-dots,
+      body[data-page="today"] #panel-today .today-hero.hero-solo #today-simple-actions,
+      body[data-page="today"] #panel-today .today-hero.hero-solo .hero-icon-row,
+      body[data-page="today"] #panel-today .today-hero.hero-solo .hero-controls { justify-content: center !important; margin-left: auto !important; margin-right: auto !important; }
       /* ================= Build .78.6b — sheets: one way to pop out =================
          Every pop-out is a bottom sheet (or the full-screen outfit view /
          look layer): rounded top corners, a drag handle, its own scroll
@@ -5324,6 +5344,20 @@
       .sheet-snap { transition: transform 250ms cubic-bezier(.2, .8, .2, 1) !important; }
       /* Undo sits above whatever action row it follows, above any sheet, for ~4s */
       .undo-toast { z-index: 260 !important; }
+      /* ================= Build .78.9d — honey nav + one title colour =================
+         The bottom nav is honey on every page (no outline): light #C29E74,
+         dark a deeper #8A6A44; the active tab in near-white rgb(255,250,240),
+         the others rgb(244,228,206). The page title colour is ONE variable,
+         --title-ink (default: the current dark text) — e.g. set it to
+         rgb(176,132,82) for a honey 'Home'. */
+      :root { --title-ink: var(--text); --honey-nav: #C29E74; --honey-on: rgb(255, 250, 240); --honey-muted: rgb(244, 228, 206); --honey-shadow: 0 8px 24px rgba(120, 88, 48, .22); }
+      html[data-theme="dark"] { --title-ink: var(--text); --honey-nav: #8A6A44; --honey-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
+      html body #bottombar, html body #bottombar.bottombar { --nav: var(--honey-nav); --nav-on: var(--honey-on); --nav-muted: var(--honey-muted); }
+      html body #bottombar .nav-pill { background: var(--honey-nav) !important; border: 0 !important; outline: 0 !important; box-shadow: var(--honey-shadow) !important; }
+      html body #bottombar .nav-pill .navbtn, html body #bottombar .nav-pill .navbtn span, html body #bottombar .nav-pill .navbtn svg { color: var(--honey-muted) !important; }
+      html body #bottombar .nav-pill .navbtn[aria-current="page"], html body #bottombar .nav-pill .navbtn[aria-current="page"] span, html body #bottombar .nav-pill .navbtn[aria-current="page"] svg { color: var(--honey-on) !important; }
+      html body #bottombar .nav-pill .navbtn { border: 0 !important; outline: 0 !important; box-shadow: none !important; background: transparent !important; }
+      html body .masthead h1.brand, html body .masthead .brand { color: var(--title-ink) !important; }
     </style>
 
   </head>
@@ -6543,7 +6577,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.9c</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.9e</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8151,7 +8185,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.9c";
+var WARDROBE_BUILD = "2026-11-19.78.9e";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -39038,11 +39072,14 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var day = typeof localTodayISO === "function" ? localTodayISO() : new Date().toISOString().slice(0, 10), h = 0;
     for (var i = 0; i < day.length; i++) h = (h * 31 + day.charCodeAt(i)) >>> 0;
     h += gOff782;
+    keys = keys.filter(function (k) { return window.cutFor784("assets/onbody/" + k + ".webp"); });
     if (keys.length) { var k = keys[h % keys.length]; return { cut: C.map[k], render: "assets/onbody/" + k + ".webp" }; }
     var rs = typeof ONBODY !== "undefined" && ONBODY.map ? Object.keys(ONBODY.map).sort().map(function (x) { return ONBODY.map[x]; }) : [];
-    return rs.length ? { cut: "", render: rs[h % rs.length] } : null;
+    /* .78.9e: only ever a cut-out — never the plain studio render */
+    rs = rs.filter(function (r) { return typeof window.cutFor784 === "function" && window.cutFor784(r); });
+    return rs.length ? { cut: window.cutFor784(rs[h % rs.length]), render: rs[h % rs.length] } : null;
   }
-  function guestHero782() {
+  function guestHero782(forceTitle) {
     if (userDeal782) { gOff782++; userDeal782 = false; }
     var g = guestSrc782(); if (!g) return false;
     var before = hero.classList.contains("hero-solo") ? img.getAttribute("src") : null;
@@ -39053,7 +39090,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     img.setAttribute("data-render", g.render);
     if (img.getAttribute("src") !== shown) img.setAttribute("src", shown);
     img.hidden = false; img.alt = "David in a look from his closet";
-    var nm = document.getElementById("today-name"); if (nm && !nm.textContent.trim()) nm.textContent = "From your closet";
+    var nm = document.getElementById("today-name"); if (nm && (forceTitle || !nm.textContent.trim())) nm.textContent = "From your closet";
     sampleBg(g.render, hero); placeHero();
     if (before && before !== shown && !/^data:/.test(before)) crossfade(before);
     return true;
@@ -39080,6 +39117,10 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       skip = 0; booted782 = true; userDeal782 = false;
       /* nothing rendered to show: one photo, never a tile grid */
       if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
+      /* .78.9e: the hero only ever shows a transparent cut-out — when this
+         look has none, one of his cut-outs stands in (never the plain
+         studio render, never a piece photo) */
+      if (guestHero782(true)) return;
       var fb = (typeof lookImg === "function" && lookImg(todayLook)) || "";
       if (SELFIE782.test(fb)) fb = "";
       if (!fb || /^data:image\/svg/.test(fb)) { var pp = piecesOf(todayLook).map(photoOf).filter(Boolean); fb = pp[0] || fb; }
