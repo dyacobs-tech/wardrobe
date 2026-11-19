@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.19" />
+    <meta name="wardrobe-build" content="2026-11-19.80.20" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -6020,7 +6020,18 @@
           overflow-y: auto; margin: 0 !important; border-radius: 20px !important;
         }
       }
-    </style>
+    
+      /* .80.19 (audit P1.9): Outfits top row on one line */
+      #panel-looks .outfits-row { display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 6px; margin: 8px 0 10px; max-width: 100%; }
+      #panel-looks .outfits-row .outfits-toggle { margin: 0 !important; flex: none; gap: 4px !important; width: auto !important; }
+      #panel-looks .outfits-row .outfits-toggle .chip { min-width: 0 !important; width: 66px !important; justify-content: center; flex: none !important; padding-left: 14px !important; padding-right: 14px !important; }
+      #panel-looks .outfits-row > button { flex: none; min-height: 44px; padding-left: 14px !important; padding-right: 14px !important; min-width: 0 !important; }
+      #panel-looks .outfits-row .outfits-ideas-btn { width: 44px; padding: 0; justify-content: center; }
+      #panel-looks .outfits-row .outfits-ideas-btn svg { width: 18px; height: 18px; }
+      #panel-looks .looks-filter { margin: 6px 0 12px !important; justify-content: center; }
+      #panel-looks .looks-filter .cal-subtab { min-width: 84px !important; }
+      @media (max-width: 380px) { #panel-looks .outfits-row { gap: 4px; } #panel-looks .outfits-row .outfits-toggle .chip { width: 58px !important; } #panel-looks .outfits-row .outfits-toggle .chip, #panel-looks .outfits-row > button { padding-left: 10px !important; padding-right: 10px !important; } }
+</style>
 
 
   </head>
@@ -6576,14 +6587,22 @@
 
       <!-- ================= LOOKS ================= -->
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
-        <div class="outfits-toggle theme-toggle" role="group" aria-label="Outfits">
+        <!-- .80.19 (audit P1.9): one row — Mine/Inspo, Build, Ideas, Shuffle -->
+        <div class="outfits-build-row outfits-row">
+          <div class="outfits-toggle theme-toggle" role="group" aria-label="Outfits">
           <button type="button" class="chip" id="outfits-mine" aria-pressed="true">Mine</button>
           <button type="button" class="chip" id="outfits-inspo" aria-pressed="false">Inspo</button>
+          </div>
+          <button type="button" class="btn-ink" id="outfits-build" aria-label="Build a look">Build</button><button type="button" class="btn-ghost outfits-ideas-btn" id="outfits-ideas" aria-label="Ideas — six takes" title="Ideas"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg></button><button type="button" class="btn-ghost" id="outfits-shuffle">Shuffle</button>
         </div>
-        <div class="outfits-build-row"><button type="button" class="btn-ink" id="outfits-build">Build a look</button><button type="button" class="btn-ghost outfits-ideas-btn" id="outfits-ideas" aria-label="Ideas — six takes"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg><span>Ideas</span></button><button type="button" class="btn-ghost" id="outfits-shuffle">Shuffle</button></div>
         <div id="outfits-mine-view">
           <div class="looks-tools">
             <input type="search" id="looks-search" class="ward-search" aria-label="Search your looks" placeholder="Search looks" autocomplete="off" />
+          </div>
+          <div class="cal-subtabs looks-filter" role="group" aria-label="Show looks">
+            <button type="button" class="cal-subtab" data-looks-filter="new" aria-pressed="false">New</button>
+            <button type="button" class="cal-subtab" data-looks-filter="liked" aria-pressed="false">Liked</button>
+            <button type="button" class="cal-subtab" data-looks-filter="all" aria-pressed="true">All</button>
           </div>
           <div class="saved-grid" id="saved-grid"></div>
         </div>
@@ -7294,7 +7313,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.19</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.20</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9104,7 +9123,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.19";
+var WARDROBE_BUILD = "2026-11-19.80.20";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -25474,7 +25493,8 @@ function renderSaved() {
     if (looksFilter === "queued" && !queueIds[l.id]) return false;
     if (looksFilter === "worn" && !l.worn) return false;
     if (looksFilter === "liked" && l.verdict !== "like") return false;
-    if (looksFilter === "new" && l.worn) return false;
+    /* .80.19: New = not liked yet (no worn data in the UI) */
+    if (looksFilter === "new" && l.verdict === "like") return false;
     if (!q) return true;
     var hay = [l.title, l.meta, l.notes, l.comment, (l.swatches || []).map(function (s) { return s.name + " " + (s.role || ""); }).join(" ")].join(" ").toLowerCase();
     return hay.indexOf(q) !== -1;
@@ -25801,6 +25821,7 @@ document.getElementById("panel-looks").addEventListener("click", function (e) {
     b.setAttribute("aria-pressed", b === f ? "true" : "false");
   });
   renderSaved();
+  if (typeof composerSyncFeed === "function") composerSyncFeed(false);
 });
 
 /* ================= Watches ================= */
@@ -37465,7 +37486,8 @@ function analyzeFilePiece(card, job, ix) {
   feed.setAttribute("aria-label", "From your closet");
   feed.innerHTML = '<div class="cf-head"><h3 class="fav-head">From your closet</h3><button type="button" class="btn-ghost" id="cf-shuffle">Shuffle</button></div>' +
     '<div class="options-grid cf-grid" id="cf-grid" role="list"></div><div class="cf-sentinel" id="cf-sentinel" aria-hidden="true"></div>';
-  if (mineHost) mineHost.insertBefore(feed, mineHost.firstChild);
+  /* .80.19: under the New / Liked / All filter when it heads Mine */
+  if (mineHost) { var lf0 = mineHost.querySelector(".looks-filter"); mineHost.insertBefore(feed, lf0 ? lf0.nextSibling : mineHost.firstChild); }
   else result.parentNode.insertBefore(feed, result.nextSibling);
   var grid = feed.querySelector("#cf-grid");
   var sentinel = feed.querySelector("#cf-sentinel");
@@ -37474,7 +37496,8 @@ function analyzeFilePiece(card, job, ix) {
   function feedLevel() { return (typeof studioTypeAny !== "undefined" && studioTypeAny) ? null : ((typeof formalityLevel !== "undefined") ? formalityLevel : 4); }
   function feedWanted() {
     if (typeof currentTab !== "undefined" && currentTab === "looks") {
-      return window.outfitsMode !== "inspo";
+      /* .80.19: Liked shows only his liked looks (no fresh feed) */
+      return window.outfitsMode !== "inspo" && !(typeof looksFilter !== "undefined" && looksFilter === "liked");
     }
     var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
     return src === "wardrobe" || src === "combo";
@@ -41487,6 +41510,13 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   if (ib) ib.addEventListener("click", function () { switchTab("studio"); });
   var bk = document.getElementById("studio-back");
   if (bk) bk.addEventListener("click", function () { switchTab("looks"); });
+})();
+</script>
+<script>
+/* .80.19: the New / Liked / All filter heads Mine, above the closet feed */
+(function () {
+  var mv = document.getElementById("outfits-mine-view"), lf = document.querySelector("#outfits-mine-view .looks-filter");
+  if (mv && lf && mv.firstChild !== lf) mv.insertBefore(lf, mv.firstChild);
 })();
 </script>
 </body>

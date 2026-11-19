@@ -74,7 +74,13 @@ TOGGLE_JS = """() => {
   const heights = rects.map(r => r.height);
   const docW = document.documentElement.clientWidth;
   const barR = bar.getBoundingClientRect();
-  const mid = (rects[0].left + rects[1].right) / 2;
+  /* .80.19: the toggle shares one row with Build / Ideas / Shuffle — the
+     row (first to last visible control) is what is centred */
+  const rowEl = document.querySelector('#panel-looks .outfits-row');
+  const rowKids = rowEl ? [...rowEl.children].filter(k => k.offsetParent !== null).map(k => k.getBoundingClientRect()) : [];
+  const rowL = rowKids.length ? Math.min(...rowKids.map(k => k.left)) : rects[0].left;
+  const rowR = rowKids.length ? Math.max(...rowKids.map(k => k.right)) : rects[1].right;
+  const mid = (rowL + rowR) / 2;
   const overflow = document.documentElement.scrollWidth - docW;
   const bodyOverflow = document.body.scrollWidth - docW;
   const feed = document.getElementById('closet-feed');
@@ -91,7 +97,7 @@ TOGGLE_JS = """() => {
     heights,
     widths,
     centered: Math.abs(mid - docW / 2) <= 8,
-    padEqual: Math.abs(barR.left - (docW - barR.right)) <= 8,
+    padEqual: rowEl ? Math.abs(rowL - (docW - rowR)) <= 8 : Math.abs(barR.left - (docW - barR.right)) <= 8,
     noHorizOverflow: overflow <= 1 && bodyOverflow <= 1,
     overflow, bodyOverflow, docW,
     minePressed: mine.getAttribute('aria-pressed') === 'true',
