@@ -29,7 +29,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-19.78.4"
+BUILD = "2026-11-19.78.4a"
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:18975/"
 
 
@@ -98,7 +98,8 @@ def main():
         check(n >= len(man["r"]), "page knows %d renders at boot" % n)
         home = pg.evaluate("""() => {
           const c = document.getElementById('today-collage');
-          const im = c && c.querySelector('img[data-onbody]');
+          /* .78.2c: the Home hero is the render itself (#today-img), no collage */
+          const im0 = document.getElementById('today-img'); const im = im0 && !im0.hidden && /\/onbody\//.test(im0.getAttribute('src') || '') ? im0 : null;
           const ids = (todayLook && todayLook.fwPieces || []).map(p => p.id);
           return { src: im ? im.getAttribute('src') : null, ok: im ? (im.complete && im.naturalWidth > 0) : false,
                    key: todayLook && todayLook.composerKey, ids, seed: ids.filter(i => String(i).indexOf('seed-') === 0).length,
@@ -139,10 +140,9 @@ def main():
         c, pg = ctx_for(plain)
         pg.goto(BASE, wait_until="load")
         pg.wait_for_timeout(2500)
-        fl = pg.evaluate("""() => { const c = document.getElementById('today-collage');
-          return { ob: c ? c.querySelectorAll('img[data-onbody]').length : -1, cells: c ? c.querySelectorAll('.fl-cell img').length : 0,
-                   sw: c ? c.querySelectorAll('.fl-swatch').length : -1 }; }""")
-        check(fl["ob"] == 0 and fl["cells"] >= 3 and fl["sw"] == 0, "fallback is a photo flat-lay (%d photos, %d swatches)" % (fl["cells"], fl["sw"]))
+        fl = pg.evaluate("""() => { const c = document.getElementById('today-collage'), im = document.getElementById('today-img');
+          return { tiles: c && !c.hidden ? c.querySelectorAll('.fl-cell').length : 0, img: !!(im && !im.hidden && im.getAttribute('src')), ob: /\/onbody\//.test(im.getAttribute('src') || '') }; }""")
+        check(fl["tiles"] == 0 and fl["img"] and not fl["ob"], "fallback: no render, so the hero shows a photo, never a tile grid (%s)" % fl)
         c.close()
         b.close()
     check(not errors, "no page errors %s" % errors[:3])

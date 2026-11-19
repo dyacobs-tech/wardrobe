@@ -319,7 +319,7 @@ def run() -> int:
             page.wait_for_timeout(300)
             st = closet_state(page)
             expected_ids = sorted(f"item-{ITEM_TS + i}" for i in range(N_SERVER))
-            check("build is .71", st["build"] == "2026-11-19.78.4", st["build"])
+            check("build is .71", st["build"] == "2026-11-19.78.4a", st["build"])
             check("all 83 server items reappear in memory", st["userCount"] == N_SERVER, f"got {st['userCount']}")
             check("all 83 persisted to wardrobe.items", st["storedUserCount"] == N_SERVER, f"got {st['storedUserCount']}")
             check("restored ids match the mock server", st["storedIds"] == expected_ids, f"got {len(st['storedIds'])} ids")
@@ -451,7 +451,8 @@ def run() -> int:
             check("fresh profile: bar is fixed or absolute in the fixed slot", style["position"] == "fixed" or (style["position"]=="absolute" and style.get("slotPosition")=="fixed"), style.get("position")+" slot="+str(style.get("slotPosition")))
             check("fresh profile: bar height is 68px (inset 0 in this browser)", style["height"] == "68px", style["height"])
             check("fresh profile: body padding-bottom is 68px", style["bodyPad"] == "68px", style["bodyPad"])
-            check("fresh profile: no transition on the bar", "none" in (style["transition"] or ""), style["transition"])
+            t_ = (style["transition"] or "")
+            check("fresh profile: bar transitions only transform (.78.2b tuck-away), never layout", "none" in t_ or (t_.startswith("transform ") and not __import__("re").search(r"\),\s*[a-z]|s,\s*[a-z]", t_)), t_)
             check("fresh profile: back chevron hidden on Home", style["backHidden"], "")
             # Bar top should sit at 844-68=776 when inset is 0.
             if ui_load:

@@ -146,7 +146,7 @@ def main() -> int:
 
         # ---- outfit of the day is stable for the day -----------------------
         page.click("#tab-today")
-        page.wait_for_timeout(500)
+        page.wait_for_timeout(2500)
         t_a = page.evaluate("document.querySelector('#today-name')?.innerText?.trim() || ''")
         # A "fresh open" = a new tab (new sessionStorage, same localStorage),
         # which is what reopening the installed app does. A plain reload

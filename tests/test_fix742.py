@@ -36,7 +36,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-19.78.4"
+BUILD = "2026-11-19.78.4a"
 KEY = "test-key-fix742"
 ACCT = "test-acct-742"
 CURSOR = 603
@@ -176,7 +176,8 @@ HERO_JS = """() => {
           composer: !!(window.todayLook && todayLook.composer),
           ids: (todayLook && todayLook.fwPieces || []).map(p => p.id),
           swatches: cells.filter(c => c.classList.contains('fl-swatch')).length,
-          pieceImgs: cells.filter(c => !c.classList.contains('fl-watch')).map(c => { const i = c.querySelector('img'); return i ? (i.getAttribute('src') || '').slice(0, 15) : 'NONE'; }),
+          /* .78.2c: Home is him only; the pieces live in the outfit view */
+          pieceImgs: (() => { const d = document.createElement('div'); d.innerHTML = window.outfitPieceRows782 ? window.outfitPieceRows782(todayLook) : ''; return Array.from(d.querySelectorAll('.ov-piece')).map(b => { const i = b.querySelector('img'); return i ? (i.getAttribute('src') || '').slice(0, 15) : 'NONE'; }); })(),
           homeDealSwatches: (() => { let n = 0, seeds = 0; (buildClosetLooks({count: 12}) || []).forEach(l => {
               n += (window.composerFlatlayHTML(l, false).match(/fl-swatch/g) || []).length;
               seeds += l.fwPieces.filter(p => p.id.indexOf('seed-') === 0).length; }); return {n, seeds}; })()};

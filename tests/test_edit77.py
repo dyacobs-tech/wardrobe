@@ -35,7 +35,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).resolve().parent
-BUILD = "2026-11-19.78.4"
+BUILD = "2026-11-19.78.4a"
 TRY = "https://wardrobe-tryon.dyacobs.workers.dev"
 PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
 CLOSET = json.loads((HERE / "fixture_onbody.json").read_text())
@@ -301,7 +301,7 @@ def main():
         pg.click("#outfits-inspo"); pg.wait_for_timeout(600)
         check("Inspo opens on On you", pg.locator("#panel-onyou").is_visible() and pg.get_attribute('[data-inspo-view="onyou"]', "aria-pressed") == "true")
         nlooks = pg.locator("#panel-onyou [data-ion-look]").count()
-        check("16 on-body inspo renders", nlooks == MAN["count"] == 16, nlooks)
+        check("every manifest on-body inspo render shown (%d)" % MAN["count"], nlooks == MAN["count"] >= 16, nlooks)
         check("your shop build shows there too", pg.locator("#panel-onyou [data-ion-build]").count() >= 1)
         f0 = pg.locator("#panel-onyou [data-ion-look]").first
         check("render is the webp", (f0.locator(".ion-fig img").get_attribute("src") or "").startswith("assets/inspo/") and pg.evaluate("(() => { const i = document.querySelector('#panel-onyou [data-ion-look] .ion-fig img'); return i.complete && i.naturalWidth > 0; })()"))
@@ -317,7 +317,7 @@ def main():
         seen["manifest"] = extra
         pg.reload(wait_until="load"); pg.wait_for_timeout(2200)
         pg.click("#section-ideas"); pg.wait_for_timeout(300); pg.click("#outfits-inspo"); pg.wait_for_timeout(600)
-        check("manifest re-read at launch (17 looks)", pg.locator("#panel-onyou [data-ion-look]").count() == 17, pg.locator("#panel-onyou [data-ion-look]").count())
+        check("manifest re-read at launch (+1 look)", pg.locator("#panel-onyou [data-ion-look]").count() == MAN["count"] + 1, pg.locator("#panel-onyou [data-ion-look]").count())
         check("no i icons on Inspo", pg.locator("#panel-onyou .info-btn").count() == 0)
 
         # 6. pairsWith

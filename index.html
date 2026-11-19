@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.4" />
+    <meta name="wardrobe-build" content="2026-11-19.78.4a" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -4932,6 +4932,88 @@
       /* the pull-to-refresh ring only exists while pulling; at rest it is
          gone, never a dark dot under the clock or over a page title */
       .ptr:not(.show) { opacity: 0 !important; visibility: hidden !important; }
+      /* ================= Build .78.2c — Home is him ================= */
+      /* Home: one full-length render of him, head to feet, never cropped */
+      #panel-today .today-hero.hero-solo .today-collage { display: none !important; }
+      #panel-today .today-hero.hero-solo img#today-img {
+        display: block !important; position: relative !important; inset: auto !important; flex: 1 1 auto !important;
+        width: 100% !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        object-fit: contain !important; object-position: center bottom !important;
+        background: var(--hero-bg, linear-gradient(#b9b6b1, #cfccc7)) !important; cursor: pointer; transition: none;
+      }
+      #panel-today .today-hero.hero-solo .hero-xfade {
+        position: absolute; left: 0; width: 100%; object-fit: contain; object-position: center bottom; pointer-events: none;
+        opacity: 1; transition: opacity .45s ease; z-index: 1; background: var(--hero-bg, transparent);
+      }
+      #panel-today .today-hero.hero-solo .hero-xfade.out { opacity: 0; }
+      @media (prefers-reduced-motion: reduce) { #panel-today .today-hero.hero-solo .hero-xfade { transition: none; } }
+      #panel-today .today-hero.hero-solo .hero-corner { z-index: 2; }
+      /* the dark panel runs on behind the floating nav: no bare band */
+      #panel-today .today-hero.hero-solo { margin-bottom: calc(-1 * var(--nav-band, 0px)) !important; }
+      #panel-today .today-hero.hero-solo .today-caption { padding-bottom: calc(var(--nav-band, 0px) + 14px) !important; }
+      #panel-today .today-hero.hero-solo #today-name { cursor: pointer; }
+      /* the outfit view */
+      .outfit-view { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; flex-direction: column; }
+      .outfit-view[hidden] { display: none !important; }
+      body.ov-open { overflow: hidden; }
+      .outfit-view .ov-top { position: relative; flex: none; display: flex; align-items: center; justify-content: center; min-height: 44px; padding: env(safe-area-inset-top, 0px) 52px 0; }
+      .outfit-view .ov-title { margin: 0; font: 500 22px/1.2 var(--font-display); color: var(--text); text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .outfit-view .ov-close { position: absolute; left: 8px; bottom: 4px; width: 36px !important; height: 36px !important; min-width: 36px !important; min-height: 36px !important; padding: 0 !important; border: 0 !important; border-radius: 50% !important; background: transparent !important; color: var(--text) !important; font-size: 26px; line-height: 36px; }
+      .outfit-view .ov-scroll { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); }
+      .outfit-view .ov-figure { height: calc(100dvh - 44px - env(safe-area-inset-top, 0px) - 76px); min-height: 360px; background: var(--hero-bg, linear-gradient(#b9b6b1, #cfccc7)); display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+      .outfit-view .ov-figure img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; display: block; transition: opacity .18s ease; }
+      .outfit-view .ov-figure img.swap { opacity: 0; }
+      .outfit-view .ov-acts { display: flex; justify-content: center; gap: 10px; padding: 14px 16px 4px; }
+      .outfit-view .ov-acts[hidden] { display: none !important; }
+      .outfit-view .ov-acts .hero-icon-btn { min-width: 64px; height: 44px; border-radius: 999px; border: var(--ctl-border, 1px solid var(--border)); background: var(--surface); color: var(--text); font: 600 15px var(--font-ui); padding: 0 18px; }
+      .outfit-view .ov-acts .hero-icon-btn[aria-pressed="true"] { background: var(--ink-btn); color: var(--ink-btn-text); }
+      .outfit-view .ov-head { margin: 18px 16px 8px !important; font: 600 11px/1.3 var(--font-ui) !important; letter-spacing: .14em !important; text-transform: uppercase !important; color: var(--dim) !important; text-align: center !important; }
+      .ov-pieces { list-style: none; margin: 0; padding: 0 16px; display: grid; gap: 8px; }
+      .ov-piece { display: flex !important; align-items: center; gap: 12px; width: 100%; min-height: 84px !important; height: auto !important; padding: 8px 12px 8px 8px !important; border-radius: 14px !important; border: var(--ctl-border, 1px solid var(--border)) !important; background: var(--surface) !important; color: var(--text) !important; text-align: left; justify-content: flex-start !important; }
+      .ov-pph { flex: none; width: 68px; height: 68px; border-radius: 10px; overflow: hidden; background: #ede7db; display: block; }
+      .ov-pph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .ov-sw { display: block; width: 100%; height: 100%; }
+      .ov-pt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+      .ov-pb { font: 600 10.5px var(--font-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+      .ov-pn { font: 500 16px/1.25 var(--font-display); white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .ov-chev { flex: none; font-size: 22px; color: var(--dim); }
+      .ov-layer-pieces { margin: 8px 0 4px; }
+      .ov-layer-pieces .ov-pieces { padding: 0; }
+      /* ================= Build .78.2c — one action row, thumbs ================= */
+      /* Home: Thumbs up · Thumbs down · Next · occasion, one row, one pill height */
+      #panel-today #today-simple-actions { display: flex !important; flex-wrap: nowrap !important; align-items: center !important; gap: 6px !important; }
+      #panel-today #today-simple-actions > .hero-icon-cell { flex: none; display: flex; }
+      #panel-today #today-simple-actions > .hero-icon-cell[hidden] { display: none !important; }
+      #panel-today #today-simple-actions .hero-type-cell { flex: 0 1 auto; min-width: 0; }
+      #panel-today #today-simple-actions .hero-type-cell .cdd { margin: 0; min-width: 0; }
+      #panel-today #today-simple-actions .hero-type-cell .hero-cdd-btn { max-width: 100%; }
+      #panel-today #today-simple-actions .hero-type-cell .cdd-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .thumb-btn { font-size: 0 !important; width: 44px; min-width: 44px !important; padding: 0 !important; }
+      #panel-today .hero-icon-btn.thumb-btn { font-size: 0 !important; width: 44px !important; min-width: 44px !important; padding: 0 !important; letter-spacing: 0 !important; }
+      .thumb-btn::before {
+        content: ""; width: 18px; height: 18px; display: block; background: currentColor;
+        -webkit-mask: var(--thumb-up) center / contain no-repeat; mask: var(--thumb-up) center / contain no-repeat;
+      }
+      .thumb-btn.thumb-down::before { -webkit-mask-image: var(--thumb-down); mask-image: var(--thumb-down); }
+      :root {
+        --thumb-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 10v11H3V10h4z'/%3E%3Cpath d='M7 10l4-8a3 3 0 0 1 3 3v4h5.5a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 18.1 21H7'/%3E%3C/svg%3E");
+        --thumb-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 14V3h4v11h-4z'/%3E%3Cpath d='M17 14l-4 8a3 3 0 0 1-3-3v-4H4.5a2 2 0 0 1-2-2.3l1.4-8A2 2 0 0 1 5.9 3H17'/%3E%3C/svg%3E");
+      }
+      .thumb-btn[aria-pressed="true"]::before { -webkit-mask-image: var(--thumb-up); }
+      /* the look's ••• (Share / Upload) lives in the outfit view header now, not over him */
+      .outfit-view .ov-top .hero-corner { position: absolute !important; right: 8px; left: auto; top: auto !important; bottom: 4px; z-index: 3; }
+      .outfit-view .ov-top .hero-corner-btn { width: 36px !important; height: 36px !important; min-height: 36px !important; padding: 0 !important; border: 0 !important; background: transparent !important; color: var(--text) !important; box-shadow: none !important; font-size: 16px; letter-spacing: .08em; }
+      .outfit-view .ov-top .cdd-menu { top: 100%; bottom: auto; right: 0; left: auto; }
+      /* Outfits cards: the same thumbs */
+      .cf-actions { display: flex; gap: 8px; }
+      .cf-actions [data-cf-like], .cf-actions [data-cf-dislike] {
+        font-size: 0 !important; width: 44px; min-width: 44px; height: 34px; padding: 0 !important; display: inline-flex !important; align-items: center; justify-content: center;
+      }
+      .cf-actions [data-cf-like]::before, .cf-actions [data-cf-dislike]::before {
+        content: ""; width: 17px; height: 17px; display: block; background: currentColor;
+        -webkit-mask: var(--thumb-up) center / contain no-repeat; mask: var(--thumb-up) center / contain no-repeat;
+      }
+      .cf-actions [data-cf-dislike]::before { -webkit-mask-image: var(--thumb-down); mask-image: var(--thumb-down); }
     </style>
 
   </head>
@@ -6144,7 +6226,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.4</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.4a</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7698,7 +7780,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.4";
+var WARDROBE_BUILD = "2026-11-19.78.4a";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -35692,6 +35774,7 @@ function analyzeFilePiece(card, job, ix) {
     if (force || !feedLooks.length || feedSig !== stateSig()) resetFeed();
   }
   window.composerSyncFeed = syncFeed;
+  window.__cfKeyFor = function (btn) { var l = feedLooks[parseInt(btn.getAttribute("data-cf-dislike"), 10)]; return l ? l.composerKey : null; };
   feed.querySelector("#cf-shuffle").addEventListener("click", function () { resetFeed(); feed.scrollIntoView({ block: "start", behavior: "smooth" }); });
   grid.addEventListener("click", function (e) {
     var like = e.target.closest("[data-cf-like]");
@@ -38070,6 +38153,309 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var _st = window.switchTab;
     window.switchTab = function () { show(); return _st.apply(this, arguments); };
   }
+})();
+    </script>
+    <script type="wardrobe/app">
+/* Build .78.2c — Home is him: the hero is the one full-length render of
+   him in today's outfit (whole head to feet, never cropped), and Next
+   crossfades to the next render so the clothes change around him. No
+   piece collage on Home. Tapping him (or the title) opens the outfit
+   view: the render full-screen, then each piece (studio photo, name,
+   brand) — a piece opens its item page. Outfits cards show the render
+   alone too; their pieces live in the look's detail. */
+(function () {
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var hero = document.getElementById("today-hero"), img = document.getElementById("today-img"), collage = document.getElementById("today-collage");
+  if (!hero || !img) return;
+
+  /* ---------- the render for a look ---------- */
+  function renderFor(look) {
+    if (!look) return "";
+    if (look.swapPhoto && (look.swapPieces || look.swapComboId)) return look.swapPhoto;
+    if (look.fwRender) return look.fwRender;
+    var ob = typeof onbodyForLook === "function" ? onbodyForLook(look) : null;
+    return ob || "";
+  }
+  function piecesOf(look) {
+    var ps = (look && (look.fwPieces || look.pieces)) || [];
+    return ps.map(function (p) {
+      var it = p && p.id && typeof closetItemById === "function" ? (closetItemById(p.id) || p) : p;
+      return it && typeof it === "object" ? it : null;
+    }).filter(Boolean);
+  }
+  function photoOf(p) {
+    var ph = typeof itemPhoto === "function" ? itemPhoto(p) : (p.photo || "");
+    if (ph && ph.indexOf("idb:") === 0) { var pv = window.photoVault; var hit = pv && pv.cache ? pv.cache[ph.slice(4)] : undefined; if (hit) ph = hit; else if (pv && pv.fetch) { try { pv.fetch(ph.slice(4), function () {}); } catch (e) {} } }
+    else if (ph && /^blob:[0-9a-f]{16,}/.test(ph)) { var bs = window.blobStore; var bh = bs && bs.cache ? bs.cache[ph.slice(5)] : undefined; if (bh) ph = bh; }
+    return ph || "";
+  }
+  function brandOf(p) {
+    if (p.brand) return String(p.brand);
+    var bl = typeof bulkBrands === "function" ? bulkBrands() : [], nm = String(p.name || "");
+    var hit = bl.filter(function (b) { return nm.toLowerCase().indexOf(String(b).toLowerCase() + " ") === 0; }).sort(function (a, b) { return b.length - a.length; })[0];
+    return hit || "";
+  }
+
+  /* the render's own studio colour behind it, so contain never shows a band */
+  var bgCache = {};
+  function sampleBg(src, el) {
+    if (!src || !el) return;
+    if (bgCache[src]) { el.style.setProperty("--hero-bg", bgCache[src]); return; }
+    var im = new Image();
+    im.onload = function () {
+      try {
+        /* the bars sit beside the render's left and right edges: carry
+           those edge columns' colours top to bottom, so there is no seam */
+        var H = 48, cv = document.createElement("canvas"); cv.width = 32; cv.height = H;
+        var cx = cv.getContext("2d"); cx.drawImage(im, 0, 0, 32, H);
+        var stops = [];
+        for (var y = 0; y < H; y += 6) {
+          var L = cx.getImageData(0, y, 2, 6).data, R = cx.getImageData(30, y, 2, 6).data, r = 0, g = 0, b = 0, n = 0, i;
+          for (i = 0; i < L.length; i += 4) { r += L[i] + R[i]; g += L[i + 1] + R[i + 1]; b += L[i + 2] + R[i + 2]; n += 2; }
+          stops.push("rgb(" + Math.round(r / n) + "," + Math.round(g / n) + "," + Math.round(b / n) + ") " + Math.round((y + 3) / H * 100) + "%");
+        }
+        bgCache[src] = "linear-gradient(" + stops.join(",") + ")";
+        el.style.setProperty("--hero-bg", bgCache[src]);
+      } catch (e) {}
+    };
+    im.src = src;
+  }
+
+  /* ---------- the hero ---------- */
+  var skip = 0, prevSrc = null;
+  function crossfade(prev) {
+    if (!prev || prev === img.getAttribute("src")) return;
+    var old = hero.querySelector(".hero-xfade");
+    if (old) old.remove();
+    var ov = document.createElement("img");
+    ov.className = "hero-xfade"; ov.alt = ""; ov.setAttribute("aria-hidden", "true"); ov.src = prev;
+    ov.style.top = img.offsetTop + "px"; ov.style.height = img.offsetHeight + "px";
+    img.parentNode.insertBefore(ov, img.nextSibling);
+    function go() { requestAnimationFrame(function () { ov.classList.add("out"); setTimeout(function () { ov.remove(); }, 520); }); }
+    if (img.complete && img.naturalWidth) go(); else { img.addEventListener("load", go, { once: true }); img.addEventListener("error", go, { once: true }); setTimeout(go, 1500); }
+  }
+  function placeHero() {
+    var bb = document.getElementById("bottombar");
+    var band = bb && bb.getBoundingClientRect().height ? Math.max(0, Math.round(window.innerHeight - bb.getBoundingClientRect().top)) : 0;
+    hero.style.setProperty("--nav-band", band + "px");
+  }
+  var booted782 = false, userDeal782 = false, rcache = { sig: "", v: false };
+  function anyRenderable782() {
+    try {
+      var keys = typeof ONBODY !== "undefined" && ONBODY.map ? Object.keys(ONBODY.map) : [];
+      var sig = keys.length + "/" + (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0) + "/" + (typeof dislikedImgs !== "undefined" ? dislikedImgs.length : 0);
+      if (rcache.sig === sig) return rcache.v;
+      var own = {}; (wardrobeItems || []).forEach(function (i) { own[i.id] = 1; });
+      var v = keys.some(function (k) { var src = ONBODY.map[k]; return k.split("|").every(function (id) { return own[id]; }) && !(typeof isDislikedImg === "function" && isDislikedImg(src)); });
+      rcache = { sig: sig, v: v }; return v;
+    } catch (e) { return true; }
+  }
+  document.addEventListener("click", function (e) { if (e.target && e.target.closest && e.target.closest("#today-next, #today-dislike, #ov-next, #ov-dislike")) userDeal782 = true; }, true);
+  function soloHero() {
+    if (typeof todayLook === "undefined" || !todayLook) return;
+    var src = renderFor(todayLook);
+    /* .78.2c: a render he gave a thumbs-down never comes back */
+    if (src && typeof isDislikedImg === "function" && isDislikedImg(src)) src = null;
+    if (!src) {
+      /* Home only deals looks he can be seen in: skip one with no render */
+      var lkey = todayLook.composerKey || todayLook.id || todayLook.img || "", acc = null, dayIso = typeof localTodayISO === "function" ? localTodayISO() : "";
+      try { acc = JSON.parse(localStorage.getItem("wardrobe.ootdNoRender782") || "null"); } catch (e) {}
+      var accepted = acc && acc.date === dayIso && acc.key === lkey && !userDeal782;
+      if (!accepted && !anyRenderable782()) accepted = true; /* none of his looks has a render yet: don't churn */
+      if (!accepted && skip < 30 && typeof dealAnotherToday === "function") { skip++; setTimeout(dealAnotherToday, 0); return; }
+      /* nothing he can be seen in today: settle on this look for the day (stable across opens) */
+      if (!accepted && !userDeal782) { try { localStorage.setItem("wardrobe.ootdNoRender782", JSON.stringify({ date: dayIso, key: lkey })); } catch (e) {} if (typeof persistOpeningLook === "function") try { persistOpeningLook(todayLook); } catch (e) {} }
+      skip = 0; booted782 = true; userDeal782 = false;
+      /* nothing rendered to show: one photo, never a tile grid */
+      if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
+      var fb = (typeof lookImg === "function" && lookImg(todayLook)) || "";
+      if (!fb || /^data:image\/svg/.test(fb)) { var pp = piecesOf(todayLook).map(photoOf).filter(Boolean); fb = pp[0] || fb; }
+      if (fb && img.getAttribute("src") !== fb) img.setAttribute("src", fb);
+      hero.classList.add("hero-solo");
+      img.hidden = false; placeHero(); return;
+    }
+    /* .78.2c: the day's opening look is the first one he can be seen in —
+       keep THAT as the outfit of the day so every app open shows it */
+    if ((!booted782 || !userDeal782) && skip > 0 && typeof persistOpeningLook === "function") try { persistOpeningLook(todayLook); } catch (e) {}
+    booted782 = true; userDeal782 = false;
+    skip = 0;
+    var prev = prevSrc; prevSrc = null;
+    if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
+    if (img.getAttribute("src") !== src) img.setAttribute("src", src);
+    img.hidden = false;
+    img.alt = (todayLook.title || "Outfit") + " on David";
+    hero.classList.add("hero-solo");
+    sampleBg(src, hero);
+    placeHero();
+    crossfade(prev && prev !== src ? prev : null);
+    if (ovOpen) fillView();
+  }
+  if (typeof renderToday === "function") {
+    var _rt782 = renderToday;
+    renderToday = function () {
+      prevSrc = hero.classList.contains("hero-solo") ? img.getAttribute("src") : null;
+      var out = _rt782.apply(this, arguments); try { soloHero(); } catch (e) {} return out;
+    };
+  }
+  window.addEventListener("resize", placeHero);
+  if (collage && "MutationObserver" in window) new MutationObserver(function () {
+    if (hero.classList.contains("hero-solo") && !collage.hidden) { collage.hidden = true; img.hidden = false; }
+  }).observe(collage, { attributes: true, attributeFilter: ["hidden"], childList: true });
+
+  /* ---------- the outfit view ---------- */
+  var ov = document.createElement("div");
+  ov.id = "outfit-view"; ov.className = "outfit-view"; ov.hidden = true;
+  ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-labelledby", "ov-title");
+  ov.innerHTML = '<div class="ov-top"><button type="button" class="ov-close" id="ov-close" aria-label="Close">×</button><h2 class="ov-title" id="ov-title"></h2></div>' +
+    '<div class="ov-scroll" id="ov-scroll"><div class="ov-figure" id="ov-figure"><img id="ov-img" alt="" decoding="async" /></div>' +
+    '<div class="ov-acts" id="ov-acts"><button type="button" class="hero-icon-btn thumb-btn" id="ov-like" aria-pressed="false" aria-label="Like">Like</button><button type="button" class="hero-icon-btn thumb-btn thumb-down" id="ov-dislike" aria-label="Dislike — remove this look">Dislike</button><button type="button" class="hero-icon-btn" id="ov-next" aria-label="Next look">Next</button></div>' +
+    '<h3 class="ov-head">In this look</h3><ul class="ov-pieces" id="ov-pieces"></ul></div>';
+  document.body.appendChild(ov);
+  var ovOpen = false, ovLook = null, ovFromHome = true;
+  function pieceRows(look) {
+    return piecesOf(look).map(function (p) {
+      var ph = photoOf(p), br = brandOf(p);
+      return '<li><button type="button" class="ov-piece" data-ov-item="' + esc(p.id) + '">' +
+        '<span class="ov-pph">' + (ph ? '<img src="' + esc(ph) + '" alt="" loading="lazy" decoding="async" />' : '<span class="ov-sw" style="background:' + esc(p.colourHex || "#d9cfbd") + '"></span>') + "</span>" +
+        '<span class="ov-pt">' + (br ? '<span class="ov-pb">' + esc(br) + "</span>" : "") + '<span class="ov-pn">' + esc(p.name || "") + "</span></span>" +
+        '<span class="ov-chev" aria-hidden="true">›</span></button></li>';
+    }).join("");
+  }
+  window.outfitPieceRows782 = pieceRows; window.renderFor782 = renderFor; window.fillOutfitView782 = function () { if (ovOpen) fillView(); };
+  function fillView() {
+    var look = ovFromHome && typeof todayLook !== "undefined" ? todayLook : ovLook;
+    if (!look) return;
+    var src = renderFor(look) || (typeof lookImg === "function" ? lookImg(look) : "");
+    var im = document.getElementById("ov-img"), prev = im.getAttribute("src");
+    if (prev !== src) {
+      if (prev && ovOpen) { im.classList.add("swap"); setTimeout(function () { im.setAttribute("src", src); im.classList.remove("swap"); }, 180); }
+      else im.setAttribute("src", src);
+    }
+    im.alt = (look.title || "Outfit") + " on David";
+    sampleBg(src, document.getElementById("ov-figure"));
+    document.getElementById("ov-title").textContent = look.title || "Outfit";
+    document.getElementById("ov-pieces").innerHTML = pieceRows(look);
+    var lk = document.getElementById("today-like");
+    document.getElementById("ov-like").setAttribute("aria-pressed", lk ? lk.getAttribute("aria-pressed") || "false" : "false");
+    document.getElementById("ov-acts").hidden = !ovFromHome;
+  }
+  function openView(look, fromHome) {
+    ovFromHome = fromHome !== false; ovLook = look || null;
+    ovOpen = true; fillView();
+    ov.hidden = false; document.body.classList.add("ov-open");
+    var sc = document.getElementById("ov-scroll"); if (sc) sc.scrollTop = 0;
+    var c = document.getElementById("ov-close"); if (c) try { c.focus({ preventScroll: true }); } catch (e) {}
+  }
+  function closeView() { if (!ovOpen) return; ovOpen = false; ov.hidden = true; document.body.classList.remove("ov-open"); }
+  window.openOutfitView = openView; window.closeOutfitView = closeView;
+  ov.addEventListener("click", function (e) {
+    var t = e.target; if (!t || !t.closest) return;
+    if (t.closest("#ov-close")) { closeView(); return; }
+    if (t.closest("#ov-like")) { var l = document.getElementById("today-like"); if (l) l.click(); setTimeout(fillView, 60); return; }
+    if (t.closest("#ov-dislike")) { var d = document.getElementById("today-dislike"); if (d) d.click(); setTimeout(fillView, 60); return; }
+    if (t.closest("#ov-next")) { var n = document.getElementById("today-next"); if (n) n.click(); setTimeout(fillView, 60); return; }
+    var b = t.closest("[data-ov-item]");
+    if (b) {
+      var iid = b.getAttribute("data-ov-item");
+      if (typeof closetItemById === "function" && closetItemById(iid) && typeof switchTab === "function") {
+        closeView();
+        if (typeof lookLayerOpen !== "undefined" && lookLayerOpen && typeof closeLookLayer === "function") closeLookLayer();
+        detailItemId = iid; switchTab("wardrobe");
+        if (typeof renderItemDetail === "function") renderItemDetail();
+        var dt = document.getElementById("item-detail"); if (dt && dt.scrollIntoView) try { dt.scrollIntoView({ block: "start" }); } catch (x) {}
+      }
+    }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && ovOpen) closeView(); });
+
+  /* tap him (or the title) → the outfit view; a swipe still deals */
+  var tx = 0, ty = 0, moved = 0, tEnd = 0;
+  hero.addEventListener("touchstart", function (e) { if (e.touches.length === 1) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; moved = 0; } }, { passive: true, capture: true });
+  hero.addEventListener("touchend", function (e) { if (e.changedTouches.length) { var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty; moved = Math.sqrt(dx * dx + dy * dy); tEnd = Date.now(); } }, { passive: true, capture: true });
+  hero.addEventListener("click", function (e) {
+    var t = e.target; if (!t || !t.closest) return;
+    var onTitle = t.closest("#today-name");
+    if (!onTitle && (t.closest(".today-caption") || t.closest(".hero-corner"))) return;
+    if (Date.now() - tEnd < 600 && moved > 40) return;
+    if (typeof todayLook === "undefined" || !todayLook) return;
+    e.stopImmediatePropagation(); e.preventDefault();
+    openView(todayLook, true);
+  }, true);
+
+  try { soloHero(); } catch (e) {}
+})();
+    </script>
+    <script type="wardrobe/app">
+/* Build .78.2c — Home's action row reads Thumbs up · Thumbs down · Next ·
+   occasion on one line. Thumbs up is the existing Like. Thumbs down is the
+   existing Dislike (the composer ban / not-for-me photo list) plus the
+   render itself on the synced not-for-me list (dislikedImgs), so that
+   look never returns to Home, Outfits, or a later rotation; Undo puts it
+   back. Nothing in the closet is deleted. */
+(function () {
+  var row = document.getElementById("today-simple-actions");
+  var like = document.getElementById("today-like"), dis = document.getElementById("today-dislike");
+  if (!row || !like || !dis) return;
+  like.classList.add("thumb-btn"); like.textContent = "Like"; like.setAttribute("aria-label", "Like");
+  dis.classList.add("thumb-btn", "thumb-down"); dis.textContent = "Dislike"; dis.setAttribute("aria-label", "Dislike — remove this look");
+  var lc = like.closest(".hero-icon-cell"), dc = dis.closest(".hero-icon-cell"), nc = (document.getElementById("today-next") || {}).closest ? document.getElementById("today-next").closest(".hero-icon-cell") : null;
+  if (dc) { dc.hidden = false; if (lc && lc.nextSibling !== dc) row.insertBefore(dc, lc.nextSibling); }
+  var tb = document.getElementById("today-type-btn"), tdd = tb && tb.closest(".cdd");
+  if (tdd && nc) {
+    var cell = document.createElement("div"); cell.className = "hero-icon-cell hero-type-cell";
+    cell.appendChild(tdd); row.insertBefore(cell, nc.nextSibling);
+  }
+  /* the ••• (Share this look / Upload a look) moves off the hero into the outfit view header */
+  var corner = document.querySelector("#today-hero .hero-corner"), top = document.querySelector("#outfit-view .ov-top");
+  if (corner && top) top.appendChild(corner);
+
+  function unban(img) {
+    if (!img || typeof dislikedImgs === "undefined") return;
+    var i = dislikedImgs.indexOf(img);
+    if (i !== -1) { dislikedImgs.splice(i, 1); try { store.set("dislikedImgs", dislikedImgs); } catch (e) {} }
+  }
+  function unbanComposer(look) {
+    if (!look || !look.composer || typeof composerPrefs !== "function") return;
+    try { var p = composerPrefs(); if (p.banned) delete p.banned[look.composerKey]; composerSavePrefs(p); } catch (e) {}
+  }
+  var pending = null;
+  document.addEventListener("click", function (e) {
+    if (!e.target || !e.target.closest || !e.target.closest("#today-dislike")) return;
+    if (typeof todayLook === "undefined" || !todayLook) return;
+    var snap = JSON.parse(JSON.stringify(todayLook));
+    var rsrc = typeof window.renderFor782 === "function" ? window.renderFor782(todayLook) : null;
+    var pimg = typeof lookImg === "function" ? lookImg(snap) : null;
+    pending = { look: snap, render: rsrc, img: pimg, had: typeof dislikedImgs !== "undefined" && pimg ? dislikedImgs.indexOf(pimg) !== -1 : false };
+    setTimeout(function () {
+      var p = pending; pending = null; if (!p) return;
+      if (p.render && typeof recordDislike === "function") recordDislike(p.render);
+      if (typeof window.fillOutfitView782 === "function") window.fillOutfitView782();
+      if (typeof showUndoToast === "function") showUndoToast("Look removed.", function () {
+        unban(p.render); if (!p.had) unban(p.img); unbanComposer(p.look);
+        p.look.verdict = null;
+        todayLook = p.look;
+        try { if (typeof saveToday === "function") saveToday(); } catch (x) {}
+        if (typeof renderToday === "function") renderToday();
+        if (typeof syncTodayVerdict === "function") syncTodayVerdict();
+        if (typeof toast === "function") toast("Undone — that look is back.");
+      });
+    }, 0);
+  }, true);
+
+  /* Outfits cards: thumbs down removes the card (a fresh one takes its place); Undo returns the pairing to the rotation */
+  document.addEventListener("click", function (e) {
+    var d = e.target && e.target.closest ? e.target.closest("#cf-grid [data-cf-dislike]") : null;
+    if (!d) return;
+    var card = d.closest(".cf-card"), title = card ? (card.querySelector(".oc-title") || {}).textContent : "";
+    var key = null;
+    try { var k = window.__cfKeyFor ? window.__cfKeyFor(d) : null; key = k; } catch (x) {}
+    setTimeout(function () {
+      if (typeof showUndoToast === "function") showUndoToast("Removed" + (title ? " — " + title : "") + ".", function () {
+        if (key) unbanComposer({ composer: true, composerKey: key });
+        if (typeof toast === "function") toast("Undone — it's back in the rotation.");
+      });
+    }, 0);
+  }, true);
 })();
     </script>
   </body>

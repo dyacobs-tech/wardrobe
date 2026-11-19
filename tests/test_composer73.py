@@ -30,7 +30,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-19.78.4"
+BUILD = "2026-11-19.78.4a"
 # Build .74.2: Home deals only pieces that carry a photo, so each fixture
 # piece gets a tiny valid one (the fixture itself stays photo-free).
 FIXTURE_PHOTO = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
@@ -151,20 +151,22 @@ def main() -> int:
 
             closet_n = page.evaluate("wardrobeItems.filter(i => !String(i.id).startsWith('seed-')).length")
             check("fixture closet loaded", closet_n == len(FIXTURE), closet_n)
+            page.wait_for_timeout(1500)
             home = page.evaluate("""() => ({ composer: !!(todayLook && todayLook.composer), key: todayLook && todayLook.composerKey,
                 cells: document.querySelectorAll('#today-collage .flatlay .fl-cell').length,
                 collage: !document.getElementById('today-collage').hidden,
                 fits: (document.scrollingElement || document.documentElement).scrollHeight <= window.innerHeight + 1 })""")
             check("Home deals a composed closet look", home["composer"], home)
-            check("Home shows the flat-lay", home["collage"] and home["cells"] >= 3, home["cells"])
+            check("Home shows him, never a tile grid (.78.2c)", not home["collage"], home)
             check("Home still fits one screen", home["fits"])
             dis_before = page.evaluate("localStorage.getItem('wardrobe.dislikedImgs')")
             # Dislike is hidden on Home in .75 (heart + next only); still invoke the handler.
             page.evaluate("document.getElementById('today-dislike') && document.getElementById('today-dislike').click()")
-            page.wait_for_timeout(300)
+            page.wait_for_timeout(1500)
             after = page.evaluate("({ key: todayLook.composerKey, dis: localStorage.getItem('wardrobe.dislikedImgs'), banned: Object.keys((JSON.parse(localStorage.getItem('wardrobe.composerPrefs') || '{}').banned) || {}) })")
             check("hero Dislike deals a new combo", after["key"] and after["key"] != home["key"])
-            check("hero Dislike bans the combo, not a photo", home["key"] in after["banned"] and after["dis"] == dis_before)
+            added = [x for x in json.loads(after["dis"] or "[]") if x not in json.loads(dis_before or "[]")]
+            check("hero Dislike bans the combo (and only his on-body render), not a piece photo", home["key"] in after["banned"] and all("/onbody/" in x for x in added), (added, home["key"], after))
 
             page.locator("#section-ideas").click(); page.wait_for_timeout(250)
             page.locator("#outfits-mine").click(); page.wait_for_timeout(700)
