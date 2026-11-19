@@ -133,7 +133,7 @@ self.addEventListener('fetch', (event) => {
 
   // On-body renders: content-hashed, cache-first in their own cache.
   // The manifest beside them stays network-first (below).
-  if (url.pathname.includes('/assets/onbody/') && url.pathname.endsWith('.webp')) {
+  if ((url.pathname.includes('/assets/onbody/') || url.pathname.includes('/assets/inspo/')) && url.pathname.endsWith('.webp')) {
     event.respondWith(
       caches.open(ONBODY_CACHE).then((cache) =>
         cache.match(req, { ignoreSearch: true }).then((hit) => {
