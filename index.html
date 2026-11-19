@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.1" />
+    <meta name="wardrobe-build" content="2026-11-19.78.2a" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -4438,9 +4438,14 @@
         z-index: 48;
         background: var(--bg);
       }
-      .masthead-slot { display: block; height: 44px; pointer-events: none; }
+      /* Build .78.2a: the fixed masthead is 44px PLUS the status-bar inset
+         (59px on Dynamic Island iPhones in standalone), so the in-flow
+         spacer must be too — a flat 44px slot left every page's top row
+         (Outfits Mine/Inspo, Inspo subtabs, Edit tabs, Calendar, Closet
+         search, Home's head) hidden under the masthead until pulled down. */
+      .masthead-slot { display: block; height: calc(44px + min(env(safe-area-inset-top, 0px), 59px)); pointer-events: none; }
       @media (max-width: 1023px) {
-        :root { --hdr-h: 44px; }
+        :root { --hdr-h: calc(44px + min(env(safe-area-inset-top, 0px), 59px)); }
         .navstack { top: var(--hdr-h); }
       }
       @media (min-width: 1024px) {
@@ -6066,7 +6071,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.1</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.2a</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7620,7 +7625,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.1";
+var WARDROBE_BUILD = "2026-11-19.78.2a";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }

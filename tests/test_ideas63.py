@@ -28,7 +28,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 AUDIT = Path("/workspace/wardrobe-audit")
 BLOCK = re.compile(r"https?://[^/]*workers.dev/.*")
-BUILD = "2026-11-19.78.1"
+BUILD = "2026-11-19.78.2a"
 
 TYPE_JS = """() => {
   const btn = document.getElementById('today-type-btn');
