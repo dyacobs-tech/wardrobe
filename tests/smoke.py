@@ -176,6 +176,8 @@ def main() -> int:
 
         # ---- errors -------------------------------------------------------
         check("No JS errors", not errors, " | ".join(errors[:5]))
+        # the cut-out manifest is optional until the cut-outs land (.78.5b)
+        bad_responses = [r for r in bad_responses if "onbody-cut/manifest.json" not in r]
         check("No 4xx/5xx from own origin", not bad_responses, " | ".join(bad_responses[:5]))
         results.append(("INFO", "Worker calls blocked", str(len(blocked))))
         browser.close()

@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.6" />
+    <meta name="wardrobe-build" content="2026-11-19.78.6a" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5135,6 +5135,14 @@
       html[data-theme="dark"] .outfit-view .ov-figure { background: #2a2622 !important; }
       .outfit-view .ov-figure .hero-bg { z-index: 0; }
       .outfit-view .ov-figure > img#ov-img { position: relative; z-index: 1; background: transparent !important; }
+      /* .78.5b: cut-out on the closet backdrop — head to feet, feet grounded near the bottom */
+      #panel-today .today-hero.hero-solo.has-cut img#today-img, #panel-today .today-hero.hero-solo.has-cut .hero-xfade,
+      .outfit-view .ov-figure.has-cut > img#ov-img {
+        -webkit-mask-image: none !important; mask-image: none !important;
+        object-fit: contain !important; object-position: center bottom !important;
+        padding: 2% 0 3.5% !important; box-sizing: border-box !important;
+        filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .30));
+      }
     </style>
 
   </head>
@@ -6354,7 +6362,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.6</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.6a</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7908,7 +7916,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.6";
+var WARDROBE_BUILD = "2026-11-19.78.6a";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -38683,13 +38691,17 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     skip = 0;
     var prev = prevSrc; prevSrc = null;
     if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
-    if (img.getAttribute("src") !== src) img.setAttribute("src", src);
+    /* .78.5b: his cut-out on the closet backdrop when one exists */
+    var shown = (typeof window.cutFor784 === "function" && window.cutFor784(src)) || src;
+    hero.classList.toggle("has-cut", shown !== src);
+    img.setAttribute("data-render", src);
+    if (img.getAttribute("src") !== shown) img.setAttribute("src", shown);
     img.hidden = false;
     img.alt = (todayLook.title || "Outfit") + " on David";
     hero.classList.add("hero-solo");
     sampleBg(src, hero);
     placeHero();
-    crossfade(prev && prev !== src ? prev : null);
+    crossfade(prev && prev !== shown ? prev : null);
     if (ovOpen) fillView();
   }
   if (typeof renderToday === "function") {
@@ -38727,14 +38739,16 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   function fillView() {
     var look = ovFromHome && typeof todayLook !== "undefined" ? todayLook : ovLook;
     if (!look) return;
-    var src = renderFor(look) || (typeof lookImg === "function" ? lookImg(look) : "");
+    var src0 = renderFor(look) || (typeof lookImg === "function" ? lookImg(look) : "");
+    var src = (typeof window.cutFor784 === "function" && window.cutFor784(src0)) || src0;
+    var fig0 = document.getElementById("ov-figure"); if (fig0) fig0.classList.toggle("has-cut", src !== src0);
     var im = document.getElementById("ov-img"), prev = im.getAttribute("src");
     if (prev !== src) {
       if (prev && ovOpen) { im.classList.add("swap"); setTimeout(function () { im.setAttribute("src", src); im.classList.remove("swap"); }, 180); }
       else im.setAttribute("src", src);
     }
     im.alt = (look.title || "Outfit") + " on David";
-    sampleBg(src, document.getElementById("ov-figure"));
+    sampleBg(src0, document.getElementById("ov-figure"));
     document.getElementById("ov-title").textContent = look.title || "Outfit";
     document.getElementById("ov-pieces").innerHTML = pieceRows(look);
     var lk = document.getElementById("today-like");
@@ -38882,7 +38896,46 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     }
     return bg;
   }
-  function backdrop() { try { return localStorage.getItem(BD_KEY) || ""; } catch (e) { return ""; } }
+  /* ---- cut-outs + the closet backdrop (assets/onbody-cut/manifest.json) ---- */
+  var CUT = { map: null, backdrop: "", placeholder: "" };
+  function idOf(src) { var m = String(src || "").match(/\/onbody\/([^\/?#]+?)\.(webp|png|jpe?g)/i); return m ? m[1] : ""; }
+  window.cutFor784 = function (src) {
+    if (!CUT.map || !src) return "";
+    var id = idOf(src); if (!id) return "";
+    return CUT.map[id] || "";
+  };
+  function ingestCut(j) {
+    if (!j || typeof j !== "object") return false;
+    var map = j.r || j.map || j.cuts || j.cutouts || j.renders || null, bd = j.backdrop, ph = j.placeholder || j.backdropPlaceholder;
+    if (bd && typeof bd === "object") { ph = ph || bd.placeholder || bd.thumb || bd.tiny; bd = bd.src || bd.path || bd.url || ""; }
+    if (!map) { map = {}; Object.keys(j).forEach(function (k) { if (!/^(backdrop|placeholder|backdropPlaceholder|v|version|count|updated|generated)$/.test(k)) map[k] = j[k]; }); }
+    var clean = {};
+    Object.keys(map).forEach(function (k) {
+      var v = map[k]; if (v && typeof v === "object") v = v.cut || v.cutout || v.src || v.path || "";
+      if (typeof v !== "string" || !v) return;
+      clean[idOf(k) || k.replace(/\.(webp|png|jpe?g)$/i, "").replace(/^.*\//, "")] = v;
+    });
+    CUT.map = clean; CUT.backdrop = typeof bd === "string" ? bd : ""; CUT.placeholder = typeof ph === "string" ? ph : "";
+    return true;
+  }
+  function loadCuts() {
+    try {
+      fetch("assets/onbody-cut/manifest.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (!ingestCut(j) || !Object.keys(CUT.map).length) return;
+        if (CUT.backdrop) { var b = new Image(); b.decoding = "async"; b.src = CUT.backdrop; }
+        if (typeof renderToday === "function" && typeof todayLook !== "undefined" && todayLook) try { renderToday(); } catch (e) {}
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  window.cutManifest784 = function () { return CUT; };
+  window.ingestCut784 = ingestCut;
+  setTimeout(loadCuts, 0);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && !CUT.map) loadCuts(); });
+  function backdrop(src) {
+    var o = ""; try { o = localStorage.getItem(BD_KEY) || ""; } catch (e) {}
+    if (o) return o;
+    return src && CUT.backdrop && window.cutFor784(src) ? CUT.backdrop : "";
+  }
   /* the blurred layer is built once per render from the render's own outer
      columns (stretched across, then blurred), so it continues the studio
      backdrop seamlessly at the render's edges — no panel, no band */
@@ -38922,7 +38975,8 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   }
   function setBg(src, el) {
     var bg = layerFor(el); if (!bg) return;
-    var bd = backdrop();
+    var bd = backdrop(src);
+    if (bd && CUT.placeholder && !bg.style.backgroundImage) { bg.style.backgroundImage = "url(\"" + CUT.placeholder + "\")"; bg.style.backgroundSize = "cover"; bg.style.backgroundPosition = "center"; }
     bg.classList.toggle("bd-custom", !!bd);
     if (!bd && src) { edgeOf(src, function (u) { paintBg(bg, u); }); return; }
     paintBg(bg, bd || src);
@@ -38976,6 +39030,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   /* ---- fetch + decode the next renders ahead ---- */
   var warm = {}, warmQ = [];
   function warmOne(src) {
+    var cut = window.cutFor784 && window.cutFor784(src); if (cut) src = cut;
     if (!src || warm[src]) return; warm[src] = 1;
     var im = new Image(); im.decoding = "async"; im.src = src;
     if (im.decode) im.decode().catch(function () {});
