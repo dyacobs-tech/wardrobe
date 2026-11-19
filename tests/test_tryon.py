@@ -7,6 +7,9 @@ followed by the render. Also checks the not-configured message.
 Run: python -m http.server 8000 & python tests/test_tryon.py [base_url]
 """
 import json, sys, base64
+from pathlib import Path
+# Build .76: one saved product so The Edit's Saved view carries an "On me" card
+WISH = json.loads((Path(__file__).resolve().parent / "fixture_edit76.json").read_text())["shopWishlist"][:2]
 from playwright.sync_api import sync_playwright
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000/"
@@ -19,6 +22,7 @@ def run(mode):
     with sync_playwright() as p:
         b = p.chromium.launch()
         ctx = b.new_context(viewport={"width": 390, "height": 844})
+        ctx.add_init_script("localStorage.setItem('wardrobe.shopWishlist', %s); localStorage.setItem('wardrobe.editView', JSON.stringify('saved'));" % json.dumps(json.dumps(WISH)))
         ctx.add_init_script("localStorage.setItem('wardrobe.sync', JSON.stringify({key:'%s', acct:'test', last:0, snap:{}, st:{}, tomb:{}, dirty:{}, status:'x', lastOk:0}));" % ("a" * 48))
         def route(r):
             u = r.request.url
@@ -42,7 +46,7 @@ def run(mode):
         pg.wait_for_timeout(2500)
         pg.click("#tab-find")
         pg.wait_for_timeout(800)
-        btn = pg.locator("[data-tryon-shop], [data-tryon-sale], [data-tryon-wish]")
+        btn = pg.locator("[data-tryon-shop], [data-tryon-sale], [data-tryon-wish], [data-edit-onme]").locator("visible=true")
         n = btn.count()
         if n == 0:
             # Sale view renders its cards on demand

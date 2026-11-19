@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.75.2" />
+    <meta name="wardrobe-build" content="2026-11-19.76" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -4687,6 +4687,92 @@
       #inspo-host > section { padding: 0 !important; margin: 0 !important; }
       .profile-head:has(#pf-head-photo[hidden]):has(#pf-head-name:empty) { display: none !important; }
       .loc-weather:empty { display: none; }
+      /* ================= Build .76 — The Edit: Saved / Searches / Build ================= */
+      #panel-find .edit-tabs { margin: 8px 0 14px !important; }
+      #panel-find .edit-tabs .chip .n { opacity: .6; font-weight: 500; margin-left: 4px; }
+      #panel-find .edit-tabs .chip .n:empty { display: none; }
+      #find-nolook, #edit-list { display: none !important; }
+      #panel-find .edit-q, #panel-find #edit-search-q { display: block; width: 100%; box-sizing: border-box; height: 40px; border-radius: 999px; border: var(--ctl-border, 1px solid var(--border)); background: var(--surface); color: var(--text); padding: 0 16px; font: 16px var(--font-ui); margin: 0 0 12px; -webkit-appearance: none; appearance: none; }
+      #edit-search-form { margin: 0; }
+      #panel-find .edit-filters { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px 6px; padding: 0 16px 2px; justify-content: flex-start; }
+      #panel-find .edit-filters::-webkit-scrollbar { display: none; }
+      #panel-find .edit-filters .chip { flex: 0 0 auto; min-width: 0 !important; }
+      #panel-find .edit-chip svg { width: 14px; height: 14px; fill: currentColor; }
+      #panel-find .edit-sec { display: flex; align-items: baseline; justify-content: space-between; margin: 18px 0 10px; }
+      #panel-find .edit-sec h3 { margin: 0; font: 600 20px/1.2 var(--font-display); text-transform: none; letter-spacing: -0.01em; }
+      #panel-find .edit-meta { color: var(--dim); font-size: 12.5px; margin: 2px 0 0; }
+      #panel-find .edit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      @media (min-width: 760px) { #panel-find .edit-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+      @media (min-width: 1100px) { #panel-find .edit-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+      #panel-find .edit-pc { position: relative; display: flex; flex-direction: column; padding: 0 !important; overflow: hidden; margin: 0; }
+      #panel-find .edit-pc.is-star { box-shadow: inset 0 0 0 2px var(--brass, #a8834a); }
+      #panel-find .edit-ph { aspect-ratio: 4 / 5; background: #EDE6DA; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+      #panel-find .edit-ph img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+      #panel-find .edit-heart { position: absolute; top: 8px; right: 8px; width: 34px !important; height: 34px !important; min-width: 34px !important; min-height: 34px !important; max-height: 34px !important; box-sizing: border-box !important; border-radius: 999px; border: 0; background: rgba(255,251,244,.94); display: flex; align-items: center; justify-content: center; padding: 0 !important; cursor: pointer; }
+      #panel-find .edit-heart svg { width: 16px; height: 16px; fill: none; stroke: #1A1612; stroke-width: 1.7; }
+      #panel-find .edit-heart[aria-pressed="true"] svg { fill: #1A1612; }
+      #panel-find .edit-add { position: absolute; top: 8px; left: 8px; height: 28px; border-radius: 999px; border: 0; padding: 0 10px; background: rgba(26,22,18,.86); color: #F6F1E8; font: 600 11px var(--font-ui); letter-spacing: .02em; cursor: pointer; }
+      #panel-find .edit-add.on { background: var(--teal, #1B4A4C); }
+      #panel-find .edit-body { padding: 10px 12px 10px; display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+      #panel-find .edit-kick { font: 600 10.5px var(--font-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      #panel-find .edit-pc h3 { margin: 0; font: 500 15px/1.25 var(--font-display); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.5em; }
+      #panel-find .edit-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+      #panel-find .edit-price { font-weight: 600; font-size: 14px; }
+      #panel-find .edit-store { color: var(--dim); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+      #panel-find .edit-acts { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+      #panel-find .edit-ico { width: 34px !important; height: 34px !important; min-width: 34px !important; max-width: 34px !important; min-height: 34px !important; max-height: 34px !important; box-sizing: border-box !important; border-radius: 999px; border: var(--ctl-border, 1px solid var(--border)); background: transparent; color: var(--text); display: inline-flex; align-items: center; justify-content: center; padding: 0 !important; cursor: pointer; flex: none; }
+      #panel-find .edit-ico svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+      #panel-find .edit-ico[aria-pressed="true"] { background: var(--ink-btn); color: var(--ink-btn-text); border-color: var(--ink-btn); }
+      #panel-find .edit-ico[aria-pressed="true"] svg { fill: currentColor; }
+      #panel-find .edit-onme { margin-left: auto; height: 34px; border-radius: 999px; border: 0; padding: 0 12px; background: var(--ink-btn); color: var(--ink-btn-text); font: 600 12px var(--font-ui); letter-spacing: .02em; cursor: pointer; white-space: nowrap; }
+      #panel-find .edit-srch { padding: 14px 16px 16px !important; margin: 0 0 14px; }
+      #panel-find .edit-srch-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+      #panel-find .edit-srch h3, #panel-find .edit-open-h h3 { margin: 0; font: 600 18px/1.2 var(--font-display); }
+      #panel-find .edit-srch-acts { display: flex; gap: 6px; align-items: center; flex: none; }
+      #panel-find .edit-srch-acts .chip { min-width: 0 !important; }
+      #panel-find .edit-strip { display: flex; gap: 8px; overflow-x: auto; margin: 12px -16px 4px; padding: 0 16px; scrollbar-width: none; }
+      #panel-find .edit-strip::-webkit-scrollbar { display: none; }
+      #panel-find .edit-thumb { flex: 0 0 92px; width: 92px; border: 0; background: transparent; padding: 0; text-align: left; color: var(--text); cursor: pointer; display: flex; flex-direction: column; }
+      #panel-find .edit-tph { width: 92px; height: 112px; border-radius: 12px; background: #EDE6DA; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+      #panel-find .edit-tph img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+      #panel-find .edit-tt { display: block; font-size: 11.5px; line-height: 1.25; margin-top: 4px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      #panel-find .edit-tt b { color: var(--text); font-weight: 600; }
+      #panel-find .edit-open-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin: 4px 0 8px; }
+      #panel-find .edit-sug { display: flex; flex-wrap: wrap; gap: 8px; }
+      #panel-find .edit-sug .chip { min-width: 0 !important; }
+      #panel-find .edit-more { display: flex; justify-content: center; margin: 16px 0; }
+      #panel-find .edit-empty-acts { display: flex; justify-content: center; margin-top: 12px; }
+      #panel-find .edit-board { display: grid; gap: 12px; }
+      @media (min-width: 760px) { #panel-find .edit-board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      #panel-find .edit-slot { padding: 12px !important; margin: 0; }
+      #panel-find .edit-slot-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+      #panel-find .edit-tag { height: 24px; border-radius: 999px; padding: 0 10px; font: 700 10.5px var(--font-ui); letter-spacing: .1em; text-transform: uppercase; display: inline-flex; align-items: center; border: var(--ctl-border, 1px solid var(--border)); }
+      #panel-find .edit-tag.shop { background: var(--teal, #1B4A4C); color: #F4F7F4; border-color: var(--teal, #1B4A4C); }
+      #panel-find .edit-slot-row { display: flex; align-items: center; gap: 10px; }
+      #panel-find .edit-arrow { width: 34px !important; height: 34px !important; min-width: 34px !important; max-width: 34px !important; min-height: 34px !important; max-height: 34px !important; border-radius: 999px !important; box-sizing: border-box !important; border-radius: 999px; border: var(--ctl-border, 1px solid var(--border)); background: transparent; color: var(--text); flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; line-height: 1; padding: 0 !important; cursor: pointer; }
+      #panel-find .edit-arrow[disabled] { opacity: .35; cursor: default; }
+      #panel-find .edit-sph { width: 72px; height: 84px; border-radius: 12px; background: #EDE6DA; overflow: hidden; flex: none; display: flex; align-items: center; justify-content: center; }
+      #panel-find .edit-sph img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+      #panel-find .edit-sph.edit-none { background: repeating-linear-gradient(45deg, transparent 0 6px, rgba(127,127,127,.12) 6px 7px); }
+      #panel-find .edit-sm { flex: 1; min-width: 0; }
+      #panel-find .edit-sm h3 { margin: 2px 0 0; font: 500 15px/1.25 var(--font-display); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      #panel-find .edit-sm .edit-price { font-size: 13px; margin-top: 2px; }
+      #panel-find .edit-cta { display: flex; justify-content: center; gap: 8px; margin: 16px 0; }
+      #panel-find .edit-on { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; padding: 12px !important; margin: 0 0 8px; }
+      #panel-find .edit-on-fig { border-radius: 14px; overflow: hidden; background: linear-gradient(#9d9996, #bdb9b3); aspect-ratio: 3 / 5; display: flex; align-items: center; justify-content: center; }
+      #panel-find .edit-on-fig img { width: 100%; height: 100%; object-fit: cover; object-position: center top; cursor: zoom-in; }
+      #panel-find .edit-on-side { display: flex; flex-direction: column; gap: 10px; justify-content: center; min-width: 0; }
+      #panel-find .edit-on-side h3 { margin: 0; font: 600 18px/1.2 var(--font-display); }
+      #panel-find .edit-on-side .edit-store { white-space: normal; }
+      #panel-find .edit-buy-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--border); }
+      #panel-find .edit-bph { width: 56px; height: 66px; border-radius: 10px; background: #EDE6DA; overflow: hidden; flex: none; }
+      #panel-find .edit-bph img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+      #panel-find a.edit-buy { text-decoration: none; flex: none; min-width: 64px; }
+      #panel-find .edit-total { display: flex; justify-content: space-between; align-items: center; padding: 12px 0 0; border-top: 1px solid var(--border); font-weight: 600; }
+      #panel-find .edit-look-thumb { flex-basis: 110px; width: 110px; }
+      #panel-find .edit-look-thumb .edit-tph { width: 110px; height: 150px; }
+      #panel-find .edit-today h3.fav-head { text-align: left; }
+      #tryon-sheet .tryon-note { text-align: center; color: var(--dim); font-size: 13px; margin: -4px 0 10px; }
     </style>
 
   </head>
@@ -5608,10 +5694,36 @@
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
-        <div id="edit-gaps"></div>
-        <div id="edit-list"></div>
-        <div id="find-look-mode" hidden></div>
-        <p class="meta" id="find-nolook" hidden>No look selected.</p>
+        <div class="outfits-toggle theme-toggle edit-tabs" role="group" aria-label="The Edit">
+          <button type="button" class="chip" id="edit-tab-saved" data-edit-view="saved" aria-pressed="true">Saved<span class="n" id="edit-n-saved"></span></button>
+          <button type="button" class="chip" id="edit-tab-searches" data-edit-view="searches" aria-pressed="false">Searches<span class="n" id="edit-n-search"></span></button>
+          <button type="button" class="chip" id="edit-tab-build" data-edit-view="build" aria-pressed="false">Build</button>
+        </div>
+        <div id="edit-v-saved">
+          <input type="search" id="edit-saved-q" class="edit-q" aria-label="Search everything you've saved" placeholder="Search everything you've saved" autocomplete="off" />
+          <div class="edit-filters" id="edit-groups"></div>
+          <div id="edit-saved-out"></div>
+        </div>
+        <div id="edit-v-searches" hidden>
+          <form id="edit-search-form" role="search" autocomplete="off"><input type="search" id="edit-search-q" aria-label="Search the stores" placeholder="Search the stores" enterkeyhint="search" autocomplete="off" /></form>
+          <div id="edit-search-out"></div>
+          <div id="edit-gaps"></div>
+          <div id="edit-list"></div>
+          <div class="edit-today" id="edit-today-look">
+            <div id="find-look-mode" hidden></div>
+          </div>
+          <p class="meta" id="find-nolook" hidden>No look selected.</p>
+        </div>
+        <div id="edit-v-build" hidden>
+          <div class="edit-board" id="edit-board"></div>
+          <div class="edit-cta"><button type="button" class="btn-ink" id="edit-see">See it on me</button><button type="button" class="btn-ghost" id="edit-shuffle">Shuffle</button></div>
+          <div id="edit-onme" hidden></div>
+          <div id="edit-tobuy" hidden>
+            <div class="edit-sec"><h3>To buy</h3><span class="edit-meta" id="edit-buy-n"></span></div>
+            <div id="edit-buy-out"></div>
+          </div>
+          <div id="edit-looks"></div>
+        </div>
       </section>
       <div class="info-pop-backdrop" id="shop-plus-sheet" hidden>
         <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="shop-plus-title">
@@ -5831,7 +5943,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.75.2</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.76</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -6233,8 +6345,10 @@
           <div class="tryon-wait" id="tryon-wait"><span class="analyze-spin" aria-hidden="true"></span><span id="tryon-status" role="status">Getting ready…</span></div>
           <img id="tryon-img" alt="" hidden />
         </div>
+        <p class="tryon-note" id="tryon-note" hidden></p>
         <div class="look-actions tryon-actions" id="tryon-actions" hidden>
-          <a class="btn-ghost" id="tryon-buy" target="_blank" rel="noopener" hidden>Buy</a>
+          <a class="btn-ink" id="tryon-buy" target="_blank" rel="noopener" hidden>Buy</a>
+          <button type="button" class="btn-ghost" id="tryon-withmine" hidden>With my clothes</button>
           <a class="btn-ghost" id="tryon-open" target="_blank" rel="noopener">Full size</a>
         </div>
       </div>
@@ -7380,7 +7494,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.75.2";
+var WARDROBE_BUILD = "2026-11-19.76";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -26180,7 +26294,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches", "editBoard", "editView"];
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
@@ -26201,7 +26315,7 @@ document.getElementById("data-export").addEventListener("click", function () {
    that fails puts everything back. "Nothing was changed" is only
    ever said when it is true. */
 var BACKUP_VERSION = 1;
-var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "recentlyRemoved", "dealtImgs", "weekPlan", "trips", "packedItems", "receiptInbox", "priceDrops"];
+var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "recentlyRemoved", "dealtImgs", "weekPlan", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches"];
 var BACKUP_OBJECT_KEYS = ["profile", "overrides", "lazyRenders"];
 function readBackupFile(text) {
   var payload = JSON.parse(text);
@@ -28933,6 +29047,13 @@ function receiptDismiss(rec) {
    My Looks is a different thing and is untouched.) */
 var SALE_ITEMS = [{"brand": "Mr P.", "name": "Ribbed Cashmere Polo Shirt", "retailer": "Mr Porter", "price": 263, "wasPrice": 525, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/ribbed-cashmere-polo-shirt/1647597343168605", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Cashmere Polo Sweater", "retailer": "Mr Porter", "price": 278, "wasPrice": 555, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/cashmere-polo-sweater/46376663162890176", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Curtis Cashmere Sweater", "retailer": "Mr Porter", "price": 200, "wasPrice": 500, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/curtis-cashmere-sweater/46376663162887731", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Geo Intarsia-Knit Wool and Cashmere-Blend Sweater", "retailer": "Mr Porter", "price": 235, "wasPrice": 470, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/geo-intarsia-knit-wool-and-cashmere-blend-sweater/46376663162890197", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Rib-Detailed Merino Wool Sweater", "retailer": "Mr Porter", "price": 114, "wasPrice": 285, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/rib-detailed-merino-wool-sweater/46376663162890225", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Clyde Cashmere Rollneck Sweater", "retailer": "Mr Porter", "price": 258, "wasPrice": 515, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/rollnecks/clyde-cashmere-rollneck-sweater/1647597344408062", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Cable-Knit Wool Cardigan", "retailer": "Mr Porter", "price": 193, "wasPrice": 385, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/cardigans/cable-knit-wool-cardigan/46376663162914495", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Ribbed-Knit Cardigan", "retailer": "Mr Porter", "price": 170, "wasPrice": 425, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/cardigans/ribbed-knit-cardigan/46376663162890221", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Cashmere Sweater", "retailer": "Mr Porter", "price": 256, "wasPrice": 640, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/cashmere-sweater/46376663162890193", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Open-Knit Wool Polo Shirt", "retailer": "Mr Porter", "price": 142, "wasPrice": 355, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/open-knit-wool-polo-shirt/46376663162890222", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Edward Straight-Leg Garment-Dyed Linen Drawstring Trousers", "retailer": "Mr Porter", "price": 84, "wasPrice": 210, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/edward-straight-leg-garment-dyed-linen-drawstring-trousers/1647597356993805", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Tapered Wool-Twill Drawstring Trousers", "retailer": "Mr Porter", "price": 77, "wasPrice": 255, "off": 70, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/suit-trousers/tapered-wool-twill-drawstring-trousers/1647597318722059", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Camp-Collar Organic Cotton-Terry Jacquard Shirt", "retailer": "Mr Porter", "price": 84, "wasPrice": 210, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/printed-shirts/camp-collar-organic-cotton-terry-jacquard-shirt/1647597358473428", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "Mr P.", "name": "Adam Straight-Leg Cotton-Blend Twill Chinos", "retailer": "Mr Porter", "price": 84, "wasPrice": 210, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/adam-straight-leg-cotton-blend-twill-chinos/1647597332778393", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Straight-Leg Mid-Length Striped Seersucker Swim Shorts", "retailer": "Mr Porter", "price": 75, "wasPrice": 125, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/plain-swim-shorts/straight-leg-mid-length-striped-seersucker-swim-shorts/1647597358469746", "img": "", "category": "Swim", "cat": "swim"}, {"brand": "Mr P.", "name": "Waffle-Knit Organic Cotton-Jersey Polo Shirt", "retailer": "Mr Porter", "price": 78, "wasPrice": 195, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/waffle-knit-organic-cotton-jersey-polo-shirt/46376663162890131", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Samuel Straight-Leg Garment-Dyed Cotton and Linen-Blend Twill Cargo Trousers", "retailer": "Mr Porter", "price": 72, "wasPrice": 240, "off": 70, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/samuel-straight-leg-garment-dyed-cotton-and-linen-blend-twill-cargo-trousers/1647597334943049", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Straight-Leg Stretch-Cotton Twill Chinos", "retailer": "Mr Porter", "price": 63, "wasPrice": 210, "off": 70, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/straight-leg-stretch-cotton-twill-chinos/1647597318609216", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Ribbed Merino Wool Polo Shirt", "retailer": "Mr Porter", "price": 178, "wasPrice": 355, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/ribbed-merino-wool-polo-shirt/46376663162890205", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Merino Wool Mock-Neck Sweater", "retailer": "Mr Porter", "price": 143, "wasPrice": 285, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/rollnecks/merino-wool-mock-neck-sweater/1647597344086856", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Wool and Cashmere-Blend Polo Shirt", "retailer": "Mr Porter", "price": 178, "wasPrice": 355, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/wool-and-cashmere-blend-polo-shirt/46376663162890183", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Wool and Cashmere-Blend Sweater Vest", "retailer": "Mr Porter", "price": 130, "wasPrice": 325, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/knitted-vests/wool-and-cashmere-blend-sweater-vest/46376663162890168", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Richard Merino Wool Zip-Up Cardigan", "retailer": "Mr Porter", "price": 130, "wasPrice": 325, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/cardigans/richard-merino-wool-zip-up-cardigan/1647597320209299", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Relaxed-Fit Organic and Recycled Cotton-Jersey T-Shirt", "retailer": "Mr Porter", "price": 63, "wasPrice": 105, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/plain-t-shirts/relaxed-fit-organic-and-recycled-cotton-jersey-t-shirt/46376663162890136", "img": "", "category": "Tees", "cat": "top"}, {"brand": "Mr P.", "name": "Scott Leather Loafers", "retailer": "Mr Porter", "price": 240, "wasPrice": 400, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/shoes/loafers/scott-leather-loafers/46376663162923996", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Brunello Cucinelli", "name": "Ribbed Cashmere Rollneck Sweater", "retailer": "Mr Porter", "price": 2050, "wasPrice": 4100, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/rollnecks/ribbed-cashmere-rollneck-sweater/46376663162997752", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Brunello Cucinelli", "name": "Tapered Pleated Stretch Cotton and Cashmere-Blend Corduroy Trousers", "retailer": "Mr Porter", "price": 1000, "wasPrice": 2000, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/suit-trousers/tapered-pleated-stretch-cotton-and-cashmere-blend-corduroy-trousers/46376663162997740", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Brunello Cucinelli", "name": "Ribbed Cotton Sweater", "retailer": "Mr Porter", "price": 825, "wasPrice": 1650, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/crew-necks/ribbed-cotton-sweater/46376663163000376", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Tom Ford", "name": "Cashmere Sweater", "retailer": "Mr Porter", "price": 1470, "wasPrice": 2450, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/crew-necks/cashmere-sweater/46376663162880792", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Canali", "name": "Puppytooth Wool Suit Jacket", "retailer": "Mr Porter", "price": 1230, "wasPrice": 2050, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/suit-jackets/puppytooth-wool-suit-jacket/46376663163003750", "img": "", "category": "Suits", "cat": "suit"}, {"brand": "Brunello Cucinelli", "name": "Tapered Pleated Cotton-Corduroy Trousers", "retailer": "Mr Porter", "price": 810, "wasPrice": 1350, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/casual-trousers/tapered-pleated-cotton-corduroy-trousers/46376663162997750", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Tom Ford", "name": "Cotton and Silk-Blend Shirt", "retailer": "Mr Porter", "price": 690, "wasPrice": 1150, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/plain-shirts/cotton-and-silk-blend-shirt/46376663163003392", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "Tom Ford", "name": "Cotton Sweater", "retailer": "Mr Porter", "price": 495, "wasPrice": 990, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/crew-necks/cotton-sweater/46376663163003286", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "FRAME", "name": "Wool Blazer", "retailer": "Mr Porter", "price": 600, "wasPrice": 1000, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/frame/clothing/suit-jackets/wool-blazer/46376663162864156", "img": "", "category": "Blazers", "cat": "blazer"}, {"brand": "Brunello Cucinelli", "name": "Slim-Fit Pleated Cotton-Twill Suit Trousers", "retailer": "Mr Porter", "price": 900, "wasPrice": 1500, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/suit-trousers/slim-fit-pleated-cotton-twill-suit-trousers/1647597352899726", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Thom Sweeney", "name": "Suede Bomber Jacket", "retailer": "Mr Porter", "price": 2259, "wasPrice": 3765, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/thom-sweeney/clothing/bomber-jackets/suede-bomber-jacket/46376663162899535", "img": "", "category": "Coats", "cat": "outerwear"}, {"brand": "Thom Sweeney", "name": "Double-Breasted Wool and Cashmere-Blend Felt Overcoat", "retailer": "Mr Porter", "price": 2247, "wasPrice": 3745, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/thom-sweeney/clothing/winter-coats/double-breasted-wool-and-cashmere-blend-felt-overcoat/1647597345219215", "img": "", "category": "Coats", "cat": "outerwear"}, {"brand": "Tom Ford", "name": "Double-Breasted Pinstriped Wool Suit Jacket", "retailer": "Mr Porter", "price": 2196, "wasPrice": 5490, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/suit-jackets/double-breasted-pinstriped-wool-suit-jacket/46376663163003117", "img": "", "category": "Suits", "cat": "suit"}, {"brand": "Brunello Cucinelli", "name": "Suede Penny Loafers", "retailer": "Mr Porter", "price": 780, "wasPrice": 1300, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/shoes/loafers/suede-penny-loafers/46376663163010014", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Tom Ford", "name": "Rod Suede Loafers", "retailer": "Mr Porter", "price": 492, "wasPrice": 820, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/shoes/driving-shoes/rod-suede-loafers/46376663162965125", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Brunello Cucinelli", "name": "Suede Penny Loafers (lightweight EVA sole)", "retailer": "Mr Porter", "price": 810, "wasPrice": 1350, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/shoes/loafers/suede-penny-loafers/46376663163009974", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Tod's", "name": "Gommino Suede Loafers", "retailer": "Mr Porter", "price": 555, "wasPrice": 925, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tod-s/shoes/loafers/gommino-suede-loafers/46376663163009923", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Tom Ford", "name": "Dyllan Straight-Leg Cotton-Satin Trousers", "retailer": "Mr Porter", "price": 960, "wasPrice": 1920, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/casual-trousers/dyllan-straight-leg-cotton-satin-trousers/46376663162880772", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Canali", "name": "Camp-Collar Wool-Blend Felt Overshirt", "retailer": "Mr Porter", "price": 1158, "wasPrice": 2895, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/overshirts/camp-collar-wool-blend-felt-overshirt/46376663162941405", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "Saman Amel", "name": "Unstructured Linen Suit Jacket", "retailer": "Mr Porter", "price": 1587, "wasPrice": 2645, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/saman-amel/clothing/suit-jackets/unstructured-linen-suit-jacket/46376663162903925", "img": "", "category": "Suits", "cat": "suit"}, {"brand": "Ralph Lauren Purple Label", "name": "Cable-Knit Crew-Neck Sweater", "retailer": "Farfetch", "price": 1317, "wasPrice": 1882, "off": 30, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-cable-knit-crew-neck-sweater-item-31950530.aspx", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Ralph Lauren Purple Label", "name": "Alonzo Velvet Loafers", "retailer": "Farfetch", "price": 738, "wasPrice": 1666, "off": 56, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-alonzo-velvet-loafers-item-36161655.aspx", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Ralph Lauren Purple Label", "name": "Cashmere Polo Sweater", "retailer": "Farfetch", "price": 1468, "wasPrice": 1803, "off": 19, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-cashmere-polo-sweater-item-38508298.aspx", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Ralph Lauren Purple Label", "name": "Cotton Wool Blend Parka", "retailer": "Farfetch", "price": 1780, "wasPrice": 3938, "off": 55, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-cotton-wool-blend-parka-item-18626588.aspx", "img": "", "category": "Coats", "cat": "outerwear"}, {"brand": "Ralph Lauren Purple Label", "name": "Wool Blazer", "retailer": "Farfetch", "price": 2917, "wasPrice": 4154, "off": 30, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-wool-blazer-item-15752125.aspx", "img": "", "category": "Blazers", "cat": "blazer"}, {"brand": "Ralph Lauren Purple Label", "name": "Pointed-Collar Button-Up Cotton Blend Shirt", "retailer": "Farfetch", "price": 602, "wasPrice": 1008, "off": 40, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-pointed-collar-button-up-cotton-blend-shirt-item-20508702.aspx", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "A.P.C.", "name": "Beige Suede Loafers", "retailer": "SSENSE", "price": 332, "wasPrice": 510, "off": 35, "url": "https://www.ssense.com/en-us/men/product/apc/beige-suede-loafers/18862741", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261252M231007_1/apc-beige-suede-loafers.jpg", "category": "Shoes", "cat": "shoes"}, {"brand": "A.P.C.", "name": "Black Moc Loafers", "retailer": "SSENSE", "price": 388, "wasPrice": 485, "off": 20, "url": "https://www.ssense.com/en-us/men/product/apc/black-moc-loafers/18671261", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "A.P.C.", "name": "Black Cotton Sweater", "retailer": "SSENSE", "price": 198, "wasPrice": 300, "off": 34, "url": "https://www.ssense.com/en-us/men/product/apc/black-cotton-sweater/18677391", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261252M201006_1/apc-black-cotton-sweater.jpg", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Todd Snyder", "name": "Monte Sweater Polo in Baja Dunes Stripe", "retailer": "Todd Snyder", "price": 124, "wasPrice": 298, "off": 58, "url": "https://www.toddsnyder.com/collections/sale-tops/products/monte-polobaja-dunes?option-0=M&variant=42328341446727", "img": "https://www.toddsnyder.com/cdn/shop/files/APR26_SW1110049_BAJA_DUNES_F1_R.jpg?v=1774011041&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Vista Sweater Polo in Heather Taupe", "retailer": "Todd Snyder", "price": 139, "wasPrice": 198, "off": 30, "url": "https://www.toddsnyder.com/collections/sale-tops/products/ls-vista-poloheather-taupe?option-0=M&variant=42356228620359", "img": "https://www.toddsnyder.com/cdn/shop/files/APR26_SW5810004_HEATHER_TAUPE_FL1_R.jpg?v=1774010364&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Miles Sweater Polo in Baja Dunes", "retailer": "Todd Snyder", "price": 94, "wasPrice": 268, "off": 65, "url": "https://www.toddsnyder.com/collections/sale/products/relaxed-silk-cotton-polobaja-dunes", "img": "https://www.toddsnyder.com/cdn/shop/files/MAR26_SW1200093_BAJA_DUNES_FL1_R.jpg?v=1771965677&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Clemente Sweater Polo in Blue Ridge Stripe", "retailer": "Todd Snyder", "price": 114, "wasPrice": 298, "off": 62, "url": "https://www.toddsnyder.com/collections/sale/products/stripe-linen-poloblue-ridge?option-0=M", "img": "https://www.toddsnyder.com/cdn/shop/files/MAY26_SW26309200_BLUE_RIDGET_F1_R.jpg?v=1777038966&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Mojave Sweater Polo in Baja Dunes", "retailer": "Todd Snyder", "price": 174, "wasPrice": 248, "off": 30, "url": "https://www.toddsnyder.com/collections/sale/products/mojave-polobaja-dunes?variant=42221523107911", "img": "https://www.toddsnyder.com/cdn/shop/files/MAR26_SW1289200_BAJA_DUNES_FL1_R.jpg?v=1771965682&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Casanova Sweater Polo in Steel Blue", "retailer": "Todd Snyder", "price": 134, "wasPrice": 248, "off": 46, "url": "https://www.toddsnyder.com/collections/best-of-sale/products/casanova-polosteel-blue?variant=42230501015623", "img": "https://www.toddsnyder.com/cdn/shop/files/MAR26_SW1131019_STEEL_BLUE_FL1_R.jpg?v=1771965681&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Charters Sweater Polo in Craspedia Chevron", "retailer": "Todd Snyder", "price": 254, "wasPrice": 348, "off": 27, "url": "https://www.toddsnyder.com/collections/sale/products/cotton-silk-chevron-polocraspedia", "img": "https://www.toddsnyder.com/cdn/shop/files/APR26_SW2760049_BERGAMOTRIND_FL1_R.jpg?v=1774010361&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Mikasa Sweater Polo in Sand Geo", "retailer": "Todd Snyder", "price": 224, "wasPrice": 298, "off": 25, "url": "https://www.toddsnyder.com/collections/sale/products/mikasa-polosand?option-0=M&variant=42080004669511", "img": "https://www.toddsnyder.com/cdn/shop/files/FEB26_SW1949200_SAND_FL1_R.jpg?v=1769110069&width=120", "category": "Polos", "cat": "top"}];
 var shopWishlist = store.get("shopWishlist", []);
+/* Build .76 — The Edit: per-product notes + built looks ("edits"
+   sync collection) and every store search with its shortlist
+   ("searches"). */
+var editMeta = store.get("editMeta", []);
+if (!Array.isArray(editMeta)) editMeta = [];
+var editSearches = store.get("editSearches", []);
+if (!Array.isArray(editSearches)) editSearches = [];
 function saveShopWishlist() { store.set("shopWishlist", shopWishlist); }
 /* Build .45 — wishlist price-drop records, written server-side by
    the weekly checker into the pricedrops sync collection. The app
@@ -32733,7 +32854,7 @@ window.blobStore = (function () {
      one just because it dealt a look more recently. */
 var SYNC_URL = "https://wardrobe-sync.dyacobs.workers.dev";
 try { SYNC_URL = localStorage.getItem("wardrobe.syncurl") || SYNC_URL; } catch (e) {}
-var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed", "receipts", "shopwish", "pricedrops", "blobs"];
+var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed", "receipts", "shopwish", "pricedrops", "edits", "searches", "blobs"];
 function syBlank() {
   var o = { key: null, acct: null, last: 0, snap: {}, st: {}, tomb: {}, dirty: {}, status: "Not synced yet", lastOk: 0 };
   SY_COLLS.forEach(function (c) { o.snap[c] = {}; o.st[c] = {}; o.tomb[c] = {}; o.dirty[c] = {}; });
@@ -32866,6 +32987,8 @@ function syCollGet(c) {
     case "receipts": return receiptInbox;
     case "shopwish": return shopWishlist;
     case "pricedrops": return priceDrops;
+    case "edits": return editMeta;
+    case "searches": return editSearches;
     case "blobs": return [];
   }
   return [];
@@ -32891,8 +33014,8 @@ function syMetaOf() {
    vanished ids become tombstones. Runs on every tracked store
    write (hinted to the affected collection) and in full at boot
    and at the start of every sync, so no write path is missed. */
-var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops" };
-var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox", shopwish: "shopWishlist", pricedrops: "priceDrops" };
+var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops", editMeta: "edits", editSearches: "searches" };
+var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox", shopwish: "shopWishlist", pricedrops: "priceDrops", edits: "editMeta", searches: "editSearches" };
 var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
 function syTrackChanges(onlyColl) {
   var now = Date.now(), ch = false, mig = false;
@@ -33142,6 +33265,8 @@ function syPutLocal(c, data) {
   else if (c === "receipts") { receiptInbox = put(receiptInbox); store.set("receiptInbox", receiptInbox); if (typeof renderReceipts === "function") renderReceipts(); if (typeof renderReceiptsSection === "function") renderReceiptsSection(); }
   else if (c === "shopwish") { shopWishlist = put(shopWishlist); store.set("shopWishlist", shopWishlist); if (typeof refreshWishButtons === "function") refreshWishButtons(); if (typeof renderShopWishlist === "function") renderShopWishlist(); }
   else if (c === "pricedrops") { priceDrops = put(priceDrops); store.set("priceDrops", priceDrops); if (typeof renderShopWishlist === "function") renderShopWishlist(); }
+  else if (c === "edits") { editMeta = put(editMeta); store.set("editMeta", editMeta); if (typeof editOnSync === "function") editOnSync(); }
+  else if (c === "searches") { editSearches = put(editSearches); store.set("editSearches", editSearches); if (typeof editOnSync === "function") editOnSync(); }
   else if (c === "worn") wornLog = put(wornLog);
   else if (c === "inspo") inspoImages = put(inspoImages);
   else if (c === "finds") finds = put(finds);
@@ -33185,6 +33310,8 @@ function syRemoveLocal(c, id) {
   else if (c === "receipts") { receiptInbox = drop(receiptInbox); store.set("receiptInbox", receiptInbox); if (typeof renderReceipts === "function") renderReceipts(); if (typeof renderReceiptsSection === "function") renderReceiptsSection(); }
   else if (c === "shopwish") { shopWishlist = drop(shopWishlist); store.set("shopWishlist", shopWishlist); if (typeof refreshWishButtons === "function") refreshWishButtons(); if (typeof renderShopWishlist === "function") renderShopWishlist(); }
   else if (c === "pricedrops") { priceDrops = drop(priceDrops); store.set("priceDrops", priceDrops); if (typeof renderShopWishlist === "function") renderShopWishlist(); }
+  else if (c === "edits") { editMeta = drop(editMeta); store.set("editMeta", editMeta); if (typeof editOnSync === "function") editOnSync(); }
+  else if (c === "searches") { editSearches = drop(editSearches); store.set("editSearches", editSearches); if (typeof editOnSync === "function") editOnSync(); }
   else if (c === "worn") wornLog = drop(wornLog);
   else if (c === "inspo") inspoImages = drop(inspoImages);
   else if (c === "finds") finds = drop(finds);
@@ -35379,25 +35506,54 @@ function analyzeFilePiece(card, job, ix) {
 </script>
 
     <script>
-/* ================= See it on me — in-app try-on =================
-   Renders a product (or a whole built look) onto the user's own
-   template photo through the wardrobe-tryon worker (FASHN Try-On
-   Max; one garment per step, chained server-side). Same Bearer
-   sync key as wardrobe-sync; the worker keeps a per-account daily
-   cap and returns a cached render for an identical request. */
+/* ================= See it on me — in-app try-on (build .76) =================
+   Puts a product, a product with his own clothes, or a whole built
+   look onto his standing studio template through the wardrobe-tryon
+   worker (FASHN Try-On Max; one garment per step, chained server-
+   side). Same Bearer sync key as wardrobe-sync; the worker caps
+   garments per day and returns a cached job for a repeat request,
+   and this device also remembers every finished render by request
+   hash so a repeat tap never posts at all. When a try-on cannot run
+   the nearest pre-rendered on-body outfit is shown instead. */
 var TRYON_URL = "https://wardrobe-tryon.dyacobs.workers.dev";
 try { TRYON_URL = localStorage.getItem("wardrobe.tryonurl") || TRYON_URL; } catch (e) {}
 var tryonRun = 0;
-var TRYON_SLOT = { top: "top", layer: "outer", bottom: "bottom", shoes: "shoes", accessory: "accessory" };
+var TRYON_SLOT = { top: "top", layer: "outer", outer: "outer", bottom: "bottom", shoes: "shoes", accessory: "accessory" };
+var TRYON_ORDER = { under: 0, top: 1, outer: 2, bottom: 3, accessory: 4, shoes: 5 };
 function tryonKey() { try { return (typeof SY !== "undefined" && SY && SY.key) ? SY.key : null; } catch (e) { return null; } }
 function tryonEl(id) { return document.getElementById(id); }
-/* An image the worker can read: data URIs pass through, blob: URLs
-   are read in the page, everything else becomes an absolute https
-   URL (the app's own assets and retailer images). */
+function tryonHash(s) {
+  var h1 = 0x811c9dc5, h2 = 0x01000193 ^ s.length;
+  for (var i = 0; i < s.length; i++) { var c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 16777619); h2 = Math.imul(h2 ^ c, 2246822507); }
+  return ((h1 >>> 0).toString(16) + (h2 >>> 0).toString(16));
+}
+var tryonCache = {};
+try { tryonCache = JSON.parse(localStorage.getItem("wardrobe.tryoncache") || "{}") || {}; } catch (e) { tryonCache = {}; }
+function tryonCacheKey(items) {
+  return tryonHash(items.map(function (it) { return it.slot + "=" + tryonHash(String(it.image)); }).join("&"));
+}
+function tryonCachePut(k, url) {
+  tryonCache[k] = { u: url, t: Date.now() };
+  var ks = Object.keys(tryonCache);
+  if (ks.length > 300) ks.sort(function (a, b) { return tryonCache[a].t - tryonCache[b].t; }).slice(0, ks.length - 300).forEach(function (x) { delete tryonCache[x]; });
+  try { localStorage.setItem("wardrobe.tryoncache", JSON.stringify(tryonCache)); } catch (e) {}
+}
+/* An image the worker can read: data URIs pass through, vault and
+   blob references are read on this device, the app's own files are
+   read in the page, retailer images go as https URLs. */
 function tryonImageRef(img) {
   if (!img || typeof img !== "string") return Promise.resolve(null);
   if (img.indexOf("data:image/") === 0) return Promise.resolve(img);
-  if (img.indexOf("idb:") === 0) return Promise.resolve(null);
+  if (img.indexOf("idb:") === 0) {
+    var pv = window.photoVault;
+    if (!pv || !pv.fetch) return Promise.resolve(null);
+    if (pv.cache && pv.cache[img.slice(4)]) return tryonImageRef(pv.cache[img.slice(4)]);
+    return new Promise(function (res) { try { pv.fetch(img.slice(4), function (d) { res(d ? tryonImageRef(d) : null); }); } catch (e) { res(null); } });
+  }
+  if (/^blob:[0-9a-f]{16,}/.test(img) && window.blobStore && window.blobStore.fetch) {
+    var bs = window.blobStore;
+    return new Promise(function (res) { try { bs.fetch(img.slice(5), function (d) { res(d ? tryonImageRef(d) : null); }); } catch (e) { res(null); } });
+  }
   function inPage(src) {
     return fetch(src).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.blob(); }).then(function (b) {
       return new Promise(function (res) { var fr = new FileReader(); fr.onload = function () { res(String(fr.result)); }; fr.onerror = function () { res(null); }; fr.readAsDataURL(b); });
@@ -35406,16 +35562,24 @@ function tryonImageRef(img) {
   if (img.indexOf("blob:") === 0) return inPage(img);
   try {
     var u = new URL(img, location.href);
-    /* The app's own photos are read here and sent as data, so the
-       worker never needs to reach back into the app. */
     if (u.origin === location.origin) return inPage(u.toString());
     if (u.protocol !== "https:") return Promise.resolve(null);
     return Promise.resolve(u.toString());
   } catch (e) { return Promise.resolve(null); }
 }
+/* Closet category -> outfit slot (layer / top / bottom / shoes). */
+function closetSlot76(cat) {
+  var c = String(cat || "").toLowerCase();
+  if (/blazer|jacket|coat|vest|gilet|suit|outer|overshirt|cardigan/.test(c)) return "layer";
+  if (/shoe|sneaker|boot|loafer|trainer|sandal|mule|espadrille|driver/.test(c)) return "shoes";
+  if (/trouser|jean|short|chino|pant|swim|bathing/.test(c)) return "bottom";
+  if (/shirt|button|tee|t-shirt|polo|sweater|knit|top|henley|crew/.test(c)) return "top";
+  return null;
+}
 function tryonSlotForEntry(e) {
-  var pc = (typeof buildShopPiece === "function") ? buildShopPiece(e) : null;
-  if (pc && TRYON_SLOT[pc.slot]) return TRYON_SLOT[pc.slot];
+  var m = (typeof BUILD_CAT_MAP !== "undefined") ? BUILD_CAT_MAP[e.cat] : null;
+  if (m && TRYON_SLOT[m[1]]) return TRYON_SLOT[m[1]];
+  if (e.category) { var cs = closetSlot76(e.category); if (cs) return TRYON_SLOT[cs]; }
   var c = (typeof linkClassify === "function") ? linkClassify((e.name || "") + " " + (e.category || e.cat || "")) : ["", ""];
   var cat = c[0];
   if (cat === "blazer" || cat === "suit" || cat === "outerwear") return "outer";
@@ -35424,20 +35588,109 @@ function tryonSlotForEntry(e) {
   if (cat === "belt" || cat === "tie") return "accessory";
   return "top";
 }
+function tryonEntryName(e) { return ((e.brand ? e.brand + " " : "") + (e.name || "")).trim().slice(0, 120); }
 function tryonEntryItems(e) {
   return tryonImageRef(e.img).then(function (ref) {
     if (!ref) return [];
-    return [{ slot: tryonSlotForEntry(e), image: ref, name: ((e.brand ? e.brand + " " : "") + (e.name || "")).trim().slice(0, 120) }];
+    return [{ slot: tryonSlotForEntry(e), image: ref, name: tryonEntryName(e) }];
+  });
+}
+/* His own photographed pieces (never built-in seed pieces unless he
+   has none), by slot. */
+function tryonClosetPool() {
+  var own = (typeof homeOwnedPhotoPieces742 === "function") ? homeOwnedPhotoPieces742() : { own: [], withPhoto: [] };
+  var list = own.own.length ? own.own : own.withPhoto;
+  var by = { layer: [], top: [], bottom: [], shoes: [] };
+  list.forEach(function (it) { var s = closetSlot76(it.category); if (s && by[s]) by[s].push(it); });
+  return by;
+}
+function hexRGB76(h) {
+  var m = /^#?([0-9a-f]{6})$/i.exec(String(h || "").trim());
+  if (!m) return null;
+  var n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function hexDist76(a, b) {
+  var x = hexRGB76(a), y = hexRGB76(b);
+  if (!x || !y) return 300;
+  return Math.sqrt(Math.pow(x[0] - y[0], 2) + Math.pow(x[1] - y[1], 2) + Math.pow(x[2] - y[2], 2));
+}
+/* The nearest pre-rendered on-body outfit: most closet pieces in
+   common first, then a piece in the wanted slot close in colour. */
+function tryonNearestOnbody(closetIds, wantSlot, wantHex) {
+  if (typeof ONBODY === "undefined" || !ONBODY.map) return null;
+  var want = {};
+  (closetIds || []).forEach(function (id) { if (id) want[id] = 1; });
+  var best = null, bestScore = 0;
+  Object.keys(ONBODY.map).forEach(function (k) {
+    var ids = k.split("|"), score = 0, known = 0;
+    ids.forEach(function (id) {
+      var it = (typeof closetItemById === "function") ? closetItemById(id) : null;
+      if (it) known++;
+      if (want[id]) score += 10;
+      if (wantSlot && it && closetSlot76(it.category) === wantSlot) score += 3 + Math.max(0, 2 - hexDist76(it.colourHex, wantHex) / 120);
+    });
+    if (!known) return;
+    if (score > bestScore) { bestScore = score; best = ONBODY.map[k]; }
+  });
+  return best;
+}
+/* Product + his own clothes: the product in its slot, the rest of
+   a complete outfit from his closet — the pieces of the nearest
+   rendered outfit when there is one, so the pairing is one he has
+   already seen on himself. */
+function tryonWithClosetPieces(e) {
+  var slot = tryonSlotForEntry(e);
+  var mine = slot === "outer" ? "layer" : slot;
+  var pool = tryonClosetPool();
+  var need = mine === "layer" ? ["top", "bottom"] : mine === "top" ? ["bottom", "shoes"] : mine === "bottom" ? ["top", "shoes"] : mine === "shoes" ? ["top", "bottom"] : ["top", "bottom"];
+  var hex = (typeof buildShopColour === "function") ? buildShopColour(e).hex : null;
+  var picked = {};
+  var ob = tryonNearestOnbody([], mine, hex);
+  if (ob && typeof ONBODY !== "undefined") {
+    Object.keys(ONBODY.map).forEach(function (k) {
+      if (ONBODY.map[k] !== ob) return;
+      k.split("|").forEach(function (id) {
+        var it = closetItemById(id), s = it ? closetSlot76(it.category) : null;
+        if (it && it.photo && s && need.indexOf(s) !== -1 && !picked[s]) picked[s] = it;
+      });
+    });
+  }
+  need.forEach(function (s) { if (!picked[s] && pool[s] && pool[s].length) picked[s] = pool[s][0]; });
+  return need.map(function (s) { return picked[s]; }).filter(Boolean);
+}
+function tryonPiecesItems(products, closetPieces) {
+  var jobs = [];
+  (products || []).forEach(function (p) { jobs.push(tryonImageRef(p.img).then(function (ref) { return ref ? { slot: tryonSlotForEntry(p), image: ref, name: tryonEntryName(p) } : null; })); });
+  (closetPieces || []).forEach(function (it) {
+    var s = TRYON_SLOT[closetSlot76(it.category)] || "top";
+    jobs.push(tryonImageRef(it.photo).then(function (ref) { return ref ? { slot: s, image: ref, name: String(it.name || "").slice(0, 120) } : null; }));
+  });
+  return Promise.all(jobs).then(function (xs) {
+    var out = xs.filter(Boolean), seen = {};
+    out = out.filter(function (x) { if (seen[x.slot]) return false; seen[x.slot] = 1; return true; });
+    out.sort(function (a, b) { return (TRYON_ORDER[a.slot] || 0) - (TRYON_ORDER[b.slot] || 0); });
+    return out;
   });
 }
 function tryonLookPieces(look) {
   var out = [];
-  if (!look || !look.swapPieces || typeof PIECE_BY_ID === "undefined") return out;
-  var ids = Array.isArray(look.swapPieces) ? look.swapPieces : Object.keys(look.swapPieces).map(function (k) { return look.swapPieces[k]; });
-  ids.forEach(function (id) {
-    var pc = PIECE_BY_ID[id];
-    if (pc && pc.img && TRYON_SLOT[pc.slot]) out.push(pc);
-  });
+  if (!look) return out;
+  if (look.swapPieces && typeof PIECE_BY_ID !== "undefined") {
+    var ids = Array.isArray(look.swapPieces) ? look.swapPieces : Object.keys(look.swapPieces).map(function (k) { return look.swapPieces[k]; });
+    ids.forEach(function (id) {
+      var pc = PIECE_BY_ID[id];
+      if (pc && pc.img && TRYON_SLOT[pc.slot]) out.push({ slot: TRYON_SLOT[pc.slot], img: pc.img, name: pc.name || "" });
+    });
+  }
+  if (!out.length && look.fwPieces) {
+    look.fwPieces.forEach(function (p) {
+      var it = (p && p.id && typeof closetItemById === "function") ? closetItemById(p.id) : null;
+      var ph = (it && it.photo) || (p && p.photo);
+      var s = closetSlot76((it && it.category) || (p && p.category));
+      if (ph && s) out.push({ slot: TRYON_SLOT[s], img: ph, name: (it && it.name) || p.name || "", id: p.id });
+    });
+  }
   return out;
 }
 function tryonSyncLookBtn(look) {
@@ -35447,10 +35700,69 @@ function tryonSyncLookBtn(look) {
 function tryonLookItems(look) {
   var pcs = tryonLookPieces(look);
   return Promise.all(pcs.map(function (pc) { return tryonImageRef(pc.img); })).then(function (refs) {
-    var items = [];
-    refs.forEach(function (ref, i) { if (ref) items.push({ slot: TRYON_SLOT[pcs[i].slot], image: ref, name: pcs[i].name || "" }); });
+    var items = [], seen = {};
+    refs.forEach(function (ref, i) { if (ref && !seen[pcs[i].slot]) { seen[pcs[i].slot] = 1; items.push({ slot: pcs[i].slot, image: ref, name: pcs[i].name || "" }); } });
+    items.sort(function (a, b) { return (TRYON_ORDER[a.slot] || 0) - (TRYON_ORDER[b.slot] || 0); });
     return items;
   });
+}
+function tryonErrorText(status, body) {
+  var err = body && body.error;
+  if (status === 401) return "Turn on sync in Profile first — try-on uses the same account.";
+  if (err === "not_configured") return "Try-on isn't switched on yet. It will work as soon as the render service is connected.";
+  if (err === "daily_cap") return "That's today's try-on limit. It resets overnight.";
+  if (err === "garment_image") return "Couldn't read that product's photo. Try another listing.";
+  if (body && body.message) return body.message;
+  return "Couldn't render that right now. Try again in a minute.";
+}
+/* The job runner shared by the sheet and the Build page.
+   onState(state, text, url): state is loading | done | error. */
+function tryonJob(itemsPromise, onState, isLive) {
+  var started = Date.now();
+  function live() { return !isLive || isLive(); }
+  function stepText(j) {
+    if (!j || j.steps <= 1) return "Putting it on you… about 20 seconds.";
+    return "Dressing you — piece " + Math.max(1, j.step) + " of " + j.steps + "…";
+  }
+  Promise.resolve(itemsPromise).then(function (items) {
+    if (!live()) return;
+    if (!items || !items.length) { onState("error", "There's no photo of this piece to try on yet."); return; }
+    items = items.slice(0, 6);
+    var ck = tryonCacheKey(items);
+    if (tryonCache[ck] && tryonCache[ck].u) { onState("done", "", tryonCache[ck].u, true); return; }
+    var key = tryonKey();
+    if (!key) { onState("error", tryonErrorText(401)); return; }
+    var headers = { "authorization": "Bearer " + key, "content-type": "application/json" };
+    function finish(j) { tryonCachePut(ck, j.resultUrl); onState("done", "", j.resultUrl); }
+    function poll(id) {
+      if (!live()) return;
+      if (Date.now() - started > 8 * 60 * 1000) { onState("error", "This one is taking too long. Try again later."); return; }
+      fetch(TRYON_URL + "/tryon/" + id, { headers: { "authorization": "Bearer " + key } })
+        .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+        .then(function (x) {
+          if (!live()) return;
+          if (x.status !== 200) { onState("error", tryonErrorText(x.status, x.body)); return; }
+          var j = x.body;
+          if (j.status === "done" && j.resultUrl) { finish(j); return; }
+          if (j.status === "failed") { onState("error", j.note || "Couldn't render that one."); return; }
+          onState("loading", stepText(j));
+          setTimeout(function () { poll(id); }, 3000);
+        })
+        .catch(function () { if (live()) setTimeout(function () { poll(id); }, 5000); });
+    }
+    onState("loading", stepText({ steps: items.length, step: 1 }));
+    return fetch(TRYON_URL + "/tryon", { method: "POST", headers: headers, body: JSON.stringify({ items: items }) })
+      .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+      .then(function (x) {
+        if (!live()) return;
+        if (x.status !== 200 && x.status !== 202) { onState("error", tryonErrorText(x.status, x.body)); return; }
+        var j = x.body;
+        if (j.status === "done" && j.resultUrl) { finish(j); return; }
+        if (j.status === "failed") { onState("error", j.note || "Couldn't render that one."); return; }
+        onState("loading", stepText(j));
+        setTimeout(function () { poll(j.id); }, 2500);
+      });
+  }).catch(function () { if (live()) onState("error", "No connection — try again when you're online."); });
 }
 function tryonShow(state, text) {
   var wait = tryonEl("tryon-wait"), img = tryonEl("tryon-img"), act = tryonEl("tryon-actions");
@@ -35466,96 +35778,82 @@ function tryonClose() {
   var s = tryonEl("tryon-sheet");
   if (s) s.hidden = true;
 }
-function tryonErrorText(status, body) {
-  var err = body && body.error;
-  if (status === 401) return "Turn on sync in Profile first — try-on uses the same account.";
-  if (err === "not_configured") return "Try-on isn't switched on yet. It will work as soon as the render service is connected.";
-  if (err === "daily_cap") return "That's today's try-on limit. It resets overnight.";
-  if (err === "garment_image") return "Couldn't read that product's photo. Try another listing.";
-  if (body && body.message) return body.message;
-  return "Couldn't render that right now. Try again in a minute.";
-}
-function tryonStart(itemsPromise, title, buyUrl) {
+var tryonCurrent = null;
+/* opts: { buyUrl, product (an entry: enables "With my clothes"),
+           closetIds + slot + hex (for the on-body fallback) } */
+function tryonStart(itemsPromise, title, buyUrl, opts) {
+  opts = opts || {};
   var run = ++tryonRun;
+  tryonCurrent = opts;
   var sheet = tryonEl("tryon-sheet");
   tryonEl("tryon-title").textContent = "On you";
   tryonEl("tryon-sub").textContent = title || "";
   var buy = tryonEl("tryon-buy");
   if (buyUrl) { buy.href = buyUrl; buy.hidden = false; } else { buy.hidden = true; buy.removeAttribute("href"); }
+  var withMine = tryonEl("tryon-withmine");
+  if (withMine) withMine.hidden = !(opts.product && !opts.withCloset);
+  var note = tryonEl("tryon-note");
+  if (note) { note.hidden = true; note.textContent = ""; }
   tryonEl("tryon-img").removeAttribute("src");
   tryonShow("loading", "Getting ready…");
   sheet.hidden = false;
-  var key = tryonKey();
-  if (!key) { tryonShow("error", tryonErrorText(401)); return; }
-  var headers = { "authorization": "Bearer " + key, "content-type": "application/json" };
-  var started = Date.now();
-  function stepText(j) {
-    if (!j || j.steps <= 1) return "Putting it on you… this takes about 20 seconds.";
-    return "Dressing you — piece " + Math.max(1, j.step) + " of " + j.steps + "…";
-  }
-  function finish(j) {
+  function showImg(url, fallback) {
     var img = tryonEl("tryon-img");
     img.onload = function () { if (run === tryonRun) tryonShow("done"); };
     img.onerror = function () { if (run === tryonRun) tryonShow("error", "The render finished but couldn't load. Try again."); };
-    img.alt = "You wearing " + (title || "this");
-    img.src = j.resultUrl;
-    tryonEl("tryon-open").href = j.resultUrl;
+    img.alt = (fallback ? "Closest outfit on you" : "You wearing ") + (fallback ? "" : (title || "this"));
+    img.src = url;
+    tryonEl("tryon-open").href = url;
   }
-  function poll(id) {
-    if (run !== tryonRun) return;
-    if (Date.now() - started > 8 * 60 * 1000) { tryonShow("error", "This one is taking too long. Try again later."); return; }
-    fetch(TRYON_URL + "/tryon/" + id, { headers: { "authorization": "Bearer " + key } })
-      .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
-      .then(function (x) {
-        if (run !== tryonRun) return;
-        if (x.status !== 200) { tryonShow("error", tryonErrorText(x.status, x.body)); return; }
-        var j = x.body;
-        if (j.status === "done" && j.resultUrl) { finish(j); return; }
-        if (j.status === "failed") { tryonShow("error", j.note || "Couldn't render that one."); return; }
-        tryonShow("loading", stepText(j));
-        setTimeout(function () { poll(id); }, 3000);
-      })
-      .catch(function () { if (run === tryonRun) setTimeout(function () { poll(id); }, 5000); });
-  }
-  Promise.resolve(itemsPromise).then(function (items) {
-    if (run !== tryonRun) return;
-    if (!items || !items.length) { tryonShow("error", "There's no photo of this piece to try on yet."); return; }
-    return fetch(TRYON_URL + "/tryon", { method: "POST", headers: headers, body: JSON.stringify({ items: items.slice(0, 6) }) })
-      .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
-      .then(function (x) {
-        if (run !== tryonRun) return;
-        if (x.status !== 200 && x.status !== 202) { tryonShow("error", tryonErrorText(x.status, x.body)); return; }
-        var j = x.body;
-        if (j.status === "done" && j.resultUrl) { finish(j); return; }
-        if (j.status === "failed") { tryonShow("error", j.note || "Couldn't render that one."); return; }
-        tryonShow("loading", stepText(j));
-        setTimeout(function () { poll(j.id); }, 2500);
-      });
-  }).catch(function () { if (run === tryonRun) tryonShow("error", "No connection — try again when you're online."); });
+  tryonJob(itemsPromise, function (state, text, url) {
+    if (state === "done") { showImg(url, false); if (opts.onDone) opts.onDone(url); return; }
+    if (state === "error") {
+      var fb = opts.noFallback ? null : tryonNearestOnbody(opts.closetIds || [], opts.slot || null, opts.hex || null);
+      tryonShow("error", text);
+      if (fb) {
+        if (note) { note.textContent = text + " Closest look on you:"; note.hidden = false; }
+        showImg(fb, true);
+      }
+      return;
+    }
+    tryonShow(state, text);
+  }, function () { return run === tryonRun; });
+}
+function tryonForEntry(e, withCloset) {
+  if (!e) return;
+  var slot = tryonSlotForEntry(e), mine = slot === "outer" ? "layer" : slot;
+  var hex = (typeof buildShopColour === "function") ? buildShopColour(e).hex : null;
+  var pieces = withCloset ? tryonWithClosetPieces(e) : [];
+  var title = tryonEntryName(e) + (pieces.length ? " with " + pieces.map(function (p) { return p.name; }).join(", ") : "");
+  tryonStart(withCloset ? tryonPiecesItems([e], pieces) : tryonEntryItems(e), title, e.url, {
+    product: e, withCloset: !!withCloset, slot: mine, hex: hex,
+    closetIds: pieces.map(function (p) { return p.id; })
+  });
 }
 document.addEventListener("click", function (e) {
   var t = e.target;
   if (!t || !t.closest) return;
   if (t.closest("#tryon-close") || t.id === "tryon-sheet") { tryonClose(); return; }
+  if (t.closest("#tryon-withmine")) { if (tryonCurrent && tryonCurrent.product) tryonForEntry(tryonCurrent.product, true); return; }
   var b;
   if ((b = t.closest("[data-tryon-shop]"))) {
-    var se = (typeof buildEntryByKey === "function") ? buildEntryByKey(b.getAttribute("data-tryon-shop")) : null;
-    if (se) tryonStart(tryonEntryItems(se), ((se.brand || "") + " " + (se.name || "")).trim(), se.url);
+    tryonForEntry((typeof buildEntryByKey === "function") ? buildEntryByKey(b.getAttribute("data-tryon-shop")) : null, false);
     e.stopPropagation(); return;
   }
   if ((b = t.closest("[data-tryon-wish]"))) {
-    var we = (typeof wishlistFor === "function") ? wishlistFor(b.getAttribute("data-tryon-wish")) : null;
-    if (we) tryonStart(tryonEntryItems(we), ((we.brand || "") + " " + (we.name || "")).trim(), we.url);
+    tryonForEntry((typeof wishlistFor === "function") ? wishlistFor(b.getAttribute("data-tryon-wish")) : null, false);
     e.stopPropagation(); return;
   }
   if ((b = t.closest("[data-tryon-sale]"))) {
-    var si = (typeof SALE_ITEMS !== "undefined") ? SALE_ITEMS[parseInt(b.getAttribute("data-tryon-sale"), 10)] : null;
-    if (si) tryonStart(tryonEntryItems(si), ((si.brand || "") + " " + (si.name || "")).trim(), si.url);
+    tryonForEntry((typeof SALE_ITEMS !== "undefined") ? SALE_ITEMS[parseInt(b.getAttribute("data-tryon-sale"), 10)] : null, false);
     e.stopPropagation(); return;
   }
   if (t.closest("#tryon-look-btn")) {
     var lk = (typeof currentLook !== "undefined") ? currentLook : null;
-    if (lk) tryonStart(tryonLookItems(lk), lk.title || "This look", null);
+    if (lk) {
+      var ids = tryonLookPieces(lk).map(function (p) { return p.id; }).filter(Boolean);
+      tryonStart(tryonLookItems(lk), lk.title || "This look", null, { closetIds: ids });
+    }
     e.stopPropagation(); return;
   }
 }, true);
@@ -35563,6 +35861,665 @@ document.addEventListener("keydown", function (e) {
   var s = tryonEl("tryon-sheet");
   if (e.key === "Escape" && s && !s.hidden) tryonClose();
 });
+    </script>
+    <script type="wardrobe/app">
+/* ================= Build .76 — The Edit: Saved / Searches / Build =================
+   Saved      everything he has saved (the wishlist), searchable and
+              grouped by category, colour, search, brand, store or
+              price; star or pass on any piece.
+   Searches   every store search is kept automatically with its own
+              shortlist (what he saved, starred or put in a look from
+              it), how many results he saw and the price range.
+   Build      Layer / Top / Bottom / Shoes from his closet and his
+              saved pieces, See it on me on his template, and a To buy
+              list with buy links for every piece he doesn't own.
+   Sync: product notes (star / pass / which searches) ride the
+   "edits" collection, searches the "searches" collection, saved
+   items stay in "shopwish" — same last-writer-wins records as every
+   other collection, no worker change. */
+(function () {
+  var EDIT_CATALOG = [];
+  var editState = { view: store.get("editView", "saved") || "saved", group: "Category", starred: false, q: "", openSearch: null, results: [], resultsN: 0 };
+  if (["saved", "searches", "build"].indexOf(editState.view) === -1) editState.view = "saved";
+  var EDIT_HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1z"/></svg>';
+  var EDIT_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.8L12 16.6l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"/></svg>';
+  var EDIT_DOWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 4.5h9.2a1.6 1.6 0 0 1 1.6 1.4l1 7.1a1.6 1.6 0 0 1-1.6 1.8h-4.4l.7 3.4a1.7 1.7 0 0 1-3.1 1.2L7.5 14.5z"/><path d="M4 4.5h3.5v10H4z"/></svg>';
+  var EDIT_X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
+  function h76(s) { return (typeof tryonHash === "function") ? tryonHash(String(s)) : String(s).length.toString(16); }
+  function money(n) { return (typeof n === "number" && isFinite(n)) ? "$" + Math.round(n).toLocaleString("en-US") : ""; }
+  function nowISO() { return new Date().toISOString(); }
+
+  /* ---------- products ---------- */
+  var CAT_LABEL = { knitwear: "Knitwear", top: "Tops", shirt: "Shirts", blazer: "Blazers", suit: "Suits", outerwear: "Outerwear", trousers: "Trousers", jeans: "Jeans", shorts: "Shorts", swim: "Swim", shoes: "Shoes", belt: "Belts", tie: "Ties" };
+  var CAT_FROM = [[/loafer|sneaker|shoe|boot|derby|oxford|mule|sandal|espadrille|driver|trainer/, "shoes"], [/blazer|sport ?coat/, "blazer"], [/suit\b/, "suit"],
+    [/jacket|coat|parka|overshirt|outer|gilet|vest|bomber/, "outerwear"], [/jean|denim/, "jeans"], [/short/, "shorts"], [/swim/, "swim"],
+    [/trouser|pant|chino/, "trousers"], [/knit|sweater|cardigan|crew|cashmere|jumper|turtleneck|roll ?neck/, "knitwear"],
+    [/shirt|oxford/, "shirt"], [/polo|tee|t-shirt|henley|top/, "top"], [/belt/, "belt"], [/tie\b/, "tie"]];
+  function catOf(e) {
+    if (e.cat && CAT_LABEL[e.cat]) return e.cat;
+    var s = String((e.cat || "") + " " + (e.category || "") + " " + (e.name || "")).toLowerCase();
+    for (var i = 0; i < CAT_FROM.length; i++) if (CAT_FROM[i][0].test(s)) return CAT_FROM[i][1];
+    return "top";
+  }
+  function slotOfCat(c) { var m = (typeof BUILD_CAT_MAP !== "undefined") ? BUILD_CAT_MAP[c] : null; return m ? m[1] : "top"; }
+  function colourOf(e) {
+    if (e.colour) return String(e.colour);
+    if (e.colourName) return e.colourName;
+    var c = (typeof buildShopColour === "function") ? buildShopColour(e) : null;
+    return c && c.name ? c.name : "";
+  }
+  function cap(s) { s = String(s || ""); return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+  function storeName(e) {
+    var st = String(e.retailer || e.store || "").trim();
+    if (st.length <= 3) st = e.brand || st;
+    return st;
+  }
+  /* One plain product snapshot — what Saved, Searches and Build keep. */
+  function snap(e) {
+    var key = e.key || (typeof shopEntryKey === "function" ? shopEntryKey(e) : (e.brand + "|" + e.name + "|" + e.url));
+    var c = catOf(e);
+    var hex = e.hex || ((typeof buildShopColour === "function") ? buildShopColour(e).hex : "");
+    var nm = String(e.name || ""), br = String(e.brand || "");
+    /* "Giorgio Armani - Pleated trousers" -> "Pleated trousers": the brand is the kicker */
+    if (br && nm.toLowerCase().indexOf(br.toLowerCase()) === 0 && nm.length > br.length + 3) nm = nm.slice(br.length).replace(/^[\s\-–—:|,]+/, "");
+    if (nm) nm = nm.charAt(0).toUpperCase() + nm.slice(1);
+    return { key: key, brand: e.brand || "", name: nm, price: (typeof e.price === "number" ? e.price : parseFloat(e.price) || null),
+      url: e.url || "", img: e.img || "", store: storeName(e), cat: c, colour: cap(colourOf(e)), hex: hex || "" };
+  }
+  function pool() {
+    var base = (typeof shopCatalogueAll === "function") ? shopCatalogueAll() : [];
+    var sale = (typeof SALE_ITEMS !== "undefined" && SALE_ITEMS) ? SALE_ITEMS : [];
+    return EDIT_CATALOG.concat(base, sale);
+  }
+  /* ---------- the verified Edit catalogue (assets/edit-catalog.json) ---------- */
+  window.editNormalizeCatalog = function (j) {
+    var arr = Array.isArray(j) ? j : (j && (j.products || j.items || j.skus)) || [];
+    var out = [], seen = {};
+    arr.forEach(function (p) {
+      if (!p || typeof p !== "object") return;
+      var url = p.url || p.link || p.pdp || p.href;
+      var name = p.name || p.title;
+      var price = typeof p.price === "number" ? p.price : parseFloat(String(p.price || p.price_usd || "").replace(/[^0-9.]/g, ""));
+      var img = p.img || p.image || p.image_url || p.imageUrl || (Array.isArray(p.images) ? (typeof p.images[0] === "string" ? p.images[0] : p.images[0] && (p.images[0].src || p.images[0].url)) : null);
+      if (!url || !name || !isFinite(price) || !img || seen[url]) return;
+      seen[url] = 1;
+      var e = { brand: p.brand || p.vendor || "", name: String(name), price: price, url: url, img: img, retailer: p.store || p.retailer || p.seller || "", colour: p.colour || p.color || "", verified: true };
+      e.cat = catOf({ cat: String(p.cat || p.category || p.type || "").toLowerCase(), name: name });
+      if (typeof p.wasPrice === "number") e.wasPrice = p.wasPrice;
+      out.push(e);
+    });
+    return out;
+  };
+  window.editLoadCatalog = function () {
+    try {
+      fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) {
+        if (!j) return;
+        EDIT_CATALOG = editNormalizeCatalog(j);
+        _textCache = null;
+        if (typeof currentTab !== "undefined" && currentTab === "find") renderTheEdit();
+      }).catch(function () {});
+    } catch (e) {}
+  };
+  window.editCatalogCount = function () { return EDIT_CATALOG.length; };
+
+  /* ---------- notes (edits collection) + searches ---------- */
+  function metaId(key) { return "m-" + h76(key); }
+  function metaFor(key) { var id = metaId(key); return editMeta.filter(function (m) { return m && m.id === id; })[0] || null; }
+  function putMeta(key, patch, sn) {
+    var m = metaFor(key);
+    if (!m) { m = { id: metaId(key), kind: "note", key: key, star: false, pass: false, searches: [], at: nowISO() }; editMeta.unshift(m); }
+    Object.keys(patch).forEach(function (k) { m[k] = patch[k]; });
+    if (sn) m.p = sn;
+    m.upd = nowISO();
+    store.set("editMeta", editMeta);
+    return m;
+  }
+  function isSaved(key) { return !!(typeof wishlistFor === "function" && wishlistFor(key)); }
+  function saveProduct(sn) {
+    if (isSaved(sn.key)) return;
+    shopWishlist.unshift({ key: sn.key, brand: sn.brand, name: sn.name, price: sn.price, wasPrice: null, retailer: sn.store, url: sn.url, img: sn.img,
+      cat: sn.cat, category: "", pieceDesc: "", garment: "", hex: sn.hex || "", colourName: sn.colour || "", addedISO: localTodayISO() });
+    saveShopWishlist();
+    if (typeof refreshWishButtons === "function") refreshWishButtons();
+  }
+  function unsaveProduct(key) {
+    shopWishlist = shopWishlist.filter(function (w) { return w.key !== key; });
+    saveShopWishlist();
+    if (typeof refreshWishButtons === "function") refreshWishButtons();
+  }
+  function searchById(id) { return editSearches.filter(function (s) { return s && s.id === id; })[0] || null; }
+  function shortlistAdd(sn) {
+    var s = editState.openSearch ? searchById(editState.openSearch) : null;
+    if (!s) return;
+    s.shortlist = (s.shortlist || []).filter(function (x) { return x.key !== sn.key; });
+    s.shortlist.unshift(sn);
+    s.upd = nowISO();
+    store.set("editSearches", editSearches);
+    var m = metaFor(sn.key);
+    var ids = (m && m.searches) || [];
+    if (ids.indexOf(s.id) === -1) putMeta(sn.key, { searches: [s.id].concat(ids).slice(0, 12) }, sn);
+  }
+  function shortlistDrop(key) {
+    var ch = false;
+    editSearches.forEach(function (s) {
+      var n = (s.shortlist || []).length;
+      s.shortlist = (s.shortlist || []).filter(function (x) { return x.key !== key; });
+      if (s.shortlist.length !== n) { s.upd = nowISO(); ch = true; }
+    });
+    if (ch) store.set("editSearches", editSearches);
+  }
+
+  /* ---------- store search ---------- */
+  var SYN = { pants: ["trouser", "pant", "chino"], trousers: ["trouser", "pant", "chino"], trouser: ["trouser", "pant", "chino"], chinos: ["chino"], sneakers: ["sneaker", "trainer"], sneaker: ["sneaker", "trainer"],
+    sweater: ["sweater", "knit", "crew", "cardigan", "jumper", "pullover"], sweaters: ["sweater", "knit", "crew", "cardigan", "jumper", "pullover"], knit: ["knit", "sweater", "crew"], crewneck: ["crew", "crewneck"],
+    jacket: ["jacket", "blouson", "bomber", "overshirt"], tee: ["tee", "t-shirt"], tshirt: ["tee", "t-shirt"], loafers: ["loafer"], shoes: ["shoe", "loafer", "sneaker", "boot", "derby", "oxford"],
+    grey: ["grey", "gray"], gray: ["grey", "gray"], navy: ["navy", "midnight"], olive: ["olive", "khaki", "military"], cream: ["cream", "ecru", "off-white", "ivory"], tan: ["tan", "camel", "beige"], beige: ["beige", "tan", "sand", "stone"] };
+  var _textCache = null;
+  function textOf(e) {
+    if (!_textCache) _textCache = new WeakMap();
+    var t = _textCache.get(e);
+    if (t === undefined) {
+      t = (" " + [e.brand, e.name, e.cat, e.category, e.retailer, e.colour, (e.keys || []).join(" ")].join(" ") + " ").toLowerCase();
+      _textCache.set(e, t);
+    }
+    return t;
+  }
+  function alts(tok) {
+    var a = SYN[tok] ? SYN[tok].slice() : [tok];
+    if (tok.length > 3 && /s$/.test(tok)) a.push(tok.slice(0, -1));
+    if (a.indexOf(tok) === -1) a.push(tok);
+    return a;
+  }
+  window.editSearchCatalog = function (q) {
+    var toks = String(q || "").toLowerCase().replace(/[^a-z0-9\- ]+/g, " ").split(/\s+/).filter(function (t) { return t && ["men", "mens", "men's", "the", "a", "and", "in", "for", "with"].indexOf(t) === -1; });
+    if (!toks.length) return [];
+    var A = toks.map(alts), seen = {}, out = [];
+    pool().forEach(function (e) {
+      if (!e || !e.url || !e.name || !e.img || seen[e.url]) return;
+      if (/\/wom[ae]n|womens/.test(e.url)) return;
+      var t = textOf(e), score = 0;
+      for (var i = 0; i < A.length; i++) {
+        var hit = false;
+        for (var j = 0; j < A[i].length; j++) if (t.indexOf(A[i][j]) !== -1) { hit = true; break; }
+        if (!hit) return;
+        if ((" " + String(e.name).toLowerCase() + " ").indexOf(A[i][0]) !== -1) score += 2;
+      }
+      seen[e.url] = 1;
+      if (e.verified) score += 3;
+      if (e.sq === "good") score += 1;
+      out.push({ e: e, s: score });
+    });
+    out.sort(function (a, b) { return b.s - a.s || (a.e.price || 0) - (b.e.price || 0); });
+    return out.map(function (x) { return x.e; });
+  };
+  function recordSearch(q, results) {
+    var norm = String(q).trim().toLowerCase().replace(/\s+/g, " ");
+    /* Typing refines the search in place: a newer query that extends
+       (or trims) the one recorded seconds ago, with nothing shortlisted
+       from it yet, replaces it instead of piling up partials. */
+    var top = editSearches[0];
+    if (top && top.kind === "search" && !(top.shortlist || []).length && top.last && Date.now() - Date.parse(top.last) < 30000) {
+      var tq = String(top.q || "").toLowerCase();
+      if (tq !== norm && (norm.indexOf(tq) === 0 || tq.indexOf(norm) === 0)) { top.q = String(q).trim(); }
+    }
+    var s = editSearches.filter(function (x) { return x && String(x.q || "").toLowerCase() === norm; })[0];
+    var prices = results.map(function (e) { return e.price; }).filter(function (p) { return typeof p === "number"; });
+    if (!s) { s = { id: "s-" + Date.now().toString(36) + h76(norm).slice(0, 4), kind: "search", q: String(q).trim(), shortlist: [], at: nowISO() }; editSearches.unshift(s); }
+    else { editSearches = editSearches.filter(function (x) { return x !== s; }); editSearches.unshift(s); }
+    s.seen = results.length;
+    s.lo = prices.length ? Math.min.apply(null, prices) : null;
+    s.hi = prices.length ? Math.max.apply(null, prices) : null;
+    s.last = nowISO();
+    s.upd = s.last;
+    store.set("editSearches", editSearches);
+    return s;
+  }
+  function runSearch(q, keepOpen) {
+    q = String(q || "").trim();
+    if (!q) { editState.openSearch = null; renderSearches(); return; }
+    var res = editSearchCatalog(q).filter(function (e) { var m = metaFor(snap(e).key); return !(m && m.pass); });
+    var s = recordSearch(q, res);
+    editState.openSearch = s.id;
+    editState.results = res;
+    var inp = document.getElementById("edit-search-q");
+    if (inp && inp.value !== q) inp.value = q;
+    renderSearches();
+    updateCounts();
+  }
+  window.editRunSearch = runSearch;
+
+  /* ---------- cards ---------- */
+  var SNAPS = {};
+  function remember(sn) { SNAPS[sn.key] = sn; return sn; }
+  function cardHTML(sn, ctx) {
+    remember(sn);
+    var saved = isSaved(sn.key), m = metaFor(sn.key), inLook = boardHasKey(sn.key);
+    return '<article class="card edit-pc' + (m && m.star ? " is-star" : "") + '" data-edit-key="' + esc(sn.key) + '">' +
+      '<div class="edit-ph"><img src="' + esc(sn.img) + '" alt="" loading="lazy" decoding="async" /></div>' +
+      '<button type="button" class="edit-heart" data-edit-save aria-pressed="' + (saved ? "true" : "false") + '" aria-label="' + (saved ? "Saved" : "Save") + '">' + EDIT_HEART + "</button>" +
+      '<button type="button" class="edit-add' + (inLook ? " on" : "") + '" data-edit-look>' + (inLook ? "In look" : "+ Look") + "</button>" +
+      '<div class="edit-body"><span class="edit-kick">' + esc(sn.brand) + "</span><h3>" + esc(sn.name) + "</h3>" +
+      '<div class="edit-row"><span class="edit-price">' + money(sn.price) + '</span><span class="edit-store">' + esc(sn.store) + "</span></div>" +
+      '<div class="edit-acts"><button type="button" class="edit-ico" data-edit-star aria-pressed="' + (m && m.star ? "true" : "false") + '" aria-label="Star">' + EDIT_STAR + "</button>" +
+      '<button type="button" class="edit-ico" data-edit-pass aria-label="Not for me">' + EDIT_DOWN + "</button>" +
+      '<button type="button" class="edit-onme" data-edit-onme>On me</button></div>' +
+      "</div></article>";
+  }
+
+  /* ---------- Saved ---------- */
+  var GROUPS = ["Category", "Colour", "Search", "Brand", "Store", "Price"];
+  function band(p) { return typeof p !== "number" ? "No price" : p < 250 ? "Under $250" : p < 500 ? "$250–500" : p < 1000 ? "$500–1,000" : "$1,000+"; }
+  var BAND_ORDER = ["Under $250", "$250–500", "$500–1,000", "$1,000+", "No price"];
+  function savedList() {
+    return (shopWishlist || []).map(function (w) { var sn = snap(w); sn.added = w.addedISO || ""; return sn; });
+  }
+  function groupName(sn, g) {
+    if (g === "Category") return CAT_LABEL[sn.cat] || "Other";
+    if (g === "Colour") return sn.colour || "Other";
+    if (g === "Brand") return sn.brand || "Other";
+    if (g === "Store") return sn.store || "Other";
+    if (g === "Price") return band(sn.price);
+    if (g === "Search") {
+      var m = metaFor(sn.key), s = m && m.searches && m.searches.length ? searchById(m.searches[0]) : null;
+      if (!s) s = editSearches.filter(function (x) { return (x.shortlist || []).some(function (y) { return y.key === sn.key; }); })[0] || null;
+      return s ? s.q : "Wishlist";
+    }
+    return "";
+  }
+  function renderSaved() {
+    var f = document.getElementById("edit-groups");
+    if (f) f.innerHTML = '<button type="button" class="chip edit-chip" data-edit-starred aria-pressed="' + (editState.starred ? "true" : "false") + '" aria-label="Starred only">' + EDIT_STAR + "</button>" +
+      GROUPS.map(function (g) { return '<button type="button" class="chip edit-chip" data-edit-group="' + g + '" aria-pressed="' + (editState.group === g ? "true" : "false") + '">' + g + "</button>"; }).join("");
+    var out = document.getElementById("edit-saved-out");
+    if (!out) return;
+    var all = savedList();
+    var q = editState.q;
+    var list = all.filter(function (sn) {
+      var m = metaFor(sn.key);
+      if (editState.starred && !(m && m.star)) return false;
+      if (!q) return true;
+      return (sn.brand + " " + sn.name + " " + sn.colour + " " + (CAT_LABEL[sn.cat] || "") + " " + sn.store + " " + groupName(sn, "Search")).toLowerCase().indexOf(q) !== -1;
+    });
+    if (!all.length) {
+      out.innerHTML = '<div class="card empty edit-empty">Nothing saved yet.<div class="edit-empty-acts"><button type="button" class="btn-ink" data-edit-view="searches">Search the stores</button></div></div>';
+      return;
+    }
+    var groups = {}, g = editState.group;
+    list.forEach(function (sn) { var n = groupName(sn, g); (groups[n] = groups[n] || []).push(sn); });
+    var names = Object.keys(groups);
+    if (g === "Price") names.sort(function (a, b) { return BAND_ORDER.indexOf(a) - BAND_ORDER.indexOf(b); });
+    else names.sort(function (a, b) { return groups[b].length - groups[a].length || a.localeCompare(b); });
+    names.forEach(function (n) { groups[n].sort(function (a, b) { var ma = metaFor(a.key), mb = metaFor(b.key); return ((mb && mb.star) ? 1 : 0) - ((ma && ma.star) ? 1 : 0); }); });
+    out.innerHTML = names.length ? names.map(function (n) {
+      return '<div class="edit-sec"><h3>' + esc(n) + '</h3><span class="edit-meta">' + groups[n].length + (groups[n].length === 1 ? " piece" : " pieces") + "</span></div>" +
+        '<div class="edit-grid">' + groups[n].map(function (sn) { return cardHTML(sn, "saved"); }).join("") + "</div>";
+    }).join("") : '<p class="empty">Nothing saved matches.</p>';
+  }
+
+  /* ---------- Searches ---------- */
+  function legacyFinds() {
+    var list = (typeof finds !== "undefined" && Array.isArray(finds)) ? finds : [];
+    return list.filter(function (f) { return f && f.desc; }).map(function (f) {
+      var ms = String(f.id || "").match(/(\d{10,})/) ? parseInt(RegExp.$1, 10) : NaN;
+      return { id: "f:" + (f.id || h76(f.desc)), q: f.desc, shortlist: [], at: isFinite(ms) ? new Date(ms).toISOString() : "", legacy: true };
+    });
+  }
+  function allSearches() {
+    var have = {};
+    editSearches.forEach(function (s) { have[String(s.q || "").toLowerCase()] = 1; });
+    return editSearches.concat(legacyFinds().filter(function (s) { return !have[String(s.q).toLowerCase()]; }));
+  }
+  function when(iso) { var d = iso ? new Date(iso) : null; return d && isFinite(d.getTime()) ? d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : ""; }
+  function thumbHTML(sn) {
+    remember(sn);
+    return '<button type="button" class="edit-thumb" data-edit-thumb="' + esc(sn.key) + '"><span class="edit-tph"><img src="' + esc(sn.img) + '" alt="" loading="lazy" decoding="async" /></span>' +
+      '<span class="edit-tt"><b>' + esc(sn.brand) + '</b></span><span class="edit-tt">' + money(sn.price) + "</span></button>";
+  }
+  function renderSearches() {
+    var out = document.getElementById("edit-search-out");
+    if (!out) return;
+    var open = editState.openSearch ? searchById(editState.openSearch) : null;
+    var gapsHost = document.getElementById("edit-gaps"), lookHost = document.getElementById("edit-today-look");
+    if (open) {
+      var res = editState.results || [];
+      if (!res.length || editState._resFor !== open.id) {
+        res = editSearchCatalog(open.q).filter(function (e) { var m = metaFor(snap(e).key); return !(m && m.pass); });
+        editState.results = res; editState._resFor = open.id;
+      }
+      var shown = res.slice(0, editState.more ? 96 : 48);
+      out.innerHTML = '<div class="edit-open-h"><div><h3>' + esc(open.q) + '</h3><span class="edit-meta">' + res.length + (res.length === 1 ? " result" : " results") + " · " + (open.shortlist || []).length + " shortlisted</span></div>" +
+        '<button type="button" class="chip" data-edit-close-search aria-label="Close search">Done</button></div>' +
+        ((open.shortlist || []).length ? '<div class="edit-strip">' + open.shortlist.map(thumbHTML).join("") + "</div>" : "") +
+        (shown.length ? '<div class="edit-grid">' + shown.map(function (e) { return cardHTML(snap(e), "search"); }).join("") + "</div>" : '<p class="empty">No matches in the stores yet.</p>') +
+        (res.length > shown.length ? '<div class="edit-more"><button type="button" class="btn-ghost" data-edit-more>Show more</button></div>' : "");
+      if (gapsHost) gapsHost.hidden = true;
+      if (lookHost) lookHost.hidden = true;
+      return;
+    }
+    editState.results = []; editState._resFor = null; editState.more = false;
+    var list = allSearches();
+    out.innerHTML = list.length ? list.map(function (s) {
+      var sl = s.shortlist || [];
+      var range = (typeof s.lo === "number" && typeof s.hi === "number") ? " · " + money(s.lo) + "–" + money(s.hi) : "";
+      var seen = typeof s.seen === "number" ? sl.length + " shortlisted of " + s.seen : (sl.length ? sl.length + " shortlisted" : "");
+      var meta = [when(s.last || s.at), seen].filter(Boolean).join(" · ") + range;
+      return '<article class="card edit-srch" data-edit-search="' + esc(s.id) + '"><div class="edit-srch-top"><div><h3>' + esc(s.q) + '</h3><p class="edit-meta">' + esc(meta) + "</p></div>" +
+        '<div class="edit-srch-acts"><button type="button" class="chip" data-edit-open="' + esc(s.id) + '">Open</button>' +
+        (s.legacy ? "" : '<button type="button" class="edit-ico" data-edit-del-search="' + esc(s.id) + '" aria-label="Delete search">' + EDIT_X + "</button>") + "</div></div>" +
+        (sl.length ? '<div class="edit-strip">' + sl.map(thumbHTML).join("") + "</div>" : "") + "</article>";
+    }).join("") : "";
+    if (gapsHost) gapsHost.hidden = false;
+    if (lookHost) lookHost.hidden = false;
+    renderGaps();
+  }
+  var DEFAULT_SUGGEST = ["Navy suede loafers", "Linen trousers", "Cashmere crewneck", "Unstructured blazer", "White sneakers", "Knit polo"];
+  function renderGaps() {
+    var host = document.getElementById("edit-gaps");
+    if (!host) return;
+    var gaps = (typeof lastWishlist !== "undefined" && lastWishlist) ? lastWishlist.slice(0, 6).map(function (w) { return w.desc; }).filter(Boolean) : [];
+    var have = {};
+    editSearches.forEach(function (s) { have[String(s.q).toLowerCase()] = 1; });
+    var sug = gaps.concat(DEFAULT_SUGGEST).filter(function (q, i, a) { return a.indexOf(q) === i && !have[q.toLowerCase()]; }).slice(0, 8);
+    host.innerHTML = sug.length ? '<div class="edit-sec"><h3>Try</h3></div><div class="edit-sug">' + sug.map(function (q) {
+      return '<button type="button" class="chip" data-edit-suggest="' + esc(q) + '">' + esc(q) + "</button>";
+    }).join("") + "</div>" : "";
+  }
+
+  /* ---------- Build ---------- */
+  var SLOTS = ["layer", "top", "bottom", "shoes"];
+  var SLOT_LABEL = { layer: "Layer", top: "Top", bottom: "Bottom", shoes: "Shoes" };
+  var board = store.get("editBoard", null);
+  if (!board || typeof board !== "object") board = {};
+  function saveBoard() { store.set("editBoard", board); }
+  function closetPool() { return (typeof tryonClosetPool === "function") ? tryonClosetPool() : { layer: [], top: [], bottom: [], shoes: [] }; }
+  function itemSrc(it) {
+    var ph = it && it.photo;
+    if (ph && /^blob:[0-9a-f]{16,}/.test(ph) && window.blobStore && window.blobStore.cache && window.blobStore.cache[ph.slice(5)]) return window.blobStore.cache[ph.slice(5)];
+    if (ph && ph.indexOf("idb:") === 0 && window.photoVault && window.photoVault.cache && window.photoVault.cache[ph.slice(4)]) return window.photoVault.cache[ph.slice(4)];
+    return ph || "";
+  }
+  function slotOptions(slot) {
+    var opts = slot === "layer" ? [null] : [];
+    (closetPool()[slot] || []).forEach(function (it) { opts.push({ t: "c", id: it.id }); });
+    savedList().forEach(function (sn) { if (slotOfCat(sn.cat) === slot) opts.push({ t: "p", p: sn }); });
+    var cur = board[slot];
+    if (cur && cur.t === "p" && !opts.some(function (o) { return o && o.t === "p" && o.p.key === cur.p.key; })) opts.push(cur);
+    return opts;
+  }
+  function sameRef(a, b) { if (!a || !b) return !a && !b; return a.t === b.t && (a.t === "c" ? a.id === b.id : a.p.key === b.p.key); }
+  function resolve(ref) {
+    if (!ref) return null;
+    if (ref.t === "c") { var it = closetItemById(ref.id); return it ? { own: true, it: it, name: it.name || "", brand: it.brand || "", img: itemSrc(it) } : null; }
+    return { own: false, p: ref.p, name: ref.p.name, brand: ref.p.brand, img: ref.p.img, saved: isSaved(ref.p.key) };
+  }
+  function ensureBoard() {
+    var pool = closetPool();
+    /* First open: a whole outfit from his closet, with his newest
+       saved piece already in its slot. */
+    if (!Object.keys(board).length) {
+      SLOTS.forEach(function (s) { var first = (pool[s] || [])[0]; if (first) board[s] = { t: "c", id: first.id }; });
+      var nw = savedList().filter(function (sn) { return SLOTS.indexOf(slotOfCat(sn.cat)) !== -1; })[0];
+      if (nw) board[slotOfCat(nw.cat)] = { t: "p", p: nw };
+      saveBoard();
+    }
+    SLOTS.forEach(function (s) {
+      var r = board[s];
+      if (r && !resolve(r)) { delete board[s]; r = null; }
+      if (!r && s !== "layer" && !(s in board)) { var first = (pool[s] || [])[0]; if (first) board[s] = { t: "c", id: first.id }; }
+    });
+  }
+  function boardHasKey(key) { return SLOTS.some(function (s) { return board[s] && board[s].t === "p" && board[s].p.key === key; }); }
+  function boardPieces() { return SLOTS.map(function (s) { return { slot: s, x: resolve(board[s]) }; }).filter(function (o) { return o.x; }); }
+  function renderBuild() {
+    ensureBoard();
+    var host = document.getElementById("edit-board");
+    if (!host) return;
+    host.innerHTML = SLOTS.map(function (s) {
+      var x = resolve(board[s]);
+      var n = slotOptions(s).length;
+      var tag = !x ? "" : x.own ? '<span class="edit-tag">Closet</span>' : (x.saved ? '<span class="edit-tag shop">Saved</span>' : '<span class="edit-tag shop">Shop</span>');
+      return '<section class="card edit-slot" data-edit-slot="' + s + '"><div class="edit-slot-h"><span class="edit-kick">' + SLOT_LABEL[s] + "</span>" + tag + "</div>" +
+        '<div class="edit-slot-row"><button type="button" class="edit-arrow" data-edit-step="-1" data-slot="' + s + '" aria-label="Previous ' + SLOT_LABEL[s] + '"' + (n < 2 ? " disabled" : "") + ">‹</button>" +
+        (x ? '<div class="edit-sph"><img src="' + esc(x.img) + '" alt="" decoding="async" /></div><div class="edit-sm"><span class="edit-kick">' + esc(x.own ? (x.it.colourName || "") : x.brand) + "</span><h3>" + esc(x.name) + "</h3>" +
+          (x.own ? "" : '<div class="edit-price">' + money(x.p.price) + (x.p.store ? " · " + esc(x.p.store) : "") + "</div>") + "</div>"
+          : '<div class="edit-sph edit-none"></div><div class="edit-sm"><h3>' + (s === "layer" ? "No layer" : "Nothing yet") + "</h3></div>") +
+        '<button type="button" class="edit-arrow" data-edit-step="1" data-slot="' + s + '" aria-label="Next ' + SLOT_LABEL[s] + '"' + (n < 2 ? " disabled" : "") + ">›</button></div></section>";
+    }).join("");
+    var buy = boardPieces().filter(function (o) { return !o.x.own; }).map(function (o) { return o.x.p; });
+    var bn = document.getElementById("edit-buy-n");
+    if (bn) bn.textContent = buy.length ? buy.length + (buy.length === 1 ? " piece" : " pieces") : "All from your closet";
+    var bo = document.getElementById("edit-buy-out");
+    if (bo) bo.innerHTML = buy.map(function (p) {
+      return '<div class="edit-buy-row"><div class="edit-bph"><img src="' + esc(p.img) + '" alt="" loading="lazy" /></div><div class="edit-sm"><span class="edit-kick">' + esc(p.brand) + "</span><h3>" + esc(p.name) + '</h3><div class="edit-store">' + money(p.price) + (p.store ? " · " + esc(p.store) : "") + "</div></div>" +
+        (p.url ? '<a class="btn-ink edit-buy" href="' + esc(p.url) + '" target="_blank" rel="noopener">Buy</a>' : "") + "</div>";
+    }).join("") + (buy.length ? '<div class="edit-total"><span>Total</span><span>' + money(buy.reduce(function (a, p) { return a + (p.price || 0); }, 0)) + "</span></div>" : "");
+    var tb = document.getElementById("edit-tobuy");
+    if (tb) tb.hidden = !buy.length;
+    renderBuiltLooks();
+    syncOnMeCard();
+  }
+  function boardTitle() {
+    return boardPieces().map(function (o) { return o.x.name; }).filter(Boolean).slice(0, 4).join(", ");
+  }
+  function boardSig() { return SLOTS.map(function (s) { var r = board[s]; return r ? (r.t === "c" ? "c:" + r.id : "p:" + r.p.key) : "-"; }).join("|"); }
+  var onme = { sig: null, state: null, url: null, text: "", fallback: false };
+  function syncOnMeCard() {
+    var c = document.getElementById("edit-onme");
+    if (!c) return;
+    if (onme.sig !== boardSig() || !onme.state) { c.hidden = true; return; }
+    c.hidden = false;
+    var pcs = boardPieces(), own = pcs.filter(function (o) { return o.x.own; }).length, toBuy = pcs.length - own;
+    var fig = onme.state === "loading" ? '<div class="edit-on-fig edit-wait"><span class="analyze-spin" aria-hidden="true"></span></div>'
+      : onme.url ? '<div class="edit-on-fig"><img id="edit-onme-img" src="' + esc(onme.url) + '" alt="This outfit on you" data-popout="' + esc(onme.url) + '" /></div>'
+      : '<div class="edit-on-fig edit-wait"></div>';
+    c.innerHTML = '<div class="card edit-on">' + fig + '<div class="edit-on-side"><span class="edit-kick">' + (onme.fallback ? "Closest on you" : "On you") + "</span><h3>" + esc(boardTitle()) + "</h3>" +
+      '<span class="edit-store" id="edit-onme-status" role="status">' + esc(onme.state === "done" && !onme.fallback ? (own + " from your closet · " + toBuy + " to buy") : onme.text) + "</span>" +
+      (onme.state === "done" ? '<button type="button" class="btn-accent" id="edit-save-look">Save look</button>' : "") + "</div></div>";
+  }
+  var buildRun = 0;
+  function seeBoard() {
+    var pcs = boardPieces();
+    if (!pcs.length) return;
+    var run = ++buildRun, sig = boardSig();
+    onme = { sig: sig, state: "loading", url: null, text: "Getting ready…", fallback: false };
+    syncOnMeCard();
+    var c = document.getElementById("edit-onme");
+    if (c && c.scrollIntoView) try { c.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (e) {}
+    var products = pcs.filter(function (o) { return !o.x.own; }).map(function (o) { return o.x.p; });
+    var closet = pcs.filter(function (o) { return o.x.own; }).map(function (o) { return o.x.it; });
+    var items = tryonPiecesItems(products, closet);
+    tryonJob(items, function (state, text, url) {
+      if (run !== buildRun) return;
+      if (state === "done") onme = { sig: sig, state: "done", url: url, text: "", fallback: false };
+      else if (state === "error") {
+        var first = products[0];
+        var fb = tryonNearestOnbody(closet.map(function (i) { return i.id; }), first ? slotOfCat(first.cat) : null, first ? first.hex : null);
+        onme = { sig: sig, state: fb ? "done" : "error", url: fb, text: text, fallback: !!fb };
+      } else onme = { sig: sig, state: "loading", url: null, text: text, fallback: false };
+      syncOnMeCard();
+    }, function () { return run === buildRun; });
+  }
+  function shuffleBoard() {
+    SLOTS.forEach(function (s) {
+      var o = slotOptions(s);
+      if (o.length) board[s] = o[Math.floor(Math.random() * o.length)];
+    });
+    saveBoard();
+    renderBuild();
+  }
+  /* Built looks ride the edits collection (kind "look"). */
+  function builtLooks() { return editMeta.filter(function (m) { return m && m.kind === "look"; }); }
+  function saveBuiltLook() {
+    var id = "l-" + h76(boardSig());
+    editMeta = editMeta.filter(function (m) { return m.id !== id; });
+    editMeta.unshift({ id: id, kind: "look", title: boardTitle(), board: JSON.parse(JSON.stringify(board)), img: onme.fallback ? null : onme.url, at: nowISO(), upd: nowISO() });
+    store.set("editMeta", editMeta);
+    if (typeof toast === "function") toast("Look saved.");
+    renderBuiltLooks();
+  }
+  function renderBuiltLooks() {
+    var host = document.getElementById("edit-looks");
+    if (!host) return;
+    var ls = builtLooks();
+    host.innerHTML = ls.length ? '<div class="edit-sec"><h3>Your looks</h3><span class="edit-meta">' + ls.length + "</span></div>" +
+      '<div class="edit-strip">' + ls.map(function (l) {
+        var img = l.img || (function () { for (var i = 0; i < SLOTS.length; i++) { var x = resolve(l.board && l.board[SLOTS[i]]); if (x && x.img) return x.img; } return ""; })();
+        return '<button type="button" class="edit-thumb edit-look-thumb" data-edit-load-look="' + esc(l.id) + '"><span class="edit-tph"><img src="' + esc(img) + '" alt="" loading="lazy" /></span><span class="edit-tt">' + esc(l.title || "") + "</span></button>";
+      }).join("") + "</div>" : "";
+  }
+  function putInLook(sn) {
+    var s = slotOfCat(sn.cat);
+    if (SLOTS.indexOf(s) === -1) { if (typeof toast === "function") toast("Belts and ties aren't in looks yet."); return; }
+    board[s] = { t: "p", p: sn };
+    saveBoard();
+    shortlistAdd(sn);
+    show("build");
+  }
+
+  /* ---------- view switching ---------- */
+  function updateCounts() {
+    var a = document.getElementById("edit-n-saved"), b = document.getElementById("edit-n-search");
+    if (a) a.textContent = String((shopWishlist || []).length);
+    if (b) b.textContent = String(allSearches().length);
+  }
+  function show(v) {
+    editState.view = v;
+    store.set("editView", v);
+    document.querySelectorAll("[data-edit-view]").forEach(function (b) { if (b.closest(".edit-tabs")) b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-view") === v)); });
+    ["saved", "searches", "build"].forEach(function (n) { var el = document.getElementById("edit-v-" + n); if (el) el.hidden = n !== v; });
+    updateCounts();
+    if (v === "saved") renderSaved();
+    if (v === "searches") renderSearches();
+    if (v === "build") renderBuild();
+    var p = document.getElementById("panel-find");
+    if (p) p.setAttribute("data-edit-mode", v);
+  }
+  window.editShow = show;
+  window.renderTheEdit = function () {
+    if (typeof renderWishlist === "function") { try { renderWishlist(); } catch (e) {} }
+    show(editState.view);
+  };
+  window.editOnSync = function () {
+    if (typeof currentTab !== "undefined" && currentTab === "find") show(editState.view);
+  };
+  window.editBoardState = function () { return JSON.parse(JSON.stringify(board)); };
+
+  /* ---------- events ---------- */
+  function snapFromCard(el) {
+    var card = el.closest("[data-edit-key]");
+    if (!card) return null;
+    return SNAPS[card.getAttribute("data-edit-key")] || null;
+  }
+  function rerender() { if (editState.view === "saved") renderSaved(); else if (editState.view === "searches") renderSearches(); else renderBuild(); updateCounts(); }
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var panel = t.closest("#panel-find");
+    if (!panel) return;
+    var b, sn;
+    if ((b = t.closest("[data-edit-view]"))) { show(b.getAttribute("data-edit-view")); return; }
+    if ((b = t.closest("[data-edit-group]"))) { editState.group = b.getAttribute("data-edit-group"); renderSaved(); return; }
+    if (t.closest("[data-edit-starred]")) { editState.starred = !editState.starred; renderSaved(); return; }
+    if (t.closest("[data-edit-save]")) {
+      sn = snapFromCard(t); if (!sn) return;
+      if (isSaved(sn.key)) { unsaveProduct(sn.key); shortlistDrop(sn.key); }
+      else { saveProduct(sn); shortlistAdd(sn); putMeta(sn.key, { pass: false }, sn); }
+      rerender(); return;
+    }
+    if (t.closest("[data-edit-star]")) {
+      sn = snapFromCard(t); if (!sn) return;
+      var m = metaFor(sn.key), on = !(m && m.star);
+      putMeta(sn.key, { star: on, pass: false }, sn);
+      if (on) { saveProduct(sn); shortlistAdd(sn); }
+      rerender(); return;
+    }
+    if (t.closest("[data-edit-pass]")) {
+      sn = snapFromCard(t); if (!sn) return;
+      var wasSaved = isSaved(sn.key);
+      putMeta(sn.key, { pass: true, star: false }, sn);
+      if (wasSaved) unsaveProduct(sn.key);
+      shortlistDrop(sn.key);
+      editState.results = (editState.results || []).filter(function (x) { return snap(x).key !== sn.key; });
+      rerender();
+      if (typeof showUndoToast === "function") showUndoToast("Passed.", function () {
+        putMeta(sn.key, { pass: false }, sn);
+        if (wasSaved) saveProduct(sn);
+        editState._resFor = null;
+        rerender();
+      });
+      return;
+    }
+    if (t.closest("[data-edit-look]")) { sn = snapFromCard(t); if (sn) putInLook(sn); return; }
+    if (t.closest("[data-edit-onme]")) { sn = snapFromCard(t); if (sn) { shortlistAdd(sn); tryonForEntry(Object.assign({ retailer: sn.store }, sn), false); } return; }
+    if ((b = t.closest("[data-edit-open]"))) {
+      var s = searchById(b.getAttribute("data-edit-open"));
+      var q = s ? s.q : (allSearches().filter(function (x) { return x.id === b.getAttribute("data-edit-open"); })[0] || {}).q;
+      if (q) runSearch(q);
+      return;
+    }
+    if ((b = t.closest("[data-edit-thumb]"))) {
+      var srch = b.closest("[data-edit-search]");
+      if (srch) { var s2 = searchById(srch.getAttribute("data-edit-search")); if (s2) runSearch(s2.q); return; }
+      sn = SNAPS[b.getAttribute("data-edit-thumb")];
+      if (sn) tryonForEntry(Object.assign({ retailer: sn.store }, sn), false);
+      return;
+    }
+    if ((b = t.closest("[data-edit-del-search]"))) {
+      var id = b.getAttribute("data-edit-del-search");
+      var gone = searchById(id), ix = editSearches.indexOf(gone);
+      editSearches = editSearches.filter(function (x) { return x.id !== id; });
+      store.set("editSearches", editSearches);
+      renderSearches(); updateCounts();
+      if (gone && typeof showUndoToast === "function") showUndoToast("Search deleted.", function () {
+        editSearches.splice(Math.max(0, ix), 0, gone); store.set("editSearches", editSearches); renderSearches(); updateCounts();
+      });
+      return;
+    }
+    if (t.closest("[data-edit-close-search]")) { editState.openSearch = null; var si = document.getElementById("edit-search-q"); if (si) si.value = ""; renderSearches(); return; }
+    if (t.closest("[data-edit-more]")) { editState.more = true; renderSearches(); return; }
+    if ((b = t.closest("[data-edit-suggest]"))) { runSearch(b.getAttribute("data-edit-suggest")); return; }
+    if ((b = t.closest("[data-edit-step]"))) {
+      var slot = b.getAttribute("data-slot"), opts = slotOptions(slot), cur = -1;
+      opts.forEach(function (o, i) { if (sameRef(o, board[slot])) cur = i; });
+      var nx = opts[(cur + parseInt(b.getAttribute("data-edit-step"), 10) + opts.length) % opts.length];
+      if (nx) board[slot] = nx; else board[slot] = null;
+      saveBoard(); renderBuild(); return;
+    }
+    if (t.closest("#edit-see")) { seeBoard(); return; }
+    if (t.closest("#edit-shuffle")) { shuffleBoard(); return; }
+    if (t.closest("#edit-save-look")) { saveBuiltLook(); return; }
+    if ((b = t.closest("[data-edit-load-look]"))) {
+      var l = editMeta.filter(function (m) { return m.id === b.getAttribute("data-edit-load-look"); })[0];
+      if (l && l.board) {
+        board = JSON.parse(JSON.stringify(l.board)); saveBoard(); renderBuild();
+        if (l.img) { onme = { sig: boardSig(), state: "done", url: l.img, text: "", fallback: false }; syncOnMeCard(); }
+      }
+      return;
+    }
+  });
+  var qTimer = null;
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (!t) return;
+    if (t.id === "edit-saved-q") { editState.q = t.value.trim().toLowerCase(); renderSaved(); }
+    if (t.id === "edit-search-q") {
+      clearTimeout(qTimer);
+      var v = t.value.trim();
+      if (!v) { editState.openSearch = null; renderSearches(); return; }
+      if (v.length >= 3) qTimer = setTimeout(function () { runSearch(v); }, 1100);
+    }
+  });
+  document.addEventListener("submit", function (e) {
+    if (e.target && e.target.id === "edit-search-form") {
+      e.preventDefault();
+      clearTimeout(qTimer);
+      var inp = document.getElementById("edit-search-q");
+      if (inp) { runSearch(inp.value); try { inp.blur(); } catch (x) {} }
+    }
+  });
+  editLoadCatalog();
+  if (typeof currentTab !== "undefined" && currentTab === "find") renderTheEdit();
+})();
     </script>
   </body>
 </html>

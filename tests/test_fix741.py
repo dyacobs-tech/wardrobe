@@ -25,7 +25,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-18.75.2"
+BUILD = "2026-11-19.76"
 SYNC_HOST = "https://wardrobe-sync.dyacobs.workers.dev"
 KEY = "test-key-fix741"
 ACCT = "test-acct-741"
