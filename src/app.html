@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.7" />
+    <meta name="wardrobe-build" content="2026-11-19.80.8" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -7035,7 +7035,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.7</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.8</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8799,7 +8799,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.7";
+var WARDROBE_BUILD = "2026-11-19.80.8";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -15915,6 +15915,11 @@ function displayLookImg(look, src) {
 window.isCameraSelfieImg = isCameraSelfieImg;
 window.studioImgForLook = studioImgForLook;
 window.displayLookImg = displayLookImg;
+function gridPhotoForLook(l, raw) {
+  var src = arguments.length > 1 ? raw : (l && l.img);
+  return (typeof displayLookImg === "function") ? displayLookImg(l, src || "") : (src || "");
+}
+window.gridPhotoForLook = gridPhotoForLook;
 
 Object.defineProperty(window, "RENDER_POOL", { configurable: true, enumerable: true,
   get: function () { return _renderPool803 || (_renderPool803 = SEED_LOOKS.concat(EXTRA_RENDERS)); },
@@ -25113,7 +25118,7 @@ function renderSaved() {
     return !savedLooks.some(function (s) { return s.id === q.id; }) &&
       !SEED_LOOKS.some(function (s) { return s.id === q.id; });
   });
-  queuedOnly.forEach(function (q) { if (q.fwRender) assigned[q.id] = fwRenderSrc(q); else if (q.img) assigned[q.id] = q.img; });
+  queuedOnly.forEach(function (q) { if (q.fwRender) assigned[q.id] = gridPhotoForLook(q, fwRenderSrc(q)); else if (q.img) assigned[q.id] = gridPhotoForLook(q, q.img); });
   var universe = dedupeLooksByPhoto56(all.concat(queuedOnly));
   /* Build .50: this panel is My Outfits — only looks with at
      least one mapped owned piece render here. Zero-owned saved
@@ -25151,18 +25156,19 @@ function renderSaved() {
      outfit), and the taupe look's stored photo predates its fix
      and points at the wrong outfit, so it shows the taupe render
      — the same outfit, its true photo. */
-  SEED_LOOKS.forEach(function (s) { assigned[s.id] = s.img; });
+  SEED_LOOKS.forEach(function (s) { assigned[s.id] = gridPhotoForLook(s, s.img); });
   savedLooks.forEach(function (l) {
-    if (l.refLook && l.img) { assigned[l.id] = l.img; return; }
+    if (l.refLook && l.img) { assigned[l.id] = gridPhotoForLook(l, l.img); return; }
     /* A From wardrobe look's own photograph is its verified
        render — in its watch variant now — never a palette-matched
        pool render standing in for it. */
-    if (l.fwRender) { assigned[l.id] = fwRenderSrc(l); return; }
-    if (l.source === "uploaded" && l.img) { assigned[l.id] = l.img; return; }
-    if (isTaupeLook(l)) { assigned[l.id] = TAUPE_RENDER; return; }
-    assigned[l.id] = l.img || (rankedPhotoLooks(l.swatches)[0] || {}).img || "assets/photos/316150a1e65e.webp";
+    if (l.fwRender) { assigned[l.id] = gridPhotoForLook(l, fwRenderSrc(l)); return; }
+    if (l.source === "uploaded" && l.img) { assigned[l.id] = gridPhotoForLook(l, l.img); return; }
+    if (isTaupeLook(l)) { assigned[l.id] = gridPhotoForLook(l, TAUPE_RENDER); return; }
+    assigned[l.id] = gridPhotoForLook(l, l.img || (rankedPhotoLooks(l.swatches)[0] || {}).img || "");
   });
   gridImgById = assigned;
+  shown = shown.filter(function (l) { return !!assigned[l.id]; });
   if (!shown.length) {
     grid.innerHTML = '<p class="meta">' + ((q || looksFilter !== "all" || universe.length)
       ? "No outfits match — try a different search or filter."
@@ -25190,7 +25196,7 @@ function renderSaved() {
       '<button type="button" data-queue-add="' + l.id + '">Queue</button>' +
       removeItem +
       "</div>" +
-      '<img src="' + esc(img) + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + esc(img) + '"') + ' />' +
+      (img ? '<img src="' + esc(img) + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + esc(img) + '"') + ' />' : "") +
       /* Cards are photo + title + menu only (build .28): the
          status badges and the palette strip are gone from cards —
          the filter chips carry status now, and the pop-out keeps
@@ -25289,13 +25295,14 @@ function renderOutfitIdeas() {
      corrections (reference, wardrobe render, upload, taupe). */
   var assigned = {};
   shown.forEach(function (l) {
-    if (l.refLook && l.img) { assigned[l.id] = l.img; return; }
-    if (l.fwRender) { assigned[l.id] = fwRenderSrc(l); return; }
-    if (l.source === "uploaded" && l.img) { assigned[l.id] = l.img; return; }
-    if (isTaupeLook(l)) { assigned[l.id] = TAUPE_RENDER; return; }
-    assigned[l.id] = l.img || (rankedPhotoLooks(l.swatches)[0] || {}).img || "assets/photos/316150a1e65e.webp";
+    if (l.refLook && l.img) { assigned[l.id] = gridPhotoForLook(l, l.img); return; }
+    if (l.fwRender) { assigned[l.id] = gridPhotoForLook(l, fwRenderSrc(l)); return; }
+    if (l.source === "uploaded" && l.img) { assigned[l.id] = gridPhotoForLook(l, l.img); return; }
+    if (isTaupeLook(l)) { assigned[l.id] = gridPhotoForLook(l, TAUPE_RENDER); return; }
+    assigned[l.id] = gridPhotoForLook(l, l.img || (rankedPhotoLooks(l.swatches)[0] || {}).img || "");
   });
   Object.keys(assigned).forEach(function (k) { gridImgById[k] = assigned[k]; });
+  shown = shown.filter(function (l) { return !!assigned[l.id]; });
   if (!shown.length) {
     grid.innerHTML = '<p class="meta span-all">' + ((q || oiFilter !== "all" || universe.length)
       ? "No outfit ideas match — try a different search or filter."
@@ -25322,7 +25329,7 @@ function renderOutfitIdeas() {
       '<button type="button" data-queue-add="' + l.id + '">Queue</button>' +
       removeItem +
       "</div>" +
-      '<img src="' + esc(img) + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + esc(img) + '"') + ' />' +
+      (img ? '<img src="' + esc(img) + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + esc(img) + '"') + ' />' : "") +
       '<div class="sb"><h4 ' + openAttr + '>' + esc(displayTitleForLook(l, img)) + "</h4>" +
       "</div></article>";
   }).join("");
@@ -25411,7 +25418,7 @@ function lookGridCard(l, actionsHTML) {
   return '<article class="card saved-card">' +
     '<button type="button" class="card-menu-btn" data-menu-btn aria-label="Actions for ' + esc(l.title) + '" aria-haspopup="true" aria-expanded="false">•••</button>' +
     '<div class="card-menu" hidden>' + menuItems + "</div>" +
-    '<img src="' + esc(l.img || "assets/photos/316150a1e65e.webp") + '" alt="' + esc(l.imgAlt || "") + '" loading="lazy" ' + (l.refLook ? 'data-fav-open="' + l.id + '"' : 'data-popout="' + esc(l.img || "assets/photos/316150a1e65e.webp") + '"') + ' />' +
+    (function () { var g = (typeof lookImg === "function") ? lookImg(l) : gridPhotoForLook(l, l.img); return g ? '<img src="' + esc(g) + '" alt="' + esc(l.imgAlt || "") + '" loading="lazy" ' + (l.refLook ? 'data-fav-open="' + l.id + '"' : 'data-popout="' + esc(g) + '"') + ' />' : ""; }()) +
     '<div class="sb"><h4 data-fav-open="' + l.id + '">' + esc(displayTitleForLook(l, l.img || lookPicturedImg(l))) + "</h4>" +
     "</div></article>";
 }
