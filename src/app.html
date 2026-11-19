@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="DONNA" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.29" />
+    <meta name="wardrobe-build" content="2026-11-19.80.30" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -7369,7 +7369,7 @@
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.29</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.30</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9186,7 +9186,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.29";
+var WARDROBE_BUILD = "2026-11-19.80.30";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -39318,9 +39318,6 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
   function show(v) {
     editState.view = v;
     store.set("editView", v);
-    /* Shop-the-look (data-stl) was covering every Edit tab. Closing it
-       here means the tab the user tapped is actually on screen. */
-    if (typeof window.clearFindLookMode === "function") window.clearFindLookMode();
     document.querySelectorAll("[data-edit-view]").forEach(function (b) { if (b.closest(".edit-tabs")) b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-view") === v)); });
     ["saved", "searches", "build", "ask"].forEach(function (n) { var el = document.getElementById("edit-v-" + n); if (el) el.hidden = n !== v; });
     updateCounts();
@@ -39406,7 +39403,16 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     var panel = t.closest("#panel-find");
     if (!panel) return;
     var b, sn;
-    if ((b = t.closest("[data-edit-view]"))) { show(b.getAttribute("data-edit-view")); return; }
+    if ((b = t.closest("[data-edit-view]"))) {
+      /* Shop-the-look (data-stl) covers every Edit tab. Closing it on a
+         tab tap means the tab the user tapped is actually on screen.
+         Do not clear from show() itself: renderTheEdit, switchTab("find"),
+         and editShow("searches") all call show() and must leave a carried
+         look open. */
+      if (typeof window.clearFindLookMode === "function") window.clearFindLookMode();
+      show(b.getAttribute("data-edit-view"));
+      return;
+    }
     if ((b = t.closest("[data-edit-group]"))) { editState.group = b.getAttribute("data-edit-group"); renderSaved(); return; }
     if (t.closest("[data-edit-starred]")) { editState.starred = !editState.starred; renderSaved(); return; }
     if (t.closest("[data-edit-save]")) {
