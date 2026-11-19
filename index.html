@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.7a" />
+    <meta name="wardrobe-build" content="2026-11-19.78.7b" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5146,9 +5146,18 @@
       .outfit-view .ov-figure.has-cut > img#ov-img {
         -webkit-mask-image: none !important; mask-image: none !important;
         object-fit: contain !important; object-position: center bottom !important;
-        padding: 2% 0 3.5% !important; box-sizing: border-box !important;
-        filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .30));
+        padding: 3.2% 0 1.4% !important; box-sizing: border-box !important;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .22));
       }
+      /* .78.7b: a soft contact shadow on the closet floor under his soles
+         (the cut-out frame puts the soles at ~96% of its height) */
+      #panel-today .today-hero.hero-solo.has-cut .hero-bg::after, .outfit-view .ov-figure.has-cut .hero-bg::after {
+        content: ""; position: absolute; left: 50%; bottom: 2.2%; width: 46%; height: 5.5%; transform: translateX(-50%);
+        background: radial-gradient(closest-side, rgba(20, 12, 6, .50), rgba(20, 12, 6, .26) 55%, rgba(20, 12, 6, 0));
+        pointer-events: none; z-index: 1;
+      }
+      /* the closet backdrop arrives pre-blurred; shown as is, never re-sharpened */
+      #panel-today .today-hero.hero-solo.has-cut .hero-bg img, .outfit-view .ov-figure.has-cut .hero-bg img { filter: none; transform: none; object-position: center 85%; object-fit: cover; }
       /* ================= Build .78.6b — sheets: one way to pop out =================
          Every pop-out is a bottom sheet (or the full-screen outfit view /
          look layer): rounded top corners, a drag handle, its own scroll
@@ -6468,7 +6477,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.7a</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.7b</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8022,7 +8031,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.7a";
+var WARDROBE_BUILD = "2026-11-19.78.7b";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
