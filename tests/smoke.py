@@ -160,8 +160,19 @@ def main() -> int:
         check("Outfit of the day stable across app opens", t_a == t_b, f"{t_a!r} -> {t_b!r}")
 
         # ---- no personal data shipped in the page --------------------------
+        # The rendered page AND every script/style file it loaded are checked.
+        # Intended public strings (the site's own URL, the sync / try-on
+        # worker hosts, the Home location line David asked for) are listed
+        # explicitly in smoke_baseline.json "pii_allow" and removed first;
+        # anything else matching a marker fails the run.
         html = page.content()
-        pii = [w for w in BASELINE.get("pii_markers", []) if w.lower() in html.lower()]
+        code = page.evaluate("""async () => { const urls = [...document.querySelectorAll('script[src],link[rel=stylesheet]')].map(e => e.src || e.href).filter(u => u && u.indexOf(location.origin) === 0);
+          const out = []; for (const u of urls) { try { out.push(await (await fetch(u)).text()); } catch (e) {} } return out.join('\\n'); }""")
+        hay = (html + "\n" + code)
+        for allowed in BASELINE.get("pii_allow", []):
+            hay = hay.replace(allowed, "")
+        low = hay.lower()
+        pii = [w for w in BASELINE.get("pii_markers", []) if w.lower() in low]
         check("No owner PII in the page", not pii, ", ".join(pii))
 
         # ---- dead element ids --------------------------------------------

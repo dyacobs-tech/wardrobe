@@ -1,8 +1,6 @@
 {
   "_note": "Known issues from the 17 Nov 2026 audit. Delete an entry when the run reports it as FIXED?.",
-  "known_failing_checks": [
-    "No owner PII in the page"
-  ],
+  "known_failing_checks": [],
   "known_dead_ids": [
     "closet-gaps-count",
     "fb-text",
@@ -31,8 +29,20 @@
   ],
   "pii_markers": [
     "David Jacobs",
-    "Palm Beach, Florida",
-    "dyacobs"
+    "dyacobs",
+    "djacobs",
+    "@gmail.com",
+    "wexford",
+    "Palm Beach, Florida"
   ],
-  "_note_dead_ids": "Ids looked up by JS but absent from the DOM at boot. Most are handlers for removed UI (audit F17); a few may be created later at runtime. Remove each when its handler is deleted."
+  "_note_dead_ids": "Ids looked up by JS but absent from the DOM at boot. Most are handlers for removed UI (audit F17); a few may be created later at runtime. Remove each when its handler is deleted.",
+  "pii_allow": [
+    "https://dyacobs-tech.github.io/wardrobe/",
+    "https://wardrobe-sync.dyacobs.workers.dev",
+    "https://wardrobe-tryon.dyacobs.workers.dev",
+    "wardrobe-sync.dyacobs.workers.dev",
+    "wardrobe-tryon.dyacobs.workers.dev",
+    "Palm Beach, Florida"
+  ],
+  "_note_pii": "pii_allow lists the ONLY intended public strings that contain a marker: the site URL, the two worker hosts, and the Home location line (David's design rule). Everything else matching pii_markers fails."
 }

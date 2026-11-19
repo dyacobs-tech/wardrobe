@@ -26,4 +26,11 @@ Run it locally:
 
 The GitHub Action (`.github/workflows/smoke.yml`) runs on every push to `main`, on pull requests, daily against the live site, and on demand.
 
-**For the publisher (MUSE):** the publish step must keep the `.github/` and `tests/` folders. If it replaces the whole tree, add them to what it preserves.
+## Every test file
+
+    python3 tests/run_all.py            # serves this checkout, runs every test_*.py + smoke.py
+    python3 tests/run_all.py --only safety update
+
+Tests read the build under test from `sw.js` (`tests/buildinfo.py`), never a hard-coded build number. `tests/quarantine.json` lists tests that run but cannot fail CI, each with the reason and what un-quarantines it. Safety tests: `test_safety1119.py` (no accidental deletes in any synced collection; a dislike never deletes), `test_update1119.py` (updates wait for idle; atomic SW precache; previous code kept one release; image-cache LRU), `test_syncsafety77.py`.
+
+The published site never contains `tests/` (see `PUBLISHING.md`).

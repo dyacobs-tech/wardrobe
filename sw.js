@@ -29,20 +29,27 @@
 // deadline is 30s — long enough for a 2.7MB index.html on a typical
 // phone connection — so a slow fetch is not replaced by a stale
 // cached shell after 4 seconds.
-const WARDROBE_BUILD = '2026-11-19.80.11';
-const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
-const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
-const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
-// On-body renders and cut-outs are cache-first. The cache is versioned
-// on its own and survives build updates; bump ONBODY_CACHE when a file
-// at the same URL changes (the cut-outs are not content-hashed). v3
-// drops the v2 copies whose left shoe was faded out of the matte.
-const ONBODY_CACHE = 'wardrobe-onbody-v3';
+// Preview flow (Nov 19): the same file also runs as the PREVIEW worker at
+// <site>/preview/ (scope .../preview/). Its caches are namespaced
+// 'preview-…' so neither worker ever prunes the other's caches; the preview
+// page's assets/ requests are served from the live site's assets/ (the
+// preview deploy does not duplicate the 600 MB of photos); and the live
+// worker leaves everything under preview/ to the network / preview worker.
+const SCOPE_PATH = new URL(self.registration.scope).pathname;
+const PREVIEW = /\/preview\/$/.test(SCOPE_PATH);
+const NS = PREVIEW ? 'preview-' : '';
+const WARDROBE_BUILD = '2026-11-19.80.14';
+const SHELL_CACHE = NS + 'wardrobe-shell-' + WARDROBE_BUILD;
+const PHOTO_CACHE = NS + 'wardrobe-photos-' + WARDROBE_BUILD;
+const ASSET_CACHE = NS + 'wardrobe-assets-' + WARDROBE_BUILD;
+// Cut-outs keep their filenames when the matte is repaired, so bump
+// ONBODY_CACHE to drop the v2 copies whose left shoe faded out.
+const ONBODY_CACHE = NS + 'wardrobe-onbody-v3';
 // Build .79.3: the JSON manifests (renders, cut-outs, inspo, the Edit
 // catalogue, the cut-out placeholders) are stale-while-revalidate in a
 // cache that survives builds, so a reopen never waits on them; a change
 // lands on the next open.
-const DATA_CACHE = 'wardrobe-data-v2';
+const DATA_CACHE = NS + 'wardrobe-data-v2';
 const DATA_RE = /\/assets\/(onbody\/manifest\.json|onbody-cut\/(manifest|lq|feet)\.json|inspo\/manifest\.json|edit-catalog\.json)$/;
 // Cut-outs (assets/onbody-cut/, and the full-resolution zoom copies in
 // assets/onbody-cut-hq/) are immutable: cache-first in ONBODY_CACHE.
@@ -51,9 +58,9 @@ const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
 // app/<name>.<content-hash>.(js|css), written by scripts/build_shell.py.
 // Those files are immutable: cache-first in CODE_CACHE, which survives
 // builds (activate drops files no longer listed), precached on install.
-const CODE_CACHE = 'wardrobe-code-v1';
+const CODE_CACHE = NS + 'wardrobe-code-v1';
 const CODE_RE = /\/app\/[^\/]+\.[0-9a-f]{10}\.(js|css|json)$/;
-const CODE_FILES = ['./app/app.f15f590af9.css', './app/00-brand-list.27a288fac9.js', './app/01.8e77662400.js', './app/02.b18bff4f12.js', './app/22.318a5abe99.js', './app/23.84718ddeae.js', './app/24.7505b30a4e.js', './app/bundle.b61c891036.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json'];
+const CODE_FILES = ['./app/app.e37830bd48.css', './app/00-brand-list.27a288fac9.js', './app/01.8e77662400.js', './app/02.1fd33684ad.js', './app/22.318a5abe99.js', './app/23.b8fdd92cdc.js', './app/24.7505b30a4e.js', './app/bundle.6a1309b3ff.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json'];
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
@@ -67,32 +74,43 @@ const SHELL_FILES = ['./index.html', './manifest.webmanifest',
 const SHELL_DEADLINE_MS = 400;
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
+// Safety (Nov 19): the precache is ATOMIC. The new shell (index.html for
+// this exact build) and every CODE_FILES entry must be in the caches before
+// this worker may skipWaiting/claim; if any of them failed, install rejects,
+// the new worker is discarded, and the old one keeps serving a complete,
+// working offline app (the browser retries on the next update check). A
+// failed install never leaves a worker stuck in "waiting", so the iOS PWA
+// concern from build .75 does not apply. Icons and fonts stay best-effort.
+const CODE_MANIFEST_KEY = 'https://wardrobe.invalid/__code-manifest__';
 self.addEventListener('install', (event) => {
+  const scopeUrl = (u) => new URL(u, self.registration.scope).toString();
+  const shellHasBuild = (res) => res ? res.clone().text().then((t) => t.indexOf('content="' + WARDROBE_BUILD + '"') !== -1) : Promise.resolve(false);
   event.waitUntil(
-    // Build .75: precache with cache:'reload' so the HTTP cache can never
-    // hand a new worker the previous build's shell, and always skipWaiting —
-    // even when a precache file fails — so an installed iOS PWA is never
-    // left with the new worker stuck in "waiting" behind the old one.
-    // Build .79.3: the page that found this worker usually has just fetched
-    // this very build's shell (into the previous build's cache) — reuse that
-    // copy instead of downloading the 3MB shell a second time.
     caches.open(SHELL_CACHE)
-      .then((cache) => caches.keys().then((keys) => Promise.all(keys.filter((k) => k.indexOf('wardrobe-shell-') === 0 && k !== SHELL_CACHE).map((k) =>
-        caches.open(k).then((c) => c.match(SHELL_KEY)).then((hit) => hit ? hit.clone().text().then((t) => (t.indexOf('content="' + WARDROBE_BUILD + '"') !== -1 ? hit : null)) : null)
+      .then((cache) => caches.keys().then((keys) => Promise.all(keys.filter((k) => k.indexOf(NS + 'wardrobe-shell-') === 0 && k !== SHELL_CACHE).map((k) =>
+        caches.open(k).then((c) => c.match(SHELL_KEY)).then((hit) => shellHasBuild(hit).then((ok) => ok ? hit : null))
       ))).then((hits) => {
         const own = hits.filter(Boolean)[0];
-        const files = own ? SHELL_FILES.filter((u) => u !== './index.html') : SHELL_FILES;
-        return (own ? cache.put(SHELL_KEY, own) : Promise.resolve()).then(() => Promise.all(files.map((u) =>
-          // fonts/icons already cached by an older build are copied, not refetched
-          caches.match(u).then((m) => m && u !== './index.html' ? cache.put(u, m) : cache.add(new Request(u, { cache: 'reload', priority: 'low' })))
-        )));
+        // Required: this build's shell.
+        const shell = own ? cache.put(SHELL_KEY, own) : fetch(new Request('./index.html', { cache: 'reload' })).then((res) => {
+          if (!res || res.status !== 200) throw new Error('shell download failed');
+          return shellHasBuild(res).then((ok) => { if (!ok) throw new Error('shell is not build ' + WARDROBE_BUILD); return cache.put(SHELL_KEY, res); });
+        });
+        // Best-effort: manifest, icons, fonts (copied from an older cache when present).
+        const extras = SHELL_FILES.filter((u) => u !== './index.html').map((u) =>
+          caches.match(u).then((m) => m ? cache.put(u, m) : cache.add(new Request(u, { cache: 'reload', priority: 'low' }))).catch(() => {})
+        );
+        return Promise.all([shell].concat(extras));
       }))
-      .catch(() => {})
+      // Required: every code file of this build.
       .then(() => caches.open(CODE_CACHE).then((cc) => Promise.all(CODE_FILES.map((u) => {
-        const key = new URL(u, self.registration.scope).toString();
+        const key = scopeUrl(u);
         // .80.3: low priority, so Home's next cut-outs go first on a slow link
-        return cc.match(key).then((hit) => hit || fetch(key, { priority: 'low' }).then((res) => { if (res && res.status === 200) return cc.put(key, res); }));
-      }))).catch(() => {}))
+        return cc.match(key).then((hit) => hit || fetch(key, { priority: 'low' }).then((res) => {
+          if (!res || res.status !== 200) throw new Error('code file failed: ' + u);
+          return cc.put(key, res);
+        }));
+      }))))
       .then(() => self.skipWaiting())
   );
 });
@@ -100,20 +118,78 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   const keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE, DATA_CACHE, CODE_CACHE];
   const live = CODE_FILES.map((u) => new URL(u, self.registration.scope).toString());
+  // Safety (Nov 19): the previous build's code files are kept for one more
+  // release, so a page still running the old build (an update held while a
+  // sheet is open, a second tab) never hits a missing file. The cache keeps a
+  // small manifest of which files belong to which build; with no manifest yet
+  // (first activate after this change) nothing is pruned this time.
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
-      keys.filter((k) => keep.indexOf(k) === -1).map((k) => caches.delete(k))
-    )).then(() => caches.open(CODE_CACHE)).then((cc) => cc.keys().then((reqs) => Promise.all(
-      reqs.filter((r) => live.indexOf(r.url) === -1).map((r) => cc.delete(r))
-    ))).then(() => caches.open(ASSET_CACHE)).then((cache) =>
+      // only this worker's own namespace is ever pruned
+      keys.filter((k) => keep.indexOf(k) === -1 && (PREVIEW ? k.indexOf('preview-') === 0 : k.indexOf('preview-') !== 0)).map((k) => caches.delete(k))
+    )).then(() => caches.open(CODE_CACHE)).then((cc) => cc.match(CODE_MANIFEST_KEY)
+      .then((m) => m ? m.json().catch(() => null) : null)
+      .then((old) => {
+        let prev = null;
+        if (old && old.build && old.build !== WARDROBE_BUILD) prev = { build: old.build, files: old.files || [] };
+        else if (old && old.prev) prev = old.prev;
+        const manifest = { build: WARDROBE_BUILD, files: live, prev: prev };
+        const put = cc.put(CODE_MANIFEST_KEY, new Response(JSON.stringify(manifest), { headers: { 'content-type': 'application/json' } }));
+        if (!old) return put; // unknown history: prune nothing this release
+        const keepUrls = live.concat(prev ? prev.files : []).concat([CODE_MANIFEST_KEY]);
+        return put.then(() => cc.keys()).then((reqs) => Promise.all(
+          reqs.filter((r) => keepUrls.indexOf(r.url) === -1).map((r) => cc.delete(r))
+        ));
+      })
+    ).then(() => caches.open(ASSET_CACHE)).then((cache) =>
       // Prune ?r= cache-buster entries an older build may have stored.
       cache.keys().then((reqs) => Promise.all(
         reqs.filter((r) => new URL(r.url).searchParams.has('r'))
           .map((r) => cache.delete(r))
       ))
-    ).then(() => self.clients.claim())
+    ).then(() => trimImageCaches().catch(() => {})).then(() => self.clients.claim())
   );
 });
+
+// Safety/perf (Nov 19): the image caches (cut-outs + on-body renders in
+// ONBODY_CACHE, photos in PHOTO_CACHE) are capped at IMAGE_CACHE_MAX bytes,
+// least-recently-used first, so iOS never evicts the whole origin's storage
+// (localStorage/IndexedDB included) under pressure. Every stored image carries
+// x-sw-size and x-sw-at; a hit older than a day is re-stamped (moved to the
+// recent end); a trim runs a few seconds after writes settle.
+const IMAGE_CACHE_MAX = 150 * 1024 * 1024;
+const LRU_TOUCH_MS = 24 * 60 * 60 * 1000;
+let _trimT = null;
+function putLRU(cache, key, res) {
+  return res.clone().blob().then((body) => {
+    const h = new Headers(res.headers);
+    h.set('x-sw-size', String(body.size)); h.set('x-sw-at', String(Date.now()));
+    return cache.put(key, new Response(body, { status: 200, statusText: 'OK', headers: h }));
+  }).then(scheduleTrim, () => {});
+}
+function touchLRU(cache, key, hit) {
+  const at = +(hit.headers.get('x-sw-at') || 0);
+  if (Date.now() - at < LRU_TOUCH_MS) return Promise.resolve();
+  return putLRU(cache, key, hit);
+}
+function scheduleTrim() {
+  clearTimeout(_trimT);
+  _trimT = setTimeout(() => { trimImageCaches().catch(() => {}); }, 4000);
+}
+function trimImageCaches(max) {
+  const limit = max || IMAGE_CACHE_MAX;
+  return Promise.all([ONBODY_CACHE, PHOTO_CACHE].map((n) => caches.open(n).then((c) => c.keys().then((ks) =>
+    Promise.all(ks.map((k) => c.match(k).then((r) => ({ c, k, at: +((r && r.headers.get('x-sw-at')) || 0), size: +((r && (r.headers.get('x-sw-size') || r.headers.get('content-length'))) || 60000) }))))
+  )))).then((lists) => {
+    const all = [].concat.apply([], lists);
+    let total = all.reduce((t, e) => t + e.size, 0);
+    if (total <= limit) return { total, removed: 0 };
+    all.sort((a, b) => a.at - b.at);
+    const dels = [];
+    for (const e of all) { if (total <= limit * 0.9) break; total -= e.size; dels.push(e.c.delete(e.k)); }
+    return Promise.all(dels).then(() => ({ total, removed: dels.length }));
+  });
+}
 
 // The cache identity of an asset request: its URL without the ?r=
 // cache-buster, so a busted request reads and refreshes the one
@@ -169,6 +245,22 @@ self.addEventListener('fetch', (event) => {
 
   if (FONT_HOSTS.indexOf(url.hostname) !== -1) { staleWhileRevalidate(event, ASSET_CACHE); return; }
   if (url.origin !== self.location.origin) return;
+  // The preview build reads the live site's assets (both workers map
+  // preview/assets/* onto assets/*, so even a first preview visit still
+  // controlled by the live worker resolves them).
+  const ROOT_PATH = PREVIEW ? SCOPE_PATH.replace(/preview\/$/, '') : SCOPE_PATH;
+  if (url.pathname.indexOf(ROOT_PATH + 'preview/assets/') === 0 && !req.headers.has('range')) {
+    const target = url.origin + ROOT_PATH + url.pathname.slice((ROOT_PATH + 'preview/').length);
+    const cacheName = CUT_RE.test(url.pathname) || url.pathname.includes('/assets/onbody/') ? ONBODY_CACHE : (url.pathname.includes('/assets/photos/') ? PHOTO_CACHE : ASSET_CACHE);
+    event.respondWith(caches.open(cacheName).then((cache) => cache.match(target).then((hit) => {
+      const net = fetch(target + url.search).then((res) => { if (res && res.status === 200) { if (cacheName === ASSET_CACHE) cache.put(target, res.clone()); else event.waitUntil(putLRU(cache, target, res)); } return res; });
+      if (hit && cacheName !== ASSET_CACHE) { event.waitUntil(touchLRU(cache, target, hit)); return hit; }
+      return net.catch(() => hit || Promise.reject(new Error('offline')));
+    })));
+    return;
+  }
+  // The live worker never answers for the rest of the preview build.
+  if (!PREVIEW && url.pathname.indexOf(ROOT_PATH + 'preview/') === 0) return;
   // Partial requests (the page's "is there a newer build?" probe) go straight
   // to the network and are never cached.
   if (req.headers.has('range')) return;
@@ -193,9 +285,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.open(ONBODY_CACHE).then((cache) =>
         cache.match(req, { ignoreSearch: true }).then((hit) => {
-          if (hit) return hit;
+          const key = url.origin + url.pathname;
+          if (hit) { event.waitUntil(touchLRU(cache, key, hit)); return hit; }
           return fetch(req).then((res) => {
-            if (res && res.status === 200) cache.put(url.origin + url.pathname, res.clone());
+            if (res && res.status === 200) event.waitUntil(putLRU(cache, key, res));
             return res;
           });
         })
@@ -238,9 +331,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.open(ONBODY_CACHE).then((cache) =>
         cache.match(req, { ignoreSearch: true }).then((hit) => {
-          if (hit) return hit;
+          if (hit) { event.waitUntil(touchLRU(cache, req, hit)); return hit; }
           return fetch(req).then((res) => {
-            if (res && res.status === 200) cache.put(req, res.clone());
+            if (res && res.status === 200) event.waitUntil(putLRU(cache, req, res));
             return res;
           });
         })
@@ -254,9 +347,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.open(PHOTO_CACHE).then((cache) =>
         cache.match(req).then((hit) => {
-          if (hit) return hit;
+          if (hit) { event.waitUntil(touchLRU(cache, req, hit)); return hit; }
           return fetch(req).then((res) => {
-            if (res && res.status === 200) cache.put(req, res.clone());
+            if (res && res.status === 200) event.waitUntil(putLRU(cache, req, res));
             return res;
           });
         })
@@ -300,11 +393,12 @@ self.addEventListener('fetch', (event) => {
 // open or Next paints from Cache Storage.
 self.addEventListener('message', (event) => {
   const d = event.data || {};
+  if (d.type === 'trim-images') { event.waitUntil(trimImageCaches(d.max).then((r) => { if (event.source && event.source.postMessage) event.source.postMessage({ type: 'trimmed', r }); })); return; }
   if (d.type !== 'warm-cuts' || !Array.isArray(d.urls)) return;
   event.waitUntil(caches.open(ONBODY_CACHE).then((cache) => Promise.all(d.urls.slice(0, 8).map((u) => {
     let url; try { url = new URL(u, self.registration.scope); } catch (e) { return null; }
     if (url.origin !== self.location.origin || !CUT_RE.test(url.pathname)) return null;
     const key = url.origin + url.pathname;
-    return cache.match(key).then((hit) => hit || fetch(key).then((res) => { if (res && res.status === 200) return cache.put(key, res); }).catch(() => {}));
+    return cache.match(key).then((hit) => hit || fetch(key).then((res) => { if (res && res.status === 200) return putLRU(cache, key, res); }).catch(() => {}));
   }))));
 });
