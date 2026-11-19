@@ -133,7 +133,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.12" />
+    <meta name="wardrobe-build" content="2026-11-19.80.13" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -153,11 +153,11 @@
 
     <link rel="preload" as="script" fetchpriority="low" href="app/00-brand-list.27a288fac9.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/01.8e77662400.js" />
-    <link rel="preload" as="script" fetchpriority="low" href="app/02.19c51521a4.js" />
+    <link rel="preload" as="script" fetchpriority="low" href="app/02.d0c488c6d5.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/22.318a5abe99.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/23.b8fdd92cdc.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/24.7505b30a4e.js" />
-    <link rel="preload" as="script" fetchpriority="low" href="app/bundle.73e2b6d85f.js" />
+    <link rel="preload" as="script" fetchpriority="low" href="app/bundle.6a1309b3ff.js" />
   </head>
   <body data-page="today">
     <header class="masthead">
@@ -1181,7 +1181,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.12</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.13</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -1956,11 +1956,11 @@
 })();
     </script>
     <script type="wardrobe/app" data-src="app/01.8e77662400.js"></script>
-    <script type="wardrobe/app" data-src="app/02.19c51521a4.js"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="0"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="1"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="2"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="3"></script>
+    <script type="wardrobe/app" data-src="app/02.d0c488c6d5.js"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="0"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="1"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="2"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="3"></script>
     <script>
       /* Offline caching (app side): register the service worker
          Luna ships alongside the site (app-shell precache +
@@ -1990,7 +1990,9 @@
               sessionStorage.setItem(k, String(Date.now()));
             } catch (e) {}
             swRefreshing = true;
-            location.reload();
+            /* Safety (Nov 19): held while a sheet / form is in use. */
+            var goSw = function () { location.reload(); };
+            if (typeof window.wardrobeSafeReload === "function") window.wardrobeSafeReload(goSw); else goSw();
           });
           window.addEventListener("load", function () { (window.afterLookahead803 || function (f) { f(); })(function () {
             navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) {
@@ -2027,20 +2029,20 @@
 <script src="app/23.b8fdd92cdc.js" defer></script>
 
     <script src="app/24.7505b30a4e.js" defer></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="4"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="5"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="6"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="7"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="8"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="9"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="10"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="11"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="12"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="13"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="14"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="15"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="16"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="17"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.73e2b6d85f.js" data-bi="18"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="4"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="5"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="6"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="7"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="8"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="9"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="10"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="11"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="12"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="13"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="14"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="15"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="16"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="17"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.6a1309b3ff.js" data-bi="18"></script>
   </body>
 </html>

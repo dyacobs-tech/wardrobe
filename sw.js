@@ -29,7 +29,7 @@
 // deadline is 30s — long enough for a 2.7MB index.html on a typical
 // phone connection — so a slow fetch is not replaced by a stale
 // cached shell after 4 seconds.
-const WARDROBE_BUILD = '2026-11-19.80.12';
+const WARDROBE_BUILD = '2026-11-19.80.13';
 const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
@@ -52,7 +52,7 @@ const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
 // builds (activate drops files no longer listed), precached on install.
 const CODE_CACHE = 'wardrobe-code-v1';
 const CODE_RE = /\/app\/[^\/]+\.[0-9a-f]{10}\.(js|css|json)$/;
-const CODE_FILES = ['./app/app.f15f590af9.css', './app/00-brand-list.27a288fac9.js', './app/01.8e77662400.js', './app/02.19c51521a4.js', './app/22.318a5abe99.js', './app/23.b8fdd92cdc.js', './app/24.7505b30a4e.js', './app/bundle.73e2b6d85f.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json'];
+const CODE_FILES = ['./app/app.f15f590af9.css', './app/00-brand-list.27a288fac9.js', './app/01.8e77662400.js', './app/02.d0c488c6d5.js', './app/22.318a5abe99.js', './app/23.b8fdd92cdc.js', './app/24.7505b30a4e.js', './app/bundle.6a1309b3ff.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json'];
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
@@ -66,32 +66,43 @@ const SHELL_FILES = ['./index.html', './manifest.webmanifest',
 const SHELL_DEADLINE_MS = 400;
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
+// Safety (Nov 19): the precache is ATOMIC. The new shell (index.html for
+// this exact build) and every CODE_FILES entry must be in the caches before
+// this worker may skipWaiting/claim; if any of them failed, install rejects,
+// the new worker is discarded, and the old one keeps serving a complete,
+// working offline app (the browser retries on the next update check). A
+// failed install never leaves a worker stuck in "waiting", so the iOS PWA
+// concern from build .75 does not apply. Icons and fonts stay best-effort.
+const CODE_MANIFEST_KEY = 'https://wardrobe.invalid/__code-manifest__';
 self.addEventListener('install', (event) => {
+  const scopeUrl = (u) => new URL(u, self.registration.scope).toString();
+  const shellHasBuild = (res) => res ? res.clone().text().then((t) => t.indexOf('content="' + WARDROBE_BUILD + '"') !== -1) : Promise.resolve(false);
   event.waitUntil(
-    // Build .75: precache with cache:'reload' so the HTTP cache can never
-    // hand a new worker the previous build's shell, and always skipWaiting —
-    // even when a precache file fails — so an installed iOS PWA is never
-    // left with the new worker stuck in "waiting" behind the old one.
-    // Build .79.3: the page that found this worker usually has just fetched
-    // this very build's shell (into the previous build's cache) — reuse that
-    // copy instead of downloading the 3MB shell a second time.
     caches.open(SHELL_CACHE)
       .then((cache) => caches.keys().then((keys) => Promise.all(keys.filter((k) => k.indexOf('wardrobe-shell-') === 0 && k !== SHELL_CACHE).map((k) =>
-        caches.open(k).then((c) => c.match(SHELL_KEY)).then((hit) => hit ? hit.clone().text().then((t) => (t.indexOf('content="' + WARDROBE_BUILD + '"') !== -1 ? hit : null)) : null)
+        caches.open(k).then((c) => c.match(SHELL_KEY)).then((hit) => shellHasBuild(hit).then((ok) => ok ? hit : null))
       ))).then((hits) => {
         const own = hits.filter(Boolean)[0];
-        const files = own ? SHELL_FILES.filter((u) => u !== './index.html') : SHELL_FILES;
-        return (own ? cache.put(SHELL_KEY, own) : Promise.resolve()).then(() => Promise.all(files.map((u) =>
-          // fonts/icons already cached by an older build are copied, not refetched
-          caches.match(u).then((m) => m && u !== './index.html' ? cache.put(u, m) : cache.add(new Request(u, { cache: 'reload', priority: 'low' })))
-        )));
+        // Required: this build's shell.
+        const shell = own ? cache.put(SHELL_KEY, own) : fetch(new Request('./index.html', { cache: 'reload' })).then((res) => {
+          if (!res || res.status !== 200) throw new Error('shell download failed');
+          return shellHasBuild(res).then((ok) => { if (!ok) throw new Error('shell is not build ' + WARDROBE_BUILD); return cache.put(SHELL_KEY, res); });
+        });
+        // Best-effort: manifest, icons, fonts (copied from an older cache when present).
+        const extras = SHELL_FILES.filter((u) => u !== './index.html').map((u) =>
+          caches.match(u).then((m) => m ? cache.put(u, m) : cache.add(new Request(u, { cache: 'reload', priority: 'low' }))).catch(() => {})
+        );
+        return Promise.all([shell].concat(extras));
       }))
-      .catch(() => {})
+      // Required: every code file of this build.
       .then(() => caches.open(CODE_CACHE).then((cc) => Promise.all(CODE_FILES.map((u) => {
-        const key = new URL(u, self.registration.scope).toString();
+        const key = scopeUrl(u);
         // .80.3: low priority, so Home's next cut-outs go first on a slow link
-        return cc.match(key).then((hit) => hit || fetch(key, { priority: 'low' }).then((res) => { if (res && res.status === 200) return cc.put(key, res); }));
-      }))).catch(() => {}))
+        return cc.match(key).then((hit) => hit || fetch(key, { priority: 'low' }).then((res) => {
+          if (!res || res.status !== 200) throw new Error('code file failed: ' + u);
+          return cc.put(key, res);
+        }));
+      }))))
       .then(() => self.skipWaiting())
   );
 });
@@ -99,12 +110,29 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   const keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE, DATA_CACHE, CODE_CACHE];
   const live = CODE_FILES.map((u) => new URL(u, self.registration.scope).toString());
+  // Safety (Nov 19): the previous build's code files are kept for one more
+  // release, so a page still running the old build (an update held while a
+  // sheet is open, a second tab) never hits a missing file. The cache keeps a
+  // small manifest of which files belong to which build; with no manifest yet
+  // (first activate after this change) nothing is pruned this time.
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
       keys.filter((k) => keep.indexOf(k) === -1).map((k) => caches.delete(k))
-    )).then(() => caches.open(CODE_CACHE)).then((cc) => cc.keys().then((reqs) => Promise.all(
-      reqs.filter((r) => live.indexOf(r.url) === -1).map((r) => cc.delete(r))
-    ))).then(() => caches.open(ASSET_CACHE)).then((cache) =>
+    )).then(() => caches.open(CODE_CACHE)).then((cc) => cc.match(CODE_MANIFEST_KEY)
+      .then((m) => m ? m.json().catch(() => null) : null)
+      .then((old) => {
+        let prev = null;
+        if (old && old.build && old.build !== WARDROBE_BUILD) prev = { build: old.build, files: old.files || [] };
+        else if (old && old.prev) prev = old.prev;
+        const manifest = { build: WARDROBE_BUILD, files: live, prev: prev };
+        const put = cc.put(CODE_MANIFEST_KEY, new Response(JSON.stringify(manifest), { headers: { 'content-type': 'application/json' } }));
+        if (!old) return put; // unknown history: prune nothing this release
+        const keepUrls = live.concat(prev ? prev.files : []).concat([CODE_MANIFEST_KEY]);
+        return put.then(() => cc.keys()).then((reqs) => Promise.all(
+          reqs.filter((r) => keepUrls.indexOf(r.url) === -1).map((r) => cc.delete(r))
+        ));
+      })
+    ).then(() => caches.open(ASSET_CACHE)).then((cache) =>
       // Prune ?r= cache-buster entries an older build may have stored.
       cache.keys().then((reqs) => Promise.all(
         reqs.filter((r) => new URL(r.url).searchParams.has('r'))

@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.12" />
+    <meta name="wardrobe-build" content="2026-11-19.80.13" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -7226,7 +7226,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.12</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.13</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8990,7 +8990,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.12";
+var WARDROBE_BUILD = "2026-11-19.80.13";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -36729,11 +36729,48 @@ function analyzeFilePiece(card, job, ix) {
      ours. If a newer build is on the server, reload once (session
      guard so it cannot loop). If we already reloaded for this build
      and the stamps still disagree, show the update bar as a fallback. */
+  /* Safety (Nov 19): a new build never reloads the page out from
+     under the user. While a sheet / dialog is open, a field has
+     focus, or something was typed in the last 15 s, the update is
+     held: a subtle "Update ready" bar shows (tap Refresh to apply
+     now), and it applies by itself at the next idle moment. */
+  var lastInput1119 = 0;
+  document.addEventListener("input", function () { lastInput1119 = Date.now(); }, true);
+  function uiBusy1119() {
+    try {
+      var ae = document.activeElement;
+      if (ae && (ae.isContentEditable || (/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && !/^(button|submit|reset|checkbox|radio|range)$/i.test(ae.type || "")))) return true;
+      var open = document.querySelectorAll('dialog[open], [role="dialog"]:not([hidden]), [aria-modal="true"]:not([hidden])');
+      for (var i = 0; i < open.length; i++) {
+        var el = open[i], cs = window.getComputedStyle ? getComputedStyle(el) : null;
+        if (el.getClientRects().length && !(cs && (cs.display === "none" || cs.visibility === "hidden"))) return true;
+      }
+      if (Date.now() - lastInput1119 < 15000) return true;
+    } catch (e) {}
+    return false;
+  }
+  var pendingReload1119 = null, pendingTimer1119 = null;
+  function safeReload1119(go) {
+    go = go || function () { location.reload(); };
+    if (!uiBusy1119()) { go(); return true; }
+    pendingReload1119 = go;
+    var bar = document.getElementById("update-bar");
+    if (bar) { var sp = bar.querySelector("span"); if (sp) sp.textContent = "Update ready."; bar.hidden = false; }
+    if (!pendingTimer1119) pendingTimer1119 = setInterval(function () {
+      if (!pendingReload1119 || uiBusy1119()) return;
+      var f = pendingReload1119; pendingReload1119 = null;
+      clearInterval(pendingTimer1119); pendingTimer1119 = null;
+      f();
+    }, 3000);
+    return false;
+  }
+  window.wardrobeUiBusy = uiBusy1119;
+  window.wardrobeSafeReload = safeReload1119;
   var lastCheck = 0;
   var BUILD_RELOAD_KEY = "wardrobe.reloadFor." + WARDROBE_BUILD;
   function reloadOnceForBuild() {
     try { if (sessionStorage.getItem(BUILD_RELOAD_KEY) === "1") return false; sessionStorage.setItem(BUILD_RELOAD_KEY, "1"); } catch (e) {}
-    location.reload();
+    safeReload1119();
     return true;
   }
   function checkBuild(force) {
@@ -37455,7 +37492,9 @@ function analyzeFilePiece(card, job, ix) {
               sessionStorage.setItem(k, String(Date.now()));
             } catch (e) {}
             swRefreshing = true;
-            location.reload();
+            /* Safety (Nov 19): held while a sheet / form is in use. */
+            var goSw = function () { location.reload(); };
+            if (typeof window.wardrobeSafeReload === "function") window.wardrobeSafeReload(goSw); else goSw();
           });
           window.addEventListener("load", function () { (window.afterLookahead803 || function (f) { f(); })(function () {
             navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) {
