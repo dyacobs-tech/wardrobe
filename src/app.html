@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.16" />
+    <meta name="wardrobe-build" content="2026-11-19.80.17" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2136,6 +2136,13 @@
           font-size: 16px !important;
         }
       }
+
+      /* Build .80.16: Ideas sparkle on the Outfits row; studio back row */
+      .outfits-ideas-btn { display: inline-flex; align-items: center; gap: 6px; }
+      .outfits-ideas-btn svg { width: 15px; height: 15px; fill: currentColor; flex: none; }
+      .studio-back-row { display: flex; align-items: center; justify-content: center; position: relative; min-height: 44px; margin: 0 0 6px; }
+      .studio-back-row .studio-back { position: absolute; left: 0; min-height: 44px; padding: 6px 12px; }
+      .studio-back-title { font-family: var(--font-display); font-size: 20px; }
 </style>
 <style>
       /* ================= Tightening pass — slim nav, quiet hero =================
@@ -6200,6 +6207,7 @@
 
       <!-- ================= STUDIO ================= -->
       <section id="panel-studio" role="tabpanel" aria-labelledby="tab-studio" hidden>
+        <div class="studio-back-row"><button type="button" class="btn-ghost studio-back" id="studio-back" aria-label="Back to Outfits">‹ Outfits</button><span class="studio-back-title">Ideas</span></div>
         <div class="studio-grid">
           <div>
             <div class="source-seg" id="ideas-source-seg" role="group" aria-label="Source — Wardrobe, Inspo or Combo">
@@ -6569,7 +6577,7 @@
           <button type="button" class="chip" id="outfits-mine" aria-pressed="true">Mine</button>
           <button type="button" class="chip" id="outfits-inspo" aria-pressed="false">Inspo</button>
         </div>
-        <div class="outfits-build-row"><button type="button" class="btn-ink" id="outfits-build">Build a look</button><button type="button" class="btn-ghost" id="outfits-shuffle">Shuffle</button></div>
+        <div class="outfits-build-row"><button type="button" class="btn-ink" id="outfits-build">Build a look</button><button type="button" class="btn-ghost outfits-ideas-btn" id="outfits-ideas" aria-label="Ideas — six takes"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg><span>Ideas</span></button><button type="button" class="btn-ghost" id="outfits-shuffle">Shuffle</button></div>
         <div id="outfits-mine-view">
           <div class="looks-tools">
             <input type="search" id="looks-search" class="ward-search" aria-label="Search your looks" placeholder="Search looks" autocomplete="off" />
@@ -7283,7 +7291,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.16</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.17</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9092,7 +9100,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.16";
+var WARDROBE_BUILD = "2026-11-19.80.17";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -31955,7 +31963,10 @@ function switchTab(name, opts) {
      single-page name lands on Profile info, the default. */
   if (name === "profile") name = "pinfo";
   if (name === "calnav") name = "calendar"; /* build .39: pseudo-view guard */
-  if (name === "studio" || name === "outfitideas") name = "looks";
+  /* Build .80.16 (audit P0.1): Ideas is a page again — "studio" opens the
+     six-take studio (Use it on a plate, Show six looks, the Ideas sparkle);
+     the retired outfitideas name lands there too. */
+  if (name === "outfitideas") name = "studio";
   if (name === "gaps") name = "find";
   if (TABS.indexOf(name) === -1) name = "today";
   var prevTab = currentTab;
@@ -31967,7 +31978,7 @@ function switchTab(name, opts) {
      the section's close (×) returns him to that page. */
   if (sec === "me" && sectionOf(prevTab) !== "me") profileReturnTo = prevTab;
   sectionHome[sec] = name;
-  if (name === "studio" && typeof dealOpeningSix === "function") dealOpeningSix();
+  if (name === "studio" && typeof dealOpeningSix === "function") { try { dealOpeningSix(); } catch (e) {} }
   /* Section buttons are plain navigation, not tabs: the one for
      the section in view carries aria-current. */
   document.querySelectorAll(".navbtn").forEach(function (t) {
@@ -32212,6 +32223,9 @@ initToday();
 var openingSixDealt = false;
 function dealOpeningSix() {
   if (openingSixDealt) return;
+  /* .80.16: no dealt look yet (first launch, empty closet) — leave the
+     studio to its own Give me ideas instead of throwing */
+  if (typeof todayLook === "undefined" || !todayLook) return;
   openingSixDealt = true;
   try {
     var derived = todayLook.swatches.filter(function (s) { return s.role && s.role !== "Accent"; }).map(function (s) { return s.name + " " + s.role.toLowerCase(); }).join(" with ");
@@ -32235,7 +32249,7 @@ function dealOpeningSix() {
     }
     renderOptions(six, { desc: derived, occasion: "", season: "", opts: { basis: "both", source: heroSrc, iconId: todayLook.iconId || null } });
   } catch (e) {
-    renderLook(todayLook);
+    try { if (todayLook) renderLook(todayLook); } catch (e2) {}
   }
 }
 restoreTab();
@@ -37475,7 +37489,9 @@ function analyzeFilePiece(card, job, ix) {
     feed.hidden = !want;
     var wardrobeMode = (typeof studioSource !== "undefined" && studioSource === "wardrobe");
     feed.classList.toggle("cf-solo", wardrobeMode);
-    if (result) result.classList.toggle("cf-replaced", wardrobeMode);
+    /* .80.16 (P0.1): the feed lives on Outfits > Mine now — only hide the
+       studio six when the feed actually sits beside them */
+    if (result) result.classList.toggle("cf-replaced", wardrobeMode && feed.parentNode === result.parentNode);
     if (!want) return;
     var looksPanel = document.getElementById("panel-looks");
     var panel = document.getElementById("panel-studio");
@@ -41442,5 +41458,14 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   }, 2500);
 })();
     </script>
-  </body>
+  <script>
+/* Build .80.16 (audit P0.1): reach the Ideas studio and come back */
+(function () {
+  var ib = document.getElementById("outfits-ideas");
+  if (ib) ib.addEventListener("click", function () { switchTab("studio"); });
+  var bk = document.getElementById("studio-back");
+  if (bk) bk.addEventListener("click", function () { switchTab("looks"); });
+})();
+</script>
+</body>
 </html>
