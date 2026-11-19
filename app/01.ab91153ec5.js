@@ -1,0 +1,738 @@
+
+/* ================= Build .78.8c — occasion-only pieces =================
+   A piece can carry occasionOnly (e.g. ["Pool"]): it is dealt ONLY in
+   looks of that occasion. Pool slides (any shoe whose name or subtype
+   says slide) are Pool-only by default: never with regular clothes.
+   Enforced in the composer (Home outfit of the day / Next, the Outfits
+   feed), the anchor / closet-look / combo / idea generators, the Build
+   board's first fill and Shuffle, and Ask's Owns row. */
+function itemOccasionOnly(item) {
+  if (!item) return null;
+  if (Array.isArray(item.occasionOnly) && item.occasionOnly.length) return item.occasionOnly;
+  if (item.occasionOnly === false) return null;
+  var cat = String(item.category || item.cat || "");
+  var t = (String(item.name || "") + " " + String(item.subtype || item.subcategory || item.type || "")).toLowerCase();
+  if ((cat === "Shoes" || /shoe|footwear|sandal|slide/i.test(cat)) && /\bslides?\b|pool slide|slide sandal/.test(t)) return ["Pool"];
+  return null;
+}
+function itemPoolOnly(item) { var o = itemOccasionOnly(item); return !!(o && o.some(function (x) { return /pool|beach|swim/i.test(String(x)); })); }
+function pieceIsSwim(item) {
+  if (!item) return false;
+  var cat = String(item.category || item.cat || "");
+  return cat === "Bathing suits" || /swim/i.test(cat) || (cat === "Shorts" && /swim|trunk/i.test(String(item.name || "")));
+}
+/* a look's pieces as closet items, whatever shape the look has */
+function lookItems788(look) {
+  if (!look) return [];
+  var out = [], seen = {};
+  function add(x) {
+    if (!x) return;
+    if (typeof x === "string") x = typeof closetItemById === "function" ? closetItemById(x) : null;
+    else if (x.id && !x.category && typeof closetItemById === "function") x = closetItemById(x.id) || x;
+    if (x && x.id && !seen[x.id]) { seen[x.id] = 1; out.push(x); }
+  }
+  (look.fwPieces || []).forEach(add);
+  (look.pieces || []).forEach(function (p) { add(p && (p.item || p)); });
+  (look.itemIds || look.ids || []).forEach(add);
+  if (look.composerKey && typeof look.composerKey === "string") look.composerKey.split("|").forEach(add);
+  return out;
+}
+function lookIsPoolCtx(look, occasion) {
+  if (occasion && /pool|beach|swim/i.test(String(occasion))) return true;
+  if (lookItems788(look).some(pieceIsSwim)) return true;
+  return false;
+}
+/* false when a Pool-only piece is in a look that is not a Pool look */
+function lookOccasionOk(look, occasion) {
+  var its = lookItems788(look);
+  if (!its.some(itemPoolOnly)) return true;
+  return lookIsPoolCtx(look, occasion);
+}
+/* Build .73 — Closet outfit composer (continued) */
+/* ================= Build .73 — Closet outfit composer =================
+   Endless outfits from the live closet, on the device. A rules-based
+   composer: every closet piece is profiled (role, formality range,
+   colour family, lightness, pattern, warmth) from its own category,
+   name and colour; every top × bottom × shoes × optional layer that
+   passes the colour and formality rules is a valid outfit; outfits
+   are dealt by weighted sampling (styling score, likes/dislikes,
+   piece coverage so every piece — newest first — gets dealt) and a
+   recently seen combination is never dealt again. Pure: no DOM, no
+   app globals; the app glue lives in the last script block. */
+(function (root) {
+  "use strict";
+  var TOP_CATS = { "Tees": 1, "Polos": 1, "Shirts": 1, "Button downs": 1, "Sweaters": 1 };
+  var BOTTOM_CATS = { "Trousers": 1, "Jeans": 1, "Shorts": 1, "Bathing suits": 1 };
+  var LAYER_CATS = { "Blazers": 1, "Suits": 1, "Jackets": 1, "Coats": 1, "Leather jackets": 1, "Vests": 1 };
+  var ACC_CATS = { "Sunglasses": 1, "Hats": 1, "Scarves": 1, "Belts": 1 };
+  var FAMILIES = [
+    [/\bnavy\b|midnight|indigo/, "navy", true],
+    [/\bblack\b|onyx|jet/, "black", true],
+    [/charcoal|\bgr[ae]y\b|silver|heather|slate grey|slate gray/, "grey", true],
+    [/\bwhite\b|ivory|cream|ecru|off-white|bone|chalk/, "white", true],
+    [/beige|stone|khaki|sand|oatmeal|taupe|camel|\btan\b|natural|fawn|biscuit|mushroom/, "beige", true],
+    [/brown|chocolate|cognac|tobacco|espresso|mocha/, "brown", true],
+    [/olive|sage|army/, "olive", true],
+    [/denim|chambray|light blue|sky|powder blue|slate blue|blue stripe|\bblue\b/, "blue", true],
+    [/teal|petrol|turquoise/, "teal", false],
+    [/mint|dark green|forest|bottle green|\bgreen\b|emerald/, "green", false],
+    [/burgundy|wine|oxblood|bordeaux|maroon/, "burgundy", false],
+    [/\bred\b|crimson|scarlet|carmine/, "red", false],
+    [/yellow|mustard|lemon|butter/, "yellow", false],
+    [/orange|rust|terracotta|coral/, "orange", false],
+    [/pink|rose|salmon/, "pink", false],
+    [/purple|lilac|lavender|violet|plum/, "purple", false]
+  ];
+  var PATTERN_RE = /plaid|check|stripe|striped|checkerboard|houndstooth|gingham|paisley|tartan|breton|zigzag|geometric|camo/;
+
+  function hexToHsl(hex) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
+    if (!m) return { h: 0, s: 0, l: 50 };
+    var n = parseInt(m[1], 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, h = 0, s = 0;
+    if (mx !== mn) {
+      var d = mx - mn;
+      s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+      if (mx === r) h = (g - b) / d + (g < b ? 6 : 0); else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return { h: h, s: s, l: l * 100 };
+  }
+  function familyOf(colourText, hsl) {
+    var t = String(colourText || "").toLowerCase();
+    for (var i = 0; i < FAMILIES.length; i++) if (FAMILIES[i][0].test(t)) return { fam: FAMILIES[i][1], neutral: FAMILIES[i][2] };
+    /* No colour word: read the hex. Low saturation reads as a neutral. */
+    if (hsl.s < 0.18 || hsl.l > 88 || hsl.l < 14) return { fam: hsl.l > 70 ? "white" : (hsl.l < 25 ? "black" : "grey"), neutral: true };
+    var h = hsl.h;
+    var fam = h < 15 || h >= 345 ? "red" : h < 40 ? "orange" : h < 65 ? "yellow" : h < 160 ? "green" : h < 190 ? "teal" : h < 250 ? "blue" : h < 290 ? "purple" : "pink";
+    return { fam: fam, neutral: fam === "blue" && hsl.s < 0.45 };
+  }
+
+  /* Lightness from the colour's NAME first: closet hexes are sampled
+     from photos and run muddy (a white polo can sample mid-grey). */
+  var NAME_L = [
+    [/off-white|ivory|cream|ecru|bone|chalk/, 90], [/\bwhite\b/, 95], [/oatmeal|beige|stone|sand|khaki|natural/, 78],
+    [/mint|yellow|lemon|butter|powder|sky/, 80], [/camel|\btan\b|fawn/, 60], [/taupe|mushroom/, 58],
+    [/charcoal/, 25], [/\bgr[ae]y\b|silver|heather/, 58], [/olive|army/, 40], [/slate/, 45], [/denim|chambray|indigo/, 48],
+    [/teal|petrol/, 40], [/burgundy|wine|oxblood|maroon/, 28], [/\bred\b|rust|terracotta|orange/, 45],
+    [/brown|chocolate|cognac|tobacco/, 35], [/green|forest/, 32], [/navy|midnight/, 18], [/\bblack\b/, 10], [/\bblue\b/, 50], [/pink|rose|salmon/, 75]
+  ];
+  function nameLightness(colourName) {
+    var t = String(colourName || "").toLowerCase().split(/[\/·,]| and /)[0];
+    for (var i = 0; i < NAME_L.length; i++) {
+      if (NAME_L[i][0].test(t)) {
+        var L = NAME_L[i][1];
+        if (/\blight\b|pale|faded|washed/.test(t)) L += 18;
+        if (/\bdark\b|deep/.test(t)) L -= 15;
+        return Math.max(5, Math.min(97, L));
+      }
+    }
+    return null;
+  }
+  /* Formality ranges on the app's seven outfit types:
+     1 Swim/Pool · 2 Shorts & Tee · 3 Casual · 4 Smart Casual ·
+     5 Business Casual · 6 Formal · 7 Black Tie. */
+  function profile(item, idx) {
+    var cat = item.category || "";
+    var name = String(item.name || "").toLowerCase();
+    var colourName = String(item.colourName || "").toLowerCase();
+    var n = name + " " + colourName;
+    var hsl = hexToHsl(item.colourHex);
+    var fc = familyOf(colourName + " " + name, hsl);
+    var p = {
+      poolOnly: typeof itemPoolOnly === "function" ? itemPoolOnly(item) : false,
+      swim: typeof pieceIsSwim === "function" ? pieceIsSwim(item) : false,
+      id: item.id, idx: idx, cat: cat, name: item.name || "", n: n,
+      role: "none", lo: 3, hi: 4, kind: "",
+      L: (function () { var nl = nameLightness(item.colourName); return nl === null ? hsl.l : nl; })(), fam: fc.fam, neutral: fc.neutral,
+      pattern: PATTERN_RE.test(n), denim: /denim|chambray/.test(n) || cat === "Jeans",
+      warm: 0, collared: false, overshirt: false, casualShirt: false, shortSleeve: false,
+      fresh: !!(item.addedISO && (Date.now() - Date.parse(item.addedISO)) < 21 * 864e5)
+    };
+    if (TOP_CATS[cat]) {
+      p.role = "top";
+      if (cat === "Tees") { p.lo = 1; p.hi = 3; p.kind = "tee"; p.shortSleeve = !/long-sleeve|long sleeve/.test(n); p.warm = -1; }
+      else if (cat === "Polos") {
+        p.collared = true; p.kind = "polo";
+        if (/long-sleeve|long sleeve|cashmere|knit|merino|wool/.test(n)) { p.lo = 3; p.hi = 6; p.warm = /cashmere|wool/.test(n) ? 1 : 0; }
+        else { p.lo = 1; p.hi = 4; p.shortSleeve = true; p.warm = -1; }
+      } else if (cat === "Sweaters") {
+        p.kind = "knit"; p.warm = 2;
+        if (/turtle|roll/.test(n)) { p.lo = 3; p.hi = 6; } else { p.lo = 3; p.hi = 5; }
+      } else {
+        p.collared = true; p.kind = "shirt";
+        if (/overshirt|shacket|waffle/.test(n)) { p.overshirt = true; p.casualShirt = true; p.lo = 3; p.hi = 4; p.kind = "overshirt"; p.warm = 1; }
+        else if (/flannel|western|corduroy|cord\b|work shirt|camp|hawaiian/.test(n)) { p.casualShirt = true; p.lo = 3; p.hi = 4; p.warm = /flannel|corduroy|suede/.test(n) ? 2 : 0; }
+        else if (/linen/.test(n)) { p.lo = 2; p.hi = 5; p.warm = -2; }
+        else if (/denim|chambray/.test(n)) { p.lo = 3; p.hi = 5; }
+        else if (/popover/.test(n)) { p.casualShirt = true; p.lo = 3; p.hi = 4; }
+        else if (/jersey/.test(n)) { p.lo = 3; p.hi = 5; }
+        else if (/plaid|check|cashmere/.test(n)) { p.casualShirt = true; p.lo = 3; p.hi = 4; p.warm = 1; }
+        else { p.lo = 3; p.hi = 7; }
+        if (/short-sleeve|short sleeve/.test(n)) { p.shortSleeve = true; p.hi = Math.min(p.hi, 4); p.lo = Math.min(p.lo, 2); }
+        if (p.pattern && !/stripe/.test(n)) p.hi = Math.min(p.hi, 4);
+        if (p.hi >= 7 && !(p.fam === "white" || p.fam === "black" || (p.fam === "blue" && p.L > 60))) p.hi = 6;
+      }
+    } else if (BOTTOM_CATS[cat]) {
+      p.role = "bottom";
+      if (cat === "Bathing suits") { p.lo = 1; p.hi = 1; p.kind = "swim"; p.warm = -3; }
+      else if (cat === "Shorts") { p.lo = 1; p.hi = 3; p.kind = "shorts"; p.warm = -3; if (/swim/.test(n)) p.hi = 2; }
+      else if (cat === "Jeans") { p.lo = 2; p.hi = 4; p.kind = "jeans"; }
+      else {
+        p.kind = "trousers";
+        if (/linen/.test(n)) { p.lo = 1; p.hi = 4; p.warm = -2; p.kind = "linen"; }
+        else if (/seersucker/.test(n)) { p.lo = 3; p.hi = /dress/.test(n) ? 6 : 5; p.warm = -2; }
+        else if (/5-pocket|five-pocket|jogger|drawstring/.test(n)) { p.lo = 2; p.hi = 4; }
+        else if (/chino|twill|cotton/.test(n)) { p.lo = 3; p.hi = 5; p.kind = "chinos"; }
+        else if (/dress|wool|flannel|tailored|pleat|tuxedo/.test(n) && !/seersucker/.test(n)) { p.lo = 4; p.hi = /tuxedo/.test(n) ? 7 : 6; p.warm = /flannel|wool/.test(n) ? 1 : 0; }
+        else { p.lo = 3; p.hi = 6; }
+        if (p.hi === 6 && (p.fam === "navy" || p.fam === "black" || p.fam === "grey") && /dress|tailored|wool|tuxedo/.test(n)) p.hi = 7;
+      }
+    } else if (cat === "Shoes") {
+      p.role = "shoes";
+      if (/espadrille/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "espadrille"; p.warm = -2; }
+      else if (/sneaker|runner|trainer|vans|canvas|toms\b/.test(n)) {
+        p.kind = "sneaker"; p.warm = -1;
+        if (/suede|leather|intrecciato/.test(n)) { p.lo = 1; p.hi = 4; } else { p.lo = 1; p.hi = 3; }
+      }
+      else if (/boat|deck/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "boat"; }
+      else if (/slide|sandal/.test(n)) { p.lo = 1; p.hi = 2; p.kind = "sandal"; p.warm = -3; }
+      else if (/venetian|furlane|slipper/.test(n)) { p.lo = 2; p.hi = 5; p.kind = "slipper"; }
+      else if (/loafer|moccasin|driver/.test(n)) {
+        p.kind = "loafer";
+        if (/driver|moccasin/.test(n)) { p.lo = 2; p.hi = 4; }
+        else if (/suede/.test(n)) { p.lo = 3; p.hi = 6; }
+        else { p.lo = 3; p.hi = 7; }
+        if (p.hi === 7 && !(p.fam === "black" || p.fam === "navy" || p.fam === "brown")) p.hi = 6;
+      }
+      else if (/oxford|derby|brogue|monk|opera|pump/.test(n)) { p.lo = 4; p.hi = 7; p.kind = "dress"; }
+      else if (/boot/.test(n)) { p.lo = 3; p.hi = 5; p.kind = "boot"; p.warm = 2; }
+      else { p.lo = 2; p.hi = 5; p.kind = "shoe"; }
+    } else if (LAYER_CATS[cat]) {
+      p.role = "layer";
+      if (cat === "Suits") { p.lo = 5; p.hi = 7; p.kind = "suit"; p.warm = 1; }
+      else if (cat === "Blazers") {
+        p.kind = "blazer"; p.warm = 1;
+        if (/knit|jersey|unstructured/.test(n)) { p.lo = 4; p.hi = 5; }
+        else if (/linen|seersucker/.test(n)) { p.lo = 4; p.hi = 6; p.warm = -1; }
+        else if (p.pattern) { p.lo = 4; p.hi = 5; }
+        else if (/velvet|tuxedo|dinner|dolce|burgundy|black|midnight/.test(n)) { p.lo = 5; p.hi = 7; }
+        else { p.lo = 4; p.hi = 6; }
+      }
+      else if (cat === "Coats") { p.lo = 3; p.hi = 7; p.kind = "coat"; p.warm = 3; }
+      else if (cat === "Vests") { p.lo = 3; p.hi = 5; p.kind = "vest"; }
+      else { p.lo = 2; p.hi = 4; p.kind = "jacket"; p.warm = 2; }
+    } else if (ACC_CATS[cat]) {
+      p.role = "acc"; p.lo = 1; p.hi = 7; p.kind = cat.toLowerCase();
+    }
+    if (/cashmere|wool|flannel|corduroy/.test(n) && p.warm < 1 && p.role !== "shoes") p.warm = 1;
+    return p;
+  }
+
+  function sameTone(a, b, dl) { return a.fam === b.fam && Math.abs(a.L - b.L) < dl; }
+
+  /* One outfit candidate. Returns null when a rule fails, else
+     { lo, hi, score } — the outfit-type range it works in and its
+     styling score. */
+  function evaluate(top, bottom, shoes, layer) {
+    var lo = Math.max(top.lo, bottom.lo, shoes.lo), hi = Math.min(top.hi, bottom.hi, shoes.hi);
+    if (layer) { lo = Math.max(lo, layer.lo); hi = Math.min(hi, layer.hi); }
+    if (lo > hi) return null;
+    var clothes = layer ? [layer, top, bottom] : [top, bottom];
+    var statements = 0, patterns = 0;
+    clothes.forEach(function (c) { if (!c.neutral) statements++; if (c.pattern) patterns++; });
+    if (statements > 1 || patterns > 1) return null;
+    if (shoes.pattern && patterns > 0) return null;
+    if (!shoes.neutral && statements > 0) return null;
+    /* Double denim — a denim or chambray shirt over blue jeans. */
+    if (bottom.cat === "Jeans" && bottom.fam === "blue" && (top.denim || (layer && layer.denim))) return null;
+    /* Tonal top and bottom only in the light family (cream on cream). */
+    if (sameTone(top, bottom, 12) && !(top.fam === "white" || top.fam === "beige") && !layer) return null;
+    if (layer) {
+      if (layer.kind === "blazer" || layer.kind === "suit") {
+        if (top.overshirt || /western/.test(top.n) || top.kind === "tee" && lo > 4) return null;
+        if (bottom.kind === "shorts" || bottom.kind === "swim") return null;
+        /* A blazer the colour of the trousers reads as an orphaned suit. */
+        if (layer.kind === "blazer" && sameTone(layer, bottom, 14)) return null;
+      }
+      if ((layer.kind === "knit" || layer.kind === "vest") && !(top.kind === "shirt" || (layer.kind === "vest" && top.kind === "polo"))) return null;
+      if (layer.kind === "overshirt" && !(top.kind === "tee" || (top.kind === "polo" && top.shortSleeve))) return null;
+      if (sameTone(layer, top, 10)) return null;
+      if (layer.pattern && top.pattern) return null;
+    }
+    /* Shorts and swim stay casual; a smart shirt never meets swim. */
+    if ((bottom.kind === "shorts" || bottom.kind === "swim") && top.kind === "knit") return null;
+    if ((bottom.kind === "shorts" || bottom.kind === "swim") && (shoes.kind === "loafer" && shoes.hi >= 7)) return null;
+    /* .78.8c: Pool-only pieces (pool slides) only ever meet swim */
+    if ((shoes.poolOnly || top.poolOnly || (layer && layer.poolOnly)) && !(bottom.kind === "swim" || bottom.swim)) return null;
+    var score = 0;
+    var upper = layer || top;
+    var dl = Math.abs(upper.L - bottom.L);
+    if (dl >= 18 && dl <= 72) score += 1.5; else if (dl < 10) score -= 0.6;
+    if (layer && Math.abs(layer.L - top.L) >= 20) score += 0.5;
+    if (statements === 1) score += 0.5; else score += 0.2;
+    if (patterns === 1 && layer && !layer.pattern) score += 0.3;
+    if ((shoes.fam === "brown" || shoes.fam === "beige") && /navy|grey|blue|white|olive|beige/.test(bottom.fam)) score += 0.7;
+    if (shoes.fam === "navy" && /beige|white|grey|olive/.test(bottom.fam)) score += 0.7;
+    if (shoes.kind === "sneaker" && bottom.cat === "Jeans") score += 0.4;
+    if (shoes.fam === "brown" && bottom.fam === "black") score -= 0.8;
+    if (top.fam === "black" && bottom.fam === "navy") score -= 0.5;
+    if (sameTone(shoes, bottom, 6) && bottom.L > 70) score -= 0.3;
+    return { lo: lo, hi: hi, score: score };
+  }
+
+  /* Structural rules per outfit type. */
+  function fitsLevel(L, top, bottom, shoes, layer) {
+    var lk = layer ? layer.kind : "";
+    if (L === 1) return !layer && (bottom.kind === "swim" || bottom.kind === "shorts" || bottom.kind === "linen") && (top.kind === "tee" || top.shortSleeve || /linen/.test(top.n));
+    if (L === 2) return (bottom.kind === "shorts" || bottom.kind === "swim") && (top.kind === "tee" || top.kind === "polo" || /linen/.test(top.n) || top.shortSleeve) && (!layer || lk === "overshirt");
+    if (L === 3) return lk !== "blazer" && lk !== "suit";
+    if (L === 4) return true;
+    if (L === 5) return top.kind !== "tee" && bottom.kind !== "shorts" && bottom.kind !== "swim";
+    if (L === 6) return (lk === "blazer" || lk === "suit") && (top.kind === "shirt" && !top.casualShirt || top.kind === "polo" && !top.shortSleeve || top.kind === "knit" && /turtle|roll/.test(top.n));
+    if (L === 7) return (lk === "blazer" || lk === "suit") && layer.hi >= 7 && top.kind !== "tee";
+    return true;
+  }
+
+  function Deck(items) {
+    this.items = (items || []).filter(function (i) { return i && i.id && !i.laundry; });
+    this.prof = this.items.map(profile);
+    var tops = [], bottoms = [], shoes = [], layers = [], accs = [];
+    this.prof.forEach(function (p) {
+      if (p.role === "top") tops.push(p);
+      else if (p.role === "bottom") bottoms.push(p);
+      else if (p.role === "shoes") shoes.push(p);
+      else if (p.role === "layer") layers.push(p);
+      else if (p.role === "acc") accs.push(p);
+    });
+    /* Knits double as a layer over a collared shirt; overshirts
+       double as a layer over a tee or short-sleeve polo. */
+    var layerOpts = [null].concat(layers);
+    tops.forEach(function (t) {
+      if (t.kind === "knit") layerOpts.push(Object.assign({}, t, { role: "layer", kind: "knit" }));
+      if (t.overshirt) layerOpts.push(Object.assign({}, t, { role: "layer", kind: "overshirt" }));
+    });
+    this.tops = tops; this.bottoms = bottoms; this.shoes = shoes; this.layerOpts = layerOpts; this.accs = accs;
+    var combos = [];
+    for (var a = 0; a < tops.length; a++) for (var b = 0; b < bottoms.length; b++) for (var c = 0; c < shoes.length; c++) for (var d = 0; d < layerOpts.length; d++) {
+      var t = tops[a], bt = bottoms[b], s = shoes[c], ly = layerOpts[d];
+      if (ly && ly.id === t.id) continue;
+      var ev = evaluate(t, bt, s, ly);
+      if (!ev) continue;
+      var mask = 0;
+      for (var L = ev.lo; L <= ev.hi; L++) if (fitsLevel(L, t, bt, s, ly)) mask |= (1 << L);
+      if (!mask) continue;
+      var cids = [t.id, bt.id, s.id].concat(ly ? [ly.id] : []);
+      combos.push({ t: t, b: bt, s: s, l: ly, mask: mask, score: ev.score, ids: cids, key: comboKey(cids) });
+    }
+    this.combos = combos;
+  }
+  function comboKey(ids) { return ids.slice().sort().join("|"); }
+  Deck.prototype.forLevel = function (level) {
+    if (!level) return this.combos;
+    var bit = 1 << level;
+    this._lv = this._lv || {};
+    if (this._lv[level]) return this._lv[level];
+    var out = this.combos.filter(function (c) { return c.mask & bit; });
+    /* Formal / Black Tie when the closet has few pieces that dressy:
+       the true matches first, topped up with the most formal the
+       closet can do — a tailored jacket over a dress shirt or knit
+       polo on a Business Casual base (scored a notch lower). */
+    if (level >= 6 && out.length < 1500) {
+      var have = {};
+      out.forEach(function (c) { have[c.key] = 1; });
+      var extra = this.forLevel(level - 1).filter(function (c) {
+        return !have[c.key] && c.l && (c.l.kind === "blazer" || c.l.kind === "suit") && c.t.kind !== "tee" && !c.t.casualShirt && !c.t.shortSleeve && c.s.kind !== "sneaker" && c.s.kind !== "espadrille" && c.s.kind !== "boat" && c.b.kind !== "jeans";
+      });
+      out = out.concat(extra.map(function (c) { return Object.assign({}, c, { score: c.score - 0.6 }); }));
+      if (!out.length) out = this.forLevel(level - 1);
+    }
+    this._lv[level] = out;
+    return out;
+  };
+  Deck.prototype.uniqueCount = function (level) { return this.forLevel(level).length; };
+  Deck.prototype.coverage = function (level) {
+    var seen = {};
+    this.forLevel(level).forEach(function (c) { [c.t, c.b, c.s, c.l].forEach(function (p) { if (p) seen[p.id] = 1; }); });
+    return seen;
+  };
+  function itemIds(c) { var ids = [c.t.id, c.b.id, c.s.id]; if (c.l) ids.push(c.l.id); return ids; }
+
+  /* Deal `count` outfits.
+     opts: level (1–7 or null for any), temp (°F or null),
+     prefs { items: {id: w}, pairs: {"a|b": w} }, exposure {id: n},
+     recent (array of keys, newest last), banned {key: 1},
+     rng () -> [0,1). */
+  Deck.prototype.deal = function (count, opts) {
+    opts = opts || {};
+    var rng = opts.rng || Math.random;
+    var pool = this.forLevel(opts.level || null);
+    if (!pool.length) return [];
+    /* Build .75: restrict to combos that have an on-body render. */
+    if (opts.onlyKeys) {
+      var okKeys = pool.filter(function (c) { return !!opts.onlyKeys[c.key]; });
+      if (!okKeys.length) return [];
+      pool = okKeys;
+    }
+    var temp = typeof opts.temp === "number" ? opts.temp : null;
+    if (temp !== null) {
+      var wx = pool.filter(function (c) {
+        if (temp >= 84 && (c.t.warm >= 2 || (c.l && c.l.warm >= 2))) return false;
+        if (temp < 55 && (c.b.kind === "shorts" || c.b.kind === "swim" || c.s.kind === "espadrille" || c.s.kind === "sandal")) return false;
+        if (temp < 45 && !c.l) return false;
+        return true;
+      });
+      if (wx.length) pool = wx;
+    }
+    var prefs = opts.prefs || {}, pItems = prefs.items || {}, pPairs = prefs.pairs || {};
+    var hasPairs = false;
+    for (var pk in pPairs) { if (pPairs[pk]) { hasPairs = true; break; } }
+    var exposure = opts.exposure || {};
+    var banned = opts.banned || {};
+    var recentArr = opts.recent || [];
+    var prof = this.prof, NI = prof.length;
+    /* Per-combo base weight: styling score + piece/pair preferences
+       + weather fit, computed once per deal. */
+    var base = new Float64Array(pool.length);
+    for (var i = 0; i < pool.length; i++) {
+      var c = pool[i], pref = 0;
+      var ids = c.ids;
+      for (var j = 0; j < ids.length; j++) {
+        pref += (pItems[ids[j]] || 0);
+        if (hasPairs) for (var k = j + 1; k < ids.length; k++) pref += (pPairs[ids[j] < ids[k] ? ids[j] + "|" + ids[k] : ids[k] + "|" + ids[j]] || 0);
+      }
+      var wxs = 0;
+      if (temp !== null) {
+        var w = c.t.warm + c.b.warm + (c.l ? c.l.warm : 0) + c.s.warm * 0.5;
+        wxs = temp >= 80 ? -w * 0.25 : temp < 60 ? w * 0.25 : 0;
+      }
+      /* Newly added pieces (last three weeks) lead the deal. */
+      var fr = (c.t.fresh ? 1 : 0) + (c.b.fresh ? 1 : 0) + (c.s.fresh ? 1 : 0) + (c.l && c.l.fresh ? 1 : 0);
+      base[i] = Math.exp(0.9 * (c.score + Math.max(-4, Math.min(4, pref)) + wxs + fr * 0.3));
+    }
+    var limit = Math.min(600, Math.floor(pool.length * 0.75));
+    var picked = [], localExp = {};
+    var excluded = new Uint8Array(pool.length);
+    function markRecent(lim) {
+      var recent = {};
+      for (var r = Math.max(0, recentArr.length - lim); r < recentArr.length; r++) recent[recentArr[r]] = 1;
+      for (var x = 0; x < pool.length; x++) excluded[x] = (banned[pool[x].key] || recent[pool[x].key]) ? 1 : 0;
+    }
+    markRecent(limit);
+    var fac = new Float64Array(NI);
+    for (var n = 0; n < count; n++) {
+      /* Coverage: a piece dealt less than the most-dealt piece is
+         boosted — a brand-new piece (never dealt) most of all. */
+      var maxE = 0, e;
+      for (var a = 0; a < NI; a++) { e = (exposure[prof[a].id] || 0) + (localExp[prof[a].id] || 0); if (e > maxE) maxE = e; }
+      for (var b = 0; b < NI; b++) {
+        e = (exposure[prof[b].id] || 0) + (localExp[prof[b].id] || 0);
+        fac[b] = Math.exp(0.9 * ((maxE - e) / (maxE + 1) * 0.9 + (e === 0 ? 0.9 : 0)));
+      }
+      var weights = new Float64Array(pool.length), total = 0;
+      for (var q = 0; q < pool.length; q++) {
+        if (excluded[q]) continue;
+        var cc = pool[q];
+        var wq = base[q] * fac[cc.t.idx] * fac[cc.b.idx] * fac[cc.s.idx] * (cc.l ? fac[cc.l.idx] : 1);
+        weights[q] = wq; total += wq;
+      }
+      if (total <= 0) {
+        /* Everything recently seen: shrink the window to its newest
+           third and deal the oldest again. */
+        if (limit > 0) { limit = Math.floor(limit / 3); markRecent(limit); picked.forEach(function (p) { excluded[p._i] = 1; }); n--; continue; }
+        break;
+      }
+      var x2 = rng() * total, chosen = -1;
+      for (var z = 0; z < pool.length; z++) { if (weights[z] <= 0) continue; chosen = z; x2 -= weights[z]; if (x2 <= 0) break; }
+      if (chosen < 0) break;
+      var pc = pool[chosen];
+      excluded[chosen] = 1;
+      pc.ids.forEach(function (id) { localExp[id] = (localExp[id] || 0) + 1; });
+      var acc = null;
+      if (this.accs.length && rng() < 0.35) acc = this.accs[Math.floor(rng() * this.accs.length)];
+      picked.push({ _i: chosen, key: pc.key, ids: pc.ids.slice(), top: pc.t, bottom: pc.b, shoes: pc.s, layer: pc.l, acc: acc, score: pc.score, mask: pc.mask });
+    }
+    return picked;
+  };
+
+  function pairKeys(ids) {
+    var out = [];
+    for (var i = 0; i < ids.length; i++) for (var j = i + 1; j < ids.length; j++) out.push(ids[i] < ids[j] ? ids[i] + "|" + ids[j] : ids[j] + "|" + ids[i]);
+    return out;
+  }
+  /* Feedback: a like lifts the pieces and their pairings, a dislike
+     drops the pairings hard (the pieces only a little — a disliked
+     outfit is usually one bad pairing, not a bad piece). */
+  function applyVerdict(prefs, ids, verdict) {
+    prefs.items = prefs.items || {}; prefs.pairs = prefs.pairs || {};
+    var di = verdict === "like" ? 0.35 : -0.15, dp = verdict === "like" ? 0.5 : -1.1;
+    ids.forEach(function (id) { prefs.items[id] = Math.max(-3, Math.min(3, (prefs.items[id] || 0) + di)); });
+    pairKeys(ids).forEach(function (k) { prefs.pairs[k] = Math.max(-4, Math.min(3, (prefs.pairs[k] || 0) + dp)); });
+    return prefs;
+  }
+
+  root.WardrobeComposer = {
+    version: 1,
+    profile: profile,
+    evaluate: evaluate,
+    fitsLevel: fitsLevel,
+    Deck: Deck,
+    comboKey: comboKey,
+    applyVerdict: applyVerdict,
+    pairKeys: pairKeys,
+    build: function (items) { return new Deck(items); }
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---------- Composer → app looks (build .73) ----------
+   buildClosetLooks hands off to these: the deck is cached per
+   closet signature, likes/dislikes and the seen-recently ring live
+   in the on-device "composerPrefs" key, and liked closet looks in
+   the synced "looks" collection feed the weighting on every device. */
+var COMPOSER_PREFS_KEY = "composerPrefs";
+var composerDeckCache = {};
+function composerClosetSig(list) {
+  return list.map(function (i) { return [i.id, i.category, i.name, i.colourName, i.colourHex, i.laundry ? 1 : 0, (i.occasionOnly || "") + ""].join("~"); }).join("\n");
+}
+function composerDeck(only, slotName) {
+  var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
+  if (only) list = only;
+  var sig = composerClosetSig(list);
+  var slot = slotName || (only ? "home" : "all");
+  var c = composerDeckCache[slot] || {};
+  if (c.sig !== sig || !c.deck) {
+    c = { sig: sig, deck: window.WardrobeComposer.build(list) };
+    composerDeckCache[slot] = c;
+  }
+  return c.deck;
+}
+/* Build .74.2: the outfit of the day is built ONLY from his own
+   synced closet pieces that carry a photograph — never a built-in
+   (seed) library piece with a shipped photo, never a photo-less
+   piece that would paint a colour block. Built-ins with photos are
+   the fallback only if his own pieces cannot make an outfit. */
+function homeOwnedPhotoPieces742() {
+  var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
+  var withPhoto = list.filter(function (i) { return i && i.photo && typeof i.photo === "string"; });
+  var own = withPhoto.filter(function (i) { return String(i.id || "").indexOf("seed-") !== 0; });
+  return { own: own, withPhoto: withPhoto };
+}
+/* ================= Build .75 — on-body renders =================
+   assets/onbody/<hash>.webp: David wearing a composed closet outfit,
+   keyed by the composer key (sorted item ids joined by "|").
+   ONBODY_SEED ships the manifest inline so the first deal after an
+   update already knows every render; assets/onbody/manifest.json is
+   re-read on boot so nightly renders appear without a new build. */
+var ONBODY_SEED = {"v":1,"count":400,"r":[{"k":"item-1794961274267-530598|item-1794970837072-242832|rcptbuy-1hkd3bh17","f":"6a9935116f8d9193.webp"},{"k":"item-1794961274260-781097|item-1794970837074-498365|rcptbuy-1hkd3bh17","f":"65a0a901c7b2b9eb.webp"},{"k":"item-1794961274257-705283|item-1794970837074-498365|rcptbuy-1hkd3bh17","f":"48152ceecb20f21a.webp"},{"k":"item-1794961274259-340133|item-1794970837072-242832|rcptbuy-1hkd3bh17","f":"a491e4a84dff62ad.webp"},{"k":"item-1794961274270-861529|item-1794970837072-242832|rcptbuy-1hkd3bh17","f":"3e565a6a389b95a6.webp"},{"k":"item-1794961274267-530598|item-1794970837069-614876|rcptbuy-1hkd3bh17","f":"e5f6b475701bb35f.webp"},{"k":"item-1794961274269-522751|item-1794970837072-242832|rcptbuy-1hkd3bh17","f":"57e9d95b00b761e9.webp"},{"k":"item-1794961274263-274909|item-1794965887183-921466|rcptbuy-1hkd3bh17","f":"c6192f4a965b3826.webp"},{"k":"item-1794961274270-861529|item-1794970837069-614876|rcptbuy-1hkd3bh17","f":"5963983a705e51ea.webp"},{"k":"item-1794961274263-274909|item-1794970837072-242832|rcptbuy-1hkd3bh17","f":"ef7401d3646952cd.webp"},{"k":"item-1794961274270-861529|item-1794970837074-498365|rcptbuy-1hkd3bh17","f":"a0ef2b6708cf99e5.webp"},{"k":"item-1794961274268-842281|item-1794970837069-614876|rcptbuy-1hkd3bh17","f":"3a10a38fc5fdee8c.webp"},{"k":"item-1794965887181-902070|item-1794965887184-384752|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"aa69f2a93b7f5196.webp"},{"k":"item-1794961274267-530598|item-1794964641246-125375|item-1794965887182-497401|rcptbuy-1hkd3bh17","f":"41be6787ecaf4e7e.webp"},{"k":"item-1794961274259-340133|item-1794964641250-679515|item-1794965180559-850546|rcptbuy-ttq7oe17","f":"98f29a476d95b431.webp"},{"k":"item-1794961274259-340133|item-1794965180557-958434|item-1794965180559-850546|rcptbuy-ttq7oe17","f":"8dbf1043e8e98914.webp"},{"k":"item-1794961274259-340133|item-1794965180558-791615|item-1794965180559-850546|rcptbuy-ttq7oe17","f":"8d1cf07b24a353b2.webp"},{"k":"item-1794961274259-340133|item-1794965887178-978505|item-1794965887183-921466|rcptbuy-ttq7oe17","f":"73f8e71e9bcb89e9.webp"},{"k":"item-1794961274269-522751|item-1794964641241-801060|item-1794965887183-921466|rcptbuy-1c3dyxl17","f":"34b702d34ac54bcf.webp"},{"k":"item-1794961274259-340133|item-1794964266134-290768|item-1794965180559-850546|rcptbuy-ttq7oe17","f":"aa04a02e9d144856.webp"},{"k":"item-1794961274259-340133|item-1794965180551-998684|item-1794965180559-850546|rcptbuy-ttq7oe17","f":"7f3e8219ce363d3f.webp"},{"k":"item-1794961274259-340133|item-1794965180556-409795|item-1794965180559-850546|rcptbuy-ttq7oe17","f":"5064f939bb5fb8a4.webp"},{"k":"item-1794961274259-340133|item-1794965887181-902070|item-1794965887184-384752|rcptbuy-ttq7oe17","f":"98b3db3659d91fe2.webp"},{"k":"item-1794961274270-861529|item-1794965887181-902070|rcptbuy-99ztz517","f":"d15cf202a6911948.webp"},{"k":"item-1794964641241-801060|item-1794965887183-921466|item-1794972496574-463743|rcptbuy-99ztz517","f":"dd605bfd76683d79.webp"},{"k":"item-1794961274257-705283|item-1794964641243-349197|item-1794965887182-497401|rcptbuy-1c3dyxl17","f":"3f12ab7f5867f224.webp"},{"k":"item-1794961274258-490248|item-1794965887178-978505|item-1794970837074-498365|rcptbuy-1dnqhzg17","f":"d68ca5467a10eba2.webp"},{"k":"item-1794961274262-794969|item-1794964641244-228763|item-1794965180559-850546|rcptbuy-1jnn02517","f":"c6115bfb39b2b6b6.webp"},{"k":"item-1794961274261-400084|item-1794964641247-703982|item-1794965887181-902070|rcptbuy-99ztz517","f":"e057f4f5807819e8.webp"},{"k":"item-1794961274264-907410|item-1794965180557-958434|item-1794965887182-497401|rcptbuy-ttq7oe17","f":"8f426261e67ea705.webp"},{"k":"item-1794961274261-400084|item-1794970837072-242832|item-1794971947769-627615|rcptbuy-1dnqhzg17","f":"c6c0fca9cf6398ed.webp"},{"k":"item-1794961274263-274909|item-1794964641242-585843|item-1794970837072-242832|rcptbuy-1hkd3bh17","f":"b1929b3a78c7dfc2.webp"},{"k":"item-1794961274257-705283|item-1794964641248-663301|item-1794965887182-497401|rcptbuy-1fo09nv17","f":"1cf7c0b935b6f13e.webp"},{"k":"item-1794961274260-781097|item-1794964641243-349197|item-1794965887182-497401|rcptbuy-gc93e317","f":"d20fd5d823a23251.webp"},{"k":"item-1794961274264-907410|item-1794965180559-850546|item-1794971947770-192661|rcptbuy-1fo09nv17","f":"29b9e907527ba9d2.webp"},{"k":"item-1794961274268-842281|item-1794964641242-585843|rcptbuy-1hkd3bh17","f":"aa94bed4c3721808.webp"},{"k":"item-1794961274260-781097|item-1794964641250-679515|item-1794965887181-902070|rcptbuy-99ztz517","f":"cb70a7424a8694d5.webp"},{"k":"item-1794961274270-861529|item-1794965887183-921466|item-1794970837066-776989|rcptbuy-1jnn02517","f":"cd1712eab0192019.webp"},{"k":"item-1794961274265-704202|item-1794964641244-228763|item-1794965887181-902070|rcptbuy-99ztz517","f":"b9e3620aa1ebb68f.webp"},{"k":"item-1794961274263-274909|item-1794964641249-263249|item-1794965887181-902070|rcptbuy-1fo09nv17","f":"8a055a4450f6ec5e.webp"},{"k":"item-1794961274266-986265|item-1794965887181-902070|item-1794965887184-384752|rcptbuy-n6ouzd17","f":"f8d9905d939c0c48.webp"},{"k":"item-1794961274270-861529|item-1794970837066-776989|item-1794970837072-242832|rcptbuy-99ztz517","f":"1cc5388f609994d1.webp"},{"k":"item-1794965887182-497401|item-1794971947773-858227|item-1794972496574-463743|rcptbuy-1dnqhzg17","f":"42a948276f974917.webp"},{"k":"item-1794961274259-340133|item-1794964641244-228763|item-1794965887182-497401|rcptbuy-gc93e317","f":"c9561d7b4e21e985.webp"},{"k":"item-1794965180555-120909|item-1794965887182-497401|rcptbuy-1dnqhzg17|rcptbuy-1pv7csr17","f":"187163c279074c96.webp"},{"k":"item-1794961274260-781097|item-1794965887181-902070|item-1794971947771-183364|rcptbuy-1fo09nv17","f":"1e1863f93f4aa41c.webp"},{"k":"item-1794964266134-290768|item-1794965180559-850546|item-1794972496574-463743|rcptbuy-99ztz517","f":"1e215844d808285e.webp"},{"k":"item-1794965887183-921466|rcptbuy-1c3dyxl17|rcptbuy-1pv7csr17","f":"a903c7e53cb9175a.webp"},{"k":"item-1794961274269-522751|item-1794964641245-386921|rcptbuy-ttq7oe17","f":"346bee713f8f8ce6.webp"},{"k":"item-1794961274259-340133|item-1794965887181-902070|item-1794971947773-858227|rcptbuy-n6ouzd17","f":"7abf8c40664d2a7a.webp"},{"k":"item-1794961274268-842281|item-1794964266133-256923|item-1794965887181-902070|rcptbuy-1c3dyxl17","f":"6c6fd5f8859e3be4.webp"},{"k":"item-1794965180554-529258|item-1794965887182-497401|item-1794972496574-463743|rcptbuy-1fo09nv17","f":"93b30957ff74d20f.webp"},{"k":"item-1794961274269-522751|item-1794965180555-120909|item-1794965887181-902070|rcptbuy-99ztz517","f":"ccc3fee8c8a9ddcb.webp"},{"k":"item-1794965180559-850546|item-1794965887180-811939|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"0813c407704a7d39.webp"},{"k":"item-1794961274261-400084|item-1794964641242-585843|item-1794970837074-498365|rcptbuy-1c3dyxl17","f":"c0165a898c6035e0.webp"},{"k":"item-1794961274268-842281|item-1794965180552-111587|item-1794965887181-902070|rcptbuy-1fo09nv17","f":"317ff181b3d73674.webp"},{"k":"item-1794961274259-340133|item-1794965180551-998684|item-1794965887181-902070|rcptbuy-ttq7oe17","f":"723adafa436f6f5e.webp"},{"k":"item-1794961274263-274909|item-1794964641249-263249|item-1794965180559-850546|rcptbuy-99ztz517","f":"626a3767d7220f85.webp"},{"k":"item-1794961274258-490248|item-1794970837066-776989|item-1794970837069-614876|rcptbuy-1dnqhzg17","f":"d3c133521217ead8.webp"},{"k":"item-1794961274268-842281|item-1794965180559-850546|item-1794970837065-174925|rcptbuy-n6ouzd17","f":"62578f476e1c0e63.webp"},{"k":"item-1794965180560-986012|rcptbuy-1dnqhzg17|rcptbuy-1pv7csr17","f":"b11090a8f1b2ecf8.webp"},{"k":"item-1794961274270-861529|item-1794965180559-850546|item-1794971947773-858227|rcptbuy-n6ouzd17","f":"3c58821dfd53d829.webp"},{"k":"item-1794961274268-842281|item-1794965887182-497401|item-1794965887185-931158|rcptbuy-1dnqhzg17","f":"72540cfcb1804b3b.webp"},{"k":"item-1794961274262-794969|item-1794964641250-679515|item-1794965887181-902070|rcptbuy-1jnn02517","f":"5f1f186057e0a192.webp"},{"k":"item-1794961274261-400084|item-1794965180560-986012|rcptbuy-1c3dyxl17","f":"0eb2ad714f289093.webp"},{"k":"item-1794961274269-522751|item-1794965180557-958434|rcptbuy-1c3dyxl17","f":"be3741c5332ea27b.webp"},{"k":"item-1794961274269-522751|item-1794965887178-978505|item-1794965887183-921466|rcptbuy-99ztz517","f":"45132fc7d4ac095a.webp"},{"k":"item-1794961274258-490248|item-1794965180554-529258|item-1794965887182-497401|rcptbuy-1jnn02517","f":"50aa4c3fe3e57eea.webp"},{"k":"item-1794961274268-842281|item-1794965887182-497401|item-1794971947774-378641|rcptbuy-1dnqhzg17","f":"1fed8ce40cffa874.webp"},{"k":"item-1794961274269-522751|item-1794965887181-902070|item-1794965887185-931158|rcptbuy-gc93e317","f":"ad07ddd8631c398b.webp"},{"k":"item-1794961274264-907410|item-1794964641247-703982|item-1794965180559-850546|rcptbuy-1fo09nv17","f":"7fa8f75c17d828fd.webp"},{"k":"item-1794961274263-274909|item-1794965180559-850546|item-1794970837071-365473|rcptbuy-gc93e317","f":"0849a5fd8b04a348.webp"},{"k":"item-1794961274261-400084|item-1794970837069-614876|item-1794971947769-627615|rcptbuy-1c3dyxl17","f":"bc4d2345fcb2fc31.webp"},{"k":"item-1794961274261-400084|item-1794964266126-146676|item-1794965180556-409795|rcptbuy-1c3dyxl17","f":"7e706a19c9fbebcd.webp"},{"k":"item-1794961274261-400084|item-1794964266129-500494|item-1794965180556-409795|rcptbuy-1c3dyxl17","f":"f842fdd83073d592.webp"},{"k":"item-1794961274270-861529|item-1794964266125-495292|item-1794970837065-174925|rcptbuy-1fo09nv17","f":"c00dcfe120a4ba20.webp"},{"k":"item-1794961274270-861529|item-1794964266131-291794|item-1794964641245-386921|rcptbuy-1jnn02517","f":"0e052fb6fd87ca61.webp"},{"k":"item-1794961274258-490248|item-1794964266134-290768|item-1794965180559-850546|rcptbuy-1c3dyxl17","f":"37d72415d4ea5b2e.webp"},{"k":"item-1794961274262-794969|item-1794964266129-500494|item-1794970837074-498365|rcptbuy-1hkd3bh17","f":"1ef1a748c381d0b9.webp"},{"k":"item-1794961274264-907410|item-1794964266129-500494|item-1794971947772-460164|rcptbuy-1dnqhzg17","f":"5a3d17f6d9c2572e.webp"},{"k":"item-1794961274264-907410|item-1794964266127-250176|item-1794970837074-498365|rcptbuy-99ztz517","f":"9733af6da96e7afc.webp"},{"k":"item-1794961274270-861529|item-1794964266132-165677|item-1794964641245-386921|rcptbuy-1c3dyxl17","f":"c8a7bd5119c08284.webp"},{"k":"item-1794961274257-705283|item-1794965180555-120909|item-1794965180559-850546|rcptbuy-1fo09nv17","f":"cdfd31a1a2fd43f9.webp"},{"k":"item-1794964266125-495292|item-1794965180554-529258|item-1794972496574-463743|rcptbuy-1jnn02517","f":"a33a71155e6b525f.webp"},{"k":"item-1794961274266-986265|item-1794964266130-490923|item-1794965887177-185377|rcptbuy-n6ouzd17","f":"bb5767c7f7a99a99.webp"},{"k":"item-1794961274262-794969|item-1794964266127-250176|item-1794965887186-222552|rcptbuy-n6ouzd17","f":"8fdbb5d8ea2d621a.webp"},{"k":"item-1794961274262-794969|item-1794965887181-902070|item-1794970837071-365473|rcptbuy-gc93e317","f":"20d67b084ad210b0.webp"},{"k":"item-1794964266131-291794|item-1794971947771-183364|item-1794972496574-463743|rcptbuy-1jnn02517","f":"c9e480e6476957b2.webp"},{"k":"item-1794961274260-781097|item-1794964266129-500494|item-1794970837073-880274|rcptbuy-gc93e317","f":"9a023da0c53dd333.webp"},{"k":"item-1794961274266-986265|item-1794964266132-165677|item-1794971947773-858227|rcptbuy-gc93e317","f":"dbb357b3ac2c93b6.webp"},{"k":"item-1794961274270-861529|item-1794964266129-500494|item-1794971947770-192661|rcptbuy-ttq7oe17","f":"e5fcc8c547dbadb8.webp"},{"k":"item-1794961274261-400084|item-1794964266131-291794|item-1794964266133-256923|rcptbuy-ttq7oe17","f":"f9109db74c0834f4.webp"},{"k":"item-1794961274270-861529|item-1794964266127-250176|item-1794965180553-367368|rcptbuy-n6ouzd17","f":"75a505ac12545c3e.webp"},{"k":"item-1794961274265-704202|item-1794970837069-614876|item-1794971947769-627615|rcptbuy-1jnn02517","f":"748ac2a2b0929bb8.webp"},{"k":"item-1794961274262-794969|item-1794964266126-146676|item-1794964641243-349197|rcptbuy-1hkd3bh17","f":"e1c60a64d5c2379a.webp"},{"k":"item-1794961274261-400084|item-1794964641241-801060|item-1794965887183-921466|rcptbuy-gc93e317","f":"7db2da13082fbaca.webp"},{"k":"item-1794961274264-907410|item-1794964266132-165677|item-1794970837067-662427|rcptbuy-1c3dyxl17","f":"76ad850ee03d8590.webp"},{"k":"item-1794964266126-146676|item-1794964266134-290768|item-1794972496574-463743|rcptbuy-n6ouzd17","f":"60a0c37d108a9e30.webp"},{"k":"item-1794961274258-490248|item-1794964266130-490923|item-1794964641246-125375|rcptbuy-99ztz517","f":"6b7e27d50825ab6e.webp"},{"k":"item-1794961274260-781097|item-1794964266126-146676|item-1794964266134-290768|rcptbuy-1c3dyxl17","f":"e262dd0c0a1b7811.webp"},{"k":"item-1794961274258-490248|item-1794964641249-263249|item-1794965180559-850546|rcptbuy-n6ouzd17","f":"e8e31446d5c03254.webp"},{"k":"item-1794961274263-274909|item-1794970837070-124326|rcptbuy-1fo09nv17","f":"e64a834d87abd071.webp"},{"k":"item-1794965887181-902070|rcptbuy-1pv7csr17|rcptbuy-gc93e317","f":"87a56810c0ac85ec.webp"},{"k":"item-1794961274262-794969|item-1794964641241-801060|item-1794970837069-614876|rcptbuy-ttq7oe17","f":"0c09887b54457ca4.webp"},{"k":"item-1794961274257-705283|item-1794965180558-791615|item-1794965180559-850546|rcptbuy-ttq7oe17","f":"c38d7a7c700599a5.webp"},{"k":"item-1794961274261-400084|item-1794965180559-850546|item-1794965887185-931158|rcptbuy-ttq7oe17","f":"72a7dca37b380846.webp"},{"k":"item-1794961274258-490248|item-1794965180559-850546|item-1794970837065-174925|rcptbuy-1jnn02517","f":"7a29e7c738596c19.webp"},{"k":"item-1794961274264-907410|item-1794964266134-290768|item-1794965887181-902070|rcptbuy-1fo09nv17","f":"2581d643987c7785.webp"},{"k":"item-1794961274260-781097|item-1794965180558-791615|item-1794965887181-902070|rcptbuy-gc93e317","f":"f72f25d90f0f08b4.webp"},{"k":"item-1794961274264-907410|item-1794965180553-367368|item-1794965887182-497401|rcptbuy-1fo09nv17","f":"9db21eaf071c9432.webp"},{"k":"item-1794961274263-274909|item-1794964641248-663301|item-1794965887182-497401|rcptbuy-1fo09nv17","f":"61ed8462a1ba83bf.webp"},{"k":"item-1794964266133-256923|item-1794965887181-902070|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"d1f455d74330f0fb.webp"},{"k":"item-1794961274262-794969|item-1794965180553-367368|item-1794965887182-497401|rcptbuy-1fo09nv17","f":"1dab77f285d4a852.webp"},{"k":"item-1794961274264-907410|item-1794965180559-850546|item-1794971947773-858227|rcptbuy-99ztz517","f":"8bca76b45905a460.webp"},{"k":"item-1794965887182-497401|item-1794965887185-931158|rcptbuy-1fo09nv17|rcptbuy-1pv7csr17","f":"c06273efa229ddba.webp"},{"k":"item-1794961274258-490248|item-1794964641244-228763|item-1794965887182-497401|rcptbuy-1fo09nv17","f":"b5595b1b271aa129.webp"},{"k":"item-1794961274264-907410|item-1794965887181-902070|item-1794965887184-384752|rcptbuy-1fo09nv17","f":"a914eebb43d27b34.webp"},{"k":"item-1794961274263-274909|item-1794964266133-256923|rcptbuy-1fo09nv17","f":"e27af5b4c891d0e9.webp"},{"k":"item-1794961274266-986265|item-1794965887182-497401|item-1794970837065-174925|rcptbuy-1jnn02517","f":"e77853eae1162bbd.webp"},{"k":"item-1794961274262-794969|item-1794965887181-902070|item-1794970837071-365473|rcptbuy-1fo09nv17","f":"755faac3c51a72d1.webp"},{"k":"item-1794961274261-400084|item-1794971947771-183364|rcptbuy-1c3dyxl17","f":"f7763fbbc56a22b3.webp"},{"k":"item-1794961274262-794969|item-1794965887178-978505|item-1794970837072-242832|rcptbuy-1hkd3bh17","f":"64c307fdde359565.webp"},{"k":"item-1794961274264-907410|item-1794964641241-801060|item-1794965887183-921466|rcptbuy-gc93e317","f":"a722e855eb96054f.webp"},{"k":"item-1794965180557-958434|item-1794972496574-463743|rcptbuy-n6ouzd17","f":"4b7adf5433416584.webp"},{"k":"item-1794961274263-274909|item-1794964641247-703982|rcptbuy-1c3dyxl17","f":"27467e88c43e9f17.webp"},{"k":"item-1794961274262-794969|item-1794965887178-978505|item-1794965887183-921466|rcptbuy-1hkd3bh17","f":"09c2da24c0d6a315.webp"},{"k":"item-1794961274263-274909|item-1794965887178-978505|item-1794970837072-242832|rcptbuy-n6ouzd17","f":"26d95f0c0b7701d1.webp"},{"k":"item-1794961274261-400084|item-1794965180551-998684|item-1794965180559-850546|rcptbuy-n6ouzd17","f":"6d8a735284165919.webp"},{"k":"item-1794961274260-781097|item-1794964641247-703982|item-1794965180559-850546|rcptbuy-1fo09nv17","f":"e2b3fc09e6da502e.webp"},{"k":"item-1794961274266-986265|item-1794965180558-791615|item-1794965887181-902070|rcptbuy-1fo09nv17","f":"053b53ddfdb24a91.webp"},{"k":"item-1794961274257-705283|item-1794964641247-703982|item-1794965887181-902070|rcptbuy-ttq7oe17","f":"8a5f8f6359f998c9.webp"},{"k":"item-1794961274264-907410|item-1794964641243-349197|item-1794965887181-902070|rcptbuy-99ztz517","f":"3a9a2bed67b25de9.webp"},{"k":"item-1794970837068-696925|item-1794972496574-463743|rcptbuy-1fo09nv17","f":"89f6d8e75af30992.webp"},{"k":"item-1794961274262-794969|item-1794964641248-663301|item-1794965887182-497401|rcptbuy-1hkd3bh17","f":"5f9b31d92e5cda49.webp"},{"k":"item-1794961274264-907410|item-1794965887181-902070|item-1794971947773-858227|rcptbuy-n6ouzd17","f":"0bb9e8a214468162.webp"},{"k":"item-1794970837071-365473|rcptbuy-1hkd3bh17|rcptbuy-1pv7csr17","f":"1876751a98db70f3.webp"},{"k":"item-1794965180553-367368|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"d3b5655b0d0e55e1.webp"},{"k":"item-1794961274258-490248|item-1794965887181-902070|item-1794965887184-384752|rcptbuy-ttq7oe17","f":"0f14d68340cde994.webp"},{"k":"item-1794964266128-402564|item-1794970837068-696925|rcptbuy-1fo09nv17|rcptbuy-1pv7csr17","f":"37dcd1068f80ad5d.webp"},{"k":"item-1794971947770-192661|item-1794972496574-463743|rcptbuy-1jnn02517","f":"3ced4be67e9b6eda.webp"},{"k":"item-1794961274258-490248|item-1794964266129-500494|item-1794970837067-662427|rcptbuy-1jnn02517","f":"0c0e88ec835c86af.webp"},{"k":"item-1794961274264-907410|item-1794965180555-120909|item-1794965180559-850546|rcptbuy-1fo09nv17","f":"2852b1d7961b78cb.webp"},{"k":"item-1794961274261-400084|item-1794964266128-402564|item-1794964641249-263249|rcptbuy-n6ouzd17","f":"1a283b49a1a1ce04.webp"},{"k":"item-1794961274262-794969|item-1794970837067-662427|rcptbuy-n6ouzd17","f":"a4e5ca1f692e87ca.webp"},{"k":"item-1794961274266-986265|item-1794964266131-291794|item-1794970837065-174925|rcptbuy-1jnn02517","f":"cbddc56a936a628d.webp"},{"k":"item-1794961274264-907410|item-1794964266128-402564|item-1794965180555-120909|rcptbuy-1jnn02517","f":"26a265b48e632626.webp"},{"k":"item-1794961274266-986265|item-1794964266132-165677|item-1794965180553-367368|rcptbuy-1fo09nv17","f":"760d1e73c31fc730.webp"},{"k":"item-1794961274262-794969|item-1794964266125-495292|item-1794970837071-365473|rcptbuy-1fo09nv17","f":"2c7cf5029ee9aeb7.webp"},{"k":"item-1794961274264-907410|item-1794964266125-495292|item-1794964641247-703982|rcptbuy-99ztz517","f":"76831e2902d5f793.webp"},{"k":"item-1794964266131-291794|item-1794971947773-858227|item-1794972496574-463743|rcptbuy-1fo09nv17","f":"d7211ce18e1baba6.webp"},{"k":"item-1794964266125-495292|item-1794965887182-497401|item-1794972496574-463743|rcptbuy-1jnn02517","f":"8843c1428aefb606.webp"},{"k":"item-1794961274262-794969|item-1794964266125-495292|item-1794965887185-931158|rcptbuy-1fo09nv17","f":"0090b3b9c00abd7c.webp"},{"k":"item-1794961274264-907410|item-1794964266130-490923|item-1794965180554-529258|rcptbuy-n6ouzd17","f":"f821b9340d4ef703.webp"},{"k":"item-1794961274262-794969|item-1794965180553-367368|item-1794965887182-497401|rcptbuy-1jnn02517","f":"d9b23d180c108d8c.webp"},{"k":"item-1794961274258-490248|item-1794964266129-500494|item-1794970837073-880274|rcptbuy-1fo09nv17","f":"f3f2f7d5d28abad8.webp"},{"k":"item-1794961274258-490248|item-1794964266126-146676|item-1794970837070-124326|rcptbuy-99ztz517","f":"c8446c09bcfa6be2.webp"},{"k":"item-1794961274261-400084|item-1794964266128-402564|item-1794965180552-111587|rcptbuy-1jnn02517","f":"c07545dd1277718a.webp"},{"k":"item-1794961274258-490248|item-1794964266127-250176|item-1794965887182-497401|rcptbuy-99ztz517","f":"829f3fdc2dbf89f1.webp"},{"k":"item-1794964266131-291794|item-1794971947773-858227|item-1794972496574-463743|rcptbuy-n6ouzd17","f":"88dcd3d1f63c287c.webp"},{"k":"item-1794964266128-402564|item-1794965887179-895680|item-1794972496574-463743|rcptbuy-1jnn02517","f":"834e956ea49aa11c.webp"},{"k":"item-1794961274258-490248|item-1794964266126-146676|item-1794965180559-850546|rcptbuy-n6ouzd17","f":"b42eda05623c7298.webp"},{"k":"item-1794961274266-986265|item-1794965180559-850546|item-1794965887185-931158|rcptbuy-99ztz517","f":"bda3418df8325641.webp"},{"k":"item-1794961274266-986265|item-1794964266131-291794|item-1794965887182-497401|rcptbuy-1jnn02517","f":"aef565f15d06c66b.webp"},{"k":"item-1794964266131-291794|item-1794970837065-174925|rcptbuy-1pv7csr17|rcptbuy-99ztz517","f":"0c3037db46bc9b87.webp"},{"k":"item-1794961274262-794969|item-1794964266131-291794|item-1794970837067-662427|rcptbuy-1jnn02517","f":"046848ba95f86273.webp"},{"k":"item-1794961274261-400084|item-1794964266128-402564|item-1794970837067-662427|rcptbuy-n6ouzd17","f":"5a237d8a3be1685a.webp"},{"k":"item-1794964266131-291794|item-1794965887182-497401|item-1794972496574-463743|rcptbuy-1jnn02517","f":"c21b9508bbdc5f8c.webp"},{"k":"item-1794964266127-250176|item-1794964641246-125375|rcptbuy-1pv7csr17|rcptbuy-99ztz517","f":"a99665fc9942fcd4.webp"},{"k":"item-1794961274265-704202|item-1794964266128-402564|item-1794965180553-367368|rcptbuy-1fo09nv17","f":"d8633b49b9f5e718.webp"},{"k":"item-1794961274262-794969|item-1794964266131-291794|item-1794965887179-895680|rcptbuy-99ztz517","f":"54e875065941fd77.webp"},{"k":"item-1794961274262-794969|item-1794965180559-850546|item-1794971947770-192661|rcptbuy-1jnn02517","f":"a70106687a0528fc.webp"},{"k":"item-1794964266128-402564|item-1794971947773-858227|item-1794972496574-463743|rcptbuy-1jnn02517","f":"56ed4e75fd645ff5.webp"},{"k":"item-1794965180559-850546|item-1794965887185-931158|rcptbuy-1fo09nv17|rcptbuy-1pv7csr17","f":"00ccebcf679bbfc8.webp"},{"k":"item-1794961274258-490248|item-1794964641248-663301|item-1794965180559-850546|rcptbuy-n6ouzd17","f":"1627b3db56a9dd4d.webp"},{"k":"item-1794961274262-794969|item-1794970837068-696925|rcptbuy-1fo09nv17","f":"54dd970eeab55442.webp"},{"k":"item-1794961274261-400084|item-1794964641248-663301|rcptbuy-99ztz517","f":"e48b5ffc2161ff7d.webp"},{"k":"item-1794961274261-400084|item-1794965180554-529258|rcptbuy-n6ouzd17","f":"f4235a1081e94675.webp"},{"k":"item-1794961274261-400084|item-1794964641249-263249|item-1794965887182-497401|rcptbuy-1jnn02517","f":"263a722fb16da9a2.webp"},{"k":"item-1794961274264-907410|item-1794965180559-850546|item-1794970837065-174925|rcptbuy-1jnn02517","f":"48ae12a12bc3f23d.webp"},{"k":"item-1794961274261-400084|item-1794964641249-263249|item-1794965887181-902070|rcptbuy-1fo09nv17","f":"1b3c660108a26855.webp"},{"k":"item-1794961274262-794969|item-1794965180559-850546|rcptbuy-1jnn02517","f":"8365dba57240de69.webp"},{"k":"item-1794965887181-902070|item-1794971947772-460164|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"8b5b45db49c9a569.webp"},{"k":"item-1794971947772-460164|item-1794972496574-463743|rcptbuy-1jnn02517","f":"6a6cbc974a2f2018.webp"},{"k":"item-1794961274261-400084|item-1794965180553-367368|rcptbuy-n6ouzd17","f":"3850b8f57271f6eb.webp"},{"k":"item-1794965180559-850546|item-1794972496574-463743|rcptbuy-1jnn02517","f":"76ab5547a1ba49e2.webp"},{"k":"item-1794961274262-794969|item-1794965180555-120909|item-1794965887181-902070|rcptbuy-1jnn02517","f":"ba840525df2345dc.webp"},{"k":"item-1794965887181-902070|item-1794971947772-460164|item-1794972496574-463743|rcptbuy-n6ouzd17","f":"f84f657a1e3b1a4f.webp"},{"k":"item-1794965887181-902070|item-1794965887185-931158|rcptbuy-1pv7csr17|rcptbuy-99ztz517","f":"7cf190459e55adc2.webp"},{"k":"item-1794965887181-902070|item-1794971947771-183364|rcptbuy-1pv7csr17|rcptbuy-99ztz517","f":"fa3c5db7d05712a2.webp"},{"k":"item-1794961274258-490248|item-1794965887181-902070|item-1794971947772-460164|rcptbuy-1jnn02517","f":"d6fbf694750270ac.webp"},{"k":"item-1794961274266-986265|item-1794965887182-497401|item-1794971947773-858227|rcptbuy-n6ouzd17","f":"915dddfc91a7f6bf.webp"},{"k":"item-1794965887177-185377|item-1794972496574-463743|rcptbuy-99ztz517","f":"3e0380a06ebe8bc6.webp"},{"k":"item-1794961274258-490248|item-1794965887182-497401|item-1794965887185-931158|rcptbuy-1fo09nv17","f":"acfed474db22223d.webp"},{"k":"item-1794970837073-880274|rcptbuy-1pv7csr17|rcptbuy-99ztz517","f":"bdc043aac70e7a0d.webp"},{"k":"item-1794965887182-497401|item-1794971947774-378641|item-1794972496574-463743|rcptbuy-1fo09nv17","f":"a9f74c2ae07b3e3a.webp"},{"k":"item-1794961274262-794969|item-1794965887182-497401|item-1794971947770-192661|rcptbuy-1jnn02517","f":"7521002e60094e53.webp"},{"k":"item-1794965180552-111587|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"3d14b1931d679056.webp"},{"k":"item-1794965180554-529258|item-1794965887182-497401|rcptbuy-1fo09nv17|rcptbuy-1pv7csr17","f":"2f029ebfc84eb465.webp"},{"k":"item-1794961274266-986265|item-1794965180552-111587|item-1794965887182-497401|rcptbuy-1fo09nv17","f":"2d04745917be0631.webp"},{"k":"item-1794965180555-120909|item-1794965887182-497401|item-1794972496574-463743|rcptbuy-n6ouzd17","f":"69b7e5c221208da1.webp"},{"k":"item-1794965180554-529258|rcptbuy-1fo09nv17|rcptbuy-1pv7csr17","f":"98f6267ced8f956b.webp"},{"k":"item-1794961274265-704202|item-1794971947774-378641|rcptbuy-1jnn02517","f":"bcad304ff1fb6a2d.webp"},{"k":"item-1794961274264-907410|item-1794965887182-497401|item-1794965887185-931158|rcptbuy-99ztz517","f":"3b473f68d2802f6f.webp"},{"k":"item-1794961274264-907410|item-1794965887181-902070|rcptbuy-1jnn02517","f":"1914bbbc426ed8b8.webp"},{"k":"item-1794964266128-402564|item-1794970837070-124326|rcptbuy-1jnn02517|rcptbuy-1pv7csr17","f":"445ce3eb57c909c8.webp"},{"k":"item-1794964266126-146676|item-1794965180560-986012|rcptbuy-1pv7csr17|rcptbuy-99ztz517","f":"eda0e9df7958f142.webp"},{"k":"item-1794961274265-704202|item-1794964266129-500494|item-1794971947774-378641|rcptbuy-1jnn02517","f":"59336fb1b10ea377.webp"},{"k":"item-1794961274266-986265|item-1794964266126-146676|item-1794965180553-367368|rcptbuy-1fo09nv17","f":"80be9bfd3a736582.webp"},{"k":"item-1794961274265-704202|item-1794964266125-495292|item-1794964641249-263249|rcptbuy-n6ouzd17","f":"3548438a99fac539.webp"},{"k":"item-1794961274262-794969|item-1794964266127-250176|item-1794970837073-880274|rcptbuy-n6ouzd17","f":"cb4301a5107108e9.webp"},{"k":"item-1794961274266-986265|item-1794964266129-500494|item-1794965887185-931158|rcptbuy-1jnn02517","f":"6b29977f5c3275ef.webp"},{"k":"item-1794961274265-704202|item-1794964266128-402564|item-1794971947770-192661|rcptbuy-1jnn02517","f":"6c95a5b8bdc300a4.webp"},{"k":"item-1794961274264-907410|item-1794964266127-250176|item-1794964641246-125375|rcptbuy-99ztz517","f":"6f08edc7571573af.webp"},{"k":"item-1794964266128-402564|item-1794965180555-120909|item-1794972496574-463743|rcptbuy-1fo09nv17","f":"4741df5a7deb735a.webp"},{"k":"item-1794961274261-400084|item-1794964266128-402564|item-1794971947771-183364|rcptbuy-1jnn02517","f":"6d4b7a2b9ac8a320.webp"},{"k":"item-1794961274265-704202|item-1794964266131-291794|item-1794971947771-183364|rcptbuy-99ztz517","f":"63494d6b9607a874.webp"},{"k":"item-1794964266132-165677|item-1794965180554-529258|item-1794972496574-463743|rcptbuy-1jnn02517","f":"88201f9c4e9d8456.webp"},{"k":"item-1794961274264-907410|item-1794964266132-165677|item-1794970837070-124326|rcptbuy-1fo09nv17","f":"ca3864fe1d4383aa.webp"},{"k":"item-1794961274261-400084|item-1794964266125-495292|item-1794970837071-365473|rcptbuy-1jnn02517","f":"ec94dff596924f93.webp"},{"k":"item-1794961274265-704202|item-1794964266125-495292|item-1794965887180-811939|rcptbuy-1fo09nv17","f":"0fd7f96c572cf345.webp"},{"k":"item-1794964266126-146676|item-1794964641249-263249|item-1794972496574-463743|rcptbuy-99ztz517","f":"e7992c48a83b7090.webp"},{"k":"item-1794961274261-400084|item-1794964266128-402564|item-1794970837067-662427|rcptbuy-1fo09nv17","f":"48b5cc990fbe4734.webp"},{"k":"item-1794961274262-794969|item-1794964266132-165677|item-1794965887186-222552|rcptbuy-1fo09nv17","f":"7db743a916038779.webp"},{"k":"item-1794964266131-291794|item-1794970837067-662427|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"8c2c3fca5e7f92e2.webp"},{"k":"item-1794964266130-490923|item-1794965887177-185377|rcptbuy-1pv7csr17|rcptbuy-99ztz517","f":"c533f4760ad543ac.webp"},{"k":"item-1794961274262-794969|item-1794964266131-291794|item-1794965180560-986012|rcptbuy-1jnn02517","f":"ea145a3853be722e.webp"},{"k":"item-1794961274261-400084|item-1794964266131-291794|item-1794971947771-183364|rcptbuy-1jnn02517","f":"15bf5a216e5b442a.webp"},{"k":"item-1794961274261-400084|item-1794964266125-495292|item-1794971947771-183364|rcptbuy-n6ouzd17","f":"e02a473a3cb84f9b.webp"},{"k":"item-1794961274264-907410|item-1794964266129-500494|item-1794971947772-460164|rcptbuy-1jnn02517","f":"cff3601d0ea400a6.webp"},{"k":"item-1794961274266-986265|item-1794964266131-291794|item-1794964641249-263249|rcptbuy-99ztz517","f":"2c6b7ddde9be27c0.webp"},{"k":"item-1794961274261-400084|item-1794964266131-291794|item-1794970837067-662427|rcptbuy-n6ouzd17","f":"c52ed8bd4cc60382.webp"},{"k":"item-1794961274261-400084|item-1794964266129-500494|item-1794965887179-895680|rcptbuy-1fo09nv17","f":"a25082da1410f58f.webp"},{"k":"item-1794961274264-907410|item-1794964266127-250176|item-1794964641247-703982|rcptbuy-n6ouzd17","f":"1a1d9f482a97ffe9.webp"},{"k":"item-1794964266131-291794|item-1794965180554-529258|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"82922f068cf9ab78.webp"},{"k":"item-1794961274261-400084|item-1794964266125-495292|item-1794965887181-902070|rcptbuy-n6ouzd17","f":"2d58c979d24d009f.webp"},{"k":"item-1794961274262-794969|item-1794964266131-291794|item-1794965180554-529258|rcptbuy-1jnn02517","f":"5f2ddba2ba475c7d.webp"},{"k":"item-1794964266127-250176|item-1794971947772-460164|item-1794972496574-463743|rcptbuy-n6ouzd17","f":"bafed2158d4164af.webp"},{"k":"item-1794964266128-402564|item-1794964641247-703982|item-1794972496574-463743|rcptbuy-1fo09nv17","f":"bee91722895c1a17.webp"},{"k":"item-1794961274261-400084|item-1794964266126-146676|item-1794964641247-703982|rcptbuy-99ztz517","f":"b52817594fa730e5.webp"},{"k":"item-1794961274262-794969|item-1794964266130-490923|item-1794970837065-174925|rcptbuy-n6ouzd17","f":"b1f36bedd30e79a6.webp"},{"k":"item-1794961274261-400084|item-1794964266125-495292|item-1794965887186-222552|rcptbuy-n6ouzd17","f":"11a802c64eb618a1.webp"},{"k":"item-1794961274264-907410|item-1794964266128-402564|item-1794970837071-365473|rcptbuy-1fo09nv17","f":"bf8679f6a922eb63.webp"},{"k":"item-1794961274265-704202|item-1794964266131-291794|item-1794970837071-365473|rcptbuy-1fo09nv17","f":"787ec98bcde3c5ed.webp"},{"k":"item-1794961274264-907410|item-1794964266131-291794|item-1794964641246-125375|rcptbuy-1fo09nv17","f":"b69d70a58fbf2623.webp"},{"k":"item-1794961274264-907410|item-1794964266131-291794|item-1794971947773-858227|rcptbuy-n6ouzd17","f":"b785b1e9a4248ae2.webp"},{"k":"item-1794961274261-400084|item-1794964266128-402564|item-1794970837070-124326|rcptbuy-1jnn02517","f":"cb5a00c023e7e63b.webp"},{"k":"item-1794961274258-490248|item-1794964266130-490923|item-1794970837068-696925|rcptbuy-99ztz517","f":"afb7e99c6fe417d0.webp"},{"k":"item-1794961274265-704202|item-1794964266127-250176|item-1794965887182-497401|rcptbuy-99ztz517","f":"b6c6487249962aa5.webp"},{"k":"item-1794964266128-402564|item-1794971947770-192661|item-1794972496574-463743|rcptbuy-1jnn02517","f":"0465fe55c4bca889.webp"},{"k":"item-1794961274258-490248|item-1794964266129-500494|item-1794964641248-663301|rcptbuy-1jnn02517","f":"d1b252eaba0e8178.webp"},{"k":"item-1794961274258-490248|item-1794964266130-490923|item-1794965180560-986012|rcptbuy-99ztz517","f":"8fdea7763e87f63a.webp"},{"k":"item-1794961274261-400084|item-1794964266127-250176|item-1794965887179-895680|rcptbuy-n6ouzd17","f":"a07888874faa09d2.webp"},{"k":"item-1794961274262-794969|item-1794964266127-250176|item-1794964641246-125375|rcptbuy-1fo09nv17","f":"e9272d0c93686f2e.webp"},{"k":"item-1794961274265-704202|item-1794964266132-165677|item-1794970837070-124326|rcptbuy-1fo09nv17","f":"5cffcacc5a541a30.webp"},{"k":"item-1794961274266-986265|item-1794964266128-402564|item-1794970837068-696925|rcptbuy-99ztz517","f":"9f069d5a06b43e75.webp"},{"k":"item-1794961274265-704202|item-1794964266128-402564|item-1794964641249-263249|rcptbuy-1fo09nv17","f":"e52e600d4d4755a7.webp"},{"k":"item-1794961274266-986265|item-1794964266132-165677|item-1794965180555-120909|rcptbuy-1jnn02517","f":"91125783183b77d3.webp"},{"k":"item-1794961274266-986265|item-1794964266127-250176|item-1794970837071-365473|rcptbuy-99ztz517","f":"e64c0bf0f311f749.webp"},{"k":"item-1794964266132-165677|item-1794965180554-529258|rcptbuy-1fo09nv17|rcptbuy-1pv7csr17","f":"d21cb9900eab2bc2.webp"},{"k":"item-1794964266129-500494|item-1794971947771-183364|rcptbuy-1fo09nv17|rcptbuy-1pv7csr17","f":"fe35e35ac86ed5b6.webp"},{"k":"item-1794964266130-490923|item-1794971947772-460164|item-1794972496574-463743|rcptbuy-n6ouzd17","f":"ada4d97a68d724be.webp"},{"k":"item-1794964266132-165677|item-1794965180554-529258|item-1794972496574-463743|rcptbuy-1fo09nv17","f":"fe9977d9789dbabb.webp"},{"k":"item-1794964266125-495292|item-1794970837070-124326|item-1794972496574-463743|rcptbuy-1fo09nv17","f":"a2d3354036a74c70.webp"},{"k":"item-1794961274261-400084|item-1794964266125-495292|item-1794971947773-858227|rcptbuy-99ztz517","f":"077d70801acab13c.webp"},{"k":"item-1794961274265-704202|item-1794964266125-495292|item-1794965887181-902070|rcptbuy-1jnn02517","f":"ecf118bef93f18bb.webp"},{"k":"item-1794961274262-794969|item-1794964266129-500494|item-1794965887180-811939|rcptbuy-1jnn02517","f":"3088e14d5bd0344f.webp"},{"k":"item-1794964266132-165677|item-1794964641246-125375|rcptbuy-1fo09nv17|rcptbuy-1pv7csr17","f":"1e51e5d4ed3cd14d.webp"},{"k":"item-1794961274265-704202|item-1794964266128-402564|item-1794964641246-125375|rcptbuy-1fo09nv17","f":"b7cc8e3e168ce852.webp"},{"k":"item-1794961274261-400084|item-1794964266125-495292|item-1794965180560-986012|rcptbuy-n6ouzd17","f":"90b4c7e1c2cd34a6.webp"},{"k":"item-1794961274261-400084|item-1794964266129-500494|item-1794971947773-858227|rcptbuy-1fo09nv17","f":"5e13c080e30270a4.webp"},{"k":"item-1794961274261-400084|item-1794964266126-146676|item-1794970837073-880274|rcptbuy-n6ouzd17","f":"75717f46aaf6a0be.webp"},{"k":"item-1794961274261-400084|item-1794964266126-146676|item-1794971947774-378641|rcptbuy-n6ouzd17","f":"ec9333878683e779.webp"},{"k":"item-1794961274258-490248|item-1794964266132-165677|item-1794971947772-460164|rcptbuy-1jnn02517","f":"128b3dbd180cd964.webp"},{"k":"item-1794961274258-490248|item-1794964266132-165677|item-1794971947773-858227|rcptbuy-1jnn02517","f":"8122b6300b06dbbe.webp"},{"k":"item-1794961274264-907410|item-1794964266125-495292|item-1794965180553-367368|rcptbuy-n6ouzd17","f":"ca0bcf809ee73aa4.webp"},{"k":"item-1794961274264-907410|item-1794964266125-495292|item-1794965887177-185377|rcptbuy-1fo09nv17","f":"b9e9e0fa296e0157.webp"},{"k":"item-1794961274258-490248|item-1794964266127-250176|item-1794964641247-703982|rcptbuy-99ztz517","f":"75a4e93d65a151e9.webp"},{"k":"item-1794961274265-704202|item-1794964266125-495292|item-1794964641247-703982|rcptbuy-99ztz517","f":"bf8a0f7904bc0f73.webp"},{"k":"item-1794964266125-495292|item-1794970837065-174925|item-1794972496574-463743|rcptbuy-1jnn02517","f":"50c2ca86ac1e823f.webp"},{"k":"item-1794964266127-250176|item-1794965180554-529258|rcptbuy-1pv7csr17|rcptbuy-99ztz517","f":"8f563feb2a753596.webp"},{"k":"item-1794961274265-704202|item-1794964266126-146676|item-1794970837071-365473|rcptbuy-n6ouzd17","f":"7841de7ede5bb07f.webp"},{"k":"item-1794961274258-490248|item-1794964266132-165677|item-1794965887180-811939|rcptbuy-1jnn02517","f":"9f58087e1a45588e.webp"},{"k":"item-1794961274266-986265|item-1794964266132-165677|item-1794965887185-931158|rcptbuy-1fo09nv17","f":"9e106682cbf4d060.webp"},{"k":"item-1794961274262-794969|item-1794964266128-402564|item-1794965180553-367368|rcptbuy-1jnn02517","f":"d943b2780376fdb6.webp"},{"k":"item-1794964266127-250176|item-1794970837071-365473|item-1794972496574-463743|rcptbuy-1jnn02517","f":"9f6fe809576768d0.webp"},{"k":"item-1794961274264-907410|item-1794964266129-500494|item-1794964641246-125375|rcptbuy-1fo09nv17","f":"324c9706cd72afda.webp"},{"k":"item-1794961274261-400084|item-1794964266128-402564|item-1794971947770-192661|rcptbuy-n6ouzd17","f":"14b132b9a5db3218.webp"},{"k":"item-1794961274261-400084|item-1794964266126-146676|item-1794965180559-850546|rcptbuy-n6ouzd17","f":"909b69e3c34c2f4b.webp"},{"k":"item-1794961274261-400084|item-1794964266126-146676|item-1794971947770-192661|rcptbuy-n6ouzd17","f":"abf982ccc79799c9.webp"},{"k":"item-1794961274258-490248|item-1794964266127-250176|item-1794970837065-174925|rcptbuy-99ztz517","f":"a3408430dbf1b7a1.webp"},{"k":"item-1794961274261-400084|item-1794964266132-165677|item-1794965887185-931158|rcptbuy-1jnn02517","f":"464290c1db81b63f.webp"},{"k":"item-1794964266126-146676|item-1794965180559-850546|item-1794972496574-463743|rcptbuy-99ztz517","f":"bdd6f6234aac79c2.webp"},{"k":"item-1794961274264-907410|item-1794964266127-250176|item-1794965887179-895680|rcptbuy-n6ouzd17","f":"6470c8e53c6d7245.webp"},{"k":"item-1794961274261-400084|item-1794964266132-165677|item-1794965180559-850546|rcptbuy-1fo09nv17","f":"7ed280ef99bfcbd1.webp"},{"k":"item-1794961274261-400084|item-1794964266130-490923|item-1794971947772-460164|rcptbuy-99ztz517","f":"a20ae7013030ada6.webp"},{"k":"item-1794961274258-490248|item-1794964266132-165677|item-1794970837068-696925|rcptbuy-1fo09nv17","f":"dd5a9e4f9c7cd0df.webp"},{"k":"item-1794964266127-250176|item-1794964641248-663301|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"275fede1d703a541.webp"},{"k":"item-1794961274264-907410|item-1794964266129-500494|item-1794965887179-895680|rcptbuy-1jnn02517","f":"6137b6fcc4162cd9.webp"},{"k":"item-1794964266130-490923|item-1794965180555-120909|rcptbuy-1pv7csr17|rcptbuy-99ztz517","f":"8354a996ec0cf9e7.webp"},{"k":"item-1794961274264-907410|item-1794964266132-165677|item-1794965180553-367368|rcptbuy-1fo09nv17","f":"f3ac9841ef53277d.webp"},{"k":"item-1794961274264-907410|item-1794964266125-495292|item-1794970837073-880274|rcptbuy-n6ouzd17","f":"93972e11b57f850c.webp"},{"k":"item-1794961274264-907410|item-1794964266126-146676|item-1794971947771-183364|rcptbuy-n6ouzd17","f":"63166802e75d74f7.webp"},{"k":"item-1794964266125-495292|item-1794970837073-880274|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"78253201604938f9.webp"},{"k":"item-1794964266126-146676|item-1794971947771-183364|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"a28885d9ca93e910.webp"},{"k":"item-1794961274261-400084|item-1794964266125-495292|item-1794970837073-880274|rcptbuy-n6ouzd17","f":"0b8d66745b2d82ab.webp"},{"k":"item-1794964266127-250176|item-1794970837071-365473|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"8ea02a4e12c12b3b.webp"},{"k":"item-1794961274264-907410|item-1794964266126-146676|item-1794970837070-124326|rcptbuy-n6ouzd17","f":"7cad57e3bb7033e2.webp"},{"k":"item-1794961274264-907410|item-1794964266125-495292|item-1794970837071-365473|rcptbuy-n6ouzd17","f":"016e9908b43f891d.webp"},{"k":"item-1794964266126-146676|item-1794970837071-365473|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"7601a0f3da9f83b1.webp"},{"k":"item-1794961274264-907410|item-1794964266128-402564|item-1794971947770-192661|rcptbuy-1jnn02517","f":"70e0281deedb2e3e.webp"},{"k":"item-1794961274264-907410|item-1794964266127-250176|item-1794970837071-365473|rcptbuy-n6ouzd17","f":"5842d597de286d50.webp"},{"k":"item-1794964266126-146676|item-1794971947770-192661|rcptbuy-1pv7csr17|rcptbuy-n6ouzd17","f":"7dc25bed766e5e15.webp"},{"k":"item-1794961274258-490248|item-1794964266129-500494|item-1794965180554-529258|rcptbuy-1jnn02517","f":"75adf0b70e1e97dd.webp"},{"k":"item-1794961274261-400084|item-1794964266126-146676|item-1794970837071-365473|rcptbuy-n6ouzd17","f":"dedb36e963e5dcc3.webp"},{"k":"item-1794961274264-907410|item-1794964266128-402564|item-1794971947770-192661|rcptbuy-1fo09nv17","f":"155d5da478ce354b.webp"},{"k":"item-1794961274264-907410|item-1794964266126-146676|item-1794965887185-931158|rcptbuy-n6ouzd17","f":"ae773da02425bfda.webp"},{"k":"item-1794961274258-490248|item-1794964266128-402564|item-1794971947770-192661|rcptbuy-1jnn02517","f":"bd8c95a60a521f74.webp"},{"k":"item-1794964266125-495292|item-1794965180554-529258|rcptbuy-1fo09nv17|rcptbuy-1pv7csr17","f":"fec83df443cb7fca.webp"},{"k":"item-1794961274261-400084|item-1794964266128-402564|item-1794971947771-183364|rcptbuy-1fo09nv17","f":"b39b95ce5ba47880.webp"},{"k":"item-1794964266130-490923|item-1794965180559-850546|item-1794972496574-463743|rcptbuy-99ztz517","f":"9af9e73b045cf5c7.webp"},{"k":"item-1794961274259-340133|item-1794964641244-228763|item-1794965180559-850546|rcptbuy-ttq7oe17","f":"a5d3096d98322eb3.webp"},{"k":"item-1794961274261-400084|item-1794964641243-349197|item-1794965887182-497401|rcptbuy-1dnqhzg17","f":"b947f0bf452df6da.webp"},{"k":"item-1794961274259-340133|item-1794965180559-850546|item-1794971947771-183364|rcptbuy-ttq7oe17","f":"f2793f44e92caa37.webp"},{"k":"item-1794964266133-256923|item-1794965887182-497401|item-1794972496574-463743|rcptbuy-gc93e317","f":"7baf53470f0ba689.webp"},{"k":"item-1794965180559-850546|item-1794971947771-183364|rcptbuy-1fo09nv17|rcptbuy-1pv7csr17","f":"872e7847ea8dd4d2.webp"},{"k":"item-1794964266133-256923|item-1794965887182-497401|item-1794972496574-463743|rcptbuy-1fo09nv17","f":"e544eea23484be57.webp"},{"k":"item-1794961274270-861529|item-1794964641244-228763|item-1794965180559-850546|rcptbuy-1jnn02517","f":"1475fd14ca283f6f.webp"},{"k":"item-1794961274270-861529|item-1794964266133-256923|item-1794965887182-497401|rcptbuy-1fo09nv17","f":"19e2eb74ce987241.webp"},{"k":"item-1794965180558-791615|item-1794965180559-850546|item-1794972496574-463743|rcptbuy-1fo09nv17","f":"cc067d038ed2b2a0.webp"},{"k":"item-1794965180554-529258|item-1794965887182-497401|rcptbuy-1pv7csr17|rcptbuy-gc93e317","f":"c7a06fb51155156d.webp"},{"k":"item-1794961274259-340133|item-1794964641241-801060|item-1794965887183-921466|rcptbuy-ttq7oe17","f":"8023c7ead4dad01b.webp"},{"k":"item-1794961274261-400084|item-1794964266133-256923|item-1794965887182-497401|rcptbuy-1fo09nv17","f":"1a0362fe0ba4c60d.webp"},{"k":"item-1794961274259-340133|item-1794965180558-791615|item-1794965887181-902070|rcptbuy-1fo09nv17","f":"dd63ae7c1829484f.webp"},{"k":"item-1794961274259-340133|item-1794964641241-801060|item-1794970837074-498365|rcptbuy-ttq7oe17","f":"1cd481478b8a08a8.webp"},{"k":"item-1794961274262-794969|item-1794965180558-791615|item-1794965887181-902070|rcptbuy-1jnn02517","f":"035938efc4cbd9c0.webp"},{"k":"item-1794961274259-340133|item-1794970837069-614876|item-1794971947769-627615|rcptbuy-1jnn02517","f":"a471669eb20ef832.webp"},{"k":"item-1794961274263-274909|item-1794965887181-902070|item-1794965887184-384752|rcptbuy-gc93e317","f":"0b4048d07957e36d.webp"},{"k":"item-1794961274261-400084|item-1794965887178-978505|item-1794965887183-921466|rcptbuy-1fo09nv17","f":"6a511935dad6412b.webp"},{"k":"item-1794961274263-274909|item-1794964641244-228763|item-1794965887181-902070|rcptbuy-ttq7oe17","f":"cb3ede90423b38d3.webp"},{"k":"item-1794961274259-340133|item-1794965887178-978505|item-1794970837072-242832|rcptbuy-ttq7oe17","f":"bc21d0e4a1c65c9e.webp"},{"k":"item-1794961274259-340133|item-1794965887181-902070|item-1794965887184-384752|rcptbuy-1jnn02517","f":"9c94afda5ba80ac7.webp"},{"k":"item-1794961274259-340133|item-1794964641241-801060|item-1794970837074-498365|rcptbuy-gc93e317","f":"db98f457ebd8091c.webp"},{"k":"item-1794961274270-861529|item-1794970837069-614876|item-1794971947769-627615|rcptbuy-1hkd3bh17","f":"e66c43fdb5580777.webp"},{"k":"item-1794961274262-794969|item-1794964641242-585843|item-1794970837074-498365|rcptbuy-1hkd3bh17","f":"85401955be5b381d.webp"},{"k":"item-1794970837069-614876|item-1794971947769-627615|item-1794972496574-463743|rcptbuy-1hkd3bh17","f":"dacdf24618e13de5.webp"},{"k":"item-1794961274258-490248|item-1794964266128-402564|item-1794971947774-378641|rcptbuy-1jnn02517","f":"449322fc663ef2aa.webp"},{"k":"item-1794961274261-400084|item-1794964266131-291794|item-1794965180554-529258|rcptbuy-1jnn02517","f":"3b2d6af73872369e.webp"},{"k":"item-1794961274261-400084|item-1794964266128-402564|item-1794971947774-378641|rcptbuy-1jnn02517","f":"8a00b1bef122eeeb.webp"},{"k":"item-1794961274262-794969|item-1794964266125-495292|item-1794965180558-791615|rcptbuy-gc93e317","f":"0fe36a081d94e79e.webp"},{"k":"item-1794961274262-794969|item-1794964266131-291794|item-1794965180554-529258|rcptbuy-ttq7oe17","f":"6babadfdd8d16359.webp"},{"k":"item-1794961274263-274909|item-1794964266129-500494|item-1794970837073-880274|rcptbuy-1jnn02517","f":"f897a7149bcf1492.webp"},{"k":"item-1794961274263-274909|item-1794964266127-250176|item-1794964641248-663301|rcptbuy-1c3dyxl17","f":"6360d85122dd4852.webp"},{"k":"item-1794961274270-861529|item-1794964266129-500494|item-1794971947774-378641|rcptbuy-gc93e317","f":"ef3f8cc1415eeeee.webp"},{"k":"item-1794961274263-274909|item-1794964266125-495292|item-1794970837073-880274|rcptbuy-gc93e317","f":"afb7b77949227271.webp"},{"k":"item-1794961274262-794969|item-1794964266129-500494|item-1794971947774-378641|rcptbuy-1fo09nv17","f":"40bcfa25d116adf8.webp"},{"k":"item-1794961274258-490248|item-1794964266128-402564|item-1794970837067-662427|rcptbuy-1fo09nv17","f":"b080b6bbda05adbc.webp"},{"k":"item-1794961274270-861529|item-1794964266132-165677|item-1794971947774-378641|rcptbuy-1c3dyxl17","f":"251499ba340abc3a.webp"},{"k":"item-1794961274262-794969|item-1794964266129-500494|item-1794970837067-662427|rcptbuy-1jnn02517","f":"af5c40c87ac6e6a4.webp"},{"k":"item-1794961274263-274909|item-1794964266127-250176|item-1794965887186-222552|rcptbuy-gc93e317","f":"7bd5fad11e87801e.webp"},{"k":"item-1794961274263-274909|item-1794964641241-801060|item-1794970837074-498365|rcptbuy-ttq7oe17","f":"f8034b9a85202645.webp"},{"k":"item-1794961274263-274909|item-1794964266129-500494|item-1794965887186-222552|rcptbuy-1fo09nv17","f":"5ecbc46002b81a6e.webp"},{"k":"item-1794961274262-794969|item-1794964266130-490923|item-1794965887183-921466|rcptbuy-1hkd3bh17","f":"41b911e3296fb7ee.webp"},{"k":"item-1794961274258-490248|item-1794964266129-500494|item-1794971947770-192661|rcptbuy-1hkd3bh17","f":"4b870f75b8d151c0.webp"},{"k":"item-1794961274262-794969|item-1794964266127-250176|item-1794970837067-662427|rcptbuy-1hkd3bh17","f":"521d820b6fb8ae6a.webp"},{"k":"item-1794961274270-861529|item-1794965887178-978505|item-1794970837074-498365|rcptbuy-ttq7oe17","f":"6680cc9773f55f84.webp"},{"k":"item-1794961274258-490248|item-1794964266127-250176|item-1794965887179-895680|rcptbuy-1hkd3bh17","f":"2ea0c23a2e91f25a.webp"},{"k":"item-1794961274258-490248|item-1794964266131-291794|item-1794965887183-921466|rcptbuy-ttq7oe17","f":"8f087bebb5c31d2a.webp"},{"k":"item-1794961274258-490248|item-1794964266132-165677|item-1794970837067-662427|rcptbuy-1hkd3bh17","f":"2afd1f8907995c6c.webp"},{"k":"item-1794961274270-861529|item-1794964266131-291794|item-1794965887177-185377|rcptbuy-99ztz517","f":"98c8653fd7fbf321.webp"},{"k":"item-1794961274270-861529|item-1794964266127-250176|item-1794965887186-222552|rcptbuy-gc93e317","f":"fde34315c02e605d.webp"},{"k":"item-1794964266132-165677|item-1794964641245-386921|item-1794972496574-463743|rcptbuy-gc93e317","f":"df270d9fee93ccd4.webp"},{"k":"item-1794964266131-291794|item-1794964266133-256923|item-1794972496574-463743|rcptbuy-ttq7oe17","f":"d49d69def12794ac.webp"},{"k":"item-1794961274257-705283|item-1794964266132-165677|item-1794964641243-349197|rcptbuy-1c3dyxl17","f":"50a4598d25e9eea2.webp"},{"k":"item-1794961274260-781097|item-1794964266130-490923|item-1794964641245-386921|rcptbuy-1c3dyxl17","f":"a32fa83e6999ff58.webp"},{"k":"item-1794961274260-781097|item-1794964266132-165677|item-1794964641244-228763|rcptbuy-1c3dyxl17","f":"54ca22ba2033d0e2.webp"},{"k":"item-1794961274257-705283|item-1794964266130-490923|item-1794965180556-409795|rcptbuy-1c3dyxl17","f":"236971c884c3ed66.webp"},{"k":"item-1794961274257-705283|item-1794964266132-165677|item-1794964641245-386921|rcptbuy-1c3dyxl17","f":"a063e1ebaf58f221.webp"},{"k":"item-1794961274260-781097|item-1794964266131-291794|item-1794964641244-228763|rcptbuy-ttq7oe17","f":"5264f245ffa9d15e.webp"},{"k":"item-1794961274260-781097|item-1794964266132-165677|item-1794964641243-349197|rcptbuy-1dnqhzg17","f":"3ff5c876803bd555.webp"},{"k":"item-1794961274257-705283|item-1794964266130-490923|item-1794965887183-921466|rcptbuy-1dnqhzg17","f":"bc68dd34960c7c29.webp"},{"k":"item-1794961274260-781097|item-1794964266131-291794|item-1794970837067-662427|rcptbuy-ttq7oe17","f":"bf9b67e98980a9a1.webp"},{"k":"item-1794961274260-781097|item-1794964266130-490923|item-1794965887183-921466|rcptbuy-1c3dyxl17","f":"ceafeb019c619603.webp"},{"k":"item-1794961274257-705283|item-1794964266130-490923|item-1794964641245-386921|rcptbuy-1c3dyxl17","f":"c6d293d7b2cfe592.webp"},{"k":"item-1794961274260-781097|item-1794970837069-614876|item-1794971947769-627615|rcptbuy-1dnqhzg17","f":"b250cd6d4fb4120e.webp"},{"k":"item-1794961274260-781097|item-1794964641243-349197|rcptbuy-ttq7oe17","f":"33f67401fedaea46.webp"},{"k":"item-1794961274257-705283|item-1794964641246-125375|rcptbuy-1c3dyxl17","f":"59897b7ba5f78630.webp"},{"k":"item-1794961274257-705283|item-1794970837072-242832|item-1794971947769-627615|rcptbuy-1c3dyxl17","f":"3a81e2b3c0390349.webp"},{"k":"item-1794961274265-704202|item-1794964641245-386921|rcptbuy-99ztz517","f":"70f9dba8e9e286ea.webp"},{"k":"item-1794961274257-705283|item-1794965887184-384752|rcptbuy-1c3dyxl17","f":"ffd9c74055691eba.webp"},{"k":"item-1794961274266-986265|item-1794964641243-349197|rcptbuy-gc93e317","f":"fca9d8f254b4ba08.webp"},{"k":"item-1794961274266-986265|item-1794964641249-263249|rcptbuy-1hkd3bh17","f":"55033ef493d1fff8.webp"},{"k":"item-1794961274265-704202|item-1794970837070-124326|rcptbuy-gc93e317","f":"0dbe031a2139811e.webp"},{"k":"item-1794961274265-704202|item-1794964641241-801060|item-1794970837069-614876|rcptbuy-gc93e317","f":"ae39336844652a5c.webp"},{"k":"item-1794961274266-986265|item-1794965180555-120909|rcptbuy-1dnqhzg17","f":"baeed28c0c44fec6.webp"},{"k":"item-1794961274265-704202|item-1794964641250-679515|rcptbuy-1hkd3bh17","f":"94ed742f029a770f.webp"},{"k":"item-1794961274265-704202|item-1794964266134-290768|rcptbuy-99ztz517","f":"fd3e9a48133b4d8d.webp"},{"k":"item-1794961274266-986265|item-1794965887184-384752|rcptbuy-1hkd3bh17","f":"5a0cf1c314da97dd.webp"},{"k":"item-1794961274266-986265|item-1794965180555-120909|rcptbuy-99ztz517","f":"70bea14a8170965d.webp"},{"k":"item-1794961274265-704202|item-1794965180560-986012|rcptbuy-1dnqhzg17","f":"f5e4c667d04171f1.webp"},{"k":"item-1794961274265-704202|item-1794965887184-384752|rcptbuy-1dnqhzg17","f":"44aa93736e84d4ca.webp"}]};
+var ONBODY = { map: {} };
+function onbodyIngest(j) {
+  if (!j || !j.r || !j.r.length) return 0;
+  var n = 0;
+  j.r.forEach(function (e) { if (e && e.k && e.f && /^[A-Za-z0-9._-]+$/.test(e.f)) { if (!ONBODY.map[e.k]) n++; ONBODY.map[e.k] = "assets/onbody/" + e.f; } });
+  return n;
+}
+onbodyIngest(ONBODY_SEED);
+try { var _obc = localStorage.getItem("wardrobe.onbody"); if (_obc) onbodyIngest(JSON.parse(_obc)); } catch (e) {}
+function onbodySrc(key) { return (key && ONBODY.map[key]) || null; }
+function onbodyKeys() { for (var k in ONBODY.map) return ONBODY.map; return null; }
+function onbodyForLook(look) {
+  if (!look) return null;
+  if (look.composerKey && ONBODY.map[look.composerKey]) return ONBODY.map[look.composerKey];
+  var ids = (look.fwPieces || []).map(function (p) { return p && p.id; }).filter(Boolean);
+  if (ids.length < 3) return null;
+  var cats = (look.fwPieces || []).map(function (p) { return String(p.category || "").toLowerCase(); });
+  /* the render key never includes the watch / accessories */
+  var core = ids.filter(function (id, i) { return !/watch|belt|sunglass|bag|hat|scarf|accessor/.test(cats[i]); });
+  return ONBODY.map[core.slice().sort().join("|")] || null;
+}
+function onbodyRefresh() {
+  try {
+    if (typeof fetch !== "function") return;
+    fetch("assets/onbody/manifest.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.r) return;
+      var added = onbodyIngest(j);
+      if (j.r.length > ONBODY_SEED.r.length) { try { localStorage.setItem("wardrobe.onbody", JSON.stringify(j)); } catch (e) {} }
+      if (added && typeof todayLook !== "undefined" && todayLook && typeof renderToday === "function" && typeof currentTab !== "undefined" && currentTab === "today") renderToday();
+    }).catch(function () {});
+  } catch (e) {}
+}
+/* Build .76: the IA script that used to call this runs before the app
+   scripts, so the manifest was never re-read — refresh from here. */
+onbodyRefresh();
+/* Build .75: every Home deal goes through the .74.2 pool — his own
+   photographed pieces first, photographed pieces as the fallback. */
+function homeComposerLooks75(count) {
+  if (typeof composerLooks !== "function") return [];
+  var temp = (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : undefined;
+  var pools = homeOwnedPhotoPieces742();
+  var r = pools.own.length >= 3 ? (composerLooks({ count: count, temp: temp, only: pools.own, renderedFirst: true }) || []) : [];
+  if (!r.length && pools.withPhoto.length) r = composerLooks({ count: count, temp: temp, only: pools.withPhoto, renderedFirst: true }) || [];
+  return r.filter(function (l) { return homeLookOk742(l); });
+}
+function homeLookOk742(look) {
+  if (!look || !look.fwPieces || !look.fwPieces.length) return true;
+  var pools = homeOwnedPhotoPieces742();
+  var pool = pools.own.length >= 3 ? pools.own : pools.withPhoto;
+  var ok = {};
+  pool.forEach(function (i) { ok[i.id] = 1; });
+  return look.fwPieces.every(function (p) { return p && ok[p.id]; });
+}
+function composerPrefs() {
+  var p = null;
+  try { p = (typeof store !== "undefined") ? store.get(COMPOSER_PREFS_KEY, null) : null; } catch (e) { p = null; }
+  if (!p || typeof p !== "object" || Array.isArray(p)) p = {};
+  p.v = 1;
+  p.items = p.items && typeof p.items === "object" ? p.items : {};
+  p.pairs = p.pairs && typeof p.pairs === "object" ? p.pairs : {};
+  p.recent = Array.isArray(p.recent) ? p.recent : [];
+  p.banned = p.banned && typeof p.banned === "object" ? p.banned : {};
+  p.exposure = p.exposure && typeof p.exposure === "object" ? p.exposure : {};
+  p.likedKeys = p.likedKeys && typeof p.likedKeys === "object" ? p.likedKeys : {};
+  return p;
+}
+function composerSavePrefs(p) {
+  if (p.recent.length > 600) p.recent = p.recent.slice(-600);
+  var mx = 0;
+  Object.keys(p.exposure).forEach(function (k) { if (p.exposure[k] > mx) mx = p.exposure[k]; });
+  if (mx > 400) Object.keys(p.exposure).forEach(function (k) { p.exposure[k] = Math.floor(p.exposure[k] / 2); });
+  try { store.set(COMPOSER_PREFS_KEY, p); } catch (e) {}
+}
+/* Weights the deck deals with: the on-device verdicts, plus every
+   liked closet look in the synced looks collection that this device
+   has not already counted. */
+function composerEffectivePrefs() {
+  var p = composerPrefs();
+  var eff = { items: Object.assign({}, p.items), pairs: Object.assign({}, p.pairs) };
+  try {
+    (typeof savedLooks !== "undefined" ? savedLooks : []).forEach(function (l) {
+      if (!l || l.verdict !== "like" || !l.fwPieces || !l.fwPieces.length) return;
+      var ids = l.fwPieces.map(function (x) { return x && x.id; }).filter(Boolean);
+      var key = window.WardrobeComposer.comboKey(ids);
+      if (p.likedKeys[key]) return;
+      window.WardrobeComposer.applyVerdict(eff, ids, "like");
+    });
+  } catch (e) {}
+  return eff;
+}
+function composerLookIds(look) {
+  return ((look && look.fwPieces) || []).map(function (x) { return x && x.id; }).filter(Boolean);
+}
+/* A look was put on screen: it joins the seen-recently ring (never
+   dealt again while recent) and its pieces' exposure counts rise,
+   which is what lets the least-shown — and newest — pieces lead. */
+function composerMarkSeen(looks) {
+  var p = composerPrefs(), changed = false;
+  (looks || []).forEach(function (look) {
+    if (!look || !look.composer || !look.composerKey) return;
+    if (p.recent[p.recent.length - 1] === look.composerKey) return;
+    var at = p.recent.indexOf(look.composerKey);
+    if (at !== -1) p.recent.splice(at, 1);
+    p.recent.push(look.composerKey);
+    composerLookIds(look).forEach(function (id) { p.exposure[id] = (p.exposure[id] || 0) + 1; });
+    changed = true;
+  });
+  if (changed) composerSavePrefs(p);
+}
+function composerVerdict(look, verdict) {
+  if (!look || !look.composer) return;
+  var p = composerPrefs();
+  var ids = composerLookIds(look);
+  window.WardrobeComposer.applyVerdict(p, ids, verdict);
+  if (verdict === "dislike") p.banned[look.composerKey] = Date.now();
+  if (verdict === "like") p.likedKeys[look.composerKey] = Date.now();
+  composerSavePrefs(p);
+}
+var COMPOSER_NOUN = { Tees: "Tee", Polos: "Polo", Sweaters: "Knit", Shirts: "Shirt", "Button downs": "Shirt", Trousers: "Trousers", Jeans: "Jeans", Shorts: "Shorts", "Bathing suits": "Swim Shorts", Blazers: "Blazer", Suits: "Suit", Jackets: "Jacket", Coats: "Coat", "Leather jackets": "Leather Jacket", Vests: "Vest", Shoes: "Shoes" };
+function composerNoun(item) {
+  var n = String(item.name || "").toLowerCase();
+  if (item.category === "Shirts" && /overshirt|waffle/.test(n)) return "Overshirt";
+  if (item.category === "Trousers") {
+    if (/chino/.test(n)) return "Chinos";
+    if (/linen/.test(n)) return "Linen Trousers";
+  }
+  return COMPOSER_NOUN[item.category] || "Piece";
+}
+function composerColour(item) {
+  var c = String(item.colourName || "").split("\u00b7")[0].trim();
+  if (!c) return "";
+  return c.split(/\s+/).map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(" ");
+}
+function composerPieceTitle(item) {
+  var c = composerColour(item), n = composerNoun(item);
+  if (c && c.toLowerCase().indexOf(n.toLowerCase()) !== -1) return c;
+  return (c ? c + " " : "") + n;
+}
+function composerOutfitToLook(o, i, renderPairs) {
+  var byId = {};
+  (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).forEach(function (it) { byId[it.id] = it; });
+  var order = [o.layer, o.top, o.bottom, o.shoes, o.acc].filter(Boolean);
+  var pieces = order.map(function (p) { return byId[p.id]; }).filter(Boolean);
+  var upper = o.layer ? byId[o.layer.id] : byId[o.top.id];
+  var bottom = byId[o.bottom.id];
+  var title = composerPieceTitle(upper) + " & " + composerPieceTitle(bottom);
+  var swatches = [], seenHex = {};
+  pieces.forEach(function (p) {
+    if (p.colourHex && !seenHex[p.colourHex]) {
+      seenHex[p.colourHex] = 1;
+      swatches.push({ name: composerColour(p) || ((typeof nearestWada === "function") ? nearestWada(p.colourHex).name : "Colour"), hex: p.colourHex, role: composerNoun(p) });
+    }
+  });
+  var fwRender = null;
+  var names = pieces.map(function (p) { return p.name; });
+  var bit = 0;
+  for (var L = 7; L >= 1; L--) if (o.mask & (1 << L)) { bit = L; break; }
+  return {
+    id: (typeof newLookId === "function") ? newLookId() : ("look-" + Date.now() + "-" + i),
+    title: title,
+    meta: "From your closet",
+    desc: names.join(" with "),
+    iconId: null, blendId: null, basis: "both", version: i + 1, plate: null, paletteName: null,
+    img: null,
+    fwRender: fwRender,
+    imgAlt: names.join(", "),
+    swatches: swatches,
+    flatlay: pieces.map(function (p) { return { hex: p.colourHex, label: composerNoun(p), detail: composerColour(p).toLowerCase() }; }),
+    notes: [],
+    source: "wardrobe",
+    anchorNames: names.slice(0, 4),
+    fwPieces: pieces.map(function (p) { return { id: p.id, name: p.name, photo: p.photo || null, colourHex: p.colourHex || null, category: p.category }; }),
+    suggestedBottom: null,
+    composer: true,
+    composerKey: o.key,
+    composerLevel: bit
+  };
+}
+/* Deal composed looks. opts: count, level (null = any outfit type;
+   undefined = the app-wide outfit type), temp. */
+function composerLooks(opts) {
+  opts = opts || {};
+  if (!window.WardrobeComposer) return [];
+  var deck = composerDeck(opts.only || null, opts.slot || null);
+  var level = opts.level === undefined ? ((typeof formalityLevel !== "undefined") ? formalityLevel : 4) : opts.level;
+  var p = composerPrefs();
+  var recent = p.recent.slice();
+  if (opts.exclude) recent = recent.concat(opts.exclude);
+  var dealOpts = {
+    level: level,
+    temp: typeof opts.temp === "number" ? opts.temp : null,
+    prefs: composerEffectivePrefs(),
+    exposure: p.exposure,
+    recent: recent,
+    banned: p.banned
+  };
+  var want = opts.count || 6;
+  var outs = [];
+  /* Build .75: outfits David has been rendered wearing come first. */
+  if (opts.renderedFirst && typeof onbodyKeys === "function") {
+    var keys = onbodyKeys();
+    if (keys) outs = deck.deal(want, Object.assign({}, dealOpts, { onlyKeys: keys })) || [];
+  }
+  if (outs.length < want) {
+    var have = outs.map(function (o) { return o.key; });
+    var more = deck.deal(want - outs.length, Object.assign({}, dealOpts, { recent: recent.concat(have) })) || [];
+    more.forEach(function (o) { if (have.indexOf(o.key) === -1) outs.push(o); });
+  }
+  return outs.map(function (o, i) { return composerOutfitToLook(o, i, null); });
+}
+
+    

@@ -29,7 +29,7 @@
 // deadline is 30s — long enough for a 2.7MB index.html on a typical
 // phone connection — so a slow fetch is not replaced by a stale
 // cached shell after 4 seconds.
-const WARDROBE_BUILD = '2026-11-19.79.6';
+const WARDROBE_BUILD = '2026-11-19.80';
 const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
@@ -42,21 +42,28 @@ const ONBODY_CACHE = 'wardrobe-onbody-v1';
 // cache that survives builds, so a reopen never waits on them; a change
 // lands on the next open.
 const DATA_CACHE = 'wardrobe-data-v1';
-const DATA_RE = /\/assets\/(onbody\/manifest\.json|onbody-cut\/(manifest|lq)\.json|inspo\/manifest\.json|edit-catalog\.json)$/;
+const DATA_RE = /\/assets\/(onbody\/manifest\.json|onbody-cut\/(manifest|lq|feet)\.json|inspo\/manifest\.json|edit-catalog\.json)$/;
 // Cut-outs (assets/onbody-cut/, and the full-resolution zoom copies in
 // assets/onbody-cut-hq/) are immutable: cache-first in ONBODY_CACHE.
 const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
+// Build .80: the shell (index.html) is small; the app's code lives in
+// app/<name>.<content-hash>.(js|css), written by scripts/build_shell.py.
+// Those files are immutable: cache-first in CODE_CACHE, which survives
+// builds (activate drops files no longer listed), precached on install.
+const CODE_CACHE = 'wardrobe-code-v1';
+const CODE_RE = /\/app\/[^\/]+\.[0-9a-f]{10}\.(js|css)$/;
+const CODE_FILES = ['./app/00-brand-list.27a288fac9.js', './app/01.ab91153ec5.js', './app/02.c962eb7e01.js', './app/03.d4e3059653.js', './app/04.c4cfb49d5c.js', './app/05.cff0fa010c.js', './app/06.42d6e07f14.js', './app/07.04dec0898b.js', './app/08.cc3ef1bc8a.js', './app/09.ecc4e31b72.js', './app/10.90a8bc4648.js', './app/11.88e48d4d6e.js', './app/12.abd5366cfd.js', './app/13.41a8f6ad22.js', './app/14.00fa301ab8.js', './app/15.613656dfbe.js', './app/16.8ab17cfb36.js', './app/17.d77feb95bb.js', './app/18.31b8f560f5.js', './app/19.5cbe945a2e.js', './app/20.059504fb55.js', './app/21.d81e147bdc.js', './app/22.734213addb.js', './app/23.e443f34154.js'];
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
   './assets/fonts/Inter.var.woff2', './assets/fonts/Inter-Italic.var.woff2',
   './assets/fonts/Fraunces.var.woff2', './assets/fonts/Fraunces-Italic.var.woff2'];
-// Build .79.3: with a cached shell, a reopen waits at most 0.8s for the
+// Build .80: the shell is small now — a reopen waits at most 0.4s (was 0.8s) for the
 // network (a 304 on a good link answers inside that); a slower link gets the
 // cached shell at once and the fresh one lands in the cache for the
 // next open ("A newer build is ready" covers the rest). With no cached
 // shell it still waits for the network.
-const SHELL_DEADLINE_MS = 800;
+const SHELL_DEADLINE_MS = 400;
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', (event) => {
@@ -80,16 +87,23 @@ self.addEventListener('install', (event) => {
         )));
       }))
       .catch(() => {})
+      .then(() => caches.open(CODE_CACHE).then((cc) => Promise.all(CODE_FILES.map((u) => {
+        const key = new URL(u, self.registration.scope).toString();
+        return cc.match(key).then((hit) => hit || fetch(key).then((res) => { if (res && res.status === 200) return cc.put(key, res); }));
+      }))).catch(() => {}))
       .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
-  const keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE, DATA_CACHE];
+  const keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE, DATA_CACHE, CODE_CACHE];
+  const live = CODE_FILES.map((u) => new URL(u, self.registration.scope).toString());
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
       keys.filter((k) => keep.indexOf(k) === -1).map((k) => caches.delete(k))
-    )).then(() => caches.open(ASSET_CACHE)).then((cache) =>
+    )).then(() => caches.open(CODE_CACHE)).then((cc) => cc.keys().then((reqs) => Promise.all(
+      reqs.filter((r) => live.indexOf(r.url) === -1).map((r) => cc.delete(r))
+    ))).then(() => caches.open(ASSET_CACHE)).then((cache) =>
       // Prune ?r= cache-buster entries an older build may have stored.
       cache.keys().then((reqs) => Promise.all(
         reqs.filter((r) => new URL(r.url).searchParams.has('r'))
@@ -157,6 +171,21 @@ self.addEventListener('fetch', (event) => {
   // to the network and are never cached.
   if (req.headers.has('range')) return;
 
+  // App code: content-hashed, cache-first.
+  if (CODE_RE.test(url.pathname)) {
+    event.respondWith(
+      caches.open(CODE_CACHE).then((cache) =>
+        cache.match(req, { ignoreSearch: true }).then((hit) => {
+          if (hit) return hit;
+          return fetch(req).then((res) => {
+            if (res && res.status === 200) cache.put(url.origin + url.pathname, res.clone());
+            return res;
+          });
+        })
+      )
+    );
+    return;
+  }
   // Cut-outs: immutable, cache-first (a ?r= retry reads the same entry).
   if (CUT_RE.test(url.pathname)) {
     event.respondWith(
