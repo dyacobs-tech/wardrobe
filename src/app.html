@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.21" />
+    <meta name="wardrobe-build" content="2026-11-19.80.22" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5177,6 +5177,9 @@
         --thumb-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 14V3h4v11h-4z'/%3E%3Cpath d='M17 14l-4 8a3 3 0 0 1-3-3v-4H4.5a2 2 0 0 1-2-2.3l1.4-8A2 2 0 0 1 5.9 3H17'/%3E%3C/svg%3E");
       }
       .thumb-btn[aria-pressed="true"]::before { -webkit-mask-image: var(--thumb-up); }
+      /* .80.22 (Home ••• move): Share this look / Upload a look — text buttons under "In this look" */
+      .outfit-view .ov-look-acts { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; padding: 0 16px; box-sizing: border-box; }
+      .outfit-view .ov-look-acts .ov-look-btn { flex: 1 1 140px; min-height: 40px; }
       /* the look's ••• (Share / Upload) lives in the outfit view header now, not over him */
       .outfit-view .ov-top .hero-corner { position: absolute !important; right: 8px; left: auto; top: auto !important; bottom: 4px; z-index: 3; }
       .outfit-view .ov-top .hero-corner-btn { width: 36px !important; height: 36px !important; min-height: 36px !important; padding: 0 !important; border: 0 !important; background: transparent !important; color: var(--text) !important; box-shadow: none !important; font-size: 16px; letter-spacing: .08em; }
@@ -7329,7 +7332,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.21</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.22</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9139,7 +9142,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.21";
+var WARDROBE_BUILD = "2026-11-19.80.22";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -40795,9 +40798,19 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var cell = document.createElement("div"); cell.className = "hero-icon-cell hero-type-cell";
     cell.appendChild(tdd); row.insertBefore(cell, nc.nextSibling);
   }
-  /* the ••• (Share this look / Upload a look) moves off the hero into the outfit view header */
-  var corner = document.querySelector("#today-hero .hero-corner"), top = document.querySelector("#outfit-view .ov-top");
-  if (corner && top) top.appendChild(corner);
+  /* .80.22 (Home ••• move): Share this look and Upload a look are plain text buttons under
+     "In this look"; the ••• that held them is gone from the header */
+  var corner = document.querySelector("#today-hero .hero-corner"), ovScroll = document.getElementById("ov-scroll");
+  if (corner && ovScroll) {
+    var acts = document.createElement("div"); acts.className = "ov-look-acts"; acts.id = "ov-look-acts";
+    ["today-share", "today-upload"].forEach(function (id) {
+      var b = document.getElementById(id); if (!b) return;
+      b.className = "btn-ghost ov-look-btn"; b.removeAttribute("role");
+      acts.appendChild(b);
+    });
+    ovScroll.appendChild(acts);
+    corner.parentNode.removeChild(corner);
+  }
 
   function unban(img) {
     if (!img || typeof dislikedImgs === "undefined") return;
