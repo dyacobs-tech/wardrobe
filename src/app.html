@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="DONNA" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.31" />
+    <meta name="wardrobe-build" content="2026-11-19.80.32" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5136,9 +5136,10 @@
       /* the dark panel runs on behind the floating nav: no bare band */
       #panel-today .today-hero.hero-solo { margin-bottom: calc(-1 * var(--nav-band, 0px)) !important; }
       #panel-today .today-hero.hero-solo .today-caption { padding-bottom: calc(var(--nav-band, 0px) + 14px) !important; }
-      /* .80.31: on phones the Like / Next / occasion row sits ~18px above the
-         nav pill (was 28px), and the figure takes the space */
-      @media (max-width: 899px) { body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption { padding-bottom: calc(var(--nav-band, 0px) + 4px) !important; } }
+      /* .80.32: on phones the whole caption group (label, title, place and
+         weather, swatches, buttons) sits low as one block: the button row
+         ends 26px above the floating nav pill; the figure takes the rest */
+      @media (max-width: 899px) { body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption { padding-bottom: calc(var(--nav-band, 0px) + 12px) !important; } }
       #panel-today .today-hero.hero-solo #today-name { cursor: pointer; }
       /* the outfit view */
       .outfit-view { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; flex-direction: column; }
@@ -7372,7 +7373,7 @@
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.31</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.32</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9194,7 +9195,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.31";
+var WARDROBE_BUILD = "2026-11-19.80.32";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
