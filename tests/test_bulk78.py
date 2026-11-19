@@ -36,7 +36,7 @@ png_uri, wait_js, start_server, server_card, CLOSET, CAT, TRY = (_g[k] for k in 
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).resolve().parent
-BUILD = "2026-11-19.79.4"
+BUILD = "2026-11-19.79.5"
 REC = json.loads((HERE / "fixtures78/identify_recorded.json").read_text())
 KEYS = list(REC["answers"].keys())
 fails: list[str] = []

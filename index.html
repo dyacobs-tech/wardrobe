@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.79.4" />
+    <meta name="wardrobe-build" content="2026-11-19.79.5" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5465,6 +5465,70 @@
       html body #bottombar .nav-pill .navbtn[aria-current="page"], html body #bottombar .nav-pill .navbtn[aria-current="page"] span, html body #bottombar .nav-pill .navbtn[aria-current="page"] svg { color: var(--honey-on) !important; }
       html body #bottombar .nav-pill .navbtn { border: 0 !important; outline: 0 !important; box-shadow: none !important; background: transparent !important; }
       html body .masthead h1.brand, html body .masthead .brand { color: var(--title-ink) !important; }
+      /* ================= Build .79.4 — desktop layout =================
+         Phone layout (below 900px) is untouched. From 900px the nav is the
+         same solid honey pill, centred at the bottom (max 560px), never a
+         translucent strip over the page; from 1024px content sits in a
+         centred 1100px column and Home is the phone composition, centred:
+         the cut-out capped near 78vh and never drawn taller than the file
+         holds (1200px at 1x, 600px on a 2x screen), caption beneath. */
+      @media (min-width: 900px) {
+        html body #bottombar.bottombar {
+          position: fixed !important; top: auto !important; bottom: 16px !important; left: 50% !important; right: auto !important;
+          transform: translateX(-50%) !important; width: min(560px, calc(100vw - 32px)) !important; max-width: none !important;
+          height: 62px !important; padding: 0 !important; margin: 0 !important; border: 0 !important; border-radius: 31px !important;
+          background: transparent !important; box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+          z-index: 60 !important; display: flex !important; justify-content: stretch !important; gap: 0 !important;
+        }
+        html body #bottombar .nav-pill { display: flex !important; flex: 1 1 auto !important; align-items: stretch !important; margin: 0 !important; border-radius: 31px !important; overflow: hidden !important; min-width: 0 !important; }
+        html body #bottombar .nav-pill .navbtn {
+          flex: 1 1 0 !important; height: 100% !important; min-height: 0 !important; display: flex !important; flex-direction: column !important;
+          align-items: center !important; justify-content: center !important; gap: 5px !important; padding: 0 2px !important;
+          font-size: 11px !important; letter-spacing: .1em !important;
+        }
+        html body #bottombar .nav-pill .navbtn svg { width: 21px !important; height: 21px !important; }
+        html body #bottombar .navbtn[aria-current="page"]::after { display: none !important; }
+        html body #bottombar .nav-pill .navbtn:hover { color: var(--honey-on) !important; }
+        html.sheet-lock body #bottombar.bottombar { transform: translate(-50%, calc(100% + 28px)) !important; pointer-events: none; }
+        html body .toast, html body .undo-toast, html body .update-bar { bottom: 94px; }
+        html body { padding-bottom: 104px; }
+      }
+      @media (min-width: 1024px) {
+        :root { --desk-max: 1100px; --hdr-h: 66px; }
+        html body .masthead .wrap { max-width: 1100px; }
+        html body:has(> main > #panel-today:not([hidden])) { padding-bottom: 0 !important; }
+        html body main:has(> #panel-today:not([hidden])) { padding: 0 !important; }
+        html body #panel-today:not([hidden]) {
+          display: flex !important; flex-direction: column !important; flex: none !important;
+          width: 100% !important; max-width: 1100px !important; margin: 0 auto !important;
+          height: calc(100vh - var(--hdr-h)) !important; height: calc(100svh - var(--hdr-h)) !important; max-height: none !important; min-height: 0 !important;
+        }
+        html body #panel-today #today-hero.today-hero {
+          display: flex !important; flex-direction: column !important; height: 100% !important; min-height: 0 !important;
+          margin: 0 !important; width: 100% !important; overflow: visible !important;
+        }
+        html body #panel-today #today-hero.today-hero img#today-img {
+          position: relative !important; left: auto !important; right: auto !important; top: auto !important; inset: auto !important;
+          width: 100% !important; height: auto !important; flex: 1 1 auto !important; min-height: 0 !important;
+          max-height: min(78vh, 1200px) !important; padding: 12px 0 4px !important; margin: 0 auto !important;
+          object-fit: contain !important; object-position: center bottom !important;
+        }
+        html body #panel-today .today-hero .today-collage { left: 0 !important; right: 0 !important; width: 100% !important; }
+        html body #panel-today .today-hero .today-caption {
+          position: relative !important; inset: auto !important; left: auto !important; right: auto !important; top: auto !important; bottom: auto !important;
+          width: auto !important; flex: 0 0 auto !important; display: block !important;
+          padding: 12px 16px 100px !important; background: transparent !important; text-align: center !important;
+        }
+        html body #panel-today .today-caption h2 { font-size: 30px !important; line-height: 1.12 !important; margin: 4px 0 6px !important; }
+        html body #panel-today #today-simple-actions { margin-left: auto !important; margin-right: auto !important; }
+        html body #panel-today .today-hero .today-dots { position: static !important; margin: 4px auto 10px !important; transform: none !important; }
+        /* the floor tone runs edge to edge, the contact shadow is sized to him */
+        body[data-page="today"] #panel-today #today-hero.hero-solo .hero-bg { left: calc(50% - 50vw) !important; right: auto !important; width: 100vw !important; }
+        body[data-page="today"] #panel-today #today-hero.hero-solo .hero-bg::after { width: calc(var(--fig-h, 520px) * .42) !important; }
+      }
+      @media (min-width: 1024px) and (min-resolution: 2dppx) {
+        html body #panel-today #today-hero.today-hero img#today-img { max-height: min(78vh, 600px) !important; }
+      }
     </style>
 
   </head>
@@ -6737,7 +6801,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.79.4</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.79.5</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8345,7 +8409,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.79.4";
+var WARDROBE_BUILD = "2026-11-19.79.5";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -26799,7 +26863,7 @@ function renderLoc() {
   document.getElementById("loc-current-kind").textContent = locUnset ? "No home set" : (travelling ? "Traveling — not home" : "Home — default");
   document.getElementById("loc-back-home").hidden = !travelling;
   var badge = travelling ? ' <span class="travel-badge">Traveling</span>' : "";
-  document.getElementById("today-loc").innerHTML = "<strong>" + esc(currentLoc.name) + "</strong><span>" + esc(currentWeather ? Math.round(currentWeather.temp) + "°F · " + currentWeather.label : "") + "</span>" + badge;
+  document.getElementById("today-loc").innerHTML = "<strong>" + esc(currentLoc.name + (currentLoc.admin && String(currentLoc.name).indexOf(currentLoc.admin) === -1 ? ", " + currentLoc.admin : "")) + "</strong><span>" + esc(currentWeather ? Math.round(currentWeather.temp) + "°F · " + currentWeather.label : "") + "</span>" + badge;
   if (locUnset && !currentWeather) {
     document.getElementById("loc-weather").textContent = "";
     document.getElementById("loc-rec").textContent = "";
