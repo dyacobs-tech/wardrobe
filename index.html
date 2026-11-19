@@ -1380,7 +1380,7 @@
       #panel-add #add-form { position: relative; }
       /* Build .78 — bulk add review grid */
       .bulk-head { display: flex; justify-content: center; margin: 4px 0 10px; min-height: 18px; }
-      .bulk-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding-bottom: 84px; }
+      .bulk-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding-bottom: 150px; }
       @media (min-width: 700px) { .bulk-grid { grid-template-columns: 1fr 1fr; } }
       @media (min-width: 1100px) { .bulk-grid { grid-template-columns: 1fr 1fr 1fr; } }
       .bulk-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: start; position: relative; padding: 12px; }
@@ -36979,7 +36979,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     Object.keys(prefs).forEach(function (k) { if (prefs[k].v && !want[k]) prefs[k] = { v: "", at: now }; });
     var recs = askThread.filter(function (t) { return t && t.id && t.state === "done"; }).map(function (t) {
       var r = { id: "t-" + t.id, kind: "turn" };
-      SYNC_TURN_KEYS.forEach(function (k) { if (t[k] !== undefined) r[k] = t[k]; });
+      SYNC_TURN_KEYS.forEach(function (k) { if (k !== "id" && t[k] !== undefined) r[k] = t[k]; });
       return r;
     });
     Object.keys(prefs).forEach(function (k) {
@@ -37429,7 +37429,19 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     grid.innerHTML = rows.map(cardHTML).join("");
     renderCount();
   }
+  /* Add all rides just above the fixed bottom nav */
+  function placeBar() {
+    var bb = document.getElementById("bottombar"), bar = document.querySelector("#panel-bulk .bulk-bar");
+    if (!bb || !bar) return;
+    var r = bb.getBoundingClientRect(), top = r.height ? r.top : window.innerHeight;
+    var sn = document.getElementById("sync-note");
+    if (sn && !sn.hidden && getComputedStyle(sn).display !== "none" && getComputedStyle(sn).visibility !== "hidden") { var q = sn.getBoundingClientRect(); if (q.height && q.top < top && q.bottom > top - 40) top = q.top - 6; }
+    bar.style.bottom = Math.max(0, Math.round(window.innerHeight - top)) + "px";
+  }
+  window.addEventListener("resize", placeBar);
+  setInterval(function () { if (typeof currentTab !== "undefined" && currentTab === "bulk") placeBar(); }, 1000);
   function renderCount() {
+    placeBar();
     var busy = rows.filter(function (r) { return r.status === "reading" || r.status === "queued" || r.status === "scaling"; }).length;
     var ready = rows.filter(function (r) { return r.status === "done" || r.status === "manual"; }).length;
     var c = document.getElementById("bulk-count");
