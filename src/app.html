@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="DONNA" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.82.1" />
+    <meta name="wardrobe-build" content="2026-11-19.82.2" />
     <script>
 /* Preview .81 guard: on the /preview/ build (or ?pv81 locally) the app is
    read-only toward the outside — nothing is written to sync or the render
@@ -6264,11 +6264,11 @@
       .pv-ic .pv-av { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center 18%; background: #e9e2d4; flex: none; }
       .pv-ic[aria-pressed="true"] { background: var(--ink-btn); color: var(--accent-ink); border-color: transparent; }
       /* the one floating + */
-      .pv-fab { position: fixed; right: max(16px, calc((100vw - 1180px) / 2)); bottom: calc(var(--bb-h, 76px) + 16px + env(safe-area-inset-bottom, 0px)); z-index: 40; width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--honey-nav, #a4804f); color: var(--honey-ink-on, #fff); box-shadow: 0 6px 18px rgba(30, 26, 23, .28); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .2s ease, opacity .2s ease; }
-      .pv-fab.pv-fab-away { transform: translateY(90px); opacity: 0; pointer-events: none; }
+      .pv-fab { position: fixed; right: max(16px, calc((100vw - 1180px) / 2)); bottom: calc(var(--bb-h, 76px) + 16px + env(safe-area-inset-bottom, 0px)); z-index: 40; width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--honey-nav, #a4804f); color: var(--honey-ink-on, #fff); box-shadow: 0 6px 18px rgba(30, 26, 23, .28); display: flex; align-items: center; justify-content: center; cursor: pointer; transform: translateY(calc(-1 * var(--pv-fab-dy, 0px))); transition: transform .2s ease, opacity .2s ease; }
+      .pv-fab.pv-fab-away, .pv-fab.pv-fab-tuck { transform: translateY(90px); opacity: 0; pointer-events: none; }
       .pv-fab svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
       #panel-looks[hidden] .pv-fab { display: none; }
-      .pv81 #panel-looks #cf-grid, .pv81 #panel-looks .en-grid { padding-bottom: 84px; }
+      .pv81 #panel-looks #cf-grid, .pv81 #panel-looks .en-grid { padding-bottom: 72px; } /* + height 48 + 24 gap */
       /* cards: thumbs + Render me on one row, a quiet Edit under them */
       .pv81 #panel-looks .cf-actions { display: flex; flex-wrap: wrap; gap: 8px; }
       .pv81 #panel-looks .cf-actions [data-cf-like], .pv81 #panel-looks .cf-actions [data-cf-dislike] { flex: 1 1 0 !important; width: auto !important; min-width: 0 !important; }
@@ -7582,7 +7582,7 @@
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.82.1</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.82.2</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10218,7 +10218,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.82.1";
+var WARDROBE_BUILD = "2026-11-19.82.2";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -43753,13 +43753,44 @@ window.inspoView = "withmine";
     /* + : build a look; it tucks away while he scrolls down, so it never
        sits on a card's buttons mid-swipe, and comes back on the way up */
     fab.addEventListener("click", function () { if (typeof showBuildSheet === "function") showBuildSheet("build-sheet"); });
+    /* at rest the + never sits on a card's controls: it keeps its corner
+       when that spot is clear, else it lifts to the nearest clear gap
+       (between card rows, above the buttons), checked whenever he stops
+       scrolling, the feed grows, or the window resizes */
+    var CTRL = ".cf-actions button, .pv-edit, .en-shop, .cf-actions a";
+    function placeFab() {
+      if (panel.hidden || !fab.isConnected) return;
+      /* layout box (offset* ignores the transform and its transition) */
+      var r0 = { top: fab.offsetTop, bottom: fab.offsetTop + fab.offsetHeight, left: fab.offsetLeft, right: fab.offsetLeft + fab.offsetWidth }, pad = 8;
+      var boxes = [];
+      panel.querySelectorAll(CTRL).forEach(function (el) {
+        if (!el.offsetParent) return;
+        var b = el.getBoundingClientRect();
+        if (b.bottom < 0 || b.top > innerHeight || b.right < r0.left - pad || b.left > r0.right + pad) return;
+        boxes.push(b);
+      });
+      function clear(dy) {
+        var t = r0.top - dy - pad, bt = r0.bottom - dy + pad;
+        for (var i = 0; i < boxes.length; i++) if (boxes[i].bottom > t && boxes[i].top < bt) return false;
+        return true;
+      }
+      var dy = 0, max = Math.max(0, r0.top - innerHeight * 0.35);
+      while (dy <= max && !clear(dy)) dy += 4;
+      if (dy > max) dy = 0;
+      fab.style.setProperty("--pv-fab-dy", dy + "px");
+      fab.classList.toggle("pv-fab-tuck", dy > max || (dy === 0 && !clear(0)));
+    }
+    window.pvPlaceFab81 = placeFab;
     var lastY = window.scrollY, fabT = null;
     window.addEventListener("scroll", function () {
       var y = window.scrollY, down = y > lastY + 4, up = y < lastY - 4;
       if (down && y > 120) fab.classList.add("pv-fab-away"); else if (up) fab.classList.remove("pv-fab-away");
       if (down || up) lastY = y;
-      clearTimeout(fabT); fabT = setTimeout(function () { fab.classList.remove("pv-fab-away"); }, 900);
+      clearTimeout(fabT); fabT = setTimeout(function () { placeFab(); fab.classList.remove("pv-fab-away"); }, 160);
     }, { passive: true });
+    window.addEventListener("resize", function () { clearTimeout(fabT); fabT = setTimeout(placeFab, 160); });
+    if (window.MutationObserver) new MutationObserver(function () { clearTimeout(fabT); fabT = setTimeout(placeFab, 160); }).observe(panel, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"] });
+    setTimeout(placeFab, 300);
     /* pull to refresh: at the top, drag down past 70px and let go */
     var ptr = document.getElementById("pv-ptr"), sy = null, pulled = 0;
     panel.addEventListener("touchstart", function (e) { sy = window.scrollY <= 0 && e.touches.length === 1 ? e.touches[0].clientY : null; pulled = 0; }, { passive: true });
