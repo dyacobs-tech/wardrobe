@@ -5275,11 +5275,12 @@
         </div>
         <div id="outfits-inspo-view" hidden>
           <div class="cal-subtabs inspo-subtabs" role="group" aria-label="Inspo pages">
+            <button type="button" class="cal-subtab" data-inspo-view="onyou" aria-pressed="false">On you</button>
             <button type="button" class="cal-subtab" data-inspo-view="icons" aria-pressed="true">Icons</button>
             <button type="button" class="cal-subtab" data-inspo-view="palettes" aria-pressed="false">Palettes</button>
             <button type="button" class="cal-subtab" data-inspo-view="myinspo" aria-pressed="false">Saved</button>
           </div>
-          <div id="inspo-host"></div>
+          <div id="inspo-host"><div id="panel-onyou" hidden></div></div>
         </div>
       </section>
 
@@ -29057,6 +29058,26 @@ function receiptDismiss(rec) {
    My Looks is a different thing and is untouched.) */
 var SALE_ITEMS = [{"brand": "Mr P.", "name": "Ribbed Cashmere Polo Shirt", "retailer": "Mr Porter", "price": 263, "wasPrice": 525, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/ribbed-cashmere-polo-shirt/1647597343168605", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Cashmere Polo Sweater", "retailer": "Mr Porter", "price": 278, "wasPrice": 555, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/cashmere-polo-sweater/46376663162890176", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Curtis Cashmere Sweater", "retailer": "Mr Porter", "price": 200, "wasPrice": 500, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/curtis-cashmere-sweater/46376663162887731", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Geo Intarsia-Knit Wool and Cashmere-Blend Sweater", "retailer": "Mr Porter", "price": 235, "wasPrice": 470, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/geo-intarsia-knit-wool-and-cashmere-blend-sweater/46376663162890197", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Rib-Detailed Merino Wool Sweater", "retailer": "Mr Porter", "price": 114, "wasPrice": 285, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/rib-detailed-merino-wool-sweater/46376663162890225", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Clyde Cashmere Rollneck Sweater", "retailer": "Mr Porter", "price": 258, "wasPrice": 515, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/rollnecks/clyde-cashmere-rollneck-sweater/1647597344408062", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Cable-Knit Wool Cardigan", "retailer": "Mr Porter", "price": 193, "wasPrice": 385, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/cardigans/cable-knit-wool-cardigan/46376663162914495", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Ribbed-Knit Cardigan", "retailer": "Mr Porter", "price": 170, "wasPrice": 425, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/cardigans/ribbed-knit-cardigan/46376663162890221", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Cashmere Sweater", "retailer": "Mr Porter", "price": 256, "wasPrice": 640, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/crew-necks/cashmere-sweater/46376663162890193", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Open-Knit Wool Polo Shirt", "retailer": "Mr Porter", "price": 142, "wasPrice": 355, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/open-knit-wool-polo-shirt/46376663162890222", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Edward Straight-Leg Garment-Dyed Linen Drawstring Trousers", "retailer": "Mr Porter", "price": 84, "wasPrice": 210, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/edward-straight-leg-garment-dyed-linen-drawstring-trousers/1647597356993805", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Tapered Wool-Twill Drawstring Trousers", "retailer": "Mr Porter", "price": 77, "wasPrice": 255, "off": 70, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/suit-trousers/tapered-wool-twill-drawstring-trousers/1647597318722059", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Camp-Collar Organic Cotton-Terry Jacquard Shirt", "retailer": "Mr Porter", "price": 84, "wasPrice": 210, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/printed-shirts/camp-collar-organic-cotton-terry-jacquard-shirt/1647597358473428", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "Mr P.", "name": "Adam Straight-Leg Cotton-Blend Twill Chinos", "retailer": "Mr Porter", "price": 84, "wasPrice": 210, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/adam-straight-leg-cotton-blend-twill-chinos/1647597332778393", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Straight-Leg Mid-Length Striped Seersucker Swim Shorts", "retailer": "Mr Porter", "price": 75, "wasPrice": 125, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/plain-swim-shorts/straight-leg-mid-length-striped-seersucker-swim-shorts/1647597358469746", "img": "", "category": "Swim", "cat": "swim"}, {"brand": "Mr P.", "name": "Waffle-Knit Organic Cotton-Jersey Polo Shirt", "retailer": "Mr Porter", "price": 78, "wasPrice": 195, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/waffle-knit-organic-cotton-jersey-polo-shirt/46376663162890131", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Samuel Straight-Leg Garment-Dyed Cotton and Linen-Blend Twill Cargo Trousers", "retailer": "Mr Porter", "price": 72, "wasPrice": 240, "off": 70, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/samuel-straight-leg-garment-dyed-cotton-and-linen-blend-twill-cargo-trousers/1647597334943049", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Straight-Leg Stretch-Cotton Twill Chinos", "retailer": "Mr Porter", "price": 63, "wasPrice": 210, "off": 70, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/casual-trousers/straight-leg-stretch-cotton-twill-chinos/1647597318609216", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Mr P.", "name": "Ribbed Merino Wool Polo Shirt", "retailer": "Mr Porter", "price": 178, "wasPrice": 355, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/ribbed-merino-wool-polo-shirt/46376663162890205", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Merino Wool Mock-Neck Sweater", "retailer": "Mr Porter", "price": 143, "wasPrice": 285, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/rollnecks/merino-wool-mock-neck-sweater/1647597344086856", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Wool and Cashmere-Blend Polo Shirt", "retailer": "Mr Porter", "price": 178, "wasPrice": 355, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/long-sleeve-polo-shirts/wool-and-cashmere-blend-polo-shirt/46376663162890183", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Mr P.", "name": "Wool and Cashmere-Blend Sweater Vest", "retailer": "Mr Porter", "price": 130, "wasPrice": 325, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/knitted-vests/wool-and-cashmere-blend-sweater-vest/46376663162890168", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Richard Merino Wool Zip-Up Cardigan", "retailer": "Mr Porter", "price": 130, "wasPrice": 325, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/cardigans/richard-merino-wool-zip-up-cardigan/1647597320209299", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Mr P.", "name": "Relaxed-Fit Organic and Recycled Cotton-Jersey T-Shirt", "retailer": "Mr Porter", "price": 63, "wasPrice": 105, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/clothing/plain-t-shirts/relaxed-fit-organic-and-recycled-cotton-jersey-t-shirt/46376663162890136", "img": "", "category": "Tees", "cat": "top"}, {"brand": "Mr P.", "name": "Scott Leather Loafers", "retailer": "Mr Porter", "price": 240, "wasPrice": 400, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/mr-p/shoes/loafers/scott-leather-loafers/46376663162923996", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Brunello Cucinelli", "name": "Ribbed Cashmere Rollneck Sweater", "retailer": "Mr Porter", "price": 2050, "wasPrice": 4100, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/rollnecks/ribbed-cashmere-rollneck-sweater/46376663162997752", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Brunello Cucinelli", "name": "Tapered Pleated Stretch Cotton and Cashmere-Blend Corduroy Trousers", "retailer": "Mr Porter", "price": 1000, "wasPrice": 2000, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/suit-trousers/tapered-pleated-stretch-cotton-and-cashmere-blend-corduroy-trousers/46376663162997740", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Brunello Cucinelli", "name": "Ribbed Cotton Sweater", "retailer": "Mr Porter", "price": 825, "wasPrice": 1650, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/crew-necks/ribbed-cotton-sweater/46376663163000376", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Tom Ford", "name": "Cashmere Sweater", "retailer": "Mr Porter", "price": 1470, "wasPrice": 2450, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/crew-necks/cashmere-sweater/46376663162880792", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Canali", "name": "Puppytooth Wool Suit Jacket", "retailer": "Mr Porter", "price": 1230, "wasPrice": 2050, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/suit-jackets/puppytooth-wool-suit-jacket/46376663163003750", "img": "", "category": "Suits", "cat": "suit"}, {"brand": "Brunello Cucinelli", "name": "Tapered Pleated Cotton-Corduroy Trousers", "retailer": "Mr Porter", "price": 810, "wasPrice": 1350, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/casual-trousers/tapered-pleated-cotton-corduroy-trousers/46376663162997750", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Tom Ford", "name": "Cotton and Silk-Blend Shirt", "retailer": "Mr Porter", "price": 690, "wasPrice": 1150, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/plain-shirts/cotton-and-silk-blend-shirt/46376663163003392", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "Tom Ford", "name": "Cotton Sweater", "retailer": "Mr Porter", "price": 495, "wasPrice": 990, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/crew-necks/cotton-sweater/46376663163003286", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "FRAME", "name": "Wool Blazer", "retailer": "Mr Porter", "price": 600, "wasPrice": 1000, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/frame/clothing/suit-jackets/wool-blazer/46376663162864156", "img": "", "category": "Blazers", "cat": "blazer"}, {"brand": "Brunello Cucinelli", "name": "Slim-Fit Pleated Cotton-Twill Suit Trousers", "retailer": "Mr Porter", "price": 900, "wasPrice": 1500, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/clothing/suit-trousers/slim-fit-pleated-cotton-twill-suit-trousers/1647597352899726", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Thom Sweeney", "name": "Suede Bomber Jacket", "retailer": "Mr Porter", "price": 2259, "wasPrice": 3765, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/thom-sweeney/clothing/bomber-jackets/suede-bomber-jacket/46376663162899535", "img": "", "category": "Coats", "cat": "outerwear"}, {"brand": "Thom Sweeney", "name": "Double-Breasted Wool and Cashmere-Blend Felt Overcoat", "retailer": "Mr Porter", "price": 2247, "wasPrice": 3745, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/thom-sweeney/clothing/winter-coats/double-breasted-wool-and-cashmere-blend-felt-overcoat/1647597345219215", "img": "", "category": "Coats", "cat": "outerwear"}, {"brand": "Tom Ford", "name": "Double-Breasted Pinstriped Wool Suit Jacket", "retailer": "Mr Porter", "price": 2196, "wasPrice": 5490, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/suit-jackets/double-breasted-pinstriped-wool-suit-jacket/46376663163003117", "img": "", "category": "Suits", "cat": "suit"}, {"brand": "Brunello Cucinelli", "name": "Suede Penny Loafers", "retailer": "Mr Porter", "price": 780, "wasPrice": 1300, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/shoes/loafers/suede-penny-loafers/46376663163010014", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Tom Ford", "name": "Rod Suede Loafers", "retailer": "Mr Porter", "price": 492, "wasPrice": 820, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/shoes/driving-shoes/rod-suede-loafers/46376663162965125", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Brunello Cucinelli", "name": "Suede Penny Loafers (lightweight EVA sole)", "retailer": "Mr Porter", "price": 810, "wasPrice": 1350, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/brunello-cucinelli/shoes/loafers/suede-penny-loafers/46376663163009974", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Tod's", "name": "Gommino Suede Loafers", "retailer": "Mr Porter", "price": 555, "wasPrice": 925, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/tod-s/shoes/loafers/gommino-suede-loafers/46376663163009923", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Tom Ford", "name": "Dyllan Straight-Leg Cotton-Satin Trousers", "retailer": "Mr Porter", "price": 960, "wasPrice": 1920, "off": 50, "url": "https://www.mrporter.com/en-us/mens/product/tom-ford/clothing/casual-trousers/dyllan-straight-leg-cotton-satin-trousers/46376663162880772", "img": "", "category": "Trousers", "cat": "trousers"}, {"brand": "Canali", "name": "Camp-Collar Wool-Blend Felt Overshirt", "retailer": "Mr Porter", "price": 1158, "wasPrice": 2895, "off": 60, "url": "https://www.mrporter.com/en-us/mens/product/canali/clothing/overshirts/camp-collar-wool-blend-felt-overshirt/46376663162941405", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "Saman Amel", "name": "Unstructured Linen Suit Jacket", "retailer": "Mr Porter", "price": 1587, "wasPrice": 2645, "off": 40, "url": "https://www.mrporter.com/en-us/mens/product/saman-amel/clothing/suit-jackets/unstructured-linen-suit-jacket/46376663162903925", "img": "", "category": "Suits", "cat": "suit"}, {"brand": "Ralph Lauren Purple Label", "name": "Cable-Knit Crew-Neck Sweater", "retailer": "Farfetch", "price": 1317, "wasPrice": 1882, "off": 30, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-cable-knit-crew-neck-sweater-item-31950530.aspx", "img": "", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Ralph Lauren Purple Label", "name": "Alonzo Velvet Loafers", "retailer": "Farfetch", "price": 738, "wasPrice": 1666, "off": 56, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-alonzo-velvet-loafers-item-36161655.aspx", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "Ralph Lauren Purple Label", "name": "Cashmere Polo Sweater", "retailer": "Farfetch", "price": 1468, "wasPrice": 1803, "off": 19, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-cashmere-polo-sweater-item-38508298.aspx", "img": "", "category": "Polos", "cat": "top"}, {"brand": "Ralph Lauren Purple Label", "name": "Cotton Wool Blend Parka", "retailer": "Farfetch", "price": 1780, "wasPrice": 3938, "off": 55, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-cotton-wool-blend-parka-item-18626588.aspx", "img": "", "category": "Coats", "cat": "outerwear"}, {"brand": "Ralph Lauren Purple Label", "name": "Wool Blazer", "retailer": "Farfetch", "price": 2917, "wasPrice": 4154, "off": 30, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-wool-blazer-item-15752125.aspx", "img": "", "category": "Blazers", "cat": "blazer"}, {"brand": "Ralph Lauren Purple Label", "name": "Pointed-Collar Button-Up Cotton Blend Shirt", "retailer": "Farfetch", "price": 602, "wasPrice": 1008, "off": 40, "url": "https://www.farfetch.com/shopping/men/ralph-lauren-purple-label-pointed-collar-button-up-cotton-blend-shirt-item-20508702.aspx", "img": "", "category": "Shirts", "cat": "shirt"}, {"brand": "A.P.C.", "name": "Beige Suede Loafers", "retailer": "SSENSE", "price": 332, "wasPrice": 510, "off": 35, "url": "https://www.ssense.com/en-us/men/product/apc/beige-suede-loafers/18862741", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261252M231007_1/apc-beige-suede-loafers.jpg", "category": "Shoes", "cat": "shoes"}, {"brand": "A.P.C.", "name": "Black Moc Loafers", "retailer": "SSENSE", "price": 388, "wasPrice": 485, "off": 20, "url": "https://www.ssense.com/en-us/men/product/apc/black-moc-loafers/18671261", "img": "", "category": "Shoes", "cat": "shoes"}, {"brand": "A.P.C.", "name": "Black Cotton Sweater", "retailer": "SSENSE", "price": 198, "wasPrice": 300, "off": 34, "url": "https://www.ssense.com/en-us/men/product/apc/black-cotton-sweater/18677391", "img": "https://img.ssensemedia.com/images/f_auto,c_limit,w_1920/261252M201006_1/apc-black-cotton-sweater.jpg", "category": "Knitwear", "cat": "knitwear"}, {"brand": "Todd Snyder", "name": "Monte Sweater Polo in Baja Dunes Stripe", "retailer": "Todd Snyder", "price": 124, "wasPrice": 298, "off": 58, "url": "https://www.toddsnyder.com/collections/sale-tops/products/monte-polobaja-dunes?option-0=M&variant=42328341446727", "img": "https://www.toddsnyder.com/cdn/shop/files/APR26_SW1110049_BAJA_DUNES_F1_R.jpg?v=1774011041&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Vista Sweater Polo in Heather Taupe", "retailer": "Todd Snyder", "price": 139, "wasPrice": 198, "off": 30, "url": "https://www.toddsnyder.com/collections/sale-tops/products/ls-vista-poloheather-taupe?option-0=M&variant=42356228620359", "img": "https://www.toddsnyder.com/cdn/shop/files/APR26_SW5810004_HEATHER_TAUPE_FL1_R.jpg?v=1774010364&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Miles Sweater Polo in Baja Dunes", "retailer": "Todd Snyder", "price": 94, "wasPrice": 268, "off": 65, "url": "https://www.toddsnyder.com/collections/sale/products/relaxed-silk-cotton-polobaja-dunes", "img": "https://www.toddsnyder.com/cdn/shop/files/MAR26_SW1200093_BAJA_DUNES_FL1_R.jpg?v=1771965677&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Clemente Sweater Polo in Blue Ridge Stripe", "retailer": "Todd Snyder", "price": 114, "wasPrice": 298, "off": 62, "url": "https://www.toddsnyder.com/collections/sale/products/stripe-linen-poloblue-ridge?option-0=M", "img": "https://www.toddsnyder.com/cdn/shop/files/MAY26_SW26309200_BLUE_RIDGET_F1_R.jpg?v=1777038966&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Mojave Sweater Polo in Baja Dunes", "retailer": "Todd Snyder", "price": 174, "wasPrice": 248, "off": 30, "url": "https://www.toddsnyder.com/collections/sale/products/mojave-polobaja-dunes?variant=42221523107911", "img": "https://www.toddsnyder.com/cdn/shop/files/MAR26_SW1289200_BAJA_DUNES_FL1_R.jpg?v=1771965682&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Casanova Sweater Polo in Steel Blue", "retailer": "Todd Snyder", "price": 134, "wasPrice": 248, "off": 46, "url": "https://www.toddsnyder.com/collections/best-of-sale/products/casanova-polosteel-blue?variant=42230501015623", "img": "https://www.toddsnyder.com/cdn/shop/files/MAR26_SW1131019_STEEL_BLUE_FL1_R.jpg?v=1771965681&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Charters Sweater Polo in Craspedia Chevron", "retailer": "Todd Snyder", "price": 254, "wasPrice": 348, "off": 27, "url": "https://www.toddsnyder.com/collections/sale/products/cotton-silk-chevron-polocraspedia", "img": "https://www.toddsnyder.com/cdn/shop/files/APR26_SW2760049_BERGAMOTRIND_FL1_R.jpg?v=1774010361&width=120", "category": "Polos", "cat": "top"}, {"brand": "Todd Snyder", "name": "Mikasa Sweater Polo in Sand Geo", "retailer": "Todd Snyder", "price": 224, "wasPrice": 298, "off": 25, "url": "https://www.toddsnyder.com/collections/sale/products/mikasa-polosand?option-0=M&variant=42080004669511", "img": "https://www.toddsnyder.com/cdn/shop/files/FEB26_SW1949200_SAND_FL1_R.jpg?v=1769110069&width=120", "category": "Polos", "cat": "top"}];
 var shopWishlist = store.get("shopWishlist", []);
+      /* Build .77 — Inspo · On you */
+      #panel-onyou .ion-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+      @media (min-width: 760px) { #panel-onyou .ion-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (min-width: 1100px) { #panel-onyou .ion-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+      #panel-onyou .ion-card { display: grid; grid-template-columns: 38% minmax(0, 1fr); gap: 14px; padding: 12px; border-radius: 18px; }
+      #panel-onyou .ion-fig { border-radius: 12px; overflow: hidden; background: linear-gradient(#9d9996, #bdb9b3); aspect-ratio: 386 / 1100; }
+      #panel-onyou .ion-fig img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; cursor: zoom-in; }
+      #panel-onyou .ion-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+      #panel-onyou .ion-kick { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+      #panel-onyou .ion-own { display: flex; gap: 6px; flex-wrap: wrap; }
+      #panel-onyou .ion-own span { width: 40px; height: 48px; border-radius: 8px; background: #EDE6DA; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+      #panel-onyou .ion-own img { width: 100%; height: 100%; object-fit: contain; }
+      #panel-onyou .ion-shop { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 10px; align-items: center; }
+      #panel-onyou .ion-shop .ion-sph { grid-row: span 2; width: 44px; height: 54px; border-radius: 8px; background: #EDE6DA; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+      #panel-onyou .ion-shop .ion-sph img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+      #panel-onyou .ion-shop b { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+      #panel-onyou .ion-shop .ion-nm { font-size: 13.5px; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+      #panel-onyou .ion-shop .ion-pr { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
+      #panel-onyou .ion-shop a.btn-ink { min-height: 32px !important; padding: 0 14px !important; font-size: 12.5px; text-decoration: none; display: inline-flex; align-items: center; }
+      #panel-onyou .ion-acts { margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; }
 /* Build .76 — The Edit: per-product notes + built looks ("edits"
    sync collection) and every store search with its shortlist
    ("searches"). */
@@ -35387,7 +35408,7 @@ function analyzeFilePiece(card, job, ix) {
     var host = document.getElementById("inspo-host");
     if (!host) return;
     window.inspoView = v;
-    ["icons", "palettes", "myinspo"].forEach(function (n) {
+    ["onyou", "icons", "palettes", "myinspo"].forEach(function (n) {
       var pn = document.getElementById("panel-" + n);
       if (!pn) return;
       if (pn.parentNode !== host) host.appendChild(pn);
@@ -35397,6 +35418,7 @@ function analyzeFilePiece(card, job, ix) {
       b.setAttribute("aria-pressed", b.getAttribute("data-inspo-view") === v ? "true" : "false");
     });
     try {
+      if (v === "onyou" && typeof renderInspoOnYou === "function") renderInspoOnYou();
       if (v === "icons" && typeof renderIcons === "function") renderIcons();
       if (v === "palettes" && typeof renderPlates === "function") renderPlates();
       if (v === "myinspo" && typeof renderMyInspo === "function") renderMyInspo();
@@ -35907,7 +35929,9 @@ document.addEventListener("keydown", function (e) {
     for (var i = 0; i < CAT_FROM.length; i++) if (CAT_FROM[i][0].test(s)) return CAT_FROM[i][1];
     return "top";
   }
-  function slotOfCat(c) { var m = (typeof BUILD_CAT_MAP !== "undefined") ? BUILD_CAT_MAP[c] : null; return m ? m[1] : "top"; }
+  /* Build .77: accessories are slots of their own */
+  var ACC_SLOT = { belt: "belt", sunglasses: "eyewear", tie: "tie" };
+  function slotOfCat(c) { if (ACC_SLOT[c]) return ACC_SLOT[c]; var m = (typeof BUILD_CAT_MAP !== "undefined") ? BUILD_CAT_MAP[c] : null; return m ? m[1] : "top"; }
   function colourOf(e) {
     if (e.colour) return String(e.colour);
     if (e.colourName) return e.colourName;
@@ -36310,12 +36334,23 @@ document.addEventListener("keydown", function (e) {
   }
 
   /* ---------- Build ---------- */
-  var SLOTS = ["layer", "top", "bottom", "shoes"];
-  var SLOT_LABEL = { layer: "Layer", top: "Top", bottom: "Bottom", shoes: "Shoes" };
+  var WEAR_SLOTS = ["layer", "top", "bottom", "shoes"], ACC_SLOTS = ["belt", "eyewear", "tie"];
+  var SLOTS = WEAR_SLOTS.concat(ACC_SLOTS);
+  var SLOT_LABEL = { layer: "Layer", top: "Top", bottom: "Bottom", shoes: "Shoes", belt: "Belt", eyewear: "Sunglasses", tie: "Tie" };
+  function optionalSlot(s) { return s === "layer" || ACC_SLOTS.indexOf(s) !== -1; }
   var board = store.get("editBoard", null);
   if (!board || typeof board !== "object") board = {};
   function saveBoard() { store.set("editBoard", board); }
-  function closetPool() { return (typeof tryonClosetPool === "function") ? tryonClosetPool() : { layer: [], top: [], bottom: [], shoes: [] }; }
+  function closetPool() {
+    var by = (typeof tryonClosetPool === "function") ? tryonClosetPool() : { layer: [], top: [], bottom: [], shoes: [] };
+    ACC_SLOTS.forEach(function (s) { by[s] = []; });
+    (typeof wardrobeItems !== "undefined" && wardrobeItems ? wardrobeItems : []).forEach(function (it) {
+      var c = String((it && it.category) || "").toLowerCase();
+      var s = /belt/.test(c) ? "belt" : /sunglass|eyewear|glasses/.test(c) ? "eyewear" : /\bties?\b|bow tie/.test(c) ? "tie" : null;
+      if (s) by[s].push(it);
+    });
+    return by;
+  }
   function itemSrc(it) {
     var ph = it && it.photo;
     if (ph && /^blob:[0-9a-f]{16,}/.test(ph) && window.blobStore && window.blobStore.cache && window.blobStore.cache[ph.slice(5)]) return window.blobStore.cache[ph.slice(5)];
@@ -36323,7 +36358,7 @@ document.addEventListener("keydown", function (e) {
     return ph || "";
   }
   function slotOptions(slot) {
-    var opts = slot === "layer" ? [null] : [];
+    var opts = optionalSlot(slot) ? [null] : [];
     (closetPool()[slot] || []).forEach(function (it) { opts.push({ t: "c", id: it.id }); });
     savedList().forEach(function (sn) { if (slotOfCat(sn.cat) === slot) opts.push({ t: "p", p: sn }); });
     gapPicks({ slot: slot, ids: boardIds() }).slice(0, 6).forEach(function (e) {
@@ -36345,17 +36380,17 @@ document.addEventListener("keydown", function (e) {
     /* First open: a whole outfit from his closet, with his newest
        saved piece already in its slot. */
     if (!Object.keys(board).length) {
-      SLOTS.forEach(function (s) { var first = (pool[s] || [])[0]; if (first) board[s] = { t: "c", id: first.id }; });
-      var nw = savedList().filter(function (sn) { return SLOTS.indexOf(slotOfCat(sn.cat)) !== -1; })[0];
+      WEAR_SLOTS.forEach(function (s) { var first = (pool[s] || [])[0]; if (first) board[s] = { t: "c", id: first.id }; });
+      var nw = savedList().filter(function (sn) { return WEAR_SLOTS.indexOf(slotOfCat(sn.cat)) !== -1; })[0];
       if (nw) board[slotOfCat(nw.cat)] = { t: "p", p: nw };
       saveBoard();
     }
     SLOTS.forEach(function (s) {
       var r = board[s];
       if (r && !resolve(r)) { delete board[s]; r = null; }
-      if (!r && s !== "layer" && !(s in board)) { var first = (pool[s] || [])[0]; if (first) board[s] = { t: "c", id: first.id }; }
+      if (!r && !optionalSlot(s) && !(s in board)) { var first = (pool[s] || [])[0]; if (first) board[s] = { t: "c", id: first.id }; }
       /* a slot his closet can't fill starts on the best gap filler */
-      if (!board[s] && s !== "layer" && !(pool[s] || []).length) { var g = gapPicks({ slot: s, ids: boardIds() })[0]; if (g) board[s] = { t: "p", p: snap(g) }; }
+      if (!board[s] && !optionalSlot(s) && !(pool[s] || []).length) { var g = gapPicks({ slot: s, ids: boardIds() })[0]; if (g) board[s] = { t: "p", p: snap(g) }; }
     });
   }
   function boardIds() {
@@ -36382,7 +36417,8 @@ document.addEventListener("keydown", function (e) {
     ensureBoard();
     var host = document.getElementById("edit-board");
     if (!host) return;
-    host.innerHTML = SLOTS.map(function (s) {
+    var shown = SLOTS.filter(function (s) { return s !== "tie" || board.tie || slotOptions("tie").length > 1; });
+    host.innerHTML = shown.map(function (s) {
       var x = resolve(board[s]);
       var n = slotOptions(s).length;
       var tag = !x ? "" : x.own ? '<span class="edit-tag">Closet</span>' : (x.saved ? '<span class="edit-tag shop">Saved</span>' : '<span class="edit-tag shop">Shop</span>');
@@ -36390,9 +36426,9 @@ document.addEventListener("keydown", function (e) {
         '<div class="edit-slot-row"><button type="button" class="edit-arrow" data-edit-step="-1" data-slot="' + s + '" aria-label="Previous ' + SLOT_LABEL[s] + '"' + (n < 2 ? " disabled" : "") + ">‹</button>" +
         (x ? '<div class="edit-sph"><img src="' + esc(x.img) + '" alt="" decoding="async" /></div><div class="edit-sm"><span class="edit-kick">' + esc(x.own ? (x.it.colourName || "") : x.brand) + "</span><h3>" + esc(x.name) + "</h3>" +
           (x.own ? "" : '<div class="edit-price">' + priceText(x.p) + (x.p.store ? " · " + esc(x.p.store) : "") + "</div>") + "</div>"
-          : '<div class="edit-sph edit-none"></div><div class="edit-sm"><h3>' + (s === "layer" ? "No layer" : "Nothing yet") + "</h3></div>") +
+          : '<div class="edit-sph edit-none"></div><div class="edit-sm"><h3>' + (s === "layer" ? "No layer" : optionalSlot(s) ? "None" : "Nothing yet") + "</h3></div>") +
         '<button type="button" class="edit-arrow" data-edit-step="1" data-slot="' + s + '" aria-label="Next ' + SLOT_LABEL[s] + '"' + (n < 2 ? " disabled" : "") + ">›</button></div></section>";
-    }).join("");
+    }).map(function (h, i) { return shown[i] === "belt" ? '<div class="edit-sec edit-acc-h"><h3>Accessories</h3></div>' + h : h; }).join("");
     var buy = boardPieces().filter(function (o) { return !o.x.own; }).map(function (o) { return o.x.p; });
     var bn = document.getElementById("edit-buy-n");
     if (bn) bn.textContent = buy.length ? buy.length + (buy.length === 1 ? " piece" : " pieces") : "All from your closet";
@@ -36427,7 +36463,8 @@ document.addEventListener("keydown", function (e) {
   }
   var buildRun = 0;
   function seeBoard() {
-    var pcs = boardPieces();
+    /* accessories show on the board and in To buy; the try-on dresses the garments */
+    var pcs = boardPieces().filter(function (o) { return WEAR_SLOTS.indexOf(o.slot) !== -1; });
     if (!pcs.length) return;
     var run = ++buildRun, sig = boardSig();
     onme = { sig: sig, state: "loading", url: null, text: "Getting ready…", fallback: false };
@@ -36460,12 +36497,23 @@ document.addEventListener("keydown", function (e) {
   function builtLooks() { return editMeta.filter(function (m) { return m && m.kind === "look"; }); }
   function saveBuiltLook() {
     var id = "l-" + h76(boardSig());
+    var pcs = boardPieces(), allOwn = pcs.length > 0 && pcs.every(function (o) { return o.x.own; });
     editMeta = editMeta.filter(function (m) { return m.id !== id; });
-    editMeta.unshift({ id: id, kind: "look", title: boardTitle(), board: JSON.parse(JSON.stringify(board)), img: onme.fallback ? null : onme.url, at: nowISO(), upd: nowISO() });
+    editMeta.unshift({ id: id, kind: "look", home: allOwn ? "mine" : "inspo", title: boardTitle(), board: JSON.parse(JSON.stringify(board)), img: onme.fallback ? null : onme.url, at: nowISO(), upd: nowISO() });
     store.set("editMeta", editMeta);
-    if (typeof toast === "function") toast("Look saved.");
     renderBuiltLooks();
+    /* Build .77: every piece his own -> Outfits > Mine (a saved look);
+       with shop pieces -> Outfits > Inspo > On you (from this record). */
+    if (allOwn && typeof saveLook === "function") {
+      var its = pcs.map(function (o) { return o.x.it; });
+      saveLook({ id: "look-e77-" + h76(boardSig()), title: boardTitle(), imgAlt: boardTitle(), img: onme.url || "", source: "build", createdAt: Date.now(),
+        fwPieces: its.map(function (it) { return { id: it.id, itemId: it.id, name: it.name || "", category: it.category || "", hex: it.colourHex || "" }; }),
+        composerKey: its.map(function (it) { return it.id; }).filter(function (x, i) { return WEAR_SLOTS.indexOf(pcs[i].slot) !== -1; }).sort().join("|"),
+        swatches: its.map(function (it) { return { name: String(it.colourName || "").split("\u00b7")[0].trim(), hex: it.colourHex || "#888888", role: it.category || "Piece" }; }) });
+    } else if (typeof toast === "function") toast("Saved — in Outfits → Inspo.");
+    if (typeof renderInspoOnYou === "function") try { renderInspoOnYou(); } catch (e) {}
   }
+  window.editBuiltLooks = function () { return builtLooks(); };
   function renderBuiltLooks() {
     var host = document.getElementById("edit-looks");
     if (!host) return;
@@ -36478,7 +36526,7 @@ document.addEventListener("keydown", function (e) {
   }
   function putInLook(sn) {
     var s = slotOfCat(sn.cat);
-    if (SLOTS.indexOf(s) === -1) { if (typeof toast === "function") toast("Accessories aren't in looks yet."); return; }
+    if (SLOTS.indexOf(s) === -1) return;
     board[s] = { t: "p", p: sn };
     saveBoard();
     shortlistAdd(sn);
@@ -36504,6 +36552,36 @@ document.addEventListener("keydown", function (e) {
     if (p) p.setAttribute("data-edit-mode", v);
   }
   window.editShow = show;
+  /* Build .77: shared with Ask and Inspo */
+  window.editProductBySku = function (sku) {
+    for (var i = 0; i < EDIT_CATALOG.length; i++) if (EDIT_CATALOG[i].sku === sku) return EDIT_CATALOG[i];
+    return null;
+  };
+  window.editSnap = function (e) { return remember(snap(e)); };
+  window.editItemSrc = itemSrc;
+  window.editSlotOfCat = slotOfCat;
+  /* Replace the board with his pieces (ids) plus shop products, open Build */
+  window.editLoadOutfit = function (ownedIds, products) {
+    var nb = {};
+    (ownedIds || []).forEach(function (id) {
+      var it = closetItemById(id); if (!it) return;
+      var c = String(it.category || "").toLowerCase();
+      var s = /belt/.test(c) ? "belt" : /sunglass|eyewear/.test(c) ? "eyewear" : /\bties?\b/.test(c) ? "tie" : (typeof closetSlot76 === "function" ? closetSlot76(it.category) : null);
+      if (s && SLOTS.indexOf(s) !== -1 && !nb[s]) nb[s] = { t: "c", id: it.id };
+    });
+    (products || []).forEach(function (e) {
+      if (!e) return;
+      var sn = remember(snap(e)), s = slotOfCat(sn.cat);
+      if (SLOTS.indexOf(s) !== -1) nb[s] = { t: "p", p: sn };
+    });
+    if (!nb.layer) nb.layer = null;
+    ACC_SLOTS.forEach(function (s) { if (!nb[s]) nb[s] = null; });
+    board = nb; saveBoard();
+    onme = { sig: null, state: null, url: null, text: "", fallback: false };
+    if (typeof switchTab === "function" && (typeof currentTab === "undefined" || currentTab !== "find")) switchTab("find");
+    show("build");
+    try { window.scrollTo(0, 0); } catch (e) {}
+  };
   window.renderTheEdit = function () {
     if (typeof renderWishlist === "function") { try { renderWishlist(); } catch (e) {} }
     show(editState.view);
@@ -36630,6 +36708,100 @@ document.addEventListener("keydown", function (e) {
   editLoadCatalog();
   if (typeof currentTab !== "undefined" && currentTab === "find") renderTheEdit();
 })();
+    </script>
+    <script type="wardrobe/app">
+/* ================= Build .77 — Inspo · On you =================
+   QA-passed on-body renders of inspiration looks: some pieces his,
+   the rest from the Edit catalogue with shop links. INSPO_ONBODY_SEED
+   ships the manifest inline; assets/inspo/manifest.json is re-read on
+   every launch, so more looks land without a new build. Looks he
+   builds in The Edit with shop pieces appear here too. */
+var INSPO_ONBODY_SEED = {"v":1,"count":16,"looks":[{"id":"inspo-0001","f":"17b59cf2ba08b43c.webp","owned":["item-1794965887186-222552","item-1794961274263-274909"],"shop":[{"sku":"db-6988bdbfdd73","brand":"Brunello Cucinelli","name":"Cotton and linen canvas straight pants","price":1300,"url":"https://www.mytheresa.com/us/en/men/brunello-cucinelli-cotton-and-linen-straight-pants-white-p01187257","cat":"trousers","colour":"Panna","retailer":"Mytheresa","img":"assets/editimg/cef55075eeb3f03e.webp"}],"style":"palm-beach"},{"id":"inspo-0002","f":"1c9aa33d401d5a2f.webp","owned":["item-1794965180554-529258","item-1794961274270-861529"],"shop":[{"sku":"db-8deac94e6a5f","brand":"Kiton","name":"PURE LINEN WHITE TROUSERS","price":2760,"url":"https://us.kiton.com/products/trousers-linen-upn07k0644g01","cat":"trousers","colour":"White","retailer":"Kiton","img":"assets/editimg/e488b13802a82e8e.webp"},{"sku":"db-57d8bb126ec0","brand":"Buck Mason","name":"Tortoise / G15 Speedster Sunglasses","price":248,"url":"https://www.buckmason.com/products/tortoise-g15-speedster-sunglasses","cat":"sunglasses","colour":"Neutral","retailer":"Buck Mason","img":"assets/editimg/aaa20d9405e41a65.webp"}],"style":"palm-beach"},{"id":"inspo-0003","f":"24c792f21c23b878.webp","owned":["item-1794970837073-880274","seed-loropiana-espadrilles"],"shop":[{"sku":"db-97575364eb40","brand":"Zegna","name":"Straight-Leg Linen-Twill Trousers","price":1350,"url":"https://www.mrporter.com/en-us/mens/product/zegna/clothing/casual-trousers/straight-leg-linen-twill-trousers/46376663163016487","cat":"trousers","colour":"Ivory","retailer":"Mr Porter","img":"assets/editimg/22f1502a329dc628.webp"}],"style":"palm-beach"},{"id":"inspo-0004","f":"09f94c4b44a4d7ab.webp","owned":["item-1794970837065-174925","item-1794964266126-146676","item-1794961274264-907410"],"shop":[{"sku":"db-d437e6921088","brand":"Brunello Cucinelli","name":"Linen straight pants","price":1900,"url":"https://www.mytheresa.com/us/en/men/brunello-cucinelli-linen-straight-pants-beige-p01187253","cat":"trousers","colour":"Beige","retailer":"Mytheresa","img":"assets/editimg/6bf0c048dd626396.webp"}],"style":"palm-beach"},{"id":"inspo-0005","f":"b0536550643378d7.webp","owned":["item-1794965180552-111587","item-1794961274261-400084","item-1794964266127-250176"],"shop":[{"sku":"db-7fd4715b51b3","brand":"Kiton","name":"LINEN AND COTTON BLEND BEIGE PANTS","price":1270,"url":"https://us.kiton.com/products/trousers-linen-upr003lk0603h04","cat":"trousers","colour":"Beige","retailer":"Kiton","img":"assets/editimg/759dd6ab590847bb.webp"}],"style":"palm-beach"},{"id":"inspo-0006","f":"cc2431afc2695214.webp","owned":["item-1794965887177-185377","seed-armani-cream-loafers"],"shop":[{"sku":"db-6b1dc95f0045","brand":"Kiton","name":"LINEN TROUSERS WITH DARTS IN BEIGE","price":2760,"url":"https://us.kiton.com/products/trousers-linen-upna2sk0644g02","cat":"trousers","colour":"Beige","retailer":"Kiton","img":"assets/editimg/4e35db9b0e7cc5db.webp"}],"style":"palm-beach"},{"id":"inspo-0007","f":"b92cbbea6a99ab66.webp","owned":["item-1794965887179-895680","item-1794961274270-861529"],"shop":[{"sku":"db-d3a397019c88","brand":"Zegna","name":"Straight-Leg Linen Trousers","price":1350,"url":"https://www.mrporter.com/en-us/mens/product/zegna/clothing/casual-trousers/straight-leg-linen-trousers/46376663163016519","cat":"trousers","colour":"Beige","retailer":"Mr Porter","img":"assets/editimg/9afeffb2fd92eeb1.webp"},{"sku":"db-3d2d1d2d8f2c","brand":"Buck Mason","name":"Smoke / Vintage Brown The Caddy Sunglasses","price":248,"url":"https://www.buckmason.com/products/smoke-vintage-brown-the-caddy-sunglasses","cat":"sunglasses","colour":"Brown","retailer":"Buck Mason","img":"assets/editimg/f93f264c4e38126e.webp"}],"style":"palm-beach"},{"id":"inspo-0008","f":"6f59941be0897e0d.webp","owned":["item-1794970837070-124326","item-1794961274263-274909","item-1794964266125-495292"],"shop":[{"sku":"db-dd639c538110","brand":"Sunspel","name":"Men's Cotton Drawstring Trousers in Dark Stone","price":280,"url":"https://us.sunspel.com/products/mens-cotton-drawstring-trousers-in-dark-stone-mtrs3141-whdc","cat":"trousers","colour":"Stone","retailer":"Sunspel US","img":"assets/editimg/1fd85ca991d08712.webp"}],"style":"palm-beach"},{"id":"inspo-0009","f":"bb860d428b532a08.webp","owned":["item-1794970837067-662427","item-1794961274264-907410"],"shop":[{"sku":"db-50449e0daf09","brand":"Kiton","name":"TAILORED LINEN AND WOOL BROWN TROUSERS","price":2510,"url":"https://us.kiton.com/products/trousers-linen-upna2sk0663g12","cat":"trousers","colour":"Brown","retailer":"Kiton","img":"assets/editimg/4cf1945922c1a267.webp"},{"sku":"db-8080f762fecd","brand":"Kiton","name":"CALFSKIN DARK BROWN BELT","price":980,"url":"https://us.kiton.com/products/belt-calfskin-usca001n0135402","cat":"belt","colour":"Dark Brown","retailer":"Kiton","img":"assets/editimg/e8d84f9f7ce0b43d.webp"}],"style":"palm-beach"},{"id":"inspo-0010","f":"2adb95321cbc4daa.webp","owned":["item-1794965180556-409795","item-1794961274270-861529"],"shop":[{"sku":"db-979741178856","brand":"Brunello Cucinelli","name":"Cotton and linen straight pants","price":1300,"url":"https://www.mytheresa.com/us/en/men/brunello-cucinelli-cotton-and-linen-straight-pants-green-p01187255","cat":"trousers","colour":"Militare","retailer":"Mytheresa","img":"assets/editimg/4ea417e096b63e7c.webp"}],"style":"palm-beach"},{"id":"inspo-0011","f":"7378d6bd80bbe9d7.webp","owned":["seed-isaia-polo","seed-loropiana-espadrilles"],"shop":[{"sku":"db-71c93d00e706","brand":"Kiton","name":"CREAM-WHITE COTTON FIVE-POCKET TROUSERS","price":2820,"url":"https://us.kiton.com/products/trousers-cotton-upr005lk0149l32","cat":"trousers","colour":"White","retailer":"Kiton","img":"assets/editimg/1775f036a1e75c8a.webp"}],"style":"palm-beach"},{"id":"inspo-0012","f":"e00dff8ca5109554.webp","owned":["item-1794971947774-378641","item-1794961274261-400084"],"shop":[{"sku":"db-f9028adc9622","brand":"Buck Mason","name":"Pearl Snap White Cotton Twill El Camino Pant","price":178,"url":"https://www.buckmason.com/products/pearl-snap-white-cotton-twill-el-camino-pant","cat":"trousers","colour":"White","retailer":"Buck Mason","img":"assets/editimg/4c21fc437432ab4c.webp"},{"sku":"db-c1b29fc9918b","brand":"Buck Mason","name":"Natural Holdfast Web Belt","price":68,"url":"https://www.buckmason.com/products/natural-holdfast-web-belt","cat":"belt","colour":"Natural","retailer":"Buck Mason","img":"assets/editimg/f26d2714bc9af3ca.webp"}],"style":"palm-beach"},{"id":"inspo-0013","f":"51f76619ee9839f0.webp","owned":["seed-loropiana-sage-polo","item-1794961274266-986265"],"shop":[{"sku":"db-c200df418d71","brand":"Alex Mill","name":"Standard Pleated Pant in Chino","price":165,"url":"https://alexmill.com/products/standard-pleated-pant-in-chino-in-oatmilk","cat":"trousers","colour":"Neutral","retailer":"Alex Mill","img":"assets/editimg/12183a38ad92a05f.webp"}],"style":"palm-beach"},{"id":"inspo-0015","f":"26ce103bb570374b.webp","owned":["item-1794965887185-931158","item-1794964266130-490923","seed-edwardgreen-tan-loafers"],"shop":[{"sku":"db-2c534416cff6","brand":"Kiton","name":"STRETCH COTTON WHITE TROUSERS","price":1790,"url":"https://us.kiton.com/products/trousers-cotton-upr002lk0618h02","cat":"trousers","colour":"White","retailer":"Kiton","img":"assets/editimg/fd0f10857f2a8be0.webp"}],"style":"palm-beach"},{"id":"inspo-0016","f":"66c205d113210f01.webp","owned":["item-1794964641248-663301","item-1794964266129-500494","item-1794961274258-490248"],"shop":[{"sku":"db-496b4e43434b","brand":"Kiton","name":"BLUE SOFT COTTON PANTS WITH FRONT PLEATS","price":1820,"url":"https://us.kiton.com/products/trousers-cotton-upn07h0984908","cat":"trousers","colour":"Blue","retailer":"Kiton","img":"assets/editimg/46a049afb86ec426.webp"}],"style":"smart-casual"},{"id":"inspo-0018","f":"06701450f8525b65.webp","owned":["item-1794965180555-120909","item-1794961274265-704202"],"shop":[{"sku":"db-0fba33c21b20","brand":"Kiton","name":"GRAY COTTON TROUSERS WITH FRONT PLEATS","price":1820,"url":"https://us.kiton.com/products/trousers-cotton-upn07h0984917","cat":"trousers","colour":"Gray","retailer":"Kiton","img":"assets/editimg/7582f522d7891f1d.webp"},{"sku":"db-3e7fba35a886","brand":"Buck Mason","name":"Dark Brown Semi-Fancy American Dress Belt","price":148,"url":"https://www.buckmason.com/products/dark-brown-semi-fancy-american-dress-belt","cat":"belt","colour":"Dark Brown","retailer":"Buck Mason","img":"assets/editimg/f06ac27eb01271aa.webp"}],"style":"smart-casual"}]};
+var INSPO_ONBODY = { looks: [] };
+function inspoOnbodyIngest(j) {
+  if (!j || !Array.isArray(j.looks)) return false;
+  var ok = j.looks.filter(function (l) { return l && l.id && l.f && /^[A-Za-z0-9._-]+$/.test(l.f); });
+  if (ok.length < INSPO_ONBODY.looks.length) return false;
+  INSPO_ONBODY.looks = ok;
+  return true;
+}
+inspoOnbodyIngest(INSPO_ONBODY_SEED);
+try { var _ioc = localStorage.getItem("wardrobe.inspoOnbody"); if (_ioc) inspoOnbodyIngest(JSON.parse(_ioc)); } catch (e) {}
+function inspoOnbodyRefresh() {
+  try {
+    if (typeof fetch !== "function") return;
+    fetch("assets/inspo/manifest.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!inspoOnbodyIngest(j)) return;
+      try { localStorage.setItem("wardrobe.inspoOnbody", JSON.stringify(j)); } catch (e) {}
+      if (window.inspoView === "onyou") renderInspoOnYou();
+    }).catch(function () {});
+  } catch (e) {}
+}
+inspoOnbodyRefresh();
+function ionEsc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+function ionMoney(p) { if (p && p.pd) return p.pd; return (p && typeof p.price === "number") ? "$" + Math.round(p.price).toLocaleString("en-US") : ""; }
+function ionProduct(sp) {
+  var e = (sp && sp.sku && typeof editProductBySku === "function") ? editProductBySku(sp.sku) : null;
+  return e || sp;
+}
+function ionOwnHTML(ids) {
+  var th = (ids || []).map(function (id) { return typeof closetItemById === "function" ? closetItemById(id) : null; }).filter(Boolean).slice(0, 4).map(function (it) {
+    var src = typeof editItemSrc === "function" ? editItemSrc(it) : it.photo;
+    return '<span title="' + ionEsc(it.name) + '">' + (src ? '<img src="' + ionEsc(src) + '" alt="" loading="lazy" />' : "") + "</span>";
+  });
+  return th.length ? '<div class="ion-kick">Yours</div><div class="ion-own">' + th.join("") + "</div>" : "";
+}
+function ionShopHTML(list) {
+  return list.map(function (p) {
+    return '<div class="ion-shop"><span class="ion-sph">' + (p.img ? '<img src="' + ionEsc(p.img) + '" alt="" loading="lazy" />' : "") + "</span>" +
+      '<div><b>' + ionEsc(p.brand) + '</b><span class="ion-nm">' + ionEsc(p.name) + "</span></div>" +
+      '<div class="ion-pr"><span>' + ionEsc(ionMoney(p)) + "</span>" + (p.url ? '<a class="btn-ink" href="' + ionEsc(p.url) + '" target="_blank" rel="noopener">Shop</a>' : "") + "</div></div>";
+  }).join("");
+}
+var ION_STYLE = { "palm-beach": "Palm Beach", "smart-casual": "Smart casual", evening: "Evening", weekend: "Weekend" };
+function renderInspoOnYou() {
+  var host = document.getElementById("panel-onyou");
+  if (!host) return;
+  var mine = (typeof editBuiltLooks === "function" ? editBuiltLooks() : []).filter(function (l) {
+    if (l.home === "mine") return false;
+    return l.board && Object.keys(l.board).some(function (k) { return l.board[k] && l.board[k].t === "p"; });
+  });
+  var cards = mine.map(function (l) {
+    var ids = [], shop = [];
+    Object.keys(l.board).forEach(function (k) { var r = l.board[k]; if (!r) return; if (r.t === "c") ids.push(r.id); else if (r.p) shop.push(r.p); });
+    var img = l.img || (shop[0] && shop[0].img) || "";
+    return '<article class="card ion-card" data-ion-build="' + ionEsc(l.id) + '"><div class="ion-fig">' + (img ? '<img src="' + ionEsc(img) + '" alt="" data-popout="' + ionEsc(img) + '" loading="lazy" />' : "") + "</div>" +
+      '<div class="ion-side"><span class="ion-kick">Your build</span>' + ionOwnHTML(ids) + '<div class="ion-kick">To buy</div>' + ionShopHTML(shop) +
+      '<div class="ion-acts"><button type="button" class="btn-ghost" data-ion-open-build="' + ionEsc(l.id) + '">Build</button></div></div></article>';
+  });
+  INSPO_ONBODY.looks.forEach(function (l) {
+    var shop = (l.shop || []).map(ionProduct);
+    var img = "assets/inspo/" + l.f;
+    cards.push('<article class="card ion-card" data-ion-look="' + ionEsc(l.id) + '"><div class="ion-fig"><img src="' + img + '" alt="" data-popout="' + img + '" loading="lazy" decoding="async" /></div>' +
+      '<div class="ion-side"><span class="ion-kick">' + ionEsc(ION_STYLE[l.style] || "") + "</span>" + ionOwnHTML(l.owned) +
+      (shop.length ? '<div class="ion-kick">To buy</div>' + ionShopHTML(shop) : "") +
+      '<div class="ion-acts"><button type="button" class="btn-ghost" data-ion-build-look="' + ionEsc(l.id) + '">Build this look</button></div></div></article>');
+  });
+  host.innerHTML = cards.length ? '<div class="ion-grid">' + cards.join("") + "</div>" : "";
+}
+window.renderInspoOnYou = renderInspoOnYou;
+document.addEventListener("click", function (e) {
+  var t = e.target; if (!t || !t.closest) return;
+  var b = t.closest("[data-ion-build-look]");
+  if (b) {
+    var l = INSPO_ONBODY.looks.filter(function (x) { return x.id === b.getAttribute("data-ion-build-look"); })[0];
+    if (l && typeof editLoadOutfit === "function") editLoadOutfit(l.owned || [], (l.shop || []).map(ionProduct));
+    return;
+  }
+  b = t.closest("[data-ion-open-build]");
+  if (b) {
+    var id = b.getAttribute("data-ion-open-build");
+    if (typeof switchTab === "function") switchTab("find");
+    if (typeof editShow === "function") editShow("build");
+    var el = document.querySelector('[data-edit-load-look="' + id + '"]'); if (el) el.click();
+  }
+});
+if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     </script>
   </body>
 </html>
