@@ -5716,6 +5716,7 @@
         </div>
         <div id="edit-v-build" hidden>
           <div class="edit-board" id="edit-board"></div>
+          <div id="edit-gapfill"></div>
           <div class="edit-cta"><button type="button" class="btn-ink" id="edit-see">See it on me</button><button type="button" class="btn-ghost" id="edit-shuffle">Shuffle</button></div>
           <div id="edit-onme" hidden></div>
           <div id="edit-tobuy" hidden>
@@ -28305,7 +28306,7 @@ function catalogueScored(pc, applyCeiling, tierKey) {
        tier-aware ordering below are untouched — attributes only
        ever refine the order the ceiling already allowed. */
     var score = matched + attrMatched + ((colourOK && !colourLiteral) ? 1 : 0);
-    if (score >= 2 && garmentMatched >= 1) scored.push({ e: e, score: score });
+    if (score >= 2 && garmentMatched >= 1) scored.push({ e: e, score: score + ((window.EDIT_GAP_URLS && window.EDIT_GAP_URLS[e.url]) || 0) });
   });
   var eliteFirst = (tierKey || shopTier) === "insensitive";
   scored.sort(function (a, b) {
@@ -35890,14 +35891,23 @@ document.addEventListener("keydown", function (e) {
   var EDIT_X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
   function h76(s) { return (typeof tryonHash === "function") ? tryonHash(String(s)) : String(s).length.toString(16); }
   function money(n) { return (typeof n === "number" && isFinite(n)) ? "$" + Math.round(n).toLocaleString("en-US") : ""; }
+  /* a product's own price text — the verified GBP rows keep their £ */
+  function priceText(sn) { return (sn && sn.pd) ? String(sn.pd) : money(sn && sn.price); }
+  function totalText(list) {
+    var usd = 0, other = {}, parts = [];
+    list.forEach(function (p) { if (p.cur && p.cur !== "USD") other[p.cur] = (other[p.cur] || 0) + (p.price || 0); else usd += (p.price || 0); });
+    if (usd || !Object.keys(other).length) parts.push(money(usd));
+    Object.keys(other).forEach(function (c) { parts.push((c === "GBP" ? "£" : c === "EUR" ? "€" : c + " ") + Math.round(other[c]).toLocaleString("en-US")); });
+    return parts.join(" + ");
+  }
   function nowISO() { return new Date().toISOString(); }
 
   /* ---------- products ---------- */
-  var CAT_LABEL = { knitwear: "Knitwear", top: "Tops", shirt: "Shirts", blazer: "Blazers", suit: "Suits", outerwear: "Outerwear", trousers: "Trousers", jeans: "Jeans", shorts: "Shorts", swim: "Swim", shoes: "Shoes", belt: "Belts", tie: "Ties" };
+  var CAT_LABEL = { knitwear: "Knitwear", top: "Tops", shirt: "Shirts", blazer: "Blazers", suit: "Suits", outerwear: "Outerwear", trousers: "Trousers", jeans: "Jeans", shorts: "Shorts", swim: "Swim", shoes: "Shoes", belt: "Belts", tie: "Ties", sunglasses: "Sunglasses" };
   var CAT_FROM = [[/loafer|sneaker|shoe|boot|derby|oxford|mule|sandal|espadrille|driver|trainer/, "shoes"], [/blazer|sport ?coat/, "blazer"], [/suit\b/, "suit"],
     [/jacket|coat|parka|overshirt|outer|gilet|vest|bomber/, "outerwear"], [/jean|denim/, "jeans"], [/short/, "shorts"], [/swim/, "swim"],
     [/trouser|pant|chino/, "trousers"], [/knit|sweater|cardigan|crew|cashmere|jumper|turtleneck|roll ?neck/, "knitwear"],
-    [/shirt|oxford/, "shirt"], [/polo|tee|t-shirt|henley|top/, "top"], [/belt/, "belt"], [/tie\b/, "tie"]];
+    [/shirt|oxford/, "shirt"], [/polo|tee|t-shirt|henley|top/, "top"], [/belt/, "belt"], [/tie\b/, "tie"], [/sunglass/, "sunglasses"]];
   function catOf(e) {
     if (e.cat && CAT_LABEL[e.cat]) return e.cat;
     var s = String((e.cat || "") + " " + (e.category || "") + " " + (e.name || "")).toLowerCase();
@@ -35927,7 +35937,8 @@ document.addEventListener("keydown", function (e) {
     if (br && nm.toLowerCase().indexOf(br.toLowerCase()) === 0 && nm.length > br.length + 3) nm = nm.slice(br.length).replace(/^[\s\-–—:|,]+/, "");
     if (nm) nm = nm.charAt(0).toUpperCase() + nm.slice(1);
     return { key: key, brand: e.brand || "", name: nm, price: (typeof e.price === "number" ? e.price : parseFloat(e.price) || null),
-      url: e.url || "", img: e.img || "", store: storeName(e), cat: c, colour: cap(colourOf(e)), hex: hex || "" };
+      url: e.url || "", img: e.img || "", store: storeName(e), cat: c, colour: cap(colourOf(e)), hex: hex || "",
+      cur: e.cur || e.currency || "", pd: e.pd || e.priceDisplay || "", gap: e.gap ? 1 : 0 };
   }
   function pool() {
     var base = (typeof shopCatalogueAll === "function") ? shopCatalogueAll() : [];
@@ -35946,10 +35957,28 @@ document.addEventListener("keydown", function (e) {
       var img = p.img || p.image || p.image_url || p.imageUrl || (Array.isArray(p.images) ? (typeof p.images[0] === "string" ? p.images[0] : p.images[0] && (p.images[0].src || p.images[0].url)) : null);
       if (!url || !name || !isFinite(price) || !img || seen[url]) return;
       seen[url] = 1;
-      var e = { brand: p.brand || p.vendor || "", name: String(name), price: price, url: url, img: img, retailer: p.store || p.retailer || p.seller || "", colour: p.colour || p.color || "", verified: true };
-      e.cat = catOf({ cat: String(p.cat || p.category || p.type || "").toLowerCase(), name: name });
+      var e = { brand: p.brand || p.vendor || "", name: String(name), price: price, url: url, img: img, retailer: p.retailer || p.store || p.seller || "", colour: p.colour || p.colourName || p.color || "", verified: true };
+      var rc = String(p.cat || p.category || p.type || "").toLowerCase();
+      rc = { chinos: "trousers", chino: "trousers", polo: "knitwear", pants: "trousers" }[rc] || rc;
+      e.cat = catOf({ cat: rc, name: name });
+      if (p.subcat) e.subcat = String(p.subcat).toLowerCase();
+      if (p.hex) e.hex = p.hex;
+      if (Array.isArray(p.keys)) e.keys = p.keys.concat(e.subcat ? [e.subcat] : []);
+      ["tier", "st", "sq", "occasion"].forEach(function (k) { if (p[k]) e[k] = p[k]; });
+      var cur = p.currency || p.cur;
+      if (cur && cur !== "USD") { e.cur = cur; if (p.priceDisplay) e.pd = p.priceDisplay; }
+      var tg = p.tags || {};
+      if (p.gap || tg.gapFiller === true || /^(yes|true|1)$/i.test(String(tg.gapFiller || ""))) e.gap = 1;
+      var pw = p.pairs || tg.pairsWith;
+      if (Array.isArray(pw) && pw.length) e.pairs = pw;
       if (typeof p.wasPrice === "number") e.wasPrice = p.wasPrice;
       out.push(e);
+    });
+    /* colourways share a name: name the colour so the cards differ */
+    var nn = {};
+    out.forEach(function (e) { var k = (e.brand + "|" + e.name).toLowerCase(); nn[k] = (nn[k] || 0) + 1; });
+    out.forEach(function (e) {
+      if (nn[(e.brand + "|" + e.name).toLowerCase()] > 1 && e.colour && e.name.toLowerCase().indexOf(String(e.colour).toLowerCase()) === -1) e.name += ", " + e.colour;
     });
     return out;
   };
@@ -35958,6 +35987,10 @@ document.addEventListener("keydown", function (e) {
       fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) {
         if (!j) return;
         EDIT_CATALOG = editNormalizeCatalog(j);
+        /* gap fillers (trousers above all) also lead Shop the look */
+        var gu = {};
+        EDIT_CATALOG.forEach(function (e) { if (e.gap) gu[e.url] = (e.cat === "trousers" ? 2 : 1); });
+        window.EDIT_GAP_URLS = gu;
         _textCache = null;
         if (typeof currentTab !== "undefined" && currentTab === "find") renderTheEdit();
       }).catch(function () {});
@@ -35981,7 +36014,7 @@ document.addEventListener("keydown", function (e) {
   function saveProduct(sn) {
     if (isSaved(sn.key)) return;
     shopWishlist.unshift({ key: sn.key, brand: sn.brand, name: sn.name, price: sn.price, wasPrice: null, retailer: sn.store, url: sn.url, img: sn.img,
-      cat: sn.cat, category: "", pieceDesc: "", garment: "", hex: sn.hex || "", colourName: sn.colour || "", addedISO: localTodayISO() });
+      cur: sn.cur || "", pd: sn.pd || "", gap: sn.gap || 0, cat: sn.cat, category: "", pieceDesc: "", garment: "", hex: sn.hex || "", colourName: sn.colour || "", addedISO: localTodayISO() });
     saveShopWishlist();
     if (typeof refreshWishButtons === "function") refreshWishButtons();
   }
@@ -36017,6 +36050,7 @@ document.addEventListener("keydown", function (e) {
     sweater: ["sweater", "knit", "crew", "cardigan", "jumper", "pullover"], sweaters: ["sweater", "knit", "crew", "cardigan", "jumper", "pullover"], knit: ["knit", "sweater", "crew"], crewneck: ["crew", "crewneck"],
     jacket: ["jacket", "blouson", "bomber", "overshirt"], tee: ["tee", "t-shirt"], tshirt: ["tee", "t-shirt"], loafers: ["loafer"], shoes: ["shoe", "loafer", "sneaker", "boot", "derby", "oxford"],
     grey: ["grey", "gray"], gray: ["grey", "gray"], navy: ["navy", "midnight"], olive: ["olive", "khaki", "military"], cream: ["cream", "ecru", "off-white", "ivory"], tan: ["tan", "camel", "beige"], beige: ["beige", "tan", "sand", "stone"] };
+  var LOUNGE = /pyjama|pajama|lounge|sleep|robe\b/i;
   var _textCache = null;
   function textOf(e) {
     if (!_textCache) _textCache = new WeakMap();
@@ -36049,6 +36083,8 @@ document.addEventListener("keydown", function (e) {
       }
       seen[e.url] = 1;
       if (e.verified) score += 3;
+      if (e.gap) score += (e.cat === "trousers" ? 2 : 1);
+      if (LOUNGE.test(e.name) && !LOUNGE.test(q)) score -= 6;
       if (e.sq === "good") score += 1;
       out.push({ e: e, s: score });
     });
@@ -36102,7 +36138,7 @@ document.addEventListener("keydown", function (e) {
       '<button type="button" class="edit-heart" data-edit-save aria-pressed="' + (saved ? "true" : "false") + '" aria-label="' + (saved ? "Saved" : "Save") + '">' + EDIT_HEART + "</button>" +
       '<button type="button" class="edit-add' + (inLook ? " on" : "") + '" data-edit-look>' + (inLook ? "In look" : "+ Look") + "</button>" +
       '<div class="edit-body"><span class="edit-kick">' + esc(sn.brand) + "</span><h3>" + esc(sn.name) + "</h3>" +
-      '<div class="edit-row"><span class="edit-price">' + money(sn.price) + '</span><span class="edit-store">' + esc(sn.store) + "</span></div>" +
+      '<div class="edit-row"><span class="edit-price">' + priceText(sn) + '</span><span class="edit-store">' + esc(sn.store) + "</span></div>" +
       '<div class="edit-acts"><button type="button" class="edit-ico" data-edit-star aria-pressed="' + (m && m.star ? "true" : "false") + '" aria-label="Star">' + EDIT_STAR + "</button>" +
       '<button type="button" class="edit-ico" data-edit-pass aria-label="Not for me">' + EDIT_DOWN + "</button>" +
       '<button type="button" class="edit-onme" data-edit-onme>On me</button></div>' +
@@ -36176,7 +36212,7 @@ document.addEventListener("keydown", function (e) {
   function thumbHTML(sn) {
     remember(sn);
     return '<button type="button" class="edit-thumb" data-edit-thumb="' + esc(sn.key) + '"><span class="edit-tph"><img src="' + esc(sn.img) + '" alt="" loading="lazy" decoding="async" /></span>' +
-      '<span class="edit-tt"><b>' + esc(sn.brand) + '</b></span><span class="edit-tt">' + money(sn.price) + "</span></button>";
+      '<span class="edit-tt"><b>' + esc(sn.brand) + '</b></span><span class="edit-tt">' + priceText(sn) + "</span></button>";
   }
   function renderSearches() {
     var out = document.getElementById("edit-search-out");
@@ -36215,6 +36251,52 @@ document.addEventListener("keydown", function (e) {
     if (lookHost) lookHost.hidden = false;
     renderGaps();
   }
+  /* ---------- closet gaps: the verified gap fillers, trousers first ---------- */
+  var GAP_ORDER = { trousers: 0, jeans: 1, shorts: 2, outerwear: 3, belt: 4, sunglasses: 5 };
+  function closetIdSet() {
+    var o = {};
+    (typeof wardrobeItems !== "undefined" && wardrobeItems ? wardrobeItems : []).forEach(function (it) { if (it && it.id) o[it.id] = 1; });
+    return o;
+  }
+  function gapPicks(opts) {
+    opts = opts || {};
+    var ids = opts.ids || closetIdSet(), seen = {};
+    var out = EDIT_CATALOG.filter(function (e) {
+      if (!e.gap || !e.img || seen[e.url]) return false;
+      seen[e.url] = 1;
+      if (opts.slot && slotOfCat(e.cat) !== opts.slot) return false;
+      if (opts.cat && e.cat !== opts.cat) return false;
+      var sn = snap(e), m = metaFor(sn.key);
+      return !(m && m.pass) && !(opts.unsaved && isSaved(sn.key));
+    }).map(function (e) {
+      var pair = (e.pairs || []).filter(function (id) { return ids[id]; }).length;
+      return { e: e, o: (e.cat in GAP_ORDER) ? GAP_ORDER[e.cat] : 9, pair: pair };
+    });
+    out.forEach(function (x) { if (LOUNGE.test(x.e.name)) x.o += 20; });
+    out.sort(function (a, b) { return a.o - b.o || b.pair - a.pair || (a.e.price || 0) - (b.e.price || 0); });
+    /* one colourway per style, and brands take turns within a category */
+    var styles = {}, uniq = [], dup = [];
+    out.forEach(function (x) { var k = (x.e.brand + "|" + String(x.e.name).split(",")[0]).toLowerCase(); if (styles[k]) dup.push(x); else { styles[k] = 1; uniq.push(x); } });
+    var res = [], byO = {};
+    uniq.forEach(function (x) { (byO[x.o] = byO[x.o] || []).push(x); });
+    Object.keys(byO).map(Number).sort(function (a, b) { return a - b; }).forEach(function (o) {
+      var grp = byO[o], brands = {}, q = [];
+      grp.forEach(function (x) { (brands[x.e.brand] = brands[x.e.brand] || []).push(x); });
+      var bl = Object.keys(brands), more = true;
+      for (var r = 0; more; r++) { more = false; bl.forEach(function (b) { if (brands[b][r]) { q.push(brands[b][r]); more = true; } }); }
+      res = res.concat(q);
+    });
+    return res.concat(dup).map(function (x) { return x.e; });
+  }
+  window.editGapPicks = function (o) { return gapPicks(o).map(snap); };
+  function gapMix(n) {
+    /* trousers lead; the rest of the row is one of each other gap */
+    var all = gapPicks({ unsaved: true }), tr = all.filter(function (e) { return e.cat === "trousers"; }), rest = [], cats = {};
+    all.forEach(function (e) { if (e.cat !== "trousers" && !cats[e.cat]) { cats[e.cat] = 1; rest.push(e); } });
+    var k = Math.max(Math.ceil(n / 2), n - rest.length);
+    return tr.slice(0, k).concat(rest).slice(0, n);
+  }
+  var GAP_SUGGEST = ["Trousers", "Chinos", "Jeans", "Shorts", "Belts", "Sunglasses", "Outerwear"];
   var DEFAULT_SUGGEST = ["Navy suede loafers", "Linen trousers", "Cashmere crewneck", "Unstructured blazer", "White sneakers", "Knit polo"];
   function renderGaps() {
     var host = document.getElementById("edit-gaps");
@@ -36222,10 +36304,13 @@ document.addEventListener("keydown", function (e) {
     var gaps = (typeof lastWishlist !== "undefined" && lastWishlist) ? lastWishlist.slice(0, 6).map(function (w) { return w.desc; }).filter(Boolean) : [];
     var have = {};
     editSearches.forEach(function (s) { have[String(s.q).toLowerCase()] = 1; });
-    var sug = gaps.concat(DEFAULT_SUGGEST).filter(function (q, i, a) { return a.indexOf(q) === i && !have[q.toLowerCase()]; }).slice(0, 8);
-    host.innerHTML = sug.length ? '<div class="edit-sec"><h3>Try</h3></div><div class="edit-sug">' + sug.map(function (q) {
+    var gapQ = EDIT_CATALOG.some(function (e) { return e.gap; }) ? GAP_SUGGEST : [];
+    var sug = gapQ.concat(gaps, DEFAULT_SUGGEST).filter(function (q, i, a) { return a.indexOf(q) === i && !have[q.toLowerCase()]; }).slice(0, 9);
+    var picks = gapMix(4);
+    host.innerHTML = (picks.length ? '<div class="edit-sec" id="edit-closet-gaps"><h3>Closet gaps</h3></div><div class="edit-grid">' + picks.map(function (e) { return cardHTML(snap(e), "gap"); }).join("") + "</div>" : "") +
+      (sug.length ? '<div class="edit-sec"><h3>Try</h3></div><div class="edit-sug">' + sug.map(function (q) {
       return '<button type="button" class="chip" data-edit-suggest="' + esc(q) + '">' + esc(q) + "</button>";
-    }).join("") + "</div>" : "";
+    }).join("") + "</div>" : "");
   }
 
   /* ---------- Build ---------- */
@@ -36245,6 +36330,10 @@ document.addEventListener("keydown", function (e) {
     var opts = slot === "layer" ? [null] : [];
     (closetPool()[slot] || []).forEach(function (it) { opts.push({ t: "c", id: it.id }); });
     savedList().forEach(function (sn) { if (slotOfCat(sn.cat) === slot) opts.push({ t: "p", p: sn }); });
+    gapPicks({ slot: slot, ids: boardIds() }).slice(0, 6).forEach(function (e) {
+      var sn = snap(e);
+      if (!opts.some(function (o) { return o && o.t === "p" && o.p.key === sn.key; })) opts.push({ t: "p", p: sn });
+    });
     var cur = board[slot];
     if (cur && cur.t === "p" && !opts.some(function (o) { return o && o.t === "p" && o.p.key === cur.p.key; })) opts.push(cur);
     return opts;
@@ -36269,7 +36358,27 @@ document.addEventListener("keydown", function (e) {
       var r = board[s];
       if (r && !resolve(r)) { delete board[s]; r = null; }
       if (!r && s !== "layer" && !(s in board)) { var first = (pool[s] || [])[0]; if (first) board[s] = { t: "c", id: first.id }; }
+      /* a slot his closet can't fill starts on the best gap filler */
+      if (!board[s] && s !== "layer" && !(pool[s] || []).length) { var g = gapPicks({ slot: s, ids: boardIds() })[0]; if (g) board[s] = { t: "p", p: snap(g) }; }
     });
+  }
+  function boardIds() {
+    var o = {};
+    SLOTS.forEach(function (s) { if (board[s] && board[s].t === "c") o[board[s].id] = 1; });
+    return Object.keys(o).length ? o : closetIdSet();
+  }
+  /* Build: gap fillers that pair with the pieces on the board */
+  function renderGapFill() {
+    var host = document.getElementById("edit-gapfill");
+    if (!host) return;
+    var ids = boardIds(), picks = gapPicks({ ids: ids }).filter(function (e) { var sl = slotOfCat(e.cat); return SLOTS.indexOf(sl) !== -1 && !boardHasKey(snap(e).key); });
+    var tr = picks.filter(function (e) { return e.cat === "trousers"; }), rest = picks.filter(function (e) { return e.cat !== "trousers"; });
+    picks = tr.slice(0, 6).concat(rest.slice(0, 4));
+    host.innerHTML = picks.length ? '<div class="edit-sec"><h3>Fills a gap</h3></div><div class="edit-strip">' + picks.map(function (e) {
+      var sn = remember(snap(e));
+      return '<button type="button" class="edit-thumb" data-edit-gap-put="' + esc(sn.key) + '"><span class="edit-tph"><img src="' + esc(sn.img) + '" alt="" loading="lazy" decoding="async" /></span>' +
+        '<span class="edit-tt"><b>' + esc(sn.brand) + '</b></span><span class="edit-tt">' + priceText(sn) + "</span></button>";
+    }).join("") + "</div>" : "";
   }
   function boardHasKey(key) { return SLOTS.some(function (s) { return board[s] && board[s].t === "p" && board[s].p.key === key; }); }
   function boardPieces() { return SLOTS.map(function (s) { return { slot: s, x: resolve(board[s]) }; }).filter(function (o) { return o.x; }); }
@@ -36284,7 +36393,7 @@ document.addEventListener("keydown", function (e) {
       return '<section class="card edit-slot" data-edit-slot="' + s + '"><div class="edit-slot-h"><span class="edit-kick">' + SLOT_LABEL[s] + "</span>" + tag + "</div>" +
         '<div class="edit-slot-row"><button type="button" class="edit-arrow" data-edit-step="-1" data-slot="' + s + '" aria-label="Previous ' + SLOT_LABEL[s] + '"' + (n < 2 ? " disabled" : "") + ">‹</button>" +
         (x ? '<div class="edit-sph"><img src="' + esc(x.img) + '" alt="" decoding="async" /></div><div class="edit-sm"><span class="edit-kick">' + esc(x.own ? (x.it.colourName || "") : x.brand) + "</span><h3>" + esc(x.name) + "</h3>" +
-          (x.own ? "" : '<div class="edit-price">' + money(x.p.price) + (x.p.store ? " · " + esc(x.p.store) : "") + "</div>") + "</div>"
+          (x.own ? "" : '<div class="edit-price">' + priceText(x.p) + (x.p.store ? " · " + esc(x.p.store) : "") + "</div>") + "</div>"
           : '<div class="edit-sph edit-none"></div><div class="edit-sm"><h3>' + (s === "layer" ? "No layer" : "Nothing yet") + "</h3></div>") +
         '<button type="button" class="edit-arrow" data-edit-step="1" data-slot="' + s + '" aria-label="Next ' + SLOT_LABEL[s] + '"' + (n < 2 ? " disabled" : "") + ">›</button></div></section>";
     }).join("");
@@ -36293,11 +36402,12 @@ document.addEventListener("keydown", function (e) {
     if (bn) bn.textContent = buy.length ? buy.length + (buy.length === 1 ? " piece" : " pieces") : "All from your closet";
     var bo = document.getElementById("edit-buy-out");
     if (bo) bo.innerHTML = buy.map(function (p) {
-      return '<div class="edit-buy-row"><div class="edit-bph"><img src="' + esc(p.img) + '" alt="" loading="lazy" /></div><div class="edit-sm"><span class="edit-kick">' + esc(p.brand) + "</span><h3>" + esc(p.name) + '</h3><div class="edit-store">' + money(p.price) + (p.store ? " · " + esc(p.store) : "") + "</div></div>" +
+      return '<div class="edit-buy-row"><div class="edit-bph"><img src="' + esc(p.img) + '" alt="" loading="lazy" /></div><div class="edit-sm"><span class="edit-kick">' + esc(p.brand) + "</span><h3>" + esc(p.name) + '</h3><div class="edit-store">' + priceText(p) + (p.store ? " · " + esc(p.store) : "") + "</div></div>" +
         (p.url ? '<a class="btn-ink edit-buy" href="' + esc(p.url) + '" target="_blank" rel="noopener">Buy</a>' : "") + "</div>";
-    }).join("") + (buy.length ? '<div class="edit-total"><span>Total</span><span>' + money(buy.reduce(function (a, p) { return a + (p.price || 0); }, 0)) + "</span></div>" : "");
+    }).join("") + (buy.length ? '<div class="edit-total"><span>Total</span><span>' + totalText(buy) + "</span></div>" : "");
     var tb = document.getElementById("edit-tobuy");
     if (tb) tb.hidden = !buy.length;
+    renderGapFill();
     renderBuiltLooks();
     syncOnMeCard();
   }
@@ -36372,7 +36482,7 @@ document.addEventListener("keydown", function (e) {
   }
   function putInLook(sn) {
     var s = slotOfCat(sn.cat);
-    if (SLOTS.indexOf(s) === -1) { if (typeof toast === "function") toast("Belts and ties aren't in looks yet."); return; }
+    if (SLOTS.indexOf(s) === -1) { if (typeof toast === "function") toast("Accessories aren't in looks yet."); return; }
     board[s] = { t: "p", p: sn };
     saveBoard();
     shortlistAdd(sn);
@@ -36460,6 +36570,7 @@ document.addEventListener("keydown", function (e) {
       if (q) runSearch(q);
       return;
     }
+    if ((b = t.closest("[data-edit-gap-put]"))) { sn = SNAPS[b.getAttribute("data-edit-gap-put")]; if (sn) { putInLook(sn); renderBuild(); } return; }
     if ((b = t.closest("[data-edit-thumb]"))) {
       var srch = b.closest("[data-edit-search]");
       if (srch) { var s2 = searchById(srch.getAttribute("data-edit-search")); if (s2) runSearch(s2.q); return; }

@@ -272,6 +272,33 @@ def main():
         pg.evaluate("syRemoveLocal('searches', 's-remote')"); pg.wait_for_timeout(200)
         check("remote delete applied", "Remote linen shirt" not in pg.inner_text("#edit-search-out"))
 
+        # 7b. The shipped verified catalogue (assets/edit-catalog.json)
+        cat = json.loads((ROOT / "assets/edit-catalog.json").read_text())
+        check("shipped catalogue has the verified SKUs", len(cat["products"]) >= 200 and all((ROOT / e["img"]).exists() for e in cat["products"] if not e["img"].startswith("http")), len(cat["products"]))
+        check("catalogue loaded in the app", pg.evaluate("editCatalogCount()") == len(cat["products"]), pg.evaluate("editCatalogCount()"))
+        g = pg.evaluate("editGapPicks().slice(0, 8).map(s => s.cat)")
+        check("gap fillers lead with trousers", g and g[0] == "trousers" and g.count("trousers") >= 4, g)
+        check("gap fillers marked", pg.evaluate("Object.keys(window.EDIT_GAP_URLS || {}).length") > 50)
+        check("GBP rows keep their price", pg.evaluate("editSearchCatalog('baudoin').some(e => e.cur === 'GBP' && /£/.test(e.pd || ''))"))
+        check("sunglasses searchable", len(pg.evaluate("editSearchCatalog('sunglasses').filter(e => e.cat === 'sunglasses')")) >= 5)
+        check("no pyjamas on top of a trousers search", not any("pyjama" in n.lower() for n in pg.evaluate("editSearchCatalog('trousers').slice(0, 8).map(e => e.name)")))
+        if pg.locator("[data-edit-close-search]").count():
+            pg.click("[data-edit-close-search]")
+        pg.click("#edit-tab-searches"); pg.wait_for_timeout(400)
+        if pg.locator("[data-edit-close-search]").count():
+            pg.click("[data-edit-close-search]"); pg.wait_for_timeout(300)
+        gk = pg.locator("#edit-gaps .edit-pc .edit-body h3").all_inner_texts()
+        check("Closet gaps shows gap fillers", pg.locator("#edit-closet-gaps").count() == 1 and len(gk) >= 3, gk)
+        chips = pg.locator("#edit-gaps [data-edit-suggest]").all_inner_texts()
+        check("Try starts with Trousers", chips[:1] == ["Trousers"], chips)
+        pg.click("#edit-tab-build"); pg.wait_for_timeout(500)
+        gf = pg.locator("#edit-gapfill [data-edit-gap-put]")
+        check("Build: Fills a gap strip", gf.count() >= 4, gf.count())
+        k0 = gf.first.get_attribute("data-edit-gap-put")
+        gf.first.click(); pg.wait_for_timeout(400)
+        check("gap filler goes on the board", pg.evaluate("k => Object.values(editBoardState()).some(r => r && r.t === 'p' && r.p.key === k)", k0))
+        check("and into To buy", pg.locator("#edit-buy-out a.edit-buy").count() >= 1)
+
         # 8. Catalogue ingestion
         seen["catalog"] = {"products": [{"brand": "Zzverified", "title": "Zzverified Cashmere Polo", "price": "$1,234", "url": "https://example.com/zz", "image": "https://example.com/zz.jpg", "category": "Polos", "color": "Navy", "store": "Example"}]}
         pg.evaluate("editLoadCatalog()"); pg.wait_for_timeout(800)
