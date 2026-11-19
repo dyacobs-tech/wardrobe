@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.26" />
+    <meta name="wardrobe-build" content="2026-11-19.80.27" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5413,6 +5413,39 @@
       /* No 'Home' title on Home: the person icon stays, the hero rises */
       body[data-page="today"] .masthead h1.brand { visibility: hidden !important; }
       body[data-page="today"] .masthead-slot { height: calc(8px + min(env(safe-area-inset-top, 0px), 59px)) !important; }
+      /* Nov 19 (Donna): Home shows the DONNA wordmark top-centre; the hero
+         starts below it so the wordmark never touches his head. */
+      html > body[data-page="today"]:not(#_):not(#__) .masthead h1.brand { visibility: visible !important; text-transform: uppercase !important; letter-spacing: .34em !important; text-indent: .34em !important; font-size: 17px !important; font-weight: 500 !important; }
+      body[data-page="today"] .masthead-slot { height: calc(40px + min(env(safe-area-inset-top, 0px), 59px)) !important; }
+      /* Nov 19 (David, 4:00 PM): no page titles on the main tabs — the
+         bottom nav shows where you are and each tab's own toggle row is the
+         context. The h1 stays for screen readers (visually hidden) and the
+         top band is reclaimed on Closet and Calendar. Outfits (its one
+         full-width row would run under the back/profile buttons), The Edit,
+         Profile and sub-pages keep a small quiet label instead. */
+      body:not([data-page="today"]) .masthead h1.brand {
+        font-family: var(--font-body, inherit) !important; font-size: 12px !important; font-weight: 600 !important;
+        letter-spacing: .2em !important; text-indent: .2em !important; text-transform: uppercase !important;
+        color: var(--dim) !important; opacity: .9;
+      }
+      body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead h1.brand {
+        position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important;
+        overflow: hidden !important; clip: rect(0 0 0 0) !important; clip-path: inset(50%) !important; white-space: nowrap !important; border: 0 !important;
+      }
+      body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead-slot {
+        height: calc(2px + min(env(safe-area-inset-top, 0px), 59px)) !important;
+      }
+      /* the masthead band is gone on these pages: its buttons float over
+         the page's own top row (which is centred), on a soft disc */
+      body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead {
+        background: transparent !important; pointer-events: none; box-shadow: none !important; border: 0 !important;
+      }
+      body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead .rule-double { display: none !important; }
+      body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead :is(button, a) { pointer-events: auto; }
+      body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead #tab-profile {
+        background: color-mix(in srgb, var(--bg) 82%, transparent) !important; border-radius: 999px;
+      }
+      body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) { --hdr-h: calc(8px + min(env(safe-area-inset-top, 0px), 59px)); }
       body[data-page="today"] #panel-today .today-hero.hero-solo .hero-corner { top: 40px !important; }
       /* Home text centred: kicker, title, location, dots and the action row */
       body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption { text-align: center !important; align-items: center !important; }
@@ -7340,7 +7373,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.26</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.27</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9157,7 +9190,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.26";
+var WARDROBE_BUILD = "2026-11-19.80.27";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -9187,7 +9220,7 @@ applyTheme(currentTheme(), false);
   if (dark) dark.addEventListener("click", function () { applyTheme("dark"); });
 })();
 var PAGE_TITLES = {
-  today: "Home", wardrobe: "Closet", looks: "Outfits", watches: "Closet",
+  today: "", wardrobe: "Closet", looks: "Outfits", watches: "Closet",
   wearing: "Today", gaps: "The Edit", studio: "Outfits",
   outfitideas: "Outfits", icons: "Icons", palettes: "Palettes",
   myinspo: "My Inspo", find: "The Edit", brands: "Brands", sale: "Sale",
