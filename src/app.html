@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.6" />
+    <meta name="wardrobe-build" content="2026-11-19.80.7" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5573,6 +5573,198 @@
       #panel-today #today-name { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; max-width: 100%; }
     </style>
 
+    <style>
+      /* ================= Build .80.6 — The Edit cleanup + smooth nav =================
+         The Edit: calm centred pills, Closet-matched search, compact saved-search
+         rows, desktop Shop-the-look in a centred max-width column with a wrapping
+         product grid (no sliced cards). Phone carousels show two full cards plus a
+         14px peek. The bottom nav hides and returns on a GPU transform+opacity
+         only, with no idle pop-in. */
+      #panel-find .edit-tabs {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 6px !important;
+        margin: 4px 0 16px !important;
+        width: 100%;
+        padding: 0 2px;
+        box-sizing: border-box;
+      }
+      #panel-find .edit-tabs .chip {
+        flex: 0 0 auto !important;
+        min-width: 0 !important;
+        height: 34px !important;
+        padding: 0 14px !important;
+        font-size: 13px !important;
+        letter-spacing: .02em !important;
+        border-radius: 999px !important;
+        border: var(--ctl-border, 1px solid var(--border)) !important;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        white-space: nowrap;
+      }
+      #panel-find .edit-tabs .chip .n { margin-left: 4px !important; opacity: .6; font-weight: 500; }
+      #panel-find .edit-tabs .chip[aria-pressed="true"],
+      #panel-find .edit-tabs .price-pill[aria-pressed="true"] {
+        background: var(--ink-btn) !important;
+        color: var(--ink-btn-text) !important;
+        border-color: var(--ink-btn) !important;
+      }
+      #panel-find .edit-search-wrap,
+      #panel-find #edit-search-form {
+        position: relative;
+        display: block;
+        margin: 0 0 14px;
+      }
+      #panel-find .edit-search-wrap .cs-mag,
+      #panel-find #edit-search-form .cs-mag {
+        position: absolute; left: 12px; top: 50%; width: 14px; height: 14px;
+        transform: translateY(-50%); fill: none; stroke: currentColor; stroke-width: 2;
+        stroke-linecap: round; opacity: .65; pointer-events: none;
+      }
+      #panel-find .edit-q,
+      #panel-find #edit-search-q,
+      #panel-find #edit-saved-q {
+        display: block; width: 100%; box-sizing: border-box;
+        height: var(--ctl-h, 34px) !important; min-height: 0 !important;
+        padding: 0 14px 0 34px !important;
+        border-radius: 999px !important;
+        border: var(--ctl-border, 1px solid var(--border-strong)) !important;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        font: 16px var(--font-ui);
+        margin: 0 !important;
+        -webkit-appearance: none; appearance: none;
+      }
+      #panel-find .edit-q::-webkit-search-cancel-button,
+      #panel-find #edit-search-q::-webkit-search-cancel-button,
+      #panel-find #edit-saved-q::-webkit-search-cancel-button { -webkit-appearance: none; }
+      /* compact saved-search rows: title, date, chevron — the whole row opens */
+      #panel-find .edit-srch {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        padding: 11px 2px 11px 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: 0 !important;
+        border-bottom: 1px solid var(--border) !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        cursor: pointer;
+      }
+      #panel-find .edit-srch-top { display: contents; }
+      #panel-find .edit-srch-main { flex: 1 1 auto; min-width: 0; }
+      #panel-find .edit-srch h3 {
+        margin: 0 !important;
+        font: 500 16px/1.25 var(--font-display) !important;
+        color: var(--text);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      #panel-find .edit-srch .edit-meta { margin: 2px 0 0; font-size: 12px; color: var(--dim); }
+      #panel-find .edit-srch-acts { display: flex; align-items: center; gap: 2px; flex: none; }
+      #panel-find .edit-srch-chev { font-size: 20px; line-height: 1; color: var(--dim); opacity: .55; flex: none; padding: 0 4px; }
+      #panel-find .edit-srch .edit-strip { display: none !important; }
+      /* Shop the look — phone: two full cards + 14px peek, never a random slice */
+      #find-look-mode .vp-row,
+      #panel-find .stl-piece .vp-row {
+        grid-auto-columns: calc((100% - 12px - 14px) / 2);
+        padding: 2px 0 6px 0;
+        margin: 0;
+        scroll-padding-inline: 0;
+      }
+      #find-look-mode .vp-card { scroll-snap-align: start; scroll-margin: 0; }
+      #panel-find .edit-hrow > .edit-pc { flex: 0 0 calc((100% - 12px - 14px) / 2); max-width: none; }
+      #find-look-mode .shop-look-head img,
+      #panel-find .shop-look-head img,
+      #panel-find .vp-ph img,
+      #panel-find .edit-ph img {
+        object-fit: contain !important;
+        object-position: top center;
+      }
+      #find-look-mode { width: 100%; max-width: 1100px; margin: 0 auto; }
+      #find-look-mode .stl-summary,
+      #find-look-mode .stl-piece { width: 100%; max-width: 100%; }
+      @media (min-width: 900px) {
+        #find-look-mode {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: stretch !important;
+          gap: 4px !important;
+          width: 100% !important;
+          max-width: 1100px !important;
+          margin: 0 auto !important;
+        }
+        #find-look-mode[hidden] { display: none !important; }
+        #find-look-mode .shop-look-head {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          text-align: center !important;
+          grid-template-columns: none !important;
+          column-gap: 0 !important;
+          width: 100% !important;
+        }
+        #find-look-mode .shop-look-head img {
+          grid-row: auto !important;
+          width: auto !important;
+          max-width: min(300px, 100%) !important;
+          max-height: 52vh !important;
+          height: auto !important;
+          object-fit: contain !important;
+          object-position: top center !important;
+          margin: 0 auto;
+        }
+        #find-look-mode .shop-look-titlerow,
+        #find-look-mode .shop-honest,
+        #find-look-mode .stl-summary,
+        #find-look-mode .stl-piece {
+          grid-column: auto !important;
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        #find-look-mode .stl-piece {
+          border: 0 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+          margin: 22px 0 6px !important;
+        }
+        /* each category is a full-width wrapping grid — no sliced cards */
+        #find-look-mode .vp-row,
+        #panel-find .stl-piece .vp-row {
+          display: grid !important;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+          grid-auto-flow: row !important;
+          grid-auto-columns: unset !important;
+          overflow: visible !important;
+          scroll-snap-type: none !important;
+          margin: 0 !important;
+          padding: 2px 0 8px !important;
+          gap: 16px !important;
+        }
+        #find-look-mode .vp-card { scroll-snap-align: unset; }
+      }
+      /* Smooth nav: GPU transform + opacity, no display toggling, no layout shift */
+      @media (max-width: 899px) {
+        #bottombar.bottombar {
+          transition: transform 240ms cubic-bezier(.22, .8, .28, 1), opacity 240ms cubic-bezier(.22, .8, .28, 1) !important;
+          will-change: transform, opacity;
+          transform: translate3d(0, 0, 0);
+          opacity: 1;
+        }
+        html.nav-away #bottombar.bottombar {
+          transform: translate3d(0, calc(100% + env(safe-area-inset-bottom, 0px) + 10px), 0) !important;
+          opacity: 0 !important;
+          pointer-events: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #bottombar.bottombar { transition: none !important; }
+      }
+    </style>
+
   </head>
   <body data-page="today">
     <header class="masthead">
@@ -6570,12 +6762,12 @@
           <button type="button" class="chip price-pill" id="price-pill" aria-haspopup="dialog" aria-pressed="false">Price</button>
         </div>
         <div id="edit-v-saved">
-          <input type="search" id="edit-saved-q" class="edit-q" aria-label="Search everything you've saved" placeholder="Search everything you've saved" autocomplete="off" />
+          <div class="edit-search-wrap"><svg class="cs-mag" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/></svg><input type="search" id="edit-saved-q" class="edit-q" aria-label="Search everything you've saved" placeholder="Search everything you've saved" autocomplete="off" /></div>
           <div class="edit-filters" id="edit-groups"></div>
           <div id="edit-saved-out"></div>
         </div>
         <div id="edit-v-searches" hidden>
-          <form id="edit-search-form" role="search" autocomplete="off"><input type="search" id="edit-search-q" aria-label="Search the stores" placeholder="Search the stores" enterkeyhint="search" autocomplete="off" /></form>
+          <form id="edit-search-form" class="edit-search-wrap" role="search" autocomplete="off"><svg class="cs-mag" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/></svg><input type="search" id="edit-search-q" aria-label="Search the stores" placeholder="Search the stores" enterkeyhint="search" autocomplete="off" /></form>
           <div id="edit-gapcards"></div>
           <div id="edit-search-out"></div>
           <div id="edit-gaps"></div>
@@ -6843,7 +7035,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.6</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.7</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8607,7 +8799,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.6";
+var WARDROBE_BUILD = "2026-11-19.80.7";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -15660,6 +15852,70 @@ var EXTRA_RENDERS = [
 ];
 /* .80.3: built on first use, so the pool's renders (lazy data) load only when needed */
 var _renderPool803 = null;
+/* Build .80.6 — never display the old camera / mirror-selfie try-ons of David.
+   673 bundled assets at 1376×1824 were try-ons onto his phone selfie
+   (he is still holding the phone in the closet mirror). Studio on-body renders
+   or a piece flat-lay are shown instead. Synced/idb selfies (look.selfie) are
+   hidden the same way; nothing is written to the sync store. */
+var CAMERA_SELFIE_IDS = "00329aa0c02b00b94a5b518a010ee7dcb49701a535083c9801d62c42733802178b0fa47702d2d81ec6d903709f29e99c05206e51812f05587233440005b65567e9c30664843013c606bc7b9647a1077d8d7bcf06082add7101d5089b5c465bf0090e6b533db2095f16fedf34097665b1aca30a1741dde4f60a5437cc8ec50a75e2b20c980ac401ccbc810b19377b5ea50b3aeedc4e5b0b67fbf0b5460bb17b37cc0a0bd7dfecc76a0c394b27174d0c3e9c37ee5e0c4d05f519c60c6e0a129d1b0cd3507fb1970d1919c8533a0d303bf7ce0d0d3fdb92e46b0d998cfee2340dd18b7fafef0dd4fbb64b410e318618283b0eb5afe5d6b30fb2de64db010fb5a6f88e9f10c05db0b1af10cb62cbc504113a3f5b339f113bebfb427e1223075c2c5e1288d219a23b12e1ef018bcc12e9217ffc6b135d35771385138ec8b335af13b4d4a01c1f1446635a1883145701d3499d151d4570445e1536506cec211589e8e9192d16029c9cd66f16233c36a9bc1630182524e216479887337716a6d42c9ada1712fd3b6a801721de1440a4177a63f00e4017d46bc5414b181c70b289d1181ebd408db918346b2111f1183b7a685fdb19e1ed51b27d1a1178291b821a4c2200541d1a6d54fb77501a7eef202ecb1b7885bdfa441bde61e747e71c045902ef931c943fb3c1ef1d0486f8d10e1d2a28f9081c1d715ea89aeb1e0dad1126401e8708e5365d1eaf9fb99eed1ed56f01a3f62014a9b2c4a0202b0eaad2c0206ebcae8fd8208d24fc982420d666857a0820d75a0c6ec920ee39d4a2c322b62ad0683c22bff9c28ffd23381e975c7c23a6c7c98ca5244e7e6183a52475184d8e7a250ab78998c0250f01118acc253dfba88e98256885696634256d5e298167266ca01be58926786f318a2d2722a7f9516f27d190ee122627f2ffbea4b1283f3e9d02612896d57f59df28c8648007e42977f7615e762983eb6f9da229be62bf5ef629cb36cf15562ab4ae4085792af9e31c06fc2b8ea1f271912c18ac71073c2c48c35516282c989feebb912cbb78c726842ccf278f70dd2d6c8f1e024e2da2b067b3c52e48f787c1832e603a85542d2ebbf86358ce2f13e4283d612f655beeeb732f67d03587232f8d2d9d02162ffcd96a0ff9302eb021918130c029d3e357312286b61c11315346c841f8316150a1e65e31991d18629b31a6c0cd85bf31d8e28bac7b31f242cec9fe3242d0e0af7432b91e99874b32cd7506f0ac32eda979825c333400dd577b33c5824c069033e39237d67134104034ffd1344164600f7834be2056f9a135190debe7613573f1080863359e5a1b7af93619d6773e6736be9e0fdd12374f3fbdda3937b30354930a37bd53413ce2380401dd7a3438544550f5b23883491084ab38a10fa14aad3a811b21c4563b2a71f6567b3b359c0115273b7791a88b743bd88fd01a093c56c1513aca3cb8dbcc97ed3ce311c47a153d0a3f2891cd3d281faab6443e134f7241463e599f81ceb53e894fa410713f8186e758a43f95bafbc7c8411fc9054c5041591d76604b41d187cc30364300f775016a4318a01ded114386b699f1654392594ee6c043df118b9c8f449f2f6ce68d44e0aef2b2ca44e127ac5056452dd6a442f5456c8c776f6846330e641955463657bbf046466b4eb824f7468ab7681cea46dfc31d36ff47fd4d0670944806dd84560a489e303c526c48b6b8b2a55648fad962c2b14976419172a34a1562f360684a8f99acac5b4aedc48b70d24b0fe2c4df0e4b66149f791c4ccff8d3d64b4d4da0bd68124d7e7aa1b9264d97753651e64d9c9ac9b0794e7c4257ccaf4ec36e91124e4ecae1a1395d4eeabea554604f4270c71afa4f43d18c12e54f70533baf0b4fbc21a2f8f850495f270242510f70bf42d851285108bb275170837573f55174b21e8619520b077e3e8753cfc3f43df753f3d559088655302fe76cbb55cc9ddc3293565c95e1a2a6567508883914567d4923326b56cf3693bd67570fd831ad47573137e79639573e48ce12b757ce6edce4de5806e965b7b058c86b0010fd58ca953510f15945f738ac7959a5f8fa19315a0254e85fa25a2e0c8d373a5a3afe94f3d25a46432b9e0a5a521672c11e5a64c6016b425ab4681e45485afea7d494a45b197f8f04ba5b62c092c43a5bdf5ba5adf55beba87fd8575c434f082ca35ce1571f4b635d04b49589ca5dd3c20d4c175e673c20500a5eb4766eb8c55f0a0ebad5705feebfe9b9125ff88a152f6c60bf55b2585e61470af13e9761743907809161d4aaf9ee7b62186db7055c629fadf06f2c645aabe4008b64cfa835309464d7069e876e6590f0752ea46756e91a299167b81d74452b68b49fe71bfb68c2726462d5691f12ab7a2169346196830e69da13878b3e69dad1e01ca36acf61e390aa6b19e39862966b5de58415716ba0a4fb8d8e6ca5d4ab31706d633cbfdac46dca0e24ef396df30d2675f16e223eaf9a6c6e32fa779c4e6e88c8a7b22a6e8ec5fbc4766f6e38f027aa700984181d8770d638e7d88c70f4a8e3cf02721eef4c84c872476501c4aa7272370442bf72982780172a72bafd54db3f7395c9fe1b2173e2bc4e654e7417cab6256c741930e15c287494aeb7863b74d38a8d6b3875230a9dcf9f758b34d42eae75ae5c692ecf75b4eaadecb675ca351df4fc75e03285eb027685362d9954769f070c31f4774cc7e0a47b776748c54be077ba2f65c07b78796dbaf15079565cb671a8797d5345f1647a47411354fb7be20f060af27c7a638d37477cdb813c9aa47dbe87308c957dce4df826297dd90d11cb6e7f00ea50a3a67f1490079fb57f403df8a85b7fbfa69de72080e7460e2a2c81480a5178708152074ed17e818943157c4581e65bf76a9e823b1cf059d78294fc511f2c82c5af4d1ca682e565d372d28380163d2a6983e8627579d0844306344e9c84450916db4984482f306ede8473d575489184c14449aa3d84ec24221103851271998079858f3c21373785cd242bd79f86e1bf5609d6871884991759871cc3dcd1978750a7e98c17877567090e0f878eb831fce087ceaed6b8dc8899e54adc7b88f58c436e53897896a71f8b8985fcc4fb6f89922692be0d8995785e0b348a7dbe441b788abcbcff8aad8af6ad740bb68b08b9aa3bbd8b4e7555db158b71372fd6338b946290f3068d19b7bee0a78d81002d02ff8dd4328f2e118e493fc3c01e8e744a90ad868f3357c68b848fc8c208a4648fe81715424490a626548bdb90f4a8ce573a911832f4df419187a857ef49918d3e36a1e8918f47bf65dc919ff236521e922c4e5df65992b7977051f5934b2ab2175e93689fcf01eb944ef219c54194931bd9219b94b1a92f804994bba94793f5951f91d02ddf96ba3329c43c9738255d716498913e8eede698bce56b446c9a543e585d8b9abe9ab6b3069ad94ecc26f99b2c010ca1199b92ae3ebc029bc6f3746db19cd6f9426ad09cd70bc66ace9d0cd659d3079d4e5e6200a29dfe5cd3865f9f50d658cf0e9fc431a5af50a016fffcc8f9a074fb099abaa0ac8eb98d15a18b8fc890e6a25b8bf1b12ca3edac5a4198a40eaa835f0fa437aad1712da46a421c4ab7a4a4a86c3c7da4b7f1723487a4fe6d5a7265a5419a321d39a56e03e47784a5987d3de4e0a5bdbce4ce56a5de5beda5dea6a187c24feca70677cf6250a70ef76fc941a73bae56ab84a7880d85b24ea7c2431f12aca7eb2f532dfda80a471c3f23a8b000ff8d5da8d8c9160127a922424bebb3a93fbef078f7a960d4adbbd7a973a0df760aa976b5fcf25ba9a95480389faa9a3c975b47ab44685cd93cab9505daf48dab992cb3be40abcd7aec217fabe7452adc4cac4f206ed8c8acfa968e9309acfff0361762ad1bcd0d55a6ad645c115013ad6cfa6e9a1bada428083ea5ade5f062423dae1cfaeba973ae540d173ba4afa03f0731d3b032affe00dab07f3d7fe8afb0ef956e893eb19e3f161385b1b830a12991b26c23072638b2af0312940eb2d729a91035b2e74a400fd8b3c9c366ab9fb3e91ac13a23b47288268b3fb6d3c983a07fb70739cc3133b7bbb7a8c23db7e8f661a0f7b82dfee47616b860d9804452b8c7a4a6dfe4b98ebe43ec30b9d4b9a9cbf0ba52706cd0aebb1d1debab6bbc25f491ce0bbdaabcfa29fbbdbf36dd2750be245f0018c2be5206b42e79beac5cb22afdbebd6ae4d114becc56b2af09bf6c6c07c55dbf8a69de8fd5bf9b66758123c02b7f392092c13bd374a0e5c221ee220717c2cec038dcbcc336db95606dc44b55fc4bdbc4f5642acdf1c51925db6d17c59ebf7944cfc5d653c4049dc676f65089bac6b7d08399ffc6d82fbadeffc78a62cde564c81e60f940d4c8af007697fbc91f3ab8e448c9311ec8b22ec9b9264caa8ec9e0b570a3b5c9e2ab923659c9f4fa22a034c9f9caeeb435ca440c7bd8a1ca5b264961b8ca9acab9a39bcb61f9e3807bcb9bfbcb0be5cc33e6a7a4fbccb06fbe1ae1ccd381d3b38acce6bbb645beccf0c0b19d61cd148ce7fe2ecdd81bfe0d3dce7cf4de6dc1cf38687565edcfb5ce0392dbcfd4dad86923d05a68c3fc48d05b1ef24e9cd090cc44a199d11a58eb1564d1cfd6aa8f85d1d82d9f474ed22288e698b8d26811272054d2750c032417d2d3c632aea5d2dccec0f6a9d2f38c9631c5d345313aecb3d36a84c34073d382f7517e18d3adf00a0953d3e9845d858ed415d3011b2ed441a9b25c5ad4bdbc301f60d5bed3bf8181d5f962caf101d5fa0d3fb302d75f517fe1efd77300b3eee8d79c03b2e355d7b8e7719323d7d41dceea1ad7e42064ad7dd7ea7c441ca0d835e10512bdd8488041ceacd84ee3de6ed3d97ffa7d67add9a6eb1fde88da3cd47cd7badb005b056d21db0afb45a51bdb79e141a8ebdba60cf5abb5dbf919299a7adcc763347292dd6936f919c8dd9069701e99dde4e08ce6bfde14db7e7413de337a9b6069de48a0b6f8abde55815d8292debb9bce9867dec9f35bc267def1d69306d1df0bdee59b83df32798af0fcdf5e2445ed30df8b0f6a1326e04a39e2c152e0cc3bb23780e0ce56e592c1e110deaf79d1e12c249a1aebe14898d72978e307f14ac925e33b1405b647e356d75a675ce3a5a61527e7e42ddfa500b2e4316afa049fe442fc2ad477e4f354f29741e58c869ab153e5d9ac5a5acfe63ca8689d4de6e52e121be0e71cb5283aebe7295d434406e75bbbe805cae778f166e0dee7a4ddb93719e858f9eb2fade866661fa5bfe8cb725db45beac68bdf0a9beb3de7319f0aecc5ac053333ed0282daf401ed37626d8250ee163204e66aee38837fa0afee7814e373a2eeca48e45c15eeedbf54a59cef3b352ca3f3ef3f3e8f2b84efb0b01caf8defcd6759c06fefe760904330f01becdca3c7f09ee190ea13f109eaf635ebf117141c806af159664c4907f1a68922b819f2f0498d492df2fab427913bf42744c8c491f463e12ed95df4afd2c893d3f531bd3f7acef571aa460d66f5f509dc99c5f652adc80ae8f6a6480f702af7743f14abf2f81f25fe4386f8eb98f93746f956dfe4f256f9a2eb11335dfa55ef849ff7faf7e6f00060fb122f01d41efbbdad5a52defc802a1b5068fd55d3ffa013fd60650d44d5fd9d19c854f7fda68a021c04fe916e14ae7bfe92bab0572bfec91fac1d99fecf84efd013";
+var CAMERA_SELFIE_SET = {};
+(function () {
+  for (var i = 0; i < CAMERA_SELFIE_IDS.length; i += 12) CAMERA_SELFIE_SET[CAMERA_SELFIE_IDS.slice(i, i + 12)] = 1;
+})();
+function selfieIdOf(img) {
+  if (!img || typeof img !== "string") return "";
+  var m = String(img).match(/([0-9a-f]{12})\.(?:webp|jpe?g|png)(?:$|\?)/i);
+  return m ? m[1].toLowerCase() : "";
+}
+function isCameraSelfieImg(img) {
+  if (!img || typeof img !== "string") return false;
+  if (/^composer:/.test(img)) return false;
+  var id = selfieIdOf(img);
+  if (id && CAMERA_SELFIE_SET[id]) return true;
+  return /assets\/photos\/9a543e585d8b\./.test(img);
+}
+function studioImgForLook(look) {
+  if (!look) return "";
+  try {
+    if (typeof onbodyForLook === "function") {
+      var ob = onbodyForLook(look);
+      if (ob && !isCameraSelfieImg(ob)) {
+        if (typeof window.cutFor784 === "function") {
+          var cut = window.cutFor784(ob);
+          if (cut) return cut;
+        }
+        return ob;
+      }
+    }
+  } catch (e) {}
+  if (look.fwRender) {
+    var fw = (typeof fwRenderSrc === "function" ? fwRenderSrc(look) : look.fwRender) || look.fwRender;
+    if (fw && !isCameraSelfieImg(fw)) return fw;
+  }
+  var pieces = look.fwPieces || look.pieces || look.swapPieces || [];
+  for (var i = 0; i < pieces.length; i++) {
+    var p = pieces[i], ph = "";
+    if (!p) continue;
+    try {
+      var it = (p.id && typeof closetItemById === "function") ? (closetItemById(p.id) || p) : p;
+      if (typeof itemPhoto === "function") ph = itemPhoto(it) || "";
+      else ph = (it && it.photo) || p.photo || "";
+    } catch (e2) { ph = p.photo || ""; }
+    if (ph && !isCameraSelfieImg(ph)) return ph;
+  }
+  return "";
+}
+function displayLookImg(look, src) {
+  /* Icon reference photographs are the icon, not David — leave them. */
+  if (look && look.iconSpec && src && !isCameraSelfieImg(src)) return src;
+  if (src && !isCameraSelfieImg(src) && !(look && look.selfie)) return src;
+  var studio = studioImgForLook(look);
+  return studio || "";
+}
+window.isCameraSelfieImg = isCameraSelfieImg;
+window.studioImgForLook = studioImgForLook;
+window.displayLookImg = displayLookImg;
+
 Object.defineProperty(window, "RENDER_POOL", { configurable: true, enumerable: true,
   get: function () { return _renderPool803 || (_renderPool803 = SEED_LOOKS.concat(EXTRA_RENDERS)); },
   set: function (v) { _renderPool803 = v; } });
@@ -16258,7 +16514,7 @@ function lazyShown803(panelId) {
 /* .80.3: built on first use (the dealer filters bans again at deal time) */
 var _dealPool803 = null;
 Object.defineProperty(window, "DEAL_POOL", { configurable: true, enumerable: true,
-  get: function () { return _dealPool803 || (_dealPool803 = RENDER_POOL.filter(function (r) { return !isQuarantinedImg(r.img) && !isDislikedImg(r.img); }).map(renderAsLook)); },
+  get: function () { return _dealPool803 || (_dealPool803 = RENDER_POOL.filter(function (r) { return !isQuarantinedImg(r.img) && !isDislikedImg(r.img) && !(typeof isCameraSelfieImg === "function" && isCameraSelfieImg(r.img)); }).map(renderAsLook)); },
   set: function (v) { _dealPool803 = v; } });
 function renderFormality() {
   var info = formalityInfo(formalityLevel);
@@ -16344,33 +16600,34 @@ function isTaupeLook(look) {
   return !!look && /taupe/i.test(((look.desc || "") + " " + (look.title || "")));
 }
 function lookImg(look) {
+  function out(src) { return (typeof displayLookImg === "function") ? displayLookImg(look, src) : (src || ""); }
   /* A swapped look shows its swap photograph everywhere — the
      pop-out, the grid, My Looks — never a piece's own product
      photo standing in for the combination. swapPhoto is the
      display photo by definition (see swapDisplayPhoto): the
      finished render once it lands, the source photo while it
      renders. */
-  if (look && look.swapPhoto && (look.swapPieces || look.swapComboId)) return look.swapPhoto;
+  if (look && look.swapPhoto && (look.swapPieces || look.swapComboId)) return out(look.swapPhoto);
   /* A wardrobe look with a verified render shows that render —
      the photograph of him wearing exactly its own top + shoes
      pairing. Without one, its image is its first piece's own
      photograph — never a pool render standing in for pieces it
      does not show. */
-  if (look && look.fwRender) return fwRenderSrc(look);
+  if (look && look.fwRender) return out(fwRenderSrc(look));
   if (look && look.fwPieces && look.fwPieces.length) {
-    for (var fi = 0; fi < look.fwPieces.length; fi++) { if (look.fwPieces[fi].photo) return look.fwPieces[fi].photo; }
+    for (var fi = 0; fi < look.fwPieces.length; fi++) { if (look.fwPieces[fi].photo) return out(look.fwPieces[fi].photo); }
   }
   /* An uploaded look's photograph is the look — never a palette
      match or the taupe correction standing in for it. */
-  if (look && look.source === "uploaded" && look.img) return look.img;
+  if (look && look.source === "uploaded" && look.img) return out(look.img);
   /* An icon reference look's photograph is the reference itself —
      the outfit being shopped (build .31) — never a palette match
      or the taupe correction standing in for it. */
-  if (look && look.iconSpec && look.img) return look.img;
-  if (isTaupeLook(look)) return TAUPE_RENDER;
-  if (look.img) return look.img;
+  if (look && look.iconSpec && look.img) return out(look.img);
+  if (isTaupeLook(look)) return out(TAUPE_RENDER);
+  if (look.img) return out(look.img);
   var near = nearestPhotoLook(look.swatches);
-  return near ? near.img : "assets/photos/316150a1e65e.webp";
+  return out(near ? near.img : "");
 }
 /* Every built look gets a unique id. Date.now() alone was not
    enough: the six takes are built inside the same millisecond, so
@@ -31063,7 +31320,7 @@ function renderFindLookMode() {
   ensureShopData({ pieces: shopPiecesForLook(findLookMode) });
   var look = findLookMode;
   var img = lookImg(look);
-  var html = '<div class="shop-look-head"><img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" loading="lazy" />' +
+  var html = '<div class="shop-look-head">' + (img ? '<img src="' + esc(img) + '" alt="' + esc(look.imgAlt || "") + '" data-popout="' + esc(img) + '" loading="lazy" />' : "") +
     '<div class="shop-look-titlerow"><h3>' + esc(look.title || "Untitled") + '</h3><button type="button" class="stl-clear" id="shop-clear-look">Clear look</button></div>' +
     '<p class="shop-honest">Prices checked ' + SHOP_CATALOGUE_CHECKED + ".</p>" +
     "</div>";
@@ -38125,10 +38382,10 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
       var range = (typeof s.lo === "number" && typeof s.hi === "number") ? " · " + money(s.lo) + "–" + money(s.hi) : "";
       var seen = typeof s.seen === "number" ? sl.length + " shortlisted of " + s.seen : (sl.length ? sl.length + " shortlisted" : "");
       var meta = [when(s.last || s.at), seen].filter(Boolean).join(" · ") + range;
-      return '<article class="card edit-srch" data-edit-search="' + esc(s.id) + '"><div class="edit-srch-top"><div><h3>' + esc(s.q) + '</h3><p class="edit-meta">' + esc(meta) + "</p></div>" +
-        '<div class="edit-srch-acts"><button type="button" class="chip" data-edit-open="' + esc(s.id) + '">Open</button>' +
-        (s.legacy ? "" : '<button type="button" class="edit-ico" data-edit-del-search="' + esc(s.id) + '" aria-label="Delete search">' + EDIT_X + "</button>") + "</div></div>" +
-        (sl.length ? '<div class="edit-strip">' + sl.map(thumbHTML).join("") + "</div>" : "") + "</article>";
+      var metaLine = [when(s.last || s.at), range ? range.replace(/^ \u00b7 /, "") : ""].filter(Boolean).join(" \u00b7 ");
+      return '<article class="edit-srch" data-edit-search="' + esc(s.id) + '" data-edit-open="' + esc(s.id) + '"><div class="edit-srch-main"><h3>' + esc(s.q) + '</h3><p class="edit-meta">' + esc(metaLine) + "</p></div>" +
+        (s.legacy ? "" : '<button type="button" class="edit-ico" data-edit-del-search="' + esc(s.id) + '" aria-label="Delete search">' + EDIT_X + "</button>") +
+        '<span class="edit-srch-chev" aria-hidden="true">\u203A</span></article>';
     }).join("") : "";
     if (gapsHost) gapsHost.hidden = false;
     if (lookHost) lookHost.hidden = false;
@@ -38561,7 +38818,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     }
     if (t.closest("[data-edit-look]")) { sn = snapFromCard(t); if (sn) putInLook(sn); return; }
     if (t.closest("[data-edit-onme]")) { sn = snapFromCard(t); if (sn) { shortlistAdd(sn); tryonForEntry(Object.assign({ retailer: sn.store }, sn), false); } return; }
-    if ((b = t.closest("[data-edit-open]"))) {
+    if ((b = t.closest("[data-edit-open]")) && !t.closest("[data-edit-del-search]")) {
       var s = searchById(b.getAttribute("data-edit-open"));
       var q = s ? s.q : (allSearches().filter(function (x) { return x.id === b.getAttribute("data-edit-open"); })[0] || {}).q;
       if (q) runSearch(q);
@@ -39432,23 +39689,28 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
    back on scroll up or when scrolling stops. One passive listener, reads
    only scrollY (no layout), flips one class; CSS does the motion. */
 (function () {
-  var root = document.documentElement, lastY = window.scrollY || 0, idle = 0, ticking = false;
+  var root = document.documentElement, lastY = window.scrollY || 0, ticking = false;
   var mq = window.matchMedia ? window.matchMedia("(max-width: 899px)") : null;
+  var THRESH = 10, TOP = 80, BOTTOM = 24;
   function show() { if (root.classList.contains("nav-away")) root.classList.remove("nav-away"); }
+  function hide() { if (!root.classList.contains("nav-away")) root.classList.add("nav-away"); }
   function typing() { var a = document.activeElement; return !!(a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable)); }
+  function maxY() { return Math.max(0, (document.documentElement.scrollHeight || 0) - (window.innerHeight || 0)); }
   function step() {
     ticking = false;
-    var y = window.scrollY || 0, dy = y - lastY;
+    var raw = window.scrollY || 0, max = maxY();
+    /* Clamp so iOS rubber-band / bounce never flips direction. */
+    var y = raw < 0 ? 0 : (raw > max ? max : raw);
+    var dy = y - lastY;
     if (mq && !mq.matches) { show(); lastY = y; return; }
-    if (dy > 4 && y > 60 && !typing()) root.classList.add("nav-away");
-    else if (dy < -4 || y <= 60) show();
+    if (typing() || y <= TOP || y >= max - BOTTOM) { show(); lastY = y; return; }
+    if (dy > THRESH) hide();
+    else if (dy < -THRESH) show();
     lastY = y;
   }
   window.addEventListener("scroll", function () {
     if (!ticking) { ticking = true; requestAnimationFrame(step); }
-    clearTimeout(idle); idle = setTimeout(show, 250);
   }, { passive: true });
-  ["touchend", "touchcancel"].forEach(function (t) { window.addEventListener(t, function () { clearTimeout(idle); idle = setTimeout(show, 250); }, { passive: true }); });
   window.__navShow = show;
   if (typeof window.switchTab === "function") {
     var _st = window.switchTab;
@@ -39625,7 +39887,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
          studio render, never a piece photo) */
       if (guestHero782(true)) return;
       var fb = (typeof lookImg === "function" && lookImg(todayLook)) || "";
-      if (SELFIE782.test(fb)) fb = "";
+      if (SELFIE782.test(fb) || (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(fb))) fb = "";
       if (!fb || /^data:image\/svg/.test(fb)) { var pp = piecesOf(todayLook).map(photoOf).filter(Boolean); fb = pp[0] || fb; }
       if (fb && img.getAttribute("src") !== fb) img.setAttribute("src", fb);
       img.removeAttribute("data-render"); hero.classList.remove("has-cut");
