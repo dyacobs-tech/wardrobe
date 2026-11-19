@@ -21,22 +21,9 @@ BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 PAGES = [
     ("home", ["#tab-today"]),
     ("closet-closet", ["#section-closet", "#tab-wardrobe"]),
-    ("closet-outfits", ["#section-closet", "#tab-looks"]),
     ("closet-watches", ["#section-closet", "#tab-watches"]),
-    ("closet-today", ["#section-closet", "#tab-wearing"]),
-    ("closet-gaps", ["#section-closet", "#tab-gaps"]),
-    ("ideas-ideas", ["#section-ideas", "#tab-studio"]),
-    ("ideas-outfits", ["#section-ideas", "#tab-outfitideas"]),
-    ("ideas-icons", ["#section-ideas", "#tab-icons"]),
-    ("ideas-palettes", ["#section-ideas", "#tab-palettes"]),
-    ("ideas-myinspo", ["#section-ideas", "#tab-myinspo"]),
-    ("shop-look", ["#tab-find", "#tab-shopmain"]),
-    ("shop-brands", ["#tab-find", "#tab-brands"]),
-    ("shop-sale", ["#tab-find", "#tab-sale"]),
-    ("shop-wishlist", ["#tab-find", "#tab-shopwish"]),
-    ("shop-purchased", ["#tab-find", "#tab-purchased"]),
-    ("shop-receipts", ["#tab-find", "#tab-receipts"]),
-    ("shop-search", ["#tab-find", "#tab-search"]),
+    ("outfits", ["#section-ideas"]),
+    ("shop-edit", ["#tab-find"]),
     ("calendar", ["#section-calendar"]),
     ("profile-info", ["#tab-profile", "#tab-pinfo"]),
     ("profile-location", ["#tab-profile", "#tab-plocation"]),
@@ -125,7 +112,7 @@ def main() -> int:
                     info = page.evaluate(INSPECT)
                     check(
                         f"{tag} {slug}: build is .71",
-                        info and info.get("build") == "2026-11-18.74.2",
+                        info and info.get("build") == "2026-11-18.75",
                         str(info and info.get("build")),
                     )
                     check(

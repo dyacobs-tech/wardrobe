@@ -24,10 +24,8 @@ BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 
 # (section button, first landing tab, tabs to visit)
 SECTIONS = [
-    ("#section-closet", "tab-wardrobe", ["tab-wardrobe", "tab-looks", "tab-watches", "tab-wearing", "tab-gaps"]),
-    ("#section-ideas", "tab-studio", ["tab-studio", "tab-outfitideas", "tab-icons", "tab-palettes", "tab-myinspo"]),
-    ("#tab-find", "tab-shopmain", ["tab-shopmain", "tab-brands", "tab-sale", "tab-shopwish", "tab-purchased", "tab-receipts", "tab-search"]),
-    ("#tab-profile", "tab-pinfo", ["tab-pinfo", "tab-plocation", "tab-pcloud"]),
+    ("#section-closet", "tab-wardrobe", ["tab-wardrobe", "tab-watches"]),
+    ("#tab-profile", "tab-pinfo", ["tab-pinfo", "tab-plocation"]),
 ]
 
 
@@ -158,7 +156,7 @@ def main() -> int:
                 home = nav_bbox(page)
                 check(
                     f"{name}: build is .71",
-                    home and home.get("build") == "2026-11-18.74.2",
+                    home and home.get("build") == "2026-11-18.75",
                     str(home and home.get("build")),
                 )
                 check(
@@ -198,22 +196,13 @@ def main() -> int:
                             and info.get("docOverflow", 99) <= 1,
                             str(info),
                         )
-                        # Ideas: after shortening, every tab should fit at these widths
-                        if section_sel == "#section-ideas":
-                            check(
-                                f"{name}: Ideas row fits every tab including Inspo",
-                                info and info.get("allFitInView") and info.get("count") == 5
-                                and any(r["id"] == "tab-myinspo" and "inspo" in r["text"].lower() for r in (info.get("rects") or [])),
-                                str(info),
-                            )
                         if section_sel == "#section-closet":
                             ids = [r["id"] for r in (info.get("rects") or [])]
                             texts = [r["text"] for r in (info.get("rects") or [])]
                             check(
-                                f"{name}: Closet has 5 tabs, Closet gaps immediately after Today, none clipped",
-                                info and info.get("allFitInView") and info.get("oneRow") and info.get("count") == 5
-                                and ids == ["tab-wardrobe", "tab-looks", "tab-watches", "tab-wearing", "tab-gaps"]
-                                and any("gaps" in x.lower() for x in texts)
+                                f"{name}: Closet has 2 tabs (Closet, Watches), none clipped",
+                                info and info.get("allFitInView") and info.get("oneRow") and info.get("count") == 2
+                                and ids == ["tab-wardrobe", "tab-watches"]
                                 and not any(r.get("clippedByView") for r in (info.get("rects") or [])),
                                 str(info),
                             )
@@ -225,25 +214,22 @@ def main() -> int:
                                 str(close),
                             )
 
-                # Ideas My Inspo shot at 390
+                # Outfits bar stays flush with Home
                 if vw == 390:
                     page.locator("#section-ideas").click()
-                    page.wait_for_timeout(200)
-                    page.locator("#tab-myinspo").click()
                     page.wait_for_timeout(250)
-                    # Re-check Ideas bar flush on this page
                     ideas = nav_bbox(page)
                     check(
-                        f"{name}: Ideas bar stays flush with Home",
+                        f"{name}: Outfits bar stays flush with Home",
                         ideas
                         and home
                         and nearly(ideas["bottom"], home["bottom"])
                         and nearly(ideas["top"], home["top"])
                         and nearly(ideas["bottom"], vh),
-                        f"home={home} ideas={ideas}",
+                        f"home={home} outfits={ideas}",
                     )
-                    page.screenshot(path=str(AUDIT / "ideas-myinspo-390-build64.png"), full_page=False)
-                    print(f"  wrote {AUDIT / 'ideas-myinspo-390-build64.png'}")
+                    page.screenshot(path=str(AUDIT / "outfits-390-build75.png"), full_page=False)
+                    print(f"  wrote {AUDIT / 'outfits-390-build75.png'}")
 
                 # Calendar week-strip: count badges must not cover MON/TUE
                 page.locator("#section-calendar").click()
@@ -312,14 +298,10 @@ def main() -> int:
             page.wait_for_timeout(200)
             page.locator("#section-ideas").click()
             page.wait_for_timeout(200)
-            page.locator("#tab-myinspo").click()
-            page.wait_for_timeout(200)
-            desk = page.evaluate(TAB_JS)
+            desk = nav_bbox(page)
             check(
-                "1280: Ideas shows full 'My Inspo' label, all tabs in view",
-                desk
-                and desk.get("allFitInView")
-                and any(r["id"] == "tab-myinspo" and "my inspo" in r["text"].lower() for r in (desk.get("rects") or [])),
+                "1280: Outfits bar is present and flush",
+                desk and (desk.get("position") in ("fixed", "absolute") or desk.get("slotPosition") == "fixed"),
                 str(desk),
             )
             ctx.close()

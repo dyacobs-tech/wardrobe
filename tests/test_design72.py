@@ -16,31 +16,18 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-18.74.2"
+BUILD = "2026-11-18.75"
 BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 PAGES = [
     ("home", ["#tab-today"]),
     ("closet-closet", ["#section-closet", "#tab-wardrobe"]),
-    ("closet-outfits", ["#section-closet", "#tab-looks"]),
     ("closet-watches", ["#section-closet", "#tab-watches"]),
-    ("closet-today", ["#section-closet", "#tab-wearing"]),
-    ("closet-gaps", ["#section-closet", "#tab-gaps"]),
-    ("ideas-ideas", ["#section-ideas", "#tab-studio"]),
-    ("ideas-outfits", ["#section-ideas", "#tab-outfitideas"]),
-    ("ideas-icons", ["#section-ideas", "#tab-icons"]),
-    ("ideas-palettes", ["#section-ideas", "#tab-palettes"]),
-    ("ideas-myinspo", ["#section-ideas", "#tab-myinspo"]),
-    ("shop-look", ["#tab-find", "#tab-shopmain"]),
-    ("shop-brands", ["#tab-find", "#tab-brands"]),
-    ("shop-sale", ["#tab-find", "#tab-sale"]),
-    ("shop-wishlist", ["#tab-find", "#tab-shopwish"]),
-    ("shop-purchased", ["#tab-find", "#tab-purchased"]),
-    ("shop-receipts", ["#tab-find", "#tab-receipts"]),
-    ("shop-search", ["#tab-find", "#tab-search"]),
+    ("outfits-mine", ["#section-ideas", "#outfits-mine"]),
+    ("outfits-inspo", ["#section-ideas", "#outfits-inspo"]),
+    ("shop-edit", ["#tab-find"]),
     ("calendar", ["#section-calendar"]),
     ("profile-info", ["#tab-profile", "#tab-pinfo"]),
     ("profile-location", ["#tab-profile", "#tab-plocation"]),
-    ("profile-cloud", ["#tab-profile", "#tab-pcloud"]),
 ]
 STANDALONE_INIT = """
 Object.defineProperty(window.navigator, 'standalone', { get: () => true, configurable: true });
@@ -208,18 +195,20 @@ def test_design_tokens_consistent():
     assert_one("inputs", inputs, lambda s: (round(s["h"]), s["radius"].split()[0], s["fontSize"]))
     i0 = inputs[0][1]
     assert round(i0["h"]) == 34, f"input height {i0['h']}"
-    assert i0["radius"].split()[0] == "4px", f"input radius {i0['radius']}"
+    assert i0["radius"].split()[0] == "999px", f"input radius {i0['radius']}"
     assert i0["fontSize"] == "16px", f"input font {i0['fontSize']}"
 
     cards = gather("card")
     assert_one("card radius", cards, lambda s: (s["radius"].split()[0], s["borderStyle"], s["borderW"]))
     k0 = cards[0][1]
-    assert k0["radius"].split()[0] == "4px", f"card radius {k0['radius']}"
+    assert k0["radius"].split()[0] == "16px", f"card radius {k0['radius']}"
     assert k0["borderStyle"] == "solid" and k0["borderW"] == "1px", f"card border {k0['borderW']} {k0['borderStyle']}"
 
-    titles = [item for slug, item in gather("title") if item["fontFamily"] and "masthead" not in item["cls"] and item["cls"] != "brand"]
-    # Titles that are page/section heads should be Cormorant 20px / 600
-    display = [t for t in titles if "Cormorant" in t["fontFamily"] or "Times" in t["fontFamily"] or "Georgia" in t["fontFamily"]]
+    titles = [item for slug, item in gather("title") if item["fontFamily"] and "masthead" not in item["cls"] and item["cls"] != "brand" and "page-title" not in item["cls"] and "item-name" not in item["cls"]]
+    # Build .75: Closet product-card names (.item-name) are the Vesper 15px card style, not section titles.
+    # Section / card titles are Fraunces 20px / 600; the masthead wordmark
+    # and the large #page-title are excluded from the 20px check.
+    display = [t for t in titles if any(n in t["fontFamily"] for n in ("Fraunces", "Libre", "Times", "Georgia"))]
     if display:
         sizes = {t["fontSize"] for t in display}
         weights = {t["fontWeight"] for t in display}

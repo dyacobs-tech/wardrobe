@@ -29,22 +29,28 @@
 // deadline is 30s — long enough for a 2.7MB index.html on a typical
 // phone connection — so a slow fetch is not replaced by a stale
 // cached shell after 4 seconds.
-const WARDROBE_BUILD = '2026-11-18.74.2';
+const WARDROBE_BUILD = '2026-11-18.75';
 const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
-  './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png'];
+  './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
+  './assets/fonts/Inter.var.woff2', './assets/fonts/Inter-Italic.var.woff2',
+  './assets/fonts/Fraunces.var.woff2', './assets/fonts/Fraunces-Italic.var.woff2'];
 const SHELL_DEADLINE_MS = 30000;
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
+    // Build .75: precache with cache:'reload' so the HTTP cache can never
+    // hand a new worker the previous build's shell, and always skipWaiting —
+    // even when a precache file fails — so an installed iOS PWA is never
+    // left with the new worker stuck in "waiting" behind the old one.
     caches.open(SHELL_CACHE)
-      .then((cache) => cache.addAll(SHELL_FILES))
-      .then(() => self.skipWaiting())
+      .then((cache) => cache.addAll(SHELL_FILES.map((u) => new Request(u, { cache: 'reload' }))))
       .catch(() => {})
+      .then(() => self.skipWaiting())
   );
 });
 

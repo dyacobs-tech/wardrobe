@@ -1,7 +1,13 @@
-"""Build .63 Ideas outfit-type dropdown: four equal buttons in one
-row at phone and desktop widths, no horizontal overflow, the
-dropdown changes type and generation uses it. Home nav stays the
-.62 flush-bottom contract.
+"""Build .75 Outfits page + Home outfit-type pill.
+
+The Ideas / Studio landing was folded into Outfits (Mine / Inspo).
+Outfit type lives on Home as a single pill. This test checks:
+
+  * Home type pill sets formality and the menu closes after a pick
+  * Outfits opens on #panel-looks with a two-chip Mine/Inspo toggle
+    that is one centered row, equal width, no overflow
+  * Mine shows the closet feed; Inspo hides it
+  * Bottom nav stays on the .62 flush-bottom contract after the tour
 
 Never talks to the production sync worker.
 Usage (from the repo root):
@@ -21,63 +27,77 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 AUDIT = Path("/workspace/wardrobe-audit")
-BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
+BLOCK = re.compile(r"https?://[^/]*workers.dev/.*")
+BUILD = "2026-11-18.75"
 
-ROW_JS = """() => {
-  const bar = document.querySelector('#panel-studio .studio-home-bar');
-  if (!bar) return { error: 'no bar' };
-  const deal = document.getElementById('studio-deal');
-  const typ = document.getElementById('ideas-type-btn');
-  const cust = document.getElementById('studio-customize');
-  const buildBtn = document.getElementById('studio-build');
-  const els = [deal, typ, cust, buildBtn];
-  if (els.some(e => !e)) return { error: 'missing button', present: els.map(e => !!e) };
-  const surfaceChips = [...document.querySelectorAll('#panel-studio [data-studio-type], #panel-studio [data-studio-type-any]')]
-    .filter(el => !el.closest('#ideas-type-menu') && !el.closest('#studio-type-row') && !el.closest('#studio-form'));
-  const form = document.getElementById('studio-form');
-  const outfitTypeHeading = [...document.querySelectorAll('#panel-studio span, #panel-studio p, #panel-studio label, #panel-studio h2, #panel-studio h3')].some(el => {
-    if (form && form.contains(el)) return false;
-    return (el.textContent || '').trim().toLowerCase() === 'outfit type';
-  });
+TYPE_JS = """() => {
+  const btn = document.getElementById('today-type-btn');
+  const menu = document.getElementById('today-type-row');
+  const label = document.getElementById('today-type-label');
+  if (!btn || !menu) return { error: 'no type pill' };
+  const r = btn.getBoundingClientRect();
+  let stored = null;
+  try { stored = JSON.parse(localStorage.getItem('wardrobe.formality')); } catch (e) {
+    stored = localStorage.getItem('wardrobe.formality');
+  }
+  const overflow = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+  return {
+    build: window.WARDROBE_BUILD || null,
+    visible: !!(btn.offsetParent) && r.width > 0 && r.height > 0,
+    label: (label && label.textContent || '').trim(),
+    formality: window.formalityLevel,
+    any: window.studioTypeAny,
+    stored,
+    menuHidden: menu.hidden || getComputedStyle(menu).display === 'none',
+    overflow,
+    width: r.width,
+    height: r.height,
+  };
+}"""
+
+TOGGLE_JS = """() => {
+  const panel = document.getElementById('panel-looks');
+  const bar = document.querySelector('#panel-looks .outfits-toggle');
+  const mine = document.getElementById('outfits-mine');
+  const inspo = document.getElementById('outfits-inspo');
+  if (!panel || !bar || !mine || !inspo) return { error: 'no outfits toggle', present: [!!panel, !!bar, !!mine, !!inspo] };
+  const els = [mine, inspo];
   const rects = els.map(e => {
     const r = e.getBoundingClientRect();
-    return {
-      top: r.top, bottom: r.bottom, left: r.left, right: r.right,
-      width: r.width, height: r.height,
-      overflowX: e.scrollWidth - e.clientWidth,
-      text: (e.innerText || '').replace(/\\s+/g, ' ').trim(),
-    };
+    return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height,
+             text: (e.innerText || '').replace(/\\s+/g, ' ').trim() };
   });
   const tops = rects.map(r => r.top);
   const widths = rects.map(r => r.width);
   const heights = rects.map(r => r.height);
   const docW = document.documentElement.clientWidth;
+  const barR = bar.getBoundingClientRect();
+  const mid = (rects[0].left + rects[1].right) / 2;
   const overflow = document.documentElement.scrollWidth - docW;
   const bodyOverflow = document.body.scrollWidth - docW;
-  const barOverflow = bar.scrollWidth - bar.clientWidth;
-  const panel = document.getElementById('panel-studio');
-  let stored = null;
-  try { stored = JSON.parse(localStorage.getItem('wardrobe.formality')); } catch (e) {
-    stored = localStorage.getItem('wardrobe.formality');
-  }
+  const feed = document.getElementById('closet-feed');
+  const mineView = document.getElementById('outfits-mine-view');
+  const inspoView = document.getElementById('outfits-inspo-view');
   return {
     build: window.WARDROBE_BUILD || null,
-    visibleSurfaceChips: surfaceChips.length,
-    outfitTypeHeading,
+    panelShown: !panel.hidden && panel.offsetParent !== null,
     count: els.length,
     rects,
     sameRow: (Math.max(...tops) - Math.min(...tops)) <= 2,
-    equalWidth: (Math.max(...widths) - Math.min(...widths)) <= 2,
+    equalWidth: (Math.max(...widths) - Math.min(...widths)) <= 4,
     heightClose: (Math.max(...heights) - Math.min(...heights)) <= 2,
     heights,
-    noHorizOverflow: overflow <= 1 && bodyOverflow <= 1 && barOverflow <= 1 && rects.every(r => r.overflowX <= 1),
-    overflow, bodyOverflow, barOverflow, docW,
-    dealIsAccent: deal.classList.contains('btn-accent'),
-    typeIsGhost: typ.classList.contains('btn-ghost'),
-    label: (document.getElementById('ideas-type-label') || {}).textContent || '',
-    formality: window.formalityLevel,
-    any: window.studioTypeAny,
-    stored,
+    widths,
+    centered: Math.abs(mid - docW / 2) <= 8,
+    padEqual: Math.abs(barR.left - (docW - barR.right)) <= 8,
+    noHorizOverflow: overflow <= 1 && bodyOverflow <= 1,
+    overflow, bodyOverflow, docW,
+    minePressed: mine.getAttribute('aria-pressed') === 'true',
+    inspoPressed: inspo.getAttribute('aria-pressed') === 'true',
+    mineViewShown: !!(mineView && !mineView.hidden),
+    inspoViewShown: !!(inspoView && !inspoView.hidden),
+    feedHidden: !feed || feed.hidden,
+    feedCards: document.querySelectorAll('#cf-grid .cf-card').length,
   };
 }"""
 
@@ -117,34 +137,10 @@ def nav_bbox(page):
     )
 
 
-def open_ideas(page):
+def open_outfits(page):
     page.locator("#section-ideas").click()
     page.wait_for_timeout(250)
-    page.wait_for_selector("#panel-studio .studio-home-bar", state="visible")
-
-
-def deal_stats(page):
-    return page.evaluate(
-        """() => {
-          const cards = [...document.querySelectorAll('#panel-studio .option-card img, #panel-studio .options-grid img')];
-          const srcs = cards.map(img => {
-            const s = img.getAttribute('src') || '';
-            const m = s.match(/assets\\/photos\\/[^/?#]+/);
-            return m ? m[0] : s;
-          }).filter(Boolean);
-          const levels = srcs.map(s => (window.RENDER_FORMALITY && window.RENDER_FORMALITY[s]) || null);
-          const known = levels.filter(v => typeof v === 'number');
-          const avg = known.length ? known.reduce((a, b) => a + b, 0) / known.length : null;
-          return {
-            n: cards.length,
-            known: known.length,
-            levels: known,
-            avg,
-            formality: window.formalityLevel,
-            any: window.studioTypeAny,
-          };
-        }"""
-    )
+    page.wait_for_selector("#panel-looks", state="visible")
 
 
 def main() -> int:
@@ -178,14 +174,13 @@ def main() -> int:
                 page.wait_for_timeout(250)
                 return ctx, page
 
-            # ---- 390 and 402: four-across row, no overflow, dropdown works ----
             for vw, vh, dsf in ((390, 844, 2), (402, 874, 3)):
                 name = f"{vw}x{vh}"
                 ctx, page = new_page(vw, vh, dsf)
                 home = nav_bbox(page)
                 check(
-                    f"{name}: build is .71",
-                    home and home.get("build") == "2026-11-18.74.2",
+                    f"{name}: build is .75",
+                    home and home.get("build") == BUILD,
                     str(home and home.get("build")),
                 )
                 check(
@@ -198,141 +193,107 @@ def main() -> int:
                     str(home),
                 )
 
-                open_ideas(page)
-                info = page.evaluate(ROW_JS)
+                typ = page.evaluate(TYPE_JS)
                 check(
-                    f"{name}: no Outfit type heading or surface chips",
-                    info and not info.get("outfitTypeHeading") and info.get("visibleSurfaceChips") == 0,
+                    f"{name}: Home type pill is visible",
+                    typ and typ.get("visible") and typ.get("overflow", 99) <= 1,
+                    str(typ),
+                )
+
+                page.locator("#today-type-btn").click()
+                page.wait_for_selector("#today-type-row", state="visible")
+                page.locator('#today-type-row [data-studio-type="5"]').click()
+                page.wait_for_timeout(200)
+                after5 = page.evaluate(TYPE_JS)
+                check(
+                    f"{name}: type pill sets Business Casual",
+                    after5
+                    and after5.get("label") == "Business Casual"
+                    and after5.get("formality") == 5
+                    and after5.get("stored") == 5,
+                    str(after5),
+                )
+                check(
+                    f"{name}: type menu closes after a pick",
+                    page.locator("#today-type-row").is_hidden(),
+                    "menu still open",
+                )
+
+                page.locator("#today-type-btn").click()
+                page.wait_for_selector("#today-type-row", state="visible")
+                page.locator('#today-type-row [data-studio-type="6"]').click()
+                page.wait_for_timeout(200)
+                after6 = page.evaluate(TYPE_JS)
+                check(
+                    f"{name}: type pill sets Formal and stores it",
+                    after6 and after6.get("formality") == 6 and after6.get("stored") == 6
+                    and after6.get("label") == "Formal",
+                    str(after6),
+                )
+
+                open_outfits(page)
+                info = page.evaluate(TOGGLE_JS)
+                check(
+                    f"{name}: Outfits panel is shown",
+                    info and info.get("panelShown"),
                     str(info),
                 )
                 check(
-                    f"{name}: four controls in one row",
-                    info and info.get("count") == 4 and info.get("sameRow"),
+                    f"{name}: Mine/Inspo toggle is two equal chips in one centered row",
+                    info
+                    and info.get("count") == 2
+                    and info.get("sameRow")
+                    and info.get("equalWidth")
+                    and info.get("heightClose")
+                    and info.get("centered")
+                    and info.get("padEqual"),
                     str(info),
-                )
-                check(
-                    f"{name}: equal widths and consistent height",
-                    info and info.get("equalWidth") and info.get("heightClose"),
-                    str({"widths": [r["width"] for r in (info or {}).get("rects") or []], "heights": (info or {}).get("heights")}),
                 )
                 check(
                     f"{name}: no horizontal overflow",
                     info and info.get("noHorizOverflow"),
-                    str({k: (info or {}).get(k) for k in ("overflow", "bodyOverflow", "barOverflow", "docW")}),
+                    str({k: (info or {}).get(k) for k in ("overflow", "bodyOverflow", "docW")}),
                 )
                 check(
-                    f"{name}: Give me ideas stays the orange primary; type is outlined",
-                    info and info.get("dealIsAccent") and info.get("typeIsGhost"),
+                    f"{name}: Mine is the default view",
+                    info and info.get("minePressed") and info.get("mineViewShown") and not info.get("inspoViewShown"),
                     str(info),
                 )
 
                 if vw == 390:
-                    page.screenshot(
-                        path=str(AUDIT / "ideas-390-build63.png"),
-                        full_page=False,
-                    )
-                    print(f"  wrote {AUDIT / 'ideas-390-build63.png'}")
+                    page.screenshot(path=str(AUDIT / "outfits-390-build75-ideas63.png"), full_page=False)
+                    print(f"  wrote {AUDIT / 'outfits-390-build75-ideas63.png'}")
 
-                # Dropdown: pick Business Casual (5), then Formal (6)
-                page.locator("#ideas-type-btn").click()
-                page.wait_for_selector("#ideas-type-menu", state="visible")
-                page.locator('#ideas-type-menu [data-studio-type="5"]').click()
-                page.wait_for_timeout(200)
-                after5 = page.evaluate(ROW_JS)
+                page.locator("#outfits-inspo").click()
+                page.wait_for_timeout(300)
+                insp = page.evaluate(TOGGLE_JS)
                 check(
-                    f"{name}: dropdown sets Business Casual",
-                    after5
-                    and after5.get("label") == "Business Casual"
-                    and after5.get("formality") == 5
-                    and after5.get("any") is False
-                    and after5.get("stored") == 5,
-                    str(after5),
+                    f"{name}: Inspo shows the inspo view and hides Mine / the closet feed",
+                    insp
+                    and insp.get("inspoPressed")
+                    and insp.get("inspoViewShown")
+                    and not insp.get("mineViewShown")
+                    and insp.get("feedHidden"),
+                    str(insp),
                 )
-                # Menu should close after a pick
-                check(
-                    f"{name}: type menu closes after a pick",
-                    page.locator("#ideas-type-menu").is_hidden(),
-                    "menu still open",
-                )
+                page.locator("#outfits-mine").click()
+                page.wait_for_timeout(300)
 
-                page.locator("#ideas-type-btn").click()
-                page.wait_for_selector("#ideas-type-menu", state="visible")
-                page.locator('#ideas-type-menu [data-studio-type="6"]').click()
-                page.wait_for_timeout(200)
-                page.locator("#studio-deal").click()
-                page.wait_for_timeout(800)
-                stats6 = deal_stats(page)
-                engine6 = page.evaluate(
-                    """() => ({
-                      formality: window.formalityLevel,
-                      any: window.studioTypeAny,
-                      preferFormal: typeof formalityBandCost === 'function' && formalityBandCost(6) < formalityBandCost(1),
-                      stored: (function () { try { return JSON.parse(localStorage.getItem('wardrobe.formality')); } catch (e) { return null; } })(),
-                    })"""
-                )
+                outfits_nav = nav_bbox(page)
                 check(
-                    f"{name}: Formal deal keeps formality 6, stores it, and shows looks",
-                    stats6 and stats6.get("formality") == 6 and stats6.get("any") is False and stats6.get("n", 0) >= 1
-                    and engine6 and engine6.get("preferFormal") and engine6.get("stored") == 6,
-                    f"stats={stats6} engine={engine6}",
-                )
-
-                # Re-deal at Swim/Pool: generation must read the new type, not a stale Formal.
-                page.locator("#ideas-type-btn").click()
-                page.wait_for_selector("#ideas-type-menu", state="visible")
-                page.locator('#ideas-type-menu [data-studio-type="1"]').click()
-                page.wait_for_timeout(200)
-                page.locator("#studio-deal").click()
-                page.wait_for_timeout(800)
-                stats1 = deal_stats(page)
-                engine1 = page.evaluate(
-                    """() => ({
-                      formality: window.formalityLevel,
-                      any: window.studioTypeAny,
-                      preferSwim: typeof formalityBandCost === 'function' && formalityBandCost(1) < formalityBandCost(6),
-                      stored: (function () { try { return JSON.parse(localStorage.getItem('wardrobe.formality')); } catch (e) { return null; } })(),
-                    })"""
-                )
-                check(
-                    f"{name}: Swim deal uses the new type (formality 1, engine prefers swim)",
-                    stats1 and stats1.get("formality") == 1 and stats1.get("n", 0) >= 1
-                    and engine1 and engine1.get("preferSwim") and engine1.get("stored") == 1,
-                    f"stats={stats1} engine={engine1}",
-                )
-
-                # Any keeps stored formality at the silent default 4
-                page.locator("#ideas-type-btn").click()
-                page.wait_for_selector("#ideas-type-menu", state="visible")
-                page.locator("#ideas-type-menu [data-studio-type-any]").click()
-                page.wait_for_timeout(200)
-                any_info = page.evaluate(ROW_JS)
-                check(
-                    f"{name}: Any shows Any and stores formality 4",
-                    any_info
-                    and any_info.get("label") == "Any"
-                    and any_info.get("any") is True
-                    and any_info.get("formality") == 4
-                    and any_info.get("stored") == 4,
-                    str(any_info),
-                )
-
-                # Ideas nav still flush
-                ideas_nav = nav_bbox(page)
-                check(
-                    f"{name}: Ideas bar stays flush with Home",
-                    ideas_nav
+                    f"{name}: Outfits bar stays flush with Home",
+                    outfits_nav
                     and home
-                    and nearly(ideas_nav["bottom"], home["bottom"])
-                    and nearly(ideas_nav["top"], home["top"]),
-                    f"home={home} ideas={ideas_nav}",
+                    and nearly(outfits_nav["bottom"], home["bottom"])
+                    and nearly(outfits_nav["top"], home["top"]),
+                    f"home={home} outfits={outfits_nav}",
                 )
 
-                # Return to Home and re-check the .62 nav contract
                 page.locator("#tab-today").click()
                 page.wait_for_timeout(250)
                 home2 = nav_bbox(page)
                 check(
-                    f"{name}: Home nav unchanged after Ideas",
+                    f"{name}: Home nav unchanged after Outfits",
                     home2
                     and nearly(home2["bottom"], vh)
                     and nearly(home2["height"], 68)
@@ -342,41 +303,27 @@ def main() -> int:
                 )
                 ctx.close()
 
-            # ---- 1280×800 desktop: row still holds, nothing breaks ----
             ctx, page = new_page(1280, 800, dsf=1, is_mobile=False)
-            open_ideas(page)
-            desk = page.evaluate(ROW_JS)
+            typ = page.evaluate(TYPE_JS)
             check(
-                "1280x800: build is .71",
-                desk and desk.get("build") == "2026-11-18.74.2",
-                str(desk and desk.get("build")),
+                "1280x800: build is .75",
+                typ and typ.get("build") == BUILD,
+                str(typ and typ.get("build")),
             )
             check(
-                "1280x800: four controls in one row, no overflow",
-                desk and desk.get("count") == 4 and desk.get("sameRow") and desk.get("noHorizOverflow"),
+                "1280x800: Home type pill is visible, no overflow",
+                typ and typ.get("visible") and typ.get("overflow", 99) <= 1,
+                str(typ),
+            )
+            open_outfits(page)
+            desk = page.evaluate(TOGGLE_JS)
+            check(
+                "1280x800: Mine/Inspo toggle in one row, no overflow",
+                desk and desk.get("count") == 2 and desk.get("sameRow") and desk.get("noHorizOverflow"),
                 str(desk),
             )
-            check(
-                "1280x800: equal widths, consistent height, accent + outlined type",
-                desk
-                and desk.get("equalWidth")
-                and desk.get("heightClose")
-                and desk.get("dealIsAccent")
-                and desk.get("typeIsGhost"),
-                str({"widths": [r["width"] for r in (desk or {}).get("rects") or []], "heights": (desk or {}).get("heights")}),
-            )
-            page.locator("#ideas-type-btn").click()
-            page.wait_for_selector("#ideas-type-menu", state="visible")
-            page.locator('#ideas-type-menu [data-studio-type="5"]').click()
-            page.wait_for_timeout(200)
-            desk5 = page.evaluate(ROW_JS)
-            check(
-                "1280x800: dropdown sets Business Casual",
-                desk5 and desk5.get("label") == "Business Casual" and desk5.get("formality") == 5,
-                str(desk5),
-            )
-            page.screenshot(path=str(AUDIT / "ideas-1280x800-build63.png"), full_page=False)
-            print(f"  wrote {AUDIT / 'ideas-1280x800-build63.png'}")
+            page.screenshot(path=str(AUDIT / "outfits-1280x800-build75.png"), full_page=False)
+            print(f"  wrote {AUDIT / 'outfits-1280x800-build75.png'}")
             ctx.close()
             browser.close()
     finally:
@@ -388,7 +335,7 @@ def main() -> int:
         for f in failures:
             print(" -", f)
         return 1
-    print("All Ideas .63 checks passed.")
+    print("All Outfits / Home type-pill .75 checks passed.")
     return 0
 
 

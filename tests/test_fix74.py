@@ -74,7 +74,7 @@ def main() -> int:
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.goto(url, wait_until="load")
             page.wait_for_timeout(1800)
-            check("build is .74.2", page.evaluate("window.WARDROBE_BUILD") == BUILD == "2026-11-18.74.2")
+            check("build is .74", page.evaluate("window.WARDROBE_BUILD") == BUILD == "2026-11-18.75")
             check("no syFetch error at boot", not [e for e in errors if "syFetch" in e], errors[:3])
             check("weather loads at boot", page.evaluate("!!(window.currentWeather || (typeof currentWeather !== 'undefined' && currentWeather)) && currentWeather.temp === 78"))
 
@@ -90,29 +90,35 @@ def main() -> int:
             t2 = page.evaluate("document.getElementById('today-name').textContent.trim()")
             check("Home title updates on a new deal", bool(t2), t2)
 
-            for sec, grp, tab in (("#section-ideas", "subnav-ideas", "#tab-studio"),
-                                  ("#section-closet", "subnav-closet", None),
-                                  ("#tab-find", "subnav-find", None)):
-                page.locator(sec).click(); page.wait_for_timeout(350)
-                if tab:
-                    page.locator(tab).click(); page.wait_for_timeout(700)
-                for state in ("back", "noback"):
-                    if state == "noback":
-                        page.evaluate("document.body.classList.remove('view-back-on')"); page.wait_for_timeout(100)
-                    b = page.evaluate(BAR_JS, grp)
-                    check(f"{grp} ({state}) centred", abs(b["left"] - b["right"]) <= 1, f'{b["left"]}/{b["right"]}')
-                    check(f"{grp} ({state}) equal columns, none clipped", max(b["widths"]) - min(b["widths"]) <= 1 and not b["clipped"] and b["docW"] == 390, b)
-                    if state == "back" and b["back"]:
-                        page.evaluate("window.scrollTo(0, 900)"); page.wait_for_timeout(250)
-                        b2 = page.evaluate(BAR_JS, grp)
-                        check(f"{grp} first label clears the back chevron when stuck", b2["fabRight"] is None or b2["firstText"] >= b2["fabRight"], b2)
-                        page.evaluate("window.scrollTo(0, 0)"); page.wait_for_timeout(200)
-                page.evaluate("syncViewBack()")
-                if grp == "subnav-ideas":
-                    s = page.evaluate("""() => { const b = document.getElementById('cf-shuffle').getBoundingClientRect(),
-                        h = document.querySelector('#closet-feed .cf-head').getBoundingClientRect();
-                        return Math.abs((b.left + b.right) / 2 - (h.left + h.right) / 2); }""")
-                    check("closet feed Shuffle is centred", s <= 2, s)
+            # Closet subnav (2 tabs) stays centred; Outfits and Shop have no subnav.
+            page.locator("#section-closet").click(); page.wait_for_timeout(350)
+            for state in ("back", "noback"):
+                if state == "noback":
+                    page.evaluate("document.body.classList.remove('view-back-on')"); page.wait_for_timeout(100)
+                b = page.evaluate(BAR_JS, "subnav-closet")
+                check(f"subnav-closet ({state}) centred", abs(b["left"] - b["right"]) <= 1, f'{b["left"]}/{b["right"]}')
+                check(f"subnav-closet ({state}) equal columns, none clipped", max(b["widths"]) - min(b["widths"]) <= 1 and not b["clipped"] and b["docW"] == 390, b)
+                if state == "back" and b["back"]:
+                    page.evaluate("window.scrollTo(0, 900)"); page.wait_for_timeout(250)
+                    b2 = page.evaluate(BAR_JS, "subnav-closet")
+                    check("subnav-closet first label clears the back chevron when stuck", b2["fabRight"] is None or b2["firstText"] >= b2["fabRight"], b2)
+                    page.evaluate("window.scrollTo(0, 0)"); page.wait_for_timeout(200)
+            page.evaluate("syncViewBack()")
+            page.locator("#section-ideas").click(); page.wait_for_timeout(500)
+            hidden_ideas = page.evaluate("document.getElementById('subnav-ideas').hidden || document.getElementById('subnav').hidden")
+            check("Outfits has no section subnav", hidden_ideas)
+            feed = page.evaluate("""() => {
+              const f = document.getElementById('closet-feed');
+              const b = document.getElementById('cf-shuffle');
+              if (!f || f.hidden || !b) return null;
+              const br = b.getBoundingClientRect(), h = document.querySelector('#closet-feed .cf-head').getBoundingClientRect();
+              return Math.abs((br.left + br.right) / 2 - (h.left + h.right) / 2);
+            }""")
+            if feed is not None:
+                check("closet feed Shuffle is centred", feed <= 2, feed)
+            page.locator("#tab-find").click(); page.wait_for_timeout(300)
+            hidden_shop = page.evaluate("document.getElementById('subnav-find').hidden || document.getElementById('subnav').hidden")
+            check("The Edit has no section subnav", hidden_shop)
             check("no JS errors", not errors, errors[:3])
             ctx.close(); browser.close()
     finally:

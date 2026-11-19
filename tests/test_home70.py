@@ -259,7 +259,7 @@ def main() -> int:
                 info = page.evaluate(HOME_JS)
                 check(
                     f"{name}: build is .71",
-                    info and info.get("build") == "2026-11-18.74.2",
+                    info and info.get("build") == "2026-11-18.75",
                     str(info and info.get("build")),
                 )
                 check(
@@ -287,37 +287,24 @@ def main() -> int:
                 )
                 page.screenshot(path=str(SHOTS / f"{name}-home.png"), full_page=False)
 
-                # Closet five-tab row (required at 375, checked at all sizes)
+                # Closet two-tab row (Closet, Watches)
                 page.locator("#section-closet").click()
                 page.wait_for_timeout(280)
                 closet = page.evaluate(CLOSET_JS)
                 check(
-                    f"{name}: Closet has 5 tabs, Closet gaps after Today, none clipped",
+                    f"{name}: Closet has 2 tabs (Closet, Watches), none clipped",
                     closet
-                    and closet.get("count") == 5
+                    and closet.get("count") == 2
                     and closet.get("oneRow")
                     and closet.get("allFit")
-                    and closet.get("ids") == ["tab-wardrobe", "tab-looks", "tab-watches", "tab-wearing", "tab-gaps"]
-                    and any("gaps" in t.lower() for t in (closet.get("texts") or [])),
+                    and closet.get("ids") == ["tab-wardrobe", "tab-watches"],
                     str(closet),
                 )
                 if vw == 375:
                     page.screenshot(path=str(SHOTS / f"{name}-closet-subnav.png"), full_page=False)
-                    page.locator("#tab-gaps").click()
-                    page.wait_for_timeout(250)
-                    gaps_ok = page.evaluate(
-                        """() => {
-                          const p = document.getElementById('panel-gaps');
-                          return !!(p && !p.hidden && /closet gaps/i.test(p.innerText || ''));
-                        }"""
-                    )
-                    check(f"{name}: Closet gaps tab opens the existing gaps page", gaps_ok, "")
-                    page.screenshot(path=str(SHOTS / f"{name}-closet-gaps.png"), full_page=False)
 
-                # Shop landing must not show a Receipts block; Receipts page remains
+                # The Edit landing: no Receipts teaser; paste-link + receipts live behind +
                 page.locator("#tab-find").click()
-                page.wait_for_timeout(250)
-                page.locator("#tab-shopmain").click()
                 page.wait_for_timeout(250)
                 shop = page.evaluate(SHOP_JS)
                 check(
@@ -325,6 +312,10 @@ def main() -> int:
                     shop and shop.get("findShown") and not shop.get("hasTeaserEl") and not shop.get("findHasReceiptsHeading"),
                     str(shop),
                 )
+                plus = page.locator("#shop-plus")
+                check(f"{name}: The Edit has a + button", plus.count() == 1, "")
+                plus.click()
+                page.wait_for_timeout(250)
                 compact = page.evaluate(SHOP_COMPACT_JS)
                 check(
                     f"{name}: no visible info buttons or help popovers",
@@ -339,39 +330,17 @@ def main() -> int:
                     and compact.get("btnH") is not None and 32 <= compact["btnH"] <= 42,
                     str(compact),
                 )
-                if compact and compact.get("imgH") is not None:
-                    check(
-                        f"{name}: look photo is contained and at most ~40vh",
-                        compact.get("imgFit") == "contain" and compact["imgH"] <= vh * 0.42 + 2,
-                        str(compact),
-                    )
-                    check(
-                        f"{name}: look title and CLEAR LOOK share one line",
-                        compact.get("titleOneLine") is True,
-                        str(compact),
-                    )
-                center = page.evaluate(CENTER_JS)
-                check(
-                    f"{name}: Shop subnav tabs are centered, even, on one unclipped row",
-                    center
-                    and center.get("oneRow")
-                    and center.get("even")
-                    and center.get("centered")
-                    and not center.get("clipped")
-                    and center.get("count", 0) >= 5,
-                    str(center),
-                )
-                page.screenshot(path=str(SHOTS / f"{name}-shop-landing.png"), full_page=False)
-                page.locator("#tab-receipts").click()
-                page.wait_for_timeout(250)
                 rec = page.evaluate(SHOP_JS)
                 check(
-                    f"{name}: Receipts sub page still works",
-                    rec and rec.get("receiptsShown") and rec.get("tabExists") and "Receipts" in (rec.get("receiptsHeading") or ""),
+                    f"{name}: Receipts still work behind +",
+                    rec and rec.get("receiptsShown") and "Receipts" in (rec.get("receiptsHeading") or ""),
                     str(rec),
                 )
+                page.screenshot(path=str(SHOTS / f"{name}-shop-landing.png"), full_page=False)
                 if vw == 390:
-                    page.screenshot(path=str(SHOTS / f"{name}-shop-receipts.png"), full_page=False)
+                    page.screenshot(path=str(SHOTS / f"{name}-shop-plus.png"), full_page=False)
+                page.locator("#shop-plus-close").click()
+                page.wait_for_timeout(150)
 
                 # Back to Home: still no scroll after the tour
                 page.locator("#tab-today").click()

@@ -2,10 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <script>
+      (function () {
+        var t = "light";
+        try { t = localStorage.getItem("wardrobe-theme") || "light"; } catch (e) {}
+        if (t !== "dark") t = "light";
+        document.documentElement.setAttribute("data-theme", t);
+        document.documentElement.style.colorScheme = t;
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#14110d" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#f7f2e9" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#F3EEE4" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -21,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.74.2" />
+    <meta name="wardrobe-build" content="2026-11-18.75" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -30,56 +38,88 @@
     <link rel="icon" sizes="512x512" href="assets/icon-512.png" />
     <link rel="manifest" href="manifest.webmanifest" />
     <title>Wardrobe</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Jost:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
     <style>
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/fonts/Inter.var.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/fonts/Inter-Italic.var.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: italic;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Fraunces";
+        src: url("assets/fonts/Fraunces.var.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Fraunces";
+        src: url("assets/fonts/Fraunces-Italic.var.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: italic;
+        font-display: swap;
+      }
       :root {
-        color-scheme: light dark;
-        --bg: #f7f2e9;
-        --bg-deep: #efe7d8;
-        --surface: #fffdf7;
-        --surface-alt: #f0e8da;
-        --text: #191612;
-        --dim: #7a6f5e;
-        --border: #ddd2bd;
-        --border-strong: #191612;
-        --accent: #b03a1e;
-        --accent-ink: #fff8ee;
-        --brass: #a07d3c;
+        color-scheme: light;
+        --bg: #F3EEE4;
+        --bg-deep: #EBE4D6;
+        --surface: #FFFBF4;
+        --surface-alt: #F7F1E6;
+        --text: #1A1612;
+        --dim: #6E6456;
+        --border: #E4D9C8;
+        --border-strong: #1A1612;
+        --accent: #1A1612;
+        --accent-ink: #F6F1E8;
+        --brass: #6B5840;
         --indigo: #232d3f;
-        --ink-btn: #191612;
-        --ink-btn-text: #f7f1e5;
-        --radius: 4px;
-        --shadow-lift: 0 1px 2px rgba(25,22,18,.05), 0 12px 32px -12px rgba(25,22,18,.18);
-        --shadow-card: 0 1px 0 rgba(25,22,18,.04), 0 8px 24px -16px rgba(25,22,18,.25);
-        --font-display: "Cormorant Garamond", "Times New Roman", Georgia, serif;
-        --font-ui: "Jost", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+        --ink-btn: #1A1612;
+        --ink-btn-text: #F6F1E8;
+        --radius: 16px;
+        --nav: #1A1612;
+        --nav-on: #F3EEE4;
+        --nav-muted: #A39684;
+        --shadow-lift: 0 1px 2px rgba(26,22,18,.05), 0 12px 32px -12px rgba(26,22,18,.18);
+        --shadow-card: 0 1px 0 rgba(26,22,18,.04), 0 10px 28px -16px rgba(26,22,18,.18);
+        --shadow-nav: 0 8px 28px rgba(26,22,18,.28);
+        --font-display: "Fraunces", "Libre Baskerville", "Times New Roman", Georgia, serif;
+        --font-ui: "Inter", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
         /* Build .59: bar height and body clearance are this static
            calc from the first rule, identical on every page. No JS,
            no dvh, no transitions. env() is the platform inset (0
            when there is none). */
         --bb-h: calc(68px + env(safe-area-inset-bottom, 0px));
       }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #14110d;
-          --bg-deep: #100e0a;
-          --surface: #1e1a14;
-          --surface-alt: #292219;
-          --text: #f0e7d3;
-          --dim: #a3937b;
-          --border: #3c3423;
-          --border-strong: #f0e7d3;
-          --accent: #d95f3b;
-          --accent-ink: #ffffff;
-          --brass: #c39a54;
-          --indigo: #93a9c6;
-          --ink-btn: #f0e7d3;
-          --ink-btn-text: #191612;
-          --shadow-lift: 0 12px 32px -12px rgba(0,0,0,.6);
-          --shadow-card: 0 8px 24px -16px rgba(0,0,0,.7);
-        }
+      html[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #14110E;
+        --bg-deep: #0C0B09;
+        --surface: #1E1A16;
+        --surface-alt: #2A241E;
+        --text: #F3EEE4;
+        --dim: #A39684;
+        --border: #3A3228;
+        --border-strong: #F3EEE4;
+        --accent: #F3EEE4;
+        --accent-ink: #1A1612;
+        --brass: #C4B49A;
+        --indigo: #93a9c6;
+        --ink-btn: #F3EEE4;
+        --ink-btn-text: #1A1612;
+        --nav: #0C0B09;
+        --nav-on: #F3EEE4;
+        --nav-muted: #A39684;
+        --shadow-lift: 0 12px 32px -12px rgba(0,0,0,.6);
+        --shadow-card: 0 8px 24px -16px rgba(0,0,0,.7);
+        --shadow-nav: 0 8px 28px rgba(0,0,0,.55);
       }
       * { box-sizing: border-box; }
       html { scroll-behavior: smooth; }
@@ -3158,7 +3198,7 @@
       }
       .card-photo-ph {
         display: flex; align-items: flex-end; padding: 10px;
-        color: rgba(20, 17, 13, .62); font-size: 11px; font-weight: 600;
+        color: var(--dim); font-size: 11px; font-weight: 600;
         letter-spacing: .14em; text-transform: uppercase;
         border-bottom: 1px solid var(--border);
       }
@@ -3848,7 +3888,7 @@
         --ctl-pad-x: 11px;
         --ctl-fw: 600;
         --ctl-border: 1px solid var(--border-strong);
-        --radius: 4px;
+        --radius: 16px;
         --card-pad: 12px 14px;
         --card-body-pad: 12px;
       }
@@ -4000,10 +4040,8 @@
         background-position: right 10px center;
         background-size: 10px 7px;
       }
-      @media (prefers-color-scheme: dark) {
-        select {
-          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23f0e7d3' d='M1.2 1.2l4.8 4.8 4.8-4.8'/></svg>");
-        }
+      html[data-theme="dark"] select {
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23F3EEE4' d='M1.2 1.2l4.8 4.8 4.8-4.8'/></svg>");
       }
 
       /* Chips */
@@ -4222,6 +4260,415 @@
         body.view-back-on .subnav .wrap { padding-left: 26px; padding-right: 26px; }
         body:not(.view-back-on) .subnav .wrap { padding-left: 8px; padding-right: 8px; }
       }
+
+    <style>
+      /* ================= Build .75 — Vesper light (default) + explicit dark =================
+         Light is the default regardless of OS. Theme is html[data-theme],
+         persisted in localStorage. #bottombar stays a flush, shadowless
+         68px slot (the .67 nav contract); the visible dark rounded bar
+         is the inner .nav-pill. */
+      :root { --radius: 16px; }
+      .page-title {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: 32px;
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+        text-align: center;
+        color: var(--text);
+        margin: 12px 16px 6px;
+      }
+      .page-title[hidden] { display: none !important; }
+      body.home-view .page-title { display: none !important; }
+      .theme-card {
+        margin: 12px 0 16px;
+        padding: 14px 16px !important;
+      }
+      .theme-card .fav-head { margin: 0 0 10px; text-align: left; }
+      .theme-toggle { display: flex; gap: 8px; }
+      .theme-toggle .chip { flex: 1 1 0; justify-content: center; }
+
+      /* Overlay titles stay light on the dark Home caption in both themes.
+         Build .72/.74: var(--text) on #today-name was dark-on-dark. */
+      #panel-today .today-caption h2#today-name { color: #F6F1E8 !important; }
+      #panel-today .today-kicker { color: #d9c9a3 !important; }
+      #panel-today .today-loc, #panel-today .today-loc strong { color: #efe3c8 !important; }
+      #panel-today .today-suggest { color: #efe3c8 !important; }
+
+      h1, h2, h3, h4, h5,
+      .fav-head, .brand, .item-card h4, .gap-title, .cal-title, .look-title,
+      .profile-name, .type-title, .shop-look-titlerow h3 {
+        color: var(--text);
+      }
+      .item-detail-card h3 { color: var(--text); font-family: var(--font-display); }
+
+      input[type="text"], input[type="search"], input[type="url"], input[type="email"],
+      input[type="number"], input[type="date"], input[type="password"], input[type="tel"],
+      input:not([type]), #link-url, #panel-find #link-url {
+        border-radius: 999px !important;
+        min-width: 0 !important;
+      }
+      textarea { border-radius: 16px !important; }
+      #panel-find #link-card {
+        padding: 8px 10px !important;
+      }
+      #panel-find .link-row {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      /* Inter is a hair wider than Jost — beat the #subnav-* rules
+         so 5 Closet tabs (incl. Closet Gaps) stay unclipped at 375,
+         and the Shop first label clears the back chevron, without
+         changing the equal 26px insets. */
+      @media (max-width: 1023px) {
+        #subnav-closet .subtab,
+        #subnav-ideas .subtab,
+        #subnav-find .subtab,
+        #subnav-me .subnav-scroll .subtab {
+          letter-spacing: 0;
+        }
+      }
+      @media (max-width: 430px) {
+        #subnav-closet .subtab,
+        #subnav-ideas .subtab,
+        #subnav-find .subtab,
+        #subnav-me .subnav-scroll .subtab {
+          font-size: 9px;
+          letter-spacing: 0;
+          padding: 0 1px;
+        }
+      }
+
+      .flatlay,
+      .cf-media,
+      #panel-today .today-hero .today-collage.flatlay-host {
+        background: var(--bg-deep) !important;
+      }
+      .flatlay .fl-cell { background: var(--surface-alt) !important; }
+
+      .info-pop-card, .item-detail-card {
+        background: var(--surface) !important;
+        color: var(--text);
+        border-radius: var(--radius) !important;
+      }
+      .info-pop-backdrop { background: rgba(26, 22, 18, .46); }
+      html[data-theme="dark"] .info-pop-backdrop { background: rgba(0, 0, 0, .62); }
+
+      @media (max-width: 899px) {
+        #bottombar.bottombar {
+          background: transparent !important;
+          border: none !important;
+          border-top: none !important;
+          -webkit-backdrop-filter: none !important;
+          backdrop-filter: none !important;
+          box-shadow: none !important;
+        }
+        #bottombar .nav-pill {
+          display: flex;
+          flex: 1 1 auto;
+          align-items: stretch;
+          min-width: 0;
+          min-height: 0;
+          margin: 6px 12px;
+          background: var(--nav);
+          border-radius: 28px;
+          box-shadow: var(--shadow-nav);
+          overflow: hidden;
+        }
+        #bottombar .nav-pill .navbtn {
+          color: var(--nav-muted);
+          justify-content: center !important;
+          padding: 0 2px !important;
+        }
+        #bottombar .nav-pill .navbtn[aria-current="page"] { color: var(--nav-on); }
+        #bottombar .nav-pill .navbtn[aria-current="page"]::after { display: none; }
+        .item-grid, .find-grid, .sale-grid, .myinspo-grid,
+        .options-grid, .saved-grid, .custom-grid,
+        #panel-wardrobe .item-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          gap: 16px !important;
+        }
+      }
+      @media (min-width: 900px) {
+        #bottombar .nav-pill {
+          display: contents;
+          background: none;
+          margin: 0;
+          box-shadow: none;
+          border-radius: 0;
+        }
+      }
+
+      /* ---------- Build .75 IA cuts + consistency ---------- */
+      #page-title { display: none !important; }
+      .masthead {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 48;
+        background: var(--bg);
+      }
+      .masthead-slot { display: block; height: 44px; pointer-events: none; }
+      @media (max-width: 1023px) {
+        :root { --hdr-h: 44px; }
+        .navstack { top: var(--hdr-h); }
+      }
+      @media (min-width: 1024px) {
+        .masthead-slot { display: none; } /* desktop already pads body by --hdr-h */
+      }
+      .masthead .wrap { position: relative; display: flex; align-items: center; justify-content: center; min-height: 44px; }
+      .masthead .brand,
+      body:has(> main > #panel-today:not([hidden])) .masthead .brand,
+      body.home-view .masthead .brand {
+        font-family: var(--font-display) !important;
+        font-weight: 500 !important;
+        font-size: 28px !important;
+        line-height: 1.1 !important;
+        letter-spacing: -0.02em !important;
+        text-transform: none !important;
+        text-indent: 0 !important;
+        color: var(--text) !important;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        max-width: calc(100% - 96px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .masthead .profile-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); margin: 0; }
+      .ward-rail, .sale-rail { display: none !important; }
+      #panel-wardrobe .item-grid { padding-right: 0 !important; }
+      @media (max-width: 1023px) {
+        #subnav-closet:not([hidden]) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      }
+      .item-idrow {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        gap: 8px; padding: var(--card-body-pad); padding-top: 10px;
+      }
+      .item-idmain { min-width: 0; flex: 1; }
+      .item-idrow h4 { margin: 0 0 4px; }
+      .item-details-btn { flex: none; }
+      .item-card .item-actions { display: none !important; }
+      .outfits-toggle { margin: 8px 0 14px; }
+      .edit-head { display: flex; justify-content: flex-end; margin: 0 0 12px; }
+      #shop-plus { width: 34px; min-width: 34px; padding: 0; }
+      .edit-card { padding: 14px 16px !important; }
+      .edit-card .edit-meta { color: var(--dim); font-size: 13px; margin: 4px 0 10px; }
+      .edit-card .edit-actions { display: flex; gap: 8px; }
+      .edit-card .edit-actions .chip, .edit-card .edit-actions .btn-ghost, .edit-card .edit-actions .btn-ink { flex: 1; justify-content: center; }
+      #edit-gaps { margin-bottom: 18px; }
+      .advanced-row { margin: 18px 0 8px; }
+      #advanced-toggle { width: 100%; justify-content: center; }
+      #advanced-panel { margin-top: 12px; }
+      #today-simple-actions { display: flex; gap: 8px; justify-content: flex-start; }
+      #panel-today #today-source-dd { display: none !important; }
+      #shop-plus-sheet .info-pop-card { max-width: 520px; width: calc(100vw - 32px); max-height: 80vh; overflow: auto; }
+
+      #shop-plus-sheet .link-card { margin: 0 0 16px; }
+      main.wrap { padding-left: 16px; padding-right: 16px; }
+      .inspo-missing { margin: 8px 0 0; }
+
+      /* ---------- Build .75: one pill system (34 / 999 / 12) ---------- */
+      button.btn, button.btn-ink, button.btn-ghost, button.btn-accent,
+      .btn, .btn-ink, .btn-ghost, .btn-accent,
+      .chip, button.chip, .item-details-btn, .cal-subtab,
+      #today-type-btn, .hero-cdd-btn, .hero-icon-btn,
+      #shop-plus, #advanced-toggle,
+      .edit-card .edit-actions .chip,
+      .edit-card .edit-actions .btn-ghost,
+      .edit-card .edit-actions .btn-ink,
+      #panel-wardrobe .chip, #panel-looks .chip,
+      #panel-pinfo .chip, #panel-plocation .chip, #panel-pcloud .chip,
+      #panel-studio .chip,
+      #panel-wardrobe .btn-ink, #panel-looks .btn-ink,
+      #panel-pinfo .btn-ink, #panel-plocation .btn-ink, #panel-pcloud .btn-ink,
+      #panel-wardrobe .btn-ghost, #panel-looks .btn-ghost,
+      #panel-pinfo .btn-ghost, #panel-plocation .btn-ghost, #panel-pcloud .btn-ghost,
+      #panel-wardrobe .btn-accent, #panel-looks .btn-accent,
+      #panel-pinfo .btn-accent, #panel-plocation .btn-accent, #panel-pcloud .btn-accent,
+      #panel-wardrobe .add-form .btn-accent, #panel-wardrobe .add-form .btn-ink,
+      #panel-icons .btn-accent, #panel-icons .btn-ghost, #panel-icons .btn-ink,
+      #panel-palettes .btn-ink, #panel-palettes .btn-ghost,
+      #panel-today .hero-icon-btn, #panel-today .hero-cdd-btn {
+        height: 34px !important;
+        min-height: 34px !important;
+        max-height: 34px !important;
+        border-radius: 999px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.02em !important;
+        line-height: 1 !important;
+        padding: 0 14px !important;
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      #shop-plus {
+        width: 34px !important;
+        min-width: 34px !important;
+        padding: 0 !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        line-height: 1 !important;
+      }
+      #panel-today .hero-icon-row,
+      #today-simple-actions {
+        display: flex !important;
+        gap: 8px !important;
+        justify-content: flex-start !important;
+        max-width: none;
+      }
+      #panel-today .hero-icon-cell:not([hidden]) { flex: 0 0 auto !important; display: flex; }
+      #panel-today .hero-icon-cell[hidden],
+      #today-watch-dd[hidden],
+      #today-source-dd[hidden],
+      #today-watch[hidden] {
+        display: none !important;
+      }
+      #panel-today #today-watch-dd { display: none !important; }
+      .outfits-toggle, .theme-toggle {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px !important;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+      }
+      @media (max-width: 1023px) {
+        #subnav-me .subnav-scroll { justify-content: center !important; }
+        #subnav-me .subnav-scroll::after { display: none !important; content: none !important; flex: 0 0 0 !important; width: 0 !important; }
+      }
+      .outfits-toggle .chip, .theme-toggle .chip {
+        flex: 0 0 auto !important;
+        min-width: 96px !important;
+        width: auto !important;
+      }
+      .cal-subtabs {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px !important;
+        width: 100%;
+      }
+      .cal-subtab { flex: 0 1 auto !important; min-width: 0; }
+      #advanced-toggle { width: 100%; }
+      /* Close / icon / nav / subtab controls are not text pills */
+      .info-pop-close, .profile-btn, .navbtn, .subtab, #back-btn,
+      button[aria-label="Close"], .fab-back {
+        max-height: none;
+      }
+
+
+      /* ---------- Build .75 polish pass 2: one tab system, cards, The Edit + ---------- */
+      /* Every page row of tabs (Closet, Profile subnavs; Outfits, Calendar
+         toggles) is the same centred pill pair: 34px, 999 radius, 12px. */
+      #subnav { border: 0 !important; background: var(--bg) !important; box-shadow: none !important; }
+      #subnav .wrap { border: 0 !important; box-shadow: none !important; background: transparent !important; }
+      #subnav .subnav-group:not([hidden]),
+      #subnav .subnav-group:not([hidden]) .subnav-scroll {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px !important;
+        grid-template-columns: none !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        mask-image: none !important; -webkit-mask-image: none !important;
+      }
+      #subnav .subnav-group:not([hidden]) { padding: 8px 16px 6px !important; box-sizing: border-box; }
+      #subnav .subnav-group .subnav-scroll::before,
+      #subnav .subnav-group .subnav-scroll::after,
+      #subnav .subnav-group::before,
+      #subnav .subnav-group::after { display: none !important; content: none !important; }
+      #subnav .subnav-group .subtab {
+        flex: 0 0 auto !important;
+        min-width: 96px !important;
+        width: auto !important;
+        height: 34px !important; min-height: 34px !important; max-height: 34px !important;
+        padding: 0 14px !important;
+        margin: 0 !important;
+        border-radius: 999px !important;
+        border: var(--ctl-border) !important;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        font-family: var(--font-ui, Inter, system-ui, sans-serif) !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.02em !important;
+        text-transform: none !important;
+        line-height: 1 !important;
+        box-shadow: none !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+      }
+      #subnav .subnav-group .subtab::after, #subnav .subnav-group .subtab::before { display: none !important; content: none !important; }
+      #subnav .subnav-group .subtab[aria-selected="true"] {
+        background: var(--ink-btn) !important;
+        color: var(--ink-btn-text) !important;
+        border-color: var(--ink-btn) !important;
+      }
+      #subnav .subtab .subtab-full { display: none !important; }
+      #subnav .subtab .subtab-short { display: inline !important; }
+      #subnav #profile-close { display: none !important; }
+      .outfits-toggle, .cal-subtabs { margin: 8px 0 14px !important; }
+      .outfits-toggle .chip, .cal-subtab { min-width: 96px !important; }
+
+      /* Closet cards: full name on two lines, Details beside the colour */
+      #panel-wardrobe .item-card .item-idrow { display: block !important; padding: 8px 12px 12px !important; }
+      #panel-wardrobe .item-card h4.item-name {
+        font-size: 15px !important; line-height: 1.25 !important; min-height: 2.5em !important;
+        margin: 0 0 8px !important; -webkit-line-clamp: 2;
+      }
+      .item-colorrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+      .item-colorrow .item-colors { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1 1 auto; overflow: hidden; }
+      .item-colorrow .cname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .item-colorrow .item-details-btn { flex: 0 0 auto; padding: 0 12px !important; }
+      #panel-wardrobe .item-card .cat { padding: 10px 12px 0 !important; }
+      .closet-stale-row, #ward-stale-chip { display: none !important; }
+
+      /* The Edit: the + lives in the masthead, beside Profile */
+      .masthead #shop-plus { position: absolute; right: 52px; top: 50%; transform: translateY(-50%); margin: 0; display: none !important; }
+      body[data-page="find"] .masthead #shop-plus { display: inline-flex !important; }
+      #panel-find .edit-head { display: none !important; }
+
+      /* Inspo cards: one short action, titles never clipped */
+      .inspo-card h4 { font-size: 15px !important; line-height: 1.25 !important; }
+      .inspo-card .inspo-missing { align-self: flex-start; }
+      .shop-honest { display: none !important; }
+      .outfits-build-row { display: flex; justify-content: center; gap: 8px; margin: 0 0 14px; }
+      #panel-looks .outfits-build-row [hidden] { display: none !important; }
+      #panel-looks .cf-actions .chip, #panel-looks .cf-actions .btn-ghost, #panel-looks .look-actions .chip { padding: 0 8px !important; min-width: 0 !important; }
+      #panel-find [data-shop-tier-toggle] .sel-name { display: none !important; }
+      #panel-find [data-shop-tier-toggle] .sel-val { max-width: none !important; overflow: visible !important; text-overflow: clip !important; }
+      #panel-looks .cf-head { display: none !important; }
+      .loc-now .loc-name:empty { display: none; }
+      .look-actions { flex-wrap: wrap; }
+      .look-actions > button { white-space: nowrap; }
+      #panel-watches .chip, #panel-watches .btn-ink, #panel-watches .btn-ghost, #panel-watches .btn-accent,
+      #panel-find .chip, #panel-find .btn-ink, #panel-find .btn-ghost, #panel-find .btn-accent,
+      #panel-calendar .btn-ink, #panel-calendar .btn-ghost, #panel-calendar .btn-accent,
+      #panel-myinspo .btn-ink, #panel-myinspo .btn-ghost, #panel-myinspo .btn-accent,
+      #shop-plus-sheet .btn-ink, #shop-plus-sheet .btn-ghost, #shop-plus-sheet .btn-accent,
+      #item-detail .btn-ink, #item-detail .btn-ghost, #item-detail .btn-accent,
+      #featured .btn-ink, #featured .btn-ghost, #featured .btn-accent {
+        height: 34px !important; min-height: 34px !important; max-height: 34px !important;
+        border-radius: 999px !important; font-size: 12px !important; font-weight: 600 !important;
+        letter-spacing: 0.02em !important; line-height: 1 !important; padding: 0 14px !important;
+        box-sizing: border-box !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;
+      }
+      #panel-watches .chip[hidden], #panel-find [hidden], #item-detail [hidden] { display: none !important; }
+      #inspo-host > section { padding: 0 !important; margin: 0 !important; }
+      .profile-head:has(#pf-head-photo[hidden]):has(#pf-head-name:empty) { display: none !important; }
+      .loc-weather:empty { display: none; }
     </style>
 
   </head>
@@ -4229,10 +4676,13 @@
     <header class="masthead">
       <div class="wrap">
         <h1 class="brand" id="brand-home" title="Home">Wardrobe</h1>
+        <button type="button" class="btn-ink" id="shop-plus" aria-label="Add">+</button>
         <button type="button" class="navbtn profile-btn" id="tab-profile" data-tab="profile" data-section="me" aria-controls="panel-pinfo" aria-label="Profile — info, location, cloud and backup"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg></button>
         <div class="rule-double" aria-hidden="true"></div>
       </div>
     </header>
+    <div class="masthead-slot" aria-hidden="true"></div>
+    <h2 class="page-title" id="page-title" hidden></h2>
     <div class="navstack">
       <!-- The four section buttons live in the bottom bar (after
            <main>); Profile is the icon in the masthead. This stack
@@ -4241,10 +4691,7 @@
         <div class="wrap">
           <div class="subnav-group" id="subnav-closet" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
-            <button class="subtab" role="tab" id="tab-looks" aria-selected="false" aria-controls="panel-looks" data-tab="looks" aria-label="My Outfits"><span class="subtab-full">My Outfits</span><span class="subtab-short">Outfits</span></button>
             <button class="subtab" role="tab" id="tab-watches" aria-selected="false" aria-controls="panel-watches" data-tab="watches">Watches</button>
-            <button class="subtab" role="tab" id="tab-wearing" aria-selected="false" aria-controls="panel-wearing" data-tab="wearing">Today</button>
-            <button class="subtab" role="tab" id="tab-gaps" aria-selected="false" aria-controls="panel-gaps" data-tab="gaps" aria-label="Closet gaps">Closet gaps <span class="count" id="closet-gaps-count"></span></button>
           </div>
           <div class="subnav-group" id="subnav-ideas" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Ideas</button>
@@ -4266,7 +4713,7 @@
             <div class="subnav-scroll">
             <button class="subtab" role="tab" id="tab-pinfo" aria-selected="false" aria-controls="panel-pinfo" data-tab="pinfo" aria-label="Profile info"><span class="subtab-full">Profile info</span><span class="subtab-short">Info</span></button>
             <button class="subtab" role="tab" id="tab-plocation" aria-selected="false" aria-controls="panel-plocation" data-tab="plocation">Location</button>
-            <button class="subtab" role="tab" id="tab-pcloud" aria-selected="false" aria-controls="panel-pcloud" data-tab="pcloud" aria-label="Cloud and backup"><span class="subtab-full">Cloud &amp; backup</span><span class="subtab-short">Cloud</span></button>
+            <button class="subtab" role="tab" id="tab-pcloud" aria-selected="false" aria-controls="panel-pcloud" data-tab="pcloud">Advanced</button>
             </div>
             <button type="button" class="subtab profile-close" id="profile-close" aria-label="Close profile">×</button>
           </div>
@@ -4310,11 +4757,12 @@
                  same handlers, pressed verdict state as before.
                  "Wore this today" stays off the hero; worn-marking
                  lives in Calendar and the outfit pop-out. -->
-            <div class="hero-icon-row">
-              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-like" aria-pressed="false">Like</button></div>
-              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-dislike" aria-pressed="false">Dislike</button></div>
-              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-style">Style</button></div>
-              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-find">Shop</button></div>
+            <div class="hero-icon-row" id="today-simple-actions">
+              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-like" aria-pressed="false" aria-label="Like">♥</button></div>
+              <div class="hero-icon-cell"><button type="button" class="hero-icon-btn" id="today-next" aria-label="Next look">Next</button></div>
+              <div class="hero-icon-cell" hidden><button type="button" class="hero-icon-btn" id="today-dislike" aria-pressed="false">Dislike</button></div>
+              <div class="hero-icon-cell" hidden><button type="button" class="hero-icon-btn" id="today-style">Style</button></div>
+              <div class="hero-icon-cell" hidden><button type="button" class="hero-icon-btn" id="today-find">Shop</button></div>
             </div>
             <!-- One quiet row of three compact dropdowns: watch,
                  outfit type, build from. Each shows only its current
@@ -4342,7 +4790,7 @@
                   <button type="button" class="cdd-opt" data-studio-type="7" aria-pressed="false">Black Tie</button>
                 </div>
               </div>
-              <div class="cdd cdd-up">
+              <div class="cdd cdd-up" id="today-source-dd" hidden>
                 <button type="button" class="cdd-btn hero-cdd-btn" id="today-source-btn" data-cdd-manual aria-haspopup="true" aria-expanded="false" aria-label="Source"><span class="cdd-label" id="today-source-label">Combo</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
                 <div class="cdd-menu cdd-menu-r" id="today-source-row" hidden role="menu" aria-label="Source — Wardrobe, Inspo, or Combo">
                   <button type="button" class="cdd-opt" data-source="wardrobe" aria-pressed="false">Wardrobe</button>
@@ -4548,8 +4996,7 @@
         <div class="ward-grid">
           <div>
             <div class="ward-search">
-              <label class="field" for="ward-search">Search your closet</label>
-              <input type="search" id="ward-search" placeholder="Name, colour, category, notes…" autocomplete="off" />
+              <input type="search" id="ward-search" placeholder="Name, colour, category, notes…" aria-label="Search closet" autocomplete="off" />
             </div>
             <div class="closet-top3">
               <div class="cdd closet-cat-cdd">
@@ -4707,19 +5154,25 @@
 
       <!-- ================= LOOKS ================= -->
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
-        <div class="looks-tools">
-          <input type="search" id="looks-search" class="ward-search" aria-label="Search your looks" placeholder="Search your looks — a colour, a piece, a note" autocomplete="off" />
-          <div class="fb-chips" role="group" aria-label="Filter looks">
-            <button type="button" class="chip" data-looks-filter="all" aria-pressed="true">All</button>
-            <button type="button" class="chip" data-looks-filter="queued" aria-pressed="false">Queued</button>
-            <button type="button" class="chip" data-looks-filter="worn" aria-pressed="false">Worn</button>
-            <button type="button" class="chip" data-looks-filter="liked" aria-pressed="false">Liked</button>
-            <button type="button" class="chip" data-looks-filter="new" aria-pressed="false">Not worn yet</button>
-            <button type="button" class="chip" data-looks-filter="removed" aria-pressed="false">Recently removed</button>
-            <button type="button" class="chip" data-looks-filter="wishlist" aria-pressed="false">Wishlist</button>
-          </div>
+        <div class="outfits-toggle theme-toggle" role="group" aria-label="Outfits">
+          <button type="button" class="chip" id="outfits-mine" aria-pressed="true">Mine</button>
+          <button type="button" class="chip" id="outfits-inspo" aria-pressed="false">Inspo</button>
         </div>
-        <div class="saved-grid" id="saved-grid"></div>
+        <div class="outfits-build-row"><button type="button" class="btn-ink" id="outfits-build">Build a look</button><button type="button" class="btn-ghost" id="outfits-shuffle">Shuffle</button></div>
+        <div id="outfits-mine-view">
+          <div class="looks-tools">
+            <input type="search" id="looks-search" class="ward-search" aria-label="Search your looks" placeholder="Search looks" autocomplete="off" />
+          </div>
+          <div class="saved-grid" id="saved-grid"></div>
+        </div>
+        <div id="outfits-inspo-view" hidden>
+          <div class="cal-subtabs inspo-subtabs" role="group" aria-label="Inspo pages">
+            <button type="button" class="cal-subtab" data-inspo-view="icons" aria-pressed="true">Icons</button>
+            <button type="button" class="cal-subtab" data-inspo-view="palettes" aria-pressed="false">Palettes</button>
+            <button type="button" class="cal-subtab" data-inspo-view="myinspo" aria-pressed="false">Saved</button>
+          </div>
+          <div id="inspo-host"></div>
+        </div>
       </section>
 
       <!-- ================= CALENDAR ================= -->
@@ -4727,7 +5180,6 @@
         <div class="cal-subtabs" role="group" aria-label="Calendar pages">
           <button type="button" class="cal-subtab" data-calview="week" aria-pressed="true">This week</button>
           <button type="button" class="cal-subtab" data-calview="trips" aria-pressed="false">Trips</button>
-          <button type="button" class="cal-subtab" data-calview="worn" aria-pressed="false">What I wore</button>
         </div>
         <div id="week-plan-wrap">
           <div class="wp-head">
@@ -4766,7 +5218,7 @@
               </div>
             </div>
             <div>
-              <label class="field" for="trip-dests">Destination(s) — comma separated for legs</label>
+              <label class="field" for="trip-dests">Destinations</label>
               <input type="text" id="trip-dests" autocomplete="off" />
             </div>
             <label class="tf-pool"><input type="checkbox" id="trip-pool" /> Beach / pool days</label>
@@ -5061,7 +5513,7 @@
             <input type="text" id="icon-signature-desc" required />
           </div>
           <div>
-            <label class="field" for="icon-signatures">Signature pieces — comma separated</label>
+            <label class="field" for="icon-signatures">Signature pieces</label>
             <input type="text" id="icon-signatures" />
           </div>
           <div>
@@ -5138,16 +5590,26 @@
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
-        <div class="card link-card" id="link-card">
-          <label class="field" for="link-url">Paste a product link</label>
-          <div class="link-row"><input type="url" id="link-url" placeholder="https://…" autocomplete="off" /><button type="button" class="btn-accent" id="link-go">Check it</button></div>
-          <p class="form-note" id="link-status" hidden></p>
-          <div id="link-result"></div>
-        </div>
+        <div id="edit-gaps"></div>
+        <div id="edit-list"></div>
         <div id="find-look-mode" hidden></div>
-        <p class="meta" id="find-nolook">No look selected.</p>
-
+        <p class="meta" id="find-nolook" hidden>No look selected.</p>
       </section>
+      <div class="info-pop-backdrop" id="shop-plus-sheet" hidden>
+        <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="shop-plus-title">
+          <div class="principles-head">
+            <h3 id="shop-plus-title" class="type-title">Add</h3>
+            <button type="button" class="info-pop-close" id="shop-plus-close" aria-label="Close">&times;</button>
+          </div>
+          <div class="card link-card" id="link-card">
+            <label class="field" for="link-url">Paste a product link</label>
+            <div class="link-row"><input type="url" id="link-url" placeholder="https://…" autocomplete="off" /><button type="button" class="btn-accent" id="link-go">Check it</button></div>
+            <p class="form-note" id="link-status" hidden></p>
+            <div id="link-result"></div>
+          </div>
+          <div id="plus-receipts-host"></div>
+        </div>
+      </div>
       <!-- ================= PURCHASED — own Shop sub page (build .56) =================
            Supersedes the build .51 merge: Purchased lives here, on
            its own page, one card per purchase. Receipts keep their
@@ -5241,6 +5703,13 @@
 
       <!-- ================= PROFILE ================= -->
       <section id="panel-pinfo" role="tabpanel" aria-labelledby="tab-pinfo" hidden>
+        <div class="card theme-card" id="theme-card">
+          <h3 class="fav-head">Appearance</h3>
+          <div class="theme-toggle" role="group" aria-label="Appearance">
+            <button type="button" class="chip" id="theme-light" aria-pressed="true">Light</button>
+            <button type="button" class="chip" id="theme-dark" aria-pressed="false">Dark</button>
+          </div>
+        </div>
         <div class="profile-head">
           <img class="profile-photo" id="pf-head-photo" alt="" hidden />
           <div class="profile-head-main"><h3 class="profile-name" id="pf-head-name"></h3><p class="meta" id="pf-head-city"></p></div>
@@ -5286,7 +5755,7 @@
               <span class="loc-name" id="loc-current-name"></span>
               <span class="loc-kind" id="loc-current-kind">Home — default</span>
             </div>
-            <p class="loc-weather" id="loc-weather" >Set your home city.</p>
+            <p class="loc-weather" id="loc-weather" ></p>
             <p class="loc-rec" id="loc-rec"></p>
           </div>
           <div>
@@ -5344,7 +5813,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.74.2</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.75</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -5417,11 +5886,13 @@
     <!-- Bottom nav: a direct child of body, outside main.
          position:fixed; bottom:0 — the ICB bottom, always visible. -->
     <nav class="bottombar" id="bottombar" aria-label="Wardrobe sections">
+      <div class="nav-pill" role="presentation">
       <button type="button" class="navbtn" id="tab-today" data-tab="today" data-section="today" aria-controls="panel-today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><span>Home</span></button>
       <button type="button" class="navbtn" id="section-closet" data-section="closet"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7.2a2 2 0 1 0-2-2"/><path d="M12 7.2v1.6L3.6 14.6a1.4 1.4 0 0 0 .8 2.6h15.2a1.4 1.4 0 0 0 .8-2.6L12 8.8"/></svg><span>Closet</span></button>
-      <button type="button" class="navbtn" id="section-ideas" data-section="ideas"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Ideas</span></button>
-      <button type="button" class="navbtn" id="tab-find" data-tab="find" data-section="find" aria-controls="panel-find"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Shop</span></button>
+      <button type="button" class="navbtn" id="section-ideas" data-section="ideas"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Outfits</span></button>
+      <button type="button" class="navbtn" id="tab-find" data-tab="find" data-section="find" aria-controls="panel-find"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>The Edit</span></button>
       <button type="button" class="navbtn" id="section-calendar" data-section="calendar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Calendar</span></button>
+      </div>
     </nav>
     <script>
       /* Build .62 on-device nav diagnostic. Does not write styles to
@@ -5551,7 +6022,7 @@
       })();
     </script>
 
-    <div class="ptr" id="ptr"    <div class="ptr" id="ptr" aria-hidden="true">Pull to refresh</div>
+    <div class="ptr" id="ptr" aria-hidden="true">Pull to refresh</div>
     <div class="info-pop-backdrop" id="find-sheet" hidden>
       <div class="card info-pop-card" role="dialog" aria-modal="true" aria-labelledby="find-sheet-title">
         <div class="principles-head">
@@ -6403,6 +6874,16 @@ function homeOwnedPhotoPieces742() {
   var own = withPhoto.filter(function (i) { return String(i.id || "").indexOf("seed-") !== 0; });
   return { own: own, withPhoto: withPhoto };
 }
+/* Build .75: every Home deal goes through the .74.2 pool — his own
+   photographed pieces first, photographed pieces as the fallback. */
+function homeComposerLooks75(count) {
+  if (typeof composerLooks !== "function") return [];
+  var temp = (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : undefined;
+  var pools = homeOwnedPhotoPieces742();
+  var r = pools.own.length >= 3 ? (composerLooks({ count: count, temp: temp, only: pools.own }) || []) : [];
+  if (!r.length && pools.withPhoto.length) r = composerLooks({ count: count, temp: temp, only: pools.withPhoto }) || [];
+  return r.filter(function (l) { return homeLookOk742(l); });
+}
 function homeLookOk742(look) {
   if (!look || !look.fwPieces || !look.fwPieces.length) return true;
   var pools = homeOwnedPhotoPieces742();
@@ -6586,6 +7067,14 @@ function nearestWada(hex) {
 function isLight(hex) {
   var rgb = hexRgb(hex);
   return (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) > 150;
+}
+function contrastInk(hex) {
+  var rgb = hexRgb(hex || "#c9bda6") || [201, 189, 166];
+  function lin(v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+  var L = 0.2126 * lin(rgb[0]) + 0.7152 * lin(rgb[1]) + 0.0722 * lin(rgb[2]);
+  var cLight = (Math.max(L, 0.93) + 0.05) / (Math.min(L, 0.93) + 0.05);
+  var cDark = (Math.max(L, 0.07) + 0.05) / (Math.min(L, 0.07) + 0.05);
+  return cLight >= cDark ? "#F6F1E8" : "#1A1612";
 }
 function esc(s) {
   return String(s).replace(/[&<>"']/g, function (ch) {
@@ -6799,7 +7288,55 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.74.2";
+var WARDROBE_BUILD = "2026-11-18.75";
+var THEME_KEY = "wardrobe-theme";
+function currentTheme() {
+  try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
+  catch (e) { return "light"; }
+}
+function applyTheme(t, persist) {
+  t = t === "dark" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", t);
+  document.documentElement.style.colorScheme = t;
+  var scheme = document.querySelector('meta[name="color-scheme"]');
+  if (scheme) scheme.setAttribute("content", t);
+  var meta = document.querySelector('meta[name="theme-color"]:not([media])');
+  if (meta) meta.setAttribute("content", t === "dark" ? "#14110E" : "#F3EEE4");
+  var light = document.getElementById("theme-light");
+  var dark = document.getElementById("theme-dark");
+  if (light) light.setAttribute("aria-pressed", t === "light" ? "true" : "false");
+  if (dark) dark.setAttribute("aria-pressed", t === "dark" ? "true" : "false");
+  if (persist !== false) {
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  }
+}
+applyTheme(currentTheme(), false);
+(function () {
+  var light = document.getElementById("theme-light");
+  var dark = document.getElementById("theme-dark");
+  if (light) light.addEventListener("click", function () { applyTheme("light"); });
+  if (dark) dark.addEventListener("click", function () { applyTheme("dark"); });
+})();
+var PAGE_TITLES = {
+  today: "Home", wardrobe: "Closet", looks: "Outfits", watches: "Closet",
+  wearing: "Today", gaps: "The Edit", studio: "Outfits",
+  outfitideas: "Outfits", icons: "Icons", palettes: "Palettes",
+  myinspo: "My Inspo", find: "The Edit", brands: "Brands", sale: "Sale",
+  shopwish: "Wishlist", purchased: "Purchased", receipts: "Receipts",
+  search: "Search", calendar: "Calendar", pinfo: "Profile",
+  plocation: "Profile", pcloud: "Profile", add: "Add"
+};
+function syncPageTitle(name) {
+  var title = Object.prototype.hasOwnProperty.call(PAGE_TITLES, name) ? PAGE_TITLES[name] : "";
+  if (!title) title = "Wardrobe";
+  var brand = document.getElementById("brand-home");
+  if (brand) brand.textContent = title;
+  var el = document.getElementById("page-title");
+  if (el) { el.hidden = true; el.textContent = ""; }
+  document.body.classList.toggle("home-view", name === "today");
+  document.body.setAttribute("data-page", name);
+  document.body.classList.add("has-page-title");
+}
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -20732,7 +21269,7 @@ function renderCustomPalettes() {
     return '<article class="card custom-card"><h4>' + esc(pal.name) + "</h4>" +
       stripHTML(pal.colors, "sm") + legendHTML(pal.colors) +
       '<div class="look-actions">' +
-      '<button type="button" class="btn-accent" data-use-custom="' + pal.id + '">Use this palette</button>' +
+      '<button type="button" class="btn-accent" data-use-custom="' + pal.id + '">Use it</button>' +
       '<button type="button" class="btn-ghost" data-delete-custom="' + pal.id + '">Delete</button>' +
       "</div></article>";
   }).join("");
@@ -22041,13 +22578,7 @@ function fmtDateShort(iso) {
   return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
 function wearLineHTML(i) {
-  var bits = [];
-  if (i.laundry) bits.push("In laundry");
-  bits.push("Worn " + (i.wearCount || 0) + "×");
-  if (i.lastWorn) bits.push("last " + fmtDateShort(i.lastWorn));
-  if (i.price && i.wearCount) bits.push("$" + Math.round(i.price / i.wearCount) + "/wear");
-  else if (i.price) bits.push("$" + i.price);
-  return '<p class="wear">' + esc(bits.join(" · ")) + "</p>";
+  return "";
 }
 /* ---------- Closet ordering + brand rail (build .28) ----------
    The grid is alphabetical on BOTH keys: in All, clothing type
@@ -22094,6 +22625,10 @@ function wardItemSort(a, b) {
    rail hides while an item detail is open above the grid. */
 var wardRailEl = null;
 function updateWardRail() {
+  /* Build .75: A–Z rail removed. */
+  if (wardRailEl) { wardRailEl.hidden = true; wardRailEl.innerHTML = ""; return; }
+  return;
+  /* leftover */
   var panel = document.getElementById("panel-wardrobe");
   if (!panel) return;
   if (!wardRailEl) {
@@ -22188,16 +22723,15 @@ function renderWardrobe() {
     var bk0 = (brandById[i.id] || i.name || "").charAt(0).toUpperCase();
     var bInit = /^[A-Z]$/.test(bk0) ? bk0 : "#";
     return '<article class="card item-card' + (i.laundry ? " laundry" : "") + '" data-brand-initial="' + bInit + '">' +
-      (i.photo ? '<img class="photo" src="' + i.photo + '" alt="Photograph of ' + esc(i.name) + '" loading="lazy" decoding="async" />' : '<div class="photo card-photo-ph" role="img" aria-label="No photograph yet for ' + esc(i.name) + '" style="background:' + esc(i.colourHex || "#c9bda6") + '"><span>' + esc(i.category || "Piece") + "</span></div>") +
+      (i.photo ? '<img class="photo" src="' + i.photo + '" alt="Photograph of ' + esc(i.name) + '" loading="lazy" decoding="async" />' : '<div class="photo card-photo-ph" role="img" aria-label="No photograph yet for ' + esc(i.name) + '" style="background:' + esc(i.colourHex || "#c9bda6") + ";color:" + contrastInk(i.colourHex || "#c9bda6") + '"><span>' + esc(i.category || "Piece") + "</span></div>") +
       '<span class="cat">' + esc(i.category) + "</span>" + (i.shopBought ? ' <span class="shop-bought-badge">Bought via Shop the look</span>' : "") +
-      "<h4>" + esc(i.name) + "</h4>" +
-      '<div class="item-colors">' + colours.map(function (c) {
+      '<div class="item-idrow">' +
+      '<h4 class="item-name">' + esc(i.name) + "</h4>" +
+      '<div class="item-colorrow"><div class="item-colors">' + colours.map(function (c) {
         return '<span class="cdot" style="background:' + c.hex + '" title="' + esc(c.name) + '"></span>';
       }).join("") + '<span class="cname">' + esc(colours.map(function (c) { return c.name; }).join(" · ")) + "</span></div>" +
+      '<button type="button" class="btn-ghost item-details-btn" data-item-open="' + i.id + '">Details</button></div></div>' +
       (i.notes ? '<p class="notes-line">' + esc(i.notes) + "</p>" : "") +
-      wearLineHTML(i) +
-      '<div class="item-actions"><button type="button" class="btn-ghost" data-item-open="' + i.id + '">Details</button>' +
-      '<button type="button" class="btn-ghost" data-item-wore="' + i.id + '">Mark worn</button></div>' +
       "</article>";
   }).join("");
   updateWardRail();
@@ -22238,14 +22772,10 @@ function renderItemDetail() {
     }).join("") + '<span class="cname">' + esc(colours.map(function (c) { return c.name; }).join(" · ")) + "</span></div>" +
     (it.notes ? '<p class="notes-line">' + esc(it.notes) + "</p>" : "") +
     '<dl class="wear-stats">' +
-    "<div><dt>Times worn</dt><dd>" + (it.wearCount || 0) + "</dd></div>" +
-    "<div><dt>Last worn</dt><dd>" + esc(fmtDateShort(it.lastWorn)) + "</dd></div>" +
     "<div><dt>Cost</dt><dd>" + (it.price ? "$" + it.price : "Not recorded") + "</dd></div>" +
-    "<div><dt>Cost per wear</dt><dd>" + cpw + "</dd></div>" +
     "<div><dt>Status</dt><dd>" + (it.laundry ? "In laundry" : "In the closet") + "</dd></div>" +
     "</dl>" +
     '<div class="item-actions">' +
-    '<button type="button" class="btn-ghost" data-item-act="wore">Mark worn</button>' +
     '<button type="button" class="btn-ghost" data-item-act="style">' + esc(styleItemLabel(it)) + '</button>' +
     '<button type="button" class="btn-ghost" data-item-act="find">Shop the look</button>' +
     '<button type="button" class="btn-ghost" data-item-act="laundry">' + (it.laundry ? "Back from laundry" : "Send to laundry") + "</button>" +
@@ -22534,9 +23064,9 @@ function renderFeatured() {
     "<h3>" + esc(plateName(p)) + "</h3>" +
     stripHTML(p.colors, "lg") + legendHTML(p.colors) +
     '<div class="look-actions">' +
-    '<button type="button" class="btn-accent" id="use-plate-btn">Use this palette</button>' +
-    '<button type="button" class="btn-ghost" id="find-plate-btn">Shop the look</button>' +
-    '<button type="button" class="btn-ghost" id="next-plate-btn">Next plate</button>' +
+    '<button type="button" class="btn-accent" id="use-plate-btn">Use it</button>' +
+    '<button type="button" class="btn-ghost" id="find-plate-btn">Shop it</button>' +
+    '<button type="button" class="btn-ghost" id="next-plate-btn">Next</button>' +
     "</div>";
   document.getElementById("use-plate-btn").addEventListener("click", function () { usePlateInStudio(p); });
   document.getElementById("find-plate-btn").addEventListener("click", function () { openFindSheet(plateFindLook(p)); });
@@ -22764,6 +23294,7 @@ function renderSaved() {
   universe = universe.filter(function (l) { return savedLookHome(l) === "outfits"; });
   /* Build .53: quarantined renders and verdict images never display in My Outfits. */
   universe = universe.filter(function (l) { var im = lookPicturedImg(l) || l.img || ""; return !(im && (isQuarantinedImg(im) || isDislikedImg(im))); });
+  if (typeof lookIsMine === "function") universe = universe.filter(lookIsMine);
   var shown = universe.filter(function (l) {
     if (looksFilter === "queued" && !queueIds[l.id]) return false;
     if (looksFilter === "worn" && !l.worn) return false;
@@ -22807,7 +23338,7 @@ function renderSaved() {
   if (!shown.length) {
     grid.innerHTML = '<p class="meta">' + ((q || looksFilter !== "all" || universe.length)
       ? "No outfits match — try a different search or filter."
-      : "No outfits saved yet — save a look built from your pieces and it waits for you here.") + "</p>";
+      : "No saved outfits yet.") + "</p>";
     if (typeof renderOutfitIdeas === "function") renderOutfitIdeas();
     return;
   }
@@ -22829,7 +23360,6 @@ function renderSaved() {
       '<button type="button" ' + openAttr + '>Open</button>' +
       '<button type="button" data-find-look-id="' + l.id + '">Shop the look</button>' +
       '<button type="button" data-queue-add="' + l.id + '">Queue</button>' +
-      '<button type="button" data-worn-toggle="' + l.id + '">' + (l.worn ? "Worn ✓ — undo" : "Mark worn") + "</button>" +
       removeItem +
       "</div>" +
       '<img src="' + esc(img) + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + esc(img) + '"') + ' />' +
@@ -22962,7 +23492,6 @@ function renderOutfitIdeas() {
       '<button type="button" ' + openAttr + '>Open</button>' +
       '<button type="button" data-find-look-id="' + l.id + '">Shop the look</button>' +
       '<button type="button" data-queue-add="' + l.id + '">Queue</button>' +
-      '<button type="button" data-worn-toggle="' + l.id + '">' + (l.worn ? "Worn ✓ — undo" : "Mark worn") + "</button>" +
       removeItem +
       "</div>" +
       '<img src="' + esc(img) + '" alt="' + esc(l.imgAlt || alt || "") + '" loading="lazy" ' + (l.refLook ? openAttr : 'data-popout="' + esc(img) + '"') + ' />' +
@@ -24195,7 +24724,7 @@ function parseOccasionText(t) {
    Customize are three views onto this single value, stored
    under one key — Only my wardrobe / Only inspo / Combo. */
 var studioSource = store.get("todaySource", null);
-if (["wardrobe", "inspo", "combo"].indexOf(studioSource) === -1) studioSource = "combo";
+if (["wardrobe", "inspo", "combo"].indexOf(studioSource) === -1) studioSource = "wardrobe";
 var closetOnly = false;
 var SOURCE_NOTES = {
   wardrobe: "Wardrobe: every look is built from pieces in your Closet. Until your own bottoms are catalogued, a look built on your top and your shoes may be completed by a suggested bottom — always named as a suggestion, never as yours.",
@@ -24555,75 +25084,27 @@ function openingLook() {
       return JSON.parse(JSON.stringify(dur.look));
     }
   }
-  if (savedSrc === "wardrobe" && typeof buildClosetLooks === "function") {
-    var clw = buildClosetLooks();
-    if (clw && clw.length) {
-      /* Graduated (liked) closet looks are not dealt on a fresh
-         open; the unfiltered list is the fallback so the hero
-         never comes up blank. */
-      var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned56(l); });
-      var clwDeal = clwFresh.length ? clwFresh : clw;
-      todaySeedId = clwDeal[0].id;
-      /* Build .38 (2.1): the dealt closet look is persisted as
-         the day's opening look HERE — before this, the wardrobe
-         branch returned it unpersisted, so the durable lock only
-         existed if a later action happened to write it, and a
-         second app open dealt a different outfit of the day. */
-      persistOpeningLook(clwDeal[0]);
-      return clwDeal[0];
-    }
-    savedSrc = "combo";
+  /* Build .75: Home is wardrobe-only. Never deal starter / DEAL_POOL
+     looks on a fresh open. Prefer a composed closet look, persist it
+     as the day's outfit, and keep it empty rather than show a
+     non-owned render if the closet has nothing. */
+  var clw = homeComposerLooks75(8);
+  if (!clw.length && typeof buildClosetLooks === "function") {
+    clw = (currentWeather
+      ? buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() })
+      : buildClosetLooks()) || [];
   }
-  var prevImg = store.get("lastOpeningImg", null) || (sess && sess.img) || null;
-  var pool = DEAL_POOL.slice();
-  var gradOpen = graduatedImgs();
-  /* Build .38 (2.1): the durable pool lock — a fresh open on the
-     same date in the same source mode restores the day's dealt
-     photograph instead of dealing a new one. A locked look that
-     has since been disliked, or has graduated into its 14-day
-     cooldown, falls through to the fresh deal below. */
-  var plock = store.get("todayOpeningPool", null);
-  if (plock && plock.date === localTodayISO() && plock.img && plock.source === savedSrc) {
-    var lockedPick = pool.filter(function (l) { return l.img === plock.img; })[0];
-    if (lockedPick && !isDislikedImg(lockedPick.img) && !gradOpen[lockedPick.img]) {
-      todaySeedId = lockedPick.id;
-      var lclone = JSON.parse(JSON.stringify(lockedPick));
-      lclone.id = "look-" + Date.now();
-      if (savedSrc === "inspo") { lclone.source = "inspo"; lclone.anchorNames = []; lclone.anchorHex = null; }
-      else if (savedSrc === "combo") {
-        lclone.source = "combo";
-        var caL = closetAnchorItems()[0];
-        if (caL) { lclone.anchorNames = [caL.name]; lclone.anchorHex = caL.colourHex || null; }
-      }
-      persistOpeningLook(lclone);
-      return lclone;
-    }
+  if (typeof lookIsMine === "function") clw = clw.filter(lookIsMine);
+  if (clw && clw.length) {
+    var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned56(l); });
+    var clwDeal = clwFresh.length ? clwFresh : clw;
+    var openPick = clwDeal[0];
+    openPick.source = "wardrobe";
+    todaySeedId = openPick.id;
+    persistOpeningLook(openPick);
+    return openPick;
   }
-  var candidates = pool.filter(function (l) { return l.img !== prevImg && !isDislikedImg(l.img) && !gradOpen[l.img]; });
-  if (!candidates.length) candidates = pool.filter(function (l) { return !isDislikedImg(l.img) && !gradOpen[l.img]; });
-  /* Build .56: the last-resort tiers are canonically guarded —
-     they may repeat the previous photograph or a graduated one,
-     but never a banned one (DEAL_POOL already excludes banned
-     and quarantined photographs canonically; the filter states
-     it outright so no future pool change can deal one). */
-  if (!candidates.length) candidates = pool.filter(function (l) { return l.img !== prevImg && !isDislikedImg(l.img); });
-  if (!candidates.length) candidates = pool.filter(function (l) { return !isDislikedImg(l.img); });
-  var undealt = candidates.filter(function (l) { return dealtImgHistory.indexOf(l.img) === -1; });
-  var pickPool = undealt.length ? undealt : candidates;
-  var pick = pickDealt(pickPool) || pickPool[0];
-  if (!pick) return dailyLook();
-  todaySeedId = pick.id;
-  var clone = JSON.parse(JSON.stringify(pick));
-  clone.id = "look-" + Date.now();
-  if (savedSrc === "inspo") { clone.source = "inspo"; clone.anchorNames = []; clone.anchorHex = null; }
-  else if (savedSrc === "combo") {
-    clone.source = "combo";
-    var ca0 = closetAnchorItems()[0];
-    if (ca0) { clone.anchorNames = [ca0.name]; clone.anchorHex = ca0.colourHex || null; }
-  }
-  store.set("lastOpeningImg", clone.img);
-  persistOpeningLook(clone);
-  return clone;
+  return null;
 }
 /* ================= The watch row — recommend + choose =================
    Every look carries a wrist call, shown as one compact row —
@@ -25073,7 +25554,7 @@ function renderLoc() {
   var badge = travelling ? ' <span class="travel-badge">Traveling</span>' : "";
   document.getElementById("today-loc").innerHTML = "<strong>" + esc(currentLoc.name) + "</strong><span>" + esc(currentWeather ? Math.round(currentWeather.temp) + "°F · " + currentWeather.label : "") + "</span>" + badge;
   if (locUnset && !currentWeather) {
-    document.getElementById("loc-weather").textContent = "Set your home city.";
+    document.getElementById("loc-weather").textContent = "";
     document.getElementById("loc-rec").textContent = "";
   } else if (currentWeather) {
     document.getElementById("loc-weather").textContent = Math.round(currentWeather.temp) + "°F now" +
@@ -25169,7 +25650,7 @@ function fetchWeather(attempt) {
      Tell the user to set a home city — do not leave "Checking…". */
   if (!currentLoc.lat && !currentLoc.lon) {
     var el0 = document.getElementById("loc-weather");
-    if (el0 && !currentWeather) el0.textContent = "Set your home city.";
+    if (el0 && !currentWeather) el0.textContent = "";
     return;
   }
   var url = "https://api.open-meteo.com/v1/forecast?latitude=" + currentLoc.lat + "&longitude=" + currentLoc.lon +
@@ -25379,19 +25860,36 @@ function ideasGoBack56() {
   }
   return false;
 }
+function lookIsMine(l) {
+  if (!l) return false;
+  if (l.suggestedBottom) return false;
+  if (l.source === "inspo" || l.source === "combo") return false;
+  if (l.refLook) return false;
+  if (l.fwPieces && l.fwPieces.length) {
+    return l.fwPieces.every(function (p) {
+      return p && p.id && typeof closetItemById === "function" && !!closetItemById(p.id);
+    });
+  }
+  return l.source === "wardrobe" || !!l.composer;
+}
+function pieceDisplayPhoto(item) {
+  if (!item) return null;
+  /* Prefer the current photo (own/studio shots overwrite this
+     when they are added); fall back to the merchant original. */
+  return item.photo || item.originalPhoto || null;
+}
 function dealHeroForSource() {
   heroPushHistory56();
-  var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
-  if (src === "wardrobe" && typeof buildClosetLooks === "function") {
-    /* Each deal in a session steps the rotation on by one. With a
-       fixed daily salt the list came back in the same order every
-       time, so "another look" only ever swapped between the first
-       two outfits. */
-    window._heroDealN = (window._heroDealN || 0) + 1;
-    var cl = currentWeather
+  /* Build .75: Home is always wardrobe-only. */
+  window._heroDealN = (window._heroDealN || 0) + 1;
+  var cl = homeComposerLooks75(8);
+  if (!cl.length && typeof buildClosetLooks === "function") {
+    cl = (currentWeather
       ? buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() + window._heroDealN })
-      : buildClosetLooks();
-    if (cl && cl.length) {
+      : buildClosetLooks()) || [];
+  }
+  cl = cl.filter(lookIsMine);
+  if (cl && cl.length) {
       /* Graduated (liked) closet looks are not dealt again; if
          every closet look has graduated, deal from the full list
          rather than leave the hero blank. */
@@ -25403,11 +25901,22 @@ function dealHeroForSource() {
       pickW = pickW || dealList[0];
       todaySeedId = pickW.id;
       todayLook = pickW;
+      todayLook.source = "wardrobe";
       persistOpeningLook(todayLook);
       renderToday();
       return;
-    }
   }
+  /* Build .75: Home is wardrobe-only — never starter or non-owned
+     renders. If the closet composer has nothing, keep the current
+     wardrobe look or show an empty hero. */
+  if (todayLook && todayLook.source === "wardrobe" && !todayLook.suggestedBottom) {
+    renderToday();
+    return;
+  }
+  todayLook = null;
+  todaySeedId = null;
+  renderToday();
+  return;
   var pool = DEAL_POOL.slice();
   var currentImg = todayLook && todayLook.img;
   var gradHero = graduatedImgs();
@@ -28921,17 +29430,17 @@ var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyz
    and every switchTab("…") call still resolve. */
 var SECTIONS = {
   today: ["today"],
-  closet: ["wardrobe", "add", "gaps", "analyze", "looks", "watches", "wearing"],
+  closet: ["wardrobe", "add", "analyze", "watches", "wearing"],
   calendar: ["calendar"],
-  ideas: ["studio", "outfitideas", "icons", "emulate", "palettes", "myinspo"],
-  find: ["find", "receipts", "purchased", "search", "brands", "brand", "sale", "shopwish"],
+  ideas: ["looks", "studio", "outfitideas", "icons", "emulate", "palettes", "myinspo"],
+  find: ["find", "receipts", "purchased", "search", "brands", "brand", "sale", "shopwish", "gaps"],
   me: ["pinfo", "plocation", "pcloud"]
 };
-var sectionHome = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo", calendar: "calendar" };
+var sectionHome = { today: "today", closet: "wardrobe", ideas: "looks", find: "find", me: "pinfo", calendar: "calendar" };
 /* Section tabs always open the section's FIRST page — the nav
    must be learnable. Last-page memory survives only in the
    refresh-restore path (restoreTab), never on a tab tap. */
-var SECTION_FIRST = { today: "today", closet: "wardrobe", ideas: "studio", find: "find", me: "pinfo", calendar: "calendar" };
+var SECTION_FIRST = { today: "today", closet: "wardrobe", ideas: "looks", find: "find", me: "pinfo", calendar: "calendar" };
 /* Scroll position per page, restored on return — a round trip
    from a long list (Closet, Icons, My Looks) no longer restarts
    at the top. */
@@ -28985,6 +29494,8 @@ function switchTab(name, opts) {
      single-page name lands on Profile info, the default. */
   if (name === "profile") name = "pinfo";
   if (name === "calnav") name = "calendar"; /* build .39: pseudo-view guard */
+  if (name === "studio" || name === "outfitideas") name = "looks";
+  if (name === "gaps") name = "find";
   if (TABS.indexOf(name) === -1) name = "today";
   var prevTab = currentTab;
   pageScroll[currentTab] = window.scrollY || 0;
@@ -29006,7 +29517,7 @@ function switchTab(name, opts) {
     t.setAttribute("aria-selected", t.getAttribute("data-tab") === name ? "true" : "false");
   });
   var subnav = document.getElementById("subnav");
-  var grouped = SECTIONS[sec].length > 1;
+  var grouped = SECTIONS[sec].length > 1 && sec !== "ideas" && sec !== "find";
   subnav.hidden = !grouped;
   if (grouped) {
     document.querySelectorAll(".subnav-group").forEach(function (g) {
@@ -29014,8 +29525,12 @@ function switchTab(name, opts) {
     });
   }
   TABS.forEach(function (n) {
-    document.getElementById("panel-" + n).hidden = n !== name;
+    var panel = document.getElementById("panel-" + n);
+    if (panel) panel.hidden = n !== name;
   });
+  var recInPlus = document.querySelector("#plus-receipts-host #panel-receipts");
+  if (recInPlus) recInPlus.hidden = false;
+
   if (!(opts && opts.restore)) {
     var back = pageScroll[name];
     if (back) window.scrollTo(0, back);
@@ -29035,6 +29550,9 @@ function switchTab(name, opts) {
   if ((name === "wardrobe" || name === "add") && typeof analyzeRefreshUI === "function") analyzeRefreshUI();
   if (name === "calendar") { if (typeof renderWeekPlan === "function") renderWeekPlan(); if (typeof calViewApply === "function") calViewApply(); }
   persistTab();
+  if (typeof syncPageTitle === "function") syncPageTitle(name);
+  if (name === "find" && typeof renderTheEdit === "function") renderTheEdit();
+  if (name === "looks" && typeof syncOutfitsToggle === "function") syncOutfitsToggle();
   if (typeof scrollActiveSubtabIntoView === "function") {
     requestAnimationFrame(function () { requestAnimationFrame(scrollActiveSubtabIntoView); });
   }
@@ -30153,7 +30671,21 @@ document.addEventListener("click", function (e) {
   if (detEl) detEl.value = "From the wishlist — needed by: " + w.titles.join(", ");
   var iconEl = document.getElementById("find-icon");
   if (iconEl) iconEl.value = "";
-  switchTab("search");
+  if (typeof finds !== "undefined") {
+    finds.unshift({
+      id: "find-" + Date.now(),
+      desc: w.desc,
+      cat: w.cat,
+      size: (typeof profileSizeFor === "function") ? profileSizeFor(w.cat) : "",
+      budget: "", budgetTier: (typeof shopTierName === "function") ? shopTierName() : "",
+      budgetNote: "", colour: w.colour || "",
+      details: "From closet gaps — needed by: " + (w.titles || []).join(", "),
+      iconId: null
+    });
+    if (typeof store !== "undefined") store.set("finds", finds);
+  }
+  if (typeof switchTab === "function") switchTab("find");
+  if (typeof renderTheEdit === "function") renderTheEdit();
   toast("On the hunt — " + w.desc + ".");
 });
 
@@ -30393,6 +30925,7 @@ var calView = "week";
 function calViewApply() {
   var wk = document.getElementById("week-plan-wrap"), tr = document.getElementById("trips-wrap"), wn = document.getElementById("worn-wrap");
   if (!wk || !tr || !wn) return;
+  if (calView === "worn") calView = "week"; /* build .75: worn log removed */
   wk.hidden = calView !== "week";
   tr.hidden = calView !== "trips";
   wn.hidden = calView !== "worn";
@@ -34329,7 +34862,8 @@ function analyzeFilePiece(card, job, ix) {
 
   /* ---------- Ideas feed ---------- */
   var result = document.getElementById("look-result");
-  if (!result) return;
+  var mineHost = document.getElementById("outfits-mine-view");
+  if (!result && !mineHost) return;
   var feed = document.createElement("section");
   feed.className = "closet-feed";
   feed.id = "closet-feed";
@@ -34337,13 +34871,17 @@ function analyzeFilePiece(card, job, ix) {
   feed.setAttribute("aria-label", "From your closet");
   feed.innerHTML = '<div class="cf-head"><h3 class="fav-head">From your closet</h3><button type="button" class="btn-ghost" id="cf-shuffle">Shuffle</button></div>' +
     '<div class="options-grid cf-grid" id="cf-grid" role="list"></div><div class="cf-sentinel" id="cf-sentinel" aria-hidden="true"></div>';
-  result.parentNode.insertBefore(feed, result.nextSibling);
+  if (mineHost) mineHost.insertBefore(feed, mineHost.firstChild);
+  else result.parentNode.insertBefore(feed, result.nextSibling);
   var grid = feed.querySelector("#cf-grid");
   var sentinel = feed.querySelector("#cf-sentinel");
   var feedLooks = [];
   var feedSig = null;
   function feedLevel() { return (typeof studioTypeAny !== "undefined" && studioTypeAny) ? null : ((typeof formalityLevel !== "undefined") ? formalityLevel : 4); }
   function feedWanted() {
+    if (typeof currentTab !== "undefined" && currentTab === "looks") {
+      return window.outfitsMode !== "inspo";
+    }
     var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
     return src === "wardrobe" || src === "combo";
   }
@@ -34377,10 +34915,11 @@ function analyzeFilePiece(card, job, ix) {
     feed.hidden = !want;
     var wardrobeMode = (typeof studioSource !== "undefined" && studioSource === "wardrobe");
     feed.classList.toggle("cf-solo", wardrobeMode);
-    result.classList.toggle("cf-replaced", wardrobeMode);
+    if (result) result.classList.toggle("cf-replaced", wardrobeMode);
     if (!want) return;
+    var looksPanel = document.getElementById("panel-looks");
     var panel = document.getElementById("panel-studio");
-    if (panel && panel.hidden && !force) return;
+    if (!(looksPanel && !looksPanel.hidden) && panel && panel.hidden && !force) return;
     if (force || !feedLooks.length || feedSig !== stateSig()) resetFeed();
   }
   window.composerSyncFeed = syncFeed;
@@ -34491,10 +35030,9 @@ function analyzeFilePiece(card, job, ix) {
      closet look shows as its flat-lay; the Ideas feed fills the
      first time Ideas is open. */
   try {
-    if (todayLook && todayLook.composer) renderToday();
-    else if (todayLook && studioSource === "wardrobe" && todayLook.source !== "wardrobe" && !todayTouched && typeof planLookForDate === "function" && !planLookForDate(localTodayISO())) {
-      var fresh = buildClosetLooks(currentWeather ? { temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() } : undefined);
-      if (fresh && fresh.length) { todayLook = fresh[0]; persistOpeningLook(todayLook); renderToday(); }
+    if (todayLook && (todayLook.composer || (todayLook.source === "wardrobe" && todayLook.fwPieces))) renderToday();
+    else if (!todayTouched && typeof dealHeroForSource === "function" && (!todayLook || (typeof lookIsMine === "function" && !lookIsMine(todayLook)))) {
+      dealHeroForSource();
     }
   } catch (e) {}
   syncFeed(false);
@@ -34547,5 +35085,184 @@ function analyzeFilePiece(card, job, ix) {
         }).observe(mast);
       })();
     </script>
+  
+<script>
+/* Build .75 — IA cuts: Outfits toggle, The Edit, Advanced, Home next */
+(function () {
+  function moveNode(id, hostId) {
+    var src = document.getElementById(id);
+    var host = document.getElementById(hostId);
+    if (!src || !host) return;
+    while (src.firstChild) host.appendChild(src.firstChild);
+  }
+  (function () {
+    var tc = document.getElementById("theme-card"), pc = document.getElementById("panel-pcloud");
+    if (tc && pc) pc.insertBefore(tc, pc.firstChild);
+  })();
+  var rec = document.getElementById("panel-receipts");
+  var recHost = document.getElementById("plus-receipts-host");
+  if (rec && recHost) {
+    recHost.appendChild(rec);
+    rec.hidden = false;
+    rec.style.display = "block";
+  }
+
+  window.openAdvanced = function () { if (typeof switchTab === "function") switchTab("pcloud"); };
+
+  var plus = document.getElementById("shop-plus");
+  var sheet = document.getElementById("shop-plus-sheet");
+  var plusClose = document.getElementById("shop-plus-close");
+  function openPlus(on) {
+    if (!sheet) return;
+    sheet.hidden = !on;
+    if (on && typeof renderReceipts === "function") renderReceipts();
+  }
+  if (plus) plus.addEventListener("click", function () { openPlus(true); });
+  if (plusClose) plusClose.addEventListener("click", function () { openPlus(false); });
+  if (sheet) sheet.addEventListener("click", function (e) { if (e.target === sheet) openPlus(false); });
+
+  var next = document.getElementById("today-next");
+  if (next) next.addEventListener("click", function () {
+    if (typeof dealAnotherToday === "function") dealAnotherToday();
+  });
+  window.outfitsMode = "mine";
+  window.syncOutfitsToggle = function () {
+    var mine = document.getElementById("outfits-mine");
+    var inspo = document.getElementById("outfits-inspo");
+    var mv = document.getElementById("outfits-mine-view");
+    var iv = document.getElementById("outfits-inspo-view");
+    var isMine = window.outfitsMode !== "inspo";
+    if (mine) mine.setAttribute("aria-pressed", isMine ? "true" : "false");
+    if (inspo) inspo.setAttribute("aria-pressed", isMine ? "false" : "true");
+    if (mv) mv.hidden = !isMine;
+    var osh = document.getElementById("outfits-shuffle");
+    if (osh) osh.hidden = !isMine;
+    if (iv) iv.hidden = isMine;
+    if (isMine) {
+      if (typeof renderSaved === "function") renderSaved();
+    } else {
+      showInspoView(window.inspoView || "icons");
+    }
+    if (typeof composerSyncFeed === "function") composerSyncFeed(true);
+  };
+  window.inspoView = "icons";
+  window.showInspoView = function (v) {
+    var host = document.getElementById("inspo-host");
+    if (!host) return;
+    window.inspoView = v;
+    ["icons", "palettes", "myinspo"].forEach(function (n) {
+      var pn = document.getElementById("panel-" + n);
+      if (!pn) return;
+      if (pn.parentNode !== host) host.appendChild(pn);
+      pn.hidden = n !== v;
+    });
+    document.querySelectorAll("[data-inspo-view]").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.getAttribute("data-inspo-view") === v ? "true" : "false");
+    });
+    try {
+      if (v === "icons" && typeof renderIcons === "function") renderIcons();
+      if (v === "palettes" && typeof renderPlates === "function") renderPlates();
+      if (v === "myinspo" && typeof renderMyInspo === "function") renderMyInspo();
+    } catch (err) {}
+  };
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-inspo-view]");
+    if (b) showInspoView(b.getAttribute("data-inspo-view"));
+    var bl = e.target.closest && e.target.closest("#outfits-build");
+    if (bl && typeof showBuildSheet === "function") showBuildSheet("build-sheet");
+    var sh = e.target.closest && e.target.closest("#outfits-shuffle");
+    if (sh) { var cf = document.getElementById("cf-shuffle"); if (cf) cf.click(); }
+  });
+  var mineBtn = document.getElementById("outfits-mine");
+  var inspoBtn = document.getElementById("outfits-inspo");
+  if (mineBtn) mineBtn.addEventListener("click", function () { window.outfitsMode = "mine"; syncOutfitsToggle(); });
+  if (inspoBtn) inspoBtn.addEventListener("click", function () { window.outfitsMode = "inspo"; syncOutfitsToggle(); });
+
+  window.renderTheEdit = function () {
+    if (typeof renderWishlist === "function") renderWishlist();
+    var gaps = document.getElementById("edit-gaps");
+    if (gaps) {
+      var items = (typeof lastWishlist !== "undefined" && lastWishlist) ? lastWishlist.slice(0, 8) : [];
+      if (!items.length) {
+        gaps.innerHTML = "";
+      } else {
+        gaps.innerHTML = '<h3 class="fav-head">Closet gaps</h3>' + items.map(function (w, i) {
+          return '<div class="card wish-row edit-card"><span class="cdot" style="background:' + (w.hex || "transparent") + '"></span>' +
+            '<span class="w-main"><span class="w-name">' + esc(w.desc) + '</span>' +
+            '<span class="w-sub">' + esc(w.cat) + " · completes " + w.count + (w.count === 1 ? " outfit" : " outfits") + "</span></span>" +
+            '<button type="button" class="btn-ghost" data-wish-find="' + i + '">Shop</button></div>';
+        }).join("");
+      }
+    }
+    var list = document.getElementById("edit-list");
+    if (!list) return;
+    var edits = (typeof finds !== "undefined" && finds && finds.length) ? finds.slice() : [];
+    if (typeof shopWishlist !== "undefined" && shopWishlist && shopWishlist.length) {
+      edits = edits.concat([{
+        id: "wishlist-edit",
+        desc: "Wishlist",
+        _count: shopWishlist.length,
+        _date: shopWishlist[0] && shopWishlist[0].added ? shopWishlist[0].added : null,
+        _kind: "wishlist"
+      }]);
+    }
+    if (!edits.length && !(typeof lastWishlist !== "undefined" && lastWishlist && lastWishlist.length)) {
+      list.innerHTML = '<div class="card empty">No edits yet — tap + to paste a link or file a receipt.</div>';
+      return;
+    }
+    if (!edits.length) { list.innerHTML = ""; return; }
+    list.innerHTML = '<h3 class="fav-head">Edits</h3>' + edits.map(function (f) {
+      var count = f._count || 1;
+      var ms = f._date ? Date.parse(f._date) : (String(f.id || "").match(/(\d{10,})/) ? parseInt(RegExp.$1, 10) : NaN);
+      var when = isFinite(ms) ? new Date(ms).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
+      var kind = f._kind || "find";
+      return '<article class="card edit-card" data-edit-id="' + esc(f.id) + '">' +
+        "<h3>" + esc(f.desc || "Edit") + "</h3>" +
+        '<p class="edit-meta">' + count + (count === 1 ? " piece" : " pieces") + (when ? " · " + when : "") + "</p>" +
+        '<div class="edit-actions">' +
+        '<button type="button" class="btn-ink" data-edit-continue="' + esc(f.id) + '" data-edit-kind="' + kind + '">Continue</button>' +
+        '<button type="button" class="btn-ghost" data-edit-archive="' + esc(f.id) + '" data-edit-kind="' + kind + '">Archive</button>' +
+        "</div></article>";
+    }).join("");
+  };
+  document.addEventListener("click", function (e) {
+    var cont = e.target.closest && e.target.closest("[data-edit-continue]");
+    if (cont) {
+      var kind = cont.getAttribute("data-edit-kind");
+      if (kind === "wishlist") {
+        var first = (shopWishlist && shopWishlist[0] && (shopWishlist[0].url || shopWishlist[0].href));
+        if (first) window.open(first, "_blank", "noopener");
+        else if (typeof renderShopWishlist === "function") { /* stay on The Edit */ }
+        return;
+      }
+      var id = cont.getAttribute("data-edit-continue");
+      var btn = document.querySelector('[data-brief-search="' + id + '"]');
+      if (btn) btn.click();
+      else {
+        var f = (finds || []).filter(function (x) { return x.id === id; })[0];
+        if (f && typeof findQuery === "function") {
+          window.open("https://www.ebay.com/sch/i.html?_nkw=" + encodeURIComponent(findQuery(f)), "_blank", "noopener");
+        }
+      }
+      return;
+    }
+    var arch = e.target.closest && e.target.closest("[data-edit-archive]");
+    if (arch) {
+      var kind = arch.getAttribute("data-edit-kind");
+      var id = arch.getAttribute("data-edit-archive");
+      if (kind === "wishlist") {
+        if (typeof shopWishlist !== "undefined") { shopWishlist = []; if (typeof saveShopWishlist === "function") saveShopWishlist(); }
+      } else {
+        finds = (finds || []).filter(function (x) { return x.id !== id; });
+        if (typeof store !== "undefined") store.set("finds", finds);
+      }
+      if (typeof renderTheEdit === "function") renderTheEdit();
+    }
+  });
+
+  if (typeof syncPageTitle === "function") syncPageTitle(typeof currentTab !== "undefined" ? currentTab : "today");
+})();
+</script>
+
   </body>
 </html>

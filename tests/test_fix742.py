@@ -36,7 +36,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-18.74.2"
+BUILD = "2026-11-18.75"
 KEY = "test-key-fix742"
 ACCT = "test-acct-742"
 CURSOR = 603
@@ -239,7 +239,7 @@ def main() -> int:
         s1 = wait_state(lambda s: "Synced" in str(s["status"]) and len(mock.reqs) >= 1, 40)
         page.wait_for_timeout(1500)
         s1 = page.evaluate(STATE_JS, NEW)
-        check("build is .74.2", s1["build"] == BUILD, s1["build"])
+        check("build is current", s1["build"] == BUILD, s1["build"])
         check("re-pull ran from 0 although .74.1 flag was set", any(r["since"] == 0 for r in mock.reqs), mock.reqs)
         check("vault write failure leaves photoPull742 unset", s1["p742"] == "", s1)
 

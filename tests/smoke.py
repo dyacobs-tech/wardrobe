@@ -60,6 +60,22 @@ def main() -> int:
             route.abort()
 
         ctx.route(re.compile(r"https?://[^/]*workers\.dev/.*"), block_worker)
+        # Home is wardrobe-only in .75: seed a closet that includes
+        # bottoms so the outfit of the day can be composed without
+        # falling back to starter / DEAL_POOL renders.
+        fixture_path = HERE / "fixture_closet83.json"
+        if fixture_path.exists():
+            seed_items = json.loads(fixture_path.read_text())
+            # .74.2/.75: Home deals only photographed pieces, so each fixture
+            # piece carries a tiny valid photo (the fixture file stays photo-free).
+            px = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+            seed_items = [dict(i, photo=i.get("photo") or px) for i in seed_items]
+            ctx.add_init_script(
+                "(() => { if (localStorage.getItem('wardrobe.items')) return;"
+                " localStorage.setItem('wardrobe.items', JSON.stringify(%s));"
+                " localStorage.setItem('wardrobe.todaySource', JSON.stringify('wardrobe'));"
+                " })();" % json.dumps(seed_items)
+            )
         page = ctx.new_page()
         page.on("pageerror", lambda e: errors.append(f"pageerror: {e}"))
         page.on("console", lambda m: errors.append(f"console.{m.type}: {m.text}")
@@ -86,8 +102,13 @@ def main() -> int:
         title1 = page.evaluate("document.querySelector('#today-name')?.innerText?.trim() || ''")
         check("Today hero has a title", bool(title1), title1)
         img_ok = page.evaluate(
-            "(() => { const i = document.getElementById('today-img');"
-            " return !!i && i.complete && i.naturalWidth > 0; })()")
+            """() => {
+              const collage = document.getElementById('today-collage');
+              const cells = collage && !collage.hidden ? collage.querySelectorAll('img, .fl-cell').length : 0;
+              const i = document.getElementById('today-img');
+              const photo = !!(i && !i.hidden && i.complete && i.naturalWidth > 0 && i.offsetParent);
+              return photo || cells >= 3;
+            }""")
         check("Today hero photo loaded", img_ok)
 
         # ---- manifest + icons ------------------------------------------
@@ -101,7 +122,7 @@ def main() -> int:
             check("manifest start_url relative", man.get("start_url") in ("./", "."), str(man.get("start_url")))
 
         # ---- the five sections (build .39: Calendar is its own tab) -------
-        for sel, panel in [("#section-closet", "panel-wardrobe"), ("#section-ideas", "panel-studio"),
+        for sel, panel in [("#section-closet", "panel-wardrobe"), ("#section-ideas", "panel-looks"),
                            ("#tab-find", "panel-find"), ("#tab-today", "panel-today"),
                            ("#section-calendar", "panel-calendar")]:
             try:
@@ -114,27 +135,14 @@ def main() -> int:
             except Exception as e:  # noqa: BLE001
                 check(f"tab {sel} shows #{panel}", False, str(e)[:120])
 
-        # ---- closet: mark worn persists across reload ----------------------
+        # ---- closet: Mark worn was removed in .75 ---------------------------
         page.click("#section-closet")
         page.wait_for_timeout(600)
-        btn = page.query_selector("[data-item-wore]")
-        if btn:
-            item_id = btn.get_attribute("data-item-wore")
-            btn.click()
-            page.wait_for_timeout(800)
-            page.reload(wait_until="load")
-            page.wait_for_timeout(2500)
-            count = page.evaluate(
-                "(id => { for (const k of Object.keys(localStorage)) {"
-                " if (!k.startsWith('wardrobe.')) continue;"
-                " const v = localStorage.getItem(k); if (!v || v.indexOf(id) < 0) continue;"
-                " try { const a = JSON.parse(v); const arr = Array.isArray(a) ? a : Object.values(a);"
-                " for (const it of arr) if (it && it.id === id && it.wearCount) return it.wearCount;"
-                " if (!Array.isArray(a) && a[id] && a[id].wearCount) return a[id].wearCount; } catch (e) {} }"
-                " return 0; })", item_id)
-            check("Mark worn survives a reload", bool(count and count >= 1), f"{item_id} wearCount={count}")
-        else:
-            check("Mark worn survives a reload", False, "no [data-item-wore] button found")
+        wore = page.evaluate("""() => ({
+          btn: !!document.querySelector("[data-item-wore]"),
+          text: /\\bMark [Ww]orn\\b/.test(document.body.innerText || "")
+        })""")
+        check("Mark worn is removed", not wore.get("btn") and not wore.get("text"), str(wore))
 
         # ---- outfit of the day is stable for the day -----------------------
         page.click("#tab-today")
