@@ -4710,7 +4710,7 @@
       #panel-find .ask-card { flex: 0 0 80%; max-width: 340px; scroll-snap-align: center; display: flex; flex-direction: column; padding: 0 !important; overflow: hidden; margin: 0; transition: opacity .25s ease, transform .25s ease; }
       #panel-find .ask-card.is-gone { opacity: 0; transform: translateY(16px) scale(.96); }
       #panel-find .ask-card.is-star { box-shadow: inset 0 0 0 2px var(--brass, #a8834a); }
-      #panel-find .ask-ph { aspect-ratio: 4 / 4.2; background: #EDE6DA; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+      #panel-find .ask-ph { height: clamp(170px, 30vh, 250px); background: #EDE6DA; display: flex; align-items: center; justify-content: center; overflow: hidden; }
       #panel-find .ask-ph img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
       #panel-find .ask-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
       #panel-find .ask-body h3 { margin: 0; font: 500 16px/1.25 var(--font-display); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -36609,6 +36609,7 @@ document.addEventListener("keydown", function (e) {
     if (v === "searches") renderSearches();
     if (v === "build") renderBuild();
     if (v === "ask" && typeof renderAsk === "function") renderAsk(false);
+    if (typeof askCheckHealth === "function") askCheckHealth();
     var p = document.getElementById("panel-find");
     if (p) p.setAttribute("data-edit-mode", v);
   }
@@ -37136,15 +37137,22 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     if (!on && typeof editShow === "function" && document.getElementById("panel-find") && document.getElementById("panel-find").getAttribute("data-edit-mode") === "ask") editShow("saved");
   }
   if (store.get("ask.off", false)) setAvailable(false);
-  try {
-    if (typeof fetch === "function") fetch(TRYON_URL + "/health", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-      if (!j || !j.ask) return;
-      var on = j.ask.configured !== false;
-      store.set("ask.off", !on);
-      setAvailable(on);
-      if (on) refreshCatalog();
-    }).catch(function () {});
-  } catch (e) {}
+  /* asked once per launch, when The Edit first opens (Home stays quiet) */
+  var askHealthAsked = false;
+  window.askCheckHealth = function () {
+    if (askHealthAsked) return;
+    askHealthAsked = true;
+    try {
+      if (typeof fetch === "function") fetch(TRYON_URL + "/health", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (!j || !j.ask) return;
+        var on = j.ask.configured !== false;
+        store.set("ask.off", !on);
+        setAvailable(on);
+        if (on) refreshCatalog();
+      }).catch(function () {});
+    } catch (e) {}
+  };
+  if (typeof currentTab !== "undefined" && currentTab === "find") window.askCheckHealth();
   if (typeof currentTab !== "undefined" && currentTab === "find" && document.getElementById("panel-find") && document.getElementById("panel-find").getAttribute("data-edit-mode") === "ask") renderAsk(false);
 })();
     </script>

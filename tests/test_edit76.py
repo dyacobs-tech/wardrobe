@@ -131,9 +131,9 @@ def main():
 
         # 1. tabs
         pg.click("#tab-find"); pg.wait_for_timeout(500)
-        tabs = pg.evaluate("""() => [...document.querySelectorAll('#panel-find .edit-tabs .chip')].map(b => { const r = b.getBoundingClientRect(); return { t: b.textContent.replace(/\\d+/g,'').trim(), on: b.getAttribute('aria-pressed'), c: r.left + r.width / 2 }; })""")
-        check("three tabs Saved/Searches/Build", [t["t"] for t in tabs] == ["Saved", "Searches", "Build"], tabs)
-        mid = (tabs[0]["c"] + tabs[2]["c"]) / 2 if len(tabs) == 3 else 0
+        tabs = pg.evaluate("""() => [...document.querySelectorAll('#panel-find .edit-tabs .chip')].map(b => { const r = b.getBoundingClientRect(); return { t: b.textContent.replace(/\\d+/g,'').trim(), on: b.getAttribute('aria-pressed'), c: r.left + r.width / 2, l: r.left, r: r.right }; })""")
+        check("four tabs Saved/Searches/Build/Ask (.77)", [t["t"] for t in tabs] == ["Saved", "Searches", "Build", "Ask"], tabs)
+        mid = (tabs[0]["l"] + tabs[-1]["r"]) / 2 if len(tabs) == 4 else 0
         check("tabs centred", abs(mid - 195) <= 2, mid)
         check("Saved count", pg.inner_text("#edit-n-saved") == str(len(FX["shopWishlist"])), pg.inner_text("#edit-n-saved"))
         check("Searches count", int(pg.inner_text("#edit-n-search") or 0) >= len(FX["editSearches"]), pg.inner_text("#edit-n-search"))
