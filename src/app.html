@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.8" />
+    <meta name="wardrobe-build" content="2026-11-19.80.9" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5745,6 +5745,22 @@
           gap: 16px !important;
         }
         #find-look-mode .vp-card { scroll-snap-align: unset; }
+        /* Closet gaps and other Edit product strips: same wrapping grid, never a sliced card */
+        #panel-find .edit-hrow {
+          display: grid !important;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+          grid-auto-flow: row !important;
+          overflow: visible !important;
+          scroll-snap-type: none !important;
+          margin: 0 0 18px !important;
+          padding: 0 !important;
+          gap: 16px !important;
+        }
+        #panel-find .edit-hrow > .edit-pc {
+          flex: none !important;
+          max-width: none !important;
+          width: auto !important;
+        }
       }
       /* Smooth nav: GPU transform + opacity, no display toggling, no layout shift */
       @media (max-width: 899px) {
@@ -7035,7 +7051,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.8</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.9</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8799,7 +8815,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.8";
+var WARDROBE_BUILD = "2026-11-19.80.9";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }

@@ -29,7 +29,7 @@
 // deadline is 30s — long enough for a 2.7MB index.html on a typical
 // phone connection — so a slow fetch is not replaced by a stale
 // cached shell after 4 seconds.
-const WARDROBE_BUILD = '2026-11-19.80.8';
+const WARDROBE_BUILD = '2026-11-19.80.9';
 const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
@@ -52,7 +52,7 @@ const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
 // builds (activate drops files no longer listed), precached on install.
 const CODE_CACHE = 'wardrobe-code-v1';
 const CODE_RE = /\/app\/[^\/]+\.[0-9a-f]{10}\.(js|css|json)$/;
-const CODE_FILES = ['./app/app.ba6691bc66.css', './app/00-brand-list.27a288fac9.js', './app/01.8e77662400.js', './app/02.cd1f907b5c.js', './app/22.318a5abe99.js', './app/23.84718ddeae.js', './app/24.7505b30a4e.js', './app/bundle.816cae1b6f.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json'];
+const CODE_FILES = ['./app/app.16be28d3b6.css', './app/00-brand-list.27a288fac9.js', './app/01.8e77662400.js', './app/02.22baa9961f.js', './app/22.318a5abe99.js', './app/23.84718ddeae.js', './app/24.7505b30a4e.js', './app/bundle.816cae1b6f.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json'];
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
