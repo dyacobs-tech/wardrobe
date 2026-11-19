@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.79.5" />
+    <meta name="wardrobe-build" content="2026-11-19.79.6" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -221,7 +221,7 @@
       main { padding: 20px 0 64px; }
       /* Home (Today): no gaps anywhere — the panel runs edge to edge,
          flush under the nav, with no page padding or side gutters. */
-      main:has(> #panel-today:not([hidden])) { max-width: none; padding: 0; }
+      [data-page="today"] > main:not(#_) { max-width: none; padding: 0; }
       section[hidden] { display: none; }
       .section-head { margin: 4px 0 20px; }
       .section-head h2 { font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 5vw, 40px); margin: 0 0 4px; line-height: 1.1; }
@@ -655,7 +655,7 @@
          slim collapsed tool boxes, and dense name rows, so far more of
          the index fits on one phone screen. Scoped to #panel-icons so
          no other page changes size. */
-      main:has(> #panel-icons:not([hidden])) { padding-top: 10px; }
+      [data-page="icons"] > main:not(#_) { padding-top: 10px; }
       #panel-icons .add-form { padding: 10px 12px; gap: 8px; }
       #panel-icons .tools-toggle { font-size: 17px; min-height: 34px; padding: 0; }
       #panel-icons .tools-toggle .tt-chev { font-size: 12px; }
@@ -1447,9 +1447,9 @@
          max-width:899px block below; desktop keeps the flex column
          on body inside the min-width:1024px layout. Everything
          INSIDE the hero stays small and tight, as does the wordmark. */
-      body:has(> main > #panel-today:not([hidden])) .masthead .brand { font-size: clamp(24px, 5vw, 32px); }
-      body:has(> main > #panel-today:not([hidden])) footer { margin-top: 0; }
-      main:has(> #panel-today:not([hidden])) { max-width: none; margin: 0; padding: 0; }
+      html > body[data-page="today"]:not(#_) .masthead .brand { font-size: clamp(24px, 5vw, 32px); }
+      html > body[data-page="today"]:not(#_) footer { margin-top: 0; }
+      [data-page="today"] > main:not(#_) { max-width: none; margin: 0; padding: 0; }
       #panel-today { display: flex; flex-direction: column; }
       /* Build .54: the ID rule above outranks section[hidden], which
          left the hero laid out at the top of every other page —
@@ -1933,7 +1933,7 @@
       .masthead { padding-top: min(env(safe-area-inset-top, 0px), 59px); }
       .masthead .wrap { padding-top: 10px; padding-bottom: 9px; }
       .masthead .brand,
-      body:has(> main > #panel-today:not([hidden])) .masthead .brand {
+      html > body[data-page="today"]:not(#_) .masthead .brand {
         font-family: var(--font-display); font-weight: 500;
         font-size: 17px; line-height: 1; letter-spacing: .34em;
         text-transform: uppercase; text-indent: .34em; /* optically re-centre letterspaced caps */
@@ -3026,14 +3026,14 @@
 
         /* ----- Frame: room for the fixed header; no bottom bar ----- */
         body { padding-top: var(--hdr-h); padding-bottom: 48px; }
-        body:has(> main > #panel-today:not([hidden])) {
+        html > body[data-page="today"]:not(#_) {
           display: flex; flex-direction: column;
           min-height: 100vh; min-height: 100svh;
           padding-bottom: 0;
         }
         .wrap { max-width: var(--desk-max); padding: 0 var(--desk-pad); }
         main { padding: 30px 0 56px; }
-        main:has(> #panel-today:not([hidden])) { max-width: none; padding: 0; flex: 1 1 auto; display: flex; flex-direction: column; }
+        [data-page="today"] > main:not(#_) { max-width: none; padding: 0; flex: 1 1 auto; display: flex; flex-direction: column; }
         #panel-today { flex: 1 1 auto; }
 
         /* ----- Top bar, row 1: wordmark left, Profile right ----- */
@@ -3044,7 +3044,7 @@
         }
         .masthead .wrap { height: 66px; display: flex; align-items: center; padding-top: 0; padding-bottom: 0; }
         .masthead .brand,
-        body:has(> main > #panel-today:not([hidden])) .masthead .brand {
+        html > body[data-page="today"]:not(#_) .masthead .brand {
           font-size: 26px; letter-spacing: .22em; text-indent: 0; text-align: left;
         }
         .masthead .rule-double { display: none; }
@@ -3482,7 +3482,7 @@
           min-height: 0;
           padding-bottom: var(--bb-h);
         }
-        body:has(> main > #panel-today:not([hidden])) {
+        html > body[data-page="today"]:not(#_) {
           display: block !important;
           position: static !important;
           height: auto !important;
@@ -3605,7 +3605,7 @@
           isolation: auto !important;
         }
         body,
-        body:has(> main > #panel-today:not([hidden])) {
+        html > body[data-page="today"]:not(#_) {
           display: block !important;
           position: static !important;
           height: auto !important;
@@ -3678,7 +3678,7 @@
          reserved by body padding). The photo flexes; every other
          Home element keeps its natural size. Closet's subnav is
          five equal tabs, including Closet gaps. */
-      html:has(body > main > #panel-today:not([hidden])) {
+      html:has(body[data-page="today"]):not(#_):not(div) {
         min-height: 100lvh !important;
       }
       .navstack:has(> #subnav[hidden]) { display: none; }
@@ -4454,7 +4454,7 @@
       }
       .masthead .wrap { position: relative; display: flex; align-items: center; justify-content: center; min-height: 44px; }
       .masthead .brand,
-      body:has(> main > #panel-today:not([hidden])) .masthead .brand,
+      html > body[data-page="today"]:not(#_) .masthead .brand,
       body.home-view .masthead .brand {
         font-family: var(--font-display) !important;
         font-weight: 500 !important;
@@ -5496,8 +5496,8 @@
       @media (min-width: 1024px) {
         :root { --desk-max: 1100px; --hdr-h: 66px; }
         html body .masthead .wrap { max-width: 1100px; }
-        html body:has(> main > #panel-today:not([hidden])) { padding-bottom: 0 !important; }
-        html body main:has(> #panel-today:not([hidden])) { padding: 0 !important; }
+        html body[data-page="today"]:not(#_):not(div) { padding-bottom: 0 !important; }
+        html body[data-page="today"] > main:not(#_) { padding: 0 !important; }
         html body #panel-today:not([hidden]) {
           display: flex !important; flex-direction: column !important; flex: none !important;
           width: 100% !important; max-width: 1100px !important; margin: 0 auto !important;
@@ -5529,10 +5529,23 @@
       @media (min-width: 1024px) and (min-resolution: 2dppx) {
         html body #panel-today #today-hero.today-hero img#today-img { max-height: min(78vh, 600px) !important; }
       }
+      /* ================= Build .79.6 — Outfits toggles keep their rendering =================
+         Mine / Inspo and the four Inspo pages stay in the layout tree while
+         hidden (content-visibility:hidden keeps their style and layout), so
+         showing one again is a repaint, not a fresh style + layout pass. */
+      #outfits-mine-view[hidden], #outfits-inspo-view[hidden], #inspo-host > [hidden] {
+        display: block !important; content-visibility: hidden; contain: strict; height: 0 !important; min-height: 0 !important;
+        margin: 0 !important; padding: 0 !important; border: 0 !important; overflow: hidden !important; pointer-events: none;
+      }
+      /* laid out once, unseen, while Outfits is open, so the first tap on the other view is a repaint too */
+      #outfits-mine-view[hidden].pl796, #outfits-inspo-view[hidden].pl796, #inspo-host > [hidden].pl796 {
+        content-visibility: visible !important; contain: none !important; height: auto !important; overflow: visible !important;
+        position: absolute !important; left: 0; right: 0; top: 0; visibility: hidden !important;
+      }
     </style>
 
   </head>
-  <body>
+  <body data-page="today">
     <header class="masthead">
       <div class="wrap">
         <h1 class="brand" id="brand-home" title="Home">Wardrobe</h1>
@@ -6801,7 +6814,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.79.5</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.79.6</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8409,7 +8422,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.79.5";
+var WARDROBE_BUILD = "2026-11-19.79.6";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -40154,6 +40167,99 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).forEach(function (i) { if (i && !Array.isArray(i.occasionOnly) && i.occasionOnly !== false && itemOccasionOnly(i)) { i.occasionOnly = itemOccasionOnly(i); changed = true; } });
     if (changed && typeof store !== "undefined" && !store.poisoned("items")) store.set("items", wardrobeItems.filter(function (i) { return String(i.id).indexOf("seed-") !== 0; }));
   } catch (e) {}
+})();
+    </script>
+    <script type="wardrobe/app">
+/* ================= Build .79.6 — Outfits toggles are instant =================
+   Mine / Inspo and the Inspo pages (On you, Icons, Palettes, Saved) used to
+   rebuild their whole list on every tap. Each list is now built once (on idle
+   after boot, or the first time it is needed) and kept mounted; a toggle only
+   flips aria-pressed and the hidden attribute, synchronously. A list is built
+   again only when his data changed since it was last built (any write to his
+   stored closet, looks, likes, inspo...), and then after the new state has
+   painted, never inside the tap. UI-only keys (current tab, Home's hero
+   cache) don't count as changes. */
+(function () {
+  "use strict";
+  var ver = 1;
+  var IGN = /^wardrobe\.(tab|editView|hero793|lq793|navDiag\.|dealtImgs|todayOpening|scroll|perf)/;
+  var _set = Storage.prototype.setItem, _rm = Storage.prototype.removeItem, _clr = Storage.prototype.clear;
+  Storage.prototype.setItem = function (k) { if (this === window.localStorage && !IGN.test(String(k))) ver++; return _set.apply(this, arguments); };
+  Storage.prototype.removeItem = function (k) { if (this === window.localStorage && !IGN.test(String(k))) ver++; return _rm.apply(this, arguments); };
+  Storage.prototype.clear = function () { ver++; return _clr.apply(this, arguments); };
+  window.outfitsDirty796 = function () { ver++; };
+  var ric = window.requestIdleCallback ? function (f, o) { return window.requestIdleCallback(f, o); } : function (f) { return setTimeout(function () { f({ timeRemaining: function () { return 50; } }); }, 200); };
+  var seen = {};
+  var VIEWS = { mine: "renderSaved", onyou: "renderInspoOnYou", icons: "renderIcons", palettes: "renderPlates", myinspo: "renderMyInspo" };
+  function wrap(n) {
+    var f = window[n];
+    if (typeof f !== "function" || f.__w796) return;
+    var w = function () { var r = f.apply(this, arguments); seen[n] = ver; return r; };
+    w.__w796 = 1; w.__orig = f;
+    window[n] = w;
+  }
+  Object.keys(VIEWS).forEach(function (k) { wrap(VIEWS[k]); });
+  function fresh(n) { return seen[n] === ver; }
+  function build(n) { var f = window[n]; if (typeof f === "function") { try { f(); } catch (e) {} } }
+  /* after the new state has painted: one frame, then a task */
+  function later(fn) { requestAnimationFrame(function () { setTimeout(fn, 0); }); }
+  function ensureSoon(n) { if (!fresh(n)) later(function () { if (!fresh(n)) build(n); }); }
+
+  window.syncOutfitsToggle = function () {
+    var isMine = window.outfitsMode !== "inspo";
+    var mine = document.getElementById("outfits-mine"), inspo = document.getElementById("outfits-inspo");
+    var mv = document.getElementById("outfits-mine-view"), iv = document.getElementById("outfits-inspo-view");
+    var osh = document.getElementById("outfits-shuffle");
+    if (mine) mine.setAttribute("aria-pressed", isMine ? "true" : "false");
+    if (inspo) inspo.setAttribute("aria-pressed", isMine ? "false" : "true");
+    if (mv) mv.hidden = !isMine;
+    if (osh) osh.hidden = !isMine;
+    if (iv) iv.hidden = isMine;
+    if (isMine) ensureSoon("renderSaved");
+    else window.showInspoView(window.inspoView || "icons");
+    if (typeof composerSyncFeed === "function") composerSyncFeed(false);
+    window.prelayOutfits796();
+  };
+  window.showInspoView = function (v) {
+    var host = document.getElementById("inspo-host");
+    if (!host) return;
+    window.inspoView = v;
+    ["onyou", "icons", "palettes", "myinspo"].forEach(function (n) {
+      var pn = document.getElementById("panel-" + n);
+      if (!pn) return;
+      if (pn.parentNode !== host) host.appendChild(pn);
+      if (pn.hidden !== (n !== v)) pn.hidden = n !== v;
+    });
+    document.querySelectorAll("[data-inspo-view]").forEach(function (b) {
+      var on = b.getAttribute("data-inspo-view") === v ? "true" : "false";
+      if (b.getAttribute("aria-pressed") !== on) b.setAttribute("aria-pressed", on);
+    });
+    if (VIEWS[v]) ensureSoon(VIEWS[v]);
+  };
+  /* while Outfits is on screen, lay out the views he is not looking at once, after paint */
+  var laid = {};
+  function prelay() {
+    var pl = document.getElementById("panel-looks");
+    if (!pl || pl.hidden) return;
+    ["outfits-mine-view", "outfits-inspo-view", "panel-onyou", "panel-icons", "panel-palettes", "panel-myinspo"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el || !el.hidden || laid[id] === ver) return;
+      if (id.indexOf("panel-") === 0 && el.parentNode && el.parentNode.id !== "inspo-host") return;
+      laid[id] = ver;
+      el.classList.add("pl796"); void el.offsetHeight; el.classList.remove("pl796");
+    });
+  }
+  window.prelayOutfits796 = function () { later(function () { ric(prelay, { timeout: 1500 }); }); };
+  /* build every list once on idle after boot, one per idle slot */
+  var order = ["mine", "icons", "onyou", "myinspo", "palettes"];
+  function step() {
+    var k = order.shift();
+    if (!k) return;
+    var n = VIEWS[k];
+    if (!fresh(n)) build(n);
+    ric(step, { timeout: 4000 });
+  }
+  setTimeout(function () { ric(step, { timeout: 4000 }); }, 4500);
 })();
     </script>
   </body>
