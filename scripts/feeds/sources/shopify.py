@@ -185,6 +185,8 @@ class ShopifyAdapter(SourceAdapter):
             return None  # sold out — do not ingest
         prices = [price_of(v["price"]) for v in avail]
         price = min(p for p in prices if p is not None)
+        if price is None or price <= 0:
+            return None
         compares = [price_of(v.get("compare_at_price")) for v in avail]
         was = min((c for c in compares if c and c > price), default=None)
 
@@ -202,14 +204,24 @@ class ShopifyAdapter(SourceAdapter):
 
         imgs = rec.get("images") or []
         img = ""
+        skip_img = ("sizechart", "size-chart", "size_chart", "sizecchart",
+                    "measurements", "garment-measurement", "lookbook-copy")
         if imgs:
-            img = imgs[0].get("src") or ""
+            usable = []
             for im in imgs:
                 src = im.get("src") or ""
+                alt = (im.get("alt") or "").lower()
                 low = src.lower()
-                if any(k in low for k in ("_1.", "flat", "front", "product", "-1.", "cutout", "ghost")):
-                    img = src
-                    break
+                if any(k in low or k in alt for k in skip_img):
+                    continue
+                usable.append(src)
+            if usable:
+                img = usable[0]
+                for src in usable:
+                    low = src.lower()
+                    if any(k in low for k in ("_1.", "flat", "front", "product", "-1.", "cutout", "ghost")):
+                        img = src
+                        break
         if not img:
             return None
 

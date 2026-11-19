@@ -64,12 +64,15 @@ FAMILY_HEX = {
 }
 
 WOMEN_RE = re.compile(
-    r"\b(women|woman|womens|ladies|donna|girl|female|kids|child|youth|maternity)\b",
+    r"\b(women|woman|womens|ladies|donna|femme|femmes|girl|female|kids?|kid's|child|children|youth|maternity|baby|infant|toddler|enfants?|doen by)\b",
     re.I,
 )
 # Drop junk / loud pieces. Swim trunks and bags are allowed separately.
 DROP_RE = re.compile(
-    r"\b(gift card|fragrance|perfume|candle|underwear|boxer brief|sock|hosiery|"
+    r"\b(gift card|fragrance|perfume|candle|underwear|boxer brief|boxer-brief|"
+    r"boxer shorts|boxers\b|sunglass lens|sunglasses lens|replacement lens|"
+    r"shoe care|cleaning kit|cleaning set|care kit|"
+    r"pajama|pyjama|nightshirt|sock|hosiery|"
     r"beanie|baseball cap|hat\b|scarf|glove|phone|airpod|umbrella|"
     r"shoe tree|shoetree|insole|laces\b|hoodie|sweatpants|joggers|track pant|"
     r"performance|athletic|running shoe|gym |nfl-|graphic tee|logo hoodie|"
@@ -148,15 +151,17 @@ def categorize(text: str, product_type: str = "") -> tuple[str | None, str | Non
         return "swim", "swim"
     if BAG_RE.search(t):
         return "bag", "bag"
-    if any(k in t for k in ("sunglass", "eyewear", "eye glass")):
+    if any(k in t for k in ("sunglass", "eyewear", "eye glass")) or (
+        re.search(r"\bsun\b", t) and (product_type or "").lower() in ("optical", "eyewear", "sunglasses", "sun")
+    ):
         return "sunglasses", "sunglasses"
-    if re.search(r"\bbelt\b", t):
+    if re.search(r"\b(belt|ceinture)\b", t):
         return "belt", "belt"
     if re.search(r"\b(tie|necktie|bow tie)\b", t) and "tipped" in t or re.search(r"\b(silk tie|wool tie|necktie|bow tie)\b", t):
         return "tie", "tie"
     if "tie" in (product_type or "").lower() and "shirt" not in t:
         return "tie", "tie"
-    if any(k in t for k in ("loafer", "penny", "tassel loafer", "venetian", "sagan", "slipper", "espadrille", "mule")):
+    if any(k in t for k in ("loafer", "penny", "tassel loafer", "venetian", "sagan", "slipper", "espadrille", "mule", "mocassin", "moccasin")):
         return "shoes", "loafer"
     if any(k in t for k in ("sneaker", "runner", "trainer", "tennis shoe")):
         return "shoes", "sneaker"
@@ -173,16 +178,19 @@ def categorize(text: str, product_type: str = "") -> tuple[str | None, str | Non
         return "jeans", "jeans"
     if "chino" in t or "officer pant" in t or "officer trouser" in t:
         return "trousers", "chinos"
-    if re.search(r"\bshorts\b", t) or re.search(r"\b(board|deck|chino|carry-on|cruiser)\s+short\b", t):
+    if re.search(r"\bshorts\b", t) or re.search(r"\bbermuda\b", t) or re.search(r"\b(board|deck|chino|carry-on|cruiser)\s+short\b", t):
         if not any(k in t for k in ("short sleeve", "short-sleeve", "sweater", "crew neck", "jacket", "blazer", "coat")):
             return "shorts", "shorts"
-    if any(k in t for k in ("trouser", "dress pant", "pantalon")) or re.search(r"\bpants\b", t) or product_type.lower() in ("pants", "trousers", "mens trousers"):
+    if any(k in t for k in ("trouser", "dress pant", "pantalon", "pantalone", "pantaloni")) or re.search(r"\bpants\b", t) or product_type.lower() in ("pants", "trousers", "mens trousers", "tailoring pts"):
         if "sweatpant" in t or "jogger" in t:
             return None, None
         if any(k in t for k in ("tuxedo", "dinner jacket", "suit set")):
             return None, None
         return "trousers", "trousers"
-    if any(k in t for k in ("blazer", "sport coat", "sportcoat", "suit jacket")):
+    if any(k in t for k in ("blazer", "sport coat", "sportcoat", "suit jacket", "veste de costume")):
+        return "blazer", "blazer"
+    if re.search(r"\bveste\b", t) and "chemise" not in t:
+        # Officine "Veste ross" etc. — jacket, not a knit vest
         return "blazer", "blazer"
     if any(k in t for k in ("overshirt", "shirt jacket", "shacket", "chore jacket")):
         return "shirt", "overshirt"
@@ -192,9 +200,9 @@ def categorize(text: str, product_type: str = "") -> tuple[str | None, str | Non
         return "outerwear", "outerwear"
     if "polo" in t or "rugby" in t:
         return "knitwear", "polo"
-    if any(k in t for k in ("sweater", "jumper", "cardigan", "crewneck", "crew neck", "rollneck", "turtleneck", "cashmere knit", "knitwear")):
+    if any(k in t for k in ("sweater", "jumper", "cardigan", "crewneck", "crew neck", "rollneck", "turtleneck", "cashmere knit", "knitwear", "pull-over", "pullover")) or re.search(r"\bpull\b", t):
         return "knitwear", "knitwear"
-    if any(k in t for k in ("shirt", "overshirt", "oxford", "camp collar", "popover")):
+    if any(k in t for k in ("shirt", "overshirt", "oxford", "camp collar", "popover", "chemise")):
         return "shirt", "shirt"
     return None, None
 

@@ -1,226 +1,456 @@
-# Curated Shopify sources for The Edit.
-# Only stores with verified public /products.json?limit=250&page=N are enabled.
-# Re-run scripts/feeds/shopify_pull.py --probe to refresh the verified flag.
-# Affiliate networks are listed under `affiliates` and stay disabled until
-# credentials exist in the environment — never commit tokens.
-
 shopify:
-  delay_seconds: 3.0          # polite pause between page requests
-  store_delay_seconds: 5.0    # pause between stores
+  delay_seconds: 3.0
+  store_delay_seconds: 5.0
   page_limit: 8
-  user_agent: "DonnaCatalogBot/1.0 (+https://dyacobs-tech.github.io/wardrobe/; catalog research)"
+  user_agent: DonnaCatalogBot/1.0 (+https://dyacobs-tech.github.io/wardrobe/; catalog research)
   respect_robots: true
   stores:
-    # --- verified (returned a product list on 2026-11-19) ---
-    - id: kiton
-      brand: Kiton
-      retailer: Kiton
-      base: https://us.kiton.com
-      currency: USD
-      enabled: true
-      verified: "2026-11-19"
-      taste: luxury
-      cap: 40
-    - id: sunspel
-      brand: Sunspel
-      retailer: Sunspel US
-      base: https://us.sunspel.com
-      currency: USD
-      enabled: true
-      verified: "2026-11-19"
-      taste: contemporary
-      cap: 30
-    - id: alexmill
-      brand: Alex Mill
-      retailer: Alex Mill
-      base: https://alexmill.com
-      currency: USD
-      enabled: true
-      verified: "2026-11-19"
-      taste: contemporary
-      cap: 20
-    - id: velasca
-      brand: Velasca
-      retailer: Velasca
-      base: https://www.velasca.com
-      currency: USD
-      enabled: true
-      verified: "2026-11-19"
-      taste: contemporary
-      cap: 20
-    - id: corridor
-      brand: Corridor
-      retailer: Corridor
-      base: https://www.corridornyc.com
-      currency: USD
-      enabled: true
-      verified: "2026-11-19"
-      taste: contemporary
-      cap: 20
-    - id: poolhouse
-      brand: Pool House New York
-      retailer: Pool House New York
-      base: https://www.poolhousenewyork.com
-      currency: USD
-      enabled: true
-      verified: "2026-11-19"
-      taste: palm-beach
-      cap: 20
-    - id: stoffa
-      brand: Stoffa
-      retailer: Stoffa
-      base: https://stoffa.co
-      currency: USD
-      enabled: true
-      verified: "2026-11-19"
-      taste: luxury
-      cap: 15
-    - id: stubbs
-      brand: Stubbs & Wootton
-      retailer: Stubbs & Wootton
-      base: https://www.stubbsandwootton.com
-      currency: USD
-      enabled: true
-      verified: "2026-11-19"
-      taste: palm-beach
-      cap: 12
-    - id: baudoin
-      brand: Baudoin & Lange
-      retailer: Baudoin & Lange
-      base: https://www.baudoinlange.com
-      currency: GBP
-      enabled: true
-      verified: "2026-11-19"
-      taste: luxury
-      cap: 12
-    - id: drakes
-      brand: Drake's
-      retailer: Drake's
-      base: https://www.drakes.com
-      currency: USD
-      enabled: true
-      verified: "2026-11-19"
-      taste: luxury
-      cap: 30
-    - id: aspesi
-      brand: Aspesi
-      retailer: Aspesi
-      base: https://www.aspesi.com
-      currency: EUR
-      enabled: true
-      verified: "2026-11-19"
-      taste: luxury
-      cap: 15
-    - id: merz
-      brand: Merz b. Schwanen
-      retailer: Merz b. Schwanen
-      base: https://www.merzbschwanen.com
-      currency: EUR
-      enabled: true
-      verified: "2026-11-19"
-      taste: contemporary
-      cap: 12
-    - id: vibi
-      brand: Vibi Venezia
-      retailer: Vibi Venezia
-      base: https://www.vibivenezia.it
-      currency: EUR
-      enabled: true
-      verified: "2026-11-19"
-      taste: luxury
-      cap: 12
-    - id: rubato
-      brand: Rubato
-      retailer: Rubato
-      base: https://www.rubatostore.com
-      currency: USD
-      enabled: true
-      verified: "2026-11-19"
-      taste: luxury
-      cap: 15
-    - id: ogier
-      brand: Ogier
-      retailer: Ogier
-      base: ""   # confirm store hostname before enabling
-      currency: USD
-      enabled: false
-      verified: "2026-11-19"
-      taste: luxury
-      cap: 10
-      note: "products.json was observed; confirm the public hostname before enabling."
-    # verified live 2026-11-19; taste filter is strict (drop loud/logo)
-    - id: fearofgod
-      brand: Fear of God
-      retailer: Fear of God
-      base: https://fearofgod.com
-      currency: USD
-      enabled: false
-      verified: "2026-11-19"
-      taste: contemporary
-      cap: 10
-      note: "Enable only for quieter pieces; many SKUs are logo-heavy."
-
-    # --- listed for David's taste, disabled until products.json is confirmed ---
-    - {id: orlebar, brand: Orlebar Brown, base: https://www.orlebarbrown.com, currency: USD, enabled: false, verified: null, taste: palm-beach}
-    - {id: frescobol, brand: Frescobol Carioca, base: https://www.frescobolcarioca.com, currency: USD, enabled: false, verified: null, taste: palm-beach}
-    - {id: thomsweeney, brand: Thom Sweeney, base: https://www.thomsweeney.com, currency: USD, enabled: false, verified: null, taste: luxury}
-    - {id: reigningchamp, brand: Reigning Champ, base: https://www.reigningchamp.com, currency: USD, enabled: false, verified: null, taste: contemporary}
-    - {id: rhude, brand: Rhude, base: https://www.rhude.com, currency: USD, enabled: false, verified: null, taste: contemporary}
-    - {id: essentials, brand: Essentials, base: https://essentials.fearofgod.com, currency: USD, enabled: false, verified: null, taste: contemporary}
-    - {id: faherty, brand: Faherty, base: https://fahertybrand.com, currency: USD, enabled: false, verified: null, taste: palm-beach}
-    - {id: derekrose, brand: Derek Rose, base: https://www.derek-rose.com, currency: GBP, enabled: false, verified: null, taste: luxury}
-    - {id: cdlp, brand: CDLP, base: https://cdlp.com, currency: USD, enabled: false, verified: null, taste: palm-beach}
-    - {id: norse, brand: Norse Projects, base: https://www.norseprojects.com, currency: USD, enabled: false, verified: null, taste: contemporary}
-    - {id: johnsmedley, brand: John Smedley, base: https://www.johnsmedley.com, currency: GBP, enabled: false, verified: null, taste: luxury}
-    - {id: pwvc, brand: Private White V.C., base: https://www.privatewhitevc.com, currency: GBP, enabled: false, verified: null, taste: luxury}
-    - {id: jamesperse, brand: James Perse, base: https://www.jamesperse.com, currency: USD, enabled: false, verified: null, taste: palm-beach}
-    - {id: outerknown, brand: Outerknown, base: https://www.outerknown.com, currency: USD, enabled: false, verified: null, taste: palm-beach}
-    - {id: officine, brand: Officine Générale, base: https://www.officinegenerale.com, currency: USD, enabled: false, verified: null, taste: contemporary}
-    - {id: percival, brand: Percival, base: https://www.percivalclo.com, currency: GBP, enabled: false, verified: null, taste: contemporary}
-    - {id: garrettleight, brand: Garrett Leight, base: https://www.garrettleight.com, currency: USD, enabled: false, verified: null, taste: contemporary}
-    - {id: moscot, brand: MOSCOT, base: https://www.moscot.com, currency: USD, enabled: false, verified: null, taste: contemporary}
-    - {id: raen, brand: RAEN, base: https://www.raen.com, currency: USD, enabled: false, verified: null, taste: palm-beach}
-    - {id: ahlem, brand: AHLEM, base: https://ahlemeyewear.com, currency: USD, enabled: false, verified: null, taste: luxury}
-    - {id: morjas, brand: Morjas, base: https://www.morjas.com, currency: USD, enabled: false, verified: null, taste: contemporary}
-    - {id: koio, brand: Koio, base: https://www.koio.co, currency: USD, enabled: false, verified: null, taste: contemporary}
-    - {id: bennettwinch, brand: Bennett Winch, base: https://www.bennettwinch.com, currency: GBP, enabled: false, verified: null, taste: luxury}
-
+  - id: kiton
+    brand: Kiton
+    retailer: Kiton
+    base: https://us.kiton.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: luxury
+    cap: 40
+  - id: sunspel
+    brand: Sunspel
+    retailer: Sunspel US
+    base: https://us.sunspel.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    cap: 30
+  - id: alexmill
+    brand: Alex Mill
+    retailer: Alex Mill
+    base: https://alexmill.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    cap: 20
+  - id: velasca
+    brand: Velasca
+    retailer: Velasca
+    base: https://www.velasca.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    cap: 20
+  - id: corridor
+    brand: Corridor
+    retailer: Corridor
+    base: https://www.corridornyc.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    cap: 20
+  - id: poolhouse
+    brand: Pool House New York
+    retailer: Pool House New York
+    base: https://www.poolhousenewyork.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: palm-beach
+    cap: 20
+  - id: stoffa
+    brand: Stoffa
+    retailer: Stoffa
+    base: https://stoffa.co
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: luxury
+    cap: 15
+  - id: stubbs
+    brand: Stubbs & Wootton
+    retailer: Stubbs & Wootton
+    base: https://www.stubbsandwootton.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: palm-beach
+    cap: 12
+  - id: baudoin
+    brand: Baudoin & Lange
+    retailer: Baudoin & Lange
+    base: https://www.baudoinlange.com
+    currency: GBP
+    enabled: true
+    verified: '2026-11-19'
+    taste: luxury
+    cap: 12
+  - id: drakes
+    brand: Drake's
+    retailer: Drake's
+    base: https://www.drakes.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: luxury
+    cap: 30
+  - id: aspesi
+    brand: Aspesi
+    retailer: Aspesi
+    base: https://www.aspesi.com
+    currency: EUR
+    enabled: true
+    verified: '2026-11-19'
+    taste: luxury
+    cap: 15
+  - id: merz
+    brand: Merz b. Schwanen
+    retailer: Merz b. Schwanen
+    base: https://www.merzbschwanen.com
+    currency: EUR
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    cap: 12
+  - id: vibi
+    brand: Vibi Venezia
+    retailer: Vibi Venezia
+    base: https://www.vibivenezia.it
+    currency: EUR
+    enabled: true
+    verified: '2026-11-19'
+    taste: luxury
+    cap: 12
+  - id: rubato
+    brand: Rubato
+    retailer: Rubato
+    base: https://www.rubatostore.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: luxury
+    cap: 15
+  - id: ogier
+    brand: Ogier
+    retailer: Ogier
+    base: ''
+    currency: USD
+    enabled: false
+    verified: '2026-11-19'
+    taste: luxury
+    cap: 10
+    note: products.json was observed; confirm the public hostname before enabling.
+  - id: fearofgod
+    brand: Fear of God
+    retailer: Fear of God
+    base: https://fearofgod.com
+    currency: USD
+    enabled: false
+    verified: '2026-11-19'
+    taste: contemporary
+    cap: 10
+    note: Enable only for quieter pieces; many SKUs are logo-heavy.
+  - id: orlebar
+    brand: Orlebar Brown
+    base: https://www.orlebarbrown.com
+    currency: GBP
+    enabled: true
+    verified: '2026-11-19'
+    taste: palm-beach
+    retailer: Orlebar Brown
+    cap: 40
+  - id: frescobol
+    brand: Frescobol Carioca
+    base: https://www.frescobolcarioca.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: palm-beach
+    retailer: Frescobol Carioca
+    cap: 35
+  - id: thomsweeney
+    brand: Thom Sweeney
+    base: https://www.thomsweeney.com
+    currency: GBP
+    enabled: true
+    verified: '2026-11-19'
+    taste: luxury
+    retailer: Thom Sweeney
+    cap: 25
+    note: products.json is live; first page is mostly socks which the normalizer drops. Revisit after
+      a menswear collection page pull.
+  - id: reigningchamp
+    brand: Reigning Champ
+    base: https://www.reigningchamp.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    retailer: Reigning Champ
+    cap: 25
+  - id: rhude
+    brand: Rhude
+    base: https://www.rhude.com
+    currency: USD
+    enabled: false
+    verified: null
+    taste: contemporary
+  - id: essentials
+    brand: Essentials
+    base: https://essentials.fearofgod.com
+    currency: USD
+    enabled: false
+    verified: null
+    taste: contemporary
+  - id: faherty
+    brand: Faherty
+    base: https://fahertybrand.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: palm-beach
+    retailer: Faherty
+    cap: 35
+  - id: derekrose
+    brand: Derek Rose
+    base: https://www.derek-rose.com
+    currency: GBP
+    enabled: true
+    verified: '2026-11-19'
+    taste: luxury
+    retailer: Derek Rose
+    cap: 10
+  - id: cdlp
+    brand: CDLP
+    base: https://cdlp.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: palm-beach
+    retailer: CDLP
+    cap: 15
+  - id: norse
+    brand: Norse Projects
+    base: https://www.norseprojects.com
+    currency: USD
+    enabled: false
+    verified: null
+    taste: contemporary
+  - id: johnsmedley
+    brand: John Smedley
+    base: https://www.johnsmedley.com
+    currency: GBP
+    enabled: false
+    verified: null
+    taste: luxury
+    note: HTTP 429 after long backoff on 2026-11-19; retry later
+  - id: pwvc
+    brand: Private White V.C.
+    base: https://www.privatewhitevc.com
+    currency: GBP
+    enabled: false
+    verified: null
+    taste: luxury
+  - id: jamesperse
+    brand: James Perse
+    base: https://www.jamesperse.com
+    currency: USD
+    enabled: false
+    verified: null
+    taste: palm-beach
+  - id: outerknown
+    brand: Outerknown
+    base: https://www.outerknown.com
+    currency: USD
+    enabled: false
+    verified: null
+    taste: palm-beach
+  - id: officine
+    brand: Officine Générale
+    base: https://www.officinegenerale.com
+    currency: EUR
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    retailer: Officine Générale
+    cap: 30
+  - id: percival
+    brand: Percival
+    base: https://www.percivalclo.com
+    currency: GBP
+    enabled: false
+    verified: null
+    taste: contemporary
+  - id: garrettleight
+    brand: Garrett Leight
+    base: https://www.garrettleight.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    retailer: Garrett Leight
+    cap: 15
+  - id: moscot
+    brand: MOSCOT
+    base: https://www.moscot.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    retailer: MOSCOT
+    cap: 12
+  - id: raen
+    brand: RAEN
+    base: https://www.raen.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: palm-beach
+    retailer: RAEN
+    cap: 15
+  - id: ahlem
+    brand: AHLEM
+    base: https://ahlemeyewear.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: luxury
+    retailer: AHLEM
+    cap: 12
+  - id: morjas
+    brand: Morjas
+    base: https://www.morjas.com
+    currency: USD
+    enabled: false
+    verified: null
+    taste: contemporary
+  - id: koio
+    brand: Koio
+    base: https://www.koio.co
+    currency: USD
+    enabled: false
+    verified: null
+    taste: contemporary
+  - id: bennettwinch
+    brand: Bennett Winch
+    base: https://www.bennettwinch.com
+    currency: GBP
+    enabled: false
+    verified: null
+    taste: luxury
+  - id: taylorstitch
+    brand: Taylor Stitch
+    retailer: Taylor Stitch
+    base: https://www.taylorstitch.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    cap: 30
+  - id: mackweldon
+    brand: Mack Weldon
+    retailer: Mack Weldon
+    base: https://www.mackweldon.com
+    currency: USD
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    cap: 20
+  - id: oliverspencer
+    brand: Oliver Spencer
+    retailer: Oliver Spencer
+    base: https://www.oliverspencer.co.uk
+    currency: GBP
+    enabled: true
+    verified: '2026-11-19'
+    taste: contemporary
+    cap: 20
+  - id: rhone
+    brand: Rhone
+    base: https://www.rhone.com
+    currency: USD
+    enabled: false
+    verified: null
+    note: products.json HTTP 403 on 2026-11-19
+  - id: toddsnyder
+    brand: Todd Snyder
+    base: https://www.toddsnyder.com
+    currency: USD
+    enabled: false
+    verified: null
+    note: products.json HTTP 403 on 2026-11-19
+  - id: sidmashburn
+    brand: Sid Mashburn
+    base: https://www.sidmashburn.com
+    currency: USD
+    enabled: false
+    verified: null
+    note: products.json returned empty on 2026-11-19
+  - id: propercloth
+    brand: Proper Cloth
+    base: https://propercloth.com
+    currency: USD
+    enabled: false
+    verified: null
+    note: products.json 404 on 2026-11-19
+  - id: vilebrequin
+    brand: Vilebrequin
+    base: https://www.vilebrequin.com
+    currency: USD
+    enabled: false
+    verified: null
+    note: products.json 404 on 2026-11-19
+  - id: buckmason
+    brand: Buck Mason
+    base: https://www.buckmason.com
+    currency: USD
+    enabled: false
+    verified: null
+    note: no public products.json (known); original catalog used colorway markdown
 affiliates:
-  # All disabled by default. Adapters skip cleanly when the env vars are unset.
-  # Do not apply to any network or create accounts from this pipeline.
-  - id: rakuten
-    adapter: rakuten
-    enabled: false
-    env: [RAKUTEN_TOKEN]
-  - id: cj
-    adapter: cj
-    enabled: false
-    env: [CJ_API_KEY]
-  - id: impact
-    adapter: impact
-    enabled: false
-    env: [IMPACT_SID, IMPACT_TOKEN]
-  - id: awin
-    adapter: awin
-    enabled: false
-    env: [AWIN_API_KEY, AWIN_PUBLISHER_ID]
-  - id: partnerize
-    adapter: partnerize
-    enabled: false
-    env: [PARTNERIZE_USER_KEY, PARTNERIZE_API_KEY]
-    note: "Mr Porter, SSENSE and Farfetch US programmes. Not applied."
-  - id: shopstyle
-    adapter: aggregator
-    network: shopstyle
-    enabled: false
-    env: [SHOPSTYLE_API_KEY]
-  - id: skimlinks
-    adapter: aggregator
-    network: skimlinks
-    enabled: false
-    env: [SKIMLINKS_API_KEY, SKIMLINKS_PUBLISHER_ID]
-  - id: generic_csv
-    adapter: csv_xml
-    enabled: false
-    # No credentials. Point at a local or URL feed when enabling:
-    # feed: /path/or/https://example.com/feed.csv
+- id: rakuten
+  adapter: rakuten
+  enabled: false
+  env:
+  - RAKUTEN_TOKEN
+- id: cj
+  adapter: cj
+  enabled: false
+  env:
+  - CJ_API_KEY
+- id: impact
+  adapter: impact
+  enabled: false
+  env:
+  - IMPACT_SID
+  - IMPACT_TOKEN
+- id: awin
+  adapter: awin
+  enabled: false
+  env:
+  - AWIN_API_KEY
+  - AWIN_PUBLISHER_ID
+- id: partnerize
+  adapter: partnerize
+  enabled: false
+  env:
+  - PARTNERIZE_USER_KEY
+  - PARTNERIZE_API_KEY
+  note: Mr Porter, SSENSE and Farfetch US programmes. Not applied.
+- id: shopstyle
+  adapter: aggregator
+  network: shopstyle
+  enabled: false
+  env:
+  - SHOPSTYLE_API_KEY
+- id: skimlinks
+  adapter: aggregator
+  network: skimlinks
+  enabled: false
+  env:
+  - SKIMLINKS_API_KEY
+  - SKIMLINKS_PUBLISHER_ID
+- id: generic_csv
+  adapter: csv_xml
+  enabled: false

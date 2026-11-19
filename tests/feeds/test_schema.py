@@ -30,6 +30,11 @@ def test_filters():
     assert is_women("Pleated Skirt", None, "WOMEN_TROUSERS_SS26")
     assert is_drop("Scented Candle")
     assert not is_drop("Olive Swim Trunks", "Swim")
+    assert is_drop("Boxer Shorts", "Underwear")
+    assert is_drop("Grey Polarized Sunglass Lens")
+    assert is_drop("Attirecare Shoe Care Cleaning Kit 250ml")
+    assert not is_drop("Swim Brief Box Cut", "Swim")
+    assert is_women("DOEN BY GARRETT LEIGHT INGENUE SUN")
 
 
 def test_validate_and_serialize():
