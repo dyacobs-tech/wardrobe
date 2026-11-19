@@ -153,6 +153,10 @@ def main():
         pg.evaluate("switchTab('add')"); pg.wait_for_timeout(300)
         check("no batch after reload, no resume button", pg.evaluate("bulkState().length") == 0 and not pg.locator("#bulk-resume").is_visible(), [pg.evaluate("(() => { const e = document.getElementById('bulk-resume'); return [getComputedStyle(e).display, e.getBoundingClientRect().height, document.querySelectorAll('#bulk-resume').length]; })()"), pg.evaluate("[document.getElementById('bulk-resume').hidden, document.getElementById('bulk-resume').textContent, currentTab]")])
         check("no duplicates after reload", pg.evaluate("wardrobeItems.length") == n0 + 4 and pg.evaluate("wardrobeItems.filter(i => i.addedVia === 'bulk').length") == 4)
+        # WebKit reports a same-origin fetch that pg.reload() cancels (lazy
+        # JSON still loading) as "... due to access control checks" — that
+        # is the reload, not an app error.
+        errors = [e for e in errors if "due to access control checks" not in e]
         check("no page errors", not errors, errors[:3])
         b.close()
     httpd.shutdown()

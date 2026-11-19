@@ -131,8 +131,9 @@ def main():
 
         # LRU cap: images carry size/time stamps; a trim to half the bytes drops the oldest
         pg.reload(wait_until="load"); pg.wait_for_timeout(5000)
-        lru = pg.evaluate("""async () => {
-          const c = await caches.open('wardrobe-onbody-v2'); let ks = await c.keys();
+        onbody = re.search(r"ONBODY_CACHE = NS \+ '([^']+)'", (ROOT / "sw.js").read_text()).group(1)
+        lru = pg.evaluate("""async (name) => {
+          const c = await caches.open(name); let ks = await c.keys();
           const rs = await Promise.all(ks.map(k => c.match(k)));
           const sizes = rs.map(r => +(r.headers.get('x-sw-size') || 0));
           const total = sizes.reduce((a, b) => a + b, 0);
@@ -143,7 +144,7 @@ def main():
           const r = await Promise.race([done, new Promise(res => setTimeout(() => res(null), 8000))]);
           const after = (await c.keys()).length;
           return { before, after, stamped: sizes.filter(x => x > 0).length, total, r };
-        }""")
+        }""", onbody)
         check("LRU: cached images are size/time stamped", lru["before"] > 0 and lru["stamped"] == lru["before"], lru)
         check("LRU: a trim below the cap drops the oldest images", lru["r"] is not None and lru["after"] < lru["before"], lru)
 
