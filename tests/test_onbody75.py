@@ -29,7 +29,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-19.78.8"
+BUILD = "2026-11-19.78.8a"
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:18975/"
 
 
@@ -99,9 +99,9 @@ def main():
         home = pg.evaluate("""() => {
           const c = document.getElementById('today-collage');
           /* .78.2c: the Home hero is the render itself (#today-img), no collage */
-          const im0 = document.getElementById('today-img'); const im = im0 && !im0.hidden && /\/onbody\//.test(im0.getAttribute('src') || '') ? im0 : null;
+          const im0 = document.getElementById('today-img'); const im = im0 && !im0.hidden && /\/onbody\//.test(im0.getAttribute('data-render') || im0.getAttribute('src') || '') ? im0 : null;
           const ids = (todayLook && todayLook.fwPieces || []).map(p => p.id);
-          return { src: im ? im.getAttribute('src') : null, ok: im ? (im.complete && im.naturalWidth > 0) : false,
+          return { src: im ? (im.getAttribute('data-render') || im.getAttribute('src')) : null, ok: im ? (im.complete && im.naturalWidth > 0) : false,
                    key: todayLook && todayLook.composerKey, ids, seed: ids.filter(i => String(i).indexOf('seed-') === 0).length,
                    sw: c ? c.querySelectorAll('.fl-swatch').length : -1 };
         }""")

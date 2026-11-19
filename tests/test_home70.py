@@ -53,6 +53,10 @@ HOME_JS = """() => {
     root.querySelectorAll('button, a, h1, h2, p, img, [role="button"], [role="menuitem"], .today-caption, .hero-controls, .hero-icon-row, .today-watch-row, .cdd-btn').forEach((el) => {
       if (!vis(el)) return;
       if (el.closest && el.closest('.cdd-menu') && el.closest('.cdd-menu').hidden) return;
+      /* .78.7c: the full-bleed hero layers (backdrop, and the caption's dark
+         band that runs under the nav) are decoration, not controls */
+      if (el.closest && el.closest('.hero-bg')) return;
+      if (el.classList && el.classList.contains('today-caption') && el.closest('.hero-solo')) return;
       const r = el.getBoundingClientRect();
       controls.push({
         id: el.id || el.className.toString().slice(0, 40),
@@ -259,7 +263,7 @@ def main() -> int:
                 info = page.evaluate(HOME_JS)
                 check(
                     f"{name}: build is .71",
-                    info and info.get("build") == "2026-11-19.78.8",
+                    info and info.get("build") == "2026-11-19.78.8a",
                     str(info and info.get("build")),
                 )
                 check(

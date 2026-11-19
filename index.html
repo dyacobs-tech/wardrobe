@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.8" />
+    <meta name="wardrobe-build" content="2026-11-19.78.8a" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5341,7 +5341,7 @@
       <!-- ================= TODAY — OUTFIT OF THE DAY ================= -->
       <section id="panel-today" role="tabpanel" aria-labelledby="tab-today">
         <div class="today-hero" id="today-hero">
-          <img id="today-img" src="assets/photos/9a543e585d8b.webp" alt="" fetchpriority="high" decoding="async" />
+          <img id="today-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" fetchpriority="high" decoding="async" />
           <div class="today-collage" id="today-collage" hidden></div>
           <div class="today-shade" aria-hidden="true"></div>
           <!-- Build .38 (2.12): the two lookalike corner glyphs are
@@ -6498,7 +6498,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.8</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.8a</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8052,7 +8052,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.8";
+var WARDROBE_BUILD = "2026-11-19.78.8a";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -38874,7 +38874,46 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     } catch (e) { return true; }
   }
   document.addEventListener("click", function (e) { if (e.target && e.target.closest && e.target.closest("#today-next, #today-dislike, #ov-next, #ov-dislike")) userDeal782 = true; }, true);
+  /* .78.7c: no account data (fresh browser, built-in looks only), or
+     no look at all — never his old mirror selfie, never a letterbox:
+     one of his on-body cut-outs on the walnut closet backdrop */
+  var SELFIE782 = /assets\/photos\/9a543e585d8b\./;
+  function guestMode782() {
+    if (typeof todayLook === "undefined" || !todayLook) return true;
+    if (String(todayLook.id || "").indexOf("seed-") === 0 && !(todayLook.fwPieces && todayLook.fwPieces.length)) return true;
+    try { return !homeOwnedPhotoPieces742().own.length; } catch (e) { return false; }
+  }
+  var gOff782 = 0;
+  function guestSrc782() {
+    var C = typeof window.cutManifest784 === "function" ? window.cutManifest784() : null;
+    var keys = C && C.map ? Object.keys(C.map).sort() : [];
+    var day = typeof localTodayISO === "function" ? localTodayISO() : new Date().toISOString().slice(0, 10), h = 0;
+    for (var i = 0; i < day.length; i++) h = (h * 31 + day.charCodeAt(i)) >>> 0;
+    h += gOff782;
+    if (keys.length) { var k = keys[h % keys.length]; return { cut: C.map[k], render: "assets/onbody/" + k + ".webp" }; }
+    var rs = typeof ONBODY !== "undefined" && ONBODY.map ? Object.keys(ONBODY.map).sort().map(function (x) { return ONBODY.map[x]; }) : [];
+    return rs.length ? { cut: "", render: rs[h % rs.length] } : null;
+  }
+  function guestHero782() {
+    if (userDeal782) { gOff782++; userDeal782 = false; }
+    var g = guestSrc782(); if (!g) return false;
+    var before = hero.classList.contains("hero-solo") ? img.getAttribute("src") : null;
+    if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
+    var shown = g.cut || g.render;
+    hero.classList.toggle("has-cut", !!g.cut);
+    hero.classList.add("hero-solo", "hero-guest");
+    img.setAttribute("data-render", g.render);
+    if (img.getAttribute("src") !== shown) img.setAttribute("src", shown);
+    img.hidden = false; img.alt = "David in a look from his closet";
+    var nm = document.getElementById("today-name"); if (nm && !nm.textContent.trim()) nm.textContent = "From your closet";
+    sampleBg(g.render, hero); placeHero();
+    if (before && before !== shown && !/^data:/.test(before)) crossfade(before);
+    return true;
+  }
+  window.guestHero782 = function () { try { if (guestMode782()) return guestHero782(); } catch (e) {} return false; };
   function soloHero() {
+    hero.classList.remove("hero-guest");
+    if (guestMode782() && guestHero782()) return;
     if (typeof todayLook === "undefined" || !todayLook) return;
     var src = renderFor(todayLook);
     /* .78.2c: a render he gave a thumbs-down never comes back */
@@ -38892,8 +38931,10 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       /* nothing rendered to show: one photo, never a tile grid */
       if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
       var fb = (typeof lookImg === "function" && lookImg(todayLook)) || "";
+      if (SELFIE782.test(fb)) fb = "";
       if (!fb || /^data:image\/svg/.test(fb)) { var pp = piecesOf(todayLook).map(photoOf).filter(Boolean); fb = pp[0] || fb; }
       if (fb && img.getAttribute("src") !== fb) img.setAttribute("src", fb);
+      img.removeAttribute("data-render"); hero.classList.remove("has-cut");
       hero.classList.add("hero-solo");
       img.hidden = false; placeHero(); return;
     }
@@ -39137,12 +39178,14 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
         if (!ingestCut(j) || !Object.keys(CUT.map).length) return;
         if (CUT.backdrop) { var b = new Image(); b.decoding = "async"; b.src = CUT.backdrop; }
         if (typeof renderToday === "function" && typeof todayLook !== "undefined" && todayLook) try { renderToday(); } catch (e) {}
+        if (typeof window.guestHero782 === "function") window.guestHero782();
       }).catch(function () {});
     } catch (e) {}
   }
   window.cutManifest784 = function () { return CUT; };
   window.ingestCut784 = ingestCut;
   setTimeout(loadCuts, 0);
+  setTimeout(function () { if (typeof window.guestHero782 === "function") window.guestHero782(); }, 0);
   document.addEventListener("visibilitychange", function () { if (!document.hidden && !CUT.map) loadCuts(); });
   function backdrop(src) {
     var o = ""; try { o = localStorage.getItem(BD_KEY) || ""; } catch (e) {}

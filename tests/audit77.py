@@ -24,7 +24,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path("/workspace/wardrobe-audit/build-77")
-BUILD = "2026-11-19.78.8"
+BUILD = "2026-11-19.78.8a"
 BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 EDIT_FX = json.loads((Path(__file__).resolve().parent / "fixture_edit76.json").read_text())
 _LIVE83 = Path("/workspace/wardrobe-audit/build-75/fixture_live83.json")
@@ -839,7 +839,7 @@ def page_pass(checks: list[dict], clicks: dict | None) -> bool:
 
 def write_table(rows: list[dict], path: Path) -> str:
     # rows: {viewport, theme, slug, label, pass, checks, clicks}
-    lines = ["# Build 2026-11-19.78.8 audit", "", "| Page | Viewport | Theme | Result | Failing checks |",
+    lines = ["# Build 2026-11-19.78.8a audit", "", "| Page | Viewport | Theme | Result | Failing checks |",
              "|---|---|---|---|---|"]
     for r in rows:
         fails = [c["check"] + (f" ({c['detail']})" if c.get("detail") else "") for c in r["checks"] if not c["pass"]]
