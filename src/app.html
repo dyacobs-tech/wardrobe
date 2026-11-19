@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="DONNA" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.82.2" />
+    <meta name="wardrobe-build" content="2026-11-19.82.3" />
     <script>
 /* Preview .81 guard: on the /preview/ build (or ?pv81 locally) the app is
    read-only toward the outside — nothing is written to sync or the render
@@ -6224,6 +6224,67 @@
       .en-card .ob-figure.en-render, .en-card .onbody-split, .en-card .ob-pieces { background: #F6F2EA !important; }
       .en-card .ob-figure.en-render img { object-fit: contain; }
       #panel-looks .cf-actions { justify-content: center; }
+
+      /* ===== Preview .81.2 — The Edit > Curate ===== */
+      #panel-find .edit-section-tabs { margin: 4px 0 10px !important; }
+      #panel-find .edit-section-tabs .chip[aria-pressed="true"],
+      #panel-find .curate-subs .chip[aria-pressed="true"],
+      #cw-levels [data-cw-level][aria-pressed="true"] {
+        background: var(--honey-nav, #C29E74) !important;
+        color: #1A1612 !important;
+        border-color: var(--honey-nav, #C29E74) !important;
+      }
+      html[data-theme="dark"] #panel-find .edit-section-tabs .chip[aria-pressed="true"],
+      html[data-theme="dark"] #panel-find .curate-subs .chip[aria-pressed="true"],
+      html[data-theme="dark"] #cw-levels [data-cw-level][aria-pressed="true"] {
+        color: #1A1612 !important;
+      }
+      #panel-find .edit-shop-tabs[hidden], #edit-v-curate[hidden],
+      #curate-weights[hidden], #panel-find #panel-icons[hidden],
+      #panel-find #panel-palettes[hidden] { display: none !important; }
+      #edit-v-curate { max-width: 720px; margin: 0 auto; }
+      #panel-find .curate-subs { margin: 0 0 14px !important; }
+      #curate-pages #panel-icons, #curate-pages #panel-palettes { padding: 0; margin: 0; }
+      .curate-weights {
+        background: var(--surface, #fff);
+        border: 1px solid var(--border, rgba(26,22,18,.12));
+        border-radius: 16px;
+        padding: 14px 14px 10px;
+        margin: 0 0 18px;
+      }
+      .cw-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; margin: 0 0 10px; }
+      .cw-kicker { margin: 0; font: 600 12px var(--font-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+      .cw-all { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--text); cursor: pointer; min-height: 44px; }
+      .cw-all input { width: 18px; height: 18px; accent-color: var(--honey-nav, #C29E74); }
+      #cw-levels { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0 0 12px; }
+      #cw-levels [data-cw-level] {
+        height: 34px; min-height: 34px; padding: 0 12px; border-radius: 999px;
+        border: 1px solid var(--border-strong, rgba(26,22,18,.18));
+        background: var(--surface, #fff); color: var(--text);
+        font: 600 12.5px var(--font-ui); letter-spacing: .02em; cursor: pointer; white-space: nowrap;
+      }
+      #cw-levels[aria-disabled="true"] [data-cw-level] { opacity: .45; cursor: default; }
+      .cw-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) minmax(120px, 1.4fr) 36px; align-items: center; gap: 8px 10px; padding: 6px 0; min-height: 44px; }
+      .cw-row + .cw-row { border-top: 1px solid var(--border, rgba(26,22,18,.08)); }
+      .cw-av { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; object-position: center 18%; background: #E9E2D4; display: block; }
+      .cw-name { font: 600 14px/1.2 var(--font-ui); color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .cw-row input[type="range"] { width: 100%; accent-color: var(--honey-nav, #C29E74); height: 28px; }
+      .cw-val { font: 600 12px var(--font-ui); color: var(--dim); text-align: right; letter-spacing: .02em; }
+      .cw-note { margin: 10px 2px 4px; font-size: 12.5px; line-height: 1.45; color: var(--dim); }
+      .cw-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; }
+      @media (max-width: 420px) {
+        .cw-row { grid-template-columns: 32px minmax(0, 1fr) 32px; grid-template-areas: "av name val" "sl sl sl"; gap: 4px 8px; padding: 8px 0; }
+        .cw-row .cw-av { grid-area: av; width: 32px; height: 32px; }
+        .cw-row .cw-name { grid-area: name; }
+        .cw-row input[type="range"] { grid-area: sl; }
+        .cw-row .cw-val { grid-area: val; }
+        #panel-find .edit-section-tabs .chip, #panel-find .curate-subs .chip { padding: 0 12px !important; }
+      }
+
+      .pv-ic.pv-ic-off { opacity: .45; }
+      .pv-ic .pv-w { font-style: normal; font-size: 11px; font-weight: 700; color: var(--honey-nav, #C29E74); margin-left: 2px; }
+      .pv-ic[aria-pressed="true"] .pv-w { color: inherit; opacity: .85; }
+
       /* ===== Preview .82 (html.pv81): the clean Looks page ===== */
       .pv81 #panel-looks .outfits-row, .pv81 #panel-looks .looks-filter, .pv81 #panel-looks #lf-row, .pv81 #panel-looks .inspo-subtabs, .pv81 #panel-looks .cf-head, .pv81 #panel-looks .looks-tools { display: none !important; }
       #pv-top { margin: 6px 0 14px; min-width: 0; }
@@ -6304,8 +6365,6 @@
           <div class="subnav-group" id="subnav-ideas" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Ideas</button>
             <button class="subtab" role="tab" id="tab-outfitideas" aria-selected="false" aria-controls="panel-outfitideas" data-tab="outfitideas" aria-label="Outfit Ideas"><span class="subtab-full">Outfit Ideas</span><span class="subtab-short">Outfits</span></button>
-            <button class="subtab" role="tab" id="tab-icons" aria-selected="false" aria-controls="panel-icons" data-tab="icons">Icons <span class="count" id="icon-tab-count"></span></button>
-            <button class="subtab" role="tab" id="tab-palettes" aria-selected="false" aria-controls="panel-palettes" data-tab="palettes">Palettes <span class="count" id="palette-count">348</span></button>
             <button class="subtab" role="tab" id="tab-myinspo" aria-selected="false" aria-controls="panel-myinspo" data-tab="myinspo" aria-label="My Inspo"><span class="subtab-full">My Inspo</span><span class="subtab-short">Inspo</span></button>
           </div>
           <div class="subnav-group" id="subnav-find" role="tablist" hidden>
@@ -7293,7 +7352,11 @@
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
-        <div class="outfits-toggle theme-toggle edit-tabs" role="group" aria-label="The Edit">
+        <div class="outfits-toggle theme-toggle edit-tabs edit-section-tabs" role="group" aria-label="The Edit">
+          <button type="button" class="chip" id="edit-tab-shop" data-edit-section="shop" aria-pressed="true">Shop</button>
+          <button type="button" class="chip" id="edit-tab-curate" data-edit-section="curate" aria-pressed="false">Curate</button>
+        </div>
+        <div class="outfits-toggle theme-toggle edit-tabs edit-shop-tabs" role="group" aria-label="Shop the stores">
           <button type="button" class="chip" id="edit-tab-saved" data-edit-view="saved" aria-pressed="true">Saved<span class="n" id="edit-n-saved"></span></button>
           <button type="button" class="chip" id="edit-tab-searches" data-edit-view="searches" aria-pressed="false">Searches<span class="n" id="edit-n-search"></span></button>
           <button type="button" class="chip" id="edit-tab-build" data-edit-view="build" aria-pressed="false">Build</button>
@@ -7327,6 +7390,29 @@
           <div id="ask-thread" aria-live="polite"></div>
           <div class="ask-sugs" id="ask-sugs"></div>
           <form id="ask-form" autocomplete="off"><input type="text" id="ask-q" aria-label="Ask Vesper" placeholder="Ask Vesper…" maxlength="1000" enterkeyhint="send" autocomplete="off" /><button type="submit" id="ask-send" aria-label="Send" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>
+        </div>
+
+        <div id="edit-v-curate" hidden>
+          <div class="outfits-toggle theme-toggle edit-tabs curate-subs" role="group" aria-label="Curate">
+            <button type="button" class="chip" id="tab-icons" data-curate-view="icons" aria-pressed="true" aria-controls="panel-icons">Icons</button>
+            <button type="button" class="chip" id="tab-palettes" data-curate-view="palettes" aria-pressed="false" aria-controls="panel-palettes">Palettes</button>
+          </div>
+          <div id="curate-weights" class="curate-weights">
+            <div class="cw-head">
+              <p class="cw-kicker">Icon weightings</p>
+              <label class="cw-all"><input type="checkbox" id="cw-same" /> Same for all levels</label>
+            </div>
+            <div id="cw-levels" role="group" aria-label="Dress level">
+              <button type="button" data-cw-level="casual" aria-pressed="true">Casual</button>
+              <button type="button" data-cw-level="smart" aria-pressed="false">Smart Casual</button>
+              <button type="button" data-cw-level="business" aria-pressed="false">Business</button>
+              <button type="button" data-cw-level="formal" aria-pressed="false">Formal</button>
+            </div>
+            <div class="cw-actions"><button type="button" class="btn-ghost" id="cw-apply-all">Apply these to every level</button></div>
+            <div id="cw-sliders"></div>
+            <p class="cw-note">These steer looks from your closet, Mix and New, and Shop the look. A single Icon in Looks still overrides. Wardrobe Rules always win.</p>
+          </div>
+          <div id="curate-pages"></div>
         </div>
           <div class="edit-today" id="edit-today-look">
             <div id="find-look-mode" hidden></div>
@@ -7582,7 +7668,7 @@
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.82.2</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.82.3</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9003,6 +9089,7 @@ function lookOccasionOk(look, occasion) {
   };
 })(typeof window !== "undefined" ? window : globalThis);/*</composer73>*/
 
+/*<wardrobe-rules>*/
 /* ================= Build .80.34 — Wardrobe Rules =================
    Plain-English style rules. A deterministic local parser turns common
    patterns into hard constraints the generators enforce; anything it
@@ -9665,6 +9752,7 @@ function lookOccasionOk(look, occasion) {
     signature: signature
   };
 })(typeof window !== "undefined" ? window : globalThis);
+/*</wardrobe-rules>*/
 
 
 /* ---------- Composer → app looks (build .73) ----------
@@ -10218,7 +10306,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.82.2";
+var WARDROBE_BUILD = "2026-11-19.82.3";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -31822,7 +31910,13 @@ function catalogueScored(pc, applyCeiling, tierKey) {
        into the one score, so the tier ceiling above and the
        tier-aware ordering below are untouched — attributes only
        ever refine the order the ceiling already allowed. */
+    if (typeof window.wardrobeRulesAllow === "function" && !window.wardrobeRulesAllow(e, { via: "shop", level: typeof formalityLevel !== "undefined" ? formalityLevel : 4 })) return;
+    if (typeof window.iconWeights81 !== "undefined" && window.iconWeights81.rulesAllow && !window.iconWeights81.rulesAllow(e, { via: "shop", level: typeof formalityLevel !== "undefined" ? formalityLevel : 4 })) return;
     var score = matched + attrMatched + ((colourOK && !colourLiteral) ? 1 : 0);
+    if (typeof window.iconWeights81 !== "undefined" && window.iconWeights81.scorePiece) {
+      var lv = (typeof formalityLevel !== "undefined") ? formalityLevel : 4;
+      score += window.iconWeights81.scorePiece({ name: e.name, category: e.cat || e.category, colourHex: e.hex || e.colourHex, hex: e.hex || e.colourHex }, lv) * 0.45;
+    }
     if (score >= 2 && garmentMatched >= 1) scored.push({ e: e, score: score + ((window.EDIT_GAP_URLS && window.EDIT_GAP_URLS[e.url]) || 0) });
   });
   var eliteFirst = (tierKey || shopTier) === "insensitive";
@@ -33299,7 +33393,13 @@ function persistTab() {
   try { sessionStorage.setItem("wardrobe.tab", currentTab); } catch (e) {}
   store.set("openIcon", currentTab === "icons" ? openIconId : null);
   try {
-    var h = currentTab === "icons" && openIconId ? "#icons/" + encodeURIComponent(openIconId) : "#" + currentTab;
+    var h;
+    if (currentTab === "find" && (window._pendingCurate || window.curateView81 || (typeof editState !== "undefined" && editState && editState.view === "curate") || (document.getElementById("edit-v-curate") && !document.getElementById("edit-v-curate").hidden))) {
+      var cv = (window._pendingCurate && window._pendingCurate.sub) || window.curateView81 || "icons";
+      h = (cv === "icons" && openIconId) ? "#icons/" + encodeURIComponent(openIconId) : (cv === "palettes" ? "#palettes" : "#icons");
+    } else {
+      h = currentTab === "icons" && openIconId ? "#icons/" + encodeURIComponent(openIconId) : "#" + currentTab;
+    }
     if (location.hash !== h) history.replaceState(null, "", h);
   } catch (e) {}
 }
@@ -33324,6 +33424,12 @@ function switchTab(name, opts) {
   /* Consolidated destinations: the old Queue and Yours pages are
      states and filters inside My Looks now — old links and stored
      tabs land there. */
+  if (name === "icons" || name === "palettes") {
+    var _curateSub = name;
+    var _curateIcon = (opts && opts.icon) || (name === "icons" ? (typeof openIconId !== "undefined" ? openIconId : null) : null);
+    window._pendingCurate = { sub: _curateSub, icon: _curateIcon, opts: opts };
+    name = "find";
+  }
   if (name === "queue" || name === "favourites") name = "looks";
   /* Build .54: the Wishlist left My Outfits for its own Shop sub
      page — the old name lands there, never on a dead end. */
@@ -33367,7 +33473,9 @@ function switchTab(name, opts) {
   }
   TABS.forEach(function (n) {
     var panel = document.getElementById("panel-" + n);
-    if (panel) panel.hidden = n !== name;
+    if (!panel) return;
+    if (panel.closest && panel.closest("#curate-pages, #edit-v-curate")) return;
+    panel.hidden = n !== name;
   });
   lazyShown803("panel-" + name);
   var recInPlus = document.querySelector("#plus-receipts-host #panel-receipts");
@@ -33393,7 +33501,15 @@ function switchTab(name, opts) {
   if (name === "calendar") { if (typeof renderWeekPlan === "function") renderWeekPlan(); if (typeof calViewApply === "function") calViewApply(); }
   persistTab();
   if (typeof syncPageTitle === "function") syncPageTitle(name);
-  if (name === "find" && typeof renderTheEdit === "function") { if (typeof window.editOnOpen804 === "function") window.editOnOpen804(); else renderTheEdit(); }
+  if (name === "find" && window._pendingCurate) {
+    if (typeof window.flushCurate81 === "function") window.flushCurate81();
+    else if (typeof window.editShow === "function") window.editShow("curate");
+  } else if (name === "find" && typeof renderTheEdit === "function") {
+    if (!(opts && opts.restore) && typeof editState !== "undefined" && editState && editState.view === "curate" && sectionOf(prevTab) !== "find") {
+      editState.view = editState.lastShopView || "saved";
+    }
+    if (typeof window.editOnOpen804 === "function") window.editOnOpen804(); else renderTheEdit();
+  }
   if (name === "prules" && typeof renderRulesPage === "function") renderRulesPage();
   if (name === "looks" && typeof syncOutfitsToggle === "function") syncOutfitsToggle();
   if (typeof scrollActiveSubtabIntoView === "function") {
@@ -33527,7 +33643,8 @@ function tabFromHash() {
 }
 window.addEventListener("hashchange", function () {
   var from = tabFromHash();
-  if (!from || from.tab === currentTab) return;
+  if (!from) return;
+  if (from.tab === currentTab && from.tab !== "icons" && from.tab !== "palettes") return;
   switchTab(from.tab, { restore: true });
   if (from.tab === "icons" && from.icon && iconById(from.icon)) openIconDetail(from.icon);
 });
@@ -33568,6 +33685,9 @@ function restoreTab() {
   }
   var from = tabFromHash();
   var name = sess || (from && from.tab) || store.get("tab", "today");
+  /* A deep link to Icons or Palettes wins over the session tab, so #palettes
+     still opens Curate → Palettes after a previous visit to The Edit. */
+  if (from && (from.tab === "icons" || from.tab === "palettes")) name = from.tab;
   if (TABS.indexOf(name) === -1) name = "today";
   if (name === "add" || name === "analyze" || name === "bulk") name = "wardrobe";
   if (name === "receipts") name = "find";
@@ -39132,10 +39252,15 @@ function analyzeFilePiece(card, job, ix) {
   };
   window.inspoView = "withmine";
   window.showInspoView = function (v) {
+    if (v === "icons" || v === "palettes") {
+      if (typeof window.openCurate === "function") window.openCurate(v);
+      else if (typeof switchTab === "function") switchTab(v);
+      return;
+    }
     var host = document.getElementById("inspo-host");
     if (!host) return;
     window.inspoView = v;
-    ["withmine", "allnew", "onyou", "icons", "palettes", "myinspo"].forEach(function (n) {
+    ["withmine", "allnew", "onyou", "myinspo"].forEach(function (n) {
       var pn = document.getElementById("panel-" + n);
       if (!pn) return;
       if (pn.parentNode !== host) host.appendChild(pn);
@@ -40585,13 +40710,19 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
   function show(v) {
     editState.view = v;
     store.set("editView", v);
-    document.querySelectorAll("[data-edit-view]").forEach(function (b) { if (b.closest(".edit-tabs")) b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-view") === v)); });
-    ["saved", "searches", "build", "ask"].forEach(function (n) { var el = document.getElementById("edit-v-" + n); if (el) el.hidden = n !== v; });
+    if (v !== "curate") editState.lastShopView = v;
+    var section = v === "curate" ? "curate" : "shop";
+    document.querySelectorAll("[data-edit-section]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-section") === section)); });
+    var shopTabs = document.querySelector("#panel-find .edit-shop-tabs");
+    if (shopTabs) shopTabs.hidden = section === "curate";
+    document.querySelectorAll("[data-edit-view]").forEach(function (b) { if (b.closest(".edit-shop-tabs")) b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-view") === v)); });
+    ["saved", "searches", "build", "ask", "curate"].forEach(function (n) { var el = document.getElementById("edit-v-" + n); if (el) el.hidden = n !== v; });
     updateCounts();
     if (v === "saved") renderSaved();
     if (v === "searches") renderSearches();
     if (v === "build") renderBuild();
     if (v === "ask" && typeof renderAsk === "function") renderAsk(false);
+    if (v === "curate" && typeof window.paintCurate81 === "function") window.paintCurate81();
     if (typeof askCheckHealth === "function") askCheckHealth();
     var p = document.getElementById("panel-find");
     if (p) p.setAttribute("data-edit-mode", v);
@@ -40670,6 +40801,12 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     var panel = t.closest("#panel-find");
     if (!panel) return;
     var b, sn;
+    if ((b = t.closest("[data-edit-section]"))) {
+      var sec = b.getAttribute("data-edit-section");
+      if (typeof window.clearFindLookMode === "function") window.clearFindLookMode();
+      show(sec === "curate" ? "curate" : (editState.lastShopView || "saved"));
+      return;
+    }
     if ((b = t.closest("[data-edit-view]"))) {
       /* Shop-the-look (data-stl) covers every Edit tab. Closing it on a
          tab tap means the tab the user tapped is actually on screen.
@@ -42807,10 +42944,15 @@ window.inspoView = "withmine";
     window.prelayOutfits796();
   };
   window.showInspoView = function (v) {
+    if (v === "icons" || v === "palettes") {
+      if (typeof window.openCurate === "function") window.openCurate(v);
+      else if (typeof switchTab === "function") switchTab(v);
+      return;
+    }
     var host = document.getElementById("inspo-host");
     if (!host) return;
     window.inspoView = v;
-    ["withmine", "allnew", "onyou", "icons", "palettes", "myinspo"].forEach(function (n) {
+    ["withmine", "allnew", "onyou", "myinspo"].forEach(function (n) {
       var pn = document.getElementById("panel-" + n);
       if (!pn) return;
       if (pn.parentNode !== host) host.appendChild(pn);
@@ -43054,6 +43196,354 @@ window.inspoView = "withmine";
   });
 })();
     </script>
+    <script type="wardrobe/app">
+/* ================= Preview .81.2 — Curate + per-level icon weights =================
+   Icons and Palettes live in The Edit → Curate. Weight sliders are per dress
+   level (Casual / Smart Casual / Business / Formal), kept on this device with
+   the lens state (endless81). "Same for all levels" copies one set everywhere.
+   A single Icon pick in Looks still overrides. Wardrobe Rules, when present,
+   always veto before a weighting can boost a piece. */
+(function () {
+  "use strict";
+  var GROUPS = {
+    casual: { id: "casual", label: "Casual", levels: [1, 2, 3] },
+    smart: { id: "smart", label: "Smart Casual", levels: [4] },
+    business: { id: "business", label: "Business", levels: [5] },
+    formal: { id: "formal", label: "Formal", levels: [6, 7] }
+  };
+  var GROUP_ORDER = ["casual", "smart", "business", "formal"];
+  var HIGH = 8, MID = 2, MAX = 10;
+  var LENS_WORDS = ["double-breasted", "blazer", "suit", "polo", "loafer", "linen", "knit", "sweater", "cardigan", "chino", "jean", "denim", "tee", "t-shirt", "shirt", "oxford", "trouser", "shorts", "suede", "boot", "sneaker", "overshirt", "jacket", "coat", "turtleneck", "roll-neck", "rollneck", "cashmere", "gurkha", "pleat", "leather", "tweed", "flannel", "corduroy", "camp collar", "henley", "espadrille", "driver", "derby", "chelsea", "field jacket", "safari", "bomber", "peacoat", "trench", "waistcoat", "cable"];
+  var lensMemo = {};
+  var cwLevel = "casual";
+  var mounted = false;
+
+  function icons() {
+    try { return typeof allIcons === "function" ? allIcons() : []; } catch (e) { return []; }
+  }
+  function groupForLevel(level) {
+    var n = +level || 0;
+    for (var i = 0; i < GROUP_ORDER.length; i++) {
+      var g = GROUPS[GROUP_ORDER[i]];
+      if (g.levels.indexOf(n) !== -1) return g.id;
+    }
+    return "smart";
+  }
+  function midMap() {
+    var o = {};
+    icons().forEach(function (ic) { o[ic.id] = MID; });
+    return o;
+  }
+  function seedByLevel() {
+    var mid = midMap(), by = {};
+    GROUP_ORDER.forEach(function (g) { by[g] = Object.assign({}, mid); });
+    /* Casual leans Squarzi — Alexander Skarsgård is not in the icon set (see the HAN-14 report). Business and Formal lean Kraft + Beckham. */
+    if (by.casual.squarzi !== undefined) by.casual.squarzi = HIGH;
+    ["business", "formal"].forEach(function (g) {
+      if (by[g].kraft !== undefined) by[g].kraft = HIGH;
+      if (by[g].beckham !== undefined) by[g].beckham = HIGH;
+    });
+    return by;
+  }
+  function readStore() {
+    try { return (typeof store !== "undefined" && store.get("endless81", null)) || {}; } catch (e) { return {}; }
+  }
+  function writeStore(patch) {
+    var S = readStore();
+    if (!S || typeof S !== "object" || Array.isArray(S)) S = {};
+    Object.keys(patch).forEach(function (k) { S[k] = patch[k]; });
+    try { store.set("endless81", S); } catch (e) {}
+    return S;
+  }
+  function defaultState() {
+    var mid = midMap();
+    return { mode: "per", all: mid, byLevel: seedByLevel() };
+  }
+  function normalize(raw) {
+    var d = defaultState();
+    if (!raw || typeof raw !== "object") return d;
+    var out = { mode: raw.mode === "all" ? "all" : "per", all: Object.assign({}, d.all, raw.all || {}), byLevel: {} };
+    GROUP_ORDER.forEach(function (g) {
+      out.byLevel[g] = Object.assign({}, d.byLevel[g], (raw.byLevel && raw.byLevel[g]) || {});
+    });
+    return out;
+  }
+  function loadWeights() {
+    var S = readStore();
+    return normalize(S.weights);
+  }
+  function saveWeights(w) {
+    writeStore({ weights: w });
+    if (window.endlessOnWeights81) window.endlessOnWeights81();
+  }
+  function clampW(n) {
+    n = Math.round(+n);
+    if (!(n >= 0)) n = 0;
+    if (n > MAX) n = MAX;
+    return n;
+  }
+  function weightsForLevel(level, w) {
+    w = w || loadWeights();
+    if (w.mode === "all") return Object.assign({}, w.all);
+    var g = groupForLevel(level);
+    return Object.assign({}, w.byLevel[g] || w.all);
+  }
+  function hexRgb(h) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(String(h || ""));
+    if (!m) return null;
+    var n = parseInt(m[1], 16);
+    return [n >> 16 & 255, n >> 8 & 255, n & 255];
+  }
+  function hexDist(a, b) {
+    var x = hexRgb(a), y = hexRgb(b);
+    if (!x || !y) return 999;
+    var dr = x[0] - y[0], dg = x[1] - y[1], db = x[2] - y[2];
+    return Math.sqrt(0.3 * dr * dr + 0.59 * dg * dg + 0.11 * db * db);
+  }
+  function iconLensOf(ic) {
+    if (!ic) return null;
+    var key = ic.id + "/" + ((ic.looks && ic.looks.length) || 0) + "/" + ((ic.signatures && ic.signatures.length) || 0);
+    if (lensMemo[key]) return lensMemo[key];
+    var hex = (ic.palette || []).slice(), cnt = {}, txt = [];
+    var specs = (typeof ICON_SPECS !== "undefined" && ICON_SPECS[ic.id]) || {};
+    Object.keys(specs).forEach(function (k) {
+      (specs[k] || []).forEach(function (row) {
+        if (row[2]) hex.push(row[2]);
+        txt.push(String(row[0] || "") + " " + String(row[3] || ""));
+      });
+    });
+    (ic.signatures || []).forEach(function (t) { txt.push(t); txt.push(t); });
+    if (ic.shoeLabel) txt.push(ic.shoeLabel + " " + (ic.shoeDetail || ""));
+    if (ic.shoeHex) hex.push(ic.shoeHex);
+    (ic.looks || []).forEach(function (l) { if (l && l.desc) txt.push(l.desc); });
+    var all = txt.join(" | ").toLowerCase();
+    LENS_WORDS.forEach(function (w) { var n = all.split(w).length - 1; if (n) cnt[w] = n; });
+    var words = {}, mx = 0;
+    Object.keys(cnt).forEach(function (w) { if (cnt[w] > mx) mx = cnt[w]; });
+    Object.keys(cnt).forEach(function (w) { words[w] = Math.round((0.3 + 1.2 * cnt[w] / mx) * 100) / 100; });
+    var hc = {};
+    hex.forEach(function (h) { h = String(h).toLowerCase(); if (/^#[0-9a-f]{6}$/.test(h)) hc[h] = (hc[h] || 0) + 1; });
+    var hx = Object.keys(hc).sort(function (a, b) { return hc[b] - hc[a]; }).slice(0, 48);
+    var v = { id: ic.id, name: ic.name, hex: hx, words: words, formality: typeof ic.formality === "number" ? ic.formality : null };
+    lensMemo[key] = v;
+    return v;
+  }
+  function lensPiece(p, lens) {
+    if (!p || !lens) return 0;
+    var sc = 0;
+    if (p.hex && lens.hex && lens.hex.length) {
+      var best = 999;
+      for (var i = 0; i < lens.hex.length; i++) { var d = hexDist(lens.hex[i], p.hex); if (d < best) best = d; }
+      sc += best < 22 ? 2 : best < 45 ? 1.2 : best < 75 ? 0.2 : -1.4;
+    }
+    var nm = p.nm || "";
+    if (nm && lens.words) for (var w in lens.words) if (nm.indexOf(w) !== -1) sc += lens.words[w];
+    return sc;
+  }
+  function rulesAllow(p, ctx) {
+    /* Hard Wardrobe Rules always win over a weighting bonus. */
+    try {
+      if (window.WardrobeRules && typeof window.WardrobeRules.check === "function" && p) {
+        var packed = (p.fwPieces || p.t || p.top || p.pieces) ? p : { fwPieces: [{ name: p.name, category: p.category || p.cat || p.garment, colourName: p.colourName || p.colour, colourHex: p.colourHex || p.hex, hex: p.hex || p.colourHex }] };
+        if (window.WardrobeRules.check(packed, ctx || {}).ok === false) return false;
+      }
+    } catch (e) {}
+    return true;
+  }
+  function asPiece(p) {
+    if (!p) return null;
+    var nm = (p.nm || ((p.name || "") + " " + (p.category || p.garment || p.cat || "") + " " + (p.detail || p.colour || p.colourName || ""))).toLowerCase();
+    return { id: p.id || p.sku || p.url || "", hex: p.hex || p.colourHex || "", nm: nm, raw: p };
+  }
+  function scorePiece(p, level, w) {
+    p = asPiece(p);
+    if (!p || !rulesAllow(p.raw || p, { level: level, via: "weight" })) return 0;
+    var wt = weightsForLevel(level, w), tot = 0, acc = 0;
+    icons().forEach(function (ic) {
+      var wv = +wt[ic.id] || 0;
+      if (wv <= 0) return;
+      var lens = iconLensOf(ic);
+      if (!lens) return;
+      acc += lensPiece(p, lens) * wv;
+      tot += wv;
+    });
+    return tot ? acc / tot : 0;
+  }
+  function topLens(ids, piecesById, level, w) {
+    var scores = {}, best = null, bestS = -1e9;
+    icons().forEach(function (ic) {
+      var lens = iconLensOf(ic);
+      if (!lens) return;
+      var t = 0;
+      (ids || []).forEach(function (id) { t += lensPiece(asPiece(piecesById[id] || { id: id }), lens); });
+      scores[ic.id] = t;
+      if (t > bestS) { bestS = t; best = ic.id; }
+    });
+    return { top: best, scores: scores };
+  }
+
+  function mountPanels() {
+    var host = document.getElementById("curate-pages");
+    var ic = document.getElementById("panel-icons");
+    var pal = document.getElementById("panel-palettes");
+    if (host && ic && ic.parentNode !== host) host.appendChild(ic);
+    if (host && pal && pal.parentNode !== host) host.appendChild(pal);
+    mounted = !!(host && ic && pal);
+  }
+  function showSub(sub) {
+    sub = sub === "palettes" ? "palettes" : "icons";
+    window.curateView81 = sub;
+    mountPanels();
+    var ic = document.getElementById("panel-icons");
+    var pal = document.getElementById("panel-palettes");
+    if (ic) ic.hidden = sub !== "icons";
+    if (pal) pal.hidden = sub !== "palettes";
+    var w = document.getElementById("curate-weights");
+    if (w) w.hidden = sub !== "icons";
+    document.querySelectorAll("[data-curate-view]").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.getAttribute("data-curate-view") === sub ? "true" : "false");
+    });
+    if (sub === "icons" && typeof renderIcons === "function") try { renderIcons(); } catch (e) {}
+    if (sub === "palettes" && typeof renderPlates === "function") try { renderPlates(); } catch (e) {}
+    if (sub === "icons") paintWeights();
+  }
+  function escAttr(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  }
+  function paintWeights() {
+    var host = document.getElementById("cw-sliders");
+    var levels = document.getElementById("cw-levels");
+    var same = document.getElementById("cw-same");
+    if (!host) return;
+    var w = loadWeights();
+    if (same) same.checked = w.mode === "all";
+    if (levels) {
+      levels.querySelectorAll("[data-cw-level]").forEach(function (b) {
+        b.setAttribute("aria-pressed", b.getAttribute("data-cw-level") === cwLevel ? "true" : "false");
+        b.disabled = w.mode === "all";
+      });
+      levels.setAttribute("aria-disabled", w.mode === "all" ? "true" : "false");
+    }
+    var map = w.mode === "all" ? w.all : (w.byLevel[cwLevel] || w.all);
+    var h = "";
+    icons().forEach(function (ic) {
+      var val = clampW(map[ic.id] != null ? map[ic.id] : MID);
+      var thumb = (ic.photo || ic.img || ((ic.looks || [])[0] && (ic.looks || [])[0].img)) || "";
+      h += '<label class="cw-row" data-cw-icon="' + escAttr(ic.id) + '">' +
+        (thumb ? '<img class="cw-av" src="' + escAttr(thumb) + '" alt="" />' : '<span class="cw-av"></span>') +
+        '<span class="cw-name">' + escAttr(ic.name) + '</span>' +
+        '<input type="range" min="0" max="' + MAX + '" step="1" value="' + val + '" aria-label="' + escAttr(ic.name) + ' weighting" />' +
+        '<span class="cw-val">' + (val === 0 ? "Off" : val) + "</span></label>";
+    });
+    host.innerHTML = h || '<p class="cw-note">Icons are still loading\u2026</p>';
+  }
+  function setSlider(id, val) {
+    var w = loadWeights();
+    val = clampW(val);
+    if (w.mode === "all") {
+      w.all[id] = val;
+      GROUP_ORDER.forEach(function (g) { w.byLevel[g][id] = val; });
+    } else {
+      w.byLevel[cwLevel][id] = val;
+    }
+    saveWeights(w);
+    paintWeights();
+  }
+  function setSame(on) {
+    var w = loadWeights();
+    if (on) {
+      w.mode = "all";
+      w.all = Object.assign({}, w.byLevel[cwLevel] || w.all);
+    } else {
+      w.mode = "per";
+    }
+    saveWeights(w);
+    paintWeights();
+  }
+  function applySameToAll() {
+    var w = loadWeights();
+    var src = w.mode === "all" ? w.all : (w.byLevel[cwLevel] || w.all);
+    GROUP_ORDER.forEach(function (g) { w.byLevel[g] = Object.assign({}, src); });
+    w.all = Object.assign({}, src);
+    saveWeights(w);
+    paintWeights();
+  }
+
+  window.iconLensOf = iconLensOf;
+  window.iconLensPiece = lensPiece;
+  window.wardrobeRulesAllow = window.wardrobeRulesAllow || function () { return true; };
+  window.iconWeights81 = {
+    HIGH: HIGH, MID: MID, MAX: MAX, GROUPS: GROUPS,
+    groupForLevel: groupForLevel,
+    state: loadWeights,
+    setState: function (w) { saveWeights(normalize(w)); paintWeights(); },
+    resetDefaults: function () { var d = defaultState(); saveWeights(d); paintWeights(); return d; },
+    weightsForLevel: weightsForLevel,
+    scorePiece: scorePiece,
+    topLens: topLens,
+    lensOf: iconLensOf,
+    rulesAllow: rulesAllow,
+    seedNote: "Casual seeds to Squarzi (Alexander Skarsgård is not in the icon set). Business and Formal seed to Kraft and Beckham."
+  };
+
+  window.paintCurate81 = function () {
+    mountPanels();
+    showSub(window.curateView81 || "icons");
+  };
+  window.openCurate = function (sub, opts) {
+    sub = sub === "palettes" ? "palettes" : "icons";
+    window.curateView81 = sub;
+    if (typeof currentTab !== "undefined" && currentTab !== "find") {
+      window._pendingCurate = { sub: sub, icon: opts && opts.icon, opts: opts };
+      if (typeof switchTab === "function") switchTab("find", opts);
+      return;
+    }
+    if (typeof window.editShow === "function") window.editShow("curate");
+    else window.paintCurate81();
+    if (sub === "icons" && opts && opts.icon && typeof openIconDetail === "function" && typeof iconById === "function" && iconById(opts.icon)) {
+      try { openIconDetail(opts.icon, opts); } catch (e) {}
+    }
+  };
+  window.flushCurate81 = function () {
+    var p = window._pendingCurate;
+    if (!p) return;
+    window._pendingCurate = null;
+    window.curateView81 = p.sub;
+    if (typeof window.editShow === "function") window.editShow("curate");
+    else window.paintCurate81();
+    if (p.sub === "icons" && p.icon && typeof openIconDetail === "function") {
+      try { openIconDetail(p.icon, p.opts); } catch (e) {}
+    }
+  };
+
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var b = t.closest("[data-cw-level]");
+    if (b) { cwLevel = b.getAttribute("data-cw-level") || "casual"; paintWeights(); return; }
+    b = t.closest("[data-curate-view]");
+    if (b) { showSub(b.getAttribute("data-curate-view")); if (typeof persistTab === "function") persistTab(); return; }
+    b = t.closest("#cw-apply-all");
+    if (b) { applySameToAll(); return; }
+  });
+  document.addEventListener("change", function (e) {
+    if (!e.target) return;
+    if (e.target.id === "cw-same") { setSame(!!e.target.checked); return; }
+    var row = e.target.closest && e.target.closest(".cw-row");
+    if (row && e.target.matches("input[type=range]")) setSlider(row.getAttribute("data-cw-icon"), e.target.value);
+  });
+  document.addEventListener("input", function (e) {
+    var row = e.target && e.target.closest && e.target.closest(".cw-row");
+    if (!row || !e.target.matches("input[type=range]")) return;
+    var lab = row.querySelector(".cw-val");
+    var v = clampW(e.target.value);
+    if (lab) lab.textContent = v === 0 ? "Off" : String(v);
+  });
+
+  if (document.readyState !== "loading") { mountPanels(); window.flushCurate81(); }
+  else document.addEventListener("DOMContentLoaded", function () { mountPanels(); window.flushCurate81(); });
+})();
+    </script>
     <script type="wardrobe/module" data-name="endless">
 /* ================= Build .81 — endless looks (on demand) =================
    Loaded the first time Outfits opens (or on idle well after boot) —
@@ -43134,7 +43624,7 @@ window.inspoView = "withmine";
     return o;
   }
   function iconsLite() {
-    try { return (typeof allIcons === "function" ? allIcons() : []).map(function (ic) { return { id: ic.id, name: ic.name, palette: ic.palette || [], formality: typeof ic.formality === "number" ? ic.formality : null }; }); } catch (e) { return []; }
+    try { return (typeof allIcons === "function" ? allIcons() : []).map(function (ic) { return { id: ic.id, name: ic.name, palette: ic.palette || [], formality: typeof ic.formality === "number" ? ic.formality : null, lens: (typeof window.iconLensOf === "function") ? window.iconLensOf(ic) : null }; }); } catch (e) { return []; }
   }
   function platesLite() {
     var out = [];
@@ -43182,7 +43672,8 @@ window.inspoView = "withmine";
     dataSig = sig; ready = false;
     BUF.mine = []; BUF.withmine = []; BUF.allnew = [];
     gen.mine++; gen.withmine++; gen.allnew++;
-    W.postMessage({ type: "data", mine: mine, own: own, shop: shop, icons: iconsLite(), plates: platesLite(), gaps: gapsLite() });
+    var rules = (typeof window.WardrobeRules !== "undefined" && window.WardrobeRules.getActive) ? window.WardrobeRules.getActive() : [];
+    W.postMessage({ type: "data", mine: mine, own: own, shop: shop, icons: iconsLite(), plates: platesLite(), gaps: gapsLite(), rules: rules });
   }
   function level() { return (typeof studioTypeAny !== "undefined" && studioTypeAny) ? null : ((typeof formalityLevel !== "undefined") ? formalityLevel : 4); }
   var WANT = { mine: 24, withmine: 24, allnew: 24 };
@@ -43203,6 +43694,7 @@ window.inspoView = "withmine";
       q.recent = S.recent.concat(BUF[feed].map(function (o) { return o.key; }), shownKeys(feed));
     }
     q.lens = lensData();
+    if (window.iconWeights81 && window.iconWeights81.state) q.weights = window.iconWeights81.state();
     try { W.postMessage(q); } catch (e) { asking[feed] = false; }
   }
   function fillAll() { ["mine", "withmine", "allnew"].forEach(function (f) { if (f === "mine" || active === f || BUF[f].length < 8) fill(f); }); }
@@ -43242,6 +43734,7 @@ window.inspoView = "withmine";
     if (lensCache.id === id) return lensCache.v;
     var ic = iconList().filter(function (x) { return x.id === id; })[0];
     if (!ic) { lensCache = { id: id, v: null }; return null; }
+    if (typeof window.iconLensOf === "function") { var shared = window.iconLensOf(ic); lensCache = { id: id, v: shared }; return shared; }
     var hex = (ic.palette || []).slice(), cnt = {}, txt = [];
     var specs = (typeof ICON_SPECS !== "undefined" && ICON_SPECS[ic.id]) || {};
     Object.keys(specs).forEach(function (k) { (specs[k] || []).forEach(function (row) { if (row[2]) hex.push(row[2]); txt.push(String(row[0] || "") + " " + String(row[3] || "")); }); });
@@ -43271,6 +43764,33 @@ window.inspoView = "withmine";
     if (window.pvSyncLens81) window.pvSyncLens81();
   }
   window.endlessLens81 = { set: setLens, get: function () { return S.lens || null; }, data: lensData, icons: iconList };
+  window.endlessOnWeights81 = function () {
+    gen.mine++; BUF.mine = []; asking.mine = false; pendingMine = true; fill("mine");
+    ["withmine", "allnew"].forEach(function (fd) { reset(fd); if (F[fd]) F[fd].sig = null; });
+    if (active) rebuild(active);
+    if (window.pvSyncLens81) window.pvSyncLens81();
+  };
+  window.endlessMeasure81 = function (opts) {
+    opts = opts || {};
+    return new Promise(function (resolve, reject) {
+      if (!W || !ready) { reject(new Error("endless worker not ready")); return; }
+      var id = ++reqId;
+      function on(ev) {
+        var m = ev.data || {};
+        if (m.type === "measured" && m.id === id) { W.removeEventListener("message", on); resolve(m); }
+        if (m.type === "error" && m.id === id) { W.removeEventListener("message", on); reject(new Error(m.msg || "measure failed")); }
+      }
+      W.addEventListener("message", on);
+      var fi = window.__cfInputs81 ? window.__cfInputs81() : {};
+      var q = { type: "measure", id: id, feed: opts.feed || "allnew", n: opts.n || 80, gen: 0 };
+      q.level = opts.level != null ? opts.level : (fi.level || level());
+      q.temp = fi.temp; q.prefs = (opts.feed === "mine" && typeof composerEffectivePrefs === "function") ? composerEffectivePrefs() : (S.prefs || { items: {}, pairs: {} });
+      q.exposure = {}; q.recent = []; q.banned = {}; q.price = priceState();
+      q.lens = opts.lens === undefined ? lensData() : opts.lens;
+      q.weights = opts.weights || (window.iconWeights81 && window.iconWeights81.state && window.iconWeights81.state());
+      try { W.postMessage(q); } catch (e) { W.removeEventListener("message", on); reject(e); }
+    });
+  };
 
   /* ---------- price (per piece or the whole look) ---------- */
   function priceState() { var p = S.price || {}; return { mode: p.mode === "total" ? "total" : "piece", lo: p.lo > 0 ? p.lo : 0, hi: p.hi > 0 ? p.hi : null }; }
@@ -43731,11 +44251,15 @@ window.inspoView = "withmine";
     window.pvPaintSheet81 = function (sh) {
       var host = sh.querySelector("#pvf-icons"); if (!host) return;
       var cur = S.lens || "";
+      var lv = (typeof formalityLevel !== "undefined") ? formalityLevel : 4;
+      var wt = (window.iconWeights81 && window.iconWeights81.weightsForLevel) ? window.iconWeights81.weightsForLevel(lv) : {};
+      var list = iconList().slice().sort(function (a, b) { return (+wt[b.id] || 0) - (+wt[a.id] || 0); });
       var h = '<button type="button" class="pv-ic pv-none" data-pv-lens="" aria-pressed="' + (cur ? "false" : "true") + '"><span>None</span></button>';
-      iconList().forEach(function (ic) {
-        var t = thumb(ic);
-        h += '<button type="button" class="pv-ic" data-pv-lens="' + E(ic.id) + '" aria-pressed="' + (cur === ic.id ? "true" : "false") + '" title="' + E(ic.name) + '">' +
-          (t ? '<img class="pv-av" src="' + E(t) + '" alt="" loading="lazy" decoding="async" />' : '<span class="pv-av"></span>') + "<span>" + E(short(ic.name)) + "</span></button>";
+      list.forEach(function (ic) {
+        var t = thumb(ic), w = +wt[ic.id] || 0;
+        h += '<button type="button" class="pv-ic' + (w <= 0 ? " pv-ic-off" : "") + '" data-pv-lens="' + E(ic.id) + '" aria-pressed="' + (cur === ic.id ? "true" : "false") + '" title="' + E(ic.name) + (w ? " · weight " + w : " · off") + '">' +
+          (t ? '<img class="pv-av" src="' + E(t) + '" alt="" loading="lazy" decoding="async" />' : '<span class="pv-av"></span>') + "<span>" + E(short(ic.name)) + "</span>" +
+          (w ? '<i class="pv-w" aria-hidden="true">' + w + "</i>" : "") + "</button>";
       });
       host.innerHTML = h;
       var sw = sh.querySelector("#pvf-liked"); sw.setAttribute("aria-checked", S.likedOnly ? "true" : "false");
@@ -43862,6 +44386,7 @@ window.inspoView = "withmine";
 var POOL_ONLY = {}, SWIM = {};
 self.itemPoolOnly = function (it) { return !!(it && POOL_ONLY[it.id]); };
 self.pieceIsSwim = function (it) { return !!(it && SWIM[it.id]); };
+/*@@INCLUDE wardrobe-rules@@*/
 /*@@INCLUDE composer73@@*/
 var C = self.WardrobeComposer;
 var mineDeck = null, mineSig = "";
@@ -43922,6 +44447,7 @@ function setData(d) {
   ICONS = d.icons || []; PLATES = d.plates || []; GAPS = d.gaps || [];
   STYLE_FAM = {};
   OWN.forEach(function (p) { STYLE_FAM[p.fam] = (STYLE_FAM[p.fam] || 0) + 1; });
+  if (self.WardrobeRules && self.WardrobeRules.setActive) self.WardrobeRules.setActive(d.rules || []);
   var sig = (d.mine || []).map(function (i) { return i.id + "~" + i.category + "~" + i.name + "~" + i.colourHex; }).join("\n");
   if (sig !== mineSig) { mineSig = sig; mineDeck = (d.mine && d.mine.length >= 3) ? C.build(d.mine) : null; }
 }
@@ -43949,20 +44475,84 @@ function dealMine(q) {
     outs.forEach(function (x) { var t = 0; (x.ids || []).forEach(function (id) { t += lensPiece(MINEI[id], q.lens); }); x._ls = t + rng() * 1.0; });
     outs.sort(function (a, b) { return b._ls - a._ls; });
     outs = outs.slice(0, q.n);
+  } else if (outs.length && weightLenses(q).length) {
+    /* no single Icon override: blend per-level icon weights into the re-rank */
+    var haveW = outs.map(function (x) { return x.key; });
+    var extraW = mineDeck.deal(q.n * 8, Object.assign({}, o, { recent: (q.recent || []).concat(haveW) })) || [];
+    extraW.forEach(function (x) { if (haveW.indexOf(x.key) === -1) { haveW.push(x.key); outs.push(x); } });
+    var Lset = weightLenses(q), tw = 0;
+    Lset.forEach(function (L) { tw += L.w; });
+    outs.forEach(function (x) {
+      var t = 0;
+      Lset.forEach(function (L) {
+        var s = 0;
+        (x.ids || []).forEach(function (id) { s += lensPiece(MINEI[id], L.lens); });
+        t += s * (L.w / tw);
+      });
+      x._ls = t + rng() * 1.0;
+    });
+    outs.sort(function (a, b) { return b._ls - a._ls; });
+    outs = outs.slice(0, q.n);
   }
   return outs.map(slim);
 }
 
 /* ---------- Inspo: sampled looks ---------- */
 function priceOk(p, pr) { if (!pr || pr.mode !== "piece") return true; var v = p.price; if (!(v > 0)) return pr.lo <= 0 && pr.hi == null; return v >= (pr.lo || 0) && (pr.hi == null || v <= pr.hi); }
-function inspiration(feed) {
+function groupForLevel(level) {
+  var n = +level || 0;
+  if (n <= 3) return "casual";
+  if (n === 4) return "smart";
+  if (n === 5) return "business";
+  return "formal";
+}
+function weightsFor(q) {
+  var W = (q && q.weights) || {};
+  if (W.mode === "all") return W.all || {};
+  var g = groupForLevel(q && q.level);
+  return (W.byLevel && W.byLevel[g]) || W.all || {};
+}
+function weightLenses(q) {
+  var wt = weightsFor(q), out = [];
+  ICONS.forEach(function (ic) {
+    var w = +wt[ic.id] || 0;
+    if (w <= 0) return;
+    var lens = ic.lens;
+    if (!lens) return;
+    out.push({ ic: ic, w: w, lens: lens });
+  });
+  return out;
+}
+function iconShare(feed, wt) {
+  var tot = 0, on = 0;
+  ICONS.forEach(function (ic) { var w = +wt[ic.id] || 0; if (w > 0) { tot += w; on++; } });
+  if (!on || tot <= 0) return 0;
+  var base = feed === "allnew" ? 0.35 : 0.15;
+  var scale = Math.min(1.6, tot / Math.max(1, ICONS.length * 2));
+  return base * scale;
+}
+function pickIcon(wt) {
+  var arr = [], w = [];
+  ICONS.forEach(function (ic) { var x = +wt[ic.id] || 0; if (x > 0) { arr.push(ic); w.push(x); } });
+  if (!arr.length) return null;
+  return pickW(arr, w);
+}
+function inspiration(feed, q) {
   /* allnew: one source per look, by group (Icons, palettes, his own
      colours, gaps) so no one group crowds the feed; withmine: his style
-     first, sometimes a gap or an Icon */
-  var g = feed === "allnew" ? [["icon", ICONS.length ? 0.35 : 0], ["palette", PLATES.length ? 0.25 : 0], ["style", 0.2], ["gap", GAPS.length ? 0.2 : 0]]
-    : [["style", 0.6], ["gap", GAPS.length ? 0.25 : 0], ["icon", ICONS.length ? 0.15 : 0]];
+     first, sometimes a gap or an Icon.
+     Icon picks are weighted per dress level; a zero total weight drops
+     the icon group (no icon-seeded looks). */
+  var wt = weightsFor(q);
+  var iShare = iconShare(feed, wt);
+  var g = feed === "allnew" ? [["icon", iShare], ["palette", PLATES.length ? 0.25 : 0], ["style", 0.2], ["gap", GAPS.length ? 0.2 : 0]]
+    : [["style", 0.6], ["gap", GAPS.length ? 0.25 : 0], ["icon", iShare]];
   var t = pickW(g, g.map(function (x) { return x[1]; }))[0];
-  if (t === "icon") return { t: "icon", ic: ICONS[Math.floor(rng() * ICONS.length)] };
+  if (t === "icon") {
+    var ic = pickIcon(wt);
+    if (!ic) return { t: "style" };
+    return { t: "icon", ic: ic };
+  }
   if (t === "palette") { var mine = PLATES.filter(function (p) { return p.mine; }); var src = mine.length && rng() < 0.6 ? mine : PLATES; return { t: "palette", pl: src[Math.floor(rng() * src.length)] }; }
   if (t === "gap") return { t: "gap", g: GAPS[Math.floor(rng() * GAPS.length)] };
   return { t: "style" };
@@ -44051,7 +44641,7 @@ function dealInspo(q) {
   var seen = {}; (q.recent || []).forEach(function (k) { seen[k] = 1; });
   var out = [], tries = 0, MAX = 9000;
   while (out.length < q.n && tries < MAX) {
-    var src = q.lens ? { t: "icon", ic: { id: q.lens.id, name: q.lens.name, palette: q.lens.hex, formality: q.lens.formality, lens: q.lens } } : inspiration(q.feed);
+    var src = q.lens ? { t: "icon", ic: { id: q.lens.id, name: q.lens.name, palette: q.lens.hex, formality: q.lens.formality, lens: q.lens } } : inspiration(q.feed, q);
     var cands = [];
     for (var j = 0; j < 40 && tries < MAX && cands.length < 6; j++) { tries++; var c = sampleOne(q, seen, src); if (c) cands.push(c); }
     if (!cands.length) continue;
@@ -44071,6 +44661,26 @@ self.onmessage = function (ev) {
       var looks = m.feed === "mine" ? dealMine(m) : dealInspo(m);
       var why = null; if (!looks.length) { var mx = 0; Object.keys(WHY).forEach(function (k) { if (WHY[k] > mx) { mx = WHY[k]; why = k; } }); }
       self.postMessage({ type: "dealt", id: m.id, feed: m.feed, gen: m.gen, looks: looks, why: why, ms: Date.now() - t1 });
+    }
+    if (m.type === "measure") {
+      var t2 = Date.now();
+      WHY = {};
+      var dealt = m.feed === "mine" ? dealMine(m) : dealInspo(m);
+      var rows = dealt.map(function (l) {
+        var scores = {}, top = null, best = -1e9;
+        ICONS.forEach(function (ic) {
+          if (!ic.lens) return;
+          var t = 0;
+          (l.ids || []).forEach(function (id) {
+            var p = (m.feed === "mine" ? MINEI[id] : null) || byId[id];
+            t += lensPiece(p, ic.lens);
+          });
+          scores[ic.id] = Math.round(t * 100) / 100;
+          if (t > best) { best = t; top = ic.id; }
+        });
+        return { src: l.src || null, top: top, scores: scores, ids: l.ids || [] };
+      });
+      self.postMessage({ type: "measured", id: m.id, feed: m.feed, level: m.level, looks: rows, n: rows.length, ms: Date.now() - t2 });
     }
   } catch (err) { self.postMessage({ type: "error", id: m.id, feed: m.feed, gen: m.gen, msg: String(err && err.message || err) }); }
 };

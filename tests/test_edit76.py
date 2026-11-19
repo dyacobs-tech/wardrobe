@@ -133,7 +133,7 @@ def main():
 
         # 1. tabs
         pg.click("#tab-find"); pg.wait_for_timeout(500)
-        tabs = pg.evaluate("""() => [...document.querySelectorAll('#panel-find .edit-tabs .chip')].map(b => { const r = b.getBoundingClientRect(); return { t: b.textContent.replace(/\\d+/g,'').trim(), on: b.getAttribute('aria-pressed'), c: r.left + r.width / 2, l: r.left, r: r.right }; })""")
+        tabs = pg.evaluate("""() => [...document.querySelectorAll('#panel-find .edit-shop-tabs .chip')].map(b => { const r = b.getBoundingClientRect(); return { t: b.textContent.replace(/\\d+/g,'').trim(), on: b.getAttribute('aria-pressed'), c: r.left + r.width / 2, l: r.left, r: r.right }; })""")
         check("four tabs Saved/Searches/Build/Ask (.77) + Price pill (.78.4)", [t["t"] for t in tabs][:4] == ["Saved", "Searches", "Build", "Ask"] and len(tabs) == 5, tabs)
         mid = (tabs[0]["l"] + tabs[-1]["r"]) / 2 if len(tabs) == 5 else 0
         check("tabs centred", abs(mid - 195) <= 2, mid)
