@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.4" />
+    <meta name="wardrobe-build" content="2026-11-19.80.5" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -6843,7 +6843,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.4</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.5</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7381,6 +7381,8 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
       var st = db.transaction("p", "readwrite").objectStore("p");
       dead.forEach(function (k) { st.delete(k); delete cache[k]; delete bootKeys[k]; });
     } catch (e) {}
+    /* their grid thumbnails go too */
+    try { if (TH.db) { var ts = TH.db.transaction("t", "readwrite").objectStore("t"); dead.forEach(function (k) { if (TH.has[k]) { ts.delete(k); delete TH.has[k]; } }); } } catch (e) {}
     return dead.length;
   };
   /* Build .55 (3.2d): lazy image hydration. Photos are no longer
@@ -7392,11 +7394,87 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
   /* .80: resolved photos are swapped in once per frame, in one pass over
      the waiting images, instead of a whole-document scan per photo (with
      ~100 photos that was ~100 scans of every <img> on a reopen) */
-  var _resolved = Object.create(null), _flushQ = false;
+  /* .80.5: grid thumbnails. A closet / watch grid tile shows a small copy
+     of its photo (~360px wide, WebP where the browser can write it), kept
+     in its own IndexedDB database ("wardrobe-thumbs", this device only,
+     never synced) and shown through a blob: URL — so opening the closet no
+     longer reads and decodes every full 900x1200 photo. The full photo still
+     loads everywhere else (item detail, pop-out, try-on). Only the <img> in
+     the page changes: the stored records, their "idb:" references and sync
+     are untouched (the full photo and its reference stay exactly as they
+     were; blob: page URLs are never written to storage — the store saves
+     the record, not the page). A tile without a thumbnail yet shows the
+     full photo and makes its thumbnail on idle, for the next open. */
+  var TH_W = 360, TH_SEL = ".item-card > img.photo, img.watch-thumb";
+  var TH = { db: null, has: Object.create(null), url: Object.create(null), busy: Object.create(null), ready: false, wait: [] };
+  function thReady(f) { if (TH.ready) f(); else TH.wait.push(f); }
+  function thDone() { if (TH.ready) return; TH.ready = true; TH.wait.splice(0).forEach(function (f) { try { f(); } catch (e) {} }); }
+  try {
+    var trq = indexedDB.open("wardrobe-thumbs", 1);
+    trq.onupgradeneeded = function () { var d = trq.result; if (!d.objectStoreNames.contains("t")) d.createObjectStore("t"); };
+    trq.onerror = trq.onblocked = thDone;
+    trq.onsuccess = function () {
+      var d = trq.result;
+      try {
+        var kc = d.transaction("t").objectStore("t").openKeyCursor();
+        kc.onerror = thDone;
+        kc.onsuccess = function () { var c = kc.result; if (c) { TH.has[c.key] = 1; c.continue(); return; } TH.db = d; thDone(); };
+      } catch (e) { thDone(); }
+    };
+    setTimeout(thDone, 1500);
+  } catch (e) { thDone(); }
+  function thGet(key, cb) {
+    if (TH.url[key]) return cb(TH.url[key]);
+    if (!TH.db || !TH.has[key]) return cb(null);
+    try {
+      var g = TH.db.transaction("t").objectStore("t").get(key);
+      g.onsuccess = function () {
+        /* stored as bytes + type (WebKit can refuse a Blob in IndexedDB) */
+        var v = g.result, b = v && v.b && v.b.byteLength ? new Blob([v.b], { type: v.t || "image/webp" }) : null;
+        if (b && typeof URL !== "undefined" && URL.createObjectURL) { TH.url[key] = URL.createObjectURL(b); cb(TH.url[key]); } else { delete TH.has[key]; cb(null); }
+      };
+      g.onerror = function () { cb(null); };
+    } catch (e) { cb(null); }
+  }
+  var thIdle = window.requestIdleCallback ? function (f) { window.requestIdleCallback(f, { timeout: 5000 }); } : function (f) { setTimeout(f, 300); };
+  /* draw the tile's own (already decoded) full photo small, once */
+  function thMake(im, key) {
+    if (!TH.db || TH.has[key] || TH.busy[key]) return;
+    TH.busy[key] = 1;
+    function go() {
+      thIdle(function () {
+        try {
+          var nw = im.naturalWidth, nh = im.naturalHeight;
+          if (!nw || !nh || nw <= TH_W * 1.25) return;
+          var cv = document.createElement("canvas"); cv.width = TH_W; cv.height = Math.round(nh * TH_W / nw);
+          var cx = cv.getContext("2d"); if (!cx) return;
+          cx.imageSmoothingQuality = "high";
+          cx.drawImage(im, 0, 0, cv.width, cv.height);
+          cv.toBlob(function (b) {
+            if (!b || !b.size || !TH.db) return;
+            var put = function (buf) {
+              try { var tx = TH.db.transaction("t", "readwrite"); tx.objectStore("t").put({ t: b.type, b: buf }, key); tx.oncomplete = function () { TH.has[key] = 1; }; } catch (e) {}
+            };
+            if (b.arrayBuffer) b.arrayBuffer().then(put, function () {});
+            else { var fr = new FileReader(); fr.onload = function () { put(fr.result); }; fr.readAsArrayBuffer(b); }
+          }, "image/webp", 0.82);
+        } catch (e) {}
+      });
+    }
+    if (im.complete && im.naturalWidth) go(); else im.addEventListener("load", go, { once: true });
+  }
+  V.thumbs = TH;
+  var _resolved = Object.create(null), _thumbRes = Object.create(null), _flushQ = false;
   function hydrateFlush() {
     _flushQ = false;
     var res = _resolved; _resolved = Object.create(null);
-    document.querySelectorAll('img[src^="idb:"]').forEach(function (im) { var d = res[im.getAttribute("src")]; if (d) im.src = d; });
+    var tres = _thumbRes; _thumbRes = Object.create(null);
+    document.querySelectorAll('img[src^="idb:"]').forEach(function (im) {
+      var ref = im.getAttribute("src"), tile = im.matches && im.matches(TH_SEL);
+      if (tile && tres[ref]) { im.src = tres[ref]; return; }
+      var d = res[ref];
+      if (d) { im.src = d; if (tile) thMake(im, ref.slice(4)); }
+    });
     document.querySelectorAll('[data-popout^="idb:"]').forEach(function (el) { var d = res[el.getAttribute("data-popout")]; if (d) el.setAttribute("data-popout", d); });
   }
   function hydrateResolve(ref, data) {
@@ -7408,7 +7486,15 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
     var s = img.getAttribute("src");
     if (s && s.indexOf("idb:") === 0) {
       var ref = s;
-      V.fetch(s.slice(4), function (data) { if (data) hydrateResolve(ref, data); });
+      var full = function () { V.fetch(s.slice(4), function (data) { if (data) hydrateResolve(ref, data); }); };
+      if (!(img.matches && img.matches(TH_SEL))) return full();
+      thReady(function () {
+        thGet(ref.slice(4), function (u) {
+          if (!u) return full();
+          _thumbRes[ref] = u;
+          if (!_flushQ) { _flushQ = true; (window.requestAnimationFrame || setTimeout)(hydrateFlush); }
+        });
+      });
     }
   }
   function hydrateScan(root) {
@@ -8521,7 +8607,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.4";
+var WARDROBE_BUILD = "2026-11-19.80.5";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
