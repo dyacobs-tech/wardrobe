@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.14" />
+    <meta name="wardrobe-build" content="2026-11-19.80.15" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5965,6 +5965,32 @@
         line-height: 1.25 !important;
       }
       #myinspo-desc { font-size: 14px; }
+      /* Audit leftovers — The Edit + P2 polish (do not touch Home hero layout) */
+      #panel-find .edit-tag.shop {
+        background: var(--honey-nav, #C29E74);
+        color: #1A1612;
+        border-color: var(--honey-nav, #C29E74);
+      }
+      html[data-theme="dark"] #panel-find .edit-tag.shop {
+        color: var(--honey-on, #FFFAF0);
+      }
+      #panel-find .edit-acc-h { grid-column: 1 / -1; margin: 8px 0 0; }
+      #panel-onyou { padding-bottom: 28px; }
+      #panel-onyou .ion-acts { margin-top: 16px; padding-bottom: 6px; }
+      #panel-onyou .ion-fig { background: #F6F2EA; }
+      html[data-theme="dark"] #panel-onyou .ion-fig { background: #F6F2EA; }
+      :focus { outline: none; }
+      :focus-visible {
+        outline: 2px solid var(--honey-nav, #C29E74);
+        outline-offset: 2px;
+      }
+      input:focus-visible, select:focus-visible, textarea:focus-visible {
+        outline: 2px solid var(--honey-nav, #C29E74);
+        outline-offset: 1px;
+        border-color: var(--honey-nav, #C29E74);
+      }
+      #ask-thread .ask-signedout { display: grid; gap: 14px; justify-items: start; padding: 8px 0 16px; }
+      #ask-thread .ask-signedout .ask-msg { margin: 0; }
       /* Desktop: Details opens as a centred sheet, not a panel buried at the top of Closet */
       @media (min-width: 900px) {
         #item-detail:not(:empty) {
@@ -7251,7 +7277,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.14</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.15</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8773,7 +8799,7 @@ var COLORS = window.WADA.colors.map(function (c) { return { name: c[0], hex: c[1
 var PLATES = window.WADA.plates.map(function (idxs, i) {
   return { plate: i + 1, colors: idxs.map(function (j) { return COLORS[j]; }) };
 });
-function plateName(p) { return "Plate " + p.plate + " — " + p.colors.map(function (c) { return c.name; }).join(" & "); }
+function plateName(p) { if (!p) return "Plate"; var cols = (p.colors && p.colors.slice) ? p.colors : []; return "Plate " + p.plate + " — " + cols.map(function (c) { return c.name; }).join(" & "); }
 function plateKind(n) { return n === 2 ? "Two colours" : n === 3 ? "Three colours" : "Four colours"; }
 
 function hexRgb(hex) {
@@ -9015,7 +9041,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.14";
+var WARDROBE_BUILD = "2026-11-19.80.15";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -18887,6 +18913,7 @@ function iconPhotoFindLook(ic, lk) {
   return built;
 }
 function plateFindLook(p) {
+  if (!p || !p.colors) return null;
   var names = p.colors.map(function (c) { return c.name.toLowerCase(); }).join(" and ");
   var look = buildLook("An outfit in " + names + " (Wada Plate " + p.plate + ")", "", "", { basis: "palette", plate: p, source: "inspo" });
   return look;
@@ -25121,6 +25148,7 @@ var colourFilter = null;
 
 function renderFeatured() {
   var p = featuredPlate;
+  if (!p || !p.colors) return;
   document.getElementById("featured").innerHTML =
     "<h3>" + esc(plateName(p)) + "</h3>" +
     stripHTML(p.colors, "lg") + legendHTML(p.colors) +
@@ -25200,6 +25228,7 @@ function openPlate(num, goStudio) {
   if (goStudio) usePlateInStudio(p);
 }
 function usePlateInStudio(p) {
+  if (!p || !p.colors) return;
   var names = p.colors.map(function (c) { return c.name.toLowerCase(); }).join(" and ");
   document.getElementById("desc").value = "An outfit in " + names + " (Wada Plate " + p.plate + ")";
   setBasis("palette");
@@ -27543,14 +27572,17 @@ function renderToday() {
    weather there re-deals the day and steers Studio looks that
    have no season chosen. Weather comes from Open-Meteo for the
    current location's coordinates. */
-var HOME_DEFAULT = { name: "", lat: 0, lon: 0, admin: "", country: "" };
+var HOME_DEFAULT = { name: "Palm Beach, Florida", lat: 26.70306, lon: -80.03661, admin: "Florida", country: "United States" };
 var QUICK_LOCS = {
-  "palm-beach": HOME_DEFAULT,
+  "palm-beach": { name: "Palm Beach, Florida", lat: 26.70306, lon: -80.03661, admin: "Florida", country: "United States" },
   "new-york": { name: "New York, New York", lat: 40.7128, lon: -74.006, admin: "New York", country: "United States" },
   "greenwich": { name: "Greenwich, Connecticut", lat: 41.0262, lon: -73.6282, admin: "Connecticut", country: "United States" }
 };
-var homeLoc = store.get("homeLocation", null) || JSON.parse(JSON.stringify(HOME_DEFAULT));
-var currentLoc = store.get("currentLocation", null) || JSON.parse(JSON.stringify(homeLoc));
+function locIsSet(loc) { return !!(loc && loc.name && Number(loc.lat) && Number(loc.lon)); }
+var _storedHome = store.get("homeLocation", null);
+var homeLoc = locIsSet(_storedHome) ? _storedHome : JSON.parse(JSON.stringify(HOME_DEFAULT));
+var _storedCur = store.get("currentLocation", null);
+var currentLoc = locIsSet(_storedCur) ? _storedCur : JSON.parse(JSON.stringify(homeLoc));
 var currentWeather = null;
 /* Per-date daily forecast from the same Open-Meteo read, keyed
    by ISO date: {hi, lo, code, label, rain}. The Calendar planner
@@ -30687,6 +30719,7 @@ function clearFindLookMode() {
   store.set("findLook", null);
   renderFindLookMode();
 }
+window.clearFindLookMode = clearFindLookMode;
 /* The carried look is the look CURRENTLY on Today. Every hero
    render calls this, so a fresh deal, a swipe, the Like /
    Don't-like flow, an Outfit type or source change, a location
@@ -39056,6 +39089,9 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
   function show(v) {
     editState.view = v;
     store.set("editView", v);
+    /* Shop-the-look (data-stl) was covering every Edit tab. Closing it
+       here means the tab the user tapped is actually on screen. */
+    if (typeof window.clearFindLookMode === "function") window.clearFindLookMode();
     document.querySelectorAll("[data-edit-view]").forEach(function (b) { if (b.closest(".edit-tabs")) b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-view") === v)); });
     ["saved", "searches", "build", "ask"].forEach(function (n) { var el = document.getElementById("edit-v-" + n); if (el) el.hidden = n !== v; });
     updateCounts();
@@ -39300,6 +39336,20 @@ function ionShopHTML(list) {
   }).join("");
 }
 var ION_STYLE = { "palm-beach": "Palm Beach", "smart-casual": "Smart casual", evening: "Evening", weekend: "Weekend" };
+var INSPO_BADCUT = {};
+window.inspoCutFor = function (src) {
+  var m = String(src || "").match(/assets\/inspo\/([^/?#]+)$/);
+  if (!m || INSPO_BADCUT[m[1]]) return "";
+  return "assets/inspo-cut/" + m[1];
+};
+window.inspoCutOnError = function (el) {
+  if (!el) return;
+  var m = String(el.getAttribute("src") || "").match(/assets\/inspo-cut\/([^/?#]+)$/);
+  if (!m || INSPO_BADCUT[m[1]]) return;
+  INSPO_BADCUT[m[1]] = 1;
+  el.onerror = null;
+  el.src = "assets/inspo/" + m[1];
+};
 function renderInspoOnYou() {
   var host = document.getElementById("panel-onyou");
   if (!host) return;
@@ -39310,15 +39360,17 @@ function renderInspoOnYou() {
   var cards = mine.map(function (l) {
     var ids = [], shop = [];
     Object.keys(l.board).forEach(function (k) { var r = l.board[k]; if (!r) return; if (r.t === "c") ids.push(r.id); else if (r.p) shop.push(r.p); });
-    var img = l.img || (shop[0] && shop[0].img) || "";
-    return '<article class="card ion-card" data-ion-build="' + ionEsc(l.id) + '"><div class="ion-fig">' + (img ? '<img src="' + ionEsc(img) + '" alt="" data-popout="' + ionEsc(img) + '" loading="lazy" />' : "") + "</div>" +
+    var raw = l.img || (shop[0] && shop[0].img) || "";
+    var img = (typeof window.inspoCutFor === "function" && window.inspoCutFor(raw)) || raw;
+    return '<article class="card ion-card" data-ion-build="' + ionEsc(l.id) + '"><div class="ion-fig">' + (img ? '<img src="' + ionEsc(img) + '" alt="" data-popout="' + ionEsc(img) + '" loading="lazy" onerror="if(window.inspoCutOnError)inspoCutOnError(this)" />' : "") + "</div>" +
       '<div class="ion-side"><span class="ion-kick">Your build</span>' + ionOwnHTML(ids) + '<div class="ion-kick">To buy</div>' + ionShopHTML(shop) +
       '<div class="ion-acts"><button type="button" class="btn-ghost" data-ion-open-build="' + ionEsc(l.id) + '">Build</button></div></div></article>';
   });
   INSPO_ONBODY.looks.forEach(function (l) {
     var shop = (l.shop || []).map(ionProduct);
-    var img = "assets/inspo/" + l.f;
-    cards.push('<article class="card ion-card" data-ion-look="' + ionEsc(l.id) + '"><div class="ion-fig"><img src="' + img + '" alt="" data-popout="' + img + '" loading="lazy" decoding="async" /></div>' +
+    var raw = "assets/inspo/" + l.f;
+    var img = (typeof window.inspoCutFor === "function" && window.inspoCutFor(raw)) || raw;
+    cards.push('<article class="card ion-card" data-ion-look="' + ionEsc(l.id) + '"><div class="ion-fig"><img src="' + img + '" alt="" data-popout="' + raw + '" loading="lazy" decoding="async" onerror="if(window.inspoCutOnError)inspoCutOnError(this)" /></div>' +
       '<div class="ion-side"><span class="ion-kick">' + ionEsc(ION_STYLE[l.style] || "") + "</span>" + ionOwnHTML(l.owned) +
       (shop.length ? '<div class="ion-kick">To buy</div>' + ionShopHTML(shop) : "") +
       '<div class="ion-acts"><button type="button" class="btn-ghost" data-ion-build-look="' + ionEsc(l.id) + '">Build this look</button></div></div></article>');
@@ -39582,7 +39634,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   }
   function syncSend() {
     var b = document.getElementById("ask-send"), q = document.getElementById("ask-q");
-    if (b) b.disabled = askBusy || !online() || !(q && q.value.trim());
+    if (b) b.disabled = askBusy || !online() || !tryonKey() || !(q && q.value.trim());
   }
   /* the input rides just above the fixed bottom nav */
   function placeForm() {
@@ -39597,9 +39649,16 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var host = document.getElementById("ask-thread");
     if (!host) return;
     placeForm();
-    host.innerHTML = askThread.map(turnHTML).join("");
+    var signed = !!(typeof tryonKey === "function" && tryonKey());
+    var qEl = document.getElementById("ask-q");
+    if (qEl) qEl.placeholder = signed ? "Ask Vesper…" : "Sign in to ask…";
+    if (!signed) {
+      host.innerHTML = '<div class="ask-signedout"><p class="ask-a ask-msg">Ask is ready once this device is signed in. Open Profile to connect, then come back here.</p><button type="button" class="btn-ink" id="ask-goto-profile">Open Profile</button></div>';
+    } else {
+      host.innerHTML = askThread.map(turnHTML).join("");
+    }
     var sg = document.getElementById("ask-sugs");
-    if (sg) sg.innerHTML = askThread.length ? "" : ASK_SUGS.map(function (s) { return '<button type="button" class="chip" data-ask-sug>' + esc(s) + "</button>"; }).join("");
+    if (sg) sg.innerHTML = (!signed || askThread.length) ? "" : ASK_SUGS.map(function (s) { return '<button type="button" class="chip" data-ask-sug>' + esc(s) + "</button>"; }).join("");
     syncSend();
     if (toEnd) {
       var last = host.lastElementChild;
@@ -39627,6 +39686,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     ev.preventDefault();
     var q = document.getElementById("ask-q");
     if (!q || !q.value.trim() || askBusy || !online()) return;
+    if (!tryonKey()) { renderAsk(false); return; }
     var v = q.value; q.value = ""; syncSend();
     ask(v);
   });
@@ -39636,7 +39696,8 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   document.addEventListener("click", function (ev) {
     var t = ev.target; if (!t || !t.closest || !t.closest("#edit-v-ask")) return;
     var b, card, x;
-    if ((b = t.closest("[data-ask-sug]"))) { ask(b.textContent); return; }
+    if ((b = t.closest("#ask-goto-profile"))) { if (typeof switchTab === "function") switchTab("pcloud"); return; }
+    if ((b = t.closest("[data-ask-sug]"))) { if (!tryonKey()) { renderAsk(false); return; } ask(b.textContent); return; }
     if ((b = t.closest("[data-ask-retry]"))) {
       var old = turnById(b.getAttribute("data-ask-retry"));
       if (old && !askBusy && online()) { askThread = askThread.filter(function (z) { return z !== old; }); saveThread(); ask(old.q); }
