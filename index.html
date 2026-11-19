@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78.9e" />
+    <meta name="wardrobe-build" content="2026-11-19.79.1" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5225,6 +5225,34 @@
       .outfit-view .ov-figure, html[data-theme="dark"] .outfit-view .ov-figure { background: var(--ow-base, #F6F2EA) !important; }
       .outfit-view .ov-figure .hero-bg img { display: none !important; }
       .outfit-view .ov-figure .hero-bg { background: radial-gradient(ellipse 58% 40% at 50% 30%, var(--ow-glow, #FDFBF7), transparent), linear-gradient(to bottom, transparent 80%, var(--ow-floor, #E9E2D5) 96%, transparent 100%) !important; }
+      /* ================= Build .79.1 — Closet: search + filters + Add on one row =================
+         A compact search pill (magnifier + "Search"), the three category
+         filters and a round + for Add a piece, one row at 390 and 430.
+         Focusing the search widens it across the row (the filters step
+         aside until it is left empty). */
+      #panel-wardrobe .closet-top3.closet-row789 {
+        display: flex !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: flex-start !important;
+        gap: 5px !important; width: 100% !important; max-width: 100% !important; margin: 0 0 8px !important;
+      }
+      #panel-wardrobe .closet-row789 .closet-search789 { position: relative; flex: 1 1 80px; min-width: 34px; margin: 0 !important; transition: flex-basis .2s ease; container-type: inline-size; }
+      @container (max-width: 62px) { #panel-wardrobe .closet-row789 .closet-search789 input::placeholder { color: transparent; } #panel-wardrobe .closet-row789 .closet-search789 input { padding-right: 0 !important; } }
+      #panel-wardrobe .closet-row789 .closet-search789 input {
+        width: 100% !important; height: var(--ctl-h, 34px) !important; min-height: 0 !important; box-sizing: border-box;
+        padding: 0 8px 0 28px !important; border-radius: 999px !important; font-size: var(--fs-ctl, 12.5px) !important;
+        border: var(--ctl-border, 1px solid var(--border-strong)) !important; background: var(--surface) !important; color: var(--text) !important;
+        -webkit-appearance: none; appearance: none;
+      }
+      #panel-wardrobe .closet-row789 .closet-search789 input::-webkit-search-cancel-button { -webkit-appearance: none; }
+      #panel-wardrobe .closet-row789 .cs-mag { position: absolute; left: 10px; top: 50%; width: 14px; height: 14px; transform: translateY(-50%); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; opacity: .65; pointer-events: none; }
+      #panel-wardrobe .closet-row789 .cdd { flex: none !important; min-width: 0; }
+      #panel-wardrobe .closet-row789 .closet-cat-btn { padding: 0 8px !important; font-size: 12px !important; letter-spacing: 0 !important; }
+      #panel-wardrobe .closet-row789 .closet-cat-btn .cdd-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      #panel-wardrobe .closet-row789 .closet-add789 {
+        flex: none !important; width: var(--ctl-h, 34px) !important; min-width: var(--ctl-h, 34px) !important; padding: 0 !important;
+        border-radius: 50% !important; display: inline-grid !important; place-items: center; font-size: 20px !important; line-height: 1 !important;
+      }
+      #panel-wardrobe .closet-row789.cs-open .cdd { display: none !important; }
+      #panel-wardrobe .closet-row789.cs-open .closet-search789 { flex-basis: 100%; }
       /* ================= Build .78.9e — the Home hero is only ever a cut-out =================
          Whatever path sets the hero image (boot, outfit of the day, a
          restored or liked look, the crossfade), anything that is not a
@@ -5684,10 +5712,11 @@
         <div id="item-detail"></div>
         <div class="ward-grid">
           <div>
-            <div class="ward-search">
-              <input type="search" id="ward-search" placeholder="Name, colour, category, notes…" aria-label="Search closet" autocomplete="off" />
-            </div>
-            <div class="closet-top3">
+            <div class="closet-top3 closet-row789">
+              <div class="ward-search closet-search789">
+                <svg class="cs-mag" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5L21 21"></path></svg>
+                <input type="search" id="ward-search" placeholder="Search" aria-label="Search closet — name, colour, category, notes" autocomplete="off" />
+              </div>
               <div class="cdd closet-cat-cdd">
                 <button type="button" class="cdd-btn closet-cat-btn" id="ward-cat-clothing-btn" data-cdd-manual data-cat-group="clothing" aria-haspopup="true" aria-expanded="false" aria-label="Clothing — filter by category"><span class="cdd-label" id="ward-cat-clothing-label">Clothing</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
                 <div class="cdd-menu" id="ward-cat-clothing-menu" hidden role="menu" aria-label="Clothing categories"></div>
@@ -5700,7 +5729,7 @@
                 <button type="button" class="cdd-btn closet-cat-btn" id="ward-cat-shoes-btn" data-cdd-manual data-cat-group="shoes" aria-haspopup="true" aria-expanded="false" aria-label="Shoes — filter by category"><span class="cdd-label" id="ward-cat-shoes-label">Shoes</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
                 <div class="cdd-menu cdd-menu-r" id="ward-cat-shoes-menu" hidden role="menu" aria-label="Shoes categories"></div>
               </div>
-              <button type="button" class="cdd-btn closet-add-btn" id="closet-add-entry"><span class="cdd-label">+ Add a piece</span></button>
+              <button type="button" class="cdd-btn closet-add-btn closet-add789" id="closet-add-entry" aria-label="Add a piece" title="Add a piece"><span class="cdd-label" aria-hidden="true">+</span></button>
             </div>
             <div class="closet-stale-row"><button type="button" class="chip" id="ward-stale-chip" aria-pressed="false">Not worn in 90 days</button><span class="meta" id="ward-stale-note"></span></div>
             <div class="item-grid" id="item-grid"></div>
@@ -6577,7 +6606,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78.9e</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.79.1</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8185,7 +8214,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78.9e";
+var WARDROBE_BUILD = "2026-11-19.79.1";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -39642,6 +39671,16 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   document.addEventListener("touchcancel", end, { passive: true });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") { var l = sheets(); if (l.length) l[l.length - 1].close(); } });
   sync();
+})();
+    </script>
+    <script type="wardrobe/app">
+/* Build .79.1: the closet search widens across its row while in use */
+(function closetSearchRow789() {
+  var row = document.querySelector(".closet-row789"), inp = document.getElementById("ward-search");
+  if (!row || !inp) return;
+  function set() { row.classList.toggle("cs-open", document.activeElement === inp || !!inp.value); }
+  inp.addEventListener("focus", set); inp.addEventListener("blur", function () { setTimeout(set, 120); }); inp.addEventListener("input", set);
+  set();
 })();
     </script>
     <script type="wardrobe/app">

@@ -263,7 +263,7 @@ def main() -> int:
                 info = page.evaluate(HOME_JS)
                 check(
                     f"{name}: build is .71",
-                    info and info.get("build") == "2026-11-19.78.9e",
+                    info and info.get("build") == "2026-11-19.79.1",
                     str(info and info.get("build")),
                 )
                 check(
