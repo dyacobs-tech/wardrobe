@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="DONNA" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.34" />
+    <meta name="wardrobe-build" content="2026-11-19.80.35" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -2602,6 +2602,49 @@
       }
       .navbtn:focus-visible { outline: 2px solid var(--brass); outline-offset: -4px; border-radius: 10px; }
       /* Profile: the icon at the right of the masthead. */
+      /* ================= Build .80.34 — Wardrobe Rules ================= */
+      .rules-entry {
+        display: flex; align-items: center; justify-content: space-between; gap: 14px;
+        width: 100%; text-align: left; padding: 14px 16px; margin: 0 0 14px;
+        background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+        box-shadow: var(--shadow-card); color: inherit; font: inherit; cursor: pointer;
+      }
+      .rules-entry:focus-visible { outline: 2px solid var(--honey-nav, #C29E74); outline-offset: 2px; }
+      .rules-entry-copy { min-width: 0; }
+      .rules-entry-title { display: block; font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.2; margin: 0 0 3px; }
+      .rules-entry-meta { display: block; font-size: 13px; line-height: 1.4; color: var(--dim); }
+      .rules-entry-chev { flex: none; color: var(--honey-nav, #C29E74); font-size: 22px; line-height: 1; }
+      #panel-prules { padding-bottom: calc(var(--bb-h, 80px) + 28px); }
+      #panel-prules .rules-heading {
+        text-align: center; font-family: var(--font-display); font-size: 22px; font-weight: 600;
+        margin: 0 0 6px; color: var(--text);
+      }
+      #panel-prules .rules-lead {
+        text-align: center; font-size: 14px; line-height: 1.4; color: var(--dim);
+        max-width: 32rem; margin: 0 auto 10px;
+      }
+      #panel-prules .rules-composer { margin-bottom: 10px; padding: 12px 14px; display: grid; gap: 8px; }
+      #panel-prules .rules-composer textarea {
+        width: 100%; min-height: 68px; resize: vertical; padding: 8px 10px; font-size: 15px;
+        line-height: 1.4; box-sizing: border-box;
+      }
+      #panel-prules .rules-composer-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      #panel-prules .rules-preview { margin: 0; font-family: var(--font-display); font-style: italic; font-size: 15px; line-height: 1.4; color: var(--brass); }
+      #panel-prules .rules-preview.is-note { color: var(--dim); }
+      .rule-card { padding: 12px 14px; margin: 0 0 10px; display: grid; gap: 6px; }
+      .rule-card.is-off { opacity: .62; }
+      .rule-card .rule-text { margin: 0; font-size: 15.5px; line-height: 1.45; color: var(--text); }
+      .rule-card .rule-understood { margin: 0; font-family: var(--font-display); font-style: italic; font-size: 14.5px; line-height: 1.4; color: var(--brass); }
+      .rule-card .rule-understood.is-note { color: var(--dim); }
+      .rule-card .rule-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 2px; }
+      .rule-card .rule-toggle[aria-pressed="true"] { background: var(--ink-btn); color: var(--ink-btn-text); }
+      .rule-card .rule-edit-box { width: 100%; min-height: 72px; resize: vertical; padding: 8px 10px; font-size: 15px; box-sizing: border-box; }
+      #panel-prules .rules-empty { text-align: center; color: var(--dim); font-size: 14px; padding: 8px 12px 20px; }
+      @media (max-width: 430px) {
+        .rules-entry, #panel-prules .rules-composer, .rule-card { padding: 12px 14px; }
+        #panel-prules .rules-heading { font-size: 20px; }
+      }
+
       .masthead .wrap { position: relative; }
       .profile-btn {
         position: absolute; right: clamp(8px, 3vw, 32px); top: 50%; transform: translateY(-50%);
@@ -6091,7 +6134,7 @@
       <div class="wrap">
         <h1 class="brand" id="brand-home" title="Home">Donna</h1>
         <button type="button" class="btn-ink" id="shop-plus" aria-label="Add">+</button>
-        <button type="button" class="navbtn profile-btn" id="tab-profile" data-tab="profile" data-section="me" aria-controls="panel-pinfo" aria-label="Profile — info, location, cloud and backup"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg></button>
+        <button type="button" class="navbtn profile-btn" id="tab-profile" data-tab="profile" data-section="me" aria-controls="panel-pinfo" aria-label="Profile — info, location, wardrobe rules, cloud and backup"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg></button>
         <div class="rule-double" aria-hidden="true"></div>
       </div>
     </header>
@@ -6127,6 +6170,7 @@
             <div class="subnav-scroll">
             <button class="subtab" role="tab" id="tab-pinfo" aria-selected="false" aria-controls="panel-pinfo" data-tab="pinfo" aria-label="Profile info"><span class="subtab-full">Profile info</span><span class="subtab-short">Info</span></button>
             <button class="subtab" role="tab" id="tab-plocation" aria-selected="false" aria-controls="panel-plocation" data-tab="plocation">Location</button>
+            <button class="subtab" role="tab" id="tab-prules" aria-selected="false" aria-controls="panel-prules" data-tab="prules">Rules</button>
             <button class="subtab" role="tab" id="tab-pcloud" aria-selected="false" aria-controls="panel-pcloud" data-tab="pcloud">Advanced</button>
             </div>
             <button type="button" class="subtab profile-close" id="profile-close" aria-label="Close profile">×</button>
@@ -7269,6 +7313,13 @@
             <button type="button" class="chip" id="theme-dark" aria-pressed="false">Dark</button>
           </div>
         </div>
+        <button type="button" class="rules-entry" id="rules-entry" aria-controls="panel-prules">
+          <span class="rules-entry-copy">
+            <span class="rules-entry-title">Wardrobe Rules</span>
+            <span class="rules-entry-meta" id="rules-entry-meta">Plain-English rules the style engine always follows</span>
+          </span>
+          <span class="rules-entry-chev" aria-hidden="true">›</span>
+        </button>
         <div class="profile-head">
           <img class="profile-photo" id="pf-head-photo" alt="" hidden />
           <div class="profile-head-main"><h3 class="profile-name" id="pf-head-name"></h3><p class="meta" id="pf-head-city"></p></div>
@@ -7373,8 +7424,25 @@
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.34</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.35</p>
         <p class="form-note" id="nav-diag" hidden></p>
+      </section>
+
+      <section id="panel-prules" role="tabpanel" aria-labelledby="tab-prules" hidden>
+        <h2 class="rules-heading" id="prules-title">Wardrobe Rules</h2>
+        <p class="rules-lead">Write a rule in plain English. The style engine turns it into a hard rule it always follows, or keeps it as a note if it is not sure yet. You can switch any rule off or change it whenever you like.</p>
+        <form class="card rules-composer" id="rules-form">
+          <div>
+            <label class="field" for="rule-input">New rule</label>
+            <textarea id="rule-input" placeholder="e.g. No blazers on weekends" required></textarea>
+          </div>
+          <p class="rules-preview" id="rule-preview" hidden></p>
+          <div class="rules-composer-actions">
+            <button type="submit" class="btn-ink" id="rule-add">Add rule</button>
+          </div>
+        </form>
+        <div id="rules-list"></div>
+        <p class="rules-empty" id="rules-empty" hidden>No rules yet. Add one above.</p>
       </section>
 
       <!-- ================= WATCHES ================= -->
@@ -8464,6 +8532,11 @@ function lookOccasionOk(look, occasion) {
     if (shoes.fam === "brown" && bottom.fam === "black") score -= 0.8;
     if (top.fam === "black" && bottom.fam === "navy") score -= 0.5;
     if (sameTone(shoes, bottom, 6) && bottom.L > 70) score -= 0.3;
+    /* .80.35: enabled wardrobe rules that ban a pairing or colour
+       reject the combo here. Tuck is applied as a flag, not a reject. */
+    if (root.WardrobeRules && typeof root.WardrobeRules.comboAllowedStructural === "function") {
+      if (!root.WardrobeRules.comboAllowedStructural(top, bottom, shoes, layer)) return null;
+    }
     return { lo: lo, hi: hi, score: score };
   }
 
@@ -8553,7 +8626,12 @@ function lookOccasionOk(look, occasion) {
       if (!mask) continue;
       var cids = ly ? [t.id, bt.id, s.id, ly.id] : [t.id, bt.id, s.id];
       var tucked = tuckOf(t, ly);
-      combos.push({ t: t, b: bt, s: s, l: ly, mask: mask, score: ev.score, ids: cids, key: comboKey(cids), tuck: tucked, tuckPrompt: tuckPromptOf(t, ly, tucked) });
+      /* .80.35: wardrobe rules override the default tuck (HAN-12 tuckOf). */
+      if (root.WardrobeRules && typeof root.WardrobeRules.applyTuck === "function") {
+        var over = root.WardrobeRules.applyTuck(tucked, t, ly);
+        if (over === true || over === false) tucked = over;
+      }
+      combos.push({ t: t, b: bt, s: s, l: ly, mask: mask, score: ev.score, ids: cids, key: comboKey(cids), tuck: tucked, tucked: tucked, tuckPrompt: tuckPromptOf(t, ly, tucked) });
     }}}
     this.combos = combos;
   }
@@ -8634,6 +8712,14 @@ function lookOccasionOk(look, occasion) {
         return true;
       });
       if (wx.length) pool = wx;
+    }
+    /* .80.35: hard wardrobe rules. A context-sensitive ban (day,
+       occasion, weather) is applied here; if every combo would
+       break a rule the pool goes empty rather than violating it. */
+    if (root.WardrobeRules && typeof root.WardrobeRules.lookAllowed === "function") {
+      var rctx = { temp: temp, level: opts.level || null, occasion: opts.occasion, season: opts.season, weather: opts.weather, dow: (typeof opts.dow === "number" ? opts.dow : (new Date()).getDay()) };
+      pool = pool.filter(function (c) { return root.WardrobeRules.lookAllowed({ t: c.t, b: c.b, s: c.s, l: c.l, tuck: c.tuck }, rctx); });
+      if (!pool.length) return [];
     }
     var prefs = opts.prefs || {}, pItems = prefs.items || {}, pPairs = prefs.pairs || {};
     var hasPairs = false;
@@ -8720,7 +8806,7 @@ function lookOccasionOk(look, occasion) {
       pc.ids.forEach(function (id) { localExp[id] = (localExp[id] || 0) + 1; });
       var acc = null;
       if (this.accs.length && rng() < 0.35) acc = this.accs[Math.floor(rng() * this.accs.length)];
-      picked.push({ _i: chosen, key: pc.key, ids: pc.ids.slice(), top: pc.t, bottom: pc.b, shoes: pc.s, layer: pc.l, acc: acc, score: pc.score, mask: pc.mask, tuck: pc.tuck, tuckPrompt: pc.tuckPrompt });
+      picked.push({ _i: chosen, key: pc.key, ids: pc.ids.slice(), top: pc.t, bottom: pc.b, shoes: pc.s, layer: pc.l, acc: acc, score: pc.score, mask: pc.mask, tuck: pc.tuck, tucked: pc.tuck, tuckPrompt: pc.tuckPrompt });
     }
     return picked;
   };
@@ -8759,6 +8845,670 @@ function lookOccasionOk(look, occasion) {
   };
 })(typeof window !== "undefined" ? window : globalThis);
 
+/* ================= Build .80.34 — Wardrobe Rules =================
+   Plain-English style rules. A deterministic local parser turns common
+   patterns into hard constraints the generators enforce; anything it
+   cannot parse is kept as a note (shown, not enforced). Pure: no DOM,
+   no store. The app glue loads, saves and renders them. */
+(function (root) {
+  "use strict";
+  var NOTE = "Saved as a note — not yet enforced.";
+  var DAYS = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6, weekend: "weekend", weekdays: "weekdays", weekday: "weekdays" };
+  var SEASONS = { spring: 1, summer: 1, autumn: 1, fall: 1, winter: 1 };
+  var WEATHER = { hot: 1, warm: 1, cold: 1, cool: 1, rainy: 1, rain: 1, wet: 1, humid: 1 };
+  var OCCASIONS = { "black tie": 7, formal: 6, "business casual": 5, "smart casual": 4, casual: 3, pool: 1, swim: 1, weekend: "weekend" };
+  var COLOURS = "navy|black|white|ivory|cream|ecru|grey|gray|charcoal|beige|stone|khaki|sand|camel|tan|brown|olive|sage|blue|teal|green|burgundy|wine|red|yellow|orange|pink|purple|lilac";
+  var KIND_LABEL = {
+    blazer: "blazers or sport coats", "sport-coat": "blazers or sport coats",
+    shirt: "shirts", flannel: "flannel shirts", polo: "polos", knit: "knits",
+    tee: "T-shirts", "dress-tee": "dress T-shirts", "casual-tee": "casual T-shirts",
+    jacket: "jackets", coat: "coats", suit: "suits", vest: "vests",
+    jeans: "jeans", trousers: "trousers", shorts: "shorts", swim: "swim shorts",
+    sneaker: "sneakers", loafer: "loafers", boot: "boots", sandal: "sandals",
+    "any-top": "tops", "any-layer": "layers", "any-bottom": "bottoms", "any-shoes": "shoes"
+  };
+  /* Longer phrases first so "dress t-shirt" wins over "t-shirt", and
+     "sport coat" is not read as a coat. */
+  var KIND_PATTERNS = [
+    ["dress-tee", /dress\s*t[\s-]*shirts?|dress\s*tees?\b/],
+    ["casual-tee", /casual\s*t[\s-]*shirts?|casual\s*tees?\b/],
+    ["flannel", /flannels?(?:\s*shirts?)?/],
+    ["sport-coat", /sports?\s*coats?/],
+    ["blazer", /blazers?/],
+    ["polo", /polos?(?:\s*shirts?)?/],
+    ["knit", /knitwear|\bknits?\b|sweaters?|jumpers?|pullovers?|roll[\s-]*necks?|turtlenecks?/],
+    ["tee", /t[\s-]*shirts?|\btees?\b/],
+    ["shirt", /button[\s-]*downs?|oxfords?|\bshirts?\b/],
+    ["suit", /\bsuits?\b/],
+    ["jacket", /leather\s*jackets?|\bjackets?\b/],
+    ["coat", /\bcoats?\b/],
+    ["vest", /\bvests?\b|waistcoats?/],
+    ["jeans", /\bjeans?\b/],
+    ["trousers", /trousers?|chinos?|pants?\b/],
+    ["shorts", /shorts?/],
+    ["swim", /swim(?:suits?|shorts?|trunks?)?|bathing\s*suits?/],
+    ["sneaker", /sneakers?|trainers?|runners?/],
+    ["loafer", /loafers?|penny\s*loafers?/],
+    ["boot", /\bboots?\b/],
+    ["sandal", /sandals?|slides?/]
+  ];
+  var LAYER_KINDS = { blazer: 1, "sport-coat": 1, jacket: 1, coat: 1, suit: 1, vest: 1 };
+  var TOP_KINDS = { shirt: 1, flannel: 1, polo: 1, knit: 1, tee: 1, "dress-tee": 1, "casual-tee": 1, "any-top": 1 };
+  var SPECIFICITY = { flannel: 3, "dress-tee": 3, "casual-tee": 3, "sport-coat": 2, shirt: 1, polo: 1, knit: 1, tee: 1, blazer: 1, jacket: 1, coat: 1, suit: 1, vest: 1, jeans: 1, trousers: 1, shorts: 1, swim: 1, sneaker: 1, loafer: 1, boot: 1, sandal: 1, "any-top": 0, "any-layer": 0, "any-bottom": 0, "any-shoes": 0 };
+
+  var active = [];
+
+  function norm(s) {
+    return String(s || "")
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2013\u2014]/g, "-")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  function lower(s) { return norm(s).toLowerCase(); }
+
+  function labelKind(k) { return KIND_LABEL[k] || k; }
+  function labelList(kinds) {
+    var order = ["shirt","polo","knit","tee","casual-tee","dress-tee","flannel","blazer","sport-coat"];
+    var ks = (kinds || []).slice().sort(function (a, b) {
+      var ia = order.indexOf(a), ib = order.indexOf(b);
+      if (ia === -1 && ib === -1) return 0;
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+    var names = ks.map(labelKind);
+    if (names.length <= 1) return names[0] || "that piece";
+    if (names.length === 2) return names[0] + " and " + names[1];
+    return names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+  }
+
+  function scanKinds(text) {
+    var t = lower(text), found = [], used = [];
+    KIND_PATTERNS.forEach(function (pair) {
+      var k = pair[0], re = pair[1], m;
+      var r = new RegExp(re.source, "gi");
+      while ((m = r.exec(t))) {
+        var overlap = false;
+        for (var i = 0; i < used.length; i++) {
+          if (!(m.index + m[0].length <= used[i][0] || m.index >= used[i][1])) { overlap = true; break; }
+        }
+        if (overlap) continue;
+        used.push([m.index, m.index + m[0].length]);
+        if (found.indexOf(k) === -1) found.push(k);
+      }
+    });
+    return found;
+  }
+
+  function scanColour(text) {
+    var m = lower(text).match(new RegExp("\\b(" + COLOURS + ")\\b"));
+    return m ? m[1].replace("gray", "grey") : null;
+  }
+
+  function scanWhen(text) {
+    var t = lower(text), when = { days: [], occasions: [], weather: [], seasons: [] };
+    if (/\bweekends?\b/.test(t)) when.days.push("weekend");
+    if (/\bweekdays?\b/.test(t)) when.days.push("weekdays");
+    Object.keys(DAYS).forEach(function (d) {
+      if (d === "weekend" || d === "weekdays" || d === "weekday") return;
+      if (new RegExp("\\b" + d + "s?\\b").test(t)) when.days.push(d);
+    });
+    Object.keys(SEASONS).forEach(function (s) { if (new RegExp("\\b" + s + "\\b").test(t)) when.seasons.push(s === "fall" ? "autumn" : s); });
+    if (/\brainy|\brain\b|\bwet\b/.test(t)) when.weather.push("rain");
+    if (/\bcold\b|\bcool\b/.test(t)) when.weather.push("cold");
+    if (/\bhot\b|\bwarm\b|\bhumid\b/.test(t)) when.weather.push("hot");
+    if (/\bblack\s*tie\b/.test(t)) when.occasions.push("black tie");
+    if (/\bbusiness\s*casual\b/.test(t)) when.occasions.push("business casual");
+    if (/\bsmart\s*casual\b/.test(t)) when.occasions.push("smart casual");
+    if (/\bformal\b/.test(t)) when.occasions.push("formal");
+    if (/\bcasual\b/.test(t) && when.occasions.indexOf("casual") === -1 && !/business\s*casual|smart\s*casual|casual\s*t[\s-]*shirt|casual\s*tee/.test(t)) when.occasions.push("casual");
+    if (/\bpool\b|\bswim\b/.test(t) && !/swimsuit|swim short|bathing/.test(t)) when.occasions.push("pool");
+    if (!when.days.length && !when.occasions.length && !when.weather.length && !when.seasons.length) return null;
+    return when;
+  }
+
+  function whenLabel(when) {
+    if (!when) return "";
+    var bits = [];
+    (when.days || []).forEach(function (d) { bits.push(d === "weekend" ? "weekends" : d === "weekdays" ? "weekdays" : (d + "s")); });
+    (when.occasions || []).forEach(function (o) { bits.push(o); });
+    (when.seasons || []).forEach(function (s) { bits.push(s); });
+    (when.weather || []).forEach(function (w) { bits.push(w === "rain" ? "rainy weather" : w === "cold" ? "cold weather" : "hot weather"); });
+    if (!bits.length) return "";
+    if (when.days && when.days.length) return "on " + bits.join(" and ");
+    if (when.seasons && when.seasons.length) return "in " + bits.join(" and ");
+    if (when.weather && when.weather.length) return "in " + bits.join(" and ");
+    return "for " + bits.join(" and ");
+  }
+
+  function layerFrom(text) {
+    var t = lower(text);
+    var m = t.match(/\bunder (?:a |an |the )?([a-z][a-z\s-]*)$/) || t.match(/\bunder (?:a |an |the )?([a-z][a-z\s-]*)\b/);
+    var chunk = m ? m[1] : ((/\bwith a (?:blazer|sport\s*coat)/.test(t) || /\bblazer|\bsport\s*coat/.test(t)) && /under|with a blazer|over a/.test(t) ? t : "");
+    var kinds = scanKinds(chunk || ((/under|over a/.test(t)) ? t : ""));
+    for (var i = 0; i < kinds.length; i++) if (LAYER_KINDS[kinds[i]]) return kinds[i] === "sport-coat" ? "blazer" : kinds[i];
+    /* "under a blazer or sport coat" — layer kinds may have been mixed with garments */
+    if (/\bunder (?:a |an |the )?(?:blazer|sport)/.test(t) || /\bwith a (?:blazer|sport\s*coat)/.test(t)) return "blazer";
+    return null;
+  }
+
+  function garmentsFrom(text, excludeLayer) {
+    var kinds = scanKinds(text).filter(function (k) { return !excludeLayer || !LAYER_KINDS[k]; });
+    return kinds;
+  }
+
+  function parseClause(raw) {
+    var t = lower(raw);
+    if (!t) return null;
+
+    /* ---- tuck / untuck ---- */
+    var tuckVerb = null;
+    if (/\bmay be untucked\b|\bcan be untucked\b|\boptional(?:ly)? untucked\b/.test(t)) tuckVerb = "optional";
+    else if (/\bnever tucked\b|\bnot tucked\b|\bnever be tucked\b|\bnever tuck\b|\balways untucked\b|\buntucked\b/.test(t)) tuckVerb = false;
+    else if (/\balways tucked\b|\bmust be tucked\b|\bare tucked\b|\bis tucked\b|\bshould be tucked\b|\bget tucked\b|\bstay tucked\b|\balways tuck\b|\btucked in\b|\btucked\b/.test(t)) tuckVerb = true;
+    if (tuckVerb !== null) {
+      var layer = layerFrom(t);
+      var garments = garmentsFrom(t, !!layer);
+      if (!garments.length && /t[\s-]*shirts?|\btees?\b/.test(t)) garments = [/dress/.test(t) ? "dress-tee" : (/casual/.test(t) ? "casual-tee" : "tee")];
+      if (!garments.length) garments = ["any-top"];
+      return { type: "tuck", garments: garments, layer: layer, tuck: tuckVerb };
+    }
+
+    /* ---- never / always pair ---- */
+    var pair = t.match(/^(?:never|don't|do not|dont)\s+(?:wear|pair|put|combine)\s+(.+?)\s+(?:with|and)\s+(.+)$/) ||
+      t.match(/^no\s+(.+?)\s+with\s+(.+)$/) ||
+      t.match(/^(?:don't|do not|dont)\s+(?:wear|pair)\s+(.+?)\s+(?:with|and)\s+(.+)$/);
+    if (pair) {
+      return { type: "never_pair", a: describeSide(pair[1]), b: describeSide(pair[2]) };
+    }
+    var always = t.match(/^always\s+(?:wear|pair|put|combine)\s+(.+?)\s+(?:with|and)\s+(.+)$/);
+    if (always) {
+      return { type: "always_pair", a: describeSide(always[1]), b: describeSide(always[2]) };
+    }
+
+    /* ---- no category on day/occasion/weather ---- */
+    var ban = t.match(/^(?:no|never wear|don't wear|do not wear|dont wear)\s+(.+?)(?:\s+(?:on|at|in|for|during|when(?: it is)?)\s+(.+))?$/);
+    if (ban) {
+      var target = describeSide(ban[1]);
+      var when = scanWhen(ban[2] || t);
+      if (target.colour && !target.kinds.length && !when) {
+        return { type: "ban_colour", colour: target.colour, role: target.role || "any" };
+      }
+      if (target.kinds.length || target.colour) {
+        var typ = target.colour && !target.kinds.length ? "ban_colour" : "ban_category";
+        var out = { type: typ, when: when };
+        if (typ === "ban_colour") { out.colour = target.colour; out.role = target.role || "any"; }
+        else { out.kinds = target.kinds; out.colour = target.colour || null; }
+        return out;
+      }
+    }
+
+    return null;
+  }
+
+  function describeSide(text) {
+    var kinds = scanKinds(text);
+    var colour = scanColour(text);
+    var role = null;
+    if (/\bshoes?\b|\bloafers?\b|\bsneakers?\b|\bboots?\b/.test(lower(text))) role = "shoes";
+    return { kinds: kinds, colour: colour, role: role, raw: norm(text) };
+  }
+
+  function understoodPart(p) {
+    if (!p) return "";
+    if (p.type === "tuck") {
+      var g = labelList(p.garments);
+      var layer = p.layer ? " under " + labelKind(p.layer === "sport-coat" ? "blazer" : p.layer) : "";
+      if (p.tuck === "optional") return g + " may be untucked" + layer;
+      if (p.tuck === false) return g + " must never be tucked" + layer;
+      return g + " must be tucked" + layer;
+    }
+    if (p.type === "never_pair") return "never pair " + sideLabel(p.a) + " with " + sideLabel(p.b);
+    if (p.type === "always_pair") return "always pair " + sideLabel(p.a) + " with " + sideLabel(p.b);
+    if (p.type === "ban_category") {
+      var w = whenLabel(p.when);
+      return "no " + labelList(p.kinds) + (p.colour ? " in " + p.colour : "") + (w ? " " + w : "");
+    }
+    if (p.type === "ban_colour") {
+      var w2 = whenLabel(p.when);
+      var who = p.role && p.role !== "any" ? p.role : "pieces";
+      return "no " + p.colour + " " + who + (w2 ? " " + w2 : "");
+    }
+    return "";
+  }
+
+  function sideLabel(side) {
+    if (!side) return "that piece";
+    var bits = [];
+    if (side.colour) bits.push(side.colour);
+    if (side.kinds && side.kinds.length) bits.push(labelList(side.kinds));
+    else if (side.role && side.role !== "any") bits.push(side.role);
+    else if (side.raw) bits.push(side.raw);
+    return bits.join(" ") || "that piece";
+  }
+
+  function parse(text) {
+    var raw = norm(text);
+    if (!raw) return { parsed: false, constraints: [], understood: NOTE };
+    var clauses = raw.split(/\s*;\s*|\s+—\s+/);
+    var constraints = [];
+    var inheritLayer = null;
+    clauses.forEach(function (c) {
+      /* A later clause in the same rule inherits a layer mentioned earlier
+         ("Under a blazer, shirts are tucked; casual T-shirts may be untucked"). */
+      var p = parseClause(c);
+      if (!p) return;
+      if (p.type === "tuck") {
+        if (p.layer) inheritLayer = p.layer;
+        else if (inheritLayer && !p.layer) p.layer = inheritLayer;
+      }
+      constraints.push(p);
+    });
+    if (!constraints.length) return { parsed: false, constraints: [], understood: NOTE };
+    var parts = constraints.map(understoodPart).filter(Boolean);
+    return {
+      parsed: true,
+      constraints: constraints,
+      understood: "Understood as: " + parts.join("; ") + "."
+    };
+  }
+
+  /* ---------- classify a closet piece or a composer profile ---------- */
+  function classify(item) {
+    if (!item) return { kinds: [], fam: "", cat: "", role: "", n: "", id: "", L: 50 };
+    if (item.__wrClass) return item.__wrClass;
+    var cat = item.cat || item.category || "";
+    var name = item.name || item.n || "";
+    var colourName = item.colourName || item.fam || "";
+    var n = lower((item.n && item.role) ? item.n : (name + " " + colourName + " " + cat));
+    var kinds = [];
+    var role = item.role || "";
+    var kind = item.kind || "";
+    if (kind) kinds.push(kind === "sport-coat" ? "blazer" : kind);
+    if (cat === "Blazers" || /blazer|sport\s*coat/.test(n)) pushKind(kinds, "blazer");
+    if (cat === "Suits" || (kind === "suit")) pushKind(kinds, "suit");
+    if (cat === "Jackets" || cat === "Leather jackets" || kind === "jacket") pushKind(kinds, "jacket");
+    if (cat === "Coats" || kind === "coat") pushKind(kinds, "coat");
+    if (cat === "Vests" || kind === "vest") pushKind(kinds, "vest");
+    if (cat === "Sweaters" || kind === "knit") pushKind(kinds, "knit");
+    if (cat === "Polos" || kind === "polo") pushKind(kinds, "polo");
+    if (cat === "Tees" || kind === "tee") {
+      var dressTee = !!(item.dressTee) || /silk|fine[-\s]?gauge|merceris|merceriz|lisle|filo|cashmere|merino|fil\s*d['’]?ecosse|dress\s*t-?shirt|dress\s*tee/i.test(n);
+      if (dressTee) pushKind(kinds, "dress-tee");
+      else pushKind(kinds, "tee");
+    }
+    if (cat === "Shirts" || cat === "Button downs" || kind === "shirt" || kind === "overshirt") {
+      if (/flannel/.test(n)) pushKind(kinds, "flannel");
+      else pushKind(kinds, kind === "overshirt" ? "shirt" : (kind || "shirt"));
+    }
+    if (/flannel/.test(n)) pushKind(kinds, "flannel");
+    if ((cat === "Tees" || kind === "tee" || /\bt[\s-]*shirt|\btee\b/.test(n)) && kinds.indexOf("dress-tee") === -1 && /dress/.test(n)) {
+      pushKind(kinds, "dress-tee");
+      kinds = kinds.filter(function (k) { return k !== "tee"; });
+    }
+    if (cat === "Jeans" || kind === "jeans") pushKind(kinds, "jeans");
+    if (cat === "Trousers" || kind === "trousers" || kind === "chinos" || kind === "linen") pushKind(kinds, "trousers");
+    if (cat === "Shorts" || kind === "shorts") pushKind(kinds, "shorts");
+    if (cat === "Bathing suits" || kind === "swim" || item.swim) pushKind(kinds, "swim");
+    if (cat === "Shoes" || role === "shoes") {
+      if (kind === "sneaker" || /sneaker|trainer|runner/.test(n)) pushKind(kinds, "sneaker");
+      else if (kind === "loafer" || /loafer/.test(n)) pushKind(kinds, "loafer");
+      else if (kind === "boot" || /boot/.test(n)) pushKind(kinds, "boot");
+      else if (kind === "sandal" || kind === "espadrille" || /sandal|slide|espadrille/.test(n)) pushKind(kinds, "sandal");
+    }
+    if (!role) {
+      if (kinds.some(function (k) { return LAYER_KINDS[k]; })) role = "layer";
+      else if (kinds.some(function (k) { return TOP_KINDS[k]; })) role = "top";
+      else if (/jeans|trousers|shorts|swim/.test(kinds.join(" "))) role = "bottom";
+      else if (cat === "Shoes") role = "shoes";
+    }
+    var fam = item.fam || scanColour(colourName + " " + name) || "";
+    return { kinds: kinds, fam: fam, cat: cat, role: role, n: n, id: item.id || "", L: item.L, colourName: colourName };
+  }
+  function pushKind(arr, k) { if (k && arr.indexOf(k) === -1) arr.push(k); }
+
+  function hasKind(cls, want) {
+    if (!want) return true;
+    if (want === "any-top") return cls.role === "top" || (cls.kinds || []).some(function (k) { return TOP_KINDS[k]; });
+    if (want === "any-layer") return cls.role === "layer" || (cls.kinds || []).some(function (k) { return LAYER_KINDS[k]; });
+    if (want === "any-bottom") return cls.role === "bottom";
+    if (want === "any-shoes") return cls.role === "shoes";
+    if (want === "blazer" || want === "sport-coat") return (cls.kinds || []).indexOf("blazer") !== -1 || (cls.kinds || []).indexOf("sport-coat") !== -1;
+    if (want === "shirt") {
+      /* A flannel is a shirt, but a rule aimed at "shirts" is the
+         general case; callers that need to exclude flannels check
+         specificity separately. Matching: shirt OR flannel. */
+      return (cls.kinds || []).indexOf("shirt") !== -1 || (cls.kinds || []).indexOf("flannel") !== -1 || cls.cat === "Shirts" || cls.cat === "Button downs";
+    }
+    if (want === "tee") return (cls.kinds || []).indexOf("tee") !== -1 || (cls.kinds || []).indexOf("dress-tee") !== -1 || (cls.kinds || []).indexOf("casual-tee") !== -1 || cls.cat === "Tees";
+    if (want === "casual-tee") {
+      return ((cls.kinds || []).indexOf("casual-tee") !== -1) ||
+        (((cls.kinds || []).indexOf("tee") !== -1 || cls.cat === "Tees") && (cls.kinds || []).indexOf("dress-tee") === -1);
+    }
+    return (cls.kinds || []).indexOf(want) !== -1;
+  }
+
+  function sideMatches(side, cls) {
+    if (!side || !cls) return false;
+    if (side.colour && famOf(cls) !== side.colour && !new RegExp("\\b" + side.colour + "\\b").test(cls.n || "") && !new RegExp("\\b" + side.colour + "\\b").test(lower(cls.colourName || ""))) return false;
+    if (side.role === "shoes" && cls.role !== "shoes") return false;
+    if (side.kinds && side.kinds.length) {
+      for (var i = 0; i < side.kinds.length; i++) if (hasKind(cls, side.kinds[i])) return true;
+      return false;
+    }
+    return !!(side.colour || side.role);
+  }
+  function famOf(cls) { return (cls && cls.fam) ? String(cls.fam).replace("gray", "grey") : ""; }
+
+  function pieceList(top, bottom, shoes, layer, acc) {
+    return [top, bottom, shoes, layer, acc].filter(Boolean).map(classify);
+  }
+
+  function contextMatches(when, ctx) {
+    if (!when) return true;
+    ctx = ctx || {};
+    var ok = true, any = false;
+    if (when.days && when.days.length) {
+      any = true;
+      var dow = typeof ctx.dow === "number" ? ctx.dow : (ctx.date ? ctx.date.getDay() : null);
+      var hit = when.days.some(function (d) {
+        if (d === "weekend") return dow === 0 || dow === 6;
+        if (d === "weekdays") return dow !== null && dow !== 0 && dow !== 6;
+        return dow === DAYS[d];
+      });
+      /* Unknown day: do not enforce a day rule. */
+      if (dow === null || dow === undefined) return false;
+      if (!hit) ok = false;
+    }
+    if (when.seasons && when.seasons.length) {
+      any = true;
+      var season = ctx.season ? lower(ctx.season) : null;
+      if (!season) return false;
+      if (season === "fall") season = "autumn";
+      if (when.seasons.indexOf(season) === -1) ok = false;
+    }
+    if (when.weather && when.weather.length) {
+      any = true;
+      var temp = typeof ctx.temp === "number" ? ctx.temp : null;
+      var w = lower(ctx.weather || "");
+      var hitW = when.weather.some(function (tag) {
+        if (tag === "cold") return (temp !== null && temp < 60) || /cold|cool|freez/.test(w);
+        if (tag === "hot") return (temp !== null && temp >= 80) || /hot|warm|humid/.test(w);
+        if (tag === "rain") return /rain|wet|shower/.test(w);
+        return false;
+      });
+      if (temp === null && !w) return false;
+      if (!hitW) ok = false;
+    }
+    if (when.occasions && when.occasions.length) {
+      any = true;
+      var occ = lower(ctx.occasion || "");
+      var level = typeof ctx.level === "number" ? ctx.level : (typeof ctx.formality === "number" ? ctx.formality : null);
+      var hitO = when.occasions.some(function (o) {
+        if (o === "weekend") return contextMatches({ days: ["weekend"] }, ctx);
+        if (o === "black tie") return occ.indexOf("black tie") !== -1 || level === 7;
+        if (o === "formal") return occ.indexOf("formal") !== -1 || level === 6 || level === 7;
+        if (o === "business casual") return occ.indexOf("business") !== -1 || level === 5;
+        if (o === "smart casual") return occ.indexOf("smart") !== -1 || level === 4;
+        if (o === "casual") return occ === "casual" || level === 2 || level === 3;
+        if (o === "pool") return occ.indexOf("pool") !== -1 || occ.indexOf("swim") !== -1 || level === 1;
+        return occ.indexOf(o) !== -1;
+      });
+      if (!occ && level === null) return false;
+      if (!hitO) ok = false;
+    }
+    return any ? ok : true;
+  }
+
+  /* Specificity of a tuck rule against a classified top. Higher wins. */
+  function tuckSpec(constraint, topCls) {
+    var best = -1;
+    (constraint.garments || []).forEach(function (g) {
+      if (!hasKind(topCls, g)) return;
+      var s = SPECIFICITY[g] != null ? SPECIFICITY[g] : 0;
+      if (constraint.layer) s += 1;
+      if (s > best) best = s;
+    });
+    return best;
+  }
+
+  function inferTuck(text) {
+    var t = lower(text || "");
+    if (!t) return null;
+    if (/\buntucked\b/.test(t)) return false;
+    if (/\btucked into\b|\btucked in\b/.test(t)) return true;
+    return null;
+  }
+
+  /* Decide the tuck the rules require for this top + layer.
+     Returns true, false, "optional", or null (no rule applies).
+     A more specific garment rule overrides a general one; a later
+     rule of equal specificity overrides an earlier one. */
+  function tuckOverride(top, layer, rules) {
+    var list = rules || active;
+    if (!top) return null;
+    var topCls = classify(top);
+    var layerCls = layer ? classify(layer) : null;
+    var best = null, bestSpec = -1, bestIdx = -1;
+    list.forEach(function (rule, idx) {
+      if (!rule || rule.enabled === false) return;
+      (rule.constraints || []).forEach(function (c) {
+        if (!c || c.type !== "tuck") return;
+        if (c.layer) {
+          if (!layerCls || !hasKind(layerCls, c.layer)) return;
+        }
+        var spec = tuckSpec(c, topCls);
+        if (spec < 0) return;
+        if (spec > bestSpec || (spec === bestSpec && idx >= bestIdx)) {
+          best = c.tuck;
+          bestSpec = spec;
+          bestIdx = idx;
+        }
+      });
+    });
+    return best;
+  }
+
+  /* Apply rules over a default tuck flag (HAN-12 or inferred).
+     "optional" leaves the default in place. */
+  function applyTuck(defaultTuck, top, layer, rules) {
+    var over = tuckOverride(top, layer, rules);
+    if (over === null || over === "optional") return defaultTuck;
+    return over;
+  }
+
+  function checkConstraint(c, pieces, ctx, tucked) {
+    if (!c) return null;
+    if (c.type === "tuck") {
+      if (tucked === null || tucked === undefined) return null;
+      var top = pieces.filter(function (p) { return p.role === "top" || hasKind(p, "any-top"); })[0];
+      var layer = pieces.filter(function (p) { return p.role === "layer" || hasKind(p, "any-layer"); })[0];
+      if (!top) return null;
+      if (c.layer && (!layer || !hasKind(layer, c.layer))) return null;
+      if (tuckSpec(c, top) < 0) return null;
+      if (c.tuck === "optional") return null;
+      if (c.tuck === true && tucked === false) return "this look leaves " + labelList(c.garments) + " untucked";
+      if (c.tuck === false && tucked === true) return "this look tucks " + labelList(c.garments);
+      return null;
+    }
+    if (c.type === "never_pair") {
+      var hasA = pieces.some(function (p) { return sideMatches(c.a, p); });
+      var hasB = pieces.some(function (p) { return sideMatches(c.b, p); });
+      if (hasA && hasB) return "never pair " + sideLabel(c.a) + " with " + sideLabel(c.b);
+      return null;
+    }
+    if (c.type === "always_pair") {
+      var hasA2 = pieces.some(function (p) { return sideMatches(c.a, p); });
+      var hasB2 = pieces.some(function (p) { return sideMatches(c.b, p); });
+      if (hasA2 && !hasB2) return "always pair " + sideLabel(c.a) + " with " + sideLabel(c.b);
+      return null;
+    }
+    if (c.type === "ban_category") {
+      if (!contextMatches(c.when, ctx)) return null;
+      var hit = pieces.some(function (p) {
+        var kindOk = (c.kinds || []).some(function (k) { return hasKind(p, k); });
+        if (!kindOk) return false;
+        if (c.colour && famOf(p) !== c.colour && (p.n || "").indexOf(c.colour) === -1) return false;
+        return true;
+      });
+      if (hit) return understoodPart(c);
+      return null;
+    }
+    if (c.type === "ban_colour") {
+      if (!contextMatches(c.when, ctx)) return null;
+      var hitC = pieces.some(function (p) {
+        if (c.role && c.role !== "any" && p.role !== c.role) return false;
+        return famOf(p) === c.colour || new RegExp("\\b" + c.colour + "\\b").test(p.n || "") || new RegExp("\\b" + c.colour + "\\b").test(lower(p.colourName || ""));
+      });
+      if (hitC) return understoodPart(c);
+      return null;
+    }
+    return null;
+  }
+
+  function check(piecesOrLook, ctx, rules) {
+    var list = rules || active;
+    var packed = normalizeLook(piecesOrLook, ctx);
+    var violations = [];
+    list.forEach(function (rule) {
+      if (!rule || rule.enabled === false || !rule.parsed) return;
+      (rule.constraints || []).forEach(function (c) {
+        var why = checkConstraint(c, packed.pieces, packed.ctx, packed.tucked);
+        if (why) violations.push({ ruleId: rule.id, text: rule.text, reason: why });
+      });
+    });
+    return { ok: violations.length === 0, violations: violations };
+  }
+
+  function normalizeLook(look, ctx) {
+    ctx = ctx || {};
+    if (look && (look.top || look.t) && (look.bottom || look.b)) {
+      var top = look.top || look.t, bottom = look.bottom || look.b, shoes = look.shoes || look.s, layer = look.layer || look.l, acc = look.acc;
+      var tucked = (look.tucked !== undefined && look.tucked !== null) ? look.tucked : (look.tuck !== undefined && look.tuck !== null ? look.tuck : inferTuck(look.imgAlt || look.desc || ""));
+      return { pieces: pieceList(top, bottom, shoes, layer, acc), tucked: tucked, ctx: ctx };
+    }
+    if (Array.isArray(look)) {
+      return { pieces: look.map(classify), tucked: ctx.tucked, ctx: ctx };
+    }
+    if (look && (look.fwPieces || look.pieces || look.flatlay)) {
+      var raw = look.fwPieces || look.pieces || [];
+      var tucked2 = (look.tucked !== undefined && look.tucked !== null) ? look.tucked : (look.tuck !== undefined && look.tuck !== null ? look.tuck : inferTuck(look.imgAlt || look.desc || look.title || ""));
+      var ctx2 = Object.assign({}, ctx);
+      if (look.composerLevel && ctx2.level == null) ctx2.level = look.composerLevel;
+      return { pieces: raw.map(classify), tucked: tucked2, ctx: ctx2 };
+    }
+    return { pieces: [], tucked: ctx.tucked, ctx: ctx };
+  }
+
+  function comboAllowed(top, bottom, shoes, layer, ctx, rules) {
+    return check({ t: top, b: bottom, s: shoes, l: layer }, ctx || {}, rules).ok;
+  }
+
+  function lookAllowed(look, ctx, rules) {
+    return check(look, ctx || {}, rules).ok;
+  }
+
+  /* Context-free combo filter for the composer (no day/weather/occasion).
+     Tuck is not a reason to reject a combination — it is applied as a flag. */
+  function comboAllowedStructural(top, bottom, shoes, layer, rules) {
+    var list = rules || active;
+    var pieces = pieceList(top, bottom, shoes, layer);
+    for (var i = 0; i < list.length; i++) {
+      var rule = list[i];
+      if (!rule || rule.enabled === false || !rule.parsed) continue;
+      var cs = rule.constraints || [];
+      for (var j = 0; j < cs.length; j++) {
+        var c = cs[j];
+        if (!c || c.type === "tuck") continue;
+        if ((c.type === "ban_category" || c.type === "ban_colour") && c.when) continue;
+        var why = checkConstraint(c, pieces, {}, null);
+        if (why) return false;
+      }
+    }
+    return true;
+  }
+
+  function newId() {
+    return "rule-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e6).toString(36);
+  }
+
+  function makeRule(text, opts) {
+    opts = opts || {};
+    var p = parse(text);
+    return {
+      id: opts.id || newId(),
+      text: norm(text),
+      enabled: opts.enabled !== false,
+      parsed: p.parsed,
+      constraints: p.constraints,
+      understood: p.understood,
+      seeded: !!opts.seeded,
+      addedISO: opts.addedISO || (new Date()).toISOString()
+    };
+  }
+
+  function normalizeRule(rule) {
+    if (!rule || typeof rule !== "object") return null;
+    var p = parse(rule.text || "");
+    return {
+      id: rule.id || newId(),
+      text: norm(rule.text || ""),
+      enabled: rule.enabled !== false,
+      parsed: p.parsed,
+      constraints: p.constraints,
+      understood: p.understood,
+      seeded: !!rule.seeded,
+      addedISO: rule.addedISO || (new Date()).toISOString()
+    };
+  }
+
+  var SEED_TEXTS = [
+    { id: "seed-tuck-blazer", text: "Under a blazer or sport coat, shirts, polos and knits are tucked; casual T-shirts may be untucked." },
+    { id: "seed-tuck-dress-tee", text: "Dress T-shirts are always tucked." },
+    { id: "seed-tuck-flannel", text: "Flannel shirts are never tucked." }
+  ];
+
+  function seedRules() {
+    return SEED_TEXTS.map(function (s) { return makeRule(s.text, { id: s.id, seeded: true, addedISO: "2026-11-19T23:00:00.000Z" }); });
+  }
+
+  function setActive(rules) {
+    active = Array.isArray(rules) ? rules.map(normalizeRule).filter(Boolean) : [];
+    return active;
+  }
+  function getActive() { return active; }
+  function signature(rules) {
+    var list = rules || active;
+    return list.map(function (r) {
+      return [r.id, r.enabled === false ? 0 : 1, r.text, r.parsed ? 1 : 0].join("~");
+    }).join("\n");
+  }
+
+  root.WardrobeRules = {
+    version: 1,
+    NOTE: NOTE,
+    parse: parse,
+    classify: classify,
+    inferTuck: inferTuck,
+    tuckOverride: tuckOverride,
+    applyTuck: applyTuck,
+    check: check,
+    comboAllowed: comboAllowed,
+    comboAllowedStructural: comboAllowedStructural,
+    lookAllowed: lookAllowed,
+    makeRule: makeRule,
+    normalize: normalizeRule,
+    seedRules: seedRules,
+    SEED_TEXTS: SEED_TEXTS,
+    setActive: setActive,
+    getActive: getActive,
+    signature: signature
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+
 /* ---------- Composer → app looks (build .73) ----------
    buildClosetLooks hands off to these: the deck is cached per
    closet signature, likes/dislikes and the seen-recently ring live
@@ -8767,7 +9517,9 @@ function lookOccasionOk(look, occasion) {
 var COMPOSER_PREFS_KEY = "composerPrefs";
 var composerDeckCache = {};
 function composerClosetSig(list) {
-  return list.map(function (i) { return [i.id, i.category, i.name, i.colourName, i.colourHex, i.laundry ? 1 : 0, (i.occasionOnly || "") + ""].join("~"); }).join("\n");
+  var sig = list.map(function (i) { return [i.id, i.category, i.name, i.colourName, i.colourHex, i.laundry ? 1 : 0, (i.occasionOnly || "") + ""].join("~"); }).join("\n");
+  try { if (window.WardrobeRules && typeof window.WardrobeRules.signature === "function") sig += "\n#rules:" + window.WardrobeRules.signature(); } catch (e) {}
+  return sig;
 }
 function composerDeck(only, slotName) {
   var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
@@ -8837,14 +9589,20 @@ function onbodyKeys() {
 }
 function onbodyForLook(look) {
   if (!look) return null;
-  if (look.composerKey && ONBODY.map[look.composerKey] && !onbodyFileBanned(ONBODY.map[look.composerKey])) return ONBODY.map[look.composerKey];
+  function rulesOk(src) {
+    if (!src) return false;
+    if (typeof onbodyFileBanned === "function" && onbodyFileBanned(src)) return false;
+    if (window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function" && !window.WardrobeRules.lookAllowed(look)) return false;
+    return true;
+  }
+  if (look.composerKey && ONBODY.map[look.composerKey] && rulesOk(ONBODY.map[look.composerKey])) return ONBODY.map[look.composerKey];
   var ids = (look.fwPieces || []).map(function (p) { return p && p.id; }).filter(Boolean);
   if (ids.length < 3) return null;
   var cats = (look.fwPieces || []).map(function (p) { return String(p.category || "").toLowerCase(); });
   /* the render key never includes the watch / accessories */
   var core = ids.filter(function (id, i) { return !/watch|belt|sunglass|bag|hat|scarf|accessor/.test(cats[i]); });
   var src = ONBODY.map[core.slice().sort().join("|")] || null;
-  return (src && onbodyFileBanned(src)) ? null : src;
+  return rulesOk(src) ? src : null;
 }
 function onbodyRefresh() {
   try {
@@ -8876,7 +9634,9 @@ function homeLookOk742(look) {
   var pool = pools.own.length >= 3 ? pools.own : pools.withPhoto;
   var ok = {};
   pool.forEach(function (i) { ok[i.id] = 1; });
-  return look.fwPieces.every(function (p) { return p && ok[p.id]; });
+  if (!look.fwPieces.every(function (p) { return p && ok[p.id]; })) return false;
+  if (window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function") return window.WardrobeRules.lookAllowed(look);
+  return true;
 }
 function composerPrefs() {
   var p = null;
@@ -9002,6 +9762,7 @@ function composerOutfitToLook(o, i, renderPairs) {
     composerKey: o.key,
     composerLevel: bit,
     tuck: !!o.tuck,
+    tucked: (o.tucked === undefined ? o.tuck : o.tucked),
     tuckPrompt: o.tuckPrompt || ""
   };
 }
@@ -9021,7 +9782,11 @@ function composerLooks(opts) {
     prefs: composerEffectivePrefs(),
     exposure: p.exposure,
     recent: recent,
-    banned: p.banned
+    banned: p.banned,
+    occasion: opts.occasion,
+    season: opts.season,
+    weather: opts.weather,
+    dow: typeof opts.dow === "number" ? opts.dow : (new Date()).getDay()
   };
   var want = opts.count || 6;
   var outs = [];
@@ -9035,7 +9800,12 @@ function composerLooks(opts) {
     var more = deck.deal(want - outs.length, Object.assign({}, dealOpts, { recent: recent.concat(have) })) || [];
     more.forEach(function (o) { if (have.indexOf(o.key) === -1) outs.push(o); });
   }
-  return outs.map(function (o, i) { return composerOutfitToLook(o, i, null); });
+  var looks = outs.map(function (o, i) { return composerOutfitToLook(o, i, null); });
+  if (window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function") {
+    var rctx = { temp: dealOpts.temp, level: level, occasion: dealOpts.occasion, season: dealOpts.season, weather: dealOpts.weather, dow: dealOpts.dow };
+    looks = looks.filter(function (l) { return window.WardrobeRules.lookAllowed(l, rctx); });
+  }
+  return looks;
 }
 
     </script>
@@ -9290,7 +10060,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.34";
+var WARDROBE_BUILD = "2026-11-19.80.35";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -9326,7 +10096,7 @@ var PAGE_TITLES = {
   myinspo: "My Inspo", find: "The Edit", brands: "Brands", sale: "Sale",
   shopwish: "Wishlist", purchased: "Purchased", receipts: "Receipts",
   search: "Search", calendar: "Calendar", pinfo: "Profile",
-  plocation: "Profile", pcloud: "Profile", add: "Add", bulk: "Add", analyze: "Add"
+  plocation: "Profile", prules: "Profile", pcloud: "Profile", add: "Add", bulk: "Add", analyze: "Add"
 };
 function syncPageTitle(name) {
   var title = Object.prototype.hasOwnProperty.call(PAGE_TITLES, name) ? PAGE_TITLES[name] : "";
@@ -9352,8 +10122,190 @@ function persistAll() {
   if (!store.poisoned("icons") && !store.set("icons", customIcons)) ok = false;
   if (!store.poisoned("deletedIds") && !store.set("deletedIds", deletedIds)) ok = false;
   if (!store.poisoned("overrides") && !store.set("overrides", entryOverrides)) ok = false;
+  if (!store.poisoned("wardrobeRules") && !store.set("wardrobeRules", typeof wardrobeRules !== "undefined" ? wardrobeRules : [])) ok = false;
   return ok;
 }
+
+/* ================= Build .80.34 — Wardrobe Rules (app glue) =================
+   Rules live in the on-device store key "wardrobeRules" and in DATA_KEYS,
+   so a normal backup or sync carries them. This glue never calls the
+   sync worker. */
+var wardrobeRules = [];
+function loadWardrobeRules() {
+  var stored = null;
+  try { stored = (typeof store !== "undefined") ? store.get("wardrobeRules", null) : null; } catch (e) { stored = null; }
+  if (stored == null) {
+    wardrobeRules = (window.WardrobeRules && WardrobeRules.seedRules) ? WardrobeRules.seedRules() : [];
+    try { if (typeof store !== "undefined") store.set("wardrobeRules", wardrobeRules); } catch (e) {}
+  } else {
+    wardrobeRules = (Array.isArray(stored) ? stored : []).map(function (r) {
+      return window.WardrobeRules && WardrobeRules.normalize ? WardrobeRules.normalize(r) : r;
+    }).filter(Boolean);
+  }
+  if (window.WardrobeRules && WardrobeRules.setActive) WardrobeRules.setActive(wardrobeRules);
+  return wardrobeRules;
+}
+function persistWardrobeRules() {
+  if (window.WardrobeRules && WardrobeRules.setActive) WardrobeRules.setActive(wardrobeRules);
+  try { if (typeof store !== "undefined") store.set("wardrobeRules", wardrobeRules); } catch (e) {}
+  try { if (typeof composerDeckCache !== "undefined") composerDeckCache = {}; } catch (e) {}
+  renderRulesEntry();
+  if (typeof currentTab !== "undefined" && currentTab === "prules") renderRulesPage();
+}
+function rulesCountLabel() {
+  var n = wardrobeRules.length, on = wardrobeRules.filter(function (r) { return r && r.enabled !== false; }).length;
+  if (!n) return "No rules yet — add one in plain English";
+  if (on === n) return n === 1 ? "1 rule the engine always follows" : (n + " rules the engine always follows");
+  return on + " of " + n + " on";
+}
+function renderRulesEntry() {
+  var meta = document.getElementById("rules-entry-meta");
+  if (meta) meta.textContent = rulesCountLabel();
+}
+function renderRulesPage() {
+  var list = document.getElementById("rules-list");
+  var empty = document.getElementById("rules-empty");
+  if (!list) return;
+  if (!wardrobeRules.length) {
+    list.innerHTML = "";
+    if (empty) empty.hidden = false;
+    return;
+  }
+  if (empty) empty.hidden = true;
+  list.innerHTML = wardrobeRules.map(function (r) {
+    var on = r.enabled !== false;
+    var note = !r.parsed;
+    return '<article class="card rule-card' + (on ? "" : " is-off") + '" data-rule-id="' + esc(r.id) + '">' +
+      '<p class="rule-text">' + esc(r.text) + "</p>" +
+      '<p class="rule-understood' + (note ? " is-note" : "") + '">' + esc(r.understood || (window.WardrobeRules && WardrobeRules.NOTE) || "") + "</p>" +
+      '<div class="rule-actions">' +
+        '<button type="button" class="chip rule-toggle" data-rule-act="toggle" aria-pressed="' + (on ? "true" : "false") + '">' + (on ? "On" : "Off") + "</button>" +
+        '<button type="button" class="btn-ghost rule-edit-btn" data-rule-act="edit">Edit</button>' +
+        '<button type="button" class="btn-ghost rule-delete-btn" data-rule-act="delete">Delete</button>' +
+      "</div></article>";
+  }).join("");
+}
+function ruleById(id) {
+  for (var i = 0; i < wardrobeRules.length; i++) if (wardrobeRules[i] && wardrobeRules[i].id === id) return wardrobeRules[i];
+  return null;
+}
+function addWardrobeRule(text, opts) {
+  if (!window.WardrobeRules || !WardrobeRules.makeRule) return null;
+  var rule = WardrobeRules.makeRule(text, opts || {});
+  wardrobeRules.push(rule);
+  persistWardrobeRules();
+  return rule;
+}
+function updateWardrobeRule(id, text) {
+  var rule = ruleById(id);
+  if (!rule || !window.WardrobeRules) return null;
+  var next = WardrobeRules.makeRule(text, { id: rule.id, seeded: rule.seeded, addedISO: rule.addedISO, enabled: rule.enabled });
+  wardrobeRules = wardrobeRules.map(function (r) { return r.id === id ? next : r; });
+  persistWardrobeRules();
+  return next;
+}
+function toggleWardrobeRule(id, on) {
+  var rule = ruleById(id);
+  if (!rule) return;
+  rule.enabled = on !== undefined ? !!on : (rule.enabled === false);
+  persistWardrobeRules();
+}
+function deleteWardrobeRule(id) {
+  wardrobeRules = wardrobeRules.filter(function (r) { return r.id !== id; });
+  persistWardrobeRules();
+}
+function startRuleEdit(card, rule) {
+  if (!card || !rule) return;
+  var textEl = card.querySelector(".rule-text");
+  if (!textEl || card.querySelector(".rule-edit-box")) return;
+  var box = document.createElement("textarea");
+  box.className = "rule-edit-box";
+  box.value = rule.text;
+  box.setAttribute("aria-label", "Edit rule");
+  textEl.hidden = true;
+  textEl.after(box);
+  var actions = card.querySelector(".rule-actions");
+  if (actions) actions.hidden = true;
+  var save = document.createElement("div");
+  save.className = "rule-actions rule-edit-actions";
+  save.innerHTML = '<button type="button" class="btn-ink" data-rule-act="save-edit">Save</button>' +
+    '<button type="button" class="btn-ghost" data-rule-act="cancel-edit">Cancel</button>';
+  card.appendChild(save);
+  box.focus();
+}
+function cancelRuleEdit(card, rule) {
+  if (!card) return;
+  var box = card.querySelector(".rule-edit-box");
+  var extras = card.querySelector(".rule-edit-actions");
+  var textEl = card.querySelector(".rule-text");
+  var actions = card.querySelector(".rule-actions:not(.rule-edit-actions)");
+  if (box) box.remove();
+  if (extras) extras.remove();
+  if (textEl) textEl.hidden = false;
+  if (actions) actions.hidden = false;
+}
+function bindWardrobeRulesUi() {
+  var entry = document.getElementById("rules-entry");
+  if (entry && !entry.__wrBound) {
+    entry.__wrBound = true;
+    entry.addEventListener("click", function () { if (typeof switchTab === "function") switchTab("prules"); });
+  }
+  var input = document.getElementById("rule-input");
+  var preview = document.getElementById("rule-preview");
+  function showPreview() {
+    if (!preview || !window.WardrobeRules) return;
+    var t = (input && input.value) || "";
+    if (!t.trim()) { preview.hidden = true; preview.textContent = ""; return; }
+    var p = WardrobeRules.parse(t);
+    preview.hidden = false;
+    preview.textContent = p.understood;
+    preview.classList.toggle("is-note", !p.parsed);
+  }
+  if (input && !input.__wrBound) {
+    input.__wrBound = true;
+    input.addEventListener("input", showPreview);
+  }
+  var form = document.getElementById("rules-form");
+  if (form && !form.__wrBound) {
+    form.__wrBound = true;
+    form.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      var t = input ? input.value : "";
+      if (!t.trim()) return;
+      addWardrobeRule(t);
+      if (input) input.value = "";
+      showPreview();
+      if (typeof toast === "function") toast("Rule saved.");
+    });
+  }
+  var list = document.getElementById("rules-list");
+  if (list && !list.__wrBound) {
+    list.__wrBound = true;
+    list.addEventListener("click", function (ev) {
+      var btn = ev.target && ev.target.closest ? ev.target.closest("[data-rule-act]") : null;
+      if (!btn) return;
+      var card = btn.closest("[data-rule-id]");
+      var id = card && card.getAttribute("data-rule-id");
+      var rule = id ? ruleById(id) : null;
+      var act = btn.getAttribute("data-rule-act");
+      if (act === "toggle" && rule) toggleWardrobeRule(id, rule.enabled === false);
+      else if (act === "delete" && rule) deleteWardrobeRule(id);
+      else if (act === "edit" && rule) startRuleEdit(card, rule);
+      else if (act === "cancel-edit") cancelRuleEdit(card, rule);
+      else if (act === "save-edit" && rule) {
+        var box = card.querySelector(".rule-edit-box");
+        var next = box ? box.value : "";
+        if (!String(next).trim()) return;
+        updateWardrobeRule(id, next);
+      }
+    });
+  }
+  renderRulesEntry();
+}
+loadWardrobeRules();
+bindWardrobeRulesUi();
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindWardrobeRulesUi);
+
 function applyEntryState(list) {
   return list.filter(function (e) { return deletedIds.indexOf(e.id) === -1; }).map(function (e) {
     var ov = entryOverrides[e.id];
@@ -17436,6 +18388,9 @@ function dealerLook(opts) {
      pool — a caller-passed pool is dealt as chosen EXCEPT for
      the ban, which no caller can deal around. */
   var usable = pool.filter(notExcluded).filter(function (l) { return !isDislikedImg(l.img) && !isQuarantinedImg(l.img); });
+  if (window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function") {
+    usable = usable.filter(function (l) { return window.WardrobeRules.lookAllowed(l); });
+  }
   /* Free dealer's-choice deals (no caller pool) also drop
      graduated (liked) photographs; a caller-passed pool is dealt
      as chosen. The usable→pool fallback below stays as the valve. */
@@ -28512,7 +29467,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "priceRange", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches", "editBoard", "editView"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "wardrobeRules", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "priceRange", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches", "editBoard", "editView"];
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
@@ -32133,7 +33088,7 @@ document.addEventListener("click", function (e) {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "bulk", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "purchased", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "pcloud", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "bulk", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "purchased", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "prules", "pcloud", "watches", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -32159,7 +33114,7 @@ var SECTIONS = {
   calendar: ["calendar"],
   ideas: ["looks", "studio", "outfitideas", "icons", "emulate", "palettes", "myinspo"],
   find: ["find", "receipts", "purchased", "search", "brands", "brand", "sale", "shopwish", "gaps"],
-  me: ["pinfo", "plocation", "pcloud"]
+  me: ["pinfo", "plocation", "prules", "pcloud"]
 };
 var sectionHome = { today: "today", closet: "wardrobe", ideas: "looks", find: "find", me: "pinfo", calendar: "calendar" };
 /* Section tabs always open the section's FIRST page — the nav
@@ -32215,7 +33170,7 @@ function switchTab(name, opts) {
   /* Build .54: the Wishlist left My Outfits for its own Shop sub
      page — the old name lands there, never on a dead end. */
   if (name === "wishlist") name = "shopwish";
-  /* Profile is three sub pages now (build .28) — the old
+  /* Profile is four sub pages now (build .80.35 adds Wardrobe Rules) — the old
      single-page name lands on Profile info, the default. */
   if (name === "profile") name = "pinfo";
   if (name === "calnav") name = "calendar"; /* build .39: pseudo-view guard */
@@ -32281,6 +33236,7 @@ function switchTab(name, opts) {
   persistTab();
   if (typeof syncPageTitle === "function") syncPageTitle(name);
   if (name === "find" && typeof renderTheEdit === "function") { if (typeof window.editOnOpen804 === "function") window.editOnOpen804(); else renderTheEdit(); }
+  if (name === "prules" && typeof renderRulesPage === "function") renderRulesPage();
   if (name === "looks" && typeof syncOutfitsToggle === "function") syncOutfitsToggle();
   if (typeof scrollActiveSubtabIntoView === "function") {
     requestAnimationFrame(function () { requestAnimationFrame(scrollActiveSubtabIntoView); });
@@ -39397,6 +40353,15 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     var id = "l-" + h76(boardSig());
     var pcs = boardPieces(), allOwn = pcs.length > 0 && pcs.every(function (o) { return o.x.own; });
     if (!pcs.length) { if (typeof toast === "function") toast("Put a piece on the board first."); return; }
+    if (window.WardrobeRules && typeof window.WardrobeRules.check === "function") {
+      var itsChk = pcs.map(function (o) { return o.x.it || o.x.p || {}; });
+      var chk = window.WardrobeRules.check({ fwPieces: itsChk });
+      if (!chk.ok) {
+        var why = (chk.violations[0] && (chk.violations[0].reason || chk.violations[0].text)) || "a wardrobe rule";
+        if (typeof toast === "function") toast("This look breaks a wardrobe rule: " + why);
+        return;
+      }
+    }
     var pic = lookPicture(pcs);
     editMeta = editMeta.filter(function (m) { return m.id !== id; });
     editMeta.unshift({ id: id, kind: "look", home: allOwn ? "mine" : "inspo", title: boardTitle(), board: JSON.parse(JSON.stringify(board)), img: pic.url, imgKind: pic.kind, at: nowISO(), upd: nowISO() });
