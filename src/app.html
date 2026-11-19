@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.3" />
+    <meta name="wardrobe-build" content="2026-11-19.80.4" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -1247,6 +1247,9 @@
          as the hero/detail buttons, and the free-form description
          entry is a proper search bar, not a textarea in a cluster. */
       #panel-find .find-card { padding: 12px 14px; gap: 6px; }
+      /* .80.4: The Edit's product cards below the fold skip style and layout
+         until they scroll near (their last rendered height is remembered) */
+      #panel-find .edit-grid > * { content-visibility: auto; contain-intrinsic-size: auto 380px; }
       #panel-find .find-card h4 { font-size: 17px; }
       #panel-find .find-card .meta { font-size: 12px; }
       #panel-find .find-card .details { font-size: 13px; line-height: 1.45; }
@@ -6840,7 +6843,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.3</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.4</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8518,7 +8521,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.3";
+var WARDROBE_BUILD = "2026-11-19.80.4";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -31265,7 +31268,7 @@ function switchTab(name, opts) {
   if (!(opts && opts.restore)) {
     var back = pageScroll[name];
     if (back) window.scrollTo(0, back);
-    else window.scrollTo({ top: 0, behavior: "smooth" });
+    else if (window.scrollY) window.scrollTo({ top: 0, behavior: "smooth" });
   }
   if ((name === "looks" || name === "outfitideas") && typeof renderSaved === "function") renderSaved();
   if (name === "sale" && typeof renderSaleItems === "function") renderSaleItems();
@@ -31282,7 +31285,7 @@ function switchTab(name, opts) {
   if (name === "calendar") { if (typeof renderWeekPlan === "function") renderWeekPlan(); if (typeof calViewApply === "function") calViewApply(); }
   persistTab();
   if (typeof syncPageTitle === "function") syncPageTitle(name);
-  if (name === "find" && typeof renderTheEdit === "function") renderTheEdit();
+  if (name === "find" && typeof renderTheEdit === "function") { if (typeof window.editOnOpen804 === "function") window.editOnOpen804(); else renderTheEdit(); }
   if (name === "looks" && typeof syncOutfitsToggle === "function") syncOutfitsToggle();
   if (typeof scrollActiveSubtabIntoView === "function") {
     requestAnimationFrame(function () { requestAnimationFrame(scrollActiveSubtabIntoView); });
@@ -40409,6 +40412,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   Storage.prototype.removeItem = function (k) { if (this === window.localStorage && !IGN.test(String(k))) ver++; return _rm.apply(this, arguments); };
   Storage.prototype.clear = function () { ver++; return _clr.apply(this, arguments); };
   window.outfitsDirty796 = function () { ver++; };
+  window.storeVer796 = function () { return ver; };
   var ric = window.requestIdleCallback ? function (f, o) { return window.requestIdleCallback(f, o); } : function (f) { return setTimeout(function () { f({ timeRemaining: function () { return 50; } }); }, 200); };
   var seen = {};
   var VIEWS = { mine: "renderSaved", onyou: "renderInspoOnYou", icons: "renderIcons", palettes: "renderPlates", myinspo: "renderMyInspo" };
@@ -40540,6 +40544,43 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   ((window.__takeEarly803 && window.__takeEarly803("feet")) || fetch("assets/onbody-cut/feet.json")).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
     if (j && j.feet) { FEET = j.feet; all(); }
   }).catch(function () {});
+})();
+    </script>
+    <script type="wardrobe/app">
+/* ================= Build .80.4 — The Edit opens without rebuilding =================
+   Opening The Edit used to rebuild its current view (~40ms at 4x CPU) on
+   every tab tap. It is now built once (on idle after boot) and rebuilt only
+   when his stored data changed since (the Outfits change counter, .79.6),
+   and then after the tab has painted. Every other caller of renderTheEdit
+   still rebuilds at once. */
+(function () {
+  "use strict";
+  var orig = window.renderTheEdit;
+  if (typeof orig !== "function" || typeof window.storeVer796 !== "function") return;
+  var builtAt = -1;
+  function build() { var r = orig.apply(this, arguments); builtAt = window.storeVer796(); return r; }
+  window.renderTheEdit = build;
+  function later(f) { requestAnimationFrame(function () { setTimeout(f, 0); }); }
+  window.editOnOpen804 = function () {
+    if (builtAt < 0) return build();
+    later(function () {
+      if (builtAt !== window.storeVer796()) build();
+      if (typeof window.askCheckHealth === "function") window.askCheckHealth();
+    });
+  };
+  /* the first build, on idle once the shop data is in; the Ask health
+     check stays with his first visit */
+  var ric = window.requestIdleCallback ? function (f) { window.requestIdleCallback(f, { timeout: 4000 }); } : function (f) { setTimeout(f, 300); };
+  setTimeout(function () {
+    (window.lazyAll802 || function (f) { f(); })(function () {
+      ric(function () {
+        if (builtAt >= 0) return;
+        var hc = window.askCheckHealth;
+        window.askCheckHealth = function () {};
+        try { build(); } catch (e) {} finally { window.askCheckHealth = hc; }
+      });
+    });
+  }, 2500);
 })();
     </script>
   </body>

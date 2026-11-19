@@ -105,7 +105,7 @@ LAZY_LOADER = r"""<script>
       if (!navigator.serviceWorker || navigator.serviceWorker.controller) return go();
       navigator.serviceWorker.addEventListener("controllerchange", function () { setTimeout(go, 500); });
     } catch (err) { return go(); }
-    setTimeout(go, 12000);
+    setTimeout(go, 2500);
   }
   window.addEventListener("load", function () { (window.afterLookahead803 || function (f) { setTimeout(f, 3500); })(function () { afterSw(function () { idle(warm); }); }); });
 })();
