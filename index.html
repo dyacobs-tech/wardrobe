@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-18.74" />
+    <meta name="wardrobe-build" content="2026-11-18.74.1" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5344,7 +5344,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-18.74</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-18.74.1</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -6776,7 +6776,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-18.74";
+var WARDROBE_BUILD = "2026-11-18.74.1";
 window.WARDROBE_BUILD = WARDROBE_BUILD;
 function persistAll() {
   var ok = true;
@@ -32085,6 +32085,7 @@ function syBlank() {
   o.bp = {}; /* build .57: hashes of blobs this device has pushed */
   o.mig57 = ""; /* build .57: account key the one-time blob migration ran for */
   o.restore59 = ""; /* build .59: account key the one-time tomb-restore re-download completed for */
+  o.photoPull741 = ""; /* build .74.1: one-time photo re-pull after cursor-ahead-of-persist */
   return o;
 }
 var SY = null;
@@ -32277,6 +32278,7 @@ function syTrackChanges(onlyColl) {
   return ch;
 }
 var _syT = null, _syBusy = false, _syApplying = false, _syAgain = false;
+var _syForcePhotoPull741 = false;
 function schedSync() { clearTimeout(_syT); _syT = setTimeout(function () { syncNow(); }, 1500); }
 function syncStatusHTML() {
   return "<div><b>" + esc(SY.status) + "</b></div>" +
@@ -32741,7 +32743,15 @@ function syApplyDownload56(j) {
           if (_wasUnsentTomb) {
             /* fall through and restore — ignore the tomb stamp */
           } else if (!(x.updatedAt > loc)) {
-            return;
+            /* Build .74.1: a one-time closet/watch photo re-pull
+               applies the server copy even if this device already
+               holds an equal or newer stamp. Boot-time change
+               tracking can re-stamp every piece before the download
+               starts, which would otherwise skip the studio photos
+               forever and then push the old ones back up. Other
+               collections keep last-writer-wins. Session deletes
+               were already honoured above. */
+            if (!(_syForcePhotoPull741 && (x.coll === "items" || x.coll === "watches"))) return;
           }
           if (typeof x.data !== "object" || Array.isArray(x.data)) { syQuarantine56(x, "record data is not an object"); return; }
           var _xrid = null;
@@ -32902,10 +32912,12 @@ function syncNow(isRetry, force) {
          uploads before any download. The restore59 flag is set
          only after the pages finish and wardrobe.items persists. */
       var needRestore59 = !!(SY.key && SY.restore59 !== SY.key && (SY.lastOk || syHasUnsentTombs()));
+      var needPhotoPull741 = !!(SY.key && SY.photoPull741 !== SY.key && (SY.lastOk || SY.last || needRestore59));
       var restoreFailed59 = false;
-      if (SY.lastOk || needRestore59) {
+      if (SY.lastOk || needRestore59 || needPhotoPull741) {
         var _pg56 = 0;
-        var _dlSince = needRestore59 ? 0 : SY.last;
+        var _dlSince = (needRestore59 || needPhotoPull741) ? 0 : SY.last;
+        _syForcePhotoPull741 = !!needPhotoPull741;
         while (_pg56 < 80) {
           _pg56++;
           var _pr56 = null;
@@ -32914,7 +32926,7 @@ function syncNow(isRetry, force) {
               method: "POST",
               headers: { "authorization": "Bearer " + SY.key, "content-type": "application/json" },
               body: JSON.stringify({ since: _dlSince, changes: [], meta: null, limit: 200 })
-            }, 60000);
+            }, 180000);
           } catch (e) { restoreFailed59 = true; break; }
           if (_pr56.status === 401) {
             SY.rej = (SY.rej || 0) + 1;
@@ -32928,6 +32940,16 @@ function syncNow(isRetry, force) {
           var _prev56 = _dlSince;
           var _pa56 = syApplyDownload56(_pj56);
           down56 += _pa56.down; if (_pa56.changedAny) changedAny56 = true; if (_pa56.changedLooks) changedLooks56 = true;
+          /* Build .74.1: persist closet/watch records BEFORE the
+             position marker is saved. A previous pass could apply
+             photos in memory, advance SY.last, then die before
+             persistAll — after reload the cursor skipped those
+             photos forever. */
+          var _persistedPage741 = true;
+          if (_pa56.changedAny) {
+            try { _persistedPage741 = persistAll() !== false; } catch (e) { _persistedPage741 = false; }
+          }
+          if (!_persistedPage741) { restoreFailed59 = true; break; }
           SY.last = _pj56.now;
           _dlSince = _pj56.now;
           saveSY();
@@ -32935,10 +32957,15 @@ function syncNow(isRetry, force) {
           if (_pj56.now === _prev56) break;
           if (_pa56.count < 200) break;
         }
-        if (needRestore59 && !restoreFailed59) {
+        _syForcePhotoPull741 = false;
+        if ((needRestore59 || needPhotoPull741) && !restoreFailed59) {
           var _persisted59 = true;
           try { _persisted59 = persistAll() !== false; } catch (e) { _persisted59 = false; }
-          if (_persisted59) { SY.restore59 = SY.key; saveSY(); }
+          if (_persisted59) {
+            if (needRestore59) SY.restore59 = SY.key;
+            if (needPhotoPull741) SY.photoPull741 = SY.key;
+            saveSY();
+          }
           if (_syMassHold) {
             var _hc = _syMassHold.coll, _still = 0;
             Object.keys((SY.tomb && SY.tomb[_hc]) || {}).forEach(function (id) {
@@ -33134,7 +33161,7 @@ function syncNow(isRetry, force) {
           method: "POST",
           headers: { "authorization": "Bearer " + SY.key, "content-type": "application/json" },
           body: JSON.stringify(body)
-        }, 60000);
+        }, 180000);
         if (r.status === 401) {
           /* Key rejected. Keep the key and every local record; pause
              and tell the user. Creating a fresh account is their
@@ -33205,12 +33232,14 @@ function syncNow(isRetry, force) {
       if (changedAny) syRefresh();
     } catch (e) {
       _syApplying = false;
+      _syForcePhotoPull741 = false;
       _syFailed = true; _syNoteOff = false;
       clearTimeout(_syRetryT);
       _syRetryT = setTimeout(function () { if (document.visibilityState === "visible" && !SY.rej) syncNow(); }, 30000);
       setSyncStatus("Sync failed: " + (e && e.message ? e.message : "network error") + " — will retry");
     } finally {
       _syBusy = false;
+      _syForcePhotoPull741 = false;
       if (_syAgain) { _syAgain = false; if (!SY.rej) schedSync(); }
     }
   })();
