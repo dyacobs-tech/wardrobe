@@ -145,6 +145,8 @@ def main():
         geo = pg.evaluate("""(() => { const g = document.getElementById('bulk-grid'), c = g.querySelector('.bulk-card').getBoundingClientRect(), a = document.getElementById('bulk-add-all').getBoundingClientRect(), bb = document.getElementById('bottombar').getBoundingClientRect();
             return { sw: document.documentElement.scrollWidth, cl: c.left, cr: c.right, addTop: a.top, addBottom: a.bottom, barTop: bb.top, nav: !!bb.height }; })()""")
         check("grid fits 390 and Add all clears the nav", geo["sw"] <= 390 and geo["cl"] >= 0 and geo["cr"] <= 390 and geo["addBottom"] <= geo["barTop"] + 1, geo)
+        ov = pg.evaluate("""(() => [...document.querySelectorAll('#bulk-grid .bulk-card')].every(c => { const x = c.querySelector('.bulk-x').getBoundingClientRect(); return [...c.querySelectorAll('input, select')].every(f => { const r = f.getBoundingClientRect(); return r.right <= x.left || r.top >= x.bottom || r.bottom <= x.top; }); }))()""")
+        check("remove × never covers a field", ov)
         check("Add all says how many", pg.text_content("#bulk-add-all").strip() == "Add all 5", pg.text_content("#bulk-add-all"))
         # drop one then re-add count
         pg.evaluate("switchTab('wardrobe')"); pg.wait_for_timeout(200)
