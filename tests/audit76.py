@@ -198,6 +198,18 @@ MEASURE_JS = r"""() => {
     if (!vis(el)) continue;
     const r = el.getBoundingClientRect();
     const cs = getComputedStyle(el);
+    // .76: cards inside a horizontal carousel (overflow-x auto/scroll, the
+    // scroller itself inside the viewport) are scrolled to, not cut off
+    let inScroller = false;
+    for (let n = el.parentElement; n && n !== document.body; n = n.parentElement) {
+      const ncs = getComputedStyle(n);
+      if (/(auto|scroll)/.test(ncs.overflowX) && n.scrollWidth > n.clientWidth + 1) {
+        const nr = n.getBoundingClientRect();
+        if (nr.left >= -1 && nr.right <= vw + 1) inScroller = true;
+        break;
+      }
+    }
+    if (inScroller) continue;
     const cls = el.className || '';
     const rec = {
       id: el.id || '',
@@ -222,6 +234,18 @@ MEASURE_JS = r"""() => {
     if (!vis(el)) continue;
     const r = el.getBoundingClientRect();
     const cs = getComputedStyle(el);
+    // .76: cards inside a horizontal carousel (overflow-x auto/scroll, the
+    // scroller itself inside the viewport) are scrolled to, not cut off
+    let inScroller = false;
+    for (let n = el.parentElement; n && n !== document.body; n = n.parentElement) {
+      const ncs = getComputedStyle(n);
+      if (/(auto|scroll)/.test(ncs.overflowX) && n.scrollWidth > n.clientWidth + 1) {
+        const nr = n.getBoundingClientRect();
+        if (nr.left >= -1 && nr.right <= vw + 1) inScroller = true;
+        break;
+      }
+    }
+    if (inScroller) continue;
     const isCtl = el.matches('button,.chip,.subtab,.cal-subtab,.btn-ink,.btn-ghost,.btn-accent') && !el.matches('.navbtn,.cdd-opt,.sel-row,.info-pop-close');
     const clipX = (el.scrollWidth - el.clientWidth > 1 && cs.overflow !== 'visible' && cs.textOverflow !== 'ellipsis')
       || (isCtl && el.clientWidth > 0 && (() => {
