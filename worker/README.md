@@ -5,6 +5,12 @@ Cloudflare Worker + Workers KV (`SYNC_KV`). The HTTP contract matches Padel Log
 sync, so the app client cannot tell which host serves it.
 
 **This copy is ready to review and to test locally. It is not deployed.**
+
+> Verified read-only on Nov 19 2026: the deployed `wardrobe-sync` (etag
+> `cff9ac46…`, last modified Nov 17 2026 5:34 PM ET) is this `worker.ts`
+> **without** the three hardening layers below (no baseline-manifest gate,
+> no server-truth check; only the original floor-6 / 20% mass-delete 409).
+> The rest of the code matches. Deploying the hardening needs David's yes.
 Do not run `wrangler deploy`, and do not write to
 `wardrobe-sync.dyacobs.workers.dev`, unless David has explicitly said yes
 and a Cloudflare login or API token is available. `npm run deploy` is
