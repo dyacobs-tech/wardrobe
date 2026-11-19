@@ -20,6 +20,7 @@ Run it locally:
     python -m http.server 8000 &          # from the repo root
     python tests/smoke.py                  # or: python tests/smoke.py https://dyacobs-tech.github.io/wardrobe/
     python tests/test_restore59.py          # local mock worker; never hits production
+    python tests/test_feet.py               # cut-out shoes are opaque on both feet (needs ffmpeg)
 
 `tests/smoke_baseline.json` lists issues known on 17 Nov 2026. They report `KNOWN` instead of failing. When one starts passing the run prints `FIXED?`; delete it from the baseline then. Any other failure fails the run.
 
