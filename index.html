@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.78" />
+    <meta name="wardrobe-build" content="2026-11-19.78.1" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -6065,7 +6065,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.78</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.78.1</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7619,7 +7619,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.78";
+var WARDROBE_BUILD = "2026-11-19.78.1";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -37357,15 +37357,22 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     return d[m][n];
   }
   function norm(s) { return String(s || "").toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, ""); }
+  /* his brands: the brand field, else a name's first word when the second
+     word varies ("Kiton Olive…", "Kiton Navy…"), else the first two words
+     ("Loro Piana …"). Sent to /identify and used for the local snap. */
   function knownBrands() {
-    var set = {};
+    var set = {}, by = {};
     (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).forEach(function (it) {
-      if (it && it.brand) set[it.brand] = 1;
-      var w = String(it && it.name || "").split(/\s+/);
-      if (w[0] && w[0].length >= 3) set[w[0]] = 1;
-      if (w[1] && w[0].length >= 2) set[w[0] + " " + w[1]] = 1;
+      if (!it || typeof it !== "object") return;
+      if (it.brand) { set[String(it.brand)] = 1; return; }
+      var w = String(it.name || "").split(/\s+/).filter(Boolean);
+      if (w.length >= 2 && w[0].length >= 2) (by[w[0]] = by[w[0]] || []).push(w[1]);
     });
-    return Object.keys(set);
+    Object.keys(by).forEach(function (f) {
+      var secs = by[f], uniq = secs.filter(function (x, i) { return secs.indexOf(x) === i; });
+      if (secs.length >= 2 && uniq.length > 1) set[f] = 1; else set[f + " " + secs[0]] = 1;
+    });
+    return Object.keys(set).sort();
   }
   function fixBrand(brand) {
     var b = norm(brand); if (b.length < 3) return brand;
@@ -37386,7 +37393,15 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     running++;
     var ctl = typeof AbortController === "function" ? new AbortController() : null;
     var to = setTimeout(function () { if (ctl) ctl.abort(); }, 60000);
-    fetch(TRYON_URL + "/identify", { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + k }, body: JSON.stringify({ image: row.photo }), signal: ctl ? ctl.signal : undefined })
+    var pal = [];
+    /* the photo's own colours (most pixels first) and his brands go with the
+       photo, so the server can snap the hex, check the colour family and
+       keep brands to ones he owns */
+    new Promise(function (res0) { palette(row.photo, function (p) { pal = p || []; res0(); }); })
+      .then(function () {
+        var brands = knownBrands().slice(0, 80);
+        return fetch(TRYON_URL + "/identify", { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + k }, body: JSON.stringify({ image: row.photo, palette: pal.map(function (c) { return c.hex; }), brands: brands }), signal: ctl ? ctl.signal : undefined });
+      })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { s: r.status, j: j || {} }; }); })
       .then(function (res) {
         if (res.s !== 200 || !res.j.category) { row.status = "manual"; row.code = res.s; return; }
@@ -37396,7 +37411,8 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
         row.category = cats().indexOf(j.category) !== -1 ? j.category : row.category;
         row.name = name; row.brand = brand; row.colourName = j.colourName || ""; row.modelHex = j.colourHex;
         row.model = j.meta && j.meta.model || "";
-        return new Promise(function (res2) { palette(row.photo, function (pal) { row.colourHex = snapHex(pal, j.colourHex) || "#888888"; res2(); }); });
+        var srvHex = /^#[0-9a-f]{6}$/i.test(j.colourHex || "") && pal.length && j.meta && Array.isArray(j.meta.rules);
+        row.colourHex = (srvHex ? j.colourHex : snapHex(pal, j.colourHex)) || "#888888";
       })
       .catch(function () { row.status = "manual"; })
       .then(function () { clearTimeout(to); running--; if (row.status === "reading") row.status = "done"; render(row); pump(); });
@@ -37408,6 +37424,60 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
       identify(next);
     }
     renderCount();
+  }
+
+  /* ---------- the review batch survives a reload (IndexedDB) ----------
+     Each row (photo data URL, fields, status) is mirrored to
+     wardrobe-bulk/rows. Add all and × remove rows, so the store only ever
+     holds what is still waiting for review. Nothing here syncs. */
+  var BDB = null, bdbWait = [], restored = false, saveT = null;
+  function bdb(cb) {
+    if (BDB) return cb(BDB);
+    if (typeof indexedDB === "undefined") return cb(null);
+    bdbWait.push(cb); if (bdbWait.length > 1) return;
+    function go(db) { BDB = db; var w = bdbWait; bdbWait = []; w.forEach(function (f) { f(db); }); }
+    try {
+      var rq = indexedDB.open("wardrobe-bulk", 1);
+      rq.onupgradeneeded = function () { if (!rq.result.objectStoreNames.contains("rows")) rq.result.createObjectStore("rows", { keyPath: "rid" }); };
+      rq.onsuccess = function () { go(rq.result); };
+      rq.onerror = function () { go(null); };
+    } catch (e) { go(null); }
+  }
+  function rowRec(r, i) { return { rid: r.rid, ord: i, status: r.status, name: r.name || "", brand: r.brand || "", category: r.category, colourName: r.colourName || "", colourHex: r.colourHex, modelHex: r.modelHex || "", model: r.model || "", code: r.code || 0, photo: r.photo }; }
+  function flushRows() {
+    return new Promise(function (done) {
+      if (!restored) return done(false);
+      bdb(function (db) {
+        if (!db) return done(false);
+        try {
+          var tx = db.transaction("rows", "readwrite"), st = tx.objectStore("rows");
+          st.clear();
+          rows.forEach(function (r, i) { if (r.photo) st.put(rowRec(r, i)); });
+          tx.oncomplete = function () { done(true); };
+          tx.onerror = tx.onabort = function () { done(false); };
+        } catch (e) { done(false); }
+      });
+    });
+  }
+  function saveRows() { clearTimeout(saveT); saveT = setTimeout(flushRows, 200); }
+  function restoreRows() {
+    bdb(function (db) {
+      if (!db) { restored = true; return; }
+      try {
+        var rq = db.transaction("rows", "readonly").objectStore("rows").getAll();
+        rq.onsuccess = function () {
+          var have = {}; rows.forEach(function (r) { have[r.rid] = 1; });
+          /* already added (Add all landed but the clear didn't): skip */
+          var added = {}; (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).forEach(function (it) { if (it && it.addedVia === "bulk" && it.originalPhoto) added[it.originalPhoto] = 1; });
+          var back = (rq.result || []).filter(function (r) { return r && r.photo && !have[r.rid] && !added[r.photo]; })
+            .sort(function (a, b) { return (a.ord || 0) - (b.ord || 0); })
+            .map(function (r) { delete r.ord; if (r.status !== "done" && r.status !== "manual") r.status = "queued"; return r; });
+          rows = back.concat(rows); restored = true;
+          if (back.length) { render(); pump(); } else saveRows();
+        };
+        rq.onerror = function () { restored = true; };
+      } catch (e) { restored = true; }
+    });
   }
 
   /* ---------- review grid ---------- */
@@ -37445,7 +37515,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   window.addEventListener("resize", placeBar);
   setInterval(function () { if (typeof currentTab !== "undefined" && currentTab === "bulk") placeBar(); }, 1000);
   function renderCount() {
-    placeBar();
+    placeBar(); saveRows();
     var busy = rows.filter(function (r) { return r.status === "reading" || r.status === "queued" || r.status === "scaling"; }).length;
     var ready = rows.filter(function (r) { return r.status === "done" || r.status === "manual"; }).length;
     var c = document.getElementById("bulk-count");
@@ -37509,6 +37579,7 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var kept = persistAll();
     var n = ready.length;
     rows = rows.filter(function (r) { return ready.indexOf(r) === -1; });
+    clearTimeout(saveT); flushRows();
     render();
     if (typeof wardFilter !== "undefined") { wardFilter = "All"; if (typeof syncWardCatLabels === "function") syncWardCatLabels(); }
     if (typeof renderWardrobe === "function") renderWardrobe();
@@ -37522,16 +37593,21 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
     var t = ev.target; if (!t || !t.closest) return;
     if (t.closest("#bulk-resume")) { if (typeof switchTab === "function") switchTab("bulk"); render(); return; }
     if (t.closest("#bulk-add-all")) { addAll(); return; }
-    if (t.closest("[data-bulk-drop]")) { var r = rowOf(t); if (r) { rows = rows.filter(function (x) { return x !== r; }); render(); } return; }
+    if (t.closest("[data-bulk-drop]")) { var r = rowOf(t); if (r) { rows = rows.filter(function (x) { return x !== r; }); render(); clearTimeout(saveT); flushRows(); } return; }
   });
   function onField(ev) {
     var t = ev.target; if (!t || !t.getAttribute) return;
     var f = t.getAttribute("data-bk-f"); if (!f) return;
-    var r = rowOf(t); if (r) r[f] = t.value;
+    var r = rowOf(t); if (r) { r[f] = t.value; saveRows(); }
   }
   document.addEventListener("input", onField);
   document.addEventListener("change", onField);
   window.bulkAddFiles = addFiles;
+  window.addEventListener("pagehide", function () { if (saveT) { clearTimeout(saveT); flushRows(); } });
+  window.bulkFlush = function () { clearTimeout(saveT); return flushRows(); };
+  window.bulkRestored = function () { return restored; };
+  window.bulkBrands = knownBrands;
+  restoreRows();
   window.bulkState = function () { return rows.map(function (r) { return { rid: r.rid, status: r.status, name: r.name, brand: r.brand, category: r.category, colourName: r.colourName, colourHex: r.colourHex, modelHex: r.modelHex, model: r.model, code: r.code }; }); };
   window.studioQueue78 = function () { return (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).filter(function (i) { return i && i.needsStudio; }).map(function (i) { return i.id; }); };
   window.bulkSnapHex = snapHex; window.bulkPalette = palette; window.bulkFixBrand = fixBrand;
