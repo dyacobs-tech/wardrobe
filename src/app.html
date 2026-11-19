@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80.1" />
+    <meta name="wardrobe-build" content="2026-11-19.80.2" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -6816,7 +6816,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80.1</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.2</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7417,11 +7417,22 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
      deferred parse-time scripts (colour data, IA cuts, try-on) have run */
   var dclDone = document.readyState === "complete";
   document.addEventListener("DOMContentLoaded", function () { dclDone = true; });
+  /* .80.2: the shell inlines only Home's first-paint CSS; the app scripts
+     (which measure layout) start once the full stylesheet has applied */
+  var ran = false;
+  function runOnce() {
+    if (ran) return; ran = true; runApp();
+  }
+  function afterCss() {
+    if (window.__cssFull || !document.querySelector("link[data-full-css]")) { runOnce(); return; }
+    document.addEventListener("wardrobe-css", runOnce, { once: true });
+    setTimeout(runOnce, 6000);
+  }
   function boot() {
     if (booted) return;
     booted = true;
-    if (!dclDone) document.addEventListener("DOMContentLoaded", runApp);
-    else runApp();
+    if (!dclDone) document.addEventListener("DOMContentLoaded", afterCss);
+    else afterCss();
   }
   function giveUp() { clearTimeout(timer); if (!booted) V.degraded = true; boot(); }
   var timer = setTimeout(function () { V.degraded = true; boot(); }, 2500);
@@ -8441,7 +8452,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.80.1";
+var WARDROBE_BUILD = "2026-11-19.80.2";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -17485,7 +17496,27 @@ function emulatePieceHTML(pc) {
 /* Photo garments the specs carry that are not shoppable pieces —
    the sunglasses, pocket squares, hats and watches iconSpecLook
    leaves out of the breakdown. */
+/* .80.2: ICON_SPECS (the icon photographs' garments, ~490KB) is its own
+   file in the built app, loaded on idle after the hero; anything that
+   needs it sooner reads it at once from the cache (synchronous, rare). */
+function ensureIconSpecs802() {
+  if (typeof ICON_SPECS !== "undefined" || !window.ICON_SPECS_SRC) return;
+  try {
+    var x = new XMLHttpRequest(); x.open("GET", window.ICON_SPECS_SRC, false); x.send(null);
+    if (x.status === 200 && typeof ICON_SPECS === "undefined") (0, eval)(x.responseText);
+  } catch (e) {}
+}
+(function () {
+  function load() {
+    if (typeof ICON_SPECS !== "undefined" || !window.ICON_SPECS_SRC) return;
+    var sc = document.createElement("script"); sc.src = window.ICON_SPECS_SRC; sc.async = true;
+    sc.onload = function () { if (typeof window.outfitsDirty796 === "function") window.outfitsDirty796(); };
+    document.head.appendChild(sc);
+  }
+  setTimeout(function () { (window.requestIdleCallback || function (f) { return setTimeout(f, 200); })(load, { timeout: 5000 }); }, 2500);
+})();
 function emulateAlsoInPhoto(ic, lk) {
+  ensureIconSpecs802();
   if (typeof ICON_SPECS === "undefined" || !ICON_SPECS[ic.id]) return [];
   var garments = lk.spec ? ICON_SPECS[ic.id][lk.spec] : null;
   if (!garments) {
@@ -18117,6 +18148,7 @@ var ICON_SPECS = {"kraft":{"kraft-1":[["Navy single-breasted blazer","Navy","#1e
    category (sunglasses, pocket squares, hats, bags) are not
    shopping pieces and are left out. */
 function iconSpecLook(ic, lk, title) {
+  ensureIconSpecs802();
   if (typeof ICON_SPECS === "undefined" || !ICON_SPECS[ic.id]) return null;
   /* Publish-stable spec join (build .32): the look's stamped spec
      key is the primary lookup — the standalone publish rewrites img
@@ -28184,7 +28216,10 @@ function closePriceSheet() { var s = document.getElementById("price-sheet"); if 
     if (so) { setPriceRange(null, so.getAttribute("data-pr-sort")); priceSheetSync(); }
   });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sheet.hidden) closePriceSheet(); });
-  priceRangeRefresh();
+  /* .80.2: the boot-time refresh re-renders lists that are not on screen
+     (sale, The Edit, Inspo On you); run it once the app is idle */
+  try { var pill0 = document.getElementById("price-pill"); if (pill0) { pill0.textContent = priceRangeShort(); pill0.setAttribute("aria-pressed", priceRangeActive() ? "true" : "false"); } } catch (e) {}
+  setTimeout(function () { (window.requestIdleCallback || function (f) { return setTimeout(f, 200); })(function () { priceRangeRefresh(); }, { timeout: 6000 }); }, 3000);
 })();
 function closeShopTierSels() {
   document.querySelectorAll("[data-shop-tier-opts]").forEach(function (o) { o.hidden = true; });
@@ -39963,11 +39998,29 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
   }
   if (typeof homeComposerLooks75 === "function" && typeof dealHeroForSource === "function") {
     var _hcl = homeComposerLooks75, _dh = dealHeroForSource;
+    /* .80.2: a deal takes the next look from the queue and the rest of the
+       queue stays — the 8-look composition (~70ms, ~440ms at 6x CPU) runs
+       again only when the queue is nearly used up or his closet, weather,
+       level or dislikes changed */
+    var usedQ = null;
     homeComposerLooks75 = function (count) {
-      if (dealing && Q && Q.sig === qsig() && Q.list.length) { var l = Q.list; Q = null; return l; }
+      if (dealing && Q && Q.sig === qsig() && Q.list.length) { usedQ = Q; Q = null; return usedQ.list.slice(); }
       return _hcl.apply(this, arguments);
     };
-    dealHeroForSource = function () { dealing = true; try { return _dh.apply(this, arguments); } finally { dealing = false; } };
+    dealHeroForSource = function () {
+      dealing = true; usedQ = null;
+      try { return _dh.apply(this, arguments); }
+      finally {
+        dealing = false;
+        try {
+          if (usedQ && typeof todayLook !== "undefined" && todayLook) {
+            var t = todayLook.title, rest = usedQ.list.filter(function (l) { return l && l.title !== t; });
+            if (rest.length) Q = { sig: qsig(), list: rest, reused: (usedQ.reused || 0) + 1 };
+          }
+        } catch (e) {}
+        usedQ = null;
+      }
+    };
     window.homeLookahead793 = function () { return Q; };
   }
   function prefetch() {
@@ -39978,9 +40031,10 @@ if (INSPO_ONBODY.looks.length) window.inspoView = "onyou";
           var look = typeof todayLook !== "undefined" ? todayLook : null, r4 = window.renderFor782, urls = [];
           var cur = look && r4 ? r4(look) : null; if (cur && window.cutFor784 && window.cutFor784(cur)) urls.push(window.cutFor784(cur));
           if (look && typeof _hcl === "function") {
-            var list = _hcl(8) || [], good = list.filter(dealable), rest = list.filter(function (l) { return !dealable(l); });
+            var keepQ = Q && Q.sig === qsig() && Q.list.filter(dealable).length >= 4;
+            var list = keepQ ? Q.list : (_hcl(8) || []), good = list.filter(dealable), rest = list.filter(function (l) { return !dealable(l); });
             /* the queue the next deal takes: looks he can be seen in first */
-            Q = { sig: qsig(), list: good.concat(rest) };
+            if (!keepQ) Q = { sig: qsig(), list: good.concat(rest) };
             var nx = good.filter(function (l) { return l.title !== look.title; });
             nx.slice(0, 5).forEach(function (l, i) { var u = r4(l); if (!u) return; var c = window.cutFor784(u); if (c) urls.push(c); if (i < 3) warmOne(u, i === 0); });
             if (window.lqRemember793) window.lqRemember793(urls.map(function (u) { var m = u.match(/onbody-cut\/([^\/?#]+?)\./); return m ? m[1] : ""; }));

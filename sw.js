@@ -29,7 +29,7 @@
 // deadline is 30s — long enough for a 2.7MB index.html on a typical
 // phone connection — so a slow fetch is not replaced by a stale
 // cached shell after 4 seconds.
-const WARDROBE_BUILD = '2026-11-19.80.1';
+const WARDROBE_BUILD = '2026-11-19.80.2';
 const SHELL_CACHE = 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = 'wardrobe-assets-' + WARDROBE_BUILD;
@@ -52,7 +52,7 @@ const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
 // builds (activate drops files no longer listed), precached on install.
 const CODE_CACHE = 'wardrobe-code-v1';
 const CODE_RE = /\/app\/[^\/]+\.[0-9a-f]{10}\.(js|css)$/;
-const CODE_FILES = ['./app/00-brand-list.27a288fac9.js', './app/01.ab91153ec5.js', './app/02.c2b7036185.js', './app/03.d4e3059653.js', './app/04.c4cfb49d5c.js', './app/05.cff0fa010c.js', './app/06.42d6e07f14.js', './app/07.04dec0898b.js', './app/08.cc3ef1bc8a.js', './app/09.ecc4e31b72.js', './app/10.90a8bc4648.js', './app/11.88e48d4d6e.js', './app/12.abd5366cfd.js', './app/13.41a8f6ad22.js', './app/14.00fa301ab8.js', './app/15.613656dfbe.js', './app/16.8ab17cfb36.js', './app/17.d77feb95bb.js', './app/18.31b8f560f5.js', './app/19.5cbe945a2e.js', './app/20.059504fb55.js', './app/21.d81e147bdc.js', './app/22.734213addb.js', './app/23.e443f34154.js'];
+const CODE_FILES = ['./app/app.2d1f129201.css', './app/00-brand-list.27a288fac9.js', './app/01.ab91153ec5.js', './app/02.15e637f020.js', './app/03.d4e3059653.js', './app/04.c4cfb49d5c.js', './app/05.cff0fa010c.js', './app/06.42d6e07f14.js', './app/07.04dec0898b.js', './app/08.cc3ef1bc8a.js', './app/09.ecc4e31b72.js', './app/10.90a8bc4648.js', './app/11.88e48d4d6e.js', './app/12.abd5366cfd.js', './app/13.41a8f6ad22.js', './app/14.00fa301ab8.js', './app/15.74f041d55a.js', './app/16.8ab17cfb36.js', './app/17.d77feb95bb.js', './app/18.31b8f560f5.js', './app/19.5cbe945a2e.js', './app/20.059504fb55.js', './app/21.d81e147bdc.js', './app/22.734213addb.js', './app/23.e443f34154.js', './app/icon-specs.59d039a17a.js'];
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',

@@ -203,11 +203,29 @@
   }
   if (typeof homeComposerLooks75 === "function" && typeof dealHeroForSource === "function") {
     var _hcl = homeComposerLooks75, _dh = dealHeroForSource;
+    /* .80.2: a deal takes the next look from the queue and the rest of the
+       queue stays — the 8-look composition (~70ms, ~440ms at 6x CPU) runs
+       again only when the queue is nearly used up or his closet, weather,
+       level or dislikes changed */
+    var usedQ = null;
     homeComposerLooks75 = function (count) {
-      if (dealing && Q && Q.sig === qsig() && Q.list.length) { var l = Q.list; Q = null; return l; }
+      if (dealing && Q && Q.sig === qsig() && Q.list.length) { usedQ = Q; Q = null; return usedQ.list.slice(); }
       return _hcl.apply(this, arguments);
     };
-    dealHeroForSource = function () { dealing = true; try { return _dh.apply(this, arguments); } finally { dealing = false; } };
+    dealHeroForSource = function () {
+      dealing = true; usedQ = null;
+      try { return _dh.apply(this, arguments); }
+      finally {
+        dealing = false;
+        try {
+          if (usedQ && typeof todayLook !== "undefined" && todayLook) {
+            var t = todayLook.title, rest = usedQ.list.filter(function (l) { return l && l.title !== t; });
+            if (rest.length) Q = { sig: qsig(), list: rest, reused: (usedQ.reused || 0) + 1 };
+          }
+        } catch (e) {}
+        usedQ = null;
+      }
+    };
     window.homeLookahead793 = function () { return Q; };
   }
   function prefetch() {
@@ -218,9 +236,10 @@
           var look = typeof todayLook !== "undefined" ? todayLook : null, r4 = window.renderFor782, urls = [];
           var cur = look && r4 ? r4(look) : null; if (cur && window.cutFor784 && window.cutFor784(cur)) urls.push(window.cutFor784(cur));
           if (look && typeof _hcl === "function") {
-            var list = _hcl(8) || [], good = list.filter(dealable), rest = list.filter(function (l) { return !dealable(l); });
+            var keepQ = Q && Q.sig === qsig() && Q.list.filter(dealable).length >= 4;
+            var list = keepQ ? Q.list : (_hcl(8) || []), good = list.filter(dealable), rest = list.filter(function (l) { return !dealable(l); });
             /* the queue the next deal takes: looks he can be seen in first */
-            Q = { sig: qsig(), list: good.concat(rest) };
+            if (!keepQ) Q = { sig: qsig(), list: good.concat(rest) };
             var nx = good.filter(function (l) { return l.title !== look.title; });
             nx.slice(0, 5).forEach(function (l, i) { var u = r4(l); if (!u) return; var c = window.cutFor784(u); if (c) urls.push(c); if (i < 3) warmOne(u, i === 0); });
             if (window.lqRemember793) window.lqRemember793(urls.map(function (u) { var m = u.match(/onbody-cut\/([^\/?#]+?)\./); return m ? m[1] : ""; }));

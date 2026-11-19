@@ -30,7 +30,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-11-19.80.1"
+BUILD = "2026-11-19.80.2"
 # Build .74.2: Home deals only pieces that carry a photo, so each fixture
 # piece gets a tiny valid one (the fixture itself stays photo-free).
 FIXTURE_PHOTO = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
