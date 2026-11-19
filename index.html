@@ -30,7 +30,7 @@
     <meta name="twitter:title" content="Wardrobe" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.80" />
+    <meta name="wardrobe-build" content="2026-11-19.80.1" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
@@ -5549,7 +5549,7 @@
 
     <link rel="preload" as="script" fetchpriority="low" href="app/00-brand-list.27a288fac9.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/01.ab91153ec5.js" />
-    <link rel="preload" as="script" fetchpriority="low" href="app/02.c962eb7e01.js" />
+    <link rel="preload" as="script" fetchpriority="low" href="app/02.c2b7036185.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/03.d4e3059653.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/04.c4cfb49d5c.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/05.cff0fa010c.js" />
@@ -6594,7 +6594,7 @@
           </div>
           <p id="data-status"></p>
         </div>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.80</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.80.1</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7137,9 +7137,19 @@
      on the img itself and on any element whose pop-out target is
      the same reference. A resolved src no longer starts with
      "idb:", so the observer never loops on its own writes. */
+  /* .80: resolved photos are swapped in once per frame, in one pass over
+     the waiting images, instead of a whole-document scan per photo (with
+     ~100 photos that was ~100 scans of every <img> on a reopen) */
+  var _resolved = Object.create(null), _flushQ = false;
+  function hydrateFlush() {
+    _flushQ = false;
+    var res = _resolved; _resolved = Object.create(null);
+    document.querySelectorAll('img[src^="idb:"]').forEach(function (im) { var d = res[im.getAttribute("src")]; if (d) im.src = d; });
+    document.querySelectorAll('[data-popout^="idb:"]').forEach(function (el) { var d = res[el.getAttribute("data-popout")]; if (d) el.setAttribute("data-popout", d); });
+  }
   function hydrateResolve(ref, data) {
-    document.querySelectorAll("img").forEach(function (im) { if (im.getAttribute("src") === ref) im.src = data; });
-    document.querySelectorAll("[data-popout]").forEach(function (el) { if (el.getAttribute("data-popout") === ref) el.setAttribute("data-popout", data); });
+    _resolved[ref] = data;
+    if (!_flushQ) { _flushQ = true; (window.requestAnimationFrame || setTimeout)(hydrateFlush); }
   }
   function hydrateCheck(img) {
     if (!img || img.tagName !== "IMG") return;
@@ -7220,7 +7230,7 @@
 })();
     </script>
     <script type="wardrobe/app" data-src="app/01.ab91153ec5.js"></script>
-    <script type="wardrobe/app" data-src="app/02.c962eb7e01.js"></script>
+    <script type="wardrobe/app" data-src="app/02.c2b7036185.js"></script>
     <script type="wardrobe/app" data-src="app/03.d4e3059653.js"></script>
     <script type="wardrobe/app" data-src="app/04.c4cfb49d5c.js"></script>
     <script type="wardrobe/app" data-src="app/05.cff0fa010c.js"></script>
