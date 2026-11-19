@@ -28827,6 +28827,7 @@ function unmarkShopPurchased(key) {
       toast("No longer marked purchased — kept in your Closet, since you've worn it.");
     } else {
       wardrobeItems = wardrobeItems.filter(function (i) { return i.id !== p.closetItemId; });
+      try { if (typeof _sySessionDeletes !== "undefined") { (_sySessionDeletes.items = _sySessionDeletes.items || {})[p.closetItemId] = 1; } } catch (e) {}
       if (typeof detailItemId !== "undefined" && detailItemId === p.closetItemId) detailItemId = null;
     }
   }
@@ -33051,7 +33052,20 @@ function syTrackChanges(onlyColl) {
       }
     });
     Object.keys(SY.snap[c]).forEach(function (id) {
-      if (!seen[id]) { delete SY.snap[c][id]; delete SY.st[c][id]; SY.tomb[c][id] = now; SY.dirty[c][id] = 1; ch = true; }
+      if (!seen[id]) {
+        /* Build .77: a closet / watch record that vanished without a
+           deliberate delete this session (a boot-time repair, a merge,
+           a half-written store) is NEVER tombstoned — that would delete
+           a real piece on every device. Forget the snapshot entry and
+           re-download everything once, so the server copy comes back. */
+        if ((c === "items" || c === "watches") && id.indexOf("seed-") !== 0 &&
+            !(typeof _sySessionDeletes !== "undefined" && _sySessionDeletes[c] && _sySessionDeletes[c][id])) {
+          delete SY.snap[c][id]; delete SY.st[c][id]; delete SY.dirty[c][id];
+          SY.restore59 = null; SY.lost77 = (SY.lost77 || 0) + 1; ch = true;
+          return;
+        }
+        delete SY.snap[c][id]; delete SY.st[c][id]; SY.tomb[c][id] = now; SY.dirty[c][id] = 1; ch = true;
+      }
     });
   });
   /* Settings: one hash + timestamp per field. A field seen for
@@ -34822,46 +34836,20 @@ function analyzeFilePiece(card, job, ix) {
       return name || raw;
     }
     if (typeof wardrobeItems !== "undefined" && Array.isArray(wardrobeItems)) {
-      /* Cluster the same garment: same category + same brand root,
-         and (a shared model number, OR one entry's content tokens
-         a subset of the other's, OR a strong token overlap) —
-         listing titles truncate, so no single signature is trusted. */
-      function brandRoot(it) {
-        var toks = normTokens(it.name).split(" ").filter(Boolean);
-        var b = toks.length ? toks[0] : "";
-        return (b === "levi" || b === "levis") ? "levis" : b;
-      }
-      function contentTokens(it) {
-        var br = brandRoot(it);
-        var out = [];
-        normTokens(it.name).split(" ").filter(Boolean).forEach(function (tk) {
-          if (tk === br || tk === "levi" || tk === "levis") return;
-          if (/^\d{2}s$/.test(tk)) return;
-          if (["vintage", "mens", "men", "womens", "women", "size", "new", "used", "rare"].indexOf(tk) !== -1) return;
-          if (out.indexOf(tk) === -1) out.push(tk);
-        });
-        return out;
-      }
-      function modelOf(it) {
-        var m = null;
-        normTokens(it.name).split(" ").forEach(function (tk) { if (!m && /^\d{3,4}$/.test(tk)) m = tk; });
-        return m;
-      }
+      /* Build .77: only a true duplicate record merges. The fuzzy rule
+         this replaced ("same brand + model number", "token subset",
+         60% token overlap) collapsed distinct pieces — three different
+         pairs of Levi's 517, navy leather vs navy suede loafers, mint vs
+         white polos — and deleted them everywhere through sync. */
+      function colourKey(it) { return String(it.colourName || it.color || "").split("\u00b7")[0].trim().toLowerCase(); }
       function sameGarment(a, b) {
         if ((a.category || "") !== (b.category || "")) return false;
-        if (brandRoot(a) !== brandRoot(b) || !brandRoot(a)) return false;
-        var ma = modelOf(a), mb = modelOf(b);
-        if (ma && mb) return ma === mb;
-        if (ma || mb) {
-          var other = ma ? contentTokens(b) : contentTokens(a);
-          return other.indexOf(ma || mb) !== -1 || other.length <= 1;
-        }
-        var ca = contentTokens(a), cb = contentTokens(b);
-        var sub = ca.every(function (x) { return cb.indexOf(x) !== -1; }) || cb.every(function (x) { return ca.indexOf(x) !== -1; });
-        if (sub) return true;
-        var shared = ca.filter(function (x) { return cb.indexOf(x) !== -1; }).length;
-        var union = ca.concat(cb.filter(function (x) { return ca.indexOf(x) === -1; })).length;
-        return union > 0 && shared / union >= 0.6;
+        if (normTokens(a.name) !== normTokens(b.name)) return false;
+        if (String(a.name || "").replace(/\s+/g, " ").trim().toLowerCase() !== String(b.name || "").replace(/\s+/g, " ").trim().toLowerCase()) return false;
+        if (colourKey(a) && colourKey(b) && colourKey(a) !== colourKey(b)) return false;
+        if (a.receiptId && b.receiptId && a.receiptId !== b.receiptId) return false;
+        if (a.photo && b.photo && a.photo !== b.photo) return false;
+        return true;
       }
       var parent = {};
       wardrobeItems.forEach(function (it) { if (it && it.id) parent[it.id] = it.id; });
