@@ -15,6 +15,13 @@ Output:
                              are kept as they are; sunglasses stay Edit-only
                              because the shop matchers have no such slot)
 
+pairsWith (".pairs"): each SKU is re-paired with the closet pieces it
+actually goes with (--closet <items.json>, default the live closet copy):
+a different slot (a trouser pairs with tops, layers and shoes, never
+another trouser), colour harmony (neutral anchors, tonal, soft
+complements; saturated clashes lose), and at most two per closet
+category, so ordering and suggestions differ per SKU.
+
 Category mapping: subcat chinos -> trousers, polo -> knitwear,
 sunglasses kept as its own Edit category. Rows without url, name,
 numeric price or an image are dropped and counted.
@@ -28,7 +35,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = Path(sys.argv[1] if len(sys.argv) > 1 else "/workspace/wardrobe-audit/edit-catalog/catalog.json")
+ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
+SRC = Path(ARGS[0] if ARGS else "/workspace/wardrobe-audit/edit-catalog/catalog.json")
+CLOSET = Path(next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--closet=")), "/workspace/wardrobe-audit/build-75/fixture_live83.json"))
 OUT = ROOT / "assets" / "edit-catalog.json"
 IMG = ROOT / "assets" / "editimg"
 SHOPDB = ROOT / "assets" / "shop-db.json"
@@ -91,6 +100,97 @@ def cat_of(p):
     return cat, sub
 
 
+CLOSET_SLOT = {"Sweaters": "top", "Polos": "top", "Shirts": "top", "Button downs": "top", "Tees": "top", "Blazers": "layer", "Jackets": "layer", "Coats": "layer",
+               "Leather jackets": "layer", "Trousers": "bottom", "Jeans": "bottom", "Shorts": "bottom", "Bathing suits": "bottom", "Shoes": "shoes", "Belts": "accessory"}
+SKU_SLOT = {"knitwear": "top", "top": "top", "shirt": "top", "blazer": "layer", "suit": "layer", "outerwear": "layer", "trousers": "bottom", "jeans": "bottom",
+            "shorts": "bottom", "swim": "bottom", "shoes": "shoes", "belt": "accessory", "sunglasses": "accessory", "tie": "accessory"}
+NEUTRAL_WORDS = ("navy", "white", "cream", "ecru", "beige", "stone", "sand", "khaki", "tan", "camel", "brown", "chocolate", "espresso", "taupe", "grey", "gray",
+                 "charcoal", "black", "olive", "ivory", "natural", "oat", "denim", "indigo", "panna")
+
+
+def hex_hsl(h):
+    import colorsys
+    h = str(h or "").lstrip("#")
+    if len(h) != 6:
+        return None
+    r, g, b = (int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    hh, ll, ss = colorsys.rgb_to_hls(r, g, b)
+    return hh * 360, ss, ll
+
+
+def neutral(name, hx):
+    n = str(name or "").lower()
+    if any(w in n for w in NEUTRAL_WORDS):
+        return True
+    c = hex_hsl(hx)
+    return bool(c and (c[1] < 0.22 or c[2] < 0.2 or c[2] > 0.88))
+
+
+def harmony(a_name, a_hex, b_name, b_hex):
+    """Colour score for wearing a with b: neutrals anchor anything,
+    tonal pairs and soft complements work, saturated clashes don't."""
+    na, nb = neutral(a_name, a_hex), neutral(b_name, b_hex)
+    ca, cb = hex_hsl(a_hex), hex_hsl(b_hex)
+    score = 0.0
+    if na and nb:
+        score += 2.0
+        if ca and cb:
+            score += min(abs(ca[2] - cb[2]), 0.5) * 2  # light against dark reads better than two mids
+    elif na or nb:
+        score += 2.5
+    if ca and cb:
+        dh = abs(ca[0] - cb[0]); dh = min(dh, 360 - dh)
+        if not (na or nb):
+            if dh < 30:
+                score += 1.5  # tonal
+            elif 150 <= dh <= 210:
+                score += 1.0  # complement
+            elif 60 <= dh <= 120 and ca[1] > 0.35 and cb[1] > 0.35:
+                score -= 2.5  # clash
+        if abs(ca[2] - cb[2]) < 0.06 and dh < 12 and ca[1] > 0.15:
+            score -= 1.0  # same colour twice
+    return score
+
+
+def pair_closet(e, closet):
+    slot = SKU_SLOT.get(e.get("cat"), "top")
+    cands = []
+    for it in closet:
+        cs = CLOSET_SLOT.get(it.get("category"))
+        if not cs or cs == slot or (slot == "accessory" and cs == "accessory"):
+            continue
+        sc = harmony(e.get("colour"), e.get("hex"), it.get("colourName"), it.get("colourHex"))
+        # a layer pairs best with tops, shoes with bottoms, bottoms with tops
+        if (slot, cs) in (("bottom", "top"), ("layer", "top"), ("shoes", "bottom"), ("top", "bottom"), ("accessory", "bottom"), ("accessory", "shoes")):
+            sc += 0.75
+        sc += (int(hashlib.md5((e["url"] + it["id"]).encode()).hexdigest()[:4], 16) / 65535) * 0.3  # stable tiebreak
+        cands.append((sc, it))
+    cands.sort(key=lambda x: -x[0])
+    # round-robin across the other slots (a trouser gets tops, a layer
+    # AND shoes), best colour match first within each slot
+    by_slot = {}
+    for sc, it in cands:
+        if sc >= 1.0:
+            by_slot.setdefault(CLOSET_SLOT.get(it.get("category")), []).append(it)
+    order = sorted(by_slot, key=lambda k: -max(harmony(e.get("colour"), e.get("hex"), x.get("colourName"), x.get("colourHex")) for x in by_slot[k]))
+    out, per, r = [], {}, 0
+    while len(out) < 6 and any(by_slot.values()) and r < 20:
+        r += 1
+        for k in order:
+            lst = by_slot[k]
+            while lst:
+                it = lst.pop(0)
+                c = it.get("category")
+                if per.get(c, 0) >= 2:
+                    continue
+                per[c] = per.get(c, 0) + 1
+                out.append(it["id"])
+                break
+            if len(out) >= 6:
+                break
+    return out
+
+
 def yes(v):
     return v is True or str(v).lower() in ("yes", "true", "1")
 
@@ -116,6 +216,7 @@ def main():
         tags = p.get("tags") or {}
         cur = p.get("currency") or "USD"
         out.append({k: v for k, v in {
+            "sku": Path(str(img_of(p) or "")).stem if str(img_of(p) or "").startswith("img/") else (p.get("sku") or None),
             "brand": p.get("brand") or p.get("vendor") or "",
             "name": name, "price": price, "url": url, "img": img,
             "retailer": p.get("retailer") or p.get("store") or p.get("seller") or "",
@@ -132,6 +233,11 @@ def main():
             "occasion": tags.get("occasion") or None,
             "verified": p.get("verified") or True,
         }.items() if v not in (None, "", [])})
+    if CLOSET.exists():
+        closet = [i for i in json.loads(CLOSET.read_text()) if isinstance(i, dict) and i.get("id")]
+        for e in out:
+            e["pairs"] = pair_closet(e, closet)
+        print(f"paired against {len(closet)} closet pieces ({CLOSET.name})")
     out.sort(key=lambda e: (0 if e.get("gap") else 1, 0 if e.get("cat") == "trousers" else 1))
     OUT.write_text(json.dumps({"v": 1, "source": SRC.name, "count": len(out), "products": out}, separators=(",", ":"), ensure_ascii=False))
     print(f"wrote {OUT.relative_to(ROOT)}: {len(out)} products, {dropped} dropped")

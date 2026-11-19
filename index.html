@@ -35955,6 +35955,7 @@ document.addEventListener("keydown", function (e) {
       rc = { chinos: "trousers", chino: "trousers", polo: "knitwear", pants: "trousers" }[rc] || rc;
       e.cat = catOf({ cat: rc, name: name });
       if (p.subcat) e.subcat = String(p.subcat).toLowerCase();
+      if (p.sku) e.sku = String(p.sku);
       if (p.hex) e.hex = p.hex;
       if (Array.isArray(p.keys)) e.keys = p.keys.concat(e.subcat ? [e.subcat] : []);
       ["tier", "st", "sq", "occasion"].forEach(function (k) { if (p[k]) e[k] = p[k]; });
