@@ -39825,6 +39825,7 @@ async function relinkWithCode862() {
     var r = await syFetch(SYNC_URL + "/relink", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ code: v }) }, 20000);
     var j = null; try { j = await r.json(); } catch (e) { j = null; }
     if (r.status === 429) { say("Too many tries — wait 10 minutes and try again. Nothing was changed."); return; }
+    if (j && j.preview === "read-only") { say("The preview site is read-only — open the live Donna app to use a relink code. Nothing was changed."); return; }
     if (!r.ok || !j || !/^[0-9a-f]{48}$/.test(j.key || "")) { say("That code didn't work — it may have expired (codes last 10 minutes) or already been used. Nothing was changed."); return; }
     if (SY_RO_ACCTS862.indexOf(j.acct) !== -1) { say("That code is for an account this phone can't use. Nothing was changed."); return; }
     SY.key = j.key; SY.acct = j.acct || null; SY.last = 0; SY.lastOk = 0; SY.rej = 0;
