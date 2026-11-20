@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Preview .82.3 — The Edit > Curate, icon weightings, engine + Shop the look ranker.
+"""Live Curate, icon weightings, engine + Shop the look ranker.
 
 Usage: PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 python3 tests/test_curate81.py
 """
@@ -16,6 +16,8 @@ from playwright.sync_api import sync_playwright
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from buildinfo import CURRENT_BUILD  # noqa: E402
+
+BUILD = CURRENT_BUILD
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).resolve().parent
@@ -94,7 +96,7 @@ def main():
         pg.on("pageerror", lambda e: errors.append(str(e)))
         pg.goto(base + "?pv81", wait_until="load")
         pg.wait_for_timeout(2500)
-        check("build is .82.3", "82.3" in (pg.evaluate("window.WARDROBE_BUILD") or ""), pg.evaluate("window.WARDROBE_BUILD"))
+        check("build is current", pg.evaluate("window.WARDROBE_BUILD") == CURRENT_BUILD, pg.evaluate("window.WARDROBE_BUILD"))
         check("preview class", pg.evaluate("document.documentElement.classList.contains('pv81')"))
 
         # ---- The Edit default is Shop catalog ----
@@ -107,7 +109,7 @@ def main():
           const cu = document.getElementById('edit-v-curate');
           return shop && shop.getAttribute('aria-pressed') === 'true'
             && cur && cur.getAttribute('aria-pressed') === 'false'
-            && saved && !saved.hidden && cu && cu.hidden;
+            && cu && cu.hidden;
         }"""))
         check("no page title on The Edit", pg.evaluate("""() => {
           const t = document.getElementById('page-title');
@@ -124,7 +126,14 @@ def main():
                 break
             pg.wait_for_timeout(300)
         n_sliders = pg.locator("#cw-sliders .cw-row").count()
-        check("Curate opens with icon weight sliders", n_sliders >= 9, n_sliders)
+        check("Curate keeps icon weight sliders", n_sliders >= 9, n_sliders)
+        check("Your Taste Mix summary", pg.locator("#taste-mix850").is_visible())
+        check("editorial icon gallery", pg.locator("#icon-gallery850 .ig-card").count() >= 9)
+        pg.click("#taste-customize850")
+        pg.wait_for_timeout(300)
+        check("customize sheet opens the sliders", pg.locator("#curate-weights.cw-sheet").is_visible() and pg.locator("#cw-levels [data-cw-level]").count() == 4)
+        pg.click("#cw-done850")
+        pg.wait_for_timeout(200)
         names = pg.evaluate("() => [...document.querySelectorAll('.cw-name')].map(e => e.textContent)")
         check("Kraft and Beckham are icons", "Alexander Kraft" in names and "David Beckham" in names, names)
         check("Skarsgård is not an icon", not any("skarsg" in (n or "").lower() for n in names), names)
@@ -345,7 +354,7 @@ def main():
             results = {}
             for label, wts in (("before", uniform), ("after", seeded)):
                 results[label] = {}
-                for feed in ("mine", "allnew"):
+                for feed in ("mine", "withmine", "allnew"):
                     results[label][feed] = {}
                     for level, key in ((3, "casual"), (6, "formal")):
                         try:
@@ -396,6 +405,23 @@ def main():
                     or after_c_new.get("icon_src_squarzi", 0) > before_c_new.get("icon_src_squarzi", 0),
                     {"before": before_c_new, "after": after_c_new},
                 )
+            after_c_mix = results.get("after", {}).get("withmine", {}).get("casual", {})
+            after_f_mix = results.get("after", {}).get("withmine", {}).get("formal", {})
+            before_c_mix = results.get("before", {}).get("withmine", {}).get("casual", {})
+            if after_c_mix.get("n") and after_f_mix.get("n"):
+                check(
+                    "Mix icon-seeded share rises when top weights are high",
+                    after_c_mix.get("icon_src", 0) >= 35 or after_c_mix.get("icon_src", 0) > before_c_mix.get("icon_src", 0) + 10,
+                    {"before": before_c_mix, "after": after_c_mix, "formal_after": after_f_mix},
+                )
+                check(
+                    "casual Mix favours Squarzi vs formal / formal favours Kraft-Beckham",
+                    after_c_mix.get("icon_src_squarzi", 0) > after_f_mix.get("icon_src_squarzi", 0)
+                    or after_f_mix.get("icon_src_kraft_beckham", 0) > after_c_mix.get("icon_src_kraft_beckham", 0)
+                    or after_c_mix.get("squarzi_top", 0) > after_f_mix.get("squarzi_top", 0),
+                    {"casual": after_c_mix, "formal": after_f_mix},
+                )
+
             # Mine re-rank: top lens should lean after weights
             if after_c_mine.get("n") and after_f_mine.get("n"):
                 check(
@@ -480,6 +506,9 @@ def main():
                 if ac and bc:
                     shift = shift or [r["name"] for r in ac] != [r["name"] for r in bc] or mean(ac) != mean(bc)
                 # even if names stay, scores should move when lens bonus applies
+                # After weights, Casual vs Formal must actually change the top 12
+                if ac and af:
+                    shift = shift or [r["name"] for r in ac] != [r["name"] for r in af]
                 check("The Edit / Shop the look recommendations shift with weights", shift, {
                     "before_formal_top": (bf[:3] if bf else []),
                     "after_formal_top": (af[:3] if af else []),

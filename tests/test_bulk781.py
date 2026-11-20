@@ -95,7 +95,11 @@ def main():
         pg.goto(base, wait_until="load")
         pg.wait_for_timeout(2000)
         check("build string", pg.evaluate("window.WARDROBE_BUILD") == BUILD, pg.evaluate("window.WARDROBE_BUILD"))
-        check("store ready, empty at start", pg.evaluate("bulkRestored()") and pg.evaluate(IDB) == [] and not pg.locator("#bulk-resume").is_visible())
+        # The bundle installs scripts one turn apart. On a cold runner the
+        # bulk module is defined after the old fixed 2s pause, so wait for
+        # it the same way the reload checks below already do.
+        ready = wait_js(pg, "window.bulkRestored && bulkRestored()", 8000)
+        check("store ready, empty at start", ready and pg.evaluate(IDB) == [] and not pg.locator("#bulk-resume").is_visible())
         n0 = pg.evaluate("wardrobeItems.length")
         brands = pg.evaluate("bulkBrands()")
         check("his brands derived (Kiton, Loro Piana)", "Kiton" in brands and "Loro Piana" in brands and "Loro" not in brands, brands[:40])

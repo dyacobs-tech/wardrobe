@@ -19,6 +19,7 @@
             E.onbody = fetch("assets/onbody/manifest.json", { cache: "no-cache" });
             E.cut = fetch("assets/onbody-cut/manifest.json", { cache: "no-cache" });
             E.feet = fetch("assets/onbody-cut/feet.json");
+            E.editCat = fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r && r.ok ? r.json() : null; }).catch(function () { return null; });
             Object.keys(E).forEach(function (k) { E[k].catch(function () {}); });
           }
         } catch (e) {}
@@ -64,8 +65,8 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="DONNA" />
-    <meta property="og:title" content="DONNA" />
+    <meta name="apple-mobile-web-app-title" content="Donna" />
+    <meta property="og:title" content="Donna" />
     <meta property="og:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://dyacobs-tech.github.io/wardrobe/" />
@@ -73,21 +74,21 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="DONNA" />
+    <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.82.3" />
+    <meta name="wardrobe-build" content="2026-11-19.85.0" />
     <script>
-/* Preview .81 guard: on the /preview/ build (or ?pv81 locally) the app is
-   read-only toward the outside — nothing is written to sync or the render
-   worker, and the shared same-origin localStorage is never written
-   (writes stay in memory; only the preview's own keys persist, prefixed). */
+/* The clean Looks chrome and Curate are on for every deploy (html.pv81).
+   The read-only guard (no sync writes, no render-worker posts, memory-only
+   storage) runs only on the /preview/ site, so the live app can sync,
+   Render me, Save look and like as normal. */
 (function () {
   try {
-    var on = /\/preview\//.test(location.pathname) || /[?&]pv81\b/.test(location.search) || sessionStorage.getItem("pv81") === "1";
+    document.documentElement.classList.add("pv81");
+    var on = /\/preview\//.test(location.pathname);
     if (!on) return;
     try { sessionStorage.setItem("pv81", "1"); } catch (e) {}
-    document.documentElement.classList.add("pv81");
     window.__PV81 = true;
     var LS = window.localStorage, P = Storage.prototype, g = P.getItem, st = P.setItem, rm = P.removeItem, ky = P.key;
     var MEM = {}, TOMB = {}, KEEP = /^(wardrobe\.)?(endless81|wardrobe-theme)/, PFX = "pv81:";
@@ -124,13 +125,15 @@
 })();
     </script>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
-    <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png" />
-    <link rel="icon" sizes="192x192" href="assets/icon-192.png" />
-    <link rel="icon" sizes="512x512" href="assets/icon-512.png" />
-    <link rel="manifest" href="manifest.webmanifest" />
-    <title>DONNA</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png?v=donna1" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png?v=donna1" />
+    <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png?v=donna1" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=donna1" />
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png?v=donna1" />
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png?v=donna1" />
+    <link rel="shortcut icon" href="assets/favicon.ico?v=donna1" />
+    <link rel="manifest" href="manifest.webmanifest?v=donna1" />
+    <title>Donna</title>
     <style>
       /* .80.6: metric-matched stand-ins (Arial/Georgia, or their metric
          clones), sized to Inter/Fraunces so text keeps its box when the
@@ -5181,9 +5184,11 @@
         #bottombar.bottombar {
           transition: transform 250ms cubic-bezier(.2, .8, .2, 1) !important;
         }
+        /* .84.1: never translate the bar. On iOS a transform during scroll
+           detaches position:fixed and the pill floats mid-screen. */
         html.nav-away #bottombar.bottombar {
-          transform: translate3d(0, calc(100% + 12px), 0) !important;
-          pointer-events: none;
+          transform: none !important;
+          pointer-events: auto;
         }
       }
       @media (prefers-reduced-motion: reduce) {
@@ -5203,6 +5208,25 @@
       /* ================= Build .78.2c — Home is him ================= */
       /* Home: one full-length render of him, head to feet, never cropped */
       #panel-today .today-hero.hero-solo .today-collage { display: none !important; }
+      /* .84: a warm-weather look with no on-body cut shows crisp closet
+         piece photos (flat-lay), never the grey blurred silhouette. */
+      #panel-today .today-hero.hero-flatlay {
+        background: var(--bg, #f5f1e8) !important;
+        isolation: isolate;
+      }
+      html[data-theme="dark"] #panel-today .today-hero.hero-flatlay { background: var(--bg, #1c1916) !important; }
+      #panel-today .today-hero.hero-flatlay .today-collage,
+      #panel-today .today-hero.hero-flatlay .today-collage.flatlay-host {
+        display: block !important; position: relative; inset: auto; width: 100%;
+        max-height: min(72dvh, 720px); background: transparent; padding: 8px 12px 0;
+      }
+      #panel-today .today-hero.hero-flatlay img#today-img,
+      #panel-today .today-hero.hero-flatlay img.hero-lq,
+      #panel-today .today-hero.hero-flatlay .hero-xfade {
+        display: none !important; visibility: hidden !important; opacity: 0 !important;
+      }
+      #panel-today .today-hero.hero-flatlay .today-shade { display: none !important; }
+
       #panel-today .today-hero.hero-solo img#today-img {
         display: block !important; position: relative !important; inset: auto !important; flex: 1 1 auto !important;
         width: 100% !important; height: auto !important; min-height: 0 !important; max-height: none !important;
@@ -6337,8 +6361,810 @@
       .pv-edit { flex: 1 0 100%; height: 32px; border: 0; background: none; color: var(--dim); font: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; cursor: pointer; }
       .pv-edit:hover { color: var(--text); }
       .swap-sec.pv-flash { outline: 2px solid var(--honey-nav, #a4804f); outline-offset: 4px; border-radius: 10px; }
+
+
+      /* ================= Build .83.2 — HAN-15 live fixes ================= */
+      /* Item detail: tidy action rows, drop the redundant Close (× already closes). */
+      #item-detail .item-actions {
+        display: grid !important;
+        gap: 10px !important;
+        margin-top: 14px !important;
+      }
+      #item-detail .item-actions-primary,
+      #item-detail .item-actions-secondary {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 8px !important;
+        margin: 0 !important;
+      }
+      #item-detail .item-actions-primary > button {
+        flex: 1 1 calc(50% - 8px);
+        min-width: 0 !important;
+        justify-content: center !important;
+      }
+      #item-detail .item-actions-secondary {
+        display: flex !important;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 8px !important;
+      }
+      #item-detail .item-actions-secondary > button {
+        flex: 1 1 auto;
+        min-width: 0 !important;
+        width: auto !important;
+        max-width: 100%;
+        justify-content: center !important;
+        letter-spacing: .04em !important;
+        padding: 0 10px !important;
+        font-size: 11px !important;
+      }
+      #item-detail .item-actions [data-item-act="close"] { display: none !important; }
+      #item-detail .wear-stats { margin: 8px 0 0; }
+      /* Style-this results on Looks (also hide the clean Looks chrome) */
+      #style-item-host { margin: 8px 0 18px; }
+      #panel-looks:has(#style-item-host:not([hidden])) #pv-top,
+      #panel-looks:has(#style-item-host:not([hidden])) #pv-fab,
+      #panel-looks:has(#style-item-host:not([hidden])) #lf-row,
+      #panel-looks:has(#style-item-host:not([hidden])) .outfits-row { display: none !important; }
+      #style-item-host .style-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+      #style-item-host .style-item-head .oc-label { flex: 1 1 auto; min-width: 0; font-family: var(--font-display); font-size: 22px; font-weight: 600; }
+      #style-item-host .style-item-empty { margin: 8px 0 0; font-size: 14px; line-height: 1.45; color: var(--dim); }
+      /* Closet: Watches live under Accessories; no top Closet|Watches pills */
+      #subnav-closet { display: none !important; }
+      #panel-wardrobe #panel-watches { margin-top: 8px; }
+      #panel-wardrobe #panel-watches[hidden] { display: none !important; }
+      #panel-wardrobe #item-grid[hidden] { display: none !important; }
+      /* Watches cards must shrink in the 2-col grid so they never
+         widen the layout viewport (which would drop the fixed nav). */
+      #panel-wardrobe #panel-watches,
+      #panel-wardrobe #watch-ward-grid,
+      #panel-wardrobe #watch-list-view,
+      #panel-wardrobe #watch-grid,
+      #panel-wardrobe #watch-subtabs {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      #panel-wardrobe #watch-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      #panel-wardrobe #panel-watches .item-card,
+      #panel-wardrobe #panel-watches .item-card .photo,
+      #panel-wardrobe #panel-watches img {
+        max-width: 100%;
+        min-width: 0;
+      }
+      #panel-wardrobe .closet-top3 {
+        max-width: 100%;
+        min-width: 0;
+        flex-wrap: wrap;
+      }
+      #panel-wardrobe .closet-top3 .cdd-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+      }
+      /* Profile 4-tab bar: compact segmented control that fits 375–1440 inside 12px margins */
+      .subnav .wrap { padding-left: 12px; padding-right: 12px; box-sizing: border-box; }
+      #subnav-me:not([hidden]) {
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden !important;
+        box-sizing: border-box;
+      }
+      #subnav-me .subnav-scroll {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: 100%;
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 2px;
+        overflow: hidden !important;
+        background: color-mix(in srgb, var(--text) 6%, var(--surface, #F6F2EA));
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 2px;
+        scroll-padding-inline: 0;
+      }
+      #subnav-me .subnav-scroll::after { display: none !important; content: none !important; flex: none !important; width: 0 !important; }
+      #subnav-me .subnav-scroll > .subtab {
+        flex: none !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        padding: 0 4px !important;
+        margin: 0 !important;
+        font-size: 12px !important;
+        letter-spacing: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        border-radius: 999px !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+      }
+      #subnav-me .subnav-scroll > .subtab[aria-selected="true"] {
+        background: var(--honey-nav, #C29E74) !important;
+        color: #1A1612 !important;
+        font-weight: 650 !important;
+      }
+      html[data-theme="dark"] #subnav-me .subnav-scroll > .subtab[aria-selected="true"] {
+        background: var(--honey-nav, #C29E74) !important;
+        color: #1A1612 !important;
+      }
+      #subnav-me #profile-close {
+        flex: 0 0 32px !important;
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 50% !important;
+      }
+      /* Profile Info — compact 2-col sizes, lighter inputs */
+      #panel-pinfo #profile-form {
+        display: grid;
+        gap: 22px;
+        padding: 16px 16px 18px !important;
+      }
+      #panel-pinfo .profile-sec { display: grid; gap: 8px; }
+      #panel-pinfo .profile-sec-h,
+      #panel-pinfo .profile-group-head {
+        grid-column: 1 / -1;
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--brass, #C29E74);
+      }
+      #panel-pinfo .profile-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px 12px !important;
+      }
+      #panel-pinfo .profile-sec-notes { gap: 6px; }
+      #panel-pinfo #profile-form input[type="text"],
+      #panel-pinfo #profile-form input[type="search"],
+      #panel-pinfo #profile-form select,
+      #panel-pinfo #profile-form textarea {
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: none !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border, #E4D9C8) !important;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        padding: 0 10px !important;
+        font-size: 15px !important;
+        box-shadow: none !important;
+      }
+      #panel-pinfo #profile-form textarea {
+        height: auto !important;
+        min-height: 72px !important;
+        padding: 8px 10px !important;
+      }
+      #panel-pinfo #profile-form input[type="file"] {
+        height: auto !important;
+        min-height: 36px !important;
+        max-height: none !important;
+        border: 1px dashed var(--border, #E4D9C8) !important;
+        border-radius: 10px !important;
+        padding: 6px 8px !important;
+        background: transparent !important;
+      }
+      html[data-theme="dark"] #panel-pinfo #profile-form input[type="text"],
+      html[data-theme="dark"] #panel-pinfo #profile-form input[type="search"],
+      html[data-theme="dark"] #panel-pinfo #profile-form select,
+      html[data-theme="dark"] #panel-pinfo #profile-form textarea {
+        border-color: var(--border, #3A3228) !important;
+        background: var(--surface) !important;
+      }
+      /* Profile Location — tighter, calmer card */
+      #panel-plocation .loc-card {
+        display: grid;
+        gap: 16px;
+        padding: 16px 16px 18px !important;
+      }
+      #panel-plocation .loc-card h3 {
+        margin: 0 0 6px;
+        font-family: var(--font-display);
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1.15;
+      }
+      #panel-plocation .loc-now {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px 10px;
+        margin: 0 0 4px;
+      }
+      #panel-plocation .loc-name { font-size: 17px; font-weight: 600; }
+      #panel-plocation .loc-kind {
+        font-size: 12px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      #panel-plocation .loc-weather,
+      #panel-plocation .loc-rec { margin: 0; font-size: 14px; line-height: 1.45; }
+      #panel-plocation .loc-rec { color: var(--dim); }
+      #panel-plocation .loc-search-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: center;
+      }
+      #panel-plocation #loc-search {
+        min-width: 0 !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border, #E4D9C8) !important;
+        padding: 0 12px !important;
+        font-size: 15px !important;
+      }
+      #panel-plocation .loc-quick { gap: 8px; margin-top: 10px; }
+      #panel-plocation .loc-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+      #panel-plocation #loc-set-home[hidden],
+      #panel-plocation #loc-back-home[hidden] { display: none !important; }
+      #panel-pinfo, #panel-plocation, #panel-pinfo #profile-form, #panel-pinfo .profile-sec,
+      #panel-pinfo .profile-grid { max-width: 100%; min-width: 0; box-sizing: border-box; }
+      #panel-pinfo .profile-grid > * { min-width: 0; max-width: 100%; }
+      #panel-pinfo #profile-form input[type="file"],
+      #panel-pinfo #profile-form input[type="text"],
+      #panel-pinfo #profile-form select { width: 100%; min-width: 0 !important; max-width: 100%; }
+      #panel-pinfo .profile-sec:first-child .profile-grid { grid-template-columns: 1fr !important; }
+
+    </style>
+    <style id="pass841">
+      /* ================= Build .84.1 — Pass 1 layout ================= */
+      #today-hero { touch-action: pan-y; }
+      @media (max-width: 899px) {
+        html body::before {
+          content: "";
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          height: env(safe-area-inset-top, 0px);
+          background: var(--bg, #F6F2EA);
+          z-index: 90;
+          pointer-events: none;
+        }
+        html body .masthead {
+          background: var(--bg, #F6F2EA) !important;
+          z-index: 80 !important;
+          min-height: calc(44px + env(safe-area-inset-top, 0px));
+          padding-top: env(safe-area-inset-top, 0px) !important;
+          transform: none !important;
+        }
+        html body .masthead-slot {
+          display: block !important;
+          height: calc(44px + env(safe-area-inset-top, 0px)) !important;
+        }
+        body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) {
+          --hdr-h: calc(44px + env(safe-area-inset-top, 0px)) !important;
+        }
+        body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead {
+          background: var(--bg, #F6F2EA) !important;
+          pointer-events: none;
+          box-shadow: none !important;
+        }
+        body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead :is(button, a, h1, .brand) { pointer-events: auto; }
+        html body { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 24px) !important; }
+        html body #bottombar.bottombar {
+          position: fixed !important;
+          top: auto !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          width: 100% !important;
+          margin: 0 !important;
+          transform: none !important;
+          z-index: 70 !important;
+        }
+        html body #bottombar .nav-pill {
+          margin: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+          padding: 4px 8px !important;
+          box-sizing: border-box !important;
+          overflow: hidden !important;
+        }
+        html body #bottombar .nav-pill .navbtn {
+          font-size: 9px !important;
+          letter-spacing: 0 !important;
+          padding: 0 2px !important;
+        }
+        html body #bottombar .nav-pill .navbtn span {
+          font-size: 9px !important;
+          letter-spacing: 0 !important;
+        }
+      }
+      #panel-wardrobe .closet-top3.closet-row789 {
+        position: relative !important;
+        top: auto !important;
+        flex-wrap: wrap !important;
+        z-index: 1;
+      }
+      #panel-wardrobe .closet-row789 .closet-search789 {
+        flex: 1 1 160px !important;
+        min-width: 120px !important;
+      }
+      #panel-find .edit-shop-tabs.edit-tabs,
+      #panel-find .edit-tabs.edit-shop-tabs {
+        gap: 6px !important;
+      }
+      #panel-plocation #loc-search {
+        width: 100% !important;
+        text-overflow: clip !important;
+      }
+      #panel-plocation .loc-search-row { grid-template-columns: minmax(0, 1fr) auto !important; }
+      #watch-grid .item-card, #panel-wardrobe #watch-grid .item-card {
+        overflow: visible !important;
+        content-visibility: visible !important;
+        padding-bottom: 14px !important;
+      }
+      #watch-grid { padding-bottom: 8px; }
+      #watch-grid h4, #watch-grid .cname, #watch-grid .notes-line, #watch-grid p {
+        overflow: visible;
+        display: block;
+        -webkit-line-clamp: unset;
+      }
+      @media (min-width: 900px) {
+        #panel-wardrobe .item-grid .item-card { padding: 12px 14px 14px; overflow: hidden; }
+        #panel-wardrobe .item-grid .item-card .notes-line {
+          display: -webkit-box !important;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          margin: 0;
+        }
+      }
+      #pv-top .pv-bar { display: flex; align-items: center; gap: 8px; }
+      #pv-top .pv-bar .pv-fab {
+        position: static !important;
+        right: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        width: 36px; height: 36px; flex: none;
+        margin-left: 2px;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+      #panel-looks .cf-actions, .en-card .cf-actions {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        justify-content: flex-start !important;
+      }
+      #panel-looks .cf-actions [data-cf-like], #panel-looks .cf-actions [data-cf-dislike],
+      #panel-looks .cf-actions [data-en-like], #panel-looks .cf-actions [data-en-dislike],
+      .en-card .cf-actions [data-cf-like], .en-card .cf-actions [data-cf-dislike],
+      .en-card .cf-actions [data-en-like], .en-card .cf-actions [data-en-dislike] {
+        flex: 0 0 44px !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        height: 34px !important;
+        padding: 0 !important;
+      }
+      #panel-looks .en-rme, .en-card .en-rme, #panel-looks .cf-actions .en-rme {
+        flex: 1 0 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        white-space: nowrap !important;
+      }
+      .mine-empty-841 {
+        margin: 28px auto;
+        max-width: 360px;
+        text-align: center;
+        color: var(--dim);
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      .mine-empty-841 p { margin: 0 0 14px; }
+      .icon-browse { margin: 8px 0 18px; }
+      .icon-browse > summary {
+        cursor: pointer;
+        list-style: none;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: .04em;
+        color: var(--dim);
+        padding: 10px 2px;
+      }
+      .icon-browse > summary::-webkit-details-marker { display: none; }
+      .style-pane { background: transparent !important; display: block; }
+      .style-pane .style-cut, .style-pane .style-flatlay { width: 100%; display: block; background: transparent; }
+      .style-pane .flatlay { background: transparent !important; }
+      .style-quiet { display: block; margin-top: 4px; font-size: 12px; color: var(--dim); }
+      #panel-looks .cf-card, #panel-looks .en-card, #cf-grid .cf-card { content-visibility: visible; }
     </style>
 
+    <style id="pass850">
+      /* ================= Build .85.0 — Pass 2 ================= */
+      #panel-today .today-caption h2#today-name,
+      #panel-today .today-kicker,
+      #panel-today .today-loc,
+      #panel-today .today-loc strong,
+      #panel-today .today-suggest {
+        color: #1A1612 !important;
+        text-shadow: none !important;
+      }
+      #panel-today .today-loc span { color: #5c5146 !important; }
+      html[data-theme="dark"] #panel-today .today-caption h2#today-name,
+      html[data-theme="dark"] #panel-today .today-kicker,
+      html[data-theme="dark"] #panel-today .today-loc,
+      html[data-theme="dark"] #panel-today .today-loc strong,
+      html[data-theme="dark"] #panel-today .today-loc span,
+      html[data-theme="dark"] #panel-today .today-suggest {
+        color: #F4EFE6 !important;
+      }
+      html[data-theme="dark"] #panel-today .today-loc span { color: #C9BBA8 !important; }
+      body[data-page="today"] {
+        padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 28px) !important;
+      }
+      #panel-today .today-caption {
+        padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 28px) !important;
+        box-sizing: border-box;
+      }
+      #panel-today .today-hero.hero-flatlay .today-collage,
+      #panel-today .today-hero.hero-flatlay .today-collage.flatlay-host {
+        display: block !important;
+        background: transparent !important;
+      }
+      #panel-today .today-hero.hero-flatlay .flatlay {
+        background: transparent !important;
+        height: auto !important;
+        min-height: 240px;
+        max-height: min(62vh, 640px);
+      }
+      #panel-today .today-hero.hero-flatlay .fl-cell {
+        background: transparent !important;
+        min-height: 108px;
+      }
+      html body::before {
+        content: "" !important;
+        position: fixed !important;
+        top: 0; left: 0; right: 0;
+        height: env(safe-area-inset-top, 0px) !important;
+        max-height: env(safe-area-inset-top, 0px) !important;
+        background: var(--bg, #F6F2EA) !important;
+        z-index: 80 !important;
+        pointer-events: none !important;
+      }
+      body:not([data-page="today"]) .masthead {
+        background: transparent !important;
+        min-height: 0 !important;
+        height: env(safe-area-inset-top, 0px) !important;
+        padding-top: 0 !important;
+        box-shadow: none !important;
+        pointer-events: none !important;
+      }
+      body:not([data-page="today"]) .masthead .wrap { pointer-events: none !important; }
+      body:not([data-page="today"]) .masthead :is(button, a) { pointer-events: auto !important; }
+      body:not([data-page="today"]) .masthead-slot {
+        height: env(safe-area-inset-top, 0px) !important;
+        min-height: 0 !important;
+      }
+      #panel-wardrobe, #panel-calendar, #panel-looks, #panel-find, #panel-watches {
+        padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+      }
+      body:not([data-page="today"]) .masthead #tab-profile {
+        position: fixed !important;
+        top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+        right: 12px !important;
+        z-index: 86 !important;
+        transform: none !important;
+      }
+      #panel-wardrobe .closet-top3.closet-row789 {
+        padding-right: 52px !important;
+        box-sizing: border-box !important;
+      }
+      @media (min-width: 900px) {
+        #panel-wardrobe .item-grid .item-card { padding: 0 0 14px !important; }
+        #panel-wardrobe .item-grid .item-card h4,
+        #panel-wardrobe .item-grid .item-card .cname,
+        #panel-wardrobe .item-grid .item-card .meta,
+        #panel-wardrobe .item-grid .item-card .notes-line,
+        #panel-wardrobe .item-grid .item-card p {
+          padding-left: 16px !important;
+          padding-right: 16px !important;
+          box-sizing: border-box;
+        }
+        #panel-wardrobe .item-grid .item-card h4 { padding-top: 14px !important; }
+        #panel-wardrobe .item-grid .item-card .notes-line {
+          display: -webkit-box !important;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          padding-bottom: 0 !important;
+        }
+      }
+      #panel-find .edit-shop-tabs.edit-tabs {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        scrollbar-width: none !important;
+        gap: 8px !important;
+        padding: 0 12px !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      #panel-find .edit-shop-tabs.edit-tabs::-webkit-scrollbar { display: none; }
+      #panel-find .edit-tabs.edit-shop-tabs.outfits-toggle {
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        justify-content: flex-start !important;
+        scrollbar-width: none !important;
+        padding: 0 4px !important;
+        gap: 6px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      #panel-find .edit-tabs.edit-shop-tabs.outfits-toggle .chip {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: max-content !important;
+        max-width: none !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        white-space: nowrap !important;
+        padding: 0 8px !important;
+      }
+      #panel-find #edit-tab-ask { min-width: 48px !important; }
+      #shop-fold850 {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 8px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding: 0 16px 8px;
+        margin: 0;
+      }
+      #shop-fold850::-webkit-scrollbar { display: none; }
+      #shop-fold850 .chip { white-space: nowrap; flex-shrink: 0; }
+      #shop-fold850 .chip[aria-pressed="true"] { background: #C29E74; color: #1A1612; border-color: #C29E74; }
+      #edit-fold-host { padding: 0 16px 12px; }
+      #edit-fold-host[hidden] { display: none !important; }
+      .saved-missing850 { margin: 8px 16px 18px; }
+      .saved-missing850 > summary { cursor: pointer; color: var(--dim); font-size: 13px; }
+      button.style-card850 {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100%;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        text-align: left;
+        color: inherit;
+      }
+      button.style-card850 .style-pane {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 3 / 4;
+        background: transparent !important;
+      }
+      button.style-card850 .style-pane img,
+      button.style-card850 .style-pane .flatlay { width: 100%; height: 100%; object-fit: contain; background: transparent !important; }
+      button.style-card850 .oc-body { display: block; padding: 8px 2px 0; }
+      button.style-card850 .oc-title { display: block; color: #1A1612; font-family: var(--font-display, Georgia, serif); }
+      html[data-theme="dark"] button.style-card850 .oc-title { color: #F4EFE6; }
+      button.style-card850 .style-swatches, button.style-card850 .swatch-strip {
+        position: static !important;
+        display: flex;
+        margin-top: 8px;
+        inset: auto !important;
+      }
+      .style-quiet { display: none !important; }
+      #pvf-icons .pv-w {
+        position: absolute !important;
+        width: 1px !important; height: 1px !important;
+        overflow: hidden !important;
+        clip: rect(0 0 0 0) !important;
+      }
+      .edit-section-tabs .chip[aria-pressed="true"] {
+        background: #C29E74 !important;
+        color: #1A1612 !important;
+        border-color: #C29E74 !important;
+      }
+      .curate-subs .chip {
+        background: transparent !important;
+        color: #7a6e62 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border-bottom: 2px solid transparent !important;
+      }
+      .curate-subs .chip[aria-pressed="true"] {
+        color: #1A1612 !important;
+        background: transparent !important;
+        border-bottom-color: #C29E74 !important;
+      }
+      html[data-theme="dark"] .curate-subs .chip[aria-pressed="true"] { color: #F4EFE6 !important; }
+      #edit-v-curate { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 28px); }
+      #taste-mix850 {
+        margin: 8px 16px 14px;
+        padding: 14px 16px 12px;
+        border-radius: 16px;
+        background: #fffdf8;
+        border: 1px solid rgba(26, 22, 18, .08);
+        color: #1A1612;
+      }
+      html[data-theme="dark"] #taste-mix850 { background: #241f1b; color: #F4EFE6; border-color: rgba(244, 239, 230, .1); }
+      #taste-mix850 .tm-kicker { margin: 0 0 8px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #8a7764; }
+      #taste-mix850 .tm-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; }
+      #taste-mix850 .tm-row b { font-weight: 600; min-width: 7.2em; font-family: var(--font-display, Georgia, serif); }
+      #taste-mix850 .tm-avs { display: flex; }
+      #taste-mix850 .tm-avs span, #taste-mix850 .tm-avs img {
+        width: 22px; height: 22px; border-radius: 50%; margin-left: -4px;
+        object-fit: cover; background: #C29E74; color: #1A1612;
+        display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;
+        border: 2px solid #fffdf8;
+      }
+      html[data-theme="dark"] #taste-mix850 .tm-avs span, html[data-theme="dark"] #taste-mix850 .tm-avs img { border-color: #241f1b; }
+      #taste-customize850 {
+        margin-top: 8px; background: none; border: none; padding: 0;
+        color: #8a6744; font: inherit; font-size: 13px; cursor: pointer;
+      }
+      #taste-mix850 .tm-note { margin: 4px 0 0; font-size: 12px; color: #7a6e62; }
+      #icon-gallery850 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        padding: 0 16px 8px;
+      }
+      .ig-card {
+        display: flex; flex-direction: column; text-align: left;
+        padding: 0; border: none; background: transparent; color: inherit; cursor: pointer;
+      }
+      .ig-frame {
+        position: relative; aspect-ratio: 3 / 4; border-radius: 14px; overflow: hidden;
+        background: #efe8dc; display: flex; align-items: flex-end; justify-content: center;
+      }
+      html[data-theme="dark"] .ig-frame { background: #2c261f; }
+      .ig-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+      .ig-fallback {
+        font-family: var(--font-display, Georgia, serif);
+        font-size: 42px; color: #1A1612; letter-spacing: .04em;
+        width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(160deg, #f6f2ea, #e4d3bc);
+      }
+      .ig-badge {
+        position: absolute; top: 8px; left: 8px;
+        background: #C29E74; color: #1A1612;
+        border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 650;
+      }
+      .ig-name { margin: 8px 2px 0; font-family: var(--font-display, Georgia, serif); font-size: 16px; font-weight: 560; color: #1A1612; }
+      html[data-theme="dark"] .ig-name { color: #F4EFE6; }
+      .ig-cue { margin: 2px 2px 0; font-size: 12px; color: #7a6e62; }
+      #icon-add850 {
+        display: block; margin: 8px auto 18px; background: transparent;
+        border: 1px solid rgba(26, 22, 18, .2); border-radius: 999px;
+        padding: 8px 16px; color: inherit; font: inherit; cursor: pointer;
+      }
+      #icon-detail.id-sheet850 {
+        position: fixed; inset: auto 0 0 0; z-index: 120;
+        max-height: min(88vh, 760px); overflow: auto;
+        background: #F6F2EA; color: #1A1612;
+        border-radius: 18px 18px 0 0;
+        padding: 12px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+        box-shadow: 0 -12px 40px rgba(26, 22, 18, .18);
+      }
+      html[data-theme="dark"] #icon-detail.id-sheet850 { background: #1c1814; color: #F4EFE6; }
+      .id-note { margin: 0 0 12px; color: #5c5146; font-size: 14px; line-height: 1.45; }
+      .id-carousel { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; scrollbar-width: none; }
+      .id-carousel::-webkit-scrollbar { display: none; }
+      .id-look { flex: 0 0 46%; scroll-snap-align: start; background: transparent; border: none; padding: 0; text-align: left; color: inherit; }
+      .id-look .id-fig { aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; background: #efe8dc; }
+      .id-look img { width: 100%; height: 100%; object-fit: cover; }
+      .id-formula { display: block; margin-top: 6px; font-size: 12.5px; line-height: 1.35; }
+      .id-pill { display: inline-block; margin-top: 4px; padding: 1px 8px; border-radius: 999px; background: rgba(194, 158, 116, .25); color: #6d5333; font-size: 11px; }
+      .id-cta { margin: 8px 0 14px; background: none; border: none; padding: 0; color: #8a6744; font: inherit; cursor: pointer; }
+      .id-dna { margin: 0 0 14px; padding-left: 18px; }
+      .id-dna li { margin: 4px 0; font-size: 14px; }
+      .honey-range {
+        -webkit-appearance: none; appearance: none;
+        width: 100%; height: 22px; background: transparent; margin: 0;
+      }
+      .honey-range::-webkit-slider-runnable-track { height: 2px; background: transparent; }
+      .honey-range::-webkit-slider-thumb {
+        -webkit-appearance: none; appearance: none;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: #C29E74; border: 2px solid #F6F2EA; margin-top: -7px;
+      }
+      .honey-range::-moz-range-thumb {
+        width: 16px; height: 16px; border-radius: 50%;
+        background: #C29E74; border: 2px solid #F6F2EA;
+      }
+      .id-slider, .cw-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; margin: 8px 0; }
+      .id-slider input, #cw-sliders input[type="range"] { grid-column: 1 / -1; }
+      #cw-same { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .cw-switch {
+        width: 44px; height: 26px; border-radius: 999px; border: 1px solid rgba(26, 22, 18, .25);
+        background: transparent; padding: 2px; cursor: pointer; flex: none;
+      }
+      .cw-switch i { display: block; width: 20px; height: 20px; border-radius: 50%; background: #cfc6b8; transition: transform .18s ease, background .18s ease; }
+      .cw-switch[aria-pressed="true"] { background: rgba(194, 158, 116, .35); border-color: #C29E74; }
+      .cw-switch[aria-pressed="true"] i { transform: translateX(18px); background: #C29E74; }
+      .cw-all { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      #curate-weights.cw-sheet {
+        position: fixed; inset: auto 0 0 0; z-index: 120;
+        max-height: min(86vh, 720px); overflow: auto;
+        background: #F6F2EA; color: #1A1612;
+        border-radius: 18px 18px 0 0;
+        padding: 14px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+        box-shadow: 0 -12px 40px rgba(26, 22, 18, .18);
+      }
+      html[data-theme="dark"] #curate-weights.cw-sheet { background: #1c1814; color: #F4EFE6; }
+      #cw-sliders input[type="range"] {
+        -webkit-appearance: none; appearance: none; height: 22px; background: transparent; width: 100%;
+      }
+      #cw-sliders input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+        background: #C29E74; border: 2px solid #F6F2EA; margin-top: -7px;
+      }
+      #cw-sliders input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: transparent; }
+      .cw-foot { display: flex; justify-content: space-between; gap: 10px; margin-top: 12px; }
+      .cw-foot .btn-ink, #cw-done850 { background: #C29E74; color: #1A1612; border: none; border-radius: 999px; padding: 8px 16px; }
+      #icon-add-sheet850, #id-scrim850, #cw-scrim850 {
+        position: fixed; inset: 0; z-index: 110; background: rgba(26, 22, 18, .35);
+      }
+      #icon-add-sheet850 .card { margin: auto 12px 12px; max-height: 80vh; overflow: auto; }
+      /* Caption padding clears the pill. If a wrap still reaches it, the
+         empty caption must not steal the tap — only its controls do. */
+      #panel-today .today-caption { pointer-events: none; }
+      #panel-today .today-caption button,
+      #panel-today .today-caption a,
+      #panel-today .today-caption input,
+      #panel-today .today-caption label,
+      #panel-today .today-caption .fchip { pointer-events: auto; }
+      @media (max-width: 899px) {
+        html body #bottombar.bottombar,
+        html.nav-away #bottombar.bottombar {
+          position: fixed !important; top: auto !important; bottom: 0 !important;
+          left: 0 !important; right: 0 !important;
+          transform: none !important; opacity: 1 !important;
+          pointer-events: auto !important;
+          transition: none !important;
+          will-change: auto !important;
+        }
+        #bottombar .nav-pill .navbtn span {
+          display: inline-block; max-width: 72px; overflow: hidden; white-space: nowrap;
+          transition: max-width .22s ease, opacity .18s ease;
+        }
+        html.nav-compact #bottombar .nav-pill {
+          width: max-content; max-width: calc(100% - 36px);
+          margin-left: auto !important; margin-right: auto !important;
+          padding: 4px !important;
+          transition: padding .22s ease, margin .22s ease;
+        }
+        html.nav-compact #bottombar .nav-pill .navbtn { flex: 0 0 46px; width: 46px; padding: 6px 0 !important; }
+        html.nav-compact #bottombar .nav-pill .navbtn span { max-width: 0; opacity: 0; }
+        html.nav-compact #bottombar .nav-pill .navbtn[aria-current="page"] {
+          background: #C29E74; color: #1A1612; border-radius: 999px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #bottombar .nav-pill, #bottombar .nav-pill .navbtn span, .cw-switch i { transition: none !important; }
+      }
+    </style>
 
   </head>
   <body data-page="today">
@@ -6360,7 +7186,6 @@
         <div class="wrap">
           <div class="subnav-group" id="subnav-closet" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
-            <button class="subtab" role="tab" id="tab-watches" aria-selected="false" aria-controls="panel-watches" data-tab="watches">Watches</button>
           </div>
           <div class="subnav-group" id="subnav-ideas" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Ideas</button>
@@ -6737,6 +7562,70 @@
             </div>
             <div class="closet-stale-row"><button type="button" class="chip" id="ward-stale-chip" aria-pressed="false">Not worn in 90 days</button><span class="meta" id="ward-stale-note"></span></div>
             <div class="item-grid" id="item-grid"></div>
+        <section id="panel-watches" hidden aria-label="Watches">
+        <div class="filter-row" id="watch-subtabs" role="group" aria-label="Watch lists">
+          <button type="button" class="chip" data-watch-list="collection" aria-pressed="true">Collection <span class="count" id="watch-count-collection"></span></button>
+          <button type="button" class="chip" data-watch-list="sold" aria-pressed="false">Sold <span class="count" id="watch-count-sold"></span></button>
+          <button type="button" class="chip" data-watch-list="wants" aria-pressed="false">Wants <span class="count" id="watch-count-wants"></span></button>
+          <button type="button" class="chip" data-watch-list="add" aria-pressed="false" id="watch-add-tab">Add</button>
+        </div>
+        <div class="ward-grid" id="watch-ward-grid">
+          <div id="watch-list-view">
+            <div class="item-grid" id="watch-grid"></div>
+          </div>
+          <form class="card add-form" id="watch-form" hidden>
+            <h3 class="type-title" id="watch-form-title">Add</h3>
+            <div>
+              <label class="field" for="watch-name">Name</label>
+              <input type="text" id="watch-name" placeholder="" required />
+            </div>
+            <div class="form-row">
+              <div>
+                <label class="field" for="watch-metal">Case metal</label>
+                <select id="watch-metal">
+                  <option>Yellow gold</option><option>Rose gold</option><option>Pink gold</option>
+                  <option>Steel</option><option>Platinum</option><option>White gold</option>
+                  <option>Titanium</option><option>Two-tone</option><option>Bronze</option>
+                </select>
+              </div>
+              <div>
+                <label class="field" for="watch-style">Character</label>
+                <select id="watch-style">
+                  <option>Dress</option><option>Everyday</option><option>Sport</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label class="field" for="watch-strap">Strap / bracelet</label>
+                <select id="watch-strap">
+                  <option>Metal bracelet</option><option>Brown leather strap</option>
+                  <option>Black leather strap</option><option>Tan suede strap</option>
+                  <option>Rubber strap</option><option>NATO / fabric strap</option>
+                </select>
+              </div>
+              <div>
+                <label class="field" for="watch-dial-name">Dial</label>
+                <div class="row-inline">
+                  <input type="text" id="watch-dial-name" placeholder="" class="grow" />
+                  <input type="color" id="watch-dial" value="#8a8d8f" aria-label="Pick the dial colour" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="field" for="watch-notes">Notes</label>
+              <textarea id="watch-notes" placeholder=""></textarea>
+            </div>
+            <label class="photo-drop" for="watch-photo">
+              <span class="pd-title" id="watch-photo-label">Photo</span>
+              <img id="watch-photo-preview" alt="" hidden />
+              <input type="file" id="watch-photo" accept="image/*" />
+            </label>
+            <button type="submit" class="btn-ink" id="watch-submit">Add</button>
+            <button type="button" class="btn-ghost" id="watch-cancel-edit" hidden>Cancel edit</button>
+          </form>
+        </div>
+        </section>
           </div>
           </div>
       </section>
@@ -6900,6 +7789,7 @@
 
       <!-- ================= LOOKS ================= -->
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
+        <div id="style-item-host" class="style-item-host" hidden></div>
         <!-- .80.19 (audit P1.9): one row — Mine/Inspo, Build, Ideas, Shuffle -->
         <div class="outfits-build-row outfits-row">
           <div class="outfits-toggle theme-toggle" role="group" aria-label="Looks">
@@ -7334,12 +8224,14 @@
           </div>
         </form>
 
-        <div id="icon-list-view">
-          <div class="icons-browser">
-            <div class="icon-list-main" id="icon-list"></div>
-            <!-- No A–Z rail: nine icons don't need an index. -->
+        <details id="icon-browse" class="icon-browse">
+          <summary>Browse all icons</summary>
+          <div id="icon-list-view">
+            <div class="icons-browser">
+              <div class="icon-list-main" id="icon-list"></div>
+            </div>
           </div>
-        </div>
+        </details>
 
         <div id="icon-detail" hidden></div>
 
@@ -7569,32 +8461,50 @@
           <div class="profile-head-main"><h3 class="profile-name" id="pf-head-name"></h3><p class="meta" id="pf-head-city"></p></div>
         </div>
         <form class="card add-form" id="profile-form">
-          <div class="profile-grid">
-            <div><label class="field" for="pf-name">Name</label><input type="text" id="pf-name" autocomplete="off" /></div>
-            <div><label class="field" for="pf-photo">Profile photo</label><input type="file" id="pf-photo" accept="image/*" /></div>
-            <div><label class="field" for="pf-shoe">Shoe — US men's</label><input type="text" id="pf-shoe" autocomplete="off" /></div>
-            <div><label class="field" for="pf-tee">Tee size</label><input type="text" id="pf-tee" autocomplete="off" /></div>
-            <div><label class="field" for="pf-polo">Polo size</label><input type="text" id="pf-polo" autocomplete="off" /></div>
-            <div><label class="field" for="pf-shirt">Shirt — neck / size</label><input type="text" id="pf-shirt" placeholder="e.g. 15.5 / Small" autocomplete="off" /></div>
-            <div><label class="field" for="pf-knit">Sweater / knit size</label><input type="text" id="pf-knit" autocomplete="off" /></div>
-            <div><label class="field" for="pf-blazer">Blazer / suit size</label><input type="text" id="pf-blazer" placeholder="e.g. 38R / 48" autocomplete="off" /></div>
-            <div><label class="field" for="pf-coat">Coat / jacket size</label><input type="text" id="pf-coat" autocomplete="off" /></div>
-            <div><label class="field" for="pf-waist">Trouser waist</label><input type="text" id="pf-waist" placeholder="e.g. 32" autocomplete="off" /></div>
-            <div><label class="field" for="pf-inseam">Inseam</label><input type="text" id="pf-inseam" placeholder="e.g. 30" autocomplete="off" /></div>
-            <div><label class="field" for="pf-jeans">Jeans size</label><input type="text" id="pf-jeans" placeholder="e.g. 32 × 30" autocomplete="off" /></div>
-            <div><label class="field" for="pf-shorts">Shorts size</label><input type="text" id="pf-shorts" autocomplete="off" /></div>
-            <div><label class="field" for="pf-glove">Glove size</label><input type="text" id="pf-glove" placeholder="e.g. M / 8.5" autocomplete="off" /></div>
-            <div><label class="field" for="pf-hat">Hat size</label><input type="text" id="pf-hat" autocomplete="off" /></div>
-            <div><label class="field" for="pf-belt">Belt size</label><input type="text" id="pf-belt" autocomplete="off" /></div>
-            <div><label class="field" for="pf-sleeve">Sleeve length</label><input type="text" id="pf-sleeve" autocomplete="off" /></div>
-            <div><label class="field" for="pf-chest">Chest</label><input type="text" id="pf-chest" autocomplete="off" /></div>
-            <div><label class="field" for="pf-height">Height</label><input type="text" id="pf-height" autocomplete="off" /></div>
-            <div>
-              <label class="field" for="pf-fit">Preferred fit</label>
-              <select id="pf-fit"><option>Tailored / slim</option><option>Classic</option><option>Relaxed</option></select>
+          <div class="profile-sec">
+            <h3 class="profile-sec-h">You</h3>
+            <div class="profile-grid">
+              <div><label class="field" for="pf-name">Name</label><input type="text" id="pf-name" autocomplete="off" /></div>
+              <div><label class="field" for="pf-photo">Profile photo</label><input type="file" id="pf-photo" accept="image/*" /></div>
             </div>
           </div>
-          <div>
+          <div class="profile-sec">
+            <h3 class="profile-sec-h">Tops</h3>
+            <div class="profile-grid">
+              <div><label class="field" for="pf-tee">Tee size</label><input type="text" id="pf-tee" autocomplete="off" /></div>
+              <div><label class="field" for="pf-polo">Polo size</label><input type="text" id="pf-polo" autocomplete="off" /></div>
+              <div><label class="field" for="pf-shirt">Shirt — neck / size</label><input type="text" id="pf-shirt" placeholder="e.g. 15.5 / S" autocomplete="off" /></div>
+              <div><label class="field" for="pf-knit">Sweater / knit size</label><input type="text" id="pf-knit" autocomplete="off" /></div>
+              <div><label class="field" for="pf-blazer">Blazer / suit size</label><input type="text" id="pf-blazer" placeholder="e.g. 38R / 48" autocomplete="off" /></div>
+              <div><label class="field" for="pf-coat">Coat / jacket size</label><input type="text" id="pf-coat" autocomplete="off" /></div>
+            </div>
+          </div>
+          <div class="profile-sec">
+            <h3 class="profile-sec-h">Bottoms</h3>
+            <div class="profile-grid">
+              <div><label class="field" for="pf-waist">Trouser waist</label><input type="text" id="pf-waist" placeholder="e.g. 32" autocomplete="off" /></div>
+              <div><label class="field" for="pf-inseam">Inseam</label><input type="text" id="pf-inseam" placeholder="e.g. 30" autocomplete="off" /></div>
+              <div><label class="field" for="pf-jeans">Jeans size</label><input type="text" id="pf-jeans" placeholder="e.g. 32 × 30" autocomplete="off" /></div>
+              <div><label class="field" for="pf-shorts">Shorts size</label><input type="text" id="pf-shorts" autocomplete="off" /></div>
+            </div>
+          </div>
+          <div class="profile-sec">
+            <h3 class="profile-sec-h">Shoes &amp; extras</h3>
+            <div class="profile-grid">
+              <div><label class="field" for="pf-shoe">Shoe — US men's</label><input type="text" id="pf-shoe" autocomplete="off" /></div>
+              <div><label class="field" for="pf-glove">Glove size</label><input type="text" id="pf-glove" placeholder="e.g. M / 8.5" autocomplete="off" /></div>
+              <div><label class="field" for="pf-hat">Hat size</label><input type="text" id="pf-hat" autocomplete="off" /></div>
+              <div><label class="field" for="pf-belt">Belt size</label><input type="text" id="pf-belt" autocomplete="off" /></div>
+              <div><label class="field" for="pf-sleeve">Sleeve length</label><input type="text" id="pf-sleeve" autocomplete="off" /></div>
+              <div><label class="field" for="pf-chest">Chest</label><input type="text" id="pf-chest" autocomplete="off" /></div>
+              <div><label class="field" for="pf-height">Height</label><input type="text" id="pf-height" autocomplete="off" /></div>
+              <div>
+                <label class="field" for="pf-fit">Preferred fit</label>
+                <select id="pf-fit"><option>Tailored / slim</option><option>Classic</option><option>Relaxed</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="profile-sec profile-sec-notes">
             <label class="field" for="pf-notes">Notes — alterations, brands that fit you, anything a search should know</label>
             <textarea id="pf-notes" class="textarea-md"></textarea>
           </div>
@@ -7615,7 +8525,7 @@
           <div>
             <label class="field" for="loc-search">Traveling? Change location</label>
             <div class="loc-search-row">
-              <input type="search" id="loc-search" placeholder="City — e.g. New York, London, Paris" autocomplete="off" />
+              <input type="search" id="loc-search" placeholder="City" aria-label="City or town" autocomplete="off" />
               <button type="button" class="btn-ink" id="loc-search-btn">Find</button>
             </div>
             <div id="loc-results"></div>
@@ -7668,7 +8578,7 @@
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.82.3</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.85.0</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7690,70 +8600,6 @@
       </section>
 
       <!-- ================= WATCHES ================= -->
-      <section id="panel-watches" role="tabpanel" aria-labelledby="tab-watches" hidden>
-        <div class="filter-row" id="watch-subtabs" role="group" aria-label="Watch lists">
-          <button type="button" class="chip" data-watch-list="collection" aria-pressed="true">Collection <span class="count" id="watch-count-collection"></span></button>
-          <button type="button" class="chip" data-watch-list="sold" aria-pressed="false">Sold <span class="count" id="watch-count-sold"></span></button>
-          <button type="button" class="chip" data-watch-list="wants" aria-pressed="false">Wants <span class="count" id="watch-count-wants"></span></button>
-          <button type="button" class="chip" data-watch-list="add" aria-pressed="false" id="watch-add-tab">Add</button>
-        </div>
-        <div class="ward-grid" id="watch-ward-grid">
-          <div id="watch-list-view">
-            <div class="item-grid" id="watch-grid"></div>
-          </div>
-          <form class="card add-form" id="watch-form" hidden>
-            <h3 class="type-title" id="watch-form-title">Add</h3>
-            <div>
-              <label class="field" for="watch-name">Name</label>
-              <input type="text" id="watch-name" placeholder="" required />
-            </div>
-            <div class="form-row">
-              <div>
-                <label class="field" for="watch-metal">Case metal</label>
-                <select id="watch-metal">
-                  <option>Yellow gold</option><option>Rose gold</option><option>Pink gold</option>
-                  <option>Steel</option><option>Platinum</option><option>White gold</option>
-                  <option>Titanium</option><option>Two-tone</option><option>Bronze</option>
-                </select>
-              </div>
-              <div>
-                <label class="field" for="watch-style">Character</label>
-                <select id="watch-style">
-                  <option>Dress</option><option>Everyday</option><option>Sport</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div>
-                <label class="field" for="watch-strap">Strap / bracelet</label>
-                <select id="watch-strap">
-                  <option>Metal bracelet</option><option>Brown leather strap</option>
-                  <option>Black leather strap</option><option>Tan suede strap</option>
-                  <option>Rubber strap</option><option>NATO / fabric strap</option>
-                </select>
-              </div>
-              <div>
-                <label class="field" for="watch-dial-name">Dial</label>
-                <div class="row-inline">
-                  <input type="text" id="watch-dial-name" placeholder="" class="grow" />
-                  <input type="color" id="watch-dial" value="#8a8d8f" aria-label="Pick the dial colour" />
-                </div>
-              </div>
-            </div>
-            <div>
-              <label class="field" for="watch-notes">Notes</label>
-              <textarea id="watch-notes" placeholder=""></textarea>
-            </div>
-            <label class="photo-drop" for="watch-photo">
-              <span class="pd-title" id="watch-photo-label">Photo</span>
-              <img id="watch-photo-preview" alt="" hidden />
-              <input type="file" id="watch-photo" accept="image/*" />
-            </label>
-            <button type="submit" class="btn-ink" id="watch-submit">Add</button>
-            <button type="button" class="btn-ghost" id="watch-cancel-edit" hidden>Cancel edit</button>
-          </form>
-        </div>
-      </section>
     </main>
 
     <!-- Bottom nav: a direct child of body, outside main.
@@ -8641,13 +9487,16 @@ function lookOccasionOk(look, occasion) {
     if (TOP_CATS[cat]) {
       p.role = "top";
       if (cat === "Tees") {
-        p.lo = 1; p.hi = 3; p.kind = "tee"; p.shortSleeve = !/long-sleeve|long sleeve/.test(n); p.warm = -1;
+        p.lo = 1; p.hi = 4; p.kind = "tee"; p.shortSleeve = !/long-sleeve|long sleeve/.test(n); p.warm = -1;
         p.dressTee = /silk|fine[-\s]?gauge|merceris|merceriz|lisle|filo|cashmere|merino|fil\s*d['’]?ecosse|dress\s*t-?shirt|dress\s*tee/i.test(n);
-        if (p.dressTee) p.hi = 4;
+        if (p.dressTee) p.hi = 5;
       }
       else if (cat === "Polos") {
         p.collared = true; p.kind = "polo";
-        if (/long-sleeve|long sleeve|cashmere|knit|merino|wool/.test(n)) { p.lo = 3; p.hi = 6; p.warm = /cashmere|wool/.test(n) ? 1 : 0; }
+        /* Knit / merino / cashmere describe the cloth, not the sleeve.
+           Only an explicit long-sleeve word marks a polo as long-sleeve. */
+        var poloLS = /long-sleeve|long sleeve|longsleeve/.test(n);
+        if (poloLS) { p.lo = 3; p.hi = 6; p.shortSleeve = false; p.warm = /cashmere|wool/.test(n) ? 1 : 0; }
         else { p.lo = 1; p.hi = 4; p.shortSleeve = true; p.warm = -1; }
       } else if (cat === "Sweaters") {
         p.kind = "knit"; p.warm = 2;
@@ -8662,14 +9511,16 @@ function lookOccasionOk(look, occasion) {
         else if (/jersey/.test(n)) { p.lo = 3; p.hi = 5; }
         else if (/plaid|check|cashmere/.test(n)) { p.casualShirt = true; p.lo = 3; p.hi = 4; p.warm = 1; }
         else { p.lo = 3; p.hi = 7; }
-        if (/short-sleeve|short sleeve/.test(n)) { p.shortSleeve = true; p.hi = Math.min(p.hi, 4); p.lo = Math.min(p.lo, 2); }
+        if (/short-sleeve|short sleeve/.test(n) || (/safari|camp collar|camp-collar|hawaiian/.test(n) && !/long-sleeve|long sleeve/.test(n))) {
+          p.shortSleeve = true; p.hi = Math.min(p.hi, 4); p.lo = Math.min(p.lo, 2); p.warm = Math.min(p.warm, -1);
+        }
         if (p.pattern && !/stripe/.test(n)) p.hi = Math.min(p.hi, 4);
         if (p.hi >= 7 && !(p.fam === "white" || p.fam === "black" || (p.fam === "blue" && p.L > 60))) p.hi = 6;
       }
     } else if (BOTTOM_CATS[cat]) {
       p.role = "bottom";
       if (cat === "Bathing suits") { p.lo = 1; p.hi = 1; p.kind = "swim"; p.warm = -3; }
-      else if (cat === "Shorts") { p.lo = 1; p.hi = 3; p.kind = "shorts"; p.warm = -3; if (/swim/.test(n)) p.hi = 2; }
+      else if (cat === "Shorts") { p.lo = 1; p.hi = 4; p.kind = "shorts"; p.warm = -3; if (/swim/.test(n)) p.hi = 2; }
       else if (cat === "Jeans") { p.lo = 2; p.hi = 4; p.kind = "jeans"; }
       else {
         p.kind = "trousers";
@@ -8937,22 +9788,38 @@ function lookOccasionOk(look, occasion) {
     var rng = opts.rng || Math.random;
     var pool = this.forLevel(opts.level || null);
     if (!pool.length) return [];
-    /* Build .75: restrict to combos that have an on-body render. */
-    if (opts.onlyKeys) {
-      var okKeys = pool.filter(function (c) { return !!opts.onlyKeys[c.key]; });
-      if (!okKeys.length) return [];
-      pool = okKeys;
-    }
+    /* Build .75: restrict to combos that have an on-body render.
+       .84: in warm Palm Beach weather at Casual / Smart Casual, do
+       not trap the deal in the mostly long-sleeve, layered render
+       pool — boost fitting renders instead, and deal unlayered
+       closet looks (tees, short sleeves, shorts) alongside them. */
     var temp = typeof opts.temp === "number" ? opts.temp : null;
-    if (temp !== null) {
+    var tEff = (temp === null) ? 78 : temp;
+    var lv = opts.level || 0;
+    var warmCasual = tEff >= 72 && (!lv || lv <= 4);
+    if (opts.onlyKeys) {
+      if (warmCasual && !opts.strictKeys) {
+        opts.boostKeys = opts.boostKeys || opts.onlyKeys;
+      } else {
+        var okKeys = pool.filter(function (c) { return !!opts.onlyKeys[c.key]; });
+        if (!okKeys.length) return [];
+        pool = okKeys;
+      }
+    }
+    if (temp !== null || warmCasual) {
       var wx = pool.filter(function (c) {
         /* Palm Beach warmth: no coat from 70°F, no heavy jacket or
-           knit layer from 74°F; the old 84°F cap still bars a heavy top. */
-        if (temp >= 70 && c.l && (c.l.kind === "coat" || c.l.warm >= 3)) return false;
-        if (temp >= 74 && c.l && c.l.warm >= 2) return false;
-        if (temp >= 84 && (c.t.warm >= 2 || (c.l && c.l.warm >= 2))) return false;
-        if (temp < 55 && (c.b.kind === "shorts" || c.b.kind === "swim" || c.s.kind === "espadrille" || c.s.kind === "sandal")) return false;
-        if (temp < 45 && !c.l) return false;
+           knit layer from 74°F; the old 84°F cap still bars a heavy top.
+           .84: Casual (1–3) drops jackets, knits, blazers and suits
+           in the heat; Smart Casual keeps only a light optional layer. */
+        if (tEff >= 70 && c.l && (c.l.kind === "coat" || c.l.warm >= 3)) return false;
+        if (tEff >= 74 && c.l && c.l.warm >= 2) return false;
+        if (tEff >= 84 && (c.t.warm >= 2 || (c.l && c.l.warm >= 2))) return false;
+        if (tEff >= 72 && lv && lv <= 3 && c.l && (c.l.kind === "knit" || c.l.kind === "coat" || c.l.kind === "jacket" || c.l.kind === "blazer" || c.l.kind === "suit")) return false;
+        if (tEff >= 72 && lv === 4 && c.l && (c.l.kind === "knit" || c.l.kind === "coat" || c.l.kind === "jacket")) return false;
+        if (tEff < 72 && lv === 4 && c.b.kind === "shorts") return false;
+        if (tEff < 55 && (c.b.kind === "shorts" || c.b.kind === "swim" || c.s.kind === "espadrille" || c.s.kind === "sandal")) return false;
+        if (tEff < 45 && !c.l) return false;
         return true;
       });
       if (wx.length) pool = wx;
@@ -8983,13 +9850,30 @@ function lookOccasionOk(look, occasion) {
         if (hasPairs) for (var k = j + 1; k < ids.length; k++) pref += (pPairs[ids[j] < ids[k] ? ids[j] + "|" + ids[k] : ids[k] + "|" + ids[j]] || 0);
       }
       var wxs = 0;
-      if (temp !== null) {
-        var w = c.t.warm + c.b.warm + (c.l ? c.l.warm : 0) + c.s.warm * 0.5;
-        wxs = temp >= 80 ? -w * 0.25 : temp < 60 ? w * 0.25 : 0;
-      }
+      var w = c.t.warm + c.b.warm + (c.l ? c.l.warm : 0) + c.s.warm * 0.5;
+      wxs = tEff >= 72 ? -w * 0.4 : tEff < 60 ? w * 0.25 : 0;
       /* Newly added pieces (last three weeks) lead the deal. */
       var fr = (c.t.fresh ? 1 : 0) + (c.b.fresh ? 1 : 0) + (c.s.fresh ? 1 : 0) + (c.l && c.l.fresh ? 1 : 0);
-      base[i] = Math.exp(0.9 * (c.score + Math.max(-4, Math.min(4, pref)) + wxs + fr * 0.3));
+      /* .84: in warm Palm Beach weather, unlayered short-sleeve
+         looks (tee + jeans, polo + chinos, shorts) are the rule,
+         not a garnish. Layers stay for evening, business, formal
+         and the occasional Smart Casual variation. */
+      var climate = 0;
+      if (warmCasual) {
+        var ss = !!(c.t.shortSleeve || c.t.kind === "tee");
+        if (!c.l) climate += 2.6;
+        else climate -= (lv && lv <= 3 ? 2.6 : 2.4);
+        if (ss) climate += 1.8;
+        else if (c.t.kind === "shirt" && !c.t.shortSleeve) climate -= 1.0;
+        if (c.t.kind === "knit" && !c.t.shortSleeve) climate -= 1.2;
+        if (c.t.kind === "tee" && (c.b.kind === "jeans" || c.b.kind === "trousers" || c.b.kind === "chinos" || c.b.kind === "linen")) climate += 1.6;
+        if (c.b.kind === "shorts") climate += (lv === 4 ? 0.7 : 1.4);
+        if (c.l && lv === 4) climate -= 0.6;
+        if (opts.boostKeys && opts.boostKeys[c.key]) climate += (!c.l && ss) ? 0.9 : (!c.l ? 0.35 : -0.4);
+      } else if (opts.boostKeys && opts.boostKeys[c.key]) {
+        climate += 0.5;
+      }
+      base[i] = Math.exp(0.9 * (c.score + Math.max(-4, Math.min(4, pref)) + wxs + fr * 0.3 + climate));
     }
     var limit = Math.min(600, Math.floor(pool.length * 0.75));
     var picked = [], localExp = {};
@@ -9787,8 +10671,10 @@ function composerDeck(only, slotName) {
 function homeOwnedPhotoPieces742() {
   var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
   var withPhoto = list.filter(function (i) { return i && i.photo && typeof i.photo === "string"; });
-  var own = withPhoto.filter(function (i) { return String(i.id || "").indexOf("seed-") !== 0; });
-  return { own: own, withPhoto: withPhoto };
+  /* .84: seed library pieces are his clothes (tees, short-sleeve
+     polos, the safari shirt, etc.) and must be dealt on Home and
+     Looks, not held back as a fallback behind uploaded-only outfits. */
+  return { own: withPhoto, withPhoto: withPhoto };
 }
 /* ================= Build .75 — on-body renders =================
    assets/onbody/<hash>.webp: David wearing a composed closet outfit,
@@ -9866,13 +10752,144 @@ function onbodyRefresh() {
 onbodyRefresh();
 /* Build .75: every Home deal goes through the .74.2 pool — his own
    photographed pieces first, photographed pieces as the fallback. */
+function photoIsReady84(ph) {
+  if (!ph || typeof ph !== "string") return false;
+  if (/^data:image\//.test(ph) && ph.length > 80) return true;
+  if (/^(assets\/|https?:\/\/|blob:https?:)/.test(ph)) return true;
+  if (ph.indexOf("idb:") === 0) {
+    var pv = window.photoVault;
+    return !!(pv && pv.cache && pv.cache[ph.slice(4)]);
+  }
+  if (/^blob:[0-9a-f]{8,}/i.test(ph)) {
+    var bs = window.blobStore;
+    var key = ph.indexOf("blob:") === 0 ? ph.slice(5) : ph;
+    return !!(bs && bs.cache && (bs.cache[key] || bs.cache[ph]));
+  }
+  return false;
+}
+function lookHeroVisible84(look) {
+  if (!look) return false;
+  var ob = typeof onbodyForLook === "function" ? onbodyForLook(look) : null;
+  if (ob) {
+    try { if (typeof window.cutoutFor === "function") return !!window.cutoutFor(ob); } catch (e) {}
+    return true;
+  }
+  var pcs = look.fwPieces || look.pieces || [];
+  var top = false, bottom = false;
+  pcs.forEach(function (p) {
+    if (!p) return;
+    var ph = (typeof itemPhoto === "function" ? itemPhoto(p) : null) || p.photo || "";
+    if (!photoIsReady84(ph)) return;
+    var cat = String(p.category || "");
+    if (/Tees|Polos|Shirts|Sweaters/.test(cat)) top = true;
+    if (/Jeans|Trousers|Shorts|Bathing/.test(cat)) bottom = true;
+  });
+  return top && bottom;
+}
+window.photoIsReady84 = photoIsReady84;
+window.lookHeroVisible84 = lookHeroVisible84;
+function dressLevel841() {
+  var n = (typeof formalityLevel !== "undefined") ? parseInt(formalityLevel, 10) : 4;
+  return (n >= 1 && n <= 7) ? n : 4;
+}
+function lookFitsDress841(look, level) {
+  if (!look || look.dressEmpty) return false;
+  var C = window.WardrobeComposer;
+  if (!C || typeof C.fitsLevel !== "function" || typeof C.profile !== "function") return true;
+  var tops = [], bottom = null, shoes = null, layer = null;
+  (look.fwPieces || []).forEach(function (p) {
+    if (!p) return;
+    var it = (p.id && typeof closetItemById === "function") ? (closetItemById(p.id) || p) : p;
+    var pr = null;
+    try { pr = C.profile(it, 0); } catch (e) { pr = null; }
+    if (!pr) return;
+    if (pr.role === "top") tops.push(pr);
+    else if (pr.role === "bottom" && !bottom) bottom = pr;
+    else if (pr.role === "shoes" && !shoes) shoes = pr;
+    else if (pr.role === "layer" && !layer) layer = pr;
+  });
+  var top = null;
+  if (tops.length === 1) top = tops[0];
+  else if (tops.length >= 2) {
+    var first = tops[0];
+    layer = layer || Object.assign({}, first, { role: "layer", kind: first.overshirt ? "overshirt" : (first.kind === "knit" ? "knit" : first.kind) });
+    top = tops[1];
+  }
+  if (!top || !bottom || !shoes) return false;
+  if (!C.fitsLevel(level, top, bottom, shoes, layer)) return false;
+  /* Home is stricter than the composer's wide mask: Swim/Pool and
+     Shorts & Tee are short bottoms, never a linen trouser or a sweater. */
+  if (level === 1 && bottom.kind !== "swim" && bottom.kind !== "shorts") return false;
+  if (level === 2 && bottom.kind !== "shorts" && bottom.kind !== "swim") return false;
+  if (level <= 2 && layer && layer.kind !== "overshirt") return false;
+  if (level <= 3 && top.kind === "knit" && !top.shortSleeve) return false;
+  return true;
+}
+function dressEmptyLook841() {
+  var labels = (typeof HERO_TYPE_LABELS !== "undefined" && HERO_TYPE_LABELS) || ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"];
+  var lv = dressLevel841();
+  var name = labels[lv - 1] || "this dress level";
+  return {
+    id: "dress-empty-" + lv,
+    title: "Nothing in your closet for " + name + ".",
+    meta: "From your closet",
+    desc: "",
+    dressEmpty: true,
+    dressLevel: lv,
+    swatches: [],
+    fwPieces: [],
+    source: "wardrobe",
+    composer: false
+  };
+}
 function homeComposerLooks75(count) {
   if (typeof composerLooks !== "function") return [];
-  var temp = (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : undefined;
+  var want = count || 8;
+  var temp = (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78;
+  var level = dressLevel841();
   var pools = homeOwnedPhotoPieces742();
-  var r = pools.own.length >= 3 ? (composerLooks({ count: count, temp: temp, only: pools.own, renderedFirst: true }) || []) : [];
-  if (!r.length && pools.withPhoto.length) r = composerLooks({ count: count, temp: temp, only: pools.withPhoto, renderedFirst: true }) || [];
-  return r.filter(function (l) { return homeLookOk742(l); });
+  var pool = pools.own.length >= 3 ? pools.own : pools.withPhoto;
+  var r = pool.length >= 3 ? (composerLooks({ count: Math.max(want, 24), temp: temp, only: pool, renderedFirst: true, level: level }) || []) : [];
+  r = r.filter(function (l) { return homeLookOk742(l) && lookFitsDress841(l, level); });
+  var vis = r.filter(lookHeroVisible84);
+  /* When warm unlayered looks have no loadable piece photos and no
+     on-body cut, backfill from the scored render pool so Home never
+     lands on a grey silhouette or empty flat-lay. */
+  if (vis.length < want && pool.length >= 3) {
+    var more = composerLooks({ count: want, temp: temp, only: pool, renderedFirst: true, strictKeys: true }) || [];
+    var seen = {};
+    vis.forEach(function (l) { seen[l.composerKey || l.id || l.title] = 1; });
+    more.filter(function (l) { return homeLookOk742(l); }).forEach(function (l) {
+      var k = l.composerKey || l.id || l.title;
+      if (!seen[k]) { vis.push(l); seen[k] = 1; }
+    });
+  }
+  /* In the heat, a visible hero that is clearly short-sleeve (a tee,
+     an explicit short-sleeve name, or a seed polo) leads a long-sleeve
+     knit whose name never said so. */
+  function warmTopRank84(look) {
+    var top = null;
+    (look.fwPieces || []).forEach(function (p) { if (p && /Tees|Polos|Shirts/.test(String(p.category || ""))) top = p; });
+    if (!top) return 0;
+    var n = String(top.name || "").toLowerCase();
+    if (/long-sleeve|long sleeve|longsleeve/.test(n)) return 0;
+    if (top.category === "Tees") return 3;
+    if (/short-sleeve|short sleeve|shortsleeve/.test(n)) return 3;
+    /* Confirmed short-sleeve in the current on-body pool. */
+    if (String(top.id || "") === "item-1794965887177-185377" || /cream knit polo/i.test(n)) return 3;
+    if (String(top.id || "").indexOf("seed-") === 0) return 2;
+    return 1;
+  }
+  function warmHeroRank84(look) {
+    var layered = (look.fwPieces || []).some(function (p) {
+      var c = String(p && p.category || "");
+      return /Blazers|Jackets|Sweaters|Coats|Vests/.test(c) || /overshirt/i.test(String(p && p.name || ""));
+    });
+    return (layered ? 0 : 10) + warmTopRank84(look);
+  }
+  var list = vis.length ? vis : r;
+  if (temp >= 72) list = list.slice().sort(function (a, b) { return warmHeroRank84(b) - warmHeroRank84(a); });
+  return list.slice(0, want);
 }
 function homeLookOk742(look) {
   if (!look || !look.fwPieces || !look.fwPieces.length) return true;
@@ -10024,7 +11041,7 @@ function composerLooks(opts) {
   if (opts.exclude) recent = recent.concat(opts.exclude);
   var dealOpts = {
     level: level,
-    temp: typeof opts.temp === "number" ? opts.temp : null,
+    temp: typeof opts.temp === "number" ? opts.temp : ((typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78),
     prefs: composerEffectivePrefs(),
     exposure: p.exposure,
     recent: recent,
@@ -10032,7 +11049,8 @@ function composerLooks(opts) {
     occasion: opts.occasion,
     season: opts.season,
     weather: opts.weather,
-    dow: typeof opts.dow === "number" ? opts.dow : (new Date()).getDay()
+    dow: typeof opts.dow === "number" ? opts.dow : (new Date()).getDay(),
+    strictKeys: !!opts.strictKeys
   };
   var want = opts.count || 6;
   var outs = [];
@@ -10306,7 +11324,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.82.3";
+var WARDROBE_BUILD = "2026-11-19.85.0";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -18231,6 +19249,7 @@ function renderFormality() {
 function setFormality(level, opts) {
   level = Math.min(7, Math.max(1, parseInt(level, 10) || 4));
   var changed = level !== formalityLevel;
+  if (changed) window.__heroPrevLevel850 = formalityLevel;
   formalityLevel = level;
   store.set("formality", level);
   renderFormality();
@@ -20132,13 +21151,18 @@ function pieceDescription(p) {
      "Dark navy"), the colour is not prepended again. */
   var colourLc = (p.colourName || "").toLowerCase();
   var desc = garment;
-  if (p.colourName && garment !== colourLc && garment.indexOf(colourLc + " ") !== 0) {
+  if (p.colourName && garment !== colourLc && garment.indexOf(colourLc + " ") !== 0 && !new RegExp("\\b" + colourLc.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(garment)) {
     desc = p.colourName + " " + garment;
   }
   var d = (p.detail || "").trim();
   if (d && d.toLowerCase() !== "fresh pair" && desc.toLowerCase().indexOf(d.toLowerCase()) === -1 && (p.colourName || "").toLowerCase().indexOf(d.toLowerCase()) === -1) {
     desc += " — " + d;
   }
+  /* Shop the look queries must not repeat a word ("White Alex Mill White Knit Polo"). */
+  var bits = desc.split(/\s+/).filter(Boolean), lastAt = {}, bi;
+  for (bi = 0; bi < bits.length; bi++) lastAt[bits[bi].toLowerCase()] = bi;
+  bits = bits.filter(function (w, i) { return lastAt[w.toLowerCase()] === i; });
+  desc = bits.join(" ");
   return desc.charAt(0).toUpperCase() + desc.slice(1);
 }
 function swapHTML(look) {
@@ -21670,7 +22694,12 @@ function styleDeal(it, limit) {
     if (l.swapComboId) ctx.shown[l.swapComboId] = 1;
     out.push(JSON.parse(JSON.stringify(l)));
   });
+  /* (1c) On-body renders whose key includes this closet item. */
+  if (out.length < limit) {
+    styleLooksFromOnbody(it, ctx, limit - out.length).forEach(function (look) { out.push(look); });
+  }
   /* (2) New anchored combinations from the piece library. */
+  if (!anchorPiece) anchorPiece = styleEnsureAnchor(it);
   if (out.length < limit && anchorPiece && anchorPiece.slot) {
     var combos = styleAssembleCombos(anchorPiece, ctx.shown, limit - out.length + 6);
     for (var ci = 0; ci < combos.length && out.length < limit; ci++) {
@@ -21681,30 +22710,99 @@ function styleDeal(it, limit) {
   }
   return out;
 }
-function styleCardHTML(look, idx) {
-  var cstate = swapCardState(look);
-  if (cstate === "rendering" || cstate === "pending" || cstate === "failed" || cstate === "nosync") {
-    /* The not-yet-rendered states, never piece photographs: the
-       look's title and swatches with the slim state line —
-       spinner text only while a render is truly in flight. */
-    return '<button type="button" class="card option-card" data-style-idx="' + idx + '" role="listitem">' +
-      '<span class="pane swap-rendering pane-frame">' +
-      '<span class="swap-render-line">' + esc(swapCardLine(look)) + '</span></span>' +
-      '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
-      cardStripHTML(look.swatches) + "</span></button>";
+function stylePiecePhoto841(p) {
+  if (!p) return "";
+  var it = (p.id && typeof closetItemById === "function") ? (closetItemById(p.id) || p) : p;
+  var ph = "";
+  try { ph = (typeof itemPhoto === "function" ? itemPhoto(it) : "") || it.photo || p.photo || ""; } catch (e) { ph = p.photo || ""; }
+  if (!ph || /^data:image\/svg/.test(ph)) return "";
+  if (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(ph)) return "";
+  if (/assets\/photos\/9a543e585d8b\./.test(ph)) return "";
+  return ph;
+}
+function styleCutout841(look) {
+  try {
+    var ob = (typeof onbodyForLook === "function") ? onbodyForLook(look) : "";
+    if (ob && typeof window.cutoutFor === "function") {
+      var cut = window.cutoutFor(ob);
+      if (cut && !(typeof isCameraSelfieImg === "function" && isCameraSelfieImg(cut))) return cut;
+    }
+    if (look && look.fwRender && typeof window.cutoutFor === "function") {
+      var fw = (typeof fwRenderSrc === "function") ? fwRenderSrc(look) : look.fwRender;
+      var cut2 = fw && window.cutoutFor(fw);
+      if (cut2) return cut2;
+    }
+  } catch (e) {}
+  return "";
+}
+function styleFlatlay841(look) {
+  var pcs = (look && (look.fwPieces || look.pieces)) || [];
+  var cells = [];
+  pcs.forEach(function (p) {
+    if (!p) return;
+    var ph = stylePiecePhoto841(p);
+    var name = p.name || "";
+    if (ph) cells.push('<span class="fl-cell"><img src="' + esc(ph) + '" alt="' + esc(name) + '" decoding="async" /></span>');
+    else if (p.colourHex) cells.push('<span class="fl-cell fl-swatch" style="background:' + esc(p.colourHex) + '" role="img" aria-label="' + esc(name) + '"></span>');
+  });
+  if (!cells.length && look && look.swatches) {
+    look.swatches.forEach(function (s) {
+      if (s && s.hex) cells.push('<span class="fl-cell fl-swatch" style="background:' + esc(s.hex) + '" role="img" aria-label="' + esc(s.name || "") + '"></span>');
+    });
   }
-  var src = look.fwRender ? fwRenderSrc(look) : lookImg(look);
-  return '<button type="button" class="card option-card" data-style-idx="' + idx + '" role="listitem">' +
-    '<img src="' + esc(src) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy" />' +
-    '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
-    cardStripHTML(look.swatches) + "</span></button>";
+  if (!cells.length) return "";
+  return '<span class="flatlay fl-n' + Math.min(4, cells.length) + ' style-flatlay">' + cells.slice(0, 4).join("") + "</span>";
+}
+function styleCardHTML(look, idx) {
+  /* Transparent cut-out, or a flat-lay of every piece. Never a raw
+     mirror selfie, never a grey studio box, never a blank
+     "Not rendered yet" tile. The swatch strip sits under the frame. */
+  var cut = styleCutout841(look);
+  var flat = styleFlatlay841(look);
+  var title = (look && (look.title || look.imgAlt)) || "Outfit";
+  var media = cut
+    ? '<img class="style-cut" src="' + esc(cut) + '" alt="' + esc(look.imgAlt || title) + '" loading="lazy" />'
+    : (flat || '<span class="flatlay style-flatlay fl-n1"><span class="fl-cell fl-swatch" style="background:#e7dfd2" role="img" aria-label="' + esc(title) + '"></span></span>');
+  return '<button type="button" class="card option-card style-card850" data-style-idx="' + idx + '" role="listitem">' +
+    '<span class="pane pane-frame style-pane">' + media + "</span>" +
+    '<span class="oc-body"><span class="oc-title">' + esc(title) + "</span>" +
+    '<span class="style-swatches">' + cardStripHTML(look && look.swatches) + "</span></span></button>";
+}
+function styleLooksChrome(hide) {
+  /* On the clean Looks page (html.pv81) the Mine | Mix | New bar
+     and floating + are injected at runtime. Hide them — and the
+     underlying feeds — while Style this is showing outfits around
+     a closet piece, then restore the feed the user was on. */
+  ["pv-top", "pv-fab", "lf-row"].forEach(function (id) {
+    var n = document.getElementById(id);
+    if (n) n.hidden = !!hide;
+  });
+  var row = document.querySelector("#panel-looks .outfits-row");
+  if (row) row.hidden = !!hide;
+  var mine = document.getElementById("outfits-mine-view");
+  var inspo = document.getElementById("outfits-inspo-view");
+  if (hide) {
+    if (mine) mine.hidden = true;
+    if (inspo) inspo.hidden = true;
+  } else {
+    var onInspo = window.outfitsMode === "inspo";
+    if (mine) mine.hidden = !!onInspo;
+    if (inspo) inspo.hidden = !onInspo;
+  }
 }
 function renderStyleResults(it, keepScroll) {
-  var el = document.getElementById("look-result");
+  var el = document.getElementById("style-item-host") || document.getElementById("look-result");
   if (!el) return;
-  el.innerHTML = '<div class="options-head"><span class="oc-label">' + esc(it.name) + '</span>' +
-    '<button type="button" class="btn-ghost" data-style-more>Six more ideas</button></div>' +
-    '<div class="options-grid" role="list">' + styleResults.map(function (look, idx) { return styleCardHTML(look, idx); }).join("") + "</div>";
+  el.hidden = false;
+  styleLooksChrome(true);
+  var empty = !styleResults.length;
+  el.innerHTML = '<div class="options-head style-item-head"><span class="oc-label">Styled around ' + esc(it.name) + '</span>' +
+    '<button type="button" class="btn-ghost" data-style-close>All looks</button>' +
+    (empty ? "" : '<button type="button" class="btn-ghost" data-style-more>Six more ideas</button>') +
+    "</div>" +
+    (empty
+      ? '<p class="style-item-empty">No outfits with the ' + esc(it.name) + " yet — it pairs as more pieces are photographed.</p>"
+      : '<div class="options-grid" role="list">' + styleResults.map(function (look, idx) { return styleCardHTML(look, idx); }).join("") + "</div>");
   if (!keepScroll) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
   startStyleRenderWatch();
 }
@@ -21736,22 +22834,122 @@ function startStyleRenderWatch() {
     if (!styleResults.some(function (l) { return l.swapState === "rendering"; })) stopStyleRenderWatch();
   }, 20000);
 }
+function styleEnsureAnchor(it) {
+  /* Closet pieces that were never copied into the piece library
+     (the Dolce & Gabbana Burgundy Blazer is the standing case)
+     still need a slot so Style this can assemble combinations. */
+  if (!it || typeof PIECE_BY_CID === "undefined") return null;
+  if (PIECE_BY_CID[it.id]) return PIECE_BY_CID[it.id];
+  var cat = it.category || "";
+  var slot = "top", libCat = "tops", fs = 3;
+  if (/Blazer|Suit/.test(cat)) { slot = "layer"; libCat = "blazer"; fs = 4; }
+  else if (/Coat/.test(cat)) { slot = "layer"; libCat = "outerwear"; fs = 4; }
+  else if (/Leather jacket|Jacket/.test(cat)) { slot = "layer"; libCat = "outerwear"; fs = 3; }
+  else if (/Vest/.test(cat)) { slot = "layer"; libCat = "vest"; fs = 4; }
+  else if (/Trouser/.test(cat)) { slot = "bottom"; libCat = "trousers"; fs = 3; }
+  else if (/Jeans/.test(cat)) { slot = "bottom"; libCat = "jeans"; fs = 2; }
+  else if (/Shorts/.test(cat)) { slot = "bottom"; libCat = "shorts"; fs = 2; }
+  else if (/Bathing/.test(cat)) { slot = "bottom"; libCat = "swim"; fs = 1; }
+  else if (/Shoe/.test(cat)) { slot = "shoes"; libCat = "shoes"; fs = 3; }
+  else if (/Tie/.test(cat)) { slot = "accessory"; libCat = "tie"; fs = 4; }
+  else if (/Belt|Scarf|Hat|Glove|Sock|Sunglass/.test(cat)) { slot = "accessory"; libCat = "belt"; fs = 3; }
+  else if (/Sweater/.test(cat)) { slot = "top"; libCat = "knitwear"; fs = 3; }
+  else if (/Shirt|Button/.test(cat)) { slot = "top"; libCat = "shirts"; fs = 4; }
+  else if (/Polo/.test(cat)) { slot = "top"; libCat = "tops"; fs = 3; }
+  else if (/Tee/.test(cat)) { slot = "top"; libCat = "tops"; fs = 2; }
+  var hex = it.colourHex || "#888888";
+  var wn = (it.colourName || "").split("·")[0].trim();
+  if (!wn && typeof nearestWada === "function") wn = nearestWada(hex).name;
+  var anchor = {
+    id: "closet:" + it.id,
+    slot: slot,
+    cat: libCat,
+    name: it.name,
+    wn: wn || "Colour",
+    wh: hex,
+    fs: fs,
+    owned: true,
+    cid: it.id,
+    img: it.photo || "",
+    closetAnchor: true
+  };
+  PIECE_BY_CID[it.id] = anchor;
+  if (typeof PIECE_BY_ID !== "undefined") PIECE_BY_ID[anchor.id] = anchor;
+  return anchor;
+}
+function styleLooksFromOnbody(it, ctx, limit) {
+  var out = [];
+  if (!it || typeof onbodyKeys !== "function") return out;
+  var map = onbodyKeys() || {};
+  var needle = String(it.id);
+  Object.keys(map).forEach(function (key) {
+    if (out.length >= limit) return;
+    var ids = key.split("|");
+    if (ids.indexOf(needle) === -1) return;
+    var tag = "onbody:" + key;
+    if (ctx.shown[tag]) return;
+    ctx.shown[tag] = 1;
+    var pieces = ids.map(function (id) { return closetItemById(id); }).filter(Boolean);
+    var names = pieces.map(function (p) { return p.name; });
+    if (names.indexOf(it.name) === -1) names.unshift(it.name);
+    var src = map[key];
+    var sw = pieces.map(function (p) {
+      var role = cap((typeof CLOSET_GARMENT !== "undefined" && CLOSET_GARMENT[p.category]) || p.category || "Piece");
+      return { name: (p.colourName || "").split("·")[0].trim(), hex: p.colourHex, role: role };
+    });
+    out.push({
+      id: "style-ob-" + key.replace(/[^A-Za-z0-9]+/g, "").slice(0, 28),
+      title: names.slice(0, 2).join(" & ") || it.name,
+      meta: "Styled around your " + it.name,
+      desc: names.join(" with "),
+      iconId: null, blendId: null, basis: "both", version: 1, plate: null, paletteName: null,
+      img: src,
+      fwRender: src,
+      imgAlt: "You wearing " + names.join(", "),
+      swatches: sw,
+      source: "wardrobe",
+      anchorNames: [it.name],
+      fwPieces: pieces.map(function (p) { return { id: p.id, name: p.name, photo: p.photo || null, colourHex: p.colourHex || null, category: p.category }; }),
+      builtAround: it.name,
+      anchorPieceId: it.id
+    });
+  });
+  return out;
+}
+function clearStyleItemView() {
+  styleItemCtx = null;
+  styleResults = [];
+  if (typeof stopStyleRenderWatch === "function") stopStyleRenderWatch();
+  var el = document.getElementById("style-item-host");
+  if (el) { el.hidden = true; el.innerHTML = ""; }
+  styleLooksChrome(false);
+}
+var styleNavLock = false;
 function styleThisItem(it) {
   if (!it) return;
+  /* Close the item sheet first — it is a fixed overlay (z-index 210),
+     so leaving it open made Style this look like it did nothing. */
+  detailItemId = null;
+  if (typeof renderItemDetail === "function") renderItemDetail();
   /* One anchored view at a time: entering Style this retires
      any Build-a-look results (and their render watch). */
   buildCtx = null;
   if (typeof stopBuildWatch === "function") stopBuildWatch();
+  styleEnsureAnchor(it);
   styleItemCtx = { itemId: it.id, shown: {} };
   styleResults = styleDeal(it, 6);
-  if (!styleResults.length) {
-    toast("No outfits with the " + it.name + " yet — it pairs as more pieces are photographed.");
-    return;
-  }
-  if (typeof switchTab === "function") switchTab("studio");
+  styleNavLock = true;
+  if (typeof switchTab === "function") switchTab("looks");
+  styleNavLock = false;
   renderStyleResults(it);
 }
 document.addEventListener("click", function (e) {
+  var closeStyle = e.target.closest ? e.target.closest("[data-style-close]") : null;
+  if (closeStyle) {
+    clearStyleItemView();
+    if (typeof renderSaved === "function") renderSaved();
+    return;
+  }
   var more = e.target.closest ? e.target.closest("[data-style-more]") : null;
   if (more) {
     if (!styleItemCtx) return;
@@ -26046,7 +27244,7 @@ var photoDataUrl = null;
    no extra wiring. */
 var WARD_CAT_GROUPS = [
   { key: "clothing", label: "Clothing", cats: ["Bathing suits", "Blazers", "Button downs", "Coats", "Jackets", "Jeans", "Leather jackets", "Polos", "Shirts", "Shorts", "Suits", "Sweaters", "Tees", "Trousers", "Vests"] },
-  { key: "accessories", label: "Accessories", cats: ["Belts", "Gloves", "Hats", "Scarves", "Socks", "Sunglasses", "Ties"] },
+  { key: "accessories", label: "Accessories", cats: ["Belts", "Gloves", "Hats", "Scarves", "Socks", "Sunglasses", "Ties", "Watches"] },
   { key: "shoes", label: "Shoes", cats: ["Shoes"] }
 ];
 function wardCatCounts() {
@@ -26058,15 +27256,21 @@ function syncWardCatLabels() {
   WARD_CAT_GROUPS.forEach(function (g) {
     var lab = document.getElementById("ward-cat-" + g.key + "-label");
     if (!lab) return;
-    lab.textContent = (wardFilter !== "All" && g.cats.indexOf(wardFilter) !== -1) ? g.label + " · " + wardFilter : g.label;
+    /* Show only the selected category (e.g. "Watches"), not "Accessories · Watches", so the closet filter row never overflows a 375px phone. */
+    lab.textContent = (wardFilter !== "All" && g.cats.indexOf(wardFilter) !== -1) ? wardFilter : g.label;
   });
+}
+function wardWatchCount() {
+  try { return (typeof watches !== "undefined" ? watches.filter(function (w) { return !w.sold; }).length : 0); }
+  catch (e) { return 0; }
 }
 function fillWardCatMenu(g) {
   var menu = document.getElementById("ward-cat-" + g.key + "-menu");
   if (!menu) return;
   var counts = wardCatCounts();
-  var present = g.cats.filter(function (c) { return counts[c] > 0; });
-  var total = present.reduce(function (n, c) { return n + counts[c]; }, 0);
+  counts["Watches"] = wardWatchCount();
+  var present = g.cats.filter(function (c) { return c === "Watches" || counts[c] > 0; });
+  var total = present.reduce(function (n, c) { return n + (c === "Watches" ? 0 : (counts[c] || 0)); }, 0);
   var html = '<button type="button" class="cdd-opt" role="menuitem" data-cat-pick="All" aria-pressed="' + (wardFilter === "All") + '"><span class="cdd-opt-name">All</span>' + (total ? '<span class="cat-count">' + total + "</span>" : "") + "</button>";
   html += present.map(function (c) {
     return '<button type="button" class="cdd-opt" role="menuitem" data-cat-pick="' + esc(c) + '" aria-pressed="' + (wardFilter === c) + '"><span class="cdd-opt-name">' + esc(c) + '</span><span class="cat-count">' + counts[c] + "</span></button>";
@@ -26257,7 +27461,21 @@ function renderWardrobe() {
     return a.ix - b.ix;
   });
   items = decorated.map(function (d) { return d.it; });
+  var showWatches = wardFilter === "Watches";
+  var staleRow = document.querySelector("#panel-wardrobe .closet-stale-row");
+  var watchPanel = document.getElementById("panel-watches");
+  if (staleRow) staleRow.hidden = !!showWatches;
+  if (watchPanel) watchPanel.hidden = !showWatches;
+  if (showWatches) {
+    var hideGrid = document.getElementById("item-grid");
+    if (hideGrid) hideGrid.hidden = true;
+    if (typeof renderWatches === "function") renderWatches();
+    updateWardRail();
+    if (typeof renderStaleChip === "function") renderStaleChip();
+    return;
+  }
   var grid = document.getElementById("item-grid");
+  if (grid) grid.hidden = false;
   if (!items.length) {
     grid.innerHTML = '<div class="card empty span-all">' + (wardStaleOnly
       ? "Nothing has been sitting unworn for 90 days — everything with a wear date is in rotation."
@@ -26345,13 +27563,15 @@ function renderItemDetail() {
     "<div><dt>Status</dt><dd>" + (it.laundry ? "In laundry" : "In the closet") + "</dd></div>" +
     "</dl>" +
     '<div class="item-actions">' +
-    '<button type="button" class="btn-ghost" data-item-act="style">' + esc(styleItemLabel(it)) + '</button>' +
+    '<div class="item-actions-primary">' +
+    '<button type="button" class="btn-ink" data-item-act="style">' + esc(styleItemLabel(it)) + '</button>' +
     '<button type="button" class="btn-ghost" data-item-act="find">Shop the look</button>' +
+    "</div>" +
+    '<div class="item-actions-secondary">' +
     '<button type="button" class="btn-ghost" data-item-act="laundry">' + (it.laundry ? "Back from laundry" : "Send to laundry") + "</button>" +
     '<button type="button" class="btn-ghost" data-item-act="edit">Edit</button>' +
     '<button type="button" class="btn-ghost danger" data-item-act="delete" aria-pressed="false">Delete</button>' +
-    '<button type="button" class="btn-ghost" data-item-act="close">Close</button>' +
-    "</div></article>";
+    "</div></div></article>";
   box.scrollIntoView({ behavior: "smooth", block: "nearest" });
   updateWardRail();
 }
@@ -26394,25 +27614,30 @@ document.getElementById("item-detail").addEventListener("click", function (e) {
     return;
   }
   if (act === "find") {
-    /* A brief for this piece — replace it, or buy another —
-       created through the same free-form brief store. */
-    finds.unshift({
-      id: "find-" + Date.now(),
-      desc: it.name,
-      cat: it.category,
-      size: profileSizeFor(it.category),
-      budget: "",
-      budgetTier: shopTierName(),
-      budgetNote: "",
-      colour: it.colourName || "",
-      details: "From your Closet — replace it, or buy another.",
-      iconId: null
-    });
-    store.set("finds", finds);
-    renderFinds();
-    clearFindLookMode();
+    /* Shop the look for this piece opens Searches with the query
+       already run — never the empty Saved page. */
+    var qFind = [it.colourName, it.name].filter(Boolean).join(" ").replace(/\s+/g, " ").trim() || it.name;
+    if (typeof clearFindLookMode === "function") clearFindLookMode();
     switchTab("find");
-    toast("Brief added — " + it.name + ".");
+    if (typeof window.editShow === "function") window.editShow("searches");
+    if (typeof window.editRunSearch === "function") window.editRunSearch(qFind);
+    else {
+      finds.unshift({
+        id: "find-" + Date.now(),
+        desc: it.name,
+        cat: it.category,
+        size: profileSizeFor(it.category),
+        budget: "",
+        budgetTier: shopTierName(),
+        budgetNote: "",
+        colour: it.colourName || "",
+        details: "From your Closet — replace it, or buy another.",
+        iconId: null
+      });
+      store.set("finds", finds);
+      if (typeof renderFinds === "function") renderFinds();
+    }
+    toast("Searching — " + it.name + ".");
     return;
   }
   if (act === "laundry") {
@@ -28714,7 +29939,8 @@ function openingLook() {
   if (clw && clw.length) {
     var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned(l); });
     var clwDeal = clwFresh.length ? clwFresh : clw;
-    var openPick = clwDeal[0];
+    var clwVis = (typeof lookHeroVisible84 === "function") ? clwDeal.filter(lookHeroVisible84) : [];
+    var openPick = clwVis[0] || clwDeal[0];
     openPick.source = "wardrobe";
     todaySeedId = openPick.id;
     persistOpeningLook(openPick);
@@ -29133,9 +30359,9 @@ function weatherRecommendation() {
   if (!currentWeather) return "";
   var t = currentWeather.temp, place = currentLoc.name;
   var rec = "";
-  if (t >= 88) rec = "Heat in " + place + " — wear the lightest version: linen or an open collar, trousers in a breathable cloth, loafers sockless. No layers, no heavy knit.";
-  else if (t >= 78) rec = "Warm in " + place + " — light tailoring or a knit polo, no coat needed. Keep the palette sun-friendly.";
-  else if (t >= 65) rec = "Mild in " + place + " — the full register is open: blazer optional, a fine knit carries the day.";
+  if (t >= 88) rec = "Heat in " + place + " — wear the lightest version: a T-shirt or short-sleeve polo, linen or breathable trousers, shorts if you're keeping it casual, loafers sockless. No layers, no heavy knit.";
+  else if (t >= 78) rec = "Warm in " + place + " — T-shirts, short-sleeve shirts and polos, jeans or light trousers, shorts at the casual end. No coat, and skip the extra layer.";
+  else if (t >= 65) rec = "Mild in " + place + " — the full register is open: a T-shirt or polo still leads, a light layer only if you want one.";
   else if (t >= 55) rec = "Cool in " + place + " — layer: a knit under a blazer, or a coat over tailoring. Closed shoes, and gloves are worth it in the morning.";
   else if (t >= 40) rec = "Cold in " + place + " — a real coat, layered knitwear, gloves and a scarf. Boots over loafers.";
   else rec = "Well below freezing in " + place + " — heaviest coat, layers throughout, gloves and hat. Dress for standing still outside, not just walking.";
@@ -29170,6 +30396,8 @@ function renderLoc() {
   document.getElementById("loc-current-name").textContent = currentLoc.name || "";
   document.getElementById("loc-current-kind").textContent = locUnset ? "No home set" : (travelling ? "Traveling — not home" : "Home — default");
   document.getElementById("loc-back-home").hidden = !travelling;
+  var setHomeBtn = document.getElementById("loc-set-home");
+  if (setHomeBtn) setHomeBtn.hidden = !locUnset && !travelling;
   var badge = travelling ? ' <span class="travel-badge">Traveling</span>' : "";
   document.getElementById("today-loc").innerHTML = "<strong>" + esc(currentLoc.name + (currentLoc.admin && String(currentLoc.name).indexOf(currentLoc.admin) === -1 ? ", " + currentLoc.admin : "")) + "</strong><span>" + esc(currentWeather ? Math.round(currentWeather.temp) + "°F · " + currentWeather.label : "") + "</span>" + badge;
   if (locUnset && !currentWeather) {
@@ -29186,6 +30414,13 @@ function renderLoc() {
 }
 function applyWeatherToToday() {
   if (todayTouched || !currentWeather || !todayLook) return;
+  /* The outfit of the day is locked once it has been dealt for this
+     date. A later weather read must not swap it — reopening the app
+     would otherwise show a different look than the one just on screen. */
+  try {
+    var locked = (typeof store !== "undefined") ? store.get("todayOpeningCloset", null) : null;
+    if (locked && locked.date === localTodayISO() && locked.look && locked.look.title) return;
+  } catch (eLock) {}
   /* A planned day keeps its planned hero — the weather refines
      unplanned days only. */
   if (planEntryFor(localTodayISO())) return;
@@ -29445,25 +30680,29 @@ function initToday() {
 var heroHistory56 = [];
 function heroPushHistory56() {
   try {
-    if (typeof todayLook === "undefined" || !todayLook || !todayLook.img) return;
-    var key = canonicalImg(lookPicturedImg(todayLook) || todayLook.img || "");
+    if (typeof todayLook === "undefined" || !todayLook || todayLook.dressEmpty) return;
+    if (!todayLook.img && !(todayLook.fwPieces && todayLook.fwPieces.length)) return;
+    var key = todayLook.composerKey || todayLook.title || canonicalImg(lookPicturedImg(todayLook) || todayLook.img || "");
     var top = heroHistory56[heroHistory56.length - 1];
-    if (top && key && canonicalImg(lookPicturedImg(top) || top.img || "") === key) return;
+    var topKey = top && (top.composerKey || top.title || canonicalImg(lookPicturedImg(top) || top.img || ""));
+    if (top && key && topKey === key) return;
     heroHistory56.push(JSON.parse(JSON.stringify(todayLook)));
-    if (heroHistory56.length > 10) heroHistory56 = heroHistory56.slice(heroHistory56.length - 10);
+    if (heroHistory56.length > 12) heroHistory56 = heroHistory56.slice(heroHistory56.length - 12);
   } catch (e) {}
 }
 function heroGoBack56() {
   while (heroHistory56.length) {
     var prev = heroHistory56.pop();
-    if (!prev || !prev.img) continue;
-    if (lookPhotoBanned(prev)) continue;
-    if (isQuarantinedImg(lookPicturedImg(prev) || prev.img || "")) continue;
+    if (!prev) continue;
+    if (prev.img && lookPhotoBanned(prev)) continue;
+    if (prev.img && isQuarantinedImg(lookPicturedImg(prev) || prev.img || "")) continue;
     todayLook = prev;
     todayTouched = true;
-    try { store.set("lastOpeningImg", todayLook.img); } catch (e) {}
+    window.__heroUser850 = true;
+    try { if (todayLook.img) store.set("lastOpeningImg", todayLook.img); } catch (e) {}
     persistOpeningLook(todayLook);
     renderToday();
+    window.__heroUser850 = false;
     return true;
   }
   return false;
@@ -29509,13 +30748,51 @@ function dealHeroForSource() {
   heroPushHistory56();
   /* Build .75: Home is always wardrobe-only. */
   window._heroDealN = (window._heroDealN || 0) + 1;
-  var cl = homeComposerLooks75(8);
+  var userAct = !!window.__heroUser850;
+  /* .85: the outfit-of-the-day lock blocks only background weather
+     and watchdog rewrites. A dress-level change, Next, or swipe
+     rebuilds a strict queue and must leave the previous look. */
+  if (userAct && typeof window.clearHeroLookahead === "function") {
+    try { window.clearHeroLookahead(); } catch (eQ) {}
+  }
+  var cl = homeComposerLooks75(userAct ? 24 : 8);
   if (!cl.length && typeof buildClosetLooks === "function") {
     cl = (currentWeather
       ? buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() + window._heroDealN })
       : buildClosetLooks()) || [];
   }
-  cl = cl.filter(lookIsMine);
+  cl = (cl || []).filter(function (l) { return lookIsMine(l) && lookFitsDress841(l, dressLevel841()); });
+  if (userAct) {
+    var seenK = {}, uniq = [];
+    cl.forEach(function (l) {
+      if (!l) return;
+      var k = l.composerKey || l.title || l.id;
+      if (!k || seenK[k]) return;
+      seenK[k] = 1;
+      uniq.push(l);
+    });
+    cl = uniq;
+  }
+  if (!cl.length) {
+    if (userAct) {
+      todayLook = dressEmptyLook841();
+      todaySeedId = todayLook.id;
+      todayTouched = true;
+      renderToday();
+      return;
+    }
+    /* Background only: keep the dealt look rather than blanking it
+       when a weather pass finds nothing newer. */
+    if (todayLook && !todayLook.dressEmpty && ((todayLook.fwPieces && todayLook.fwPieces.length) || todayLook.img || (todayLook.flatlay && todayLook.flatlay.length))) {
+      renderToday();
+      return;
+    }
+    todayLook = dressEmptyLook841();
+    todaySeedId = todayLook.id;
+    persistOpeningLook(todayLook);
+    renderToday();
+    return;
+  }
   if (cl && cl.length) {
       /* Graduated (liked) closet looks are not dealt again; if
          every closet look has graduated, deal from the full list
@@ -29523,9 +30800,49 @@ function dealHeroForSource() {
       var clFresh = cl.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned(l); });
       var dealList = clFresh.length ? clFresh : cl;
       var curTitle = todayLook && todayLook.title;
+      var curKey = todayLook && (todayLook.composerKey || todayLook.title);
       var pickW = null;
-      for (var wi = 0; wi < dealList.length; wi++) { if (dealList[wi].title !== curTitle) { pickW = dealList[wi]; break; } }
-      pickW = pickW || dealList[0];
+      var from = dealList;
+      if (userAct) {
+        var levelNow = dressLevel841();
+        var keys = from.map(function (l) { return (l && (l.composerKey || l.title)) || ""; });
+        var sig = levelNow + "|" + keys.join("~");
+        var cursor = window.__heroCursor850 || (window.__heroCursor850 = { sig: "", i: -1 });
+        var idx = keys.indexOf(curKey);
+        if (cursor.sig !== sig) { cursor.sig = sig; idx = -1; }
+        var levelChanged = typeof window.__heroPrevLevel850 === "number" && window.__heroPrevLevel850 !== levelNow;
+        window.__heroPrevLevel850 = levelNow;
+        if (!from.length) {
+          todayLook = dressEmptyLook841();
+          todaySeedId = todayLook.id;
+          todayTouched = true;
+          renderToday();
+          return;
+        }
+        var nextI = (idx + 1) % from.length;
+        if (levelChanged && from.length > 1 && (from[nextI].composerKey || from[nextI].title) === curKey) nextI = (nextI + 1) % from.length;
+        pickW = from[nextI];
+        cursor.i = nextI;
+        /* A dress-level change must not keep a look that fails the new level. */
+        if (pickW && !lookFitsDress841(pickW, levelNow)) pickW = null;
+        if (!pickW) {
+          todayLook = dressEmptyLook841();
+          todaySeedId = todayLook.id;
+          todayTouched = true;
+          renderToday();
+          return;
+        }
+      } else {
+        if (typeof lookHeroVisible84 === "function") {
+          var visList = dealList.filter(lookHeroVisible84);
+          if (visList.length) from = visList;
+        }
+        for (var wi = 0; wi < from.length; wi++) {
+          var cand = from[wi];
+          if (cand && cand.title !== curTitle) { pickW = cand; break; }
+        }
+        pickW = pickW || from[0] || dealList[0];
+      }
       todaySeedId = pickW.id;
       todayLook = pickW;
       todayLook.source = "wardrobe";
@@ -29601,7 +30918,9 @@ function dealHeroForSource() {
    change) calls this directly. */
 function dealAnotherToday() {
   todayTouched = true;
+  window.__heroUser850 = true;
   dealHeroForSource();
+  window.__heroUser850 = false;
 }
 document.getElementById("today-source-row").addEventListener("click", function (e) {
   var b = e.target.closest("[data-source]");
@@ -31913,11 +33232,16 @@ function catalogueScored(pc, applyCeiling, tierKey) {
     if (typeof window.wardrobeRulesAllow === "function" && !window.wardrobeRulesAllow(e, { via: "shop", level: typeof formalityLevel !== "undefined" ? formalityLevel : 4 })) return;
     if (typeof window.iconWeights81 !== "undefined" && window.iconWeights81.rulesAllow && !window.iconWeights81.rulesAllow(e, { via: "shop", level: typeof formalityLevel !== "undefined" ? formalityLevel : 4 })) return;
     var score = matched + attrMatched + ((colourOK && !colourLiteral) ? 1 : 0);
-    if (typeof window.iconWeights81 !== "undefined" && window.iconWeights81.scorePiece) {
-      var lv = (typeof formalityLevel !== "undefined") ? formalityLevel : 4;
-      score += window.iconWeights81.scorePiece({ name: e.name, category: e.cat || e.category, colourHex: e.hex || e.colourHex, hex: e.hex || e.colourHex }, lv) * 0.45;
+    /* Hard quality/compatibility gates first; the icon-weight bonus only
+       re-ranks pieces that already passed, so a weighting can never sneak
+       a poor match into Shop the look. */
+    if (score >= 2 && garmentMatched >= 1) {
+      if (typeof window.iconWeights81 !== "undefined" && window.iconWeights81.scorePiece) {
+        var lv = (typeof formalityLevel !== "undefined") ? formalityLevel : 4;
+        score += window.iconWeights81.scorePiece({ name: e.name, category: e.cat || e.category, colourHex: e.hex || e.colourHex, hex: e.hex || e.colourHex }, lv) * 2.8;
+      }
+      scored.push({ e: e, score: score + ((window.EDIT_GAP_URLS && window.EDIT_GAP_URLS[e.url]) || 0) });
     }
-    if (score >= 2 && garmentMatched >= 1) scored.push({ e: e, score: score + ((window.EDIT_GAP_URLS && window.EDIT_GAP_URLS[e.url]) || 0) });
   });
   var eliteFirst = (tierKey || shopTier) === "insensitive";
   scored.sort(function (a, b) {
@@ -33340,7 +34664,7 @@ document.addEventListener("click", function (e) {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "bulk", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "purchased", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "prules", "pcloud", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "bulk", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "purchased", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "prules", "pcloud", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -33362,7 +34686,7 @@ var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyz
    and every switchTab("…") call still resolve. */
 var SECTIONS = {
   today: ["today"],
-  closet: ["wardrobe", "add", "analyze", "bulk", "watches", "wearing"],
+  closet: ["wardrobe", "add", "analyze", "bulk", "wearing"],
   calendar: ["calendar"],
   ideas: ["looks", "studio", "outfitideas", "icons", "emulate", "palettes", "myinspo"],
   find: ["find", "receipts", "purchased", "search", "brands", "brand", "sale", "shopwish", "gaps"],
@@ -33400,6 +34724,7 @@ function persistTab() {
     } else {
       h = currentTab === "icons" && openIconId ? "#icons/" + encodeURIComponent(openIconId) : "#" + currentTab;
     }
+    if (currentTab === "wardrobe" && typeof wardFilter !== "undefined" && wardFilter === "Watches") h = "#watches";
     if (location.hash !== h) history.replaceState(null, "", h);
   } catch (e) {}
 }
@@ -33431,6 +34756,12 @@ function switchTab(name, opts) {
     name = "find";
   }
   if (name === "queue" || name === "favourites") name = "looks";
+  /* Watches now live under Closet → Accessories → Watches. */
+  if (name === "watches") {
+    name = "wardrobe";
+    if (typeof wardFilter !== "undefined") wardFilter = "Watches";
+    if (typeof syncWardCatLabels === "function") syncWardCatLabels();
+  }
   /* Build .54: the Wishlist left My Outfits for its own Shop sub
      page — the old name lands there, never on a dead end. */
   if (name === "wishlist") name = "shopwish";
@@ -33464,7 +34795,7 @@ function switchTab(name, opts) {
     t.setAttribute("aria-selected", t.getAttribute("data-tab") === name ? "true" : "false");
   });
   var subnav = document.getElementById("subnav");
-  var grouped = SECTIONS[sec].length > 1 && sec !== "ideas" && sec !== "find";
+  var grouped = SECTIONS[sec].length > 1 && sec !== "ideas" && sec !== "find" && sec !== "closet";
   subnav.hidden = !grouped;
   if (grouped) {
     document.querySelectorAll(".subnav-group").forEach(function (g) {
@@ -33486,7 +34817,9 @@ function switchTab(name, opts) {
     if (back) window.scrollTo(0, back);
     else if (window.scrollY) window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  if (name === "looks" && !styleNavLock && typeof clearStyleItemView === "function" && styleItemCtx) clearStyleItemView();
   if ((name === "looks" || name === "outfitideas") && typeof renderSaved === "function") renderSaved();
+  if (name === "wardrobe" && typeof wardFilter !== "undefined" && wardFilter === "Watches" && typeof renderWardrobe === "function") renderWardrobe();
   if (name === "sale" && typeof renderSaleItems === "function") renderSaleItems();
   if (name === "shopwish" && typeof renderShopWishlist === "function") renderShopWishlist();
   if (name === "shopwish" && typeof renderWishlist === "function") renderWishlist();
@@ -33632,6 +34965,7 @@ function tabFromHash() {
      Wishlist page, its new home. Checked before the TABS gate:
      "wishlist" itself is not a tab name. */
   if (parts[0] === "wishlist") return { tab: "shopwish", icon: null };
+  if (parts[0] === "watches") return { tab: "wardrobe", icon: null, watches: true };
   if (TABS.indexOf(parts[0]) === -1) return null;
   /* Closet sub-pages are reached in-app only: a boot, refresh or
      deep link naming one lands on the Closet landing instead. */
@@ -33644,7 +34978,14 @@ function tabFromHash() {
 window.addEventListener("hashchange", function () {
   var from = tabFromHash();
   if (!from) return;
-  if (from.tab === currentTab && from.tab !== "icons" && from.tab !== "palettes") return;
+  if (from.watches && typeof wardFilter !== "undefined") {
+    wardFilter = "Watches";
+    if (typeof syncWardCatLabels === "function") syncWardCatLabels();
+  }
+  if (from.tab === currentTab && from.tab !== "icons" && from.tab !== "palettes") {
+    if (from.watches && typeof renderWardrobe === "function") renderWardrobe();
+    return;
+  }
   switchTab(from.tab, { restore: true });
   if (from.tab === "icons" && from.icon && iconById(from.icon)) openIconDetail(from.icon);
 });
@@ -33676,6 +35017,10 @@ function restoreTab() {
        launch — a shortcut to a page lands on that page. */
     var hf = tabFromHash();
     if (hf) {
+      if (hf.watches && typeof wardFilter !== "undefined") {
+        wardFilter = "Watches";
+        if (typeof syncWardCatLabels === "function") syncWardCatLabels();
+      }
       switchTab(hf.tab, { restore: true });
       if (hf.tab === "icons" && hf.icon && iconById(hf.icon)) openIconDetail(hf.icon);
       return;
@@ -33688,9 +35033,15 @@ function restoreTab() {
   /* A deep link to Icons or Palettes wins over the session tab, so #palettes
      still opens Curate → Palettes after a previous visit to The Edit. */
   if (from && (from.tab === "icons" || from.tab === "palettes")) name = from.tab;
+  if (name === "watches") { name = "wardrobe"; if (typeof wardFilter !== "undefined") wardFilter = "Watches"; }
   if (TABS.indexOf(name) === -1) name = "today";
   if (name === "add" || name === "analyze" || name === "bulk") name = "wardrobe";
   if (name === "receipts") name = "find";
+  if (from && from.watches && typeof wardFilter !== "undefined") {
+    name = "wardrobe";
+    wardFilter = "Watches";
+    if (typeof syncWardCatLabels === "function") syncWardCatLabels();
+  }
   if (name === "today" && !from) { persistTab(); return; }
   switchTab(name, { restore: true });
   if (name === "icons") {
@@ -34268,9 +35619,22 @@ function woreToday() {
      marking stays available in Calendar/planner and the pop-out. */
   var hero = document.getElementById("today-hero");
   if (hero) {
-    var sx = null, sy = null;
+    var sx = null, sy = null, lastSwipe841 = 0;
+    function heroSwipe841(dir) {
+      var now = Date.now();
+      if (now - lastSwipe841 < 380) return;
+      lastSwipe841 = now;
+      if (dir < 0) { if (typeof dealAnotherToday === "function") dealAnotherToday(); }
+      else if (typeof heroGoBack56 === "function") heroGoBack56();
+    }
+    function swipeFrom(dx, dy, target) {
+      if (target && target.closest && target.closest("button, a, input, textarea, .cdd, .cdd-menu")) return;
+      if (!(Math.abs(dx) > 40) || !(Math.abs(dx) > Math.abs(dy) * 1.3)) return;
+      heroSwipe841(dx < 0 ? -1 : 1);
+    }
     hero.addEventListener("touchstart", function (e) {
       if (e.touches.length !== 1) { sx = null; return; }
+      if (e.target.closest && e.target.closest("button, a, input, .cdd")) { sx = null; return; }
       sx = e.touches[0].clientX; sy = e.touches[0].clientY;
     }, { passive: true });
     hero.addEventListener("touchend", function (e) {
@@ -34278,14 +35642,23 @@ function woreToday() {
       var dx = e.changedTouches[0].clientX - sx;
       var dy = e.changedTouches[0].clientY - sy;
       sx = null;
-      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
-      if (dx < 0) { dealAnotherToday(); }
-      /* Build .56 (amendment): swipe right goes BACK to the look
-         dealt before this one — for the verdict the user meant
-         to give it. Like keeps its button. At the bottom of the
-         stack the gesture does nothing. */
-      else if (typeof heroGoBack56 === "function") { heroGoBack56(); }
+      swipeFrom(dx, dy, e.target);
     }, { passive: true });
+    /* Pointer covers iOS PWA, trackpad and mouse drag. touch-action: pan-y
+       keeps vertical scrolling; a clearly horizontal drag cycles the look. */
+    var px = null, py = null, pid = null;
+    hero.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      if (e.target.closest && e.target.closest("button, a, input, textarea, .cdd")) return;
+      px = e.clientX; py = e.clientY; pid = e.pointerId;
+    });
+    hero.addEventListener("pointerup", function (e) {
+      if (pid !== e.pointerId || px === null) return;
+      var dx = e.clientX - px, dy = e.clientY - py;
+      px = null; pid = null;
+      swipeFrom(dx, dy, e.target);
+    });
+    hero.addEventListener("pointercancel", function () { px = null; pid = null; });
   }
   /* Build .56 (amendment): the same swipe-right go-back on the
      Ideas deal surface — back to the previous six dealt. */
@@ -35061,7 +36434,8 @@ function renderWeekPlan() {
     var wornImg = "";
     for (var wi = 0; wi < worn.length; wi++) { if (worn[wi].img) { wornImg = worn[wi].img; break; } }
     var fc = (typeof dailyForecast !== "undefined" && dailyForecast) ? dailyForecast[iso] : null;
-    var fcTxt = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" + (fc.label ? " " + fc.label.replace("Thunderstorms", "T-storms").replace("Thunderstorm", "T-storm") : "") : "";
+    var fcFull = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" + (fc.label ? " " + fc.label : "") : "";
+    var fcTxt = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" : "";
     var cls = "wp-day" + (iso === todayIso ? " wp-today" : "") + (iso < todayIso ? " wp-past" : "") + (look ? " wp-planned" : "") + (worn.length ? " wp-hasworn" : "");
     /* Worn wins the CELL DISPLAY only — the plan underneath is
        untouched and still shows in the day sheet. */
@@ -35069,12 +36443,12 @@ function renderWeekPlan() {
     var imgTitle = wornImg ? worn[0].title : (look ? look.title : "");
     var aria = esc(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) +
       (worn.length ? " — wore: " + esc(worn.map(function (w) { return w.title; }).join(", ")) : "") +
-      (look ? " — planned: " + esc(look.title) : "");
+      (look ? " — planned: " + esc(look.title) : "") + (fcFull ? " — " + esc(fcFull) : "");
     html += '<div class="' + cls + '" data-plan-day="' + iso + '" role="button" tabindex="0" aria-label="' + aria + '">' +
       (worn.length > 1 ? '<span class="wp-worn-count">' + worn.length + '</span>' : "") +
       '<span class="wp-dow">' + esc(d.toLocaleDateString(undefined, { weekday: "short" })) + '</span>' +
       '<span class="wp-date">' + d.getDate() + '</span>' +
-      '<span class="wp-fc">' + esc(fcTxt) + '</span>' +
+      '<span class="wp-fc"' + (fcFull ? ' title="' + esc(fcFull) + '"' : "") + '>' + esc(fcTxt) + '</span>' +
       (img
         ? '<img class="wp-thumb" src="' + esc(img) + '" alt="' + esc(imgTitle) + '" loading="lazy" decoding="async" data-popout="' + esc(img) + '" data-popout-alt="' + esc(imgTitle) + '" />'
         : (worn.length ? '<span class="wp-empty" aria-hidden="true">✓</span>' : '<span class="wp-empty" aria-hidden="true">+</span>')) +
@@ -35315,11 +36689,22 @@ function closePlanSheet() {
 document.addEventListener("click", function (e) {
   var back = e.target.closest ? e.target.closest("[data-back-wardrobe]") : null;
   if (back) { if (typeof switchTab === "function") switchTab("wardrobe"); return; }
-  if (e.target.closest && e.target.closest("#closet-add-entry")) { if (typeof switchTab === "function") switchTab("add"); return; }
+  if (e.target.closest && e.target.closest("#closet-add-entry")) {
+    if (typeof wardFilter !== "undefined" && wardFilter === "Watches") {
+      watchListTab = "add";
+      if (typeof renderWatches === "function") renderWatches();
+      var host = document.getElementById("panel-watches");
+      if (host) try { host.scrollIntoView({ block: "start" }); } catch (err) {}
+      return;
+    }
+    if (typeof switchTab === "function") switchTab("add");
+    return;
+  }
 });
 
 /* ---------- Profile measurements — grouped, two columns (13) ---------- */
 (function profileGroups() {
+  if (document.querySelector("#profile-form .profile-sec")) return;
   var grid = document.querySelector("#profile-form .profile-grid");
   if (!grid) return;
   function wrap(id) { var el = document.getElementById(id); return el ? el.parentElement : null; }
@@ -38961,7 +40346,7 @@ function analyzeFilePiece(card, job, ix) {
   function feedInputs() {
     var feedPool = (typeof homeOwnedPhotoPieces742 === "function") ? homeOwnedPhotoPieces742() : null;
     var feedOnly = feedPool ? (feedPool.own.length >= 3 ? feedPool.own : feedPool.withPhoto) : null;
-    return { only: feedOnly && feedOnly.length >= 3 ? feedOnly : null, level: feedLevel(), temp: (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : undefined };
+    return { only: feedOnly && feedOnly.length >= 3 ? feedOnly : null, level: feedLevel(), temp: (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78 };
   }
   window.__cfInputs81 = feedInputs;
   function appendLooks(n) {
@@ -38970,19 +40355,60 @@ function analyzeFilePiece(card, job, ix) {
     /* .81: the next looks were dealt ahead, off the main thread (endless
        module); the synchronous deal is only the fallback */
     var looks = (window.__endless81 && window.__endless81.take) ? window.__endless81.take(n, exclude, fi) : null;
-    if (!looks) looks = composerLooks({ count: n, level: fi.level, exclude: exclude, only: fi.only, slot: "feed", renderedFirst: true, temp: fi.temp });
-    if (!looks.length) return 0;
+    if (!looks || !looks.length) looks = composerLooks({ count: n, level: fi.level, exclude: exclude, only: fi.only, slot: "feed", renderedFirst: false, temp: fi.temp });
+    if (looks && looks.length && typeof lookFitsDress841 === "function") {
+      var lvMine = fi.level;
+      if (lvMine) looks = looks.filter(function (l) { return lookFitsDress841(l, lvMine); });
+    }
+    if (!looks || !looks.length) return 0;
     var html = "";
     looks.forEach(function (l) { html += cardHTML(l, feedLooks.length); feedLooks.push(l); });
     grid.insertAdjacentHTML("beforeend", html);
     composerMarkSeen(looks);
     return looks.length;
   }
+  function mineEmpty841() {
+    var host = document.getElementById("outfits-mine-view");
+    if (!host) return;
+    var el = document.getElementById("mine-empty-841");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "mine-empty-841";
+      el.className = "mine-empty-841";
+      el.hidden = true;
+      el.innerHTML = '<p>No saved looks yet — build one with +</p><button type="button" class="btn-ink" data-mine-mix>See Mix</button>';
+      host.appendChild(el);
+      el.addEventListener("click", function (ev) {
+        var b = ev.target.closest && ev.target.closest("[data-mine-mix]");
+        if (!b) return;
+        var mix = document.querySelector("[data-pv-f='withmine']");
+        if (mix) mix.click();
+        else {
+          window.outfitsMode = "inspo";
+          if (typeof window.showInspoView === "function") window.showInspoView("withmine");
+          if (typeof syncOutfitsToggle === "function") syncOutfitsToggle();
+        }
+      });
+    }
+    var onMine = window.outfitsMode !== "inspo";
+    var cards = grid && grid.children ? grid.children.length : 0;
+    var savedN = 0;
+    try {
+      savedN = (typeof savedLooks !== "undefined" ? savedLooks : []).filter(function (l) { return l && (l.composer || l.fwPieces || l.verdict === "like"); }).length;
+    } catch (e) {}
+    var savedGrid = document.getElementById("saved-grid");
+    var savedShown = savedGrid && savedGrid.offsetParent && savedGrid.textContent && /No saved|No outfits/.test(savedGrid.textContent) ? 0 : (savedGrid && savedGrid.querySelector(".card, article, .option-card") ? 1 : 0);
+    el.hidden = !onMine || cards > 0 || savedN > 0 || savedShown > 0;
+  }
+  window.mineEmpty841 = mineEmpty841;
   function resetFeed() {
     feedLooks = [];
     grid.innerHTML = "";
     feedSig = stateSig();
+    var feedEl = document.getElementById("closet-feed");
+    if (feedEl && window.outfitsMode !== "inspo") feedEl.hidden = false;
     appendLooks(12);
+    mineEmpty841();
   }
   function syncFeed(force) {
     var want = feedWanted();
@@ -38997,6 +40423,7 @@ function analyzeFilePiece(card, job, ix) {
     var panel = document.getElementById("panel-studio");
     if (!(looksPanel && !looksPanel.hidden) && panel && panel.hidden && !force) return;
     if (force || !feedLooks.length || feedSig !== stateSig()) resetFeed();
+    if (typeof mineEmpty841 === "function") mineEmpty841();
   }
   window.__cfLooks81 = function () { return feedLooks; };
   window.__cfReset81 = function () { if (typeof feedWanted === "function" && !feedWanted()) { feedSig = null; return; } resetFeed(); };
@@ -40115,7 +41542,8 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     tries = tries || 0;
     function again() { if (tries < 2 && !EDIT_CATALOG.length) setTimeout(function () { editLoadCatalog(tries + 1); }, tries ? 4000 : 1500); }
     try {
-      fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) {
+      var early = (window.__takeEarly803 && window.__takeEarly803("editCat")) || null;
+      (early || fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r && r.ok ? r.json() : null; })).then(function (j) {
         if (!j) { again(); return; }
         EDIT_CATALOG = editNormalizeCatalog(j);
         /* gap fillers (trousers above all) also lead Shop the look */
@@ -40273,7 +41701,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
   }
 
   /* ---------- Saved ---------- */
-  var GROUPS = ["Category", "Colour", "Search", "Brand", "Store", "Price"];
+  var GROUPS = ["Category", "Colour", "Search", "Brand", "Store"];
   function band(p) { return typeof p !== "number" ? "No price" : p < 250 ? "Under $250" : p < 500 ? "$250–500" : p < 1000 ? "$500–1,000" : "$1,000+"; }
   var BAND_ORDER = ["Under $250", "$250–500", "$500–1,000", "$1,000+", "No price"];
   function savedList() {
@@ -40727,7 +42155,15 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     var p = document.getElementById("panel-find");
     if (p) p.setAttribute("data-edit-mode", v);
   }
-  window.editShow = show;
+  /* Opening Saved, Build, or Ask must actually show that view.
+     A carried Shop the look (data-stl) covers those panes with
+     display:none. Searches and Curate keep the carried look —
+     renderTheEdit and switchTab("find") call show() directly and
+     still leave it open. */
+  window.editShow = function (v) {
+    if (v !== "searches" && v !== "curate" && typeof window.clearFindLookMode === "function") window.clearFindLookMode();
+    show(v);
+  };
   /* Build .77: shared with Ask and Inspo */
   window.editProductBySku = function (sku) {
     for (var i = 0; i < EDIT_CATALOG.length; i++) if (EDIT_CATALOG[i].sku === sku) return EDIT_CATALOG[i];
@@ -41962,6 +43398,11 @@ window.inspoView = "withmine";
     return rs.length ? { cut: window.cutoutFor(rs[h % rs.length]), render: rs[h % rs.length] } : null;
   }
   function guestHero782(forceTitle) {
+    /* A composed closet look keeps its own title. The guest stand-in
+       ("From your closet") is only for a truly empty hero — never
+       painted over the outfit of the day, or a reload shows a
+       different name than the one just on screen. */
+    if (typeof todayLook !== "undefined" && todayLook && ((todayLook.fwPieces && todayLook.fwPieces.length) || todayLook.dressEmpty)) return false;
     if (userDeal782) { gOff782++; userDeal782 = false; }
     var g = guestSrc782(); if (!g) return false;
     var before = hero.classList.contains("hero-solo") ? img.getAttribute("src") : null;
@@ -41986,29 +43427,74 @@ window.inspoView = "withmine";
     if (src && typeof window.cutoutFor === "function" && !window.cutoutFor(src)) src = null;
     /* .78.2c: a render he gave a thumbs-down never comes back */
     if (src && typeof isDislikedImg === "function" && isDislikedImg(src)) src = null;
-    if (!src) {
-      /* Home only deals looks he can be seen in: skip one with no render */
-      var lkey = todayLook.composerKey || todayLook.id || todayLook.img || "", acc = null, dayIso = typeof localTodayISO === "function" ? localTodayISO() : "";
-      try { acc = JSON.parse(localStorage.getItem("wardrobe.ootdNoRender782") || "null"); } catch (e) {}
-      var accepted = acc && acc.date === dayIso && acc.key === lkey && !userDeal782;
-      if (!accepted && !anyRenderable782()) accepted = true; /* none of his looks has a render yet: don't churn */
-      if (!accepted && skip < 30 && typeof dealAnotherToday === "function") { skip++; setTimeout(dealAnotherToday, 0); return; }
-      /* nothing he can be seen in today: settle on this look for the day (stable across opens) */
-      if (!accepted && !userDeal782) { try { localStorage.setItem("wardrobe.ootdNoRender782", JSON.stringify({ date: dayIso, key: lkey })); } catch (e) {} if (typeof persistOpeningLook === "function") try { persistOpeningLook(todayLook); } catch (e) {} }
+    function paintClosetFlatlay782(look) {
+      if (!look || !collage) return false;
+      if (typeof window.lookHeroVisible84 === "function") {
+        var ob = typeof onbodyForLook === "function" ? onbodyForLook(look) : null;
+        if (ob) return false; /* a cut-out path should have been used */
+        if (!window.lookHeroVisible84(look)) return false;
+      }
+      var html = "";
+      try { if (typeof window.composerFlatlayHTML === "function") html = window.composerFlatlayHTML(look, true) || ""; } catch (e) { html = ""; }
+      if (!html || html.indexOf("<img ") === -1) {
+        var pcs = piecesOf(look).filter(function (p) { var ph = photoOf(p); return ph && !/^data:image\/svg/.test(ph) && !(typeof isCameraSelfieImg === "function" && isCameraSelfieImg(ph)) && !SELFIE782.test(ph); });
+        if (!pcs.length) return false;
+        html = '<span class="flatlay fl-n' + pcs.length + '">' + pcs.map(function (p) {
+          return '<span class="fl-cell"><img src="' + esc(photoOf(p)) + '" alt="' + esc(p.name || "") + '" decoding="async" /></span>';
+        }).join("") + "</span>";
+      }
+      collage.innerHTML = html;
+      collage.classList.add("flatlay-host");
+      collage.hidden = false;
+      hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
+      hero.classList.add("hero-flatlay");
+      if (img) { img.hidden = true; img.removeAttribute("data-render"); }
+      return true;
+    }
+    if (todayLook && todayLook.dressEmpty) {
       skip = 0; booted782 = true; userDeal782 = false;
-      /* nothing rendered to show: one photo, never a tile grid */
+      /* Keep a stable frame so the hero does not collapse to 0px. */
+      if (collage) {
+        collage.innerHTML = '<span class="flatlay fl-n1"><span class="fl-cell fl-swatch" style="background:transparent" role="img" aria-label="No matching look"></span></span>';
+        collage.classList.add("flatlay-host");
+        collage.hidden = false;
+      }
+      hero.classList.add("hero-flatlay");
+      hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
+      if (img) { img.hidden = true; img.removeAttribute("src"); img.removeAttribute("data-render"); }
+      var emptyNm = document.getElementById("today-name");
+      if (emptyNm) emptyNm.textContent = todayLook.title || "Nothing in your closet for this dress level.";
+      return;
+    }
+    if (!src) {
+      /* .84.1: this dress level's own pieces, as a flat-lay. Never a
+         random on-body cut-out from another level, and never a raw selfie. */
+      if (paintClosetFlatlay782(todayLook)) {
+        skip = 0; booted782 = true; userDeal782 = false;
+        return;
+      }
+      var pcsFb = piecesOf(todayLook);
+      if (pcsFb.length && collage) {
+        collage.innerHTML = '<span class="flatlay fl-n' + pcsFb.length + '">' + pcsFb.map(function (p) {
+          var ph = photoOf(p);
+          if (ph && !/^data:image\/svg/.test(ph) && !(typeof isCameraSelfieImg === "function" && isCameraSelfieImg(ph)) && !SELFIE782.test(ph)) {
+            return '<span class="fl-cell"><img src="' + esc(ph) + '" alt="' + esc(p.name || "") + '" decoding="async" /></span>';
+          }
+          return '<span class="fl-cell fl-swatch" style="background:' + esc(p.colourHex || "#d9cfbd") + '" role="img" aria-label="' + esc(p.name || "") + '"></span>';
+        }).join("") + "</span>";
+        collage.classList.add("flatlay-host");
+        collage.hidden = false;
+        hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
+        hero.classList.add("hero-flatlay");
+        if (img) { img.hidden = true; img.removeAttribute("data-render"); }
+        skip = 0; booted782 = true; userDeal782 = false;
+        return;
+      }
+      skip = 0; booted782 = true; userDeal782 = false;
       if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
-      /* .78.9e: the hero only ever shows a transparent cut-out — when this
-         look has none, one of his cut-outs stands in (never the plain
-         studio render, never a piece photo) */
-      if (guestHero782(true)) return;
-      var fb = (typeof lookImg === "function" && lookImg(todayLook)) || "";
-      if (SELFIE782.test(fb) || (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(fb))) fb = "";
-      if (!fb || /^data:image\/svg/.test(fb)) { var pp = piecesOf(todayLook).map(photoOf).filter(Boolean); fb = pp[0] || fb; }
-      if (fb && img.getAttribute("src") !== fb) img.setAttribute("src", fb);
-      img.removeAttribute("data-render"); hero.classList.remove("has-cut");
-      hero.classList.add("hero-solo");
-      img.hidden = false; placeHero(); return;
+      hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
+      if (img) { img.hidden = true; img.removeAttribute("data-render"); }
+      return;
     }
     /* .78.2c: the day's opening look is the first one he can be seen in —
        keep THAT as the outfit of the day so every app open shows it */
@@ -42020,6 +43506,7 @@ window.inspoView = "withmine";
     /* .78.5b: his cut-out on the closet backdrop when one exists */
     var shown = (typeof window.cutoutFor === "function" && window.cutoutFor(src)) || src;
     hero.classList.toggle("has-cut", shown !== src);
+    hero.classList.remove("hero-flatlay");
     img.setAttribute("data-render", src);
     swapHero(shown);
     img.hidden = false;
@@ -42081,6 +43568,7 @@ window.inspoView = "withmine";
   function watchdog() {
     clearTimeout(wd); if (!wdT0) wdT0 = Date.now();
     wd = setTimeout(function () {
+      if (hero.classList.contains("hero-flatlay")) { wdT0 = 0; wdTries = 0; return; }
       if (!hero.classList.contains("hero-solo") || (typeof currentTab !== "undefined" && currentTab !== "today")) { wdT0 = 0; return; }
       if (heroOnScreen()) { wdTries = 0; wdT0 = 0; hero.querySelectorAll(".hero-xfade").forEach(function (x) { if (x.classList.contains("out")) x.remove(); }); return; }
       var src = img.getAttribute("src") || "", failed = img.complete && !img.naturalWidth && isCutSrc(src);
@@ -42113,6 +43601,7 @@ window.inspoView = "withmine";
        cut-out has shown, a Next crossfades cut-out to cut-out (the old one
        stays on screen until the new one is decoded), never via the blur */
     if (ready) shownOnce80 = true;
+    if (hero.classList.contains("hero-flatlay")) { if (hero.classList.contains("lq-show")) hero.classList.remove("lq-show"); return; }
     if (shownOnce80) { if (hero.classList.contains("lq-show")) hero.classList.remove("lq-show"); return; }
     if (!ready) { var want = lqFor(src); if (lqEl.getAttribute("src") !== want) lqEl.setAttribute("src", want); lqPlace(); }
     hero.classList.toggle("lq-show", !ready);
@@ -42582,7 +44071,7 @@ window.inspoView = "withmine";
      the service worker is told to keep the outfit of the day and the next
      five in Cache Storage. Nothing competes with the hero while it loads. */
   var warm = {}, warmQ = [], Q = null, dealing = false;
-  window.clearHeroLookahead = function () { Q = null; };
+  window.clearHeroLookahead = function () { Q = null; recentT = []; };
   var ric2 = window.requestIdleCallback || function (f) { return setTimeout(f, 300); };
   var warmP = [];
   function warmOne(src, hi) {
@@ -42678,8 +44167,11 @@ window.inspoView = "withmine";
         openBgWhenWarm();
       }, { timeout: 600 });
     }
-    /* never compete with the hero itself */
-    if (him && !(him.complete && him.naturalWidth)) { var once = false, go = function () { if (once) return; once = true; run(); }; him.addEventListener("load", go, { once: true }); setTimeout(go, 6000); }
+    /* Wait only while a cut-out is actually loading. A flat-lay hides
+       #today-img, so waiting on its load event never fires and the
+       cut-out warm-up misses the first few seconds. */
+    var cutLoading = him && !him.hidden && him.getAttribute("src") && !(him.complete && him.naturalWidth);
+    if (cutLoading) { var once = false, go = function () { if (once) return; once = true; run(); }; him.addEventListener("load", go, { once: true }); him.addEventListener("error", go, { once: true }); setTimeout(go, 6000); }
     else run();
   }
   window.heroPrefetch784 = prefetch;
@@ -42940,7 +44432,8 @@ window.inspoView = "withmine";
     if (iv) iv.hidden = isMine;
     if (isMine) ensureSoon("renderSaved");
     else window.showInspoView(window.inspoView || "icons");
-    if (typeof composerSyncFeed === "function") composerSyncFeed(false);
+    var mineGrid841 = document.getElementById("cf-grid");
+    if (typeof composerSyncFeed === "function") composerSyncFeed(!!(isMine && mineGrid841 && !mineGrid841.children.length));
     window.prelayOutfits796();
   };
   window.showInspoView = function (v) {
@@ -43187,10 +44680,10 @@ window.inspoView = "withmine";
   };
   if (typeof window.switchTab === "function") {
     var _st81 = window.switchTab;
-    window.switchTab = function (name) { var r = _st81.apply(this, arguments); if (name === "looks") window.endlessLoad81(); return r; };
+    window.switchTab = function (name) { var r = _st81.apply(this, arguments); if (name === "looks" || name === "ideas") window.endlessLoad81(); return r; };
     try { switchTab = window.switchTab; } catch (e) {}
   }
-  document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("#outfits-inspo, [data-inspo-view], #lf-row, [data-tab='looks'], [data-section='looks']")) window.endlessLoad81(); }, true);
+  document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("#outfits-inspo, [data-inspo-view], #lf-row, [data-tab='looks'], [data-section='looks'], #section-ideas, [data-section='ideas']")) window.endlessLoad81(); }, true);
   window.addEventListener("load", function () {
     setTimeout(function () { (window.requestIdleCallback || function (f) { setTimeout(f, 200); })(function () { window.endlessLoad81(); }, { timeout: 5000 }); }, 7000);
   });
@@ -43334,10 +44827,10 @@ window.inspoView = "withmine";
     if (p.hex && lens.hex && lens.hex.length) {
       var best = 999;
       for (var i = 0; i < lens.hex.length; i++) { var d = hexDist(lens.hex[i], p.hex); if (d < best) best = d; }
-      sc += best < 22 ? 2 : best < 45 ? 1.2 : best < 75 ? 0.2 : -1.4;
+      sc += best < 22 ? 4 : best < 45 ? 2.2 : best < 75 ? 0.25 : -2.2;
     }
     var nm = p.nm || "";
-    if (nm && lens.words) for (var w in lens.words) if (nm.indexOf(w) !== -1) sc += lens.words[w];
+    if (nm && lens.words) for (var w in lens.words) if (nm.indexOf(w) !== -1) sc += lens.words[w] * 2;
     return sc;
   }
   function rulesAllow(p, ctx) {
@@ -43364,8 +44857,9 @@ window.inspoView = "withmine";
       if (wv <= 0) return;
       var lens = iconLensOf(ic);
       if (!lens) return;
-      acc += lensPiece(p, lens) * wv;
-      tot += wv;
+      var pw = Math.pow(wv, 2.5);
+      acc += lensPiece(p, lens) * pw;
+      tot += pw;
     });
     return tot ? acc / tot : 0;
   }
@@ -43435,7 +44929,12 @@ window.inspoView = "withmine";
         '<input type="range" min="0" max="' + MAX + '" step="1" value="' + val + '" aria-label="' + escAttr(ic.name) + ' weighting" />' +
         '<span class="cw-val">' + (val === 0 ? "Off" : val) + "</span></label>";
     });
-    host.innerHTML = h || '<p class="cw-note">Icons are still loading\u2026</p>';
+    if (!h) {
+      host.innerHTML = '<p class="cw-note">Icons are still loading\u2026</p>';
+      if (typeof window.lazyOn802 === "function") window.lazyOn802("STYLE_ICONS", function () { if (!host.querySelector(".cw-row")) paintWeights(); });
+      return;
+    }
+    host.innerHTML = h;
   }
   function setSlider(id, val) {
     var w = loadWeights();
@@ -43586,11 +45085,11 @@ window.inspoView = "withmine";
 
   /* ---------- data for the worker ---------- */
   var CATALOG = [], catAt = 0, byKey = {};
-  var CAT_MAP = { trousers: "Trousers", jeans: "Jeans", shorts: "Shorts", shoes: "Shoes", blazer: "Blazers", belt: "Belts", sunglasses: "Sunglasses" };
+  var CAT_MAP = { trousers: "Trousers", jeans: "Jeans", shorts: "Shorts", shoes: "Shoes", blazer: "Blazers", belt: "Belts", sunglasses: "Sunglasses", tees: "Tees", tee: "Tees", "t-shirt": "Tees", "t-shirts": "Tees", polos: "Polos", polo: "Polos" };
   function catItem(e) {
     var n = String(e.name || ""), c = String(e.cat || "").toLowerCase(), cat = CAT_MAP[c];
-    if (c === "knitwear") cat = /polo/i.test(n) ? "Polos" : "Sweaters";
-    else if (c === "shirt" || c === "shirts") cat = /polo/i.test(n) ? "Polos" : /\btee\b|t-shirt/i.test(n) ? "Tees" : "Shirts";
+    if (c === "knitwear") cat = /polo/i.test(n) ? "Polos" : /\btee\b|t-shirt|t shirt/i.test(n) ? "Tees" : "Sweaters";
+    else if (c === "shirt" || c === "shirts") cat = /polo/i.test(n) ? "Polos" : /\btee\b|t-shirt|t shirt/i.test(n) ? "Tees" : "Shirts";
     else if (c === "outerwear") cat = /blazer|sport coat|jacket in wool/i.test(n) ? "Blazers" : /overcoat|coat\b|trench|topcoat/i.test(n) ? "Coats" : "Jackets";
     else if (c === "shorts" && /swim|trunk/i.test(n)) cat = "Bathing suits";
     if (!cat || !e.sku || !e.img || !(e.price > 0)) return null;
@@ -43614,7 +45113,7 @@ window.inspoView = "withmine";
   }
   function ownItems() {
     var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
-    return list.filter(function (i) { return i && i.id && i.photo && !i.laundry && String(i.id).indexOf("seed-") !== 0; });
+    return list.filter(function (i) { return i && i.id && i.photo && !i.laundry; });
   }
   function lite(i) {
     var o = { id: i.id, name: i.name, category: i.category, colourName: i.colourName, colourHex: i.colourHex, addedISO: i.addedISO };
@@ -43681,8 +45180,8 @@ window.inspoView = "withmine";
     if (!W || !ready || asking[feed] || BUF[feed].length >= WANT[feed]) return;
     asking[feed] = true;
     var q = { type: "deal", id: ++reqId, feed: feed, gen: gen[feed], n: 12 };
+    var fi = window.__cfInputs81 ? window.__cfInputs81() : {};
     if (feed === "mine") {
-      var fi = window.__cfInputs81 ? window.__cfInputs81() : {};
       var p = typeof composerPrefs === "function" ? composerPrefs() : { recent: [], banned: {}, exposure: {} };
       var shown = (window.__cfLooks81 ? window.__cfLooks81() : []).map(function (l) { return l.composerKey; });
       var buf = BUF.mine.map(function (o) { return o.key; });
@@ -43691,6 +45190,7 @@ window.inspoView = "withmine";
       q.onlyKeys = typeof onbodyKeys === "function" ? onbodyKeys() : null;
     } else {
       q.level = level(); q.prefs = S.prefs; q.banned = S.hidden; q.price = priceState();
+      q.temp = (typeof fi.temp === "number") ? fi.temp : ((typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78);
       q.recent = S.recent.concat(BUF[feed].map(function (o) { return o.key; }), shownKeys(feed));
     }
     q.lens = lensData();
@@ -43784,7 +45284,8 @@ window.inspoView = "withmine";
       var fi = window.__cfInputs81 ? window.__cfInputs81() : {};
       var q = { type: "measure", id: id, feed: opts.feed || "allnew", n: opts.n || 80, gen: 0 };
       q.level = opts.level != null ? opts.level : (fi.level || level());
-      q.temp = fi.temp; q.prefs = (opts.feed === "mine" && typeof composerEffectivePrefs === "function") ? composerEffectivePrefs() : (S.prefs || { items: {}, pairs: {} });
+      q.temp = typeof opts.temp === "number" ? opts.temp : (typeof fi.temp === "number" ? fi.temp : 78);
+      q.prefs = (opts.feed === "mine" && typeof composerEffectivePrefs === "function") ? composerEffectivePrefs() : (S.prefs || { items: {}, pairs: {} });
       q.exposure = {}; q.recent = []; q.banned = {}; q.price = priceState();
       q.lens = opts.lens === undefined ? lensData() : opts.lens;
       q.weights = opts.weights || (window.iconWeights81 && window.iconWeights81.state && window.iconWeights81.state());
@@ -43922,6 +45423,7 @@ window.inspoView = "withmine";
     while (out.length < 8 && BUF[feed].length) {
       var o = BUF[feed].shift();
       if (f.keys[o.key] || S.hidden[o.key]) continue;
+      if (S.lens && (!o.src || o.src.t !== "icon" || o.src.id !== S.lens)) continue;
       var l = toLook(o, feed);
       if (l && lookPriceOk(l)) { out.push(l); S.recent.push(o.key); }
     }
@@ -44203,7 +45705,9 @@ window.inspoView = "withmine";
     var fab = document.createElement("button");
     fab.type = "button"; fab.id = "pv-fab"; fab.className = "pv-fab"; fab.setAttribute("aria-label", "Build a look");
     fab.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
-    panel.appendChild(fab);
+    var pvBar = top.querySelector(".pv-bar");
+    if (pvBar) pvBar.appendChild(fab);
+    else panel.appendChild(fab);
     function short(n) { var p = String(n || "").split(" "); return p.length > 1 ? p[p.length - 1] : p[0]; }
     function thumb(ic) { var l = (ic.looks || [])[0]; return (ic.photo || ic.img || (l && l.img)) || ""; }
     function curFeed() { return window.outfitsMode === "inspo" ? (window.inspoView === "allnew" ? "allnew" : "withmine") : "mine"; }
@@ -44212,7 +45716,14 @@ window.inspoView = "withmine";
       var f = curFeed();
       top.querySelectorAll("[data-pv-f]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-pv-f") === f ? "true" : "false"); });
       var ic = lensIcon(), pills = document.getElementById("pv-pills"), h = "";
-      if (ic) h += '<button type="button" class="pv-pill" data-pv-clear="lens" aria-label="Remove ' + E(ic.name) + ' inspiration">' + (thumb(ic) ? '<img src="' + E(thumb(ic)) + '" alt="" />' : "") + "<span>" + E(short(ic.name)) + '</span><b aria-hidden="true">\u00d7</b></button>';
+      var lensN = 0;
+      if (ic) {
+        var feedNow = F[f];
+        if (feedNow && feedNow.looks) lensN = feedNow.looks.filter(function (l) { return l && l.src && l.src.id === ic.id; }).length;
+        var mineGridN = document.getElementById("cf-grid");
+        if (f === "mine" && mineGridN) lensN = mineGridN.children.length;
+      }
+      if (ic) h += '<button type="button" class="pv-pill" data-pv-clear="lens" aria-label="Remove ' + E(ic.name) + ' inspiration">' + (thumb(ic) ? '<img src="' + E(thumb(ic)) + '" alt="" />' : "") + "<span>" + E(short(ic.name)) + (lensN ? " " + lensN : "") + '</span><b aria-hidden="true">\u00d7</b></button>';
       if (S.likedOnly) h += '<button type="button" class="pv-pill" data-pv-clear="liked" aria-label="Show all looks"><span>Liked</span><b aria-hidden="true">\u00d7</b></button>';
       if (f !== "mine" && priceActive()) h += '<button type="button" class="pv-pill" data-pv-clear="price" aria-label="Any price"><span>' + E(priceLabel()) + '</span><b aria-hidden="true">\u00d7</b></button>';
       pills.innerHTML = h; pills.hidden = !h;
@@ -44430,10 +45941,10 @@ function lensRaw(p, lens) {
   var sc = 0;
   if (p.hex && lens.hex && lens.hex.length) {
     var best = 999; for (var i = 0; i < lens.hex.length; i++) { var d = hexDist(lens.hex[i], p.hex); if (d < best) best = d; }
-    sc += best < 22 ? 2 : best < 45 ? 1.2 : best < 75 ? 0.2 : -1.4;
+    sc += best < 22 ? 4 : best < 45 ? 2.2 : best < 75 ? 0.25 : -2.2;
   }
   var nm = p.nm || "";
-  if (nm && lens.words) for (var w in lens.words) if (nm.indexOf(w) !== -1) sc += lens.words[w];
+  if (nm && lens.words) for (var w in lens.words) if (nm.indexOf(w) !== -1) sc += lens.words[w] * 2;
   return sc;
 }
 function setData(d) {
@@ -44470,26 +45981,40 @@ function dealMine(q) {
   if (q.lens && outs.length) {
     /* deal a wider hand, keep the looks closest to the Icon */
     var have2 = outs.map(function (x) { return x.key; });
-    var extra = mineDeck.deal(q.n * 8, Object.assign({}, o, { recent: q.recent.concat(have2) })) || [];
+    var extra = mineDeck.deal(q.n * 20, Object.assign({}, o, { recent: q.recent.concat(have2) })) || [];
     extra.forEach(function (x) { if (have2.indexOf(x.key) === -1) { have2.push(x.key); outs.push(x); } });
-    outs.forEach(function (x) { var t = 0; (x.ids || []).forEach(function (id) { t += lensPiece(MINEI[id], q.lens); }); x._ls = t + rng() * 1.0; });
+    outs.forEach(function (x) { var t = 0; (x.ids || []).forEach(function (id) { t += lensPiece(MINEI[id], q.lens); }); x._ls = t + rng() * 0.12; });
+    outs = outs.filter(function (x) { return x._ls >= 4; });
     outs.sort(function (a, b) { return b._ls - a._ls; });
     outs = outs.slice(0, q.n);
   } else if (outs.length && weightLenses(q).length) {
     /* no single Icon override: blend per-level icon weights into the re-rank */
     var haveW = outs.map(function (x) { return x.key; });
-    var extraW = mineDeck.deal(q.n * 8, Object.assign({}, o, { recent: (q.recent || []).concat(haveW) })) || [];
+    var extraW = mineDeck.deal(q.n * 20, Object.assign({}, o, { recent: (q.recent || []).concat(haveW) })) || [];
     extraW.forEach(function (x) { if (haveW.indexOf(x.key) === -1) { haveW.push(x.key); outs.push(x); } });
     var Lset = weightLenses(q), tw = 0;
-    Lset.forEach(function (L) { tw += L.w; });
+    Lset.forEach(function (L) { L.pw = Math.pow(L.w, 2.5); tw += L.pw; });
+    var focus = Lset.filter(function (L) { return L.w >= 8; });
     outs.forEach(function (x) {
-      var t = 0;
+      var scores = {}, t = 0, othersMax = -1e9;
       Lset.forEach(function (L) {
         var s = 0;
         (x.ids || []).forEach(function (id) { s += lensPiece(MINEI[id], L.lens); });
-        t += s * (L.w / tw);
+        scores[L.ic.id] = s;
+        t += s * (L.pw / tw);
       });
-      x._ls = t + rng() * 1.0;
+      /* When an icon is at 8+, prefer looks that actually lead on that
+         icon's lens — not looks that score high on everyone, which used
+         to leave Kraft ahead of Squarzi even in a Squarzi-weighted casual feed. */
+      if (focus.length && tw) {
+        var fs = 0, fw = 0;
+        focus.forEach(function (L) { fs += scores[L.ic.id] * L.pw; fw += L.pw; });
+        Lset.forEach(function (L) {
+          if (focus.indexOf(L) === -1 && scores[L.ic.id] > othersMax) othersMax = scores[L.ic.id];
+        });
+        t = fs / fw - 0.45 * (othersMax > -1e8 ? othersMax : 0);
+      }
+      x._ls = t + rng() * 0.12;
     });
     outs.sort(function (a, b) { return b._ls - a._ls; });
     outs = outs.slice(0, q.n);
@@ -44524,16 +46049,19 @@ function weightLenses(q) {
   return out;
 }
 function iconShare(feed, wt) {
-  var tot = 0, on = 0;
-  ICONS.forEach(function (ic) { var w = +wt[ic.id] || 0; if (w > 0) { tot += w; on++; } });
+  var tot = 0, on = 0, maxW = 0;
+  ICONS.forEach(function (ic) { var w = +wt[ic.id] || 0; if (w > 0) { tot += w; on++; if (w > maxW) maxW = w; } });
   if (!on || tot <= 0) return 0;
-  var base = feed === "allnew" ? 0.35 : 0.15;
-  var scale = Math.min(1.6, tot / Math.max(1, ICONS.length * 2));
-  return base * scale;
+  /* When an icon is set to 8+, Icons take a clear majority of New and a
+     substantial share of Mix. Uniform mid weights stay modest so the
+     contrast is visible. Zero total still means no icon-seeded looks. */
+  var high = maxW >= 8;
+  if (feed === "allnew") return high ? 0.70 : 0.32;
+  return high ? 0.50 : 0.16;
 }
 function pickIcon(wt) {
   var arr = [], w = [];
-  ICONS.forEach(function (ic) { var x = +wt[ic.id] || 0; if (x > 0) { arr.push(ic); w.push(x); } });
+  ICONS.forEach(function (ic) { var x = +wt[ic.id] || 0; if (x > 0) { arr.push(ic); w.push(Math.pow(x, 2.5)); } });
   if (!arr.length) return null;
   return pickW(arr, w);
 }
@@ -44572,7 +46100,13 @@ function gapRole(g) { var c = String(g.cat || ""); return /Trousers|Jeans|Shorts
 function gapMatch(p, g) { return hexDist(p.hex, g.hex) < 70 && (gapRole(g) === p.role || (gapRole(g) === "layer" && p.role === "layer")); }
 function sampleOne(q, seen, src) {
   var withMine = q.feed === "withmine", pr = q.price;
-  var wantLayer = rng() < (q.level && q.level >= 5 ? 0.85 : q.level && q.level <= 2 ? 0.1 : 0.45);
+  var tEff = typeof q.temp === "number" ? q.temp : 78;
+  var warm = tEff >= 72;
+  var lv = q.level || 0;
+  /* .84: in warm Palm Beach weather, Casual looks are almost never
+     layered and Smart Casual only occasionally takes a light layer. */
+  var layerChance = (lv >= 5) ? 0.85 : (lv && lv <= 2) ? 0.08 : (warm && lv && lv <= 3) ? 0.10 : (warm && lv === 4) ? 0.18 : (lv && lv <= 3) ? 0.25 : 0.45;
+  var wantLayer = rng() < layerChance;
   var slots = wantLayer ? ["top", "bottom", "shoes", "layer"] : ["top", "bottom", "shoes"];
   /* which slots come from the catalogue */
   var fromShop = {};
@@ -44601,6 +46135,16 @@ function sampleOne(q, seen, src) {
     if (!pool.length) { WHY[sl] = (WHY[sl] || 0) + 1; return null; }
     var w = pool.map(function (p) {
       var x = (q.prefs.items[p.id] || 0) * 0.8 + affinity(p, src);
+      if (warm && (!lv || lv <= 4)) {
+        if (sl === "top" && (p.shortSleeve || p.kind === "tee")) x += 1.6;
+        if (sl === "top" && p.kind === "tee") x += 0.7;
+        if (sl === "top" && p.kind === "shirt" && !p.shortSleeve) x -= 0.8;
+        if (sl === "top" && p.kind === "knit" && !p.shortSleeve) x -= 1.0;
+        if (sl === "bottom" && p.kind === "shorts" && (!lv || lv <= 3)) x += 1.3;
+        if (sl === "bottom" && p.kind === "shorts" && lv === 4) x += 0.5;
+        if (sl === "bottom" && (p.kind === "jeans" || p.kind === "chinos" || p.kind === "linen")) x += 0.35;
+        if (sl === "layer") x -= 1.6;
+      }
       return Math.exp(Math.max(-4, Math.min(4, x)));
     });
     pick[sl] = pickW(pool, w);
@@ -44633,20 +46177,68 @@ function sampleOne(q, seen, src) {
   C.pairKeys(ids).forEach(function (pk) { pref += (q.prefs.pairs[pk] || 0); });
   ids.forEach(function (id) { pref += (q.prefs.items[id] || 0); });
   var aff = 0; ids.forEach(function (id) { aff += affinity(byId[id], src); });
-  return { key: key, ids: ids, acc: acc ? acc.id : null, mask: mask, score: ev.score + Math.max(-4, Math.min(4, pref)) + aff * 0.4, shop: shop, own: own, total: Math.round(total),
+  var climate = 0;
+  if (warm && (!lv || lv <= 4)) {
+    var ssTop = !!(t.shortSleeve || t.kind === "tee");
+    if (!l) climate += 2.2; else climate -= (lv && lv <= 3 ? 2.2 : 1.1);
+    if (ssTop) climate += 1.5;
+    if (t.kind === "tee" && (b.kind === "jeans" || b.kind === "trousers" || b.kind === "chinos" || b.kind === "linen")) climate += 1.4;
+    if (b.kind === "shorts") climate += (lv === 4 ? 0.6 : 1.2);
+  }
+  return { key: key, ids: ids, acc: acc ? acc.id : null, mask: mask, score: ev.score + Math.max(-4, Math.min(4, pref)) + aff * 1.25 + climate, shop: shop, own: own, total: Math.round(total),
     t: t.id, b: b.id, s: s.id, l: l ? l.id : null, lkind: l ? l.kind : null,
     src: src ? (src.t === "icon" ? { t: "icon", id: src.ic.id, name: src.ic.name } : src.t === "palette" ? { t: "palette", name: src.pl.name } : src.t === "gap" ? { t: "gap", name: src.g.desc } : { t: "style" }) : null };
 }
 function dealInspo(q) {
   var seen = {}; (q.recent || []).forEach(function (k) { seen[k] = 1; });
   var out = [], tries = 0, MAX = 9000;
-  while (out.length < q.n && tries < MAX) {
-    var src = q.lens ? { t: "icon", ic: { id: q.lens.id, name: q.lens.name, palette: q.lens.hex, formality: q.lens.formality, lens: q.lens } } : inspiration(q.feed, q);
+  var wt = weightsFor(q);
+  var iconTarget = q.lens ? q.n : Math.round((q.n || 0) * iconShare(q.feed, wt));
+  function lensSrc() {
+    return { t: "icon", ic: { id: q.lens.id, name: q.lens.name, palette: q.lens.hex, formality: q.lens.formality, lens: q.lens } };
+  }
+  function iconSrc() {
+    if (q.lens) return lensSrc();
+    var ic = pickIcon(wt);
+    return ic ? { t: "icon", ic: ic } : null;
+  }
+  function lensScore(ids, lens) {
+    var t = 0;
+    (ids || []).forEach(function (id) { var p = byId[id]; if (p) t += lensPiece(p, lens); });
+    return t;
+  }
+  function draw(src) {
     var cands = [];
     for (var j = 0; j < 40 && tries < MAX && cands.length < 6; j++) { tries++; var c = sampleOne(q, seen, src); if (c) cands.push(c); }
-    if (!cands.length) continue;
+    if (!cands.length) return null;
+    /* A chosen Icon is a hard filter: the look has to actually
+       read as that icon, not merely be labelled with the name. */
+    if (q.lens) {
+      cands = cands.filter(function (c) { return lensScore(c.ids, q.lens) >= 4; });
+      if (!cands.length) return null;
+    }
     var best = pickW(cands, cands.map(function (c) { return Math.exp(0.9 * c.score); }));
-    seen[best.key] = 1; out.push(best);
+    seen[best.key] = 1;
+    return best;
+  }
+  /* Fill the icon quota first so failed icon samples cannot be
+     replaced by style/palette looks and shrink the visible share. */
+  var iconN = 0, iconTries = 0, iconCap = Math.max(MAX * 0.7, iconTarget * 80);
+  while (iconN < iconTarget && out.length < q.n && tries < MAX && iconTries < iconCap) {
+    iconTries++;
+    var src = iconSrc();
+    if (!src) break;
+    var best = draw(src);
+    if (best) { out.push(best); iconN++; }
+  }
+  while (out.length < q.n && tries < MAX) {
+    var src = q.lens ? lensSrc() : inspiration(q.feed, q);
+    if (!q.lens && src && src.t === "icon" && iconN >= iconTarget) continue;
+    var best = draw(src);
+    if (best) {
+      if (best.src && best.src.t === "icon") iconN++;
+      out.push(best);
+    }
   }
   return out;
 }
@@ -44685,5 +46277,580 @@ self.onmessage = function (ev) {
   } catch (err) { self.postMessage({ type: "error", id: m.id, feed: m.feed, gen: m.gen, msg: String(err && err.message || err) }); }
 };
     </script><!--/endless81-->
+    <script>
+      /* .84.1: keep the bottom nav on the visual viewport. iOS Safari
+         reports a layout viewport taller than the screen while chrome
+         shows and hides; bottom:0 then sits mid-page. Pin to the gap. */
+      (function () {
+        var bar = document.getElementById("bottombar");
+        if (!bar) return;
+        var pinnedGap = null;
+        function pin() {
+          if (document.documentElement.classList.contains("sheet-lock")) return;
+          var desktop = window.matchMedia && window.matchMedia("(min-width: 900px)").matches;
+          if (desktop) {
+            if (pinnedGap === "desk") return;
+            pinnedGap = "desk";
+            bar.style.removeProperty("bottom");
+            return;
+          }
+          var vv = window.visualViewport, gap = 0;
+          if (vv) gap = Math.max(0, Math.round(window.innerHeight - vv.offsetTop - vv.height));
+          if (pinnedGap === gap) return;
+          pinnedGap = gap;
+          bar.style.setProperty("position", "fixed", "important");
+          bar.style.setProperty("top", "auto", "important");
+          bar.style.setProperty("left", "0", "important");
+          bar.style.setProperty("right", "0", "important");
+          bar.style.setProperty("transform", "none", "important");
+          bar.style.setProperty("bottom", gap + "px", "important");
+        }
+        pin();
+        if (window.visualViewport) {
+          visualViewport.addEventListener("resize", pin);
+          visualViewport.addEventListener("scroll", pin);
+        }
+        window.addEventListener("scroll", pin, { passive: true });
+        window.addEventListener("resize", pin);
+        window.addEventListener("orientationchange", pin);
+      })();
+    </script>
+    <script type="wardrobe/app">
+/* Build .85.0 — Home pieces, icon counts, Curate editorial, Shop fold, compact nav. */
+(function () {
+  "use strict";
+  function E(s) { return (typeof esc === "function") ? esc(s) : String(s == null ? "" : s); }
+
+  function heroEnsurePieces850() {
+    var look = (typeof todayLook !== "undefined") ? todayLook : null;
+    if (!look || look.dressEmpty) return;
+    var pcs = look.fwPieces || look.pieces || [];
+    if (pcs.length < 2) return;
+    var hero = document.getElementById("today-hero");
+    var collage = document.getElementById("today-collage");
+    var img = document.getElementById("today-img");
+    if (!hero || !collage) return;
+    /* Never pull a cut-out hero down into a flat-lay. Only complete a
+       flat-lay that is already the hero (no on-body image for this look). */
+    if (hero.classList.contains("hero-solo") || hero.classList.contains("has-cut")) return;
+    if (!hero.classList.contains("hero-flatlay")) return;
+    var cells = pcs.map(function (p) {
+      var it = (p && p.id && typeof closetItemById === "function") ? (closetItemById(p.id) || p) : p;
+      var ph = "";
+      try { ph = (typeof pieceDisplayPhoto === "function" ? pieceDisplayPhoto(it) : "") || (it && it.photo) || (p && p.photo) || ""; } catch (e) { ph = (p && p.photo) || ""; }
+      if (ph && (/assets\/photos\/9a543e585d8b\./.test(ph) || /^data:image\/svg/.test(ph))) ph = "";
+      if (ph && typeof isCameraSelfieImg === "function" && isCameraSelfieImg(ph)) ph = "";
+      var name = (it && it.name) || (p && p.name) || "";
+      if (ph) return '<span class="fl-cell"><img src="' + E(ph) + '" alt="' + E(name) + '" decoding="async" /></span>';
+      var hex = (it && it.colourHex) || (p && p.colourHex) || "#d9cfbd";
+      return '<span class="fl-cell fl-swatch" style="background:' + E(hex) + '" role="img" aria-label="' + E(name) + '"></span>';
+    }).join("");
+    collage.innerHTML = '<span class="flatlay fl-n' + Math.min(pcs.length, 6) + '">' + cells + "</span>";
+    collage.classList.add("flatlay-host");
+    collage.hidden = false;
+    hero.classList.add("hero-flatlay");
+    hero.classList.remove("hero-solo", "hero-guest");
+    if (img) img.hidden = true;
+  }
+  if (typeof renderToday === "function") {
+    var _rt850 = renderToday;
+    renderToday = function () {
+      var out = _rt850.apply(this, arguments);
+      try { heroEnsurePieces850(); } catch (e) { window.__heroErr850 = String(e && e.stack || e); }
+      return out;
+    };
+  }
+
+  window.iconMatchCount850 = function (iconId) {
+    var lens = (window.endlessLens81 && window.endlessLens81.get) ? window.endlessLens81.get() : null;
+    var cards = document.querySelectorAll("#panel-looks .en-card, #cf-grid .cf-card");
+    if (iconId && lens === iconId) return cards.length;
+    if (!iconId) return cards.length;
+    var hit = 0;
+    cards.forEach(function (c) {
+      var blob = ((c.getAttribute("data-icon") || "") + " " + (c.textContent || "")).toLowerCase();
+      if (blob.indexOf(String(iconId).toLowerCase()) !== -1) hit++;
+    });
+    return hit;
+  };
+  function syncIconCounts850() {
+    var lens = (window.endlessLens81 && window.endlessLens81.get) ? window.endlessLens81.get() : null;
+    if (!lens) return;
+    var n = window.iconMatchCount850(lens);
+    var pill = document.querySelector('#pv-pills [data-pv-clear="lens"] span');
+    if (pill) {
+      var name = pill.textContent.replace(/\s+\d+\s*$/, "").trim();
+      pill.textContent = name + " " + n;
+    }
+    document.querySelectorAll("#pvf-icons [data-pv-lens]").forEach(function (b) {
+      var id = b.getAttribute("data-pv-lens");
+      if (id !== lens) return;
+      var span = b.querySelector("span");
+      if (!span) return;
+      var label = span.textContent.replace(/\s+\d+\s*$/, "").trim();
+      span.textContent = label + " " + n;
+    });
+  }
+  window.syncIconCounts850 = syncIconCounts850;
+  if (window.pvSyncTop81) {
+    var _sync = window.pvSyncTop81;
+    window.pvSyncTop81 = function () { var r = _sync.apply(this, arguments); try { syncIconCounts850(); } catch (e) {} return r; };
+  }
+  if (window.pvPaintSheet81) {
+    var _paint = window.pvPaintSheet81;
+    window.pvPaintSheet81 = function () { var r = _paint.apply(this, arguments); try { syncIconCounts850(); } catch (e) {} return r; };
+  }
+  var looksPanel = document.getElementById("panel-looks");
+  if (looksPanel && window.MutationObserver) {
+    new MutationObserver(function () { try { syncIconCounts850(); } catch (e) {} }).observe(looksPanel, { childList: true, subtree: true });
+  }
+
+  function paintRange(el) {
+    if (!el || el.type !== "range") return;
+    var max = +el.max || 10, v = +el.value || 0, pct = max ? (v / max) * 100 : 0;
+    el.style.background = "linear-gradient(90deg,#C29E74 " + pct + "%,rgba(26,22,18,.18) " + pct + "%)";
+    el.style.borderRadius = "999px";
+    el.classList.add("honey-range");
+  }
+  function paintRanges(root) {
+    (root || document).querySelectorAll("input[type=range]").forEach(paintRange);
+  }
+  if (window.MutationObserver) {
+    new MutationObserver(function () { paintRanges(document.getElementById("cw-sliders")); }).observe(document.documentElement, { childList: true, subtree: true });
+  }
+  document.addEventListener("input", function (e) {
+    if (e.target && e.target.matches && e.target.matches("input[type=range]")) paintRange(e.target);
+  });
+
+  /* ---------- Shop fold: Brands, Sale, Purchased inside Shop; Wishlist stays in Saved ---------- */
+  var foldHost = document.createElement("div");
+  foldHost.id = "edit-fold-host";
+  foldHost.hidden = true;
+  var shopTabs = document.querySelector("#panel-find .edit-shop-tabs");
+  if (shopTabs && shopTabs.parentNode) {
+    var foldRow = document.createElement("div");
+    foldRow.id = "shop-fold850";
+    foldRow.setAttribute("role", "group");
+    foldRow.setAttribute("aria-label", "Shop filters");
+    foldRow.innerHTML = '<button type="button" class="chip" data-shop-fold="brands" aria-pressed="false">Brands</button>' +
+      '<button type="button" class="chip" data-shop-fold="sale" aria-pressed="false">Sale</button>' +
+      '<button type="button" class="chip" data-shop-fold="purchased" aria-pressed="false">Purchased</button>';
+    shopTabs.parentNode.insertBefore(foldRow, shopTabs.nextSibling);
+    shopTabs.parentNode.insertBefore(foldHost, foldRow.nextSibling);
+  }
+  function shopFold850(which) {
+    which = which || "all";
+    var show = { brands: ["panel-brands"], sale: ["panel-sale"], purchased: ["panel-purchased", "panel-receipts"] };
+    var ids = show[which] || [];
+    ["panel-brands", "panel-sale", "panel-purchased", "panel-receipts"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (ids.indexOf(id) !== -1) {
+        if (el.parentNode !== foldHost) foldHost.appendChild(el);
+        el.hidden = false;
+      } else if (el.parentNode === foldHost) el.hidden = true;
+    });
+    foldHost.hidden = !ids.length;
+    if (ids.length) {
+      ["saved", "searches", "build", "ask"].forEach(function (n) {
+        var el = document.getElementById("edit-v-" + n);
+        if (el) el.hidden = true;
+      });
+      if (which === "sale" && typeof renderSaleItems === "function") try { renderSaleItems(); } catch (e) {}
+      if (which === "purchased" && typeof renderPurchased === "function") try { renderPurchased(); } catch (e) {}
+      if (which === "purchased" && typeof renderReceipts === "function") try { renderReceipts(); } catch (e) {}
+    }
+    document.querySelectorAll("[data-shop-fold]").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.getAttribute("data-shop-fold") === which ? "true" : "false");
+    });
+    if (which === "saved" || which === "all") {
+      var wrap = document.getElementById("wishlist-wrap");
+      var saved = document.getElementById("edit-v-saved");
+      if (wrap && saved) {
+        var box = document.getElementById("saved-missing850");
+        if (!box) {
+          box = document.createElement("details");
+          box.id = "saved-missing850";
+          box.className = "saved-missing850";
+          box.innerHTML = "<summary>Missing pieces</summary>";
+          saved.appendChild(box);
+        }
+        if (wrap.parentNode !== box) box.appendChild(wrap);
+      }
+    }
+  }
+  window.shopFold850 = shopFold850;
+  document.addEventListener("click", function (e) {
+    var f = e.target && e.target.closest && e.target.closest("[data-shop-fold]");
+    if (f) { e.preventDefault(); shopFold850(f.getAttribute("data-shop-fold")); return; }
+    var tab = e.target && e.target.closest && e.target.closest("#panel-find .edit-shop-tabs [data-edit-view]");
+    if (tab) shopFold850("all");
+  });
+  if (typeof window.switchTab === "function") {
+    var _st850 = window.switchTab;
+    window.switchTab = function (name) {
+      if (name === "brands" || name === "sale" || name === "purchased" || name === "receipts" || name === "shopwish") {
+        var r = _st850.call(this, "find");
+        if (name === "shopwish") { if (window.editShow) window.editShow("saved"); shopFold850("saved"); }
+        else shopFold850(name === "receipts" ? "purchased" : name);
+        return r;
+      }
+      return _st850.apply(this, arguments);
+    };
+    try { switchTab = window.switchTab; } catch (e) {}
+  }
+  ["#subnav-find #tab-brands", "#subnav-find #tab-sale", "#subnav-find #tab-shopwish", "#subnav-find #tab-purchased", "#subnav-find #tab-receipts"].forEach(function (sel) {
+    var n = document.querySelector(sel);
+    if (n) n.hidden = true;
+  });
+
+  /* ---------- compact nav ---------- */
+  (function () {
+    var root = document.documentElement, last = window.scrollY || 0, down = 0;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.addEventListener("scroll", function () {
+      var y = window.scrollY || 0, dy = y - last;
+      if (reduce) { root.classList.toggle("nav-compact", y > 80); last = y; root.classList.remove("nav-away"); return; }
+      if (y < 24 || dy < -16) { root.classList.remove("nav-compact"); down = 0; }
+      else if (dy > 0 && y > 36) { down += dy; if (down > 36) root.classList.add("nav-compact"); }
+      if (dy < 0) down = 0;
+      last = y;
+      if (root.classList.contains("nav-away")) root.classList.remove("nav-away");
+    }, { passive: true });
+  })();
+
+  /* ---------- Curate editorial ---------- */
+  function icons() { try { return typeof allIcons === "function" ? allIcons() : []; } catch (e) { return []; } }
+  function shortName(ic) { var p = String(ic && ic.name || "").split(" "); return p.length > 1 ? p[p.length - 1] : (p[0] || ""); }
+  function cueOf(ic) {
+    var lane = String((ic && ic.lane) || "").split(/[—–-]/)[0].trim();
+    var words = lane.split(/\s+/).filter(Boolean);
+    if (words.length < 2) words = String((ic && ic.signatureDesc) || "").split(/\s+/).filter(Boolean);
+    return words.slice(0, 4).join(" ");
+  }
+  function portrait(ic) {
+    var src = "", lk = ic && ic.looks && ic.looks[0];
+    if (ic && ic.photo && String(ic.photo).indexOf("assets/") === 0) src = ic.photo;
+    else if (lk && lk.img && String(lk.img).indexOf("assets/") === 0 && !/9a543e585d8b/.test(lk.img)) src = lk.img;
+    var initials = String(ic && ic.name || "?").split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
+    if (!src) return '<span class="ig-fallback" aria-hidden="true">' + E(initials) + "</span>";
+    return '<img alt="" src="' + E(src) + '" />';
+  }
+  function weights(level) {
+    try { return window.iconWeights81.weightsForLevel(level); } catch (e) { return {}; }
+  }
+  function leadLine(level) {
+    var w = weights(level);
+    var rows = icons().map(function (ic) { return { ic: ic, w: +w[ic.id] || 0 }; }).filter(function (x) { return x.w > 2; });
+    rows.sort(function (a, b) { return b.w - a.w; });
+    if (!rows.length) return { text: "Balanced", avs: "" };
+    return {
+      text: rows.map(function (x) { return shortName(x.ic); }).join(", "),
+      avs: rows.slice(0, 3).map(function (x) {
+        var src = (x.ic.looks && x.ic.looks[0] && String(x.ic.looks[0].img || "").indexOf("assets/") === 0) ? x.ic.looks[0].img : "";
+        return src ? '<img alt="" src="' + E(src) + '" />' : "<span>" + E(shortName(x.ic).charAt(0)) + "</span>";
+      }).join("")
+    };
+  }
+  function renderTaste() {
+    var host = document.getElementById("taste-mix850");
+    if (!host) return;
+    var c = leadLine(3), s = leadLine(4), b = leadLine(5), f = leadLine(6);
+    var rows = '<div class="tm-row"><b>Casual</b><span class="tm-avs">' + c.avs + "</span><span>" + E(c.text) + "</span></div>" +
+      '<div class="tm-row"><b>Smart Casual</b><span class="tm-avs">' + s.avs + "</span><span>" + E(s.text) + "</span></div>";
+    if (b.text === f.text) rows += '<div class="tm-row"><b>Business &amp; Formal</b><span class="tm-avs">' + (b.avs || f.avs) + "</span><span>" + E(b.text) + "</span></div>";
+    else rows += '<div class="tm-row"><b>Business</b><span class="tm-avs">' + b.avs + "</span><span>" + E(b.text) + "</span></div>" +
+      '<div class="tm-row"><b>Formal</b><span class="tm-avs">' + f.avs + "</span><span>" + E(f.text) + "</span></div>";
+    host.innerHTML = '<p class="tm-kicker">Your Taste Mix</p>' + rows +
+      '<button type="button" id="taste-customize850">Customize by dress level ›</button>' +
+      '<p class="tm-note">Steers Closet, Mix, New, and Shop. Your Rules always win.</p>';
+  }
+  function renderGallery() {
+    var host = document.getElementById("icon-gallery850");
+    if (!host) return;
+    var list = icons();
+    if (!list.length) {
+      if (typeof window.lazyOn802 === "function") window.lazyOn802("STYLE_ICONS", function () { renderGallery(); renderTaste(); });
+      return;
+    }
+    var lv = (typeof formalityLevel !== "undefined") ? formalityLevel : 4;
+    var w = weights(lv);
+    var rows = list.map(function (ic) { return { ic: ic, w: +w[ic.id] || 0 }; });
+    rows.sort(function (a, b) { return (b.w > 2) - (a.w > 2) || b.w - a.w || String(a.ic.name).localeCompare(String(b.ic.name)); });
+    host.innerHTML = rows.map(function (x) {
+      var badge = x.w > 2 ? '<span class="ig-badge">Lead</span>' : "";
+      return '<button type="button" class="ig-card" data-ig="' + E(x.ic.id) + '"><span class="ig-frame">' + portrait(x.ic) + badge + '</span><span class="ig-name">' + E(x.ic.name) + '</span><span class="ig-cue">' + E(cueOf(x.ic)) + "</span></button>";
+    }).join("");
+    renderTaste();
+  }
+  function mountEditorial() {
+    var panel = document.getElementById("panel-icons");
+    if (!panel || document.getElementById("taste-mix850")) return;
+    var taste = document.createElement("div");
+    taste.id = "taste-mix850";
+    var gal = document.createElement("div");
+    gal.id = "icon-gallery850";
+    panel.insertBefore(gal, panel.firstChild);
+    panel.insertBefore(taste, gal);
+    var add = document.createElement("button");
+    add.type = "button"; add.id = "icon-add850"; add.textContent = "+ Add an icon";
+    gal.insertAdjacentElement("afterend", add);
+    var browse = document.getElementById("icon-browse");
+    if (browse) browse.hidden = true;
+    var list = document.getElementById("icon-list-view");
+    if (list) list.hidden = true;
+  }
+  function openWeights(on) {
+    var w = document.getElementById("curate-weights");
+    if (!w) return;
+    w.hidden = !on;
+    w.classList.toggle("cw-sheet", !!on);
+    var scrim = document.getElementById("cw-scrim850");
+    if (on && !scrim) {
+      scrim = document.createElement("div");
+      scrim.id = "cw-scrim850";
+      scrim.addEventListener("click", function () { openWeights(false); });
+      document.body.appendChild(scrim);
+    }
+    if (scrim) scrim.hidden = !on;
+    if (on) {
+      var done = document.getElementById("cw-done850");
+      if (done && !done.closest(".cw-foot")) {
+        var foot = document.createElement("div");
+        foot.className = "cw-foot";
+        var reset = document.createElement("button");
+        reset.type = "button"; reset.id = "cw-reset850"; reset.className = "btn-ghost"; reset.textContent = "Reset to defaults";
+        foot.appendChild(reset);
+        done.hidden = false;
+        foot.appendChild(done);
+        w.appendChild(foot);
+      } else if (done) done.hidden = false;
+      var same = document.getElementById("cw-same");
+      var label = w.querySelector(".cw-all");
+      var sw = document.getElementById("cw-switch850");
+      if (!sw) {
+        sw = document.createElement("button");
+        sw.type = "button"; sw.className = "cw-switch"; sw.id = "cw-switch850";
+        sw.innerHTML = "<i></i>";
+      }
+      sw.hidden = false;
+      sw.type = "button";
+      sw.className = "cw-switch";
+      sw.setAttribute("aria-pressed", same && same.checked ? "true" : "false");
+      sw.setAttribute("aria-label", "Use same mix for all levels");
+      if (label && sw.parentNode !== label) label.appendChild(sw);
+      if (label) Array.prototype.forEach.call(label.childNodes, function (n) {
+        if (n.nodeType === 3 && /Same/.test(n.textContent || "")) n.textContent = " Use same mix for all levels ";
+      });
+      var cue = document.getElementById("cw-cue850");
+      if (!cue) {
+        cue = document.createElement("p");
+        cue.id = "cw-cue850";
+        cue.className = "tm-note";
+        var levels = document.getElementById("cw-levels");
+        if (levels) levels.insertAdjacentElement("afterend", cue);
+      }
+      paintCue();
+      paintRanges(w);
+    }
+  }
+  function paintCue() {
+    var cue = document.getElementById("cw-cue850");
+    if (!cue) return;
+    var on = document.querySelector("#cw-levels [aria-pressed=true]");
+    var id = on ? on.getAttribute("data-cw-level") : "casual";
+    var map = {
+      casual: "Home: Swim/Pool, Shorts & Tee, and Casual.",
+      smart: "Home: Smart Casual.",
+      business: "Home: Business Casual.",
+      formal: "Home: Formal and Black Tie."
+    };
+    cue.textContent = map[id] || map.casual;
+  }
+  function fillDetail(id) {
+    var ic = (typeof iconById === "function") ? iconById(id) : null;
+    var d = document.getElementById("icon-detail");
+    if (!ic || !d) return;
+    var looks = (ic.looks || []).slice(0, 8);
+    var carousel = looks.map(function (lk, i) {
+      var src = lk.img && String(lk.img).indexOf("assets/") === 0 ? lk.img : "";
+      var fig = src ? '<img alt="" src="' + E(src) + '" />' : '<span class="ig-fallback">' + E(shortName(ic).charAt(0)) + "</span>";
+      var formula = lk.caption || lk.desc || ic.signatureDesc || "";
+      return '<button type="button" class="id-look" data-ig-look="' + i + '"><span class="id-fig">' + fig + '</span><span class="id-formula">' + E(String(formula).split(/[.]/)[0]) + '</span><span class="id-pill">Signature</span></button>';
+    }).join("");
+    var dna = (ic.rules || []).slice(0, 4).map(function (r) { return "<li>" + E(r) + "</li>"; }).join("");
+    var groups = [["casual", "Casual", 3], ["smart", "Smart Casual", 4], ["business", "Business", 5], ["formal", "Formal", 6]];
+    var sliders = groups.map(function (g) {
+      var val = +weights(g[2])[ic.id] || 0;
+      return '<label class="id-slider"><span>' + g[1] + '</span><span class="id-val" data-idv="' + g[0] + '">' + val + '</span><input class="honey-range" type="range" min="0" max="10" step="1" value="' + val + '" data-idw="' + g[0] + '" aria-label="' + E(ic.name) + " " + g[1] + '" /></label>';
+    }).join("");
+    d.className = "id-sheet850";
+    d.hidden = false;
+    d.innerHTML = '<button type="button" class="btn-ghost" data-back-icons>Close</button>' +
+      "<h3>" + E(ic.name) + "</h3>" +
+      '<p class="id-note">' + E(ic.blurb || ic.signatureDesc || "") + "</p>" +
+      '<div class="id-carousel">' + carousel + "</div>" +
+      '<button type="button" class="id-cta" data-see-looks="' + E(ic.id) + '">See looks like this</button>' +
+      "<h4>Style DNA</h4><ul class=\"id-dna\">" + dna + "</ul>" +
+      "<h4>This Icon's Influence</h4>" + sliders +
+      (ic.custom ? '<button type="button" class="btn-ghost" data-delete-icon="' + E(ic.id) + '">Remove icon</button>' : "");
+    paintRanges(d);
+    var scrim = document.getElementById("id-scrim850");
+    if (!scrim) { scrim = document.createElement("div"); scrim.id = "id-scrim850"; document.body.appendChild(scrim); scrim.addEventListener("click", function () { if (typeof closeIconDetail === "function") closeIconDetail(); scrim.hidden = true; }); }
+    scrim.hidden = false;
+  }
+  if (typeof openIconDetail === "function") {
+    var _od = openIconDetail;
+    openIconDetail = function (id, opts) { var r = _od.apply(this, arguments); try { fillDetail(id); } catch (e) {} return r; };
+  }
+  if (typeof closeIconDetail === "function") {
+    var _cd = closeIconDetail;
+    closeIconDetail = function () { var s = document.getElementById("id-scrim850"); if (s) s.hidden = true; var d = document.getElementById("icon-detail"); if (d) d.classList.remove("id-sheet850"); return _cd.apply(this, arguments); };
+  }
+  function openAdd() {
+    var sheet = document.getElementById("icon-add-sheet850");
+    if (!sheet) {
+      sheet = document.createElement("div");
+      sheet.id = "icon-add-sheet850";
+      sheet.hidden = true;
+      sheet.innerHTML = '<div class="card" role="dialog" aria-label="Add an icon"><button type="button" class="btn-ghost" id="icon-add-close850">Close</button><div id="icon-add-host850"></div></div>';
+      document.body.appendChild(sheet);
+    }
+    var host = document.getElementById("icon-add-host850");
+    ["icon-search-card", "icon-form"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && host && el.parentNode !== host) { el.hidden = false; host.appendChild(el); }
+    });
+    ["icon-search-body", "icon-form-body"].forEach(function (id) { var el = document.getElementById(id); if (el) el.hidden = false; });
+    sheet.hidden = false;
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target && e.target.closest ? e.target : null;
+    if (!t || !t.closest) return;
+    if (t.closest("#taste-customize850")) { openWeights(true); return; }
+    if (t.closest("#cw-done850") || t.closest("#cw-scrim850")) { openWeights(false); renderGallery(); return; }
+    if (t.closest("#cw-reset850")) { if (window.iconWeights81) window.iconWeights81.resetDefaults(); renderGallery(); paintRanges(document.getElementById("curate-weights")); return; }
+    if (t.closest("#cw-switch850")) {
+      var sw = document.getElementById("cw-switch850");
+      var same = document.getElementById("cw-same");
+      var on = sw.getAttribute("aria-pressed") !== "true";
+      sw.setAttribute("aria-pressed", on ? "true" : "false");
+      if (same) { same.checked = on; same.dispatchEvent(new Event("change", { bubbles: true })); }
+      return;
+    }
+    if (t.closest("[data-cw-level]")) setTimeout(paintCue, 0);
+    var card = t.closest("[data-ig]");
+    if (card && typeof openIconDetail === "function") { openIconDetail(card.getAttribute("data-ig")); return; }
+    if (t.closest("#icon-add850")) { openAdd(); return; }
+    if (t.closest("#icon-add-close850") || t.id === "icon-add-sheet850") { var sh = document.getElementById("icon-add-sheet850"); if (sh) sh.hidden = true; return; }
+    var see = t.closest("[data-see-looks]");
+    if (see) {
+      var id = see.getAttribute("data-see-looks");
+      if (window.endlessLoad81) window.endlessLoad81();
+      if (window.endlessLens81) window.endlessLens81.set(id);
+      window.outfitsMode = "inspo";
+      if (typeof showInspoView === "function") showInspoView("allnew");
+      if (typeof closeIconDetail === "function") closeIconDetail();
+      if (typeof window.switchTab === "function") window.switchTab("looks");
+      return;
+    }
+  });
+  document.addEventListener("input", function (e) {
+    var el = e.target;
+    if (!el || !el.getAttribute || !el.getAttribute("data-idw")) return;
+    var id = (typeof openIconId !== "undefined") ? openIconId : null;
+    if (!id || !window.iconWeights81) return;
+    var g = el.getAttribute("data-idw");
+    var st = window.iconWeights81.state();
+    var val = Math.max(0, Math.min(10, parseInt(el.value, 10) || 0));
+    if (!st.byLevel[g]) st.byLevel[g] = {};
+    st.byLevel[g][id] = val;
+    if (st.mode === "all") st.all[id] = val;
+    window.iconWeights81.setState(st);
+    var lab = el.parentNode && el.parentNode.querySelector("[data-idv]");
+    if (lab) lab.textContent = String(val);
+    renderTaste();
+    renderGallery();
+  });
+  if (typeof showIconList === "function") {
+    showIconList = function () {
+      var list = document.getElementById("icon-list-view");
+      if (list) list.hidden = true;
+      var browse = document.getElementById("icon-browse");
+      if (browse) browse.hidden = true;
+      var d = document.getElementById("icon-detail");
+      if (d && !d.classList.contains("id-sheet850")) d.hidden = true;
+      var s = document.getElementById("id-scrim850");
+      if (s && (!d || d.hidden)) s.hidden = true;
+    };
+  }
+  function syncCurate() {
+    mountEditorial();
+    var iconsOn = document.getElementById("panel-icons") && !document.getElementById("panel-icons").hidden;
+    var w = document.getElementById("curate-weights");
+    if (w && !w.classList.contains("cw-sheet")) w.hidden = true;
+    if (iconsOn) { renderGallery(); renderTaste(); }
+    var list = document.getElementById("icon-list-view");
+    if (list) list.hidden = true;
+  }
+  if (window.paintCurate81) {
+    var _pc = window.paintCurate81;
+    window.paintCurate81 = function () { var r = _pc.apply(this, arguments); try { syncCurate(); } catch (e) {} return r; };
+  }
+  document.addEventListener("click", function (e) {
+    if (e.target && e.target.closest && e.target.closest("[data-curate-view], #edit-tab-curate")) setTimeout(syncCurate, 0);
+  }, true);
+  function ensureChrome850() {
+    function node(id, parent) {
+      var el = document.getElementById(id);
+      if (el) return el;
+      el = document.createElement("div");
+      el.id = id;
+      el.hidden = true;
+      (parent || document.body).appendChild(el);
+      return el;
+    }
+    var cwScrim = node("cw-scrim850");
+    if (!cwScrim.__wired) { cwScrim.__wired = 1; cwScrim.addEventListener("click", function () { openWeights(false); }); }
+    var idScrim = node("id-scrim850");
+    if (!idScrim.__wired) { idScrim.__wired = 1; idScrim.addEventListener("click", function () { if (typeof closeIconDetail === "function") closeIconDetail(); idScrim.hidden = true; }); }
+    var add = node("icon-add-sheet850");
+    if (!document.getElementById("icon-add-host850")) {
+      add.innerHTML = '<div class="card" role="dialog" aria-label="Add an icon"><button type="button" class="btn-ghost" id="icon-add-close850">Close</button><div id="icon-add-host850"></div></div>';
+    }
+    var w = document.getElementById("curate-weights");
+    if (w) {
+      if (!document.getElementById("cw-cue850")) {
+        var cue = document.createElement("p");
+        cue.id = "cw-cue850";
+        cue.className = "tm-note";
+        w.appendChild(cue);
+      }
+      if (!document.getElementById("cw-switch850")) {
+        var sw = document.createElement("button");
+        sw.type = "button";
+        sw.id = "cw-switch850";
+        sw.className = "cw-switch";
+        sw.hidden = true;
+        sw.innerHTML = "<i></i>";
+        w.appendChild(sw);
+      }
+      if (!document.getElementById("cw-done850")) {
+        var done = document.createElement("button");
+        done.type = "button";
+        done.id = "cw-done850";
+        done.hidden = true;
+        done.textContent = "Done";
+        w.appendChild(done);
+      }
+    }
+  }
+  ensureChrome850();
+  mountEditorial();
+  setTimeout(function () { try { syncCurate(); if (typeof openIconId !== "undefined" && openIconId) fillDetail(openIconId); shopFold850("all"); paintRanges(); } catch (e) {} }, 400);
+  window.renderCurate850 = syncCurate;
+})();
+    </script>
+
   </body>
 </html>

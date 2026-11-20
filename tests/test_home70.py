@@ -298,14 +298,12 @@ def main() -> int:
                 page.wait_for_timeout(280)
                 closet = page.evaluate(CLOSET_JS)
                 check(
-                    f"{name}: Closet has 2 tabs (Closet, Watches), none clipped",
-                    closet
-                    and closet.get("count") == 2
-                    and closet.get("oneRow")
-                    and closet.get("allFit")
-                    and closet.get("ids") == ["tab-wardrobe", "tab-watches"],
+                    f"{name}: Closet has no Watches top tab (folded under Accessories)",
+                    closet and closet.get("error") == "no closet subnav",
                     str(closet),
                 )
+                watches_tab = page.evaluate("() => { const t = document.getElementById('tab-watches'); return !!(t && !t.hidden && t.offsetParent); }")
+                check(f"{name}: #tab-watches is not visible", not watches_tab, str(watches_tab))
                 if vw == 375:
                     page.screenshot(path=str(SHOTS / f"{name}-closet-subnav.png"), full_page=False)
 
