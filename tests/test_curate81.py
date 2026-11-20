@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live .83.0 — The Edit > Curate, icon weightings, engine + Shop the look ranker.
+"""Live Curate, icon weightings, engine + Shop the look ranker.
 
 Usage: PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 python3 tests/test_curate81.py
 """
@@ -16,6 +16,8 @@ from playwright.sync_api import sync_playwright
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from buildinfo import CURRENT_BUILD  # noqa: E402
+
+BUILD = CURRENT_BUILD
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).resolve().parent
