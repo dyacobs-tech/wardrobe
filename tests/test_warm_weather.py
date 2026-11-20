@@ -3,8 +3,10 @@
 
 At 78°F, Casual and Smart Casual deals on Mine, Mix and New must
 favour unlayered short-sleeve outfits (T-shirt + jeans/trousers,
-short-sleeve shirt/polo, shorts at Casual). Wardrobe Rules still
-hold, and pool slides stay in pool outfits only.
+short-sleeve shirt/polo). .85.3: shorts are an occasional Casual
+option (~10-15% at 78°F, band 5-20% for sampling) and never deal at
+Smart Casual or above. Wardrobe Rules still hold, and pool slides stay
+in pool outfits only.
 
 Usage:
   PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 /tmp/pwvenv/bin/python tests/test_warm_weather.py
@@ -278,7 +280,8 @@ def main():
         check("casual short-sleeve is the majority (>=70%)", cfree["ss"] >= 70, cfree)
         check("casual unlayered is the majority (>=75%)", cfree["unlayered"] >= 75, cfree)
         check("casual has plenty of T-shirt + jeans/trousers (>=25%)", cfree["teeBottom"] >= 25, cfree)
-        check("casual warm weather includes shorts (>=10%)", cfree["shorts"] >= 10, cfree)
+        check("casual shorts are occasional (5-20%, target 10-15%)", 5 <= cfree["shorts"] <= 20, cfree)
+        check("smart-casual deals no shorts", sfree["shorts"] == 0, sfree)
         check("smart-casual short-sleeve is the majority (>=60%)", sfree["ss"] >= 60, sfree)
         check("smart-casual unlayered is the majority (>=70%)", sfree["unlayered"] >= 70, sfree)
         check("smart-casual has T-shirt + jeans/trousers (>=20%)", sfree["teeBottom"] >= 20, sfree)
@@ -346,9 +349,11 @@ def main():
                     check("%s casual short-sleeve majority (>=55%%)" % label, cf.get("ss", 0) >= 55, cf)
                     check("%s casual unlayered majority (>=65%%)" % label, cf.get("unlayered", 0) >= 65, cf)
                     check("%s casual 0 pool slides outside pool" % label, cf.get("poolSlide", 0) == 0, cf)
+                    check("%s casual shorts are occasional (5-20%%)" % label, 5 <= cf.get("shorts", 0) <= 20, cf)
                 if sf.get("n"):
                     check("%s smart-casual unlayered majority (>=55%%)" % label, sf.get("unlayered", 0) >= 55, sf)
                     check("%s smart-casual 0 pool slides outside pool" % label, sf.get("poolSlide", 0) == 0, sf)
+                    check("%s smart-casual deals no shorts" % label, sf.get("shorts", 0) == 0, sf)
 
         # Polo classification: a knit short-sleeve polo is not treated as long-sleeve
         polo = pg.evaluate("""() => {
@@ -365,7 +370,7 @@ def main():
         check("knit polo is short-sleeve", polo["ss"]["shortSleeve"] is True and polo["ss"]["hi"] >= 4, polo)
         check("long-sleeve polo is not marked short-sleeve", polo["ls"]["shortSleeve"] is False, polo)
         check("T-shirts reach Smart Casual (hi>=4)", polo["tee"]["hi"] >= 4 and polo["tee"]["shortSleeve"] is True, polo)
-        check("shorts can reach Smart Casual (hi>=4)", polo["shorts"]["hi"] >= 4, polo)
+        check("shorts stop at Casual (hi==3)", polo["shorts"]["hi"] == 3, polo)
 
         if errors:
             check("no page errors", False, errors[:4])

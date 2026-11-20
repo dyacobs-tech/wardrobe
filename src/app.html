@@ -76,8 +76,16 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.85.2" />
+    <meta name="wardrobe-build" content="2026-11-20.85.3" />
     <script>
+/* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
+window.notMenswear853 = function (e) {
+  if (!e) return true;
+  var u = String(e.url || "").toLowerCase(), n = String(e.name || "").toLowerCase(), c = String(e.cat || "").toLowerCase();
+  if (/(^|[^a-z])wom[ae]n|womens|-women\b|\/women\//.test(u) || /\bwom[ae]n'?s?\b/.test(n)) return true;
+  if (c === "shoes" && (/mule slipper|house slipper|sheepskin/.test(n) || /\bshirt\b/.test(n) && !/loafer|shoe|slipper|sneaker|boot|oxford|derby/.test(n))) return true;
+  return false;
+};
 /* The clean Looks chrome and Curate are on for every deploy (html.pv81).
    The read-only guard (no sync writes, no render-worker posts, memory-only
    storage) runs only on the /preview/ site, so the live app can sync,
@@ -8038,7 +8046,7 @@
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.85.2</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.85.3</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8980,7 +8988,7 @@ function lookOccasionOk(look, occasion) {
     } else if (BOTTOM_CATS[cat]) {
       p.role = "bottom";
       if (cat === "Bathing suits") { p.lo = 1; p.hi = 1; p.kind = "swim"; p.warm = -3; }
-      else if (cat === "Shorts") { p.lo = 1; p.hi = 4; p.kind = "shorts"; p.warm = -3; if (/swim/.test(n)) p.hi = 2; }
+      else if (cat === "Shorts") { p.lo = 1; p.hi = 3; p.kind = "shorts"; p.warm = -3; if (/swim/.test(n)) p.hi = 2; } /* .85.3: shorts stop at Casual — never Smart Casual and up */
       else if (cat === "Jeans") { p.lo = 2; p.hi = 4; p.kind = "jeans"; }
       else {
         p.kind = "trousers";
@@ -9072,6 +9080,8 @@ function lookOccasionOk(look, occasion) {
     /* Shorts and swim stay casual; a smart shirt never meets swim. */
     if ((bottom.kind === "shorts" || bottom.kind === "swim") && top.kind === "knit") return null;
     if ((bottom.kind === "shorts" || bottom.kind === "swim") && (shoes.kind === "loafer" && shoes.hi >= 7)) return null;
+    /* .85.3: velvet slippers / loafers and dress shoes never meet shorts */
+    if ((bottom.kind === "shorts" || bottom.kind === "swim") && (/velvet/.test(shoes.n) || shoes.kind === "dress")) return null;
     /* .78.8c: Pool-only pieces (pool slides) only ever meet swim */
     if ((shoes.poolOnly || top.poolOnly || (layer && layer.poolOnly)) && !(bottom.kind === "swim" || bottom.swim)) return null;
     var score = 0;
@@ -9103,7 +9113,7 @@ function lookOccasionOk(look, occasion) {
     if (L === 3) return lk !== "blazer" && lk !== "suit";
     /* .80.34: Smart Casual never wears a blazer or suit — overshirts,
        knits, polos, tees, linen shirts, and shorts in the heat. */
-    if (L === 4) return lk !== "blazer" && lk !== "suit";
+    if (L === 4) return lk !== "blazer" && lk !== "suit" && bottom.kind !== "shorts" && bottom.kind !== "swim";
     if (L === 5) return top.kind !== "tee" && bottom.kind !== "shorts" && bottom.kind !== "swim";
     if (L === 6) return (lk === "blazer" || lk === "suit") && (top.kind === "shirt" && !top.casualShirt || top.kind === "polo" && !top.shortSleeve || top.kind === "knit" && /turtle|roll/.test(top.n));
     if (L === 7) return (lk === "blazer" || lk === "suit") && layer.hi >= 7 && top.kind !== "tee";
@@ -9327,7 +9337,8 @@ function lookOccasionOk(look, occasion) {
         else if (c.t.kind === "shirt" && !c.t.shortSleeve) climate -= 1.0;
         if (c.t.kind === "knit" && !c.t.shortSleeve) climate -= 1.2;
         if (c.t.kind === "tee" && (c.b.kind === "jeans" || c.b.kind === "trousers" || c.b.kind === "chinos" || c.b.kind === "linen")) climate += 1.6;
-        if (c.b.kind === "shorts") climate += (lv === 4 ? 0.7 : 1.4);
+        /* .85.3: shorts are an occasional Casual option (~10-15%), not the rule */
+        if (c.b.kind === "shorts" && lv !== 1 && lv !== 2) climate -= 0.3 /*SDM*/;
         if (c.l && lv === 4) climate -= 0.6;
         if (opts.boostKeys && opts.boostKeys[c.key]) climate += (!c.l && ss) ? 0.9 : (!c.l ? 0.35 : -0.4);
       } else if (opts.boostKeys && opts.boostKeys[c.key]) {
@@ -10729,7 +10740,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.85.2";
+var WARDROBE_BUILD = "2026-11-20.85.3";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -33715,6 +33726,47 @@ function shopMatchesHTML(d, idx) {
   return html;
 }
 var shopModeData = [];
+/* .85.3: which pieces of a look he already owns. A look dealt from his
+   closet owns every piece; a Mix look owns the closet pieces it names. */
+function stlGroup853(cat) {
+  if (/^(Trousers|Jeans|Shorts|Bathing suits)$/.test(cat)) return "bottom";
+  if (cat === "Shoes") return "shoes";
+  if (/^(Blazers|Jackets|Coats|Leather jackets|Vests|Suits)$/.test(cat)) return "layer";
+  if (/^(Tees|Polos|Shirts|Button downs|Sweaters)$/.test(cat)) return "top";
+  return cat || "";
+}
+function stlOwnedCats853(look) {
+  var out = { all: false, cats: {}, groups: {}, items: [] };
+  if (!look) return out;
+  var fw = look.fwPieces || [];
+  var ownIds = {};
+  (look.own || []).forEach(function (id) { ownIds[id] = 1; });
+  fw.forEach(function (p) {
+    if (!p || !p.id) return;
+    var it = (typeof closetItemById === "function") ? closetItemById(p.id) : null;
+    if (it || ownIds[p.id]) { var c = (it && it.category) || p.category || ""; out.cats[c] = 1; out.groups[stlGroup853(c)] = 1; out.items.push(it || p); }
+  });
+  var shopN = (look.shop && look.shop.length) || 0;
+  if (look.source === "wardrobe" && !shopN && (!fw.length || out.items.length === fw.length)) out.all = true;
+  return out;
+}
+function stlPieceOwned853(own, pc) {
+  if (own.all) return true;
+  var c = garmentCategory(pc.garment || "");
+  if (own.cats[c]) return true;
+  var g = stlGroup853(c);
+  return (g === "bottom" || g === "shoes") && !!own.groups[g];
+}
+function stlShoeOK853(e, look, shorts) {
+  if (window.notMenswear853 && window.notMenswear853(e)) return false;
+  var n = String((e.brand || "") + " " + (e.name || "")).toLowerCase();
+  var lv = look && look.composerLevel ? +look.composerLevel : 0;
+  if (shorts && /velvet|slipper|furlane|oxford|derby|monk|brogue|opera|patent|tuxedo|evening/.test(n)) return false;
+  if (lv && lv <= 3 && /velvet|opera|patent|tuxedo|evening/.test(n)) return false;
+  if (lv === 4 && /opera|patent|tuxedo/.test(n)) return false;
+  if (lv >= 5 && /sneaker|trainer|runner|espadrille|slide|sandal|canvas|flip/.test(n)) return false;
+  return true;
+}
 function renderFindLookMode() {
   var box = document.getElementById("find-look-mode");
   if (!box) return;
@@ -33747,7 +33799,10 @@ function renderFindLookMode() {
       if (!cut && typeof onbodyForLook === "function") cut = window.cutoutFor(onbodyForLook(look) || "") || "";
     }
   } catch (eCut) {}
-  var shown = cut || img;
+  /* .85.3: him on-body when a render exists, never a flat product shot */
+  var ob853 = "";
+  try { if (!cut && typeof onbodyForLook === "function") ob853 = onbodyForLook(look) || ""; } catch (eOb) {}
+  var shown = cut || ob853 || img;
   var title = look.title || "Untitled";
   try { if (typeof displayTitleForLook === "function") title = displayTitleForLook(look, shown) || title; } catch (eTit) {}
   var html = '<div class="shop-look-head' + (cut ? " has-cut" : "") + '">' + (shown ? '<img src="' + esc(shown) + '" alt="' + esc(look.imgAlt || title) + '" data-popout="' + esc(shown) + '" loading="lazy"' + (cut ? ' class="shop-look-cut"' : "") + " />" : "") +
@@ -33768,13 +33823,20 @@ function renderFindLookMode() {
      purchased, style this, see it on me). The per-piece tier and
      Search dropdowns gave way to the global Price pill and the
      section's search icon; the piece state (its pick) is unchanged. */
+  var own853 = stlOwnedCats853(look);
+  var shorts853 = shopPiecesForLook(look).some(function (q) { return /short|swim|trunk/i.test(q.garment || ""); }) || !!own853.cats.Shorts;
   shopModeData = shopPiecesForLook(look).map(function (pc, idx) {
+    if (stlPieceOwned853(own853, pc)) {
+      return { pc: pc, desc: pieceDescription(pc), alts: [], owned: true, total: 0, tierKey: "insensitive", selKey: "", matches: [] };
+    }
     var alt = catalogueAlternatives(pc);
     var st = pieceStateFor(look, idx);
     var seen = {}, cands = [];
     function add(e) { var k = shopEntryKey(e); if (seen[k] || !priceOK(e)) return; seen[k] = 1; cands.push(e); }
     alt.alts.forEach(add);
     catalogueScored(pc, false).forEach(function (sc) { if (cands.length < 10) add(sc.e); });
+    if (garmentCategory(pc.garment || "") === "Shoes") cands = cands.filter(function (e) { return stlShoeOK853(e, look, shorts853); });
+    else cands = cands.filter(function (e) { return !(window.notMenswear853 && window.notMenswear853(e)); });
     cands = priceSort(cands);
     var d = { pc: pc, desc: pieceDescription(pc), alts: cands, bestOverall: alt.bestOverall, total: catalogueMatchTotal(pc), tierKey: st.tier };
     var inList = function (k) { return k && cands.some(function (e) { return shopEntryKey(e) === k; }); };
@@ -33794,7 +33856,9 @@ function renderFindLookMode() {
       '<h4 class="stl-name">' + esc(head.charAt(0).toUpperCase() + head.slice(1)) + "</h4>" +
       '<span class="stl-n">' + (d.alts.length ? d.alts.length + (d.alts.length === 1 ? " option" : " options") : "") + "</span>" +
       '<button type="button" class="vp-ico stl-search" data-stl-search="' + idx + '" aria-label="Search the stores for ' + esc(head) + '">' + VP_ICON.search + "</button></div>";
-    if (!d.alts.length) {
+    if (d.owned) {
+      html += '<p class="stl-none">In your closet.</p>';
+    } else if (!d.alts.length) {
       html += '<p class="stl-none">' + (d.total && priceRangeActive() ? "Nothing in " + esc(priceRangeLabel()) + " for this piece." : "No match in the catalogue yet.") + "</p>";
     } else {
       html += vpRowHTML(d.alts, function (e) {
@@ -33840,7 +33904,9 @@ function stlRenderSummary() {
       '<span class="stl-buy-pr">' + (bought ? "Purchased" : esc(vpPrice(e))) + "</span>" +
       (e.url && !bought ? '<a class="vp-ico" href="' + esc(e.url) + '" target="_blank" rel="noopener" aria-label="Buy at ' + esc(vpRetailer(e) || "the store") + '">' + VP_ICON.ext + "</a>" : '<span class="vp-ico vp-done">' + VP_ICON.check + "</span>") + "</div>");
   });
-  host.innerHTML = rows.length ? '<div class="stl-sum-h"><h4>Shop the look</h4><span class="stl-total">' + (n ? "$" + Math.round(total).toLocaleString("en-US") + " \u00b7 " + n + (n === 1 ? " piece" : " pieces") + " to buy" : "All purchased") + "</span></div>" +
+  var owned853 = shopModeData.filter(function (d) { return d.owned; }).length;
+  if (!rows.length && owned853) { host.innerHTML = '<div class="stl-sum-h"><h4>Shop the look</h4><span class="stl-total">All from your closet</span></div>'; return; }
+  host.innerHTML = rows.length ? '<div class="stl-sum-h"><h4>Shop the look</h4><span class="stl-total">' + (n ? "$" + Math.round(total).toLocaleString("en-US") + " \u00b7 " + n + (n === 1 ? " piece" : " pieces") + " to buy" : (owned853 ? "All from your closet" : "All purchased")) + "</span></div>" +
     '<details class="stl-missing"><summary>Buy missing pieces</summary>' + rows.join("") + "</details>" : "";
 }
 function stlSearchOpen(idx) {
@@ -35304,12 +35370,12 @@ var TRIP_SEEDS = [
 ];
 var userTrips = store.get("trips", []);
 if (!Array.isArray(userTrips)) userTrips = [];
+/* .85.3: Trips are his own — the built-in Marbella / Aspen capsules no
+   longer seed, and any seeded copy already stored is dropped. */
 (function () {
-  var changed = false;
-  TRIP_SEEDS.forEach(function (s) {
-    if (!userTrips.some(function (t) { return t && t.id === s.id; })) { userTrips.push(s); changed = true; }
-  });
-  if (changed) store.set("trips", userTrips);
+  var seedIds = {}; TRIP_SEEDS.forEach(function (s) { seedIds[s.id] = 1; });
+  var kept = userTrips.filter(function (t) { return t && !seedIds[t.id]; });
+  if (kept.length !== userTrips.length) { userTrips = kept; store.set("trips", userTrips); }
 })();
 function saveUserTrips() { store.set("trips", userTrips); }
 function tripDef(key) {
@@ -35319,7 +35385,6 @@ function tripDef(key) {
 function allTripKeys() {
   var ks = [];
   userTrips.forEach(function (t) { if (t && (t.key || t.id)) ks.push(t.key || t.id); });
-  Object.keys(TRIPS).forEach(function (k) { if (ks.indexOf(k) === -1) ks.push(k); });
   return ks;
 }
 var packedItems = store.get("packedItems", null);
@@ -37693,7 +37758,7 @@ function syPutLocal(c, data) {
   if (c === "looks") savedLooks = put(savedLooks);
   else if (c === "queue") queueLooks = put(queueLooks);
   else if (c === "plan") weekPlan = put(weekPlan);
-  else if (c === "trips") { userTrips = put(userTrips); store.set("trips", userTrips); }
+  else if (c === "trips") { if (data.id === "trip-marbella" || data.id === "trip-aspen") return; userTrips = put(userTrips); store.set("trips", userTrips); }
   else if (c === "packed") { packedItems = put(packedItems); store.set("packedItems", packedItems); }
   else if (c === "receipts") { receiptInbox = put(receiptInbox); store.set("receiptInbox", receiptInbox); if (typeof renderReceipts === "function") renderReceipts(); if (typeof renderReceiptsSection === "function") renderReceiptsSection(); }
   else if (c === "shopwish") { shopWishlist = put(shopWishlist); store.set("shopWishlist", shopWishlist); if (typeof refreshWishButtons === "function") refreshWishButtons(); if (typeof renderShopWishlist === "function") renderShopWishlist(); }
@@ -40709,6 +40774,9 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
       var price = typeof p.price === "number" ? p.price : parseFloat(String(p.price || p.price_usd || "").replace(/[^0-9.]/g, ""));
       var img = p.img || p.image || p.image_url || p.imageUrl || (Array.isArray(p.images) ? (typeof p.images[0] === "string" ? p.images[0] : p.images[0] && (p.images[0].src || p.images[0].url)) : null);
       if (!url || !name || !isFinite(price) || !img || seen[url]) return;
+      /* .85.3: menswear only — no women's styles, house slippers or
+         mis-filed non-shoes in the shoe aisle */
+      if (window.notMenswear853 && window.notMenswear853({ url: url, name: name, cat: p.cat || p.category || "" })) return;
       seen[url] = 1;
       var e = { brand: p.brand || p.vendor || "", name: String(name), price: price, url: url, img: img, retailer: p.retailer || p.store || p.seller || "", colour: p.colour || p.colourName || p.color || "", verified: true };
       var rc = String(p.cat || p.category || p.type || "").toLowerCase();
@@ -45291,8 +45359,8 @@ function sampleOne(q, seen, src) {
         if (sl === "top" && p.kind === "tee") x += 0.7;
         if (sl === "top" && p.kind === "shirt" && !p.shortSleeve) x -= 0.8;
         if (sl === "top" && p.kind === "knit" && !p.shortSleeve) x -= 1.0;
-        if (sl === "bottom" && p.kind === "shorts" && (!lv || lv <= 3)) x += 1.3;
-        if (sl === "bottom" && p.kind === "shorts" && lv === 4) x += 0.5;
+        /* .85.3: shorts occasional at Casual; trousers / jeans lead */
+        if (sl === "bottom" && p.kind === "shorts" && lv !== 1 && lv !== 2) x -= (withMine ? 1.0 : 1.9) /*SDP*/;
         if (sl === "bottom" && (p.kind === "jeans" || p.kind === "chinos" || p.kind === "linen")) x += 0.35;
         if (sl === "layer") x -= 1.6;
       }
@@ -45334,7 +45402,7 @@ function sampleOne(q, seen, src) {
     if (!l) climate += 2.2; else climate -= (lv && lv <= 3 ? 2.2 : 1.1);
     if (ssTop) climate += 1.5;
     if (t.kind === "tee" && (b.kind === "jeans" || b.kind === "trousers" || b.kind === "chinos" || b.kind === "linen")) climate += 1.4;
-    if (b.kind === "shorts") climate += (lv === 4 ? 0.6 : 1.2);
+    if (b.kind === "shorts" && lv !== 1 && lv !== 2) climate -= (withMine ? 1.2 : 2.2) /*SDF*/;
   }
   return { key: key, ids: ids, acc: acc ? acc.id : null, mask: mask, score: ev.score + Math.max(-4, Math.min(4, pref)) + aff * 1.25 + climate, shop: shop, own: own, total: Math.round(total),
     t: t.id, b: b.id, s: s.id, l: l ? l.id : null, lkind: l ? l.kind : null,
