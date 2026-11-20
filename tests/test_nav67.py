@@ -22,8 +22,8 @@ BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 
 PAGES = [
     ("home", ["#tab-today"]),
-    ("closet-closet", ["#section-closet", "#tab-wardrobe"]),
-    ("closet-watches", ["#section-closet", "#tab-watches"]),
+    ("closet-closet", ["#section-closet"]),
+    ("closet-watches", ["#section-closet", "js:openWatches"]),
     ("outfits", ["#section-ideas"]),
     ("shop-edit", ["#tab-find"]),
     ("calendar", ["#section-calendar"]),
@@ -106,6 +106,10 @@ def main() -> int:
                 short_over = []
                 for slug, clicks in PAGES:
                     for sel in clicks:
+                        if sel == "js:openWatches":
+                            page.evaluate("() => { if (typeof wardFilter !== 'undefined') { wardFilter = 'Watches'; if (typeof syncWardCatLabels === 'function') syncWardCatLabels(); if (typeof renderWardrobe === 'function') renderWardrobe(); } }")
+                            page.wait_for_timeout(180)
+                            continue
                         loc = page.locator(sel)
                         if loc.count():
                             loc.first.click()

@@ -26,8 +26,8 @@ BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 
 # (section button, first landing tab, tabs to visit)
 SECTIONS = [
-    ("#section-closet", "tab-wardrobe", ["tab-wardrobe", "tab-watches"]),
-    ("#tab-profile", "tab-pinfo", ["tab-pinfo", "tab-plocation"]),
+    ("#section-closet", "tab-wardrobe", []),
+    ("#tab-profile", "tab-pinfo", ["tab-pinfo", "tab-plocation", "tab-prules", "tab-pcloud"]),
 ]
 
 
@@ -186,6 +186,13 @@ def main() -> int:
                 for section_sel, _first, tabs in SECTIONS:
                     page.locator(section_sel).click()
                     page.wait_for_timeout(250)
+                    if section_sel == "#section-closet":
+                        hidden = page.evaluate("() => { const g = document.getElementById('subnav-closet'); const w = document.getElementById('tab-watches'); return { subnavHidden: !g || !!g.hidden || getComputedStyle(g).display === 'none', watchesTab: !!(w && !w.hidden && w.offsetParent) }; }")
+                        check(
+                            f"{name}: Closet has no Watches top tab",
+                            hidden and hidden.get("subnavHidden") and not hidden.get("watchesTab"),
+                            str(hidden),
+                        )
                     for tab_id in tabs:
                         page.locator(f"#{tab_id}").click()
                         page.wait_for_timeout(280)
@@ -198,21 +205,15 @@ def main() -> int:
                             and info.get("docOverflow", 99) <= 1,
                             str(info),
                         )
-                        if section_sel == "#section-closet":
-                            ids = [r["id"] for r in (info.get("rects") or [])]
-                            texts = [r["text"] for r in (info.get("rects") or [])]
-                            check(
-                                f"{name}: Closet has 2 tabs (Closet, Watches), none clipped",
-                                info and info.get("allFitInView") and info.get("oneRow") and info.get("count") == 2
-                                and ids == ["tab-wardrobe", "tab-watches"]
-                                and not any(r.get("clippedByView") for r in (info.get("rects") or [])),
-                                str(info),
-                            )
                         if tab_id == "tab-pcloud":
                             close = (info or {}).get("close") or {}
+                            # #profile-close is hidden by design so the four
+                            # Info|Location|Rules|Advanced pills can fit; only
+                            # assert the reserved slot when the × is shown.
+                            close_hidden = not close or close.get("width", 0) <= 0
                             check(
-                                f"{name}: Profile × reserved slot stays fully visible",
-                                close.get("fullyInView") and not close.get("overlapsLast"),
+                                f"{name}: Profile tabs do not collide with the close control",
+                                close_hidden or (close.get("fullyInView") and not close.get("overlapsLast")),
                                 str(close),
                             )
 

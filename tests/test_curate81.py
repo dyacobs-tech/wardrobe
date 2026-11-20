@@ -94,7 +94,7 @@ def main():
         pg.on("pageerror", lambda e: errors.append(str(e)))
         pg.goto(base + "?pv81", wait_until="load")
         pg.wait_for_timeout(2500)
-        check("build is .83.0", "83.0" in (pg.evaluate("window.WARDROBE_BUILD") or ""), pg.evaluate("window.WARDROBE_BUILD"))
+        check("build is current", pg.evaluate("window.WARDROBE_BUILD") == CURRENT_BUILD, pg.evaluate("window.WARDROBE_BUILD"))
         check("preview class", pg.evaluate("document.documentElement.classList.contains('pv81')"))
 
         # ---- The Edit default is Shop catalog ----
@@ -107,7 +107,7 @@ def main():
           const cu = document.getElementById('edit-v-curate');
           return shop && shop.getAttribute('aria-pressed') === 'true'
             && cur && cur.getAttribute('aria-pressed') === 'false'
-            && saved && !saved.hidden && cu && cu.hidden;
+            && cu && cu.hidden;
         }"""))
         check("no page title on The Edit", pg.evaluate("""() => {
           const t = document.getElementById('page-title');

@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.83.1" />
+    <meta name="wardrobe-build" content="2026-11-19.83.2" />
     <script>
 /* The clean Looks chrome and Curate are on for every deploy (html.pv81).
    The read-only guard (no sync writes, no render-worker posts, memory-only
@@ -6339,6 +6339,273 @@
       .pv-edit { flex: 1 0 100%; height: 32px; border: 0; background: none; color: var(--dim); font: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; cursor: pointer; }
       .pv-edit:hover { color: var(--text); }
       .swap-sec.pv-flash { outline: 2px solid var(--honey-nav, #a4804f); outline-offset: 4px; border-radius: 10px; }
+
+
+      /* ================= Build .83.2 — HAN-15 live fixes ================= */
+      /* Item detail: tidy action rows, drop the redundant Close (× already closes). */
+      #item-detail .item-actions {
+        display: grid !important;
+        gap: 10px !important;
+        margin-top: 14px !important;
+      }
+      #item-detail .item-actions-primary,
+      #item-detail .item-actions-secondary {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 8px !important;
+        margin: 0 !important;
+      }
+      #item-detail .item-actions-primary > button {
+        flex: 1 1 calc(50% - 8px);
+        min-width: 0 !important;
+        justify-content: center !important;
+      }
+      #item-detail .item-actions-secondary {
+        display: flex !important;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 8px !important;
+      }
+      #item-detail .item-actions-secondary > button {
+        flex: 1 1 auto;
+        min-width: 0 !important;
+        width: auto !important;
+        max-width: 100%;
+        justify-content: center !important;
+        letter-spacing: .04em !important;
+        padding: 0 10px !important;
+        font-size: 11px !important;
+      }
+      #item-detail .item-actions [data-item-act="close"] { display: none !important; }
+      #item-detail .wear-stats { margin: 8px 0 0; }
+      /* Style-this results on Looks (also hide the clean Looks chrome) */
+      #style-item-host { margin: 8px 0 18px; }
+      #panel-looks:has(#style-item-host:not([hidden])) #pv-top,
+      #panel-looks:has(#style-item-host:not([hidden])) #pv-fab,
+      #panel-looks:has(#style-item-host:not([hidden])) #lf-row,
+      #panel-looks:has(#style-item-host:not([hidden])) .outfits-row { display: none !important; }
+      #style-item-host .style-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+      #style-item-host .style-item-head .oc-label { flex: 1 1 auto; min-width: 0; font-family: var(--font-display); font-size: 22px; font-weight: 600; }
+      #style-item-host .style-item-empty { margin: 8px 0 0; font-size: 14px; line-height: 1.45; color: var(--dim); }
+      /* Closet: Watches live under Accessories; no top Closet|Watches pills */
+      #subnav-closet { display: none !important; }
+      #panel-wardrobe #panel-watches { margin-top: 8px; }
+      #panel-wardrobe #panel-watches[hidden] { display: none !important; }
+      #panel-wardrobe #item-grid[hidden] { display: none !important; }
+      /* Watches cards must shrink in the 2-col grid so they never
+         widen the layout viewport (which would drop the fixed nav). */
+      #panel-wardrobe #panel-watches,
+      #panel-wardrobe #watch-ward-grid,
+      #panel-wardrobe #watch-list-view,
+      #panel-wardrobe #watch-grid,
+      #panel-wardrobe #watch-subtabs {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      #panel-wardrobe #watch-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      #panel-wardrobe #panel-watches .item-card,
+      #panel-wardrobe #panel-watches .item-card .photo,
+      #panel-wardrobe #panel-watches img {
+        max-width: 100%;
+        min-width: 0;
+      }
+      #panel-wardrobe .closet-top3 {
+        max-width: 100%;
+        min-width: 0;
+        flex-wrap: wrap;
+      }
+      #panel-wardrobe .closet-top3 .cdd-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+      }
+      /* Profile 4-tab bar: compact segmented control that fits 375–1440 inside 12px margins */
+      .subnav .wrap { padding-left: 12px; padding-right: 12px; box-sizing: border-box; }
+      #subnav-me:not([hidden]) {
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden !important;
+        box-sizing: border-box;
+      }
+      #subnav-me .subnav-scroll {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: 100%;
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 2px;
+        overflow: hidden !important;
+        background: color-mix(in srgb, var(--text) 6%, var(--surface, #F6F2EA));
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 2px;
+        scroll-padding-inline: 0;
+      }
+      #subnav-me .subnav-scroll::after { display: none !important; content: none !important; flex: none !important; width: 0 !important; }
+      #subnav-me .subnav-scroll > .subtab {
+        flex: none !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        padding: 0 4px !important;
+        margin: 0 !important;
+        font-size: 12px !important;
+        letter-spacing: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        border-radius: 999px !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+      }
+      #subnav-me .subnav-scroll > .subtab[aria-selected="true"] {
+        background: var(--honey-nav, #C29E74) !important;
+        color: #1A1612 !important;
+        font-weight: 650 !important;
+      }
+      html[data-theme="dark"] #subnav-me .subnav-scroll > .subtab[aria-selected="true"] {
+        background: var(--honey-nav, #C29E74) !important;
+        color: #1A1612 !important;
+      }
+      #subnav-me #profile-close {
+        flex: 0 0 32px !important;
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 50% !important;
+      }
+      /* Profile Info — compact 2-col sizes, lighter inputs */
+      #panel-pinfo #profile-form {
+        display: grid;
+        gap: 22px;
+        padding: 16px 16px 18px !important;
+      }
+      #panel-pinfo .profile-sec { display: grid; gap: 8px; }
+      #panel-pinfo .profile-sec-h,
+      #panel-pinfo .profile-group-head {
+        grid-column: 1 / -1;
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--brass, #C29E74);
+      }
+      #panel-pinfo .profile-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px 12px !important;
+      }
+      #panel-pinfo .profile-sec-notes { gap: 6px; }
+      #panel-pinfo #profile-form input[type="text"],
+      #panel-pinfo #profile-form input[type="search"],
+      #panel-pinfo #profile-form select,
+      #panel-pinfo #profile-form textarea {
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: none !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border, #E4D9C8) !important;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        padding: 0 10px !important;
+        font-size: 15px !important;
+        box-shadow: none !important;
+      }
+      #panel-pinfo #profile-form textarea {
+        height: auto !important;
+        min-height: 72px !important;
+        padding: 8px 10px !important;
+      }
+      #panel-pinfo #profile-form input[type="file"] {
+        height: auto !important;
+        min-height: 36px !important;
+        max-height: none !important;
+        border: 1px dashed var(--border, #E4D9C8) !important;
+        border-radius: 10px !important;
+        padding: 6px 8px !important;
+        background: transparent !important;
+      }
+      html[data-theme="dark"] #panel-pinfo #profile-form input[type="text"],
+      html[data-theme="dark"] #panel-pinfo #profile-form input[type="search"],
+      html[data-theme="dark"] #panel-pinfo #profile-form select,
+      html[data-theme="dark"] #panel-pinfo #profile-form textarea {
+        border-color: var(--border, #3A3228) !important;
+        background: var(--surface) !important;
+      }
+      /* Profile Location — tighter, calmer card */
+      #panel-plocation .loc-card {
+        display: grid;
+        gap: 16px;
+        padding: 16px 16px 18px !important;
+      }
+      #panel-plocation .loc-card h3 {
+        margin: 0 0 6px;
+        font-family: var(--font-display);
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1.15;
+      }
+      #panel-plocation .loc-now {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px 10px;
+        margin: 0 0 4px;
+      }
+      #panel-plocation .loc-name { font-size: 17px; font-weight: 600; }
+      #panel-plocation .loc-kind {
+        font-size: 12px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      #panel-plocation .loc-weather,
+      #panel-plocation .loc-rec { margin: 0; font-size: 14px; line-height: 1.45; }
+      #panel-plocation .loc-rec { color: var(--dim); }
+      #panel-plocation .loc-search-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: center;
+      }
+      #panel-plocation #loc-search {
+        min-width: 0 !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border, #E4D9C8) !important;
+        padding: 0 12px !important;
+        font-size: 15px !important;
+      }
+      #panel-plocation .loc-quick { gap: 8px; margin-top: 10px; }
+      #panel-plocation .loc-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+      #panel-plocation #loc-set-home[hidden],
+      #panel-plocation #loc-back-home[hidden] { display: none !important; }
+      #panel-pinfo, #panel-plocation, #panel-pinfo #profile-form, #panel-pinfo .profile-sec,
+      #panel-pinfo .profile-grid { max-width: 100%; min-width: 0; box-sizing: border-box; }
+      #panel-pinfo .profile-grid > * { min-width: 0; max-width: 100%; }
+      #panel-pinfo #profile-form input[type="file"],
+      #panel-pinfo #profile-form input[type="text"],
+      #panel-pinfo #profile-form select { width: 100%; min-width: 0 !important; max-width: 100%; }
+      #panel-pinfo .profile-sec:first-child .profile-grid { grid-template-columns: 1fr !important; }
+
     </style>
 
 
@@ -6362,7 +6629,6 @@
         <div class="wrap">
           <div class="subnav-group" id="subnav-closet" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-wardrobe" aria-selected="false" aria-controls="panel-wardrobe" data-tab="wardrobe">Closet</button>
-            <button class="subtab" role="tab" id="tab-watches" aria-selected="false" aria-controls="panel-watches" data-tab="watches">Watches</button>
           </div>
           <div class="subnav-group" id="subnav-ideas" role="tablist" hidden>
             <button class="subtab" role="tab" id="tab-studio" aria-selected="false" aria-controls="panel-studio" data-tab="studio">Ideas</button>
@@ -6739,6 +7005,70 @@
             </div>
             <div class="closet-stale-row"><button type="button" class="chip" id="ward-stale-chip" aria-pressed="false">Not worn in 90 days</button><span class="meta" id="ward-stale-note"></span></div>
             <div class="item-grid" id="item-grid"></div>
+        <section id="panel-watches" hidden aria-label="Watches">
+        <div class="filter-row" id="watch-subtabs" role="group" aria-label="Watch lists">
+          <button type="button" class="chip" data-watch-list="collection" aria-pressed="true">Collection <span class="count" id="watch-count-collection"></span></button>
+          <button type="button" class="chip" data-watch-list="sold" aria-pressed="false">Sold <span class="count" id="watch-count-sold"></span></button>
+          <button type="button" class="chip" data-watch-list="wants" aria-pressed="false">Wants <span class="count" id="watch-count-wants"></span></button>
+          <button type="button" class="chip" data-watch-list="add" aria-pressed="false" id="watch-add-tab">Add</button>
+        </div>
+        <div class="ward-grid" id="watch-ward-grid">
+          <div id="watch-list-view">
+            <div class="item-grid" id="watch-grid"></div>
+          </div>
+          <form class="card add-form" id="watch-form" hidden>
+            <h3 class="type-title" id="watch-form-title">Add</h3>
+            <div>
+              <label class="field" for="watch-name">Name</label>
+              <input type="text" id="watch-name" placeholder="" required />
+            </div>
+            <div class="form-row">
+              <div>
+                <label class="field" for="watch-metal">Case metal</label>
+                <select id="watch-metal">
+                  <option>Yellow gold</option><option>Rose gold</option><option>Pink gold</option>
+                  <option>Steel</option><option>Platinum</option><option>White gold</option>
+                  <option>Titanium</option><option>Two-tone</option><option>Bronze</option>
+                </select>
+              </div>
+              <div>
+                <label class="field" for="watch-style">Character</label>
+                <select id="watch-style">
+                  <option>Dress</option><option>Everyday</option><option>Sport</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label class="field" for="watch-strap">Strap / bracelet</label>
+                <select id="watch-strap">
+                  <option>Metal bracelet</option><option>Brown leather strap</option>
+                  <option>Black leather strap</option><option>Tan suede strap</option>
+                  <option>Rubber strap</option><option>NATO / fabric strap</option>
+                </select>
+              </div>
+              <div>
+                <label class="field" for="watch-dial-name">Dial</label>
+                <div class="row-inline">
+                  <input type="text" id="watch-dial-name" placeholder="" class="grow" />
+                  <input type="color" id="watch-dial" value="#8a8d8f" aria-label="Pick the dial colour" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="field" for="watch-notes">Notes</label>
+              <textarea id="watch-notes" placeholder=""></textarea>
+            </div>
+            <label class="photo-drop" for="watch-photo">
+              <span class="pd-title" id="watch-photo-label">Photo</span>
+              <img id="watch-photo-preview" alt="" hidden />
+              <input type="file" id="watch-photo" accept="image/*" />
+            </label>
+            <button type="submit" class="btn-ink" id="watch-submit">Add</button>
+            <button type="button" class="btn-ghost" id="watch-cancel-edit" hidden>Cancel edit</button>
+          </form>
+        </div>
+        </section>
           </div>
           </div>
       </section>
@@ -6902,6 +7232,7 @@
 
       <!-- ================= LOOKS ================= -->
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
+        <div id="style-item-host" class="style-item-host" hidden></div>
         <!-- .80.19 (audit P1.9): one row — Mine/Inspo, Build, Ideas, Shuffle -->
         <div class="outfits-build-row outfits-row">
           <div class="outfits-toggle theme-toggle" role="group" aria-label="Looks">
@@ -7571,32 +7902,50 @@
           <div class="profile-head-main"><h3 class="profile-name" id="pf-head-name"></h3><p class="meta" id="pf-head-city"></p></div>
         </div>
         <form class="card add-form" id="profile-form">
-          <div class="profile-grid">
-            <div><label class="field" for="pf-name">Name</label><input type="text" id="pf-name" autocomplete="off" /></div>
-            <div><label class="field" for="pf-photo">Profile photo</label><input type="file" id="pf-photo" accept="image/*" /></div>
-            <div><label class="field" for="pf-shoe">Shoe — US men's</label><input type="text" id="pf-shoe" autocomplete="off" /></div>
-            <div><label class="field" for="pf-tee">Tee size</label><input type="text" id="pf-tee" autocomplete="off" /></div>
-            <div><label class="field" for="pf-polo">Polo size</label><input type="text" id="pf-polo" autocomplete="off" /></div>
-            <div><label class="field" for="pf-shirt">Shirt — neck / size</label><input type="text" id="pf-shirt" placeholder="e.g. 15.5 / Small" autocomplete="off" /></div>
-            <div><label class="field" for="pf-knit">Sweater / knit size</label><input type="text" id="pf-knit" autocomplete="off" /></div>
-            <div><label class="field" for="pf-blazer">Blazer / suit size</label><input type="text" id="pf-blazer" placeholder="e.g. 38R / 48" autocomplete="off" /></div>
-            <div><label class="field" for="pf-coat">Coat / jacket size</label><input type="text" id="pf-coat" autocomplete="off" /></div>
-            <div><label class="field" for="pf-waist">Trouser waist</label><input type="text" id="pf-waist" placeholder="e.g. 32" autocomplete="off" /></div>
-            <div><label class="field" for="pf-inseam">Inseam</label><input type="text" id="pf-inseam" placeholder="e.g. 30" autocomplete="off" /></div>
-            <div><label class="field" for="pf-jeans">Jeans size</label><input type="text" id="pf-jeans" placeholder="e.g. 32 × 30" autocomplete="off" /></div>
-            <div><label class="field" for="pf-shorts">Shorts size</label><input type="text" id="pf-shorts" autocomplete="off" /></div>
-            <div><label class="field" for="pf-glove">Glove size</label><input type="text" id="pf-glove" placeholder="e.g. M / 8.5" autocomplete="off" /></div>
-            <div><label class="field" for="pf-hat">Hat size</label><input type="text" id="pf-hat" autocomplete="off" /></div>
-            <div><label class="field" for="pf-belt">Belt size</label><input type="text" id="pf-belt" autocomplete="off" /></div>
-            <div><label class="field" for="pf-sleeve">Sleeve length</label><input type="text" id="pf-sleeve" autocomplete="off" /></div>
-            <div><label class="field" for="pf-chest">Chest</label><input type="text" id="pf-chest" autocomplete="off" /></div>
-            <div><label class="field" for="pf-height">Height</label><input type="text" id="pf-height" autocomplete="off" /></div>
-            <div>
-              <label class="field" for="pf-fit">Preferred fit</label>
-              <select id="pf-fit"><option>Tailored / slim</option><option>Classic</option><option>Relaxed</option></select>
+          <div class="profile-sec">
+            <h3 class="profile-sec-h">You</h3>
+            <div class="profile-grid">
+              <div><label class="field" for="pf-name">Name</label><input type="text" id="pf-name" autocomplete="off" /></div>
+              <div><label class="field" for="pf-photo">Profile photo</label><input type="file" id="pf-photo" accept="image/*" /></div>
             </div>
           </div>
-          <div>
+          <div class="profile-sec">
+            <h3 class="profile-sec-h">Tops</h3>
+            <div class="profile-grid">
+              <div><label class="field" for="pf-tee">Tee size</label><input type="text" id="pf-tee" autocomplete="off" /></div>
+              <div><label class="field" for="pf-polo">Polo size</label><input type="text" id="pf-polo" autocomplete="off" /></div>
+              <div><label class="field" for="pf-shirt">Shirt — neck / size</label><input type="text" id="pf-shirt" placeholder="e.g. 15.5 / S" autocomplete="off" /></div>
+              <div><label class="field" for="pf-knit">Sweater / knit size</label><input type="text" id="pf-knit" autocomplete="off" /></div>
+              <div><label class="field" for="pf-blazer">Blazer / suit size</label><input type="text" id="pf-blazer" placeholder="e.g. 38R / 48" autocomplete="off" /></div>
+              <div><label class="field" for="pf-coat">Coat / jacket size</label><input type="text" id="pf-coat" autocomplete="off" /></div>
+            </div>
+          </div>
+          <div class="profile-sec">
+            <h3 class="profile-sec-h">Bottoms</h3>
+            <div class="profile-grid">
+              <div><label class="field" for="pf-waist">Trouser waist</label><input type="text" id="pf-waist" placeholder="e.g. 32" autocomplete="off" /></div>
+              <div><label class="field" for="pf-inseam">Inseam</label><input type="text" id="pf-inseam" placeholder="e.g. 30" autocomplete="off" /></div>
+              <div><label class="field" for="pf-jeans">Jeans size</label><input type="text" id="pf-jeans" placeholder="e.g. 32 × 30" autocomplete="off" /></div>
+              <div><label class="field" for="pf-shorts">Shorts size</label><input type="text" id="pf-shorts" autocomplete="off" /></div>
+            </div>
+          </div>
+          <div class="profile-sec">
+            <h3 class="profile-sec-h">Shoes &amp; extras</h3>
+            <div class="profile-grid">
+              <div><label class="field" for="pf-shoe">Shoe — US men's</label><input type="text" id="pf-shoe" autocomplete="off" /></div>
+              <div><label class="field" for="pf-glove">Glove size</label><input type="text" id="pf-glove" placeholder="e.g. M / 8.5" autocomplete="off" /></div>
+              <div><label class="field" for="pf-hat">Hat size</label><input type="text" id="pf-hat" autocomplete="off" /></div>
+              <div><label class="field" for="pf-belt">Belt size</label><input type="text" id="pf-belt" autocomplete="off" /></div>
+              <div><label class="field" for="pf-sleeve">Sleeve length</label><input type="text" id="pf-sleeve" autocomplete="off" /></div>
+              <div><label class="field" for="pf-chest">Chest</label><input type="text" id="pf-chest" autocomplete="off" /></div>
+              <div><label class="field" for="pf-height">Height</label><input type="text" id="pf-height" autocomplete="off" /></div>
+              <div>
+                <label class="field" for="pf-fit">Preferred fit</label>
+                <select id="pf-fit"><option>Tailored / slim</option><option>Classic</option><option>Relaxed</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="profile-sec profile-sec-notes">
             <label class="field" for="pf-notes">Notes — alterations, brands that fit you, anything a search should know</label>
             <textarea id="pf-notes" class="textarea-md"></textarea>
           </div>
@@ -7617,7 +7966,7 @@
           <div>
             <label class="field" for="loc-search">Traveling? Change location</label>
             <div class="loc-search-row">
-              <input type="search" id="loc-search" placeholder="City — e.g. New York, London, Paris" autocomplete="off" />
+              <input type="search" id="loc-search" placeholder="City or town" autocomplete="off" />
               <button type="button" class="btn-ink" id="loc-search-btn">Find</button>
             </div>
             <div id="loc-results"></div>
@@ -7670,7 +8019,7 @@
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.83.1</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.83.2</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -7692,70 +8041,6 @@
       </section>
 
       <!-- ================= WATCHES ================= -->
-      <section id="panel-watches" role="tabpanel" aria-labelledby="tab-watches" hidden>
-        <div class="filter-row" id="watch-subtabs" role="group" aria-label="Watch lists">
-          <button type="button" class="chip" data-watch-list="collection" aria-pressed="true">Collection <span class="count" id="watch-count-collection"></span></button>
-          <button type="button" class="chip" data-watch-list="sold" aria-pressed="false">Sold <span class="count" id="watch-count-sold"></span></button>
-          <button type="button" class="chip" data-watch-list="wants" aria-pressed="false">Wants <span class="count" id="watch-count-wants"></span></button>
-          <button type="button" class="chip" data-watch-list="add" aria-pressed="false" id="watch-add-tab">Add</button>
-        </div>
-        <div class="ward-grid" id="watch-ward-grid">
-          <div id="watch-list-view">
-            <div class="item-grid" id="watch-grid"></div>
-          </div>
-          <form class="card add-form" id="watch-form" hidden>
-            <h3 class="type-title" id="watch-form-title">Add</h3>
-            <div>
-              <label class="field" for="watch-name">Name</label>
-              <input type="text" id="watch-name" placeholder="" required />
-            </div>
-            <div class="form-row">
-              <div>
-                <label class="field" for="watch-metal">Case metal</label>
-                <select id="watch-metal">
-                  <option>Yellow gold</option><option>Rose gold</option><option>Pink gold</option>
-                  <option>Steel</option><option>Platinum</option><option>White gold</option>
-                  <option>Titanium</option><option>Two-tone</option><option>Bronze</option>
-                </select>
-              </div>
-              <div>
-                <label class="field" for="watch-style">Character</label>
-                <select id="watch-style">
-                  <option>Dress</option><option>Everyday</option><option>Sport</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div>
-                <label class="field" for="watch-strap">Strap / bracelet</label>
-                <select id="watch-strap">
-                  <option>Metal bracelet</option><option>Brown leather strap</option>
-                  <option>Black leather strap</option><option>Tan suede strap</option>
-                  <option>Rubber strap</option><option>NATO / fabric strap</option>
-                </select>
-              </div>
-              <div>
-                <label class="field" for="watch-dial-name">Dial</label>
-                <div class="row-inline">
-                  <input type="text" id="watch-dial-name" placeholder="" class="grow" />
-                  <input type="color" id="watch-dial" value="#8a8d8f" aria-label="Pick the dial colour" />
-                </div>
-              </div>
-            </div>
-            <div>
-              <label class="field" for="watch-notes">Notes</label>
-              <textarea id="watch-notes" placeholder=""></textarea>
-            </div>
-            <label class="photo-drop" for="watch-photo">
-              <span class="pd-title" id="watch-photo-label">Photo</span>
-              <img id="watch-photo-preview" alt="" hidden />
-              <input type="file" id="watch-photo" accept="image/*" />
-            </label>
-            <button type="submit" class="btn-ink" id="watch-submit">Add</button>
-            <button type="button" class="btn-ghost" id="watch-cancel-edit" hidden>Cancel edit</button>
-          </form>
-        </div>
-      </section>
     </main>
 
     <!-- Bottom nav: a direct child of body, outside main.
@@ -10308,7 +10593,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.83.1";
+var WARDROBE_BUILD = "2026-11-19.83.2";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -21672,7 +21957,12 @@ function styleDeal(it, limit) {
     if (l.swapComboId) ctx.shown[l.swapComboId] = 1;
     out.push(JSON.parse(JSON.stringify(l)));
   });
+  /* (1c) On-body renders whose key includes this closet item. */
+  if (out.length < limit) {
+    styleLooksFromOnbody(it, ctx, limit - out.length).forEach(function (look) { out.push(look); });
+  }
   /* (2) New anchored combinations from the piece library. */
+  if (!anchorPiece) anchorPiece = styleEnsureAnchor(it);
   if (out.length < limit && anchorPiece && anchorPiece.slot) {
     var combos = styleAssembleCombos(anchorPiece, ctx.shown, limit - out.length + 6);
     for (var ci = 0; ci < combos.length && out.length < limit; ci++) {
@@ -21701,12 +21991,41 @@ function styleCardHTML(look, idx) {
     '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
     cardStripHTML(look.swatches) + "</span></button>";
 }
+function styleLooksChrome(hide) {
+  /* On the clean Looks page (html.pv81) the Mine | Mix | New bar
+     and floating + are injected at runtime. Hide them — and the
+     underlying feeds — while Style this is showing outfits around
+     a closet piece, then restore the feed the user was on. */
+  ["pv-top", "pv-fab", "lf-row"].forEach(function (id) {
+    var n = document.getElementById(id);
+    if (n) n.hidden = !!hide;
+  });
+  var row = document.querySelector("#panel-looks .outfits-row");
+  if (row) row.hidden = !!hide;
+  var mine = document.getElementById("outfits-mine-view");
+  var inspo = document.getElementById("outfits-inspo-view");
+  if (hide) {
+    if (mine) mine.hidden = true;
+    if (inspo) inspo.hidden = true;
+  } else {
+    var onInspo = window.outfitsMode === "inspo";
+    if (mine) mine.hidden = !!onInspo;
+    if (inspo) inspo.hidden = !onInspo;
+  }
+}
 function renderStyleResults(it, keepScroll) {
-  var el = document.getElementById("look-result");
+  var el = document.getElementById("style-item-host") || document.getElementById("look-result");
   if (!el) return;
-  el.innerHTML = '<div class="options-head"><span class="oc-label">' + esc(it.name) + '</span>' +
-    '<button type="button" class="btn-ghost" data-style-more>Six more ideas</button></div>' +
-    '<div class="options-grid" role="list">' + styleResults.map(function (look, idx) { return styleCardHTML(look, idx); }).join("") + "</div>";
+  el.hidden = false;
+  styleLooksChrome(true);
+  var empty = !styleResults.length;
+  el.innerHTML = '<div class="options-head style-item-head"><span class="oc-label">Styled around ' + esc(it.name) + '</span>' +
+    '<button type="button" class="btn-ghost" data-style-close>All looks</button>' +
+    (empty ? "" : '<button type="button" class="btn-ghost" data-style-more>Six more ideas</button>') +
+    "</div>" +
+    (empty
+      ? '<p class="style-item-empty">No outfits with the ' + esc(it.name) + " yet — it pairs as more pieces are photographed.</p>"
+      : '<div class="options-grid" role="list">' + styleResults.map(function (look, idx) { return styleCardHTML(look, idx); }).join("") + "</div>");
   if (!keepScroll) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
   startStyleRenderWatch();
 }
@@ -21738,22 +22057,122 @@ function startStyleRenderWatch() {
     if (!styleResults.some(function (l) { return l.swapState === "rendering"; })) stopStyleRenderWatch();
   }, 20000);
 }
+function styleEnsureAnchor(it) {
+  /* Closet pieces that were never copied into the piece library
+     (the Dolce & Gabbana Burgundy Blazer is the standing case)
+     still need a slot so Style this can assemble combinations. */
+  if (!it || typeof PIECE_BY_CID === "undefined") return null;
+  if (PIECE_BY_CID[it.id]) return PIECE_BY_CID[it.id];
+  var cat = it.category || "";
+  var slot = "top", libCat = "tops", fs = 3;
+  if (/Blazer|Suit/.test(cat)) { slot = "layer"; libCat = "blazer"; fs = 4; }
+  else if (/Coat/.test(cat)) { slot = "layer"; libCat = "outerwear"; fs = 4; }
+  else if (/Leather jacket|Jacket/.test(cat)) { slot = "layer"; libCat = "outerwear"; fs = 3; }
+  else if (/Vest/.test(cat)) { slot = "layer"; libCat = "vest"; fs = 4; }
+  else if (/Trouser/.test(cat)) { slot = "bottom"; libCat = "trousers"; fs = 3; }
+  else if (/Jeans/.test(cat)) { slot = "bottom"; libCat = "jeans"; fs = 2; }
+  else if (/Shorts/.test(cat)) { slot = "bottom"; libCat = "shorts"; fs = 2; }
+  else if (/Bathing/.test(cat)) { slot = "bottom"; libCat = "swim"; fs = 1; }
+  else if (/Shoe/.test(cat)) { slot = "shoes"; libCat = "shoes"; fs = 3; }
+  else if (/Tie/.test(cat)) { slot = "accessory"; libCat = "tie"; fs = 4; }
+  else if (/Belt|Scarf|Hat|Glove|Sock|Sunglass/.test(cat)) { slot = "accessory"; libCat = "belt"; fs = 3; }
+  else if (/Sweater/.test(cat)) { slot = "top"; libCat = "knitwear"; fs = 3; }
+  else if (/Shirt|Button/.test(cat)) { slot = "top"; libCat = "shirts"; fs = 4; }
+  else if (/Polo/.test(cat)) { slot = "top"; libCat = "tops"; fs = 3; }
+  else if (/Tee/.test(cat)) { slot = "top"; libCat = "tops"; fs = 2; }
+  var hex = it.colourHex || "#888888";
+  var wn = (it.colourName || "").split("·")[0].trim();
+  if (!wn && typeof nearestWada === "function") wn = nearestWada(hex).name;
+  var anchor = {
+    id: "closet:" + it.id,
+    slot: slot,
+    cat: libCat,
+    name: it.name,
+    wn: wn || "Colour",
+    wh: hex,
+    fs: fs,
+    owned: true,
+    cid: it.id,
+    img: it.photo || "",
+    closetAnchor: true
+  };
+  PIECE_BY_CID[it.id] = anchor;
+  if (typeof PIECE_BY_ID !== "undefined") PIECE_BY_ID[anchor.id] = anchor;
+  return anchor;
+}
+function styleLooksFromOnbody(it, ctx, limit) {
+  var out = [];
+  if (!it || typeof onbodyKeys !== "function") return out;
+  var map = onbodyKeys() || {};
+  var needle = String(it.id);
+  Object.keys(map).forEach(function (key) {
+    if (out.length >= limit) return;
+    var ids = key.split("|");
+    if (ids.indexOf(needle) === -1) return;
+    var tag = "onbody:" + key;
+    if (ctx.shown[tag]) return;
+    ctx.shown[tag] = 1;
+    var pieces = ids.map(function (id) { return closetItemById(id); }).filter(Boolean);
+    var names = pieces.map(function (p) { return p.name; });
+    if (names.indexOf(it.name) === -1) names.unshift(it.name);
+    var src = map[key];
+    var sw = pieces.map(function (p) {
+      var role = cap((typeof CLOSET_GARMENT !== "undefined" && CLOSET_GARMENT[p.category]) || p.category || "Piece");
+      return { name: (p.colourName || "").split("·")[0].trim(), hex: p.colourHex, role: role };
+    });
+    out.push({
+      id: "style-ob-" + key.replace(/[^A-Za-z0-9]+/g, "").slice(0, 28),
+      title: names.slice(0, 2).join(" & ") || it.name,
+      meta: "Styled around your " + it.name,
+      desc: names.join(" with "),
+      iconId: null, blendId: null, basis: "both", version: 1, plate: null, paletteName: null,
+      img: src,
+      fwRender: src,
+      imgAlt: "You wearing " + names.join(", "),
+      swatches: sw,
+      source: "wardrobe",
+      anchorNames: [it.name],
+      fwPieces: pieces.map(function (p) { return { id: p.id, name: p.name, photo: p.photo || null, colourHex: p.colourHex || null, category: p.category }; }),
+      builtAround: it.name,
+      anchorPieceId: it.id
+    });
+  });
+  return out;
+}
+function clearStyleItemView() {
+  styleItemCtx = null;
+  styleResults = [];
+  if (typeof stopStyleRenderWatch === "function") stopStyleRenderWatch();
+  var el = document.getElementById("style-item-host");
+  if (el) { el.hidden = true; el.innerHTML = ""; }
+  styleLooksChrome(false);
+}
+var styleNavLock = false;
 function styleThisItem(it) {
   if (!it) return;
+  /* Close the item sheet first — it is a fixed overlay (z-index 210),
+     so leaving it open made Style this look like it did nothing. */
+  detailItemId = null;
+  if (typeof renderItemDetail === "function") renderItemDetail();
   /* One anchored view at a time: entering Style this retires
      any Build-a-look results (and their render watch). */
   buildCtx = null;
   if (typeof stopBuildWatch === "function") stopBuildWatch();
+  styleEnsureAnchor(it);
   styleItemCtx = { itemId: it.id, shown: {} };
   styleResults = styleDeal(it, 6);
-  if (!styleResults.length) {
-    toast("No outfits with the " + it.name + " yet — it pairs as more pieces are photographed.");
-    return;
-  }
-  if (typeof switchTab === "function") switchTab("studio");
+  styleNavLock = true;
+  if (typeof switchTab === "function") switchTab("looks");
+  styleNavLock = false;
   renderStyleResults(it);
 }
 document.addEventListener("click", function (e) {
+  var closeStyle = e.target.closest ? e.target.closest("[data-style-close]") : null;
+  if (closeStyle) {
+    clearStyleItemView();
+    if (typeof renderSaved === "function") renderSaved();
+    return;
+  }
   var more = e.target.closest ? e.target.closest("[data-style-more]") : null;
   if (more) {
     if (!styleItemCtx) return;
@@ -26048,7 +26467,7 @@ var photoDataUrl = null;
    no extra wiring. */
 var WARD_CAT_GROUPS = [
   { key: "clothing", label: "Clothing", cats: ["Bathing suits", "Blazers", "Button downs", "Coats", "Jackets", "Jeans", "Leather jackets", "Polos", "Shirts", "Shorts", "Suits", "Sweaters", "Tees", "Trousers", "Vests"] },
-  { key: "accessories", label: "Accessories", cats: ["Belts", "Gloves", "Hats", "Scarves", "Socks", "Sunglasses", "Ties"] },
+  { key: "accessories", label: "Accessories", cats: ["Belts", "Gloves", "Hats", "Scarves", "Socks", "Sunglasses", "Ties", "Watches"] },
   { key: "shoes", label: "Shoes", cats: ["Shoes"] }
 ];
 function wardCatCounts() {
@@ -26060,15 +26479,21 @@ function syncWardCatLabels() {
   WARD_CAT_GROUPS.forEach(function (g) {
     var lab = document.getElementById("ward-cat-" + g.key + "-label");
     if (!lab) return;
-    lab.textContent = (wardFilter !== "All" && g.cats.indexOf(wardFilter) !== -1) ? g.label + " · " + wardFilter : g.label;
+    /* Show only the selected category (e.g. "Watches"), not "Accessories · Watches", so the closet filter row never overflows a 375px phone. */
+    lab.textContent = (wardFilter !== "All" && g.cats.indexOf(wardFilter) !== -1) ? wardFilter : g.label;
   });
+}
+function wardWatchCount() {
+  try { return (typeof watches !== "undefined" ? watches.filter(function (w) { return !w.sold; }).length : 0); }
+  catch (e) { return 0; }
 }
 function fillWardCatMenu(g) {
   var menu = document.getElementById("ward-cat-" + g.key + "-menu");
   if (!menu) return;
   var counts = wardCatCounts();
-  var present = g.cats.filter(function (c) { return counts[c] > 0; });
-  var total = present.reduce(function (n, c) { return n + counts[c]; }, 0);
+  counts["Watches"] = wardWatchCount();
+  var present = g.cats.filter(function (c) { return c === "Watches" || counts[c] > 0; });
+  var total = present.reduce(function (n, c) { return n + (c === "Watches" ? 0 : (counts[c] || 0)); }, 0);
   var html = '<button type="button" class="cdd-opt" role="menuitem" data-cat-pick="All" aria-pressed="' + (wardFilter === "All") + '"><span class="cdd-opt-name">All</span>' + (total ? '<span class="cat-count">' + total + "</span>" : "") + "</button>";
   html += present.map(function (c) {
     return '<button type="button" class="cdd-opt" role="menuitem" data-cat-pick="' + esc(c) + '" aria-pressed="' + (wardFilter === c) + '"><span class="cdd-opt-name">' + esc(c) + '</span><span class="cat-count">' + counts[c] + "</span></button>";
@@ -26259,7 +26684,21 @@ function renderWardrobe() {
     return a.ix - b.ix;
   });
   items = decorated.map(function (d) { return d.it; });
+  var showWatches = wardFilter === "Watches";
+  var staleRow = document.querySelector("#panel-wardrobe .closet-stale-row");
+  var watchPanel = document.getElementById("panel-watches");
+  if (staleRow) staleRow.hidden = !!showWatches;
+  if (watchPanel) watchPanel.hidden = !showWatches;
+  if (showWatches) {
+    var hideGrid = document.getElementById("item-grid");
+    if (hideGrid) hideGrid.hidden = true;
+    if (typeof renderWatches === "function") renderWatches();
+    updateWardRail();
+    if (typeof renderStaleChip === "function") renderStaleChip();
+    return;
+  }
   var grid = document.getElementById("item-grid");
+  if (grid) grid.hidden = false;
   if (!items.length) {
     grid.innerHTML = '<div class="card empty span-all">' + (wardStaleOnly
       ? "Nothing has been sitting unworn for 90 days — everything with a wear date is in rotation."
@@ -26347,13 +26786,15 @@ function renderItemDetail() {
     "<div><dt>Status</dt><dd>" + (it.laundry ? "In laundry" : "In the closet") + "</dd></div>" +
     "</dl>" +
     '<div class="item-actions">' +
-    '<button type="button" class="btn-ghost" data-item-act="style">' + esc(styleItemLabel(it)) + '</button>' +
+    '<div class="item-actions-primary">' +
+    '<button type="button" class="btn-ink" data-item-act="style">' + esc(styleItemLabel(it)) + '</button>' +
     '<button type="button" class="btn-ghost" data-item-act="find">Shop the look</button>' +
+    "</div>" +
+    '<div class="item-actions-secondary">' +
     '<button type="button" class="btn-ghost" data-item-act="laundry">' + (it.laundry ? "Back from laundry" : "Send to laundry") + "</button>" +
     '<button type="button" class="btn-ghost" data-item-act="edit">Edit</button>' +
     '<button type="button" class="btn-ghost danger" data-item-act="delete" aria-pressed="false">Delete</button>' +
-    '<button type="button" class="btn-ghost" data-item-act="close">Close</button>' +
-    "</div></article>";
+    "</div></div></article>";
   box.scrollIntoView({ behavior: "smooth", block: "nearest" });
   updateWardRail();
 }
@@ -29172,6 +29613,8 @@ function renderLoc() {
   document.getElementById("loc-current-name").textContent = currentLoc.name || "";
   document.getElementById("loc-current-kind").textContent = locUnset ? "No home set" : (travelling ? "Traveling — not home" : "Home — default");
   document.getElementById("loc-back-home").hidden = !travelling;
+  var setHomeBtn = document.getElementById("loc-set-home");
+  if (setHomeBtn) setHomeBtn.hidden = !locUnset && !travelling;
   var badge = travelling ? ' <span class="travel-badge">Traveling</span>' : "";
   document.getElementById("today-loc").innerHTML = "<strong>" + esc(currentLoc.name + (currentLoc.admin && String(currentLoc.name).indexOf(currentLoc.admin) === -1 ? ", " + currentLoc.admin : "")) + "</strong><span>" + esc(currentWeather ? Math.round(currentWeather.temp) + "°F · " + currentWeather.label : "") + "</span>" + badge;
   if (locUnset && !currentWeather) {
@@ -33347,7 +33790,7 @@ document.addEventListener("click", function (e) {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "bulk", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "purchased", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "prules", "pcloud", "watches", "wearing", "myinspo"];
+var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "bulk", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "purchased", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "prules", "pcloud", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -33369,7 +33812,7 @@ var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyz
    and every switchTab("…") call still resolve. */
 var SECTIONS = {
   today: ["today"],
-  closet: ["wardrobe", "add", "analyze", "bulk", "watches", "wearing"],
+  closet: ["wardrobe", "add", "analyze", "bulk", "wearing"],
   calendar: ["calendar"],
   ideas: ["looks", "studio", "outfitideas", "icons", "emulate", "palettes", "myinspo"],
   find: ["find", "receipts", "purchased", "search", "brands", "brand", "sale", "shopwish", "gaps"],
@@ -33407,6 +33850,7 @@ function persistTab() {
     } else {
       h = currentTab === "icons" && openIconId ? "#icons/" + encodeURIComponent(openIconId) : "#" + currentTab;
     }
+    if (currentTab === "wardrobe" && typeof wardFilter !== "undefined" && wardFilter === "Watches") h = "#watches";
     if (location.hash !== h) history.replaceState(null, "", h);
   } catch (e) {}
 }
@@ -33438,6 +33882,12 @@ function switchTab(name, opts) {
     name = "find";
   }
   if (name === "queue" || name === "favourites") name = "looks";
+  /* Watches now live under Closet → Accessories → Watches. */
+  if (name === "watches") {
+    name = "wardrobe";
+    if (typeof wardFilter !== "undefined") wardFilter = "Watches";
+    if (typeof syncWardCatLabels === "function") syncWardCatLabels();
+  }
   /* Build .54: the Wishlist left My Outfits for its own Shop sub
      page — the old name lands there, never on a dead end. */
   if (name === "wishlist") name = "shopwish";
@@ -33471,7 +33921,7 @@ function switchTab(name, opts) {
     t.setAttribute("aria-selected", t.getAttribute("data-tab") === name ? "true" : "false");
   });
   var subnav = document.getElementById("subnav");
-  var grouped = SECTIONS[sec].length > 1 && sec !== "ideas" && sec !== "find";
+  var grouped = SECTIONS[sec].length > 1 && sec !== "ideas" && sec !== "find" && sec !== "closet";
   subnav.hidden = !grouped;
   if (grouped) {
     document.querySelectorAll(".subnav-group").forEach(function (g) {
@@ -33493,7 +33943,9 @@ function switchTab(name, opts) {
     if (back) window.scrollTo(0, back);
     else if (window.scrollY) window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  if (name === "looks" && !styleNavLock && typeof clearStyleItemView === "function" && styleItemCtx) clearStyleItemView();
   if ((name === "looks" || name === "outfitideas") && typeof renderSaved === "function") renderSaved();
+  if (name === "wardrobe" && typeof wardFilter !== "undefined" && wardFilter === "Watches" && typeof renderWardrobe === "function") renderWardrobe();
   if (name === "sale" && typeof renderSaleItems === "function") renderSaleItems();
   if (name === "shopwish" && typeof renderShopWishlist === "function") renderShopWishlist();
   if (name === "shopwish" && typeof renderWishlist === "function") renderWishlist();
@@ -33639,6 +34091,7 @@ function tabFromHash() {
      Wishlist page, its new home. Checked before the TABS gate:
      "wishlist" itself is not a tab name. */
   if (parts[0] === "wishlist") return { tab: "shopwish", icon: null };
+  if (parts[0] === "watches") return { tab: "wardrobe", icon: null, watches: true };
   if (TABS.indexOf(parts[0]) === -1) return null;
   /* Closet sub-pages are reached in-app only: a boot, refresh or
      deep link naming one lands on the Closet landing instead. */
@@ -33651,7 +34104,14 @@ function tabFromHash() {
 window.addEventListener("hashchange", function () {
   var from = tabFromHash();
   if (!from) return;
-  if (from.tab === currentTab && from.tab !== "icons" && from.tab !== "palettes") return;
+  if (from.watches && typeof wardFilter !== "undefined") {
+    wardFilter = "Watches";
+    if (typeof syncWardCatLabels === "function") syncWardCatLabels();
+  }
+  if (from.tab === currentTab && from.tab !== "icons" && from.tab !== "palettes") {
+    if (from.watches && typeof renderWardrobe === "function") renderWardrobe();
+    return;
+  }
   switchTab(from.tab, { restore: true });
   if (from.tab === "icons" && from.icon && iconById(from.icon)) openIconDetail(from.icon);
 });
@@ -33683,6 +34143,10 @@ function restoreTab() {
        launch — a shortcut to a page lands on that page. */
     var hf = tabFromHash();
     if (hf) {
+      if (hf.watches && typeof wardFilter !== "undefined") {
+        wardFilter = "Watches";
+        if (typeof syncWardCatLabels === "function") syncWardCatLabels();
+      }
       switchTab(hf.tab, { restore: true });
       if (hf.tab === "icons" && hf.icon && iconById(hf.icon)) openIconDetail(hf.icon);
       return;
@@ -33695,9 +34159,15 @@ function restoreTab() {
   /* A deep link to Icons or Palettes wins over the session tab, so #palettes
      still opens Curate → Palettes after a previous visit to The Edit. */
   if (from && (from.tab === "icons" || from.tab === "palettes")) name = from.tab;
+  if (name === "watches") { name = "wardrobe"; if (typeof wardFilter !== "undefined") wardFilter = "Watches"; }
   if (TABS.indexOf(name) === -1) name = "today";
   if (name === "add" || name === "analyze" || name === "bulk") name = "wardrobe";
   if (name === "receipts") name = "find";
+  if (from && from.watches && typeof wardFilter !== "undefined") {
+    name = "wardrobe";
+    wardFilter = "Watches";
+    if (typeof syncWardCatLabels === "function") syncWardCatLabels();
+  }
   if (name === "today" && !from) { persistTab(); return; }
   switchTab(name, { restore: true });
   if (name === "icons") {
@@ -35322,11 +35792,22 @@ function closePlanSheet() {
 document.addEventListener("click", function (e) {
   var back = e.target.closest ? e.target.closest("[data-back-wardrobe]") : null;
   if (back) { if (typeof switchTab === "function") switchTab("wardrobe"); return; }
-  if (e.target.closest && e.target.closest("#closet-add-entry")) { if (typeof switchTab === "function") switchTab("add"); return; }
+  if (e.target.closest && e.target.closest("#closet-add-entry")) {
+    if (typeof wardFilter !== "undefined" && wardFilter === "Watches") {
+      watchListTab = "add";
+      if (typeof renderWatches === "function") renderWatches();
+      var host = document.getElementById("panel-watches");
+      if (host) try { host.scrollIntoView({ block: "start" }); } catch (err) {}
+      return;
+    }
+    if (typeof switchTab === "function") switchTab("add");
+    return;
+  }
 });
 
 /* ---------- Profile measurements — grouped, two columns (13) ---------- */
 (function profileGroups() {
+  if (document.querySelector("#profile-form .profile-sec")) return;
   var grid = document.querySelector("#profile-form .profile-grid");
   if (!grid) return;
   function wrap(id) { var el = document.getElementById(id); return el ? el.parentElement : null; }
