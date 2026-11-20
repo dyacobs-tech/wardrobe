@@ -36111,6 +36111,8 @@ document.getElementById("panel-calendar").addEventListener("click", function (e)
     var order = slots.map(function (s, i) {
       var all = deck.forLevel(s.level), strict = all.filter(function (c) { return c.mask & (1 << s.level); });
       if (strict.length) all = strict;
+      /* the pool slot is swim only — the same rule Home's Swim/Pool follows */
+      if (s.level === 1) all = all.filter(function (c) { return c.b.kind === "swim" || c.b.swim; });
       var warmOk = all.filter(function (c) { return tempOk(c, s.temp, s.level); });
       s._c = warmOk.length ? warmOk : all;
       return i;
