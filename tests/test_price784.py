@@ -23,7 +23,7 @@ with sync_playwright() as p:
         pg.goto(BASE); pg.wait_for_timeout(2500)
         pg.evaluate("switchTab('find'); editShow('saved')"); pg.wait_for_timeout(400)
         n0 = pg.locator("#edit-saved-out .edit-pc").count()
-        row = pg.evaluate("(function(){var r=document.querySelector('#panel-find .edit-tabs').getBoundingClientRect();var p=document.getElementById('price-pill').getBoundingClientRect();return [r.right, p.right, p.left, window.innerWidth]})()")
+        row = pg.evaluate("(function(){var r=document.querySelector('#panel-find .edit-shop-tabs').getBoundingClientRect();var p=document.getElementById('price-pill').getBoundingClientRect();return [r.right, p.right, p.left, window.innerWidth]})()")
         check("%d: price pill inside the top row" % vw, row[1] <= row[0] + 0.5 and row[2] >= 0, row)
         pg.click("#price-pill"); pg.wait_for_timeout(200)
         check("%d: sheet opens" % vw, pg.locator("#price-sheet").is_visible())

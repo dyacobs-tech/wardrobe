@@ -111,7 +111,7 @@ def main() -> int:
             page.goto(url, wait_until="load")
             page.wait_for_timeout(1800)
 
-            check("build is .80.35", str(page.evaluate("window.WARDROBE_BUILD") or "").endswith(".80.35"), page.evaluate("window.WARDROBE_BUILD"))
+            check("build is current", page.evaluate("window.WARDROBE_BUILD") == BUILD, page.evaluate("window.WARDROBE_BUILD"))
             check("WardrobeRules present", page.evaluate("!!(window.WardrobeRules && WardrobeRules.parse)"))
 
             for text, parsed, needle, needle2 in PARSER_CASES:

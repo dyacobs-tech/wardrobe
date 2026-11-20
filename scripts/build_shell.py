@@ -219,6 +219,24 @@ def main():
         name = "app/00-%s.%s.js" % (bid, h(code))
         files[name] = code; lazy_names.append(name)
         body = body[:inner0] + "</div>" + '<script src="%s" defer></script>' % name + body[i:]
+    # Build .81: on-demand modules — <script type="wardrobe/module" data-name="x">
+    # becomes app/x.<hash>.js, never loaded at boot (the page loads it via
+    # window.__mod81[x] when a view needs it); precached by the SW like the
+    # rest. /*@@INCLUDE name@@*/ inside a module is replaced by the source
+    # between /*<name>*/ and /*</name>*/ in src/app.html (one copy of the code).
+    mod_names = []
+    def module_script(m):
+        name, code = m.group(1), m.group(2)
+        def inc(mm):
+            tag = mm.group(1)
+            a = src.index("/*<%s>*/" % tag) + len("/*<%s>*/" % tag); b = src.index("/*</%s>*/" % tag)
+            return src[a:b]
+        code = re.sub(r"/\*@@INCLUDE ([\w-]+)@@\*/", inc, code)
+        code = rjsmin.jsmin(code)
+        fn = "app/%s.%s.js" % (name, h(code))
+        files[fn] = code; mod_names.append(fn)
+        return "<script>(window.__mod81 = window.__mod81 || {})[%s] = %s;</script>" % (json.dumps(name), json.dumps(fn))
+    body = re.sub(r'<script type="wardrobe/module" data-name="([\w-]+)">(.*?)</script>', module_script, body, flags=re.S)
     body = re.sub(r'<script type="wardrobe/app">(.*?)</script>', app_script, body, flags=re.S)
     body = re.sub(r"<script>(.*?)</script>", inline_script, body, flags=re.S)
     js_names = lazy_names + js_names
@@ -256,7 +274,7 @@ def main():
     open(OUT, "w", encoding="utf-8").write(out)
     # 4. sw.js code list
     sw = open(SW, encoding="utf-8").read()
-    lst = "const CODE_FILES = [%s];" % ", ".join("'./%s'" % f for f in ([css_name] if split_css else []) + js_names + ([bundle_name] if bundle_name else []) + lazy_data)
+    lst = "const CODE_FILES = [%s];" % ", ".join("'./%s'" % f for f in ([css_name] if split_css else []) + js_names + ([bundle_name] if bundle_name else []) + lazy_data + mod_names)
     sw2, k = re.subn(r"const CODE_FILES = \[.*?\];", lst, sw, flags=re.S)
     if not k: sys.exit("sw.js has no CODE_FILES line")
     if sw2 != sw: open(SW, "w", encoding="utf-8").write(sw2)
