@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.2" />
+    <meta name="wardrobe-build" content="2026-11-20.86.3" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -5396,6 +5396,7 @@ window.notMenswear853 = function (e) {
       :root {
         --thumb-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 10v11H3V10h4z'/%3E%3Cpath d='M7 10l4-8a3 3 0 0 1 3 3v4h5.5a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 18.1 21H7'/%3E%3C/svg%3E");
         --thumb-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 14V3h4v11h-4z'/%3E%3Cpath d='M17 14l-4 8a3 3 0 0 1-3-3v-4H4.5a2 2 0 0 1-2-2.3l1.4-8A2 2 0 0 1 5.9 3H17'/%3E%3C/svg%3E");
+        --pencil: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z'/%3E%3C/svg%3E");
       }
       .thumb-btn[aria-pressed="true"]::before { -webkit-mask-image: var(--thumb-up); }
       /* .80.22 (Home ••• move): Share this look / Upload a look — text buttons under "In this look" */
@@ -6469,12 +6470,39 @@ window.notMenswear853 = function (e) {
       .pv-fab svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
       #panel-looks[hidden] .pv-fab { display: none; }
       .pv81 #panel-looks #cf-grid, .pv81 #panel-looks .en-grid { padding-bottom: 72px; } /* + height 48 + 24 gap */
-      /* cards: thumbs + Render me on one row, a quiet Edit under them */
-      .pv81 #panel-looks .cf-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-      .pv81 #panel-looks .cf-actions [data-cf-like], .pv81 #panel-looks .cf-actions [data-cf-dislike] { flex: 1 1 0 !important; width: auto !important; min-width: 0 !important; }
-      .pv81 #panel-looks .cf-actions .en-rme { flex: 1.4 1 0 !important; min-width: 0; height: 36px; min-height: 36px; }
-      .pv-edit { flex: 1 0 100%; height: 32px; border: 0; background: none; color: var(--dim); font: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; cursor: pointer; }
+      /* .86.3: Like, pencil Edit, Dislike on one compact row — no separate Edit row */
+      .pv81 #panel-looks .cf-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px; }
+      .pv81 #panel-looks .cf-actions [data-cf-like],
+      .pv81 #panel-looks .cf-actions [data-cf-dislike],
+      .pv81 #panel-looks .cf-actions .pv-edit {
+        flex: 0 0 44px !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        padding: 0 !important;
+        margin: 0;
+        box-sizing: border-box;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        font-size: 0 !important;
+        letter-spacing: 0 !important;
+      }
+      .pv-edit { border: 0; background: none; color: var(--dim); cursor: pointer; text-decoration: none; }
       .pv-edit:hover { color: var(--text); }
+      .pv81 #panel-looks .cf-actions .pv-edit::before {
+        content: "";
+        width: 28px;
+        height: 28px;
+        display: block;
+        background: currentColor;
+        -webkit-mask: var(--pencil) center / contain no-repeat;
+        mask: var(--pencil) center / contain no-repeat;
+      }
+      /* Render me, when present, wraps under the three icon buttons */
+      .pv81 #panel-looks .cf-actions .en-rme { flex: 1 0 100% !important; width: auto !important; min-width: 0; max-width: none; height: 36px; min-height: 36px; }
       .swap-sec.pv-flash { outline: 2px solid var(--honey-nav, #a4804f); outline-offset: 4px; border-radius: 10px; }
 
 
@@ -8143,7 +8171,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.2</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.3</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10912,7 +10940,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.2";
+var WARDROBE_BUILD = "2026-11-20.86.3";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -40923,6 +40951,7 @@ function analyzeFilePiece(card, job, ix) {
       '<button type="button" class="cf-media" data-cf-open="' + idx + '" aria-label="' + esc(look.title) + '">' + flatlayHTML(look, true) + "</button>" +
       '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span></span>" +
       '<span class="cf-actions"><button type="button" class="chip" data-cf-like="' + idx + '" aria-pressed="' + (look.verdict === "like" ? "true" : "false") + '">Like</button>' +
+      (window.__cfEdit81 ? window.__cfEdit81(idx) : "") +
       '<button type="button" class="chip" data-cf-dislike="' + idx + '" aria-pressed="false">Dislike</button>' +
       (window.__cfExtra81 ? window.__cfExtra81(look, idx) : "") + "</span>" +
       "</article>";
@@ -45949,9 +45978,9 @@ window.inspoView = "withmine";
       (sl ? '<span class="en-src">' + E(sl) + "</span>" : "") +
       (buy ? '<span class="en-total">' + E(buy) + "</span>" : "") + "</span>" +
       '<span class="cf-actions"><button type="button" class="chip" data-cf-like="' + i + '" data-en-like="' + i + '" aria-pressed="' + (liked ? "true" : "false") + '">Like</button>' +
+      (PV ? '<button type="button" class="pv-edit" data-pv-edit="' + i + '" aria-label="Edit">Edit</button>' : "") +
       '<button type="button" class="chip" data-cf-dislike="' + i + '" data-en-dislike="' + i + '" aria-pressed="false">Dislike</button>' +
       (l.render ? "" : '<button type="button" class="chip en-rme" data-en-rme="' + i + '" aria-pressed="' + (rq ? "true" : "false") + '">' + (rq ? "Queued" : (PV ? "Render me" : "Render on me")) + "</button>") +
-      (PV ? '<button type="button" class="pv-edit" data-pv-edit="' + i + '">Edit</button>' : "") +
       "</span></article>";
   }
   function isLiked(key) { return S.liked.some(function (x) { return x.key === key; }); }
@@ -46108,11 +46137,13 @@ window.inspoView = "withmine";
     if (typeof toast === "function") toast("Queued \u2014 tonight's renders put you in it.");
   }
   /* Mine cards: Render on me on the flat-lay (no render yet) cards */
+  window.__cfEdit81 = function (idx) {
+    return PV ? '<button type="button" class="pv-edit" data-pv-edit="' + idx + '" aria-label="Edit">Edit</button>' : "";
+  };
   window.__cfExtra81 = function (look, idx) {
-    var ed = PV ? '<button type="button" class="pv-edit" data-pv-edit="' + idx + '">Edit</button>' : "";
-    if (!look || (typeof onbodyForLook === "function" && onbodyForLook(look))) return ed;
+    if (!look || (typeof onbodyForLook === "function" && onbodyForLook(look))) return "";
     var q = S.rq.some(function (r) { return r.key === look.composerKey; });
-    return '<button type="button" class="chip en-rme" data-cf-rme="' + idx + '" aria-pressed="' + (q ? "true" : "false") + '">' + (q ? "Queued" : (PV ? "Render me" : "Render on me")) + "</button>" + ed;
+    return '<button type="button" class="chip en-rme" data-cf-rme="' + idx + '" aria-pressed="' + (q ? "true" : "false") + '">' + (q ? "Queued" : (PV ? "Render me" : "Render on me")) + "</button>";
   };
   document.addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest("#cf-grid [data-cf-rme]");
@@ -46427,7 +46458,12 @@ window.inspoView = "withmine";
       document.querySelectorAll("#cf-grid .cf-card").forEach(function (c) {
         if (c.querySelector("[data-pv-edit]")) return;
         var o = c.querySelector("[data-cf-open]"), a = c.querySelector(".cf-actions");
-        if (o && a) a.insertAdjacentHTML("beforeend", '<button type="button" class="pv-edit" data-pv-edit="' + o.getAttribute("data-cf-open") + '">Edit</button>');
+        if (!o || !a) return;
+        var html = '<button type="button" class="pv-edit" data-pv-edit="' + o.getAttribute("data-cf-open") + '" aria-label="Edit">Edit</button>';
+        var dis = a.querySelector("[data-cf-dislike]"), like = a.querySelector("[data-cf-like]");
+        if (dis) dis.insertAdjacentHTML("beforebegin", html);
+        else if (like) like.insertAdjacentHTML("afterend", html);
+        else a.insertAdjacentHTML("afterbegin", html);
       });
     }
     ensureEdit();
