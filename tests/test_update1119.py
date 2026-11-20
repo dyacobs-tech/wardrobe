@@ -131,9 +131,20 @@ def main():
 
         # LRU cap: images carry size/time stamps; a trim to half the bytes drops the oldest
         pg.reload(wait_until="load"); pg.wait_for_timeout(5000)
-        onbody = re.search(r"ONBODY_CACHE = NS \+ '([^']+)'", (ROOT / "sw.js").read_text()).group(1)
-        lru = pg.evaluate("""async (name) => {
-          const c = await caches.open(name); let ks = await c.keys();
+        sw_now = (ROOT / "sw.js").read_text()
+        onbody = re.search(r"ONBODY_CACHE = NS \+ '([^']+)'", sw_now).group(1)
+        # PHOTO_CACHE appends the build, so the quoted prefix alone is not the name.
+        photo = "wardrobe-photos-" + build
+        # Home shows a flat-lay of piece photos when a look has no cut-out,
+        # so the stamped bytes may sit in the photo cache rather than on-body.
+        lru = pg.evaluate("""async (names) => {
+          let pick = null;
+          for (const name of names) {
+            const c = await caches.open(name);
+            const ks = await c.keys();
+            if (!pick || ks.length > pick.ks.length) pick = { name, c, ks };
+          }
+          const c = pick.c; let ks = pick.ks;
           const rs = await Promise.all(ks.map(k => c.match(k)));
           const sizes = rs.map(r => +(r.headers.get('x-sw-size') || 0));
           const total = sizes.reduce((a, b) => a + b, 0);
@@ -143,8 +154,8 @@ def main():
           reg.active.postMessage({ type: 'trim-images', max: Math.floor(total / 2) });
           const r = await Promise.race([done, new Promise(res => setTimeout(() => res(null), 8000))]);
           const after = (await c.keys()).length;
-          return { before, after, stamped: sizes.filter(x => x > 0).length, total, r };
-        }""", onbody)
+          return { cache: pick.name, before, after, stamped: sizes.filter(x => x > 0).length, total, r };
+        }""", [onbody, photo])
         check("LRU: cached images are size/time stamped", lru["before"] > 0 and lru["stamped"] == lru["before"], lru)
         check("LRU: a trim below the cap drops the oldest images", lru["r"] is not None and lru["after"] < lru["before"], lru)
 

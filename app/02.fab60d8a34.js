@@ -1135,7 +1135,8 @@ function lookIsMine(l){if(!l)return false;if(l.suggestedBottom)return false;if(l
 return l.source==="wardrobe"||!!l.composer;}
 function pieceDisplayPhoto(item){if(!item)return null;return item.photo||item.originalPhoto||null;}
 function dealHeroForSource(){heroPushHistory56();window._heroDealN=(window._heroDealN||0)+1;var cl=homeComposerLooks75(8);if(!cl.length&&typeof buildClosetLooks==="function"){cl=(currentWeather?buildClosetLooks({temp:currentWeather.temp,rainy:isRainy(),salt:dayOfYear()+window._heroDealN}):buildClosetLooks())||[];}
-cl=(cl||[]).filter(function(l){return lookIsMine(l)&&lookFitsDress841(l,dressLevel841());});if(!cl.length){todayLook=dressEmptyLook841();todaySeedId=todayLook.id;persistOpeningLook(todayLook);renderToday();return;}
+cl=(cl||[]).filter(function(l){return lookIsMine(l)&&lookFitsDress841(l,dressLevel841());});if(!cl.length){if(todayLook&&!todayLook.dressEmpty&&((todayLook.fwPieces&&todayLook.fwPieces.length)||todayLook.img||(todayLook.flatlay&&todayLook.flatlay.length))){renderToday();return;}
+todayLook=dressEmptyLook841();todaySeedId=todayLook.id;persistOpeningLook(todayLook);renderToday();return;}
 if(cl&&cl.length){var clFresh=cl.filter(function(l){return!isGraduatedLook(l)&&!lookPhotoBanned(l);});var dealList=clFresh.length?clFresh:cl;var curTitle=todayLook&&todayLook.title;var pickW=null;var visList=(typeof lookHeroVisible84==="function")?dealList.filter(lookHeroVisible84):dealList;var from=visList.length?visList:dealList;for(var wi=0;wi<from.length;wi++){if(from[wi].title!==curTitle){pickW=from[wi];break;}}
 pickW=pickW||from[0]||dealList[0];todaySeedId=pickW.id;todayLook=pickW;todayLook.source="wardrobe";persistOpeningLook(todayLook);renderToday();return;}
 if(todayLook&&todayLook.source==="wardrobe"&&!todayLook.suggestedBottom){renderToday();return;}

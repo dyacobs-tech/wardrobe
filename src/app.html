@@ -19,6 +19,7 @@
             E.onbody = fetch("assets/onbody/manifest.json", { cache: "no-cache" });
             E.cut = fetch("assets/onbody-cut/manifest.json", { cache: "no-cache" });
             E.feet = fetch("assets/onbody-cut/feet.json");
+            E.editCat = fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r && r.ok ? r.json() : null; }).catch(function () { return null; });
             Object.keys(E).forEach(function (k) { E[k].catch(function () {}); });
           }
         } catch (e) {}
@@ -30373,6 +30374,13 @@ function dealHeroForSource() {
   }
   cl = (cl || []).filter(function (l) { return lookIsMine(l) && lookFitsDress841(l, dressLevel841()); });
   if (!cl.length) {
+    /* Nothing new qualifies at this dress level. Keep the look already
+       on screen (a flat-lay of his pieces) instead of blanking the hero.
+       The honest empty state is only for a day that never had a look. */
+    if (todayLook && !todayLook.dressEmpty && ((todayLook.fwPieces && todayLook.fwPieces.length) || todayLook.img || (todayLook.flatlay && todayLook.flatlay.length))) {
+      renderToday();
+      return;
+    }
     todayLook = dressEmptyLook841();
     todaySeedId = todayLook.id;
     persistOpeningLook(todayLook);
@@ -41088,7 +41096,8 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     tries = tries || 0;
     function again() { if (tries < 2 && !EDIT_CATALOG.length) setTimeout(function () { editLoadCatalog(tries + 1); }, tries ? 4000 : 1500); }
     try {
-      fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) {
+      var early = (window.__takeEarly803 && window.__takeEarly803("editCat")) || null;
+      (early || fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r && r.ok ? r.json() : null; })).then(function (j) {
         if (!j) { again(); return; }
         EDIT_CATALOG = editNormalizeCatalog(j);
         /* gap fillers (trousers above all) also lead Shop the look */
@@ -41700,7 +41709,15 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     var p = document.getElementById("panel-find");
     if (p) p.setAttribute("data-edit-mode", v);
   }
-  window.editShow = show;
+  /* Opening Saved, Build, or Ask must actually show that view.
+     A carried Shop the look (data-stl) covers those panes with
+     display:none. Searches and Curate keep the carried look —
+     renderTheEdit and switchTab("find") call show() directly and
+     still leave it open. */
+  window.editShow = function (v) {
+    if (v !== "searches" && v !== "curate" && typeof window.clearFindLookMode === "function") window.clearFindLookMode();
+    show(v);
+  };
   /* Build .77: shared with Ask and Inspo */
   window.editProductBySku = function (sku) {
     for (var i = 0; i < EDIT_CATALOG.length; i++) if (EDIT_CATALOG[i].sku === sku) return EDIT_CATALOG[i];
