@@ -40,9 +40,6 @@ with sync_playwright() as p:
             nxt.click(); pg.wait_for_timeout(300)
             st = pg.evaluate("editBoardState()")[slot]
             check("%d: arrows still cycle the slot" % vw, not (st and st.get("t") == "p" and st["p"]["key"] == k0), st)
-        # The shop catalogue is fetched at boot and can land after the
-        # board's closet slots. Wait for the gap row instead of racing it.
-        pg.locator("#edit-gapfill .vp-card").nth(2).wait_for(state="attached", timeout=12000)
         gf = pg.locator("#edit-gapfill .vp-card")
         check("%d: Fills a gap on product cards" % vw, gf.count() >= 3, gf.count())
         put = pg.locator("#edit-gapfill [data-edit-gap-put]").first

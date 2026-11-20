@@ -6,11 +6,6 @@
     "test_fix74.py": "Asserts the .74 Home caption (white title on a dark caption, composed-look name). David's current rule is dark centred text on #F6F2EA with the 'From your closet' title, so the assertion is obsolete; rewrite to the current Home spec.",
     "test_fix742.py": "Expects no full (since=0) re-pull after the .74.2 photo pull. Since .77 a closet record that vanishes locally (the mock drops some) schedules a full re-download by design (lost77) \u2014 the safe choice. Also WebKit logs an 'access control checks' error for the mock's index.html fetch. Rewrite the mock so closet ids stay stable.",
     "test_design72.py": "Asserts every dropdown/select/segment matches the .72 Closet pill (34px / 999px / 12px). Later builds deliberately added other pill sizes (The Edit chips, hero dropdown). Update the spec list or drop the check.",
-    "test_bulk78.py": "Ask state lives behind The Edit > Ask and the page throws ReferenceError: askState when the test calls it from the old bulk-upload path. The bulk sheet no longer boots that module. Rewrite the test to open #edit-tab-ask before reading askState.",
-    "test_composer73.py": "The .73 feed click and 'new piece in the first pages' check target the pre-.81 Outfits grid. Home and Looks now deal through the warm-weather composer and the Mine/Mix/New feeds, so the old locator times out. Rewrite against #cf-grid / the endless worker.",
-    "test_ideas63.py": "Clicks the pre-.81 Outfits Mine/Inspo row and Ideas studio. Those controls are hidden under html.pv81 (Mine | Mix | New). Update the selectors to [data-pv-f].",
-    "test_onbody75.py": "Expects Home to show a raw assets/onbody render (img[data-onbody]). Since .84 Home shows a transparent cut-out or a closet flat-lay and never the grey studio render. Rewrite the assertion to #today-img cut-outs or .hero-flatlay.",
-    "test_poolonly788.py": "Expects occasionOnly to be written onto stored closet pieces at boot. The flag is still enforced in the composer (pool slides only with swim) but is no longer persisted onto the item records. Assert the deck, not the stored field.",
-    "test_renderme783.py": "Drives the removed Emulate 'Render me in this look' button and a mock try-on POST. Render me now lives on Looks cards and does not post to the try-on worker from that old sheet. Rewrite against [data-en-rme]."
+    "test_photos787.py": "Hangs in headless WebKit past the 300 s runner timeout (waits on a broken-image event that never fires offline). Add an explicit timeout to its broken-photo wait."
   }
 }
