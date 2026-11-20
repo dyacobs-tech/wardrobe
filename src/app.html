@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.0" />
+    <meta name="wardrobe-build" content="2026-11-20.86.1" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -5597,6 +5597,21 @@ window.notMenswear853 = function (e) {
         box-shadow: 0 10px 30px rgba(60, 44, 24, .16), 0 2px 6px rgba(60, 44, 24, .08) !important;
         animation: ddrop792 .16s ease-out !important; text-align: left !important;
       }
+      /* .86.1: Home empty dress level — off-white, never the dark backdrop */
+      html body #panel-today #today-hero.today-hero.hero-empty861, html body #panel-today #today-hero.hero-empty861 .hero-bg { background: var(--bg, #F5F1E8) !important; background-image: none !important; }
+      html body #panel-today #today-hero.hero-empty861 .today-shade, html body #panel-today #today-hero.hero-empty861 .hero-bg::after { display: none !important; }
+      html body #panel-today #today-hero.hero-empty861 .today-collage { display: flex !important; align-items: center !important; justify-content: center !important; background: transparent !important; position: absolute !important; inset: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; height: 100% !important; min-height: 0 !important; padding: 16px !important; box-sizing: border-box !important; z-index: 3 !important; }
+      html body #panel-today #today-hero.hero-empty861 > img, html body #panel-today #today-hero.hero-empty861 img#today-img, html body #panel-today #today-hero.hero-empty861 .hero-xfade, html body #panel-today #today-hero.hero-empty861 .hero-lq, html body #panel-today #today-hero.hero-empty861 .hero-bg img { display: none !important; visibility: hidden !important; }
+      .hero-empty861-box { width: 100%; max-width: 360px; margin: 0 auto; padding: 22px 20px; border-radius: 18px; background: #FBF8F2; border: 1px solid rgba(31, 26, 21, .12); color: #1F1A15; text-align: center; box-shadow: 0 6px 22px rgba(60, 44, 24, .08); }
+      .hero-empty861-box .he861-k { margin: 0 0 6px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .6; }
+      .hero-empty861-box .he861-t { margin: 0 0 8px; font-family: var(--serif, Georgia, serif); font-size: 20px; line-height: 1.25; }
+      .hero-empty861-box .he861-s { margin: 0 0 16px; font-size: 14px; line-height: 1.45; opacity: .75; }
+      .hero-empty861-box .he861-d { margin: 12px 0 0; font-size: 11px; opacity: .5; }
+      .hero-empty861-box .he861-acts { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+      .hero-empty861-box .he861-acts button { min-height: 44px; padding: 0 18px; }
+      html[data-theme="dark"] body #panel-today #today-hero.today-hero.hero-empty861, html[data-theme="dark"] body #panel-today #today-hero.hero-empty861 .hero-bg { background: var(--bg, #1c1916) !important; }
+      html[data-theme="dark"] .hero-empty861-box { background: #2A2521; color: #F2ECE2; border-color: rgba(242, 236, 226, .14); box-shadow: none; }
+      html body #panel-today #today-type-row.cdd-menu.dd-down861:not([hidden]) { top: calc(100% + 8px) !important; bottom: auto !important; max-height: var(--dd861-max, 60vh) !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
       html[data-theme="dark"] body #panel-today #today-type-row.cdd-menu:not([hidden]) { background: #2A2521 !important; color: #F2ECE2 !important; border-color: rgba(242, 236, 226, .14) !important; box-shadow: 0 10px 30px rgba(0, 0, 0, .5) !important; }
       html body #panel-today #today-type-row.cdd-menu:not([hidden])::before { display: none !important; }
       html body #panel-today #today-type-row.cdd-menu .sheet-x { display: none !important; }
@@ -8115,7 +8130,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.0</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.1</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10387,14 +10402,15 @@ function homeComposerLooks75(count) {
   var pools = homeOwnedPhotoPieces742();
   var pool = pools.own.length >= 3 ? pools.own : pools.withPhoto;
   var level853 = dressLevel841();
-  var r = pool.length >= 3 ? (composerLooks({ count: Math.max(want, 16), temp: temp, only: pool, renderedFirst: true, level: level853 }) || []) : [];
+  var fit861 = function (l) { return homeLookOk742(l) && lookFitsDress841(l, level853); };
+  var r = pool.length >= 3 ? (composerLooks({ count: Math.max(want, 16), temp: temp, only: pool, renderedFirst: true, level: level853, filter: fit861 }) || []) : [];
   r = r.filter(function (l) { return homeLookOk742(l) && lookFitsDress841(l, level853); });
   var vis = r.filter(lookHeroVisible84);
   /* When warm unlayered looks have no loadable piece photos and no
      on-body cut, backfill from the scored render pool so Home never
      lands on a grey silhouette or empty flat-lay. */
   if (vis.length < want && pool.length >= 3) {
-    var more = composerLooks({ count: want, temp: temp, only: pool, renderedFirst: true, strictKeys: true, level: level853 }) || [];
+    var more = composerLooks({ count: want, temp: temp, only: pool, renderedFirst: true, strictKeys: true, level: level853, filter: fit861 }) || [];
     var seen = {};
     vis.forEach(function (l) { seen[l.composerKey || l.id || l.title] = 1; });
     more.filter(function (l) { return homeLookOk742(l) && lookFitsDress841(l, level853); }).forEach(function (l) {
@@ -10603,9 +10619,30 @@ function composerLooks(opts) {
     more.forEach(function (o) { if (have.indexOf(o.key) === -1) outs.push(o); });
   }
   var looks = outs.map(function (o, i) { return composerOutfitToLook(o, i, null); });
-  if (window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function") {
-    var rctx = { temp: dealOpts.temp, level: level, occasion: dealOpts.occasion, season: dealOpts.season, weather: dealOpts.weather, dow: dealOpts.dow };
-    looks = looks.filter(function (l) { return window.WardrobeRules.lookAllowed(l, rctx); });
+  var rulesOn = !opts.noRules && window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function";
+  var rctx = { temp: dealOpts.temp, level: level, occasion: dealOpts.occasion, season: dealOpts.season, weather: dealOpts.weather, dow: dealOpts.dow };
+  function keep861(l) {
+    if (rulesOn && !window.WardrobeRules.lookAllowed(l, rctx)) return false;
+    if (typeof opts.filter === "function" && !opts.filter(l)) return false;
+    return true;
+  }
+  looks = looks.filter(keep861);
+  /* .86.1: rules and the dress-level check filter AFTER the deck deals,
+     so a small first deal could come back empty although the closet has
+     plenty that pass. Keep dealing past what was rejected until enough
+     pass or the deck has nothing new. */
+  if ((rulesOn || typeof opts.filter === "function") && looks.length < want) {
+    var seen861 = {};
+    outs.forEach(function (o) { seen861[o.key] = 1; });
+    looks.forEach(function (l) { if (l.composerKey) seen861[l.composerKey] = 1; });
+    for (var round = 0; round < 8 && looks.length < want; round++) {
+      var ex = Object.keys(seen861);
+      var batch = deck.deal(Math.max(24, want * 3), Object.assign({}, dealOpts, { recent: recent.concat(ex), strictKeys: true })) || [];
+      var fresh = batch.filter(function (o) { return o && !seen861[o.key]; });
+      if (!fresh.length) break;
+      fresh.forEach(function (o) { seen861[o.key] = 1; });
+      fresh.map(function (o, i) { return composerOutfitToLook(o, outs.length + i, null); }).filter(keep861).forEach(function (l) { if (looks.length < want) looks.push(l); });
+    }
   }
   return looks;
 }
@@ -10862,7 +10899,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.0";
+var WARDROBE_BUILD = "2026-11-20.86.1";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -29666,7 +29703,49 @@ function toggleCdd(btn) {
     if (menu.classList.contains("watch-menu")) fillWatchMenu(menu, cddLookFor(wrap));
     menu.hidden = false;
     btn.setAttribute("aria-expanded", "true");
+    if (menu.id === "today-type-row") { try { placeTypeMenu861(btn, menu); } catch (e86p) {} }
   }
+}
+/* .86.1: the Home dress menu opens upward only when every level fits
+   between the header and the chip; otherwise it drops down, capped to
+   the room above the nav and scrollable, so every level is tappable. */
+document.addEventListener("click", function (e) {
+  var t = e.target && e.target.closest ? e.target : null;
+  if (!t) return;
+  var b = t.closest("[data-he861-level]");
+  if (b) {
+    e.preventDefault(); e.stopPropagation();
+    var opt = document.querySelector('#today-type-row [data-studio-type="' + b.getAttribute("data-he861-level") + '"]');
+    if (opt) opt.click();
+    return;
+  }
+  if (t.closest("[data-he861-rules]")) {
+    e.preventDefault(); e.stopPropagation();
+    if (typeof switchTab === "function") switchTab("prules");
+    return;
+  }
+  if (t.closest("[data-he861-closet]")) {
+    e.preventDefault(); e.stopPropagation();
+    if (typeof switchTab === "function") switchTab("wardrobe");
+  }
+}, true);
+/* .86.1: coming back to the app re-checks a level shown empty */
+document.addEventListener("visibilitychange", function () {
+  if (document.hidden) return;
+  try { if (typeof todayLook !== "undefined" && todayLook && todayLook.dressEmpty && typeof dealHeroForSource === "function") dealHeroForSource(); } catch (e) {}
+});
+function placeTypeMenu861(btn, menu) {
+  menu.classList.remove("dd-down861");
+  menu.style.removeProperty("--dd861-max");
+  var r = btn.getBoundingClientRect(), vh = window.innerHeight || document.documentElement.clientHeight;
+  var hdr = document.querySelector("header.masthead");
+  var top = hdr ? Math.max(0, hdr.getBoundingClientRect().bottom) : 0;
+  var nav = document.getElementById("bottombar");
+  var bot = nav ? Math.min(vh, nav.getBoundingClientRect().top) : vh;
+  var need = menu.scrollHeight + 8;
+  if (r.top - top - 8 >= need) return;
+  menu.classList.add("dd-down861");
+  menu.style.setProperty("--dd861-max", Math.max(160, Math.floor(bot - r.bottom - 16)) + "px");
 }
 /* Hero + Ideas toggle buttons (marked data-cdd-manual so the
    generic delegation below leaves them to these listeners). */
@@ -30227,6 +30306,43 @@ function pieceDisplayPhoto(item) {
      when they are added); fall back to the merchant original. */
   return item.photo || item.originalPhoto || null;
 }
+/* .86.1: why a dress level has nothing — the closet itself, or his
+   Wardrobe Rules. Deals wide (no weather, no repeat history) so a
+   level his closet supports always finds its outfits. */
+function dressDiag861(level) {
+  var out = { looks: [], fit: 0, ruled: 0, rules: [], pieces: 0 };
+  if (typeof composerLooks !== "function" || typeof homeOwnedPhotoPieces742 !== "function") return out;
+  var pools = homeOwnedPhotoPieces742();
+  var pool = pools.own.length >= 3 ? pools.own : pools.withPhoto;
+  out.pieces = pool.length;
+  if (pool.length < 3) return out;
+  var R = window.WardrobeRules, active = (R && typeof R.getActive === "function") ? R.getActive().slice() : [];
+  var fitOnly = function (l) { return lookIsMine(l) && lookFitsDress841(l, level); };
+  /* what the closet can make at this level with no rules at all */
+  var raw = [];
+  try {
+    if (R && typeof R.setActive === "function") R.setActive([]);
+    raw = composerLooks({ count: 60, only: pool, level: level, noRules: true, filter: fitOnly, slot: "diag861" }) || [];
+  } catch (e) { raw = []; }
+  finally {
+    if (R && typeof R.setActive === "function") R.setActive(active);
+    try { delete composerDeckCache.diag861; } catch (eC) {}
+  }
+  out.fit = raw.length;
+  var ctx = { level: level, dow: (new Date()).getDay(), temp: (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : undefined };
+  var byRule = {};
+  raw.forEach(function (l) {
+    var res = (R && typeof R.check === "function") ? R.check(l, ctx) : { ok: true };
+    if (res && !res.ok) { out.ruled++; (res.violations || []).forEach(function (v) { byRule[v.text] = (byRule[v.text] || 0) + 1; }); return; }
+    if (typeof homeLookOk742 === "function" && !homeLookOk742(l)) { out.ruled++; return; }
+    out.looks.push(l);
+  });
+  out.rules = Object.keys(byRule).sort(function (x, y) { return byRule[y] - byRule[x]; }).slice(0, 3);
+  out.looks = out.looks.slice(0, 8);
+  try { store.set("dressDiag861", { at: new Date().toISOString(), level: level, pieces: out.pieces, fit: out.fit, ruled: out.ruled, passed: out.looks.length, rules: out.rules }); } catch (e) {}
+  return out;
+}
+window.dressDiag861 = dressDiag861;
 function dealHeroForSource() {
   heroPushHistory56();
   /* Build .75: Home is always wardrobe-only. */
@@ -30238,10 +30354,16 @@ function dealHeroForSource() {
       : buildClosetLooks()) || [];
   }
   /* .85.3: only looks that fit the chosen dress level */
-  cl = (cl || []).filter(function (l) { return lookIsMine(l) && lookFitsDress841(l, dressLevel841()); });
+  cl = (cl || []).filter(function (l) { return lookIsMine(l) && lookFitsDress841(l, dressLevel841()) && !(window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function" && !window.WardrobeRules.lookAllowed(l, { level: dressLevel841(), dow: (new Date()).getDay(), temp: (typeof currentWeather !== "undefined" && currentWeather) ? currentWeather.temp : undefined })); });
+  var d861 = null;
+  if (!cl.length) {
+    try { d861 = dressDiag861(dressLevel841()); } catch (eD) { d861 = null; }
+    if (d861 && d861.looks && d861.looks.length) cl = d861.looks;
+  }
   if (!cl.length) {
     if (todayLook && !todayLook.dressEmpty && lookFitsDress841(todayLook, dressLevel841())) { renderToday(); return; }
     todayLook = dressEmptyLook841();
+    if (d861) todayLook.diag861 = { fit: d861.fit, ruled: d861.ruled, rules: d861.rules, pieces: d861.pieces };
     todaySeedId = todayLook.id;
     persistOpeningLook(todayLook);
     renderToday();
@@ -38697,6 +38819,8 @@ function syPutLocal(c, data) {
   else if (c === "finds") finds = put(finds);
   else if (c === "palettes") customPalettes = put(customPalettes);
   else if (c === "items") {
+    /* .86.1: a dress level shown empty is re-dealt once synced pieces land */
+    try { if (typeof todayLook !== "undefined" && todayLook && todayLook.dressEmpty) { clearTimeout(window.__redeal861); window.__redeal861 = setTimeout(function () { try { if (todayLook && todayLook.dressEmpty && typeof dealHeroForSource === "function") dealHeroForSource(); } catch (e) {} }, 600); } } catch (e861) {}
     var seeds = wardrobeItems.filter(function (i) { return i.id.indexOf("seed-") === 0; });
     var users = put(wardrobeItems.filter(function (i) { return i.id.indexOf("seed-") !== 0; }));
     wardrobeItems = applyEntryState(seeds.concat(users));
@@ -43616,13 +43740,33 @@ window.inspoView = "withmine";
   function soloHero() {
     hero.classList.remove("hero-guest");
     /* .85.3: the dress level has nothing in his closet — say so, no stand-in */
+    hero.classList.remove("hero-empty861");
     if (typeof todayLook !== "undefined" && todayLook && todayLook.dressEmpty) {
-      if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
-      hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
+      /* .86.1: an off-white card on the page's own ground, never the dark
+         hero backdrop, with a one-tap way back to Casual */
+      hero.classList.remove("has-cut", "lq-show", "hero-guest");
+      hero.classList.add("hero-solo", "hero-empty861");
       if (img) { img.hidden = true; img.removeAttribute("data-render"); }
+      var lv861 = todayLook.dressLevel || 1, dg861 = todayLook.diag861 || null;
+      /* a level shown empty is re-checked once the closet finishes loading */
+      if (!hero.__retry861) { hero.__retry861 = 1; [2500, 7000].forEach(function (ms) { setTimeout(function () { try { if (todayLook && todayLook.dressEmpty && typeof dealHeroForSource === "function") dealHeroForSource(); } catch (e) {} }, ms); }); }
+      var nm861 = (typeof HERO_TYPE_LABELS !== "undefined" && HERO_TYPE_LABELS[lv861 - 1]) || "this level";
+      if (collage) {
+        collage.classList.remove("flatlay-host");
+        collage.hidden = false;
+        collage.innerHTML = '<div class="hero-empty861-box"><p class="he861-k">' + esc(nm861) + '</p><p class="he861-t">' + (dg861 && dg861.ruled && dg861.rules && dg861.rules.length ? "Your rules leave no " + esc(nm861) + " looks" : "Nothing in your closet for " + esc(nm861) + " yet") + '</p>' +
+          '<p class="he861-s">' + (dg861 && dg861.ruled && dg861.rules && dg861.rules.length
+            ? "Your closet has " + esc(nm861) + " outfits, but your Wardrobe Rules rule them all out: \u201c" + esc(dg861.rules[0]) + "\u201d"
+            : (lv861 <= 1 ? "Add swim shorts to your closet and DONNA will build pool looks from them." : "Add a piece for this level and DONNA will build looks from it.")) + "</p>" +
+          '<div class="he861-acts"><button type="button" class="btn-ink" data-he861-level="3">Back to Casual</button>' +
+          (dg861 && dg861.ruled && dg861.rules && dg861.rules.length ? '<button type="button" class="btn-ghost" data-he861-rules>Review rules</button>'
+            : '<button type="button" class="btn-ghost" data-he861-closet>' + (lv861 <= 1 ? "Add swim shorts" : "Open Closet") + "</button>") + "</div>" +
+          (dg861 ? '<p class="he861-d">Checked ' + dg861.pieces + " closet pieces</p>" : "") + "</div>";
+      }
       var emNm = document.getElementById("today-name"); if (emNm) emNm.textContent = todayLook.title;
       return;
     }
+    if (collage && collage.querySelector && collage.querySelector(".hero-empty861-box")) { collage.innerHTML = ""; collage.hidden = true; }
     /* .85.3: an opening look from another dress level is re-dealt */
     if (typeof todayLook !== "undefined" && todayLook && todayLook.fwPieces && todayLook.fwPieces.length && typeof lookFitsDress841 === "function" && !lookFitsDress841(todayLook, dressLevel841()) && misfit853 < 3 && typeof dealAnotherToday === "function") {
       misfit853++; setTimeout(dealAnotherToday, 0); return;
@@ -43852,7 +43996,7 @@ window.inspoView = "withmine";
   window.addEventListener("pageshow", watchdog);
   window.addEventListener("resize", placeHero);
   if (collage && "MutationObserver" in window) new MutationObserver(function () {
-    if (hero.classList.contains("hero-solo") && !collage.hidden) { collage.hidden = true; img.hidden = false; }
+    if (hero.classList.contains("hero-solo") && !hero.classList.contains("hero-empty861") && !collage.hidden) { collage.hidden = true; img.hidden = false; }
   }).observe(collage, { attributes: true, attributeFilter: ["hidden"], childList: true });
 
   /* ---------- the outfit view ---------- */
