@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.5" />
+    <meta name="wardrobe-build" content="2026-11-20.86.6" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8261,7 +8261,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.5</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.6</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9066,6 +9066,110 @@ function lookOccasionOk(look, occasion) {
   if (!its.some(itemPoolOnly)) return true;
   return lookIsPoolCtx(look, occasion);
 }
+
+/* ================= Build .86.6 — formal / blazer shoes =================
+   Hard rule, every surface (Home, Looks Mine/Mix/New, Ask, Shop-the-look,
+   travel planner, composer): a look with a blazer, sport coat or suit
+   jacket — or a Business Casual / Formal / Black Tie dress level — must
+   never use sneakers or sneaker-sole / rubber-cupsole slip-ons. Prefer
+   Edward Green, Belgian Shoes, Baudoin & Lange, Vibi Venezia velvet
+   slippers, and similar dress shoes from the closet. */
+var BLAZER_IDS_866 = {
+  "seed-loropiana-oatmeal-blazer": 1,
+  "item-1794964266126-146676": 1, "item-1794964266127-250176": 1, "item-1794964266129-500494": 1,
+  "item-1794964266131-291794": 1, "item-1794964266132-165677": 1, "item-1794964266125-495292": 1,
+  "item-1794964266128-402564": 1, "item-1794964266130-490923": 1
+};
+var SHOE_CASUAL_IDS_866 = {
+  "seed-adidas-sneakers": 1, "seed-grey-court-sneakers": 1, "seed-loropiana-grey-sneakers": 1,
+  "seed-loropiana-white-sneakers": 1, "seed-loropiana-runners": 1, "seed-loropiana-flexy-sneakers": 1,
+  "seed-loropiana-summer-walk": 1, "seed-loropiana-espadrilles": 1, "seed-stubbs-navy-slipons": 1,
+  "seed-fortela-concho-slippers": 1, "item-1794961274257-705283": 1, "item-1794961274258-490248": 1,
+  "item-1794961274259-340133": 1, "item-1794961274260-781097": 1, "item-1794961274261-400084": 1,
+  "item-1794961274262-794969": 1, "item-1794961274263-274909": 1, "item-1794961274265-704202": 1,
+  "item-1794961274266-986265": 1, "item-1794961274267-530598": 1, "item-1794961274268-842281": 1,
+  "item-1794961274269-522751": 1, "item-1794961274270-861529": 1
+};
+var SHOE_CASUAL_RE_866 = /sneaker|runner|trainer|\bvans\b|\btoms\b|canvas slip-on|flexy walk|tennis sneaker|court sneaker|slip-on sneaker|woven slip-on sneaker|whipstitch|summer walk|espadrille|\bboat shoes?\b|\bdeck shoes?\b|concho slipper|cupsole|sneaker-?sole|rubber[-\s]?(cup)?sole/i;
+var SHOE_PREF_RE_866 = /edward green|belgian shoes|baudoin(?:\s*&\s*|\s+and\s+)lange|vibi venezia/i;
+function shoeText866(item) {
+  if (!item) return "";
+  if (typeof item === "string") return item;
+  return [item.name, item.brand, item.n, item.category, item.cat, item.kind].map(function (x) { return x || ""; }).join(" ");
+}
+function shoeIsCasual866(item) {
+  if (!item) return false;
+  var id = typeof item === "string" ? item : String(item.id || item.key || "");
+  if (id && SHOE_CASUAL_IDS_866[id]) return true;
+  var t = shoeText866(item);
+  if (!t) return false;
+  /* Preferred-brand espadrilles stay casual; other preferred dress shoes do not. */
+  if (SHOE_CASUAL_RE_866.test(t)) return true;
+  if (item.kind === "sneaker" || item.kind === "espadrille" || item.kind === "boat" || item.kind === "sandal") return true;
+  return false;
+}
+function shoeIsPreferredDress866(item) {
+  if (!item || shoeIsCasual866(item)) return false;
+  return SHOE_PREF_RE_866.test(shoeText866(item));
+}
+function lookHasBlazer866(look, pieces) {
+  var its = pieces || (typeof lookItems788 === "function" ? lookItems788(look) : []);
+  for (var i = 0; i < its.length; i++) {
+    var it = its[i]; if (!it) continue;
+    var cat = String(it.category || it.cat || it.kind || "");
+    var n = shoeText866(it);
+    if (/^blazers?$/i.test(cat) || /^suits?$/i.test(cat) || /sport-?coat|suit jacket/i.test(cat + " " + n) || /\bblazer\b/i.test(n)) return true;
+  }
+  if (look && (look.l || look.layer)) {
+    var ly = look.l || look.layer;
+    if (ly && (ly.kind === "blazer" || ly.kind === "suit" || /blazer|sport-?coat|suit/i.test(shoeText866(ly)))) return true;
+  }
+  var key = look && (look.composerKey || look.key);
+  if (key) {
+    var ids = String(key).split("|");
+    for (var j = 0; j < ids.length; j++) if (BLAZER_IDS_866[ids[j]]) return true;
+  }
+  return false;
+}
+function formalLevel866(ctx, look) {
+  var lv = ctx && (ctx.level != null ? ctx.level : ctx.dressLevel);
+  if (lv == null && look) lv = look.composerLevel || look.dressLevel || look.level;
+  lv = +lv || 0;
+  return lv;
+}
+function formalShoesNeeded866(look, ctx) {
+  var lv = formalLevel866(ctx, look);
+  if (lv >= 5) return true;
+  return lookHasBlazer866(look);
+}
+function formalShoesOk866(look, ctx) {
+  if (!formalShoesNeeded866(look, ctx)) return true;
+  var shoes = [];
+  if (look && (look.s || look.shoes)) shoes.push(look.s || look.shoes);
+  var its = typeof lookItems788 === "function" ? lookItems788(look) : [];
+  its.forEach(function (it) {
+    var cat = String(it && (it.category || it.cat || it.role) || "");
+    if (/^shoes?$/i.test(cat) || (it && it.role === "shoes")) shoes.push(it);
+  });
+  if (!shoes.length && look && look.composerKey) {
+    String(look.composerKey).split("|").forEach(function (id) {
+      if (SHOE_CASUAL_IDS_866[id]) shoes.push({ id: id });
+    });
+  }
+  if (!shoes.length) return true;
+  for (var i = 0; i < shoes.length; i++) if (shoeIsCasual866(shoes[i])) return false;
+  return true;
+}
+function onbodyKeyBanned866(key) {
+  if (!key) return false;
+  return formalShoesOk866({ composerKey: String(key) }) === false;
+}
+window.shoeIsCasual866 = shoeIsCasual866;
+window.shoeIsPreferredDress866 = shoeIsPreferredDress866;
+window.lookHasBlazer866 = lookHasBlazer866;
+window.formalShoesOk866 = formalShoesOk866;
+window.onbodyKeyBanned866 = onbodyKeyBanned866;
+
 /* Build .73 — Closet outfit composer (continued) */
 /* ================= Build .73 — Closet outfit composer =================
    Endless outfits from the live closet, on the device. A rules-based
@@ -9218,19 +9322,29 @@ function lookOccasionOk(look, occasion) {
     } else if (cat === "Shoes") {
       p.role = "shoes";
       if (/espadrille/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "espadrille"; p.warm = -2; }
+      else if (/whipstitch|summer walk|cupsole|sneaker-?sole|rubber[-\s]?(cup)?sole/.test(n) || /slip-on loafer/.test(n)) {
+        /* .86.6: sneaker-sole / rubber-cupsole slip-ons are casual, never formal or with a blazer */
+        p.kind = "sneaker"; p.warm = -1; p.lo = 1; p.hi = 4;
+      }
       else if (/sneaker|runner|trainer|vans|canvas|toms\b/.test(n)) {
         p.kind = "sneaker"; p.warm = -1;
         if (/suede|leather|intrecciato/.test(n)) { p.lo = 1; p.hi = 4; } else { p.lo = 1; p.hi = 3; }
       }
       else if (/boat|deck/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "boat"; }
       else if (/slide|sandal/.test(n)) { p.lo = 1; p.hi = 2; p.kind = "sandal"; p.warm = -3; }
-      else if (/venetian|furlane|slipper/.test(n)) { p.lo = 2; p.hi = 5; p.kind = "slipper"; }
+      else if (/concho slipper/.test(n)) { p.lo = 2; p.hi = 4; p.kind = "slipper"; }
+      else if (/venetian|furlane|slipper/.test(n)) {
+        /* .86.6: velvet / furlane / Venetian slippers belong on blazer and formal looks */
+        p.kind = "slipper"; p.lo = 3; p.hi = 6;
+        if (/black|navy|velvet|furlane/.test(n)) p.hi = 7;
+      }
       else if (/loafer|moccasin|driver/.test(n)) {
         p.kind = "loafer";
         if (/driver|moccasin/.test(n)) { p.lo = 2; p.hi = 4; }
+        else if (/edward green|belgian shoes|baudoin/.test(n)) { p.lo = 3; p.hi = 7; }
         else if (/suede/.test(n)) { p.lo = 3; p.hi = 6; }
         else { p.lo = 3; p.hi = 7; }
-        if (p.hi === 7 && !(p.fam === "black" || p.fam === "navy" || p.fam === "brown")) p.hi = 6;
+        if (p.hi === 7 && !(p.fam === "black" || p.fam === "navy" || p.fam === "brown") && !/edward green|belgian shoes|baudoin/.test(n)) p.hi = 6;
       }
       else if (/oxford|derby|brogue|monk|opera|pump/.test(n)) { p.lo = 4; p.hi = 7; p.kind = "dress"; }
       else if (/boot/.test(n)) { p.lo = 3; p.hi = 5; p.kind = "boot"; p.warm = 2; }
@@ -9317,6 +9431,13 @@ function lookOccasionOk(look, occasion) {
     if (root.WardrobeRules && typeof root.WardrobeRules.comboAllowedStructural === "function") {
       if (!root.WardrobeRules.comboAllowedStructural(top, bottom, shoes, layer)) return null;
     }
+    /* .86.6: never put sneakers / cupsole slip-ons with a blazer, or into BC / Formal / Black Tie */
+    if (typeof formalShoesOk866 === "function") {
+      var evLook = { t: top, b: bottom, s: shoes, l: layer, shoes: shoes, layer: layer };
+      if ((layer && (layer.kind === "blazer" || layer.kind === "suit")) && !formalShoesOk866(evLook)) return null;
+      if (lo >= 5 && !formalShoesOk866(evLook, { level: lo })) return null;
+      if ((layer && (layer.kind === "blazer" || layer.kind === "suit") || lo >= 5) && typeof shoeIsPreferredDress866 === "function" && shoeIsPreferredDress866(shoes)) score += 1.25;
+    }
     return { lo: lo, hi: hi, score: score };
   }
 
@@ -9329,9 +9450,13 @@ function lookOccasionOk(look, occasion) {
     /* .80.34: Smart Casual never wears a blazer or suit — overshirts,
        knits, polos, tees, linen shirts, and shorts in the heat. */
     if (L === 4) return lk !== "blazer" && lk !== "suit" && bottom.kind !== "shorts" && bottom.kind !== "swim";
-    if (L === 5) return top.kind !== "tee" && bottom.kind !== "shorts" && bottom.kind !== "swim";
-    if (L === 6) return (lk === "blazer" || lk === "suit") && (top.kind === "shirt" && !top.casualShirt || top.kind === "polo" && !top.shortSleeve || top.kind === "knit" && /turtle|roll/.test(top.n));
-    if (L === 7) return (lk === "blazer" || lk === "suit") && layer.hi >= 7 && top.kind !== "tee";
+    if (L === 5) {
+      if (top.kind === "tee" || bottom.kind === "shorts" || bottom.kind === "swim") return false;
+      if (typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes)) return false;
+      return true;
+    }
+    if (L === 6) return (lk === "blazer" || lk === "suit") && (top.kind === "shirt" && !top.casualShirt || top.kind === "polo" && !top.shortSleeve || top.kind === "knit" && /turtle|roll/.test(top.n)) && !(typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes));
+    if (L === 7) return (lk === "blazer" || lk === "suit") && layer.hi >= 7 && top.kind !== "tee" && !(typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes));
     return true;
   }
 
@@ -10222,12 +10347,15 @@ function lookOccasionOk(look, occasion) {
   }
 
   function lookAllowed(look, ctx, rules) {
-    return check(look, ctx || {}, rules).ok;
+    ctx = ctx || {};
+    if (typeof formalShoesOk866 === "function" && !formalShoesOk866(look, ctx)) return false;
+    return check(look, ctx, rules).ok;
   }
 
   /* Context-free combo filter for the composer (no day/weather/occasion).
      Tuck is not a reason to reject a combination — it is applied as a flag. */
   function comboAllowedStructural(top, bottom, shoes, layer, rules) {
+    if (typeof formalShoesOk866 === "function" && !formalShoesOk866({ t: top, b: bottom, s: shoes, l: layer, shoes: shoes, layer: layer })) return false;
     var list = rules || active;
     var pieces = pieceList(top, bottom, shoes, layer);
     for (var i = 0; i < list.length; i++) {
@@ -10385,6 +10513,7 @@ function onbodyIngest(j) {
   var n = 0;
   j.r.forEach(function (e) {
     if (!e || !e.k || !e.f || !/^[A-Za-z0-9._-]+$/.test(e.f) || onbodyFileBanned(e.f)) return;
+    if (typeof onbodyKeyBanned866 === "function" && onbodyKeyBanned866(e.k)) return;
     if (!ONBODY.map[e.k]) n++;
     ONBODY.map[e.k] = "assets/onbody/" + e.f;
   });
@@ -10399,7 +10528,7 @@ function onbodySrc(key) {
 function onbodyKeys() {
   var out = null;
   for (var k in ONBODY.map) {
-    if (onbodyFileBanned(ONBODY.map[k])) continue;
+    if (onbodyFileBanned(ONBODY.map[k]) || (typeof onbodyKeyBanned866 === "function" && onbodyKeyBanned866(k))) continue;
     if (!out) out = {};
     out[k] = ONBODY.map[k];
   }
@@ -10505,6 +10634,7 @@ function lookFitsDress841(look, level) {
     return !!(top || level === 1);
   }
   if (!top || !shoes) return false;
+  if (typeof formalShoesOk866 === "function" && !formalShoesOk866(look, { level: level })) return false;
   if (!C.fitsLevel(level, top, bottom, shoes, layer)) return false;
   if (level <= 3 && top.kind === "knit" && !top.shortSleeve) return false;
   return true;
@@ -11036,7 +11166,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.5";
+var WARDROBE_BUILD = "2026-11-20.86.6";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -19943,6 +20073,7 @@ function planLookValid(l) {
   var pim53 = lookPicturedImg(l) || l.img || "";
   if (isRealPhotoImg(pim53) || isQuarantinedImg(pim53) || isDislikedImg(pim53)) return false;
   if (lookIsRealPhoto(l, pim53)) return false;
+  if (typeof formalShoesOk866 === "function" && !formalShoesOk866(l)) return false;
   return true;
 }
 function planLookForDate(iso) {
