@@ -30113,6 +30113,7 @@ function heroGoBack56() {
     if (lookPhotoBanned(prev)) continue;
     if (isQuarantinedImg(lookPicturedImg(prev) || prev.img || "")) continue;
     todayLook = prev;
+    todayLook.__back853 = true; /* .85.3: shown as-is, never auto-skipped */
     todayTouched = true;
     try { store.set("lastOpeningImg", todayLook.img); } catch (e) {}
     persistOpeningLook(todayLook);
@@ -42840,7 +42841,7 @@ window.inspoView = "withmine";
         skip = 0; booted782 = true; userDeal782 = false;
         return;
       }
-      if (dressLevel841() <= 2 && todayLook.fwPieces && todayLook.fwPieces.length) {
+      if ((dressLevel841() <= 2 || todayLook.__back853) && todayLook.fwPieces && todayLook.fwPieces.length) {
         var flHtml = "";
         try { if (typeof window.composerFlatlayHTML === "function") flHtml = window.composerFlatlayHTML(todayLook, true) || ""; } catch (eFl) {}
         if (flHtml && flHtml.indexOf("<img ") !== -1 && collage) {
