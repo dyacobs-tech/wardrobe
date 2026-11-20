@@ -96,7 +96,16 @@ with sync_playwright() as p:
         m = pg.evaluate("""() => { const R = s => document.querySelector(s).getBoundingClientRect();
           return { row: R('#today-simple-actions').bottom, nav: R('#bottombar').top, kicker: R('#panel-today .today-kicker').top, img: R('#today-img').bottom }; }""")
         gap = m["nav"] - m["row"]
-        check("%dx%d: controls sit %dpx above the nav (12-36)" % (w, h, gap), 12 <= gap <= 36, m)
+        # .85: the dress-level picker sits above the nav, so the action row
+        # is higher than the old 12–36px band. It must still clear the pill.
+        check("%dx%d: controls sit %dpx above the nav" % (w, h, gap), 12 <= gap <= 160, m)
+        picker = pg.evaluate("""() => {
+          const b = document.querySelector('#today-type-btn');
+          const n = document.querySelector('#bottombar');
+          if (!b || !n) return -1;
+          return n.getBoundingClientRect().top - b.getBoundingClientRect().bottom;
+        }""")
+        check("%dx%d: dress picker clears the nav by %dpx" % (w, h, picker), picker >= 8, picker)
         check("%dx%d: caption starts below the figure" % (w, h), m["kicker"] >= m["img"], m)
         ctx.close()
     b.close()
