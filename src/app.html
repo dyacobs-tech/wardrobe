@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.85.0" />
+    <meta name="wardrobe-build" content="2026-11-19.85.1" />
     <script>
 /* The clean Looks chrome and Curate are on for every deploy (html.pv81).
    The read-only guard (no sync writes, no render-worker posts, memory-only
@@ -7164,6 +7164,111 @@
       @media (prefers-reduced-motion: reduce) {
         #bottombar .nav-pill, #bottombar .nav-pill .navbtn span, .cw-switch i { transition: none !important; }
       }
+
+      /* ================= Build .85.1 — Pass 2.1 ================= */
+      /* Flat-lay / empty Home keeps the dark info band, with light text on it.
+         hero-solo (cut-out on cream) keeps its ink text. */
+      html:not([data-theme="dark"]) #panel-today .today-hero:not(.hero-solo) .today-caption h2#today-name,
+      html:not([data-theme="dark"]) #panel-today .today-hero:not(.hero-solo) .today-kicker,
+      html:not([data-theme="dark"]) #panel-today .today-hero:not(.hero-solo) .today-loc,
+      html:not([data-theme="dark"]) #panel-today .today-hero:not(.hero-solo) .today-loc strong,
+      html:not([data-theme="dark"]) #panel-today .today-hero:not(.hero-solo) .today-suggest {
+        color: #F6F1E8 !important;
+        text-shadow: none !important;
+      }
+      html:not([data-theme="dark"]) #panel-today .today-hero:not(.hero-solo) .today-loc span {
+        color: #E7D7B8 !important;
+      }
+      #panel-today .today-hero.hero-empty851 .today-collage { display: none !important; height: 0 !important; min-height: 0 !important; }
+      #panel-today .today-hero.hero-flatlay .today-collage,
+      #panel-today .today-hero.hero-flatlay .today-collage.flatlay-host {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        height: auto !important;
+      }
+      #panel-today .today-hero.hero-flatlay .flatlay {
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: 100% !important;
+      }
+      #panel-today .today-hero.hero-flatlay .fl-cell { min-height: 0 !important; }
+      #pvf-icons .pv-w { display: none !important; }
+      #pvf-icons .pv-n {
+        font-style: normal; font-size: 11px; font-weight: 700; margin-left: 4px;
+        color: var(--honey-nav, #C29E74);
+      }
+      #pvf-icons .pv-ic[aria-pressed="true"] .pv-n { color: inherit; }
+      @media (max-width: 899px) {
+        html.nav-compact #bottombar.bottombar { display: flex !important; justify-content: center !important; }
+        html.nav-compact #bottombar .nav-pill {
+          flex: 0 0 auto !important;
+          width: max-content !important;
+          margin-left: auto !important;
+          margin-right: auto !important;
+          justify-content: center !important;
+        }
+        #panel-find .edit-tabs.edit-section-tabs.outfits-toggle {
+          margin-left: 44px !important;
+          margin-right: 52px !important;
+          width: auto !important;
+          max-width: calc(100% - 96px) !important;
+        }
+        #pv-top .pv-bar {
+          padding-left: 40px;
+          padding-right: 52px;
+          box-sizing: border-box;
+          width: 100%;
+        }
+      }
+      @media (min-width: 900px) {
+        html.nav-compact #bottombar .nav-pill .navbtn span { max-width: none !important; opacity: 1 !important; }
+      }
+      #panel-find[data-edit-mode="curate"] .edit-shop-tabs,
+      #panel-find[data-edit-mode="curate"] #shop-fold850,
+      #panel-find .edit-shop-tabs[hidden],
+      #shop-fold850[hidden] { display: none !important; }
+      #style-item-host .style-item-head { padding-left: 40px; box-sizing: border-box; }
+      #style-item-host .style-item-head .oc-label { display: block; line-height: 1.2; }
+      button.style-card850 .style-pane {
+        display: block !important;
+        position: relative !important;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        height: 0 !important;
+        padding-top: 133.333% !important;
+        overflow: hidden !important;
+        aspect-ratio: auto !important;
+      }
+      button.style-card850 .style-pane .flatlay,
+      button.style-card850 .style-pane .style-cut {
+        position: absolute !important;
+        top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+      }
+      button.style-card850 .style-pane .flatlay {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        grid-auto-rows: 1fr !important;
+      }
+      button.style-card850 .style-pane .fl-cell {
+        min-height: 0 !important;
+        height: auto !important;
+        overflow: hidden;
+      }
+      button.style-card850 .style-pane .fl-cell img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+        position: static !important;
+      }
+      button.style-card850 .swatch-strip > span {
+        width: 16px; height: 16px; min-width: 16px; min-height: 16px;
+        border-radius: 50%; border: 1px solid rgba(26, 22, 18, .28); box-sizing: border-box;
+      }
     </style>
 
   </head>
@@ -8578,7 +8683,7 @@
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.85.0</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.85.1</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10647,7 +10752,9 @@ function lookOccasionOk(look, occasion) {
 var COMPOSER_PREFS_KEY = "composerPrefs";
 var composerDeckCache = {};
 function composerClosetSig(list) {
-  var sig = list.map(function (i) { return [i.id, i.category, i.name, i.colourName, i.colourHex, i.laundry ? 1 : 0, (i.occasionOnly || "") + ""].join("~"); }).join("\n");
+  var lines = list.map(function (i) { return [i.id, i.category, i.name, i.colourName, i.colourHex, i.laundry ? 1 : 0, (i.occasionOnly || "") + ""].join("~"); });
+  lines.sort();
+  var sig = lines.join("\n");
   try { if (window.WardrobeRules && typeof window.WardrobeRules.signature === "function") sig += "\n#rules:" + window.WardrobeRules.signature(); } catch (e) {}
   return sig;
 }
@@ -10656,11 +10763,15 @@ function composerDeck(only, slotName) {
   if (only) list = only;
   var sig = composerClosetSig(list);
   var slot = slotName || (only ? "home" : "all");
-  var c = composerDeckCache[slot] || {};
-  if (c.sig !== sig || !c.deck) {
-    c = { sig: sig, deck: window.WardrobeComposer.build(list) };
-    composerDeckCache[slot] = c;
+  var c = composerDeckCache[slot];
+  if (c && c.sig === sig && c.deck) return c.deck;
+  var keys = Object.keys(composerDeckCache);
+  for (var i = 0; i < keys.length; i++) {
+    var o = composerDeckCache[keys[i]];
+    if (o && o.sig === sig && o.deck) { composerDeckCache[slot] = o; return o.deck; }
   }
+  c = { sig: sig, deck: window.WardrobeComposer.build(list) };
+  composerDeckCache[slot] = c;
   return c.deck;
 }
 /* Build .74.2: the outfit of the day is built ONLY from his own
@@ -11324,7 +11435,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.85.0";
+var WARDROBE_BUILD = "2026-11-19.85.1";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -22698,27 +22809,211 @@ function styleDeal(it, limit) {
   if (out.length < limit) {
     styleLooksFromOnbody(it, ctx, limit - out.length).forEach(function (look) { out.push(look); });
   }
-  /* (2) New anchored combinations from the piece library. */
+  /* Drop photo-less leads before they consume the deal, so a real
+     photographed outfit can still fill the row. */
+  out = out.filter(styleLookReady851);
+  /* (2) Photographed closet outfits anchored on this piece. Library
+     combinations with a missing photo are not cards — a blank tile
+     is not a look. */
+  if (out.length < limit) {
+    styleClosetLooks851(it, ctx, limit - out.length).forEach(function (look) { out.push(look); });
+  }
   if (!anchorPiece) anchorPiece = styleEnsureAnchor(it);
   if (out.length < limit && anchorPiece && anchorPiece.slot) {
     var combos = styleAssembleCombos(anchorPiece, ctx.shown, limit - out.length + 6);
     for (var ci = 0; ci < combos.length && out.length < limit; ci++) {
       var look2 = styleComboLook(combos[ci].idsBySlot, combos[ci].comboId, it);
       if (look2.swapState !== "rendering" && grad(look2.img)) continue;
+      if (!styleLookReady851(look2)) continue;
       out.push(look2);
     }
   }
+  out = out.filter(styleLookReady851);
+  styleUniqueTitles851(out);
   return out;
 }
 function stylePiecePhoto841(p) {
   if (!p) return "";
   var it = (p.id && typeof closetItemById === "function") ? (closetItemById(p.id) || p) : p;
   var ph = "";
-  try { ph = (typeof itemPhoto === "function" ? itemPhoto(it) : "") || it.photo || p.photo || ""; } catch (e) { ph = p.photo || ""; }
+  try { ph = (typeof itemPhoto === "function" ? itemPhoto(it) : "") || it.photo || p.photo || p.img || ""; } catch (e) { ph = p.photo || p.img || ""; }
   if (!ph || /^data:image\/svg/.test(ph)) return "";
   if (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(ph)) return "";
   if (/assets\/photos\/9a543e585d8b\./.test(ph)) return "";
   return ph;
+}
+function styleLookPieces851(look) {
+  var pcs = (look && look.fwPieces && look.fwPieces.length) ? look.fwPieces : ((look && look.pieces) || []);
+  pcs = (pcs || []).filter(Boolean);
+  if (pcs.length) return pcs;
+  if (look && look.swapPieces && typeof PIECE_BY_ID !== "undefined") {
+    return ["top", "bottom", "shoes", "layer"].map(function (s) {
+      var id = look.swapPieces[s];
+      return id && PIECE_BY_ID[id];
+    }).filter(Boolean);
+  }
+  return [];
+}
+function styleLookReady851(look) {
+  var pcs = styleLookPieces851(look);
+  if (pcs.length < 2) return false;
+  var anchor = look && look.anchorPieceId;
+  var photos = 0, top = false, bottom = false;
+  for (var i = 0; i < pcs.length; i++) {
+    var ph = stylePiecePhoto841(pcs[i]);
+    var isAnchor = anchor && pcs[i].id === anchor;
+    if (ph) photos++;
+    else if (!isAnchor) return false;
+    var blob = String((pcs[i].category || "") + " " + (pcs[i].cat || "") + " " + (pcs[i].slot || "") + " " + (pcs[i].name || "")).toLowerCase();
+    if (/tee|polo|shirt|sweater|knit|top|blazer|jacket/.test(blob)) top = true;
+    if (/jean|trouser|short|chino|pant|swim|bottom/.test(blob)) bottom = true;
+  }
+  return top && bottom && photos >= 2;
+}
+function styleUniqueTitles851(looks) {
+  var groups = {};
+  (looks || []).forEach(function (l) {
+    if (!l) return;
+    var t = l.title || "Outfit";
+    (groups[t] = groups[t] || []).push(l);
+  });
+  Object.keys(groups).forEach(function (t) {
+    var g = groups[t];
+    if (g.length < 2) return;
+    g.forEach(function (l, i) {
+      var pcs = styleLookPieces851(l);
+      var shoe = null, bottom = null;
+      pcs.forEach(function (p) {
+        var c = String((p.category || "") + " " + (p.cat || "") + " " + (p.slot || ""));
+        if (/shoe/i.test(c)) shoe = p;
+        if (/jean|trouser|short|chino|pant|swim|bottom/i.test(c)) bottom = p;
+      });
+      var hint = "";
+      if (bottom && bottom.name) {
+        var words = String(bottom.name).split(/\s+/).filter(function (w) {
+          return w.length > 2 && t.toLowerCase().indexOf(w.toLowerCase()) === -1 && !/the|and|with/.test(w.toLowerCase());
+        });
+        if (words.length) hint = words.slice(0, 2).join(" ");
+      }
+      if (!hint && shoe) hint = String(shoe.colourName || shoe.wn || shoe.name || "").split(/[·,]/)[0].trim();
+      if (!hint) hint = String(i + 2);
+      var next = t + " · " + hint;
+      var n = 2;
+      while (groups[next]) { next = t + " · " + hint + " " + n; n++; }
+      l.title = next;
+      groups[next] = [l];
+    });
+  });
+}
+function styleClosetLooks851(it, ctx, limit) {
+  var out = [];
+  if (!it || !window.WardrobeComposer || typeof composerDeck !== "function" || typeof composerOutfitToLook !== "function") return out;
+  var deck = null;
+  try { deck = composerDeck(null, "style"); } catch (e) { deck = null; }
+  var pool = (deck && deck.combos) || [];
+  var perBottom = {};
+  for (var i = 0; i < pool.length && out.length < limit; i++) {
+    var c = pool[i];
+    var ids = c.ids || [];
+    if (ids.indexOf(it.id) === -1) continue;
+    var tag = "closet:" + (c.key || ids.join("|"));
+    if (ctx.shown[tag]) continue;
+    var bid = c.b && c.b.id;
+    if (bid && (perBottom[bid] || 0) >= 2) continue;
+    var shaped = { top: c.t, bottom: c.b, shoes: c.s, layer: c.l || null, key: c.key, mask: c.mask, ids: ids, tuck: c.tuck, tucked: c.tucked, tuckPrompt: c.tuckPrompt || "" };
+    var look = null;
+    try { look = composerOutfitToLook(shaped, out.length, null); } catch (e2) { look = null; }
+    if (look) {
+      look.anchorPieceId = it.id;
+      look.meta = "Styled around your " + it.name;
+      look.builtAround = it.name;
+    }
+    if (!look || !styleLookReady851(look)) continue;
+    if (bid) perBottom[bid] = (perBottom[bid] || 0) + 1;
+    ctx.shown[tag] = 1;
+    out.push(look);
+  }
+  if (out.length < limit) styleDirectCloset851(it, ctx, limit - out.length).forEach(function (look) { out.push(look); });
+  return out;
+}
+function styleRole851(p) {
+  var c = String((p && p.category) || "");
+  if (/Blazer|Suit|Jacket|Coat|Vest/.test(c)) return "layer";
+  if (/Trouser|Jean|Short|Bathing/.test(c)) return "bottom";
+  if (/Shoe/.test(c)) return "shoes";
+  if (/Tee|Polo|Shirt|Sweater|Button/.test(c)) return "top";
+  return "";
+}
+function styleLookFromPieces851(pieces, anchor) {
+  var order = { layer: 0, top: 1, bottom: 2, shoes: 3 };
+  pieces = pieces.filter(Boolean).slice().sort(function (a, b) { return (order[styleRole851(a)] || 9) - (order[styleRole851(b)] || 9); });
+  var upper = null, bottom = null;
+  pieces.forEach(function (p) {
+    var r = styleRole851(p);
+    if (!upper && (r === "layer" || r === "top")) upper = p;
+    if (!bottom && r === "bottom") bottom = p;
+  });
+  upper = upper || pieces[0];
+  var title = (typeof composerPieceTitle === "function" && upper)
+    ? composerPieceTitle(upper) + (bottom ? " & " + composerPieceTitle(bottom) : "")
+    : pieces.slice(0, 2).map(function (p) { return p.name; }).join(" & ");
+  var swatches = [], seen = {};
+  pieces.forEach(function (p) {
+    if (p.colourHex && !seen[p.colourHex]) {
+      seen[p.colourHex] = 1;
+      swatches.push({ name: (typeof composerColour === "function") ? composerColour(p) : (p.colourName || ""), hex: p.colourHex, role: p.category || "" });
+    }
+  });
+  return {
+    id: "style-cl-" + pieces.map(function (p) { return p.id; }).join("~").slice(0, 48),
+    title: title,
+    meta: "Styled around your " + anchor.name,
+    desc: pieces.map(function (p) { return p.name; }).join(" with "),
+    iconId: null, blendId: null, basis: "both", version: 1, plate: null, paletteName: null,
+    img: "", imgAlt: pieces.map(function (p) { return p.name; }).join(", "),
+    swatches: swatches,
+    source: "wardrobe",
+    anchorNames: [anchor.name],
+    anchorPieceId: anchor.id,
+    builtAround: anchor.name,
+    fwPieces: pieces.map(function (p) { return { id: p.id, name: p.name, photo: p.photo || null, colourHex: p.colourHex || null, category: p.category }; })
+  };
+}
+function styleDirectCloset851(it, ctx, limit) {
+  var out = [];
+  if (!it || limit <= 0) return out;
+  var pools = { top: [], bottom: [], shoes: [], layer: [] };
+  (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).forEach(function (p) {
+    if (!p || p.id === it.id || !stylePiecePhoto841(p)) return;
+    var r = styleRole851(p);
+    if (r && pools[r].length < 4) pools[r].push(p);
+  });
+  var ar = styleRole851(it);
+  var tops = ar === "top" ? [it] : (pools.top.length ? pools.top : [null]);
+  var bottoms = ar === "bottom" ? [it] : pools.bottom;
+  var shoes = ar === "shoes" ? [it] : pools.shoes;
+  var layers = ar === "layer" ? [it] : [null];
+  if (!bottoms.length || !shoes.length) return out;
+  if (ar !== "top" && ar !== "layer" && !pools.top.length && ar !== "bottom" && ar !== "shoes") return out;
+  var guard = 0;
+  for (var li = 0; li < layers.length && out.length < limit; li++) {
+    for (var ti = 0; ti < tops.length && out.length < limit; ti++) {
+      for (var bi = 0; bi < bottoms.length && out.length < limit; bi++) {
+        for (var si = 0; si < shoes.length && out.length < limit; si++) {
+          if (++guard > 80) return out;
+          var pcs = [layers[li], tops[ti], bottoms[bi], shoes[si]].filter(Boolean);
+          if (pcs.length < 2) continue;
+          var tag = "direct:" + pcs.map(function (p) { return p.id; }).sort().join("|");
+          if (ctx.shown[tag]) continue;
+          var look = styleLookFromPieces851(pcs, it);
+          if (!styleLookReady851(look)) continue;
+          ctx.shown[tag] = 1;
+          out.push(look);
+        }
+      }
+    }
+  }
+  return out;
 }
 function styleCutout841(look) {
   try {
@@ -22736,7 +23031,7 @@ function styleCutout841(look) {
   return "";
 }
 function styleFlatlay841(look) {
-  var pcs = (look && (look.fwPieces || look.pieces)) || [];
+  var pcs = styleLookPieces851(look);
   var cells = [];
   pcs.forEach(function (p) {
     if (!p) return;
@@ -22745,13 +23040,8 @@ function styleFlatlay841(look) {
     if (ph) cells.push('<span class="fl-cell"><img src="' + esc(ph) + '" alt="' + esc(name) + '" decoding="async" /></span>');
     else if (p.colourHex) cells.push('<span class="fl-cell fl-swatch" style="background:' + esc(p.colourHex) + '" role="img" aria-label="' + esc(name) + '"></span>');
   });
-  if (!cells.length && look && look.swatches) {
-    look.swatches.forEach(function (s) {
-      if (s && s.hex) cells.push('<span class="fl-cell fl-swatch" style="background:' + esc(s.hex) + '" role="img" aria-label="' + esc(s.name || "") + '"></span>');
-    });
-  }
   if (!cells.length) return "";
-  return '<span class="flatlay fl-n' + Math.min(4, cells.length) + ' style-flatlay">' + cells.slice(0, 4).join("") + "</span>";
+  return '<span class="flatlay fl-n' + cells.length + ' style-flatlay">' + cells.join("") + "</span>";
 }
 function styleCardHTML(look, idx) {
   /* Transparent cut-out, or a flat-lay of every piece. Never a raw
@@ -22759,14 +23049,16 @@ function styleCardHTML(look, idx) {
      "Not rendered yet" tile. The swatch strip sits under the frame. */
   var cut = styleCutout841(look);
   var flat = styleFlatlay841(look);
+  if (!cut && !flat) return "";
   var title = (look && (look.title || look.imgAlt)) || "Outfit";
+  var sw = (look && look.swatches || []).filter(function (s) { return s && s.hex && s.hex !== "transparent"; });
   var media = cut
     ? '<img class="style-cut" src="' + esc(cut) + '" alt="' + esc(look.imgAlt || title) + '" loading="lazy" />'
-    : (flat || '<span class="flatlay style-flatlay fl-n1"><span class="fl-cell fl-swatch" style="background:#e7dfd2" role="img" aria-label="' + esc(title) + '"></span></span>');
+    : flat;
   return '<button type="button" class="card option-card style-card850" data-style-idx="' + idx + '" role="listitem">' +
     '<span class="pane pane-frame style-pane">' + media + "</span>" +
     '<span class="oc-body"><span class="oc-title">' + esc(title) + "</span>" +
-    '<span class="style-swatches">' + cardStripHTML(look && look.swatches) + "</span></span></button>";
+    '<span class="style-swatches">' + cardStripHTML(sw) + "</span></span></button>";
 }
 function styleLooksChrome(hide) {
   /* On the clean Looks page (html.pv81) the Mine | Mix | New bar
@@ -27098,6 +27390,116 @@ var wardrobeItems = [
     notes: "Unstructured melange knit blazer, notch lapels with pick stitching, two-button front, patch pockets, unlined.",
     photo: "assets/photos/b367dcdd920d.jpg",
     originalPhoto: "assets/photos/8171705435c1.jpg"
+  },
+  {
+    id: "seed-orlebar-navy-swim",
+    name: "Orlebar Brown Navy Swim Shorts",
+    category: "Bathing suits",
+    colourName: "Navy",
+    colourHex: "#1f2a44",
+    extraColours: [],
+    notes: "Tailored navy swim shorts. Demo seed — local catalogue photo, not a new render.",
+    photo: "assets/editimg/484361227fcf9d7e.webp",
+    originalPhoto: "assets/editimg/484361227fcf9d7e.webp"
+  },
+  {
+    id: "seed-frescobol-white-shorts",
+    name: "Frescobol Carioca White Linen Shorts",
+    category: "Shorts",
+    colourName: "White",
+    colourHex: "#f4f1ea",
+    extraColours: [],
+    notes: "White linen shorts. Demo seed — local catalogue photo, not a new render.",
+    photo: "assets/editimg/aa61c4f64e14674e.webp",
+    originalPhoto: "assets/editimg/aa61c4f64e14674e.webp"
+  },
+  {
+    id: "seed-buckmason-natural-shorts",
+    name: "Buck Mason Natural Cord Shorts",
+    category: "Shorts",
+    colourName: "Natural",
+    colourHex: "#d9cbb6",
+    extraColours: [],
+    notes: "Natural cord beach shorts. Demo seed — local catalogue photo, not a new render.",
+    photo: "assets/editimg/11336add2dfd2bf6.webp",
+    originalPhoto: "assets/editimg/11336add2dfd2bf6.webp"
+  },
+  {
+    id: "seed-buckmason-indigo-jean",
+    name: "Buck Mason Indigo Jean",
+    category: "Jeans",
+    colourName: "Indigo",
+    colourHex: "#3a4a6a",
+    extraColours: [],
+    notes: "Indigo straight jean. Demo seed — local catalogue photo, not a new render.",
+    photo: "assets/editimg/cc1193f59f76bc95.webp",
+    originalPhoto: "assets/editimg/cc1193f59f76bc95.webp"
+  },
+  {
+    id: "seed-alexmill-khaki-chino",
+    name: "Alex Mill Khaki Cotton Chino",
+    category: "Trousers",
+    colourName: "Khaki",
+    colourHex: "#c2b280",
+    extraColours: [],
+    notes: "Khaki cotton chino. Demo seed — local catalogue photo, not a new render.",
+    photo: "assets/editimg/5bdb53e676298c90.webp",
+    originalPhoto: "assets/editimg/5bdb53e676298c90.webp"
+  },
+  {
+    id: "seed-cucinelli-navy-wool",
+    name: "Brunello Cucinelli Navy Pleated Wool Trousers",
+    category: "Trousers",
+    colourName: "Navy",
+    colourHex: "#1f2a44",
+    extraColours: [],
+    notes: "Navy pleated wool dress trousers. Demo seed — local catalogue photo, not a new render.",
+    photo: "assets/editimg/ab71b287ef6e2ae7.webp",
+    originalPhoto: "assets/editimg/ab71b287ef6e2ae7.webp"
+  },
+  {
+    id: "seed-navy-tuxedo-trouser",
+    name: "Navy Wool Tuxedo Trousers",
+    category: "Trousers",
+    colourName: "Navy",
+    colourHex: "#1a2238",
+    extraColours: [],
+    notes: "Navy wool tuxedo trousers for Black Tie. Demo seed — local catalogue photo, not a new render.",
+    photo: "assets/editimg/ab71b287ef6e2ae7.webp",
+    originalPhoto: "assets/editimg/ab71b287ef6e2ae7.webp"
+  },
+  {
+    id: "seed-kiton-white-shirt",
+    name: "Kiton White Cotton Dress Shirt",
+    category: "Shirts",
+    colourName: "White",
+    colourHex: "#f4f1ea",
+    extraColours: [],
+    notes: "White cotton dress shirt, French collar. Demo seed — local catalogue photo, not a new render.",
+    photo: "assets/editimg/1db3c30fdaced666.webp",
+    originalPhoto: "assets/editimg/1db3c30fdaced666.webp"
+  },
+  {
+    id: "seed-jpress-navy-blazer",
+    name: "J.Press Navy English Wool Blazer",
+    category: "Blazers",
+    colourName: "Navy",
+    colourHex: "#1f2a44",
+    extraColours: [],
+    notes: "Navy English wool blazer. Demo seed — local catalogue photo, not a new render.",
+    photo: "assets/editimg/9c9b21e0d0be8577.webp",
+    originalPhoto: "assets/editimg/9c9b21e0d0be8577.webp"
+  },
+  {
+    id: "seed-drakes-velvet-blazer",
+    name: "Drake's Midnight Navy Velvet Dinner Blazer",
+    category: "Blazers",
+    colourName: "Midnight navy",
+    colourHex: "#141a2e",
+    extraColours: [],
+    notes: "Midnight navy velvet dinner blazer. Demo seed — local catalogue photo, not a new render.",
+    photo: "assets/editimg/054d1442f69b661e.webp",
+    originalPhoto: "assets/editimg/054d1442f69b661e.webp"
   }
 ];
 /* Cleaned product photos: the 92 seeded pieces browse by their
@@ -30270,7 +30672,7 @@ function renderToday() {
        their names. */
     img.hidden = true;
     if (collage) {
-      collage.innerHTML = heroPieces.slice(0, 3).map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" />'; }).join("");
+      collage.innerHTML = heroPieces.map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" />'; }).join("");
       collage.hidden = false;
     }
   } else {
@@ -42143,6 +42545,8 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     document.querySelectorAll("[data-edit-section]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-section") === section)); });
     var shopTabs = document.querySelector("#panel-find .edit-shop-tabs");
     if (shopTabs) shopTabs.hidden = section === "curate";
+    var shopFold = document.getElementById("shop-fold850");
+    if (shopFold) shopFold.hidden = section === "curate";
     document.querySelectorAll("[data-edit-view]").forEach(function (b) { if (b.closest(".edit-shop-tabs")) b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-view") === v)); });
     ["saved", "searches", "build", "ask", "curate"].forEach(function (n) { var el = document.getElementById("edit-v-" + n); if (el) el.hidden = n !== v; });
     updateCounts();
@@ -43419,7 +43823,7 @@ window.inspoView = "withmine";
   }
   window.guestHero782 = function () { try { if (guestMode782()) return guestHero782(); } catch (e) {} return false; };
   function soloHero() {
-    hero.classList.remove("hero-guest");
+    hero.classList.remove("hero-guest", "hero-empty851");
     if (guestMode782() && guestHero782()) return;
     if (typeof todayLook === "undefined" || !todayLook) return;
     var src = renderFor(todayLook);
@@ -43449,18 +43853,20 @@ window.inspoView = "withmine";
       hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
       hero.classList.add("hero-flatlay");
       if (img) { img.hidden = true; img.removeAttribute("data-render"); }
+      if (window.__heroReady793) { try { window.__heroReady793(); } catch (eR) {} }
       return true;
     }
     if (todayLook && todayLook.dressEmpty) {
       skip = 0; booted782 = true; userDeal782 = false;
-      /* Keep a stable frame so the hero does not collapse to 0px. */
+      /* No phantom flat-lay: the caption sits with the hero, not under a tall empty gap. */
       if (collage) {
-        collage.innerHTML = '<span class="flatlay fl-n1"><span class="fl-cell fl-swatch" style="background:transparent" role="img" aria-label="No matching look"></span></span>';
-        collage.classList.add("flatlay-host");
-        collage.hidden = false;
+        collage.innerHTML = "";
+        collage.classList.remove("flatlay-host");
+        collage.hidden = true;
       }
-      hero.classList.add("hero-flatlay");
+      hero.classList.add("hero-flatlay", "hero-empty851");
       hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
+      if (window.__heroReady793) { try { window.__heroReady793(); } catch (eR) {} }
       if (img) { img.hidden = true; img.removeAttribute("src"); img.removeAttribute("data-render"); }
       var emptyNm = document.getElementById("today-name");
       if (emptyNm) emptyNm.textContent = todayLook.title || "Nothing in your closet for this dress level.";
@@ -43487,6 +43893,7 @@ window.inspoView = "withmine";
         hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
         hero.classList.add("hero-flatlay");
         if (img) { img.hidden = true; img.removeAttribute("data-render"); }
+        if (window.__heroReady793) { try { window.__heroReady793(); } catch (eR) {} }
         skip = 0; booted782 = true; userDeal782 = false;
         return;
       }
@@ -45758,7 +46165,29 @@ window.inspoView = "withmine";
         syncTop();
       }
     });
-    /* the Filters sheet: Liked only + Icon inspiration on top of Price */
+    /* the Filters sheet: Liked only + Icon inspiration on top of Price.
+       Chip numbers are how many looks that icon actually produced,
+       not the Curate weight (the weight stays in .pv-w for the
+       weighting tests, and is not shown). */
+    var baseIconCounts = {};
+    function noteIconCounts() {
+      var f = curFeed(), map = {};
+      function add(src) { if (src && src.t === "icon" && src.id) map[src.id] = (map[src.id] || 0) + 1; }
+      var feed = F[f];
+      if (feed && feed.looks) feed.looks.forEach(function (l) { add(l.src); });
+      (BUF[f] || []).forEach(function (o) { add(o.src); });
+      baseIconCounts = map;
+    }
+    function iconResultCount(id) {
+      if (!id) return 0;
+      if (S.lens === id) {
+        var live = (typeof window.iconMatchCount850 === "function") ? window.iconMatchCount850(id) : 0;
+        if (live) return live;
+        var feed = F[curFeed()];
+        if (feed && feed.looks && feed.looks.length) return feed.looks.length;
+      }
+      return baseIconCounts[id] || 0;
+    }
     window.pvPaintSheet81 = function (sh) {
       var host = sh.querySelector("#pvf-icons"); if (!host) return;
       var cur = S.lens || "";
@@ -45766,10 +46195,13 @@ window.inspoView = "withmine";
       var wt = (window.iconWeights81 && window.iconWeights81.weightsForLevel) ? window.iconWeights81.weightsForLevel(lv) : {};
       var list = iconList().slice().sort(function (a, b) { return (+wt[b.id] || 0) - (+wt[a.id] || 0); });
       var h = '<button type="button" class="pv-ic pv-none" data-pv-lens="" aria-pressed="' + (cur ? "false" : "true") + '"><span>None</span></button>';
+      if (!S.lens) noteIconCounts();
       list.forEach(function (ic) {
         var t = thumb(ic), w = +wt[ic.id] || 0;
+        var n = iconResultCount(ic.id);
         h += '<button type="button" class="pv-ic' + (w <= 0 ? " pv-ic-off" : "") + '" data-pv-lens="' + E(ic.id) + '" aria-pressed="' + (cur === ic.id ? "true" : "false") + '" title="' + E(ic.name) + (w ? " · weight " + w : " · off") + '">' +
           (t ? '<img class="pv-av" src="' + E(t) + '" alt="" loading="lazy" decoding="async" />' : '<span class="pv-av"></span>') + "<span>" + E(short(ic.name)) + "</span>" +
+          (n ? '<i class="pv-n" aria-hidden="true">' + n + "</i>" : "") +
           (w ? '<i class="pv-w" aria-hidden="true">' + w + "</i>" : "") + "</button>";
       });
       host.innerHTML = h;
@@ -46351,6 +46783,7 @@ self.onmessage = function (ev) {
     hero.classList.add("hero-flatlay");
     hero.classList.remove("hero-solo", "hero-guest");
     if (img) img.hidden = true;
+    if (window.__heroReady793) { try { window.__heroReady793(); } catch (eR) {} }
   }
   if (typeof renderToday === "function") {
     var _rt850 = renderToday;
@@ -46363,46 +46796,51 @@ self.onmessage = function (ev) {
 
   window.iconMatchCount850 = function (iconId) {
     var lens = (window.endlessLens81 && window.endlessLens81.get) ? window.endlessLens81.get() : null;
-    var cards = document.querySelectorAll("#panel-looks .en-card, #cf-grid .cf-card");
-    if (iconId && lens === iconId) return cards.length;
-    if (!iconId) return cards.length;
-    var hit = 0;
-    cards.forEach(function (c) {
-      var blob = ((c.getAttribute("data-icon") || "") + " " + (c.textContent || "")).toLowerCase();
-      if (blob.indexOf(String(iconId).toLowerCase()) !== -1) hit++;
-    });
-    return hit;
+    if (!iconId || (lens && lens !== iconId)) return 0;
+    var view = window.outfitsMode === "inspo" ? (window.inspoView === "allnew" ? "allnew" : "withmine") : "mine";
+    var host = view === "mine" ? document.getElementById("cf-grid") : document.querySelector("#panel-" + view + " .en-grid");
+    return host ? host.children.length : 0;
   };
   function syncIconCounts850() {
-    var lens = (window.endlessLens81 && window.endlessLens81.get) ? window.endlessLens81.get() : null;
-    if (!lens) return;
-    var n = window.iconMatchCount850(lens);
-    var pill = document.querySelector('#pv-pills [data-pv-clear="lens"] span');
-    if (pill) {
-      var name = pill.textContent.replace(/\s+\d+\s*$/, "").trim();
-      pill.textContent = name + " " + n;
-    }
-    document.querySelectorAll("#pvf-icons [data-pv-lens]").forEach(function (b) {
-      var id = b.getAttribute("data-pv-lens");
-      if (id !== lens) return;
-      var span = b.querySelector("span");
-      if (!span) return;
-      var label = span.textContent.replace(/\s+\d+\s*$/, "").trim();
-      span.textContent = label + " " + n;
-    });
+    if (syncIconCounts850.busy) return;
+    syncIconCounts850.busy = true;
+    try {
+      var lens = (window.endlessLens81 && window.endlessLens81.get) ? window.endlessLens81.get() : null;
+      if (!lens) return;
+      var n = window.iconMatchCount850(lens);
+      var b = document.querySelector('#pvf-icons [data-pv-lens="' + lens + '"]');
+      if (!b) return;
+      var badge = b.querySelector(".pv-n");
+      if (!n) { if (badge) badge.remove(); return; }
+      if (!badge) {
+        badge = document.createElement("i");
+        badge.className = "pv-n";
+        badge.setAttribute("aria-hidden", "true");
+        var w = b.querySelector(".pv-w");
+        if (w) b.insertBefore(badge, w); else b.appendChild(badge);
+      }
+      if (badge.textContent !== String(n)) badge.textContent = String(n);
+    } finally { syncIconCounts850.busy = false; }
   }
   window.syncIconCounts850 = syncIconCounts850;
-  if (window.pvSyncTop81) {
-    var _sync = window.pvSyncTop81;
-    window.pvSyncTop81 = function () { var r = _sync.apply(this, arguments); try { syncIconCounts850(); } catch (e) {} return r; };
-  }
-  if (window.pvPaintSheet81) {
-    var _paint = window.pvPaintSheet81;
-    window.pvPaintSheet81 = function () { var r = _paint.apply(this, arguments); try { syncIconCounts850(); } catch (e) {} return r; };
-  }
-  var looksPanel = document.getElementById("panel-looks");
-  if (looksPanel && window.MutationObserver) {
-    new MutationObserver(function () { try { syncIconCounts850(); } catch (e) {} }).observe(looksPanel, { childList: true, subtree: true });
+  if (window.MutationObserver) {
+    ["cf-grid"].forEach(function (id) {
+      var grid = document.getElementById(id);
+      if (grid) new MutationObserver(function () {
+        var sheet = document.querySelector("#lf-price-sheet");
+        if (!sheet || sheet.hidden) return;
+        syncIconCounts850();
+      }).observe(grid, { childList: true });
+    });
+    ["withmine", "allnew"].forEach(function (feed) {
+      var host = document.getElementById("panel-" + feed);
+      var grid = host && host.querySelector(".en-grid");
+      if (grid) new MutationObserver(function () {
+        var sheet = document.querySelector("#lf-price-sheet");
+        if (!sheet || sheet.hidden) return;
+        syncIconCounts850();
+      }).observe(grid, { childList: true });
+    });
   }
 
   function paintRange(el) {
@@ -46508,8 +46946,11 @@ self.onmessage = function (ev) {
   (function () {
     var root = document.documentElement, last = window.scrollY || 0, down = 0;
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function navWide() { return window.innerWidth >= 900 || document.documentElement.scrollHeight <= window.innerHeight + 24; }
+    window.addEventListener("resize", function () { if (navWide()) { root.classList.remove("nav-compact"); down = 0; } });
     window.addEventListener("scroll", function () {
       var y = window.scrollY || 0, dy = y - last;
+      if (navWide()) { root.classList.remove("nav-compact"); last = y; down = 0; return; }
       if (reduce) { root.classList.toggle("nav-compact", y > 80); last = y; root.classList.remove("nav-away"); return; }
       if (y < 24 || dy < -16) { root.classList.remove("nav-compact"); down = 0; }
       else if (dy > 0 && y > 36) { down += dy; if (down > 36) root.classList.add("nav-compact"); }
