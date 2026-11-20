@@ -1384,6 +1384,7 @@ window.notMenswear853 = function (e) {
         border-radius: 999px; padding: 5px 11px; min-height: 30px; font-size: 12px; font-weight: 600; white-space: nowrap;
       }
       .today-loc-chips .tlc[aria-pressed="true"] { background: #f7f1e5; color: #191612; }
+      #today-hero { touch-action: pan-y; } /* .85.3: horizontal swipe reaches the hero */
       .today-swipe-hint { margin: 10px 0 0; font-size: 12px; letter-spacing: .06em; color: rgba(247,241,229,.65); }
 
       /* Undo toast */
@@ -10259,23 +10260,76 @@ function lookHeroVisible84(look) {
 }
 window.photoIsReady84 = photoIsReady84;
 window.lookHeroVisible84 = lookHeroVisible84;
+/* .85.3 (ported from .84.1, Swim/Pool tightened): Home only deals looks
+   that fit the chosen dress level. Swim/Pool is swim or shorts with
+   no tailoring or knit — shirtless is fine. */
+function dressLevel841() {
+  var n = (typeof formalityLevel !== "undefined") ? parseInt(formalityLevel, 10) : 4;
+  return (n >= 1 && n <= 7) ? n : 4;
+}
+function lookFitsDress841(look, level) {
+  if (!look || look.dressEmpty) return false;
+  var C = window.WardrobeComposer;
+  if (!C || typeof C.fitsLevel !== "function" || typeof C.profile !== "function") return true;
+  var tops = [], bottom = null, shoes = null, layer = null;
+  (look.fwPieces || []).forEach(function (p) {
+    if (!p) return;
+    var it = (p.id && typeof closetItemById === "function") ? (closetItemById(p.id) || p) : p;
+    var pr = null;
+    try { pr = C.profile(it, 0); } catch (e) { pr = null; }
+    if (!pr) return;
+    if (pr.role === "top") tops.push(pr);
+    else if (pr.role === "bottom" && !bottom) bottom = pr;
+    else if (pr.role === "shoes" && !shoes) shoes = pr;
+    else if (pr.role === "layer" && !layer) layer = pr;
+  });
+  var top = null;
+  if (tops.length === 1) top = tops[0];
+  else if (tops.length >= 2) {
+    var first = tops[0];
+    layer = layer || Object.assign({}, first, { role: "layer", kind: first.overshirt ? "overshirt" : (first.kind === "knit" ? "knit" : first.kind) });
+    top = tops[1];
+  }
+  if (!bottom) return false;
+  if (level <= 2) {
+    if (bottom.kind !== "swim" && bottom.kind !== "shorts") return false;
+    if (level === 1 && bottom.kind !== "swim" && !/swim|trunk/.test(bottom.n || "")) return false;
+    if (layer && layer.kind !== "overshirt" && !/linen/.test(layer.n || "")) return false;
+    if (top && (top.kind === "knit" || (top.kind === "shirt" && !top.shortSleeve && !/linen/.test(top.n || "")))) return false;
+    if (shoes && (shoes.kind === "dress" || shoes.kind === "loafer" && shoes.hi >= 7 || /velvet/.test(shoes.n || ""))) return false;
+    return !!(top || level === 1);
+  }
+  if (!top || !shoes) return false;
+  if (!C.fitsLevel(level, top, bottom, shoes, layer)) return false;
+  if (level <= 3 && top.kind === "knit" && !top.shortSleeve) return false;
+  return true;
+}
+function dressEmptyLook841() {
+  var labels = (typeof HERO_TYPE_LABELS !== "undefined" && HERO_TYPE_LABELS) || ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"];
+  var lv = dressLevel841();
+  var name = labels[lv - 1] || "this dress level";
+  return { id: "dress-empty-" + lv, title: "No " + name + " looks in your closet yet", meta: "From your closet", desc: "", dressEmpty: true, dressLevel: lv, swatches: [], fwPieces: [], source: "wardrobe", composer: false };
+}
+window.dressLevel841 = dressLevel841;
+window.lookFitsDress841 = lookFitsDress841;
 function homeComposerLooks75(count) {
   if (typeof composerLooks !== "function") return [];
   var want = count || 8;
   var temp = (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78;
   var pools = homeOwnedPhotoPieces742();
   var pool = pools.own.length >= 3 ? pools.own : pools.withPhoto;
-  var r = pool.length >= 3 ? (composerLooks({ count: Math.max(want, 16), temp: temp, only: pool, renderedFirst: true }) || []) : [];
-  r = r.filter(function (l) { return homeLookOk742(l); });
+  var level853 = dressLevel841();
+  var r = pool.length >= 3 ? (composerLooks({ count: Math.max(want, 16), temp: temp, only: pool, renderedFirst: true, level: level853 }) || []) : [];
+  r = r.filter(function (l) { return homeLookOk742(l) && lookFitsDress841(l, level853); });
   var vis = r.filter(lookHeroVisible84);
   /* When warm unlayered looks have no loadable piece photos and no
      on-body cut, backfill from the scored render pool so Home never
      lands on a grey silhouette or empty flat-lay. */
   if (vis.length < want && pool.length >= 3) {
-    var more = composerLooks({ count: want, temp: temp, only: pool, renderedFirst: true, strictKeys: true }) || [];
+    var more = composerLooks({ count: want, temp: temp, only: pool, renderedFirst: true, strictKeys: true, level: level853 }) || [];
     var seen = {};
     vis.forEach(function (l) { seen[l.composerKey || l.id || l.title] = 1; });
-    more.filter(function (l) { return homeLookOk742(l); }).forEach(function (l) {
+    more.filter(function (l) { return homeLookOk742(l) && lookFitsDress841(l, level853); }).forEach(function (l) {
       var k = l.composerKey || l.id || l.title;
       if (!seen[k]) { vis.push(l); seen[k] = 1; }
     });
@@ -30038,10 +30092,14 @@ function initToday() {
 var heroHistory56 = [];
 function heroPushHistory56() {
   try {
-    if (typeof todayLook === "undefined" || !todayLook || !todayLook.img) return;
-    var key = canonicalImg(lookPicturedImg(todayLook) || todayLook.img || "");
+    if (typeof todayLook === "undefined" || !todayLook || todayLook.dressEmpty) return;
+    /* .85.3: closet looks (pieces, no img) are remembered too, keyed by their pieces */
+    var hasPcs = !!(todayLook.fwPieces && todayLook.fwPieces.length);
+    if (!todayLook.img && !hasPcs) return;
+    function hk(l) { return l.img ? canonicalImg(lookPicturedImg(l) || l.img || "") : (l.composerKey || l.title || ""); }
+    var key = hk(todayLook);
     var top = heroHistory56[heroHistory56.length - 1];
-    if (top && key && canonicalImg(lookPicturedImg(top) || top.img || "") === key) return;
+    if (top && key && hk(top) === key) return;
     heroHistory56.push(JSON.parse(JSON.stringify(todayLook)));
     if (heroHistory56.length > 10) heroHistory56 = heroHistory56.slice(heroHistory56.length - 10);
   } catch (e) {}
@@ -30049,7 +30107,9 @@ function heroPushHistory56() {
 function heroGoBack56() {
   while (heroHistory56.length) {
     var prev = heroHistory56.pop();
-    if (!prev || !prev.img) continue;
+    /* .85.3: closet looks carry pieces, not an img — they count too */
+    if (!prev || !(prev.img || (prev.fwPieces && prev.fwPieces.length)) || prev.dressEmpty) continue;
+    if (typeof lookFitsDress841 === "function" && prev.fwPieces && prev.fwPieces.length && !lookFitsDress841(prev, dressLevel841())) continue;
     if (lookPhotoBanned(prev)) continue;
     if (isQuarantinedImg(lookPicturedImg(prev) || prev.img || "")) continue;
     todayLook = prev;
@@ -30108,7 +30168,16 @@ function dealHeroForSource() {
       ? buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() + window._heroDealN })
       : buildClosetLooks()) || [];
   }
-  cl = cl.filter(lookIsMine);
+  /* .85.3: only looks that fit the chosen dress level */
+  cl = (cl || []).filter(function (l) { return lookIsMine(l) && lookFitsDress841(l, dressLevel841()); });
+  if (!cl.length) {
+    if (todayLook && !todayLook.dressEmpty && lookFitsDress841(todayLook, dressLevel841())) { renderToday(); return; }
+    todayLook = dressEmptyLook841();
+    todaySeedId = todayLook.id;
+    persistOpeningLook(todayLook);
+    renderToday();
+    return;
+  }
   if (cl && cl.length) {
       /* Graduated (liked) closet looks are not dealt again; if
          every closet look has graduated, deal from the full list
@@ -34950,9 +35019,30 @@ function woreToday() {
      marking stays available in Calendar/planner and the pop-out. */
   var hero = document.getElementById("today-hero");
   if (hero) {
-    var sx = null, sy = null;
+    /* .85.3 (ported from .84.1): swipe left = next look, swipe right =
+       the look before. touch-action: pan-y (CSS) keeps vertical scroll
+       with the browser and hands horizontal drags to us, so iOS Safari
+       and the PWA deliver touchend; pointer events cover trackpads and
+       mouse drags. One gesture fires once (touch + pointer dedupe). */
+    var sx = null, sy = null, lastSwipe853 = 0;
+    function heroSwipe853(dir) {
+      var now = Date.now();
+      if (now - lastSwipe853 < 380) return;
+      lastSwipe853 = now;
+      if (dir < 0) { dealAnotherToday(); }
+      /* Build .56 (amendment): swipe right goes BACK to the look
+         dealt before this one. At the bottom of the stack the
+         gesture does nothing. */
+      else if (typeof heroGoBack56 === "function") { heroGoBack56(); }
+    }
+    function swipeFrom853(dx, dy, target) {
+      if (target && target.closest && target.closest("button, a, input, textarea, select, .cdd, .cdd-menu")) return;
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+      heroSwipe853(dx < 0 ? -1 : 1);
+    }
     hero.addEventListener("touchstart", function (e) {
       if (e.touches.length !== 1) { sx = null; return; }
+      if (e.target.closest && e.target.closest("button, a, input, select, .cdd")) { sx = null; return; }
       sx = e.touches[0].clientX; sy = e.touches[0].clientY;
     }, { passive: true });
     hero.addEventListener("touchend", function (e) {
@@ -34960,14 +35050,23 @@ function woreToday() {
       var dx = e.changedTouches[0].clientX - sx;
       var dy = e.changedTouches[0].clientY - sy;
       sx = null;
-      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
-      if (dx < 0) { dealAnotherToday(); }
-      /* Build .56 (amendment): swipe right goes BACK to the look
-         dealt before this one — for the verdict the user meant
-         to give it. Like keeps its button. At the bottom of the
-         stack the gesture does nothing. */
-      else if (typeof heroGoBack56 === "function") { heroGoBack56(); }
+      swipeFrom853(dx, dy, e.target);
     }, { passive: true });
+    hero.addEventListener("touchcancel", function () { sx = null; }, { passive: true });
+    var px = null, py = null, pid = null;
+    hero.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "touch") return; /* touch handled above */
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      if (e.target.closest && e.target.closest("button, a, input, textarea, select, .cdd")) return;
+      px = e.clientX; py = e.clientY; pid = e.pointerId;
+    });
+    hero.addEventListener("pointerup", function (e) {
+      if (pid !== e.pointerId || px === null) return;
+      var dx = e.clientX - px, dy = e.clientY - py;
+      px = null; pid = null;
+      swipeFrom853(dx, dy, e.target);
+    });
+    hero.addEventListener("pointercancel", function () { px = null; pid = null; });
   }
   /* Build .56 (amendment): the same swipe-right go-back on the
      Ideas deal surface — back to the previous six dealt. */
@@ -42650,11 +42749,25 @@ window.inspoView = "withmine";
     for (var i = 0; i < day.length; i++) h = (h * 31 + day.charCodeAt(i)) >>> 0;
     h += gOff782;
     keys = keys.filter(function (k) { return window.cutoutFor("assets/onbody/" + k + ".webp"); });
+    /* .85.3: a stand-in must fit the chosen dress level */
+    keys = keys.filter(guestFits853);
     if (keys.length) { var k = keys[h % keys.length]; return { cut: C.map[k], render: "assets/onbody/" + k + ".webp" }; }
     var rs = typeof ONBODY !== "undefined" && ONBODY.map ? Object.keys(ONBODY.map).sort().map(function (x) { return ONBODY.map[x]; }) : [];
     /* .78.9e: only ever a cut-out — never the plain studio render */
     rs = rs.filter(function (r) { return typeof window.cutoutFor === "function" && window.cutoutFor(r); });
+    rs = rs.filter(function (r) { var kk = null; for (var x in ONBODY.map) if (ONBODY.map[x] === r) { kk = x; break; } return kk ? guestFits853(kk) : false; });
     return rs.length ? { cut: window.cutoutFor(rs[h % rs.length]), render: rs[h % rs.length] } : null;
+  }
+  var gFit853 = { lv: 0, m: {} };
+  function guestFits853(key) {
+    try {
+      if (typeof lookFitsDress841 !== "function") return true;
+      var lv = dressLevel841();
+      if (gFit853.lv !== lv) gFit853 = { lv: lv, m: {} };
+      if (key in gFit853.m) return gFit853.m[key];
+      var pcs = String(key).split("|").map(function (id) { return (typeof closetItemById === "function" && closetItemById(id)) || { id: id }; });
+      return (gFit853.m[key] = lookFitsDress841({ fwPieces: pcs }, lv));
+    } catch (e) { return true; }
   }
   function guestHero782(forceTitle) {
     if (userDeal782) { gOff782++; userDeal782 = false; }
@@ -42672,8 +42785,22 @@ window.inspoView = "withmine";
     return true;
   }
   window.guestHero782 = function () { try { if (guestMode782()) return guestHero782(); } catch (e) {} return false; };
+  var misfit853 = 0;
   function soloHero() {
     hero.classList.remove("hero-guest");
+    /* .85.3: the dress level has nothing in his closet — say so, no stand-in */
+    if (typeof todayLook !== "undefined" && todayLook && todayLook.dressEmpty) {
+      if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
+      hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
+      if (img) { img.hidden = true; img.removeAttribute("data-render"); }
+      var emNm = document.getElementById("today-name"); if (emNm) emNm.textContent = todayLook.title;
+      return;
+    }
+    /* .85.3: an opening look from another dress level is re-dealt */
+    if (typeof todayLook !== "undefined" && todayLook && todayLook.fwPieces && todayLook.fwPieces.length && typeof lookFitsDress841 === "function" && !lookFitsDress841(todayLook, dressLevel841()) && misfit853 < 3 && typeof dealAnotherToday === "function") {
+      misfit853++; setTimeout(dealAnotherToday, 0); return;
+    }
+    misfit853 = 0;
     if (guestMode782() && guestHero782()) return;
     if (typeof todayLook === "undefined" || !todayLook) return;
     var src = renderFor(todayLook);
@@ -42712,6 +42839,17 @@ window.inspoView = "withmine";
       if (paintClosetFlatlay782(todayLook)) {
         skip = 0; booted782 = true; userDeal782 = false;
         return;
+      }
+      if (dressLevel841() <= 2 && todayLook.fwPieces && todayLook.fwPieces.length) {
+        var flHtml = "";
+        try { if (typeof window.composerFlatlayHTML === "function") flHtml = window.composerFlatlayHTML(todayLook, true) || ""; } catch (eFl) {}
+        if (flHtml && flHtml.indexOf("<img ") !== -1 && collage) {
+          collage.innerHTML = flHtml; collage.classList.add("flatlay-host"); collage.hidden = false;
+          hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest"); hero.classList.add("hero-flatlay");
+          if (img) { img.hidden = true; img.removeAttribute("data-render"); }
+          skip = 0; booted782 = true; userDeal782 = false;
+          return;
+        }
       }
       /* Home only deals looks he can be seen in: skip one with no render */
       var lkey = todayLook.composerKey || todayLook.id || todayLook.img || "", acc = null, dayIso = typeof localTodayISO === "function" ? localTodayISO() : "";
