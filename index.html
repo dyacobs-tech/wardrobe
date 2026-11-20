@@ -156,7 +156,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.4" />
+    <meta name="wardrobe-build" content="2026-11-20.86.5" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -211,6 +211,57 @@ window.notMenswear853 = function (e) {
   } catch (e) {}
 })();
     </script>
+    <script>
+/* .86.5: decide the route before first paint so a reload on Looks
+   never flashes the Home avatar. Session tab + hash on refresh;
+   hash-only deep links on a fresh launch; otherwise Home. */
+(function () {
+  function norm(t) {
+    t = String(t || "").replace(/^#/, "").split("/")[0].split("?")[0];
+    if (!t) return "";
+    if (t === "queue" || t === "favourites" || t === "ideas") return "looks";
+    if (t === "watches") return "wardrobe";
+    if (t === "profile") return "pinfo";
+    if (t === "wishlist") return "shopwish";
+    if (t === "icons" || t === "palettes" || t === "gaps" || t === "receipts") return "find";
+    if (t === "add" || t === "analyze" || t === "bulk") return "wardrobe";
+    if (t === "outfitideas") return "studio";
+    return t;
+  }
+  function navType() {
+    try {
+      var ne = performance.getEntriesByType && performance.getEntriesByType("navigation");
+      if (ne && ne.length) return ne[0].type || "";
+      if (performance.navigation) return performance.navigation.type === 1 ? "reload" : (performance.navigation.type === 2 ? "back_forward" : "navigate");
+    } catch (e) {}
+    return "";
+  }
+  var sess = "", route = null, hash = "";
+  try { sess = sessionStorage.getItem("wardrobe.tab") || ""; } catch (e) {}
+  try { route = JSON.parse(sessionStorage.getItem("wardrobe.route") || "null"); } catch (e) { route = null; }
+  try { hash = (location.hash || "").replace(/^#/, "").split("/")[0]; } catch (e) {}
+  var refresh = !!sess || navType() === "reload" || navType() === "back_forward";
+  var tab = norm(refresh ? (sess || hash || (route && route.tab) || "") : hash) || "today";
+  var looks = (route && route.looks) || {};
+  document.documentElement.setAttribute("data-boot-tab", tab);
+  window.__bootRoute865 = { tab: tab, looks: looks, scroll: (route && route.scroll) || 0 };
+})();
+    </script>
+    <style id="boot-route-865">
+      /* Hide the Home hero until JS switchTab finishes, when this load is not Home. */
+      html[data-boot-tab]:not([data-boot-tab="today"]) #panel-today,
+      html[data-boot-tab]:not([data-boot-tab="today"]) #today-hero,
+      html[data-boot-tab]:not([data-boot-tab="today"]) #today-img { display: none !important; visibility: hidden !important; }
+      html[data-boot-tab="looks"] #panel-looks { display: block !important; }
+      html[data-boot-tab="wardrobe"] #panel-wardrobe { display: block !important; }
+      html[data-boot-tab="find"] #panel-find { display: block !important; }
+      html[data-boot-tab="calendar"] #panel-calendar { display: block !important; }
+      html[data-boot-tab="studio"] #panel-studio { display: block !important; }
+      html[data-boot-tab="pinfo"] #panel-pinfo,
+      html[data-boot-tab="plocation"] #panel-plocation,
+      html[data-boot-tab="prules"] #panel-prules,
+      html[data-boot-tab="pcloud"] #panel-pcloud { display: block !important; }
+    </style>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png?v=donna1" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png?v=donna1" />
@@ -232,16 +283,34 @@ window.notMenswear853 = function (e) {
 
     <link rel="preload" as="script" fetchpriority="low" href="app/00-brand-list.27a288fac9.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/01.4608886ffb.js" />
-    <link rel="preload" as="script" fetchpriority="low" href="app/02.fe0979c957.js" />
+    <link rel="preload" as="script" fetchpriority="low" href="app/02.adf7f69fdc.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/24.318a5abe99.js" />
-    <link rel="preload" as="script" fetchpriority="low" href="app/25.4ce0a8be32.js" />
+    <link rel="preload" as="script" fetchpriority="low" href="app/25.44c6f329b2.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/26.7505b30a4e.js" />
-    <link rel="preload" as="script" fetchpriority="low" href="app/bundle.271ef1a746.js" />
+    <link rel="preload" as="script" fetchpriority="low" href="app/bundle.470dc7fd9f.js" />
   </head>
   <body data-page="today">
+    <script>
+(function () {
+  var t = "today", titles = { today: "Donna", looks: "Looks", wardrobe: "Closet", find: "The Edit", calendar: "Calendar", studio: "Looks", pinfo: "Profile", plocation: "Profile", prules: "Profile", pcloud: "Profile", shopwish: "Wishlist", sale: "Sale", search: "Search" };
+  try { t = document.documentElement.getAttribute("data-boot-tab") || "today"; } catch (e) {}
+  document.body.setAttribute("data-page", t);
+  document.body.classList.toggle("home-view", t === "today");
+  var brand = document.getElementById("brand-home");
+  if (brand) brand.textContent = titles[t] || "Donna";
+})();
+    </script>
     <header class="masthead">
       <div class="wrap">
         <h1 class="brand" id="brand-home" title="Home">Donna</h1>
+    <script>
+(function () {
+  var t = document.documentElement.getAttribute("data-boot-tab") || "today";
+  var titles = { today: "Donna", looks: "Looks", wardrobe: "Closet", find: "The Edit", calendar: "Calendar", studio: "Looks", pinfo: "Profile", plocation: "Profile", prules: "Profile", pcloud: "Profile", shopwish: "Wishlist", sale: "Sale", search: "Search" };
+  var brand = document.getElementById("brand-home");
+  if (brand) brand.textContent = titles[t] || "Donna";
+})();
+    </script>
         <button type="button" class="btn-ink" id="shop-plus" aria-label="Add">+</button>
         <button type="button" class="navbtn profile-btn" id="tab-profile" data-tab="profile" data-section="me" aria-controls="panel-pinfo" aria-label="Profile — info, location, wardrobe rules, cloud and backup"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg></button>
         <div class="rule-double" aria-hidden="true"></div>
@@ -817,6 +886,27 @@ window.notMenswear853 = function (e) {
 
       
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
+        <div id="pv-top">
+          <div class="pv-bar"><span class="pv-bar-l" aria-hidden="true"></span>
+          <div class="pv-seg" role="group" aria-label="Looks from">
+          <button type="button" class="pv-segb" data-pv-f="mine" aria-pressed="true">Mine</button>
+          <button type="button" class="pv-segb" data-pv-f="withmine" aria-pressed="false">Mix</button>
+          <button type="button" class="pv-segb" data-pv-f="allnew" aria-pressed="false">New</button></div>
+          <button type="button" class="pv-filter" id="pv-filter" aria-haspopup="dialog" aria-label="Filters"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="pv-dot" hidden></span></button></div>
+          <div class="pv-pills" id="pv-pills" hidden></div>
+          <div class="pv-ptr" id="pv-ptr" aria-hidden="true"><span></span></div>
+        </div>
+        <script>
+        (function () {
+          try {
+            var f = (window.__bootRoute865 && window.__bootRoute865.looks && window.__bootRoute865.looks.feed) || "mine";
+            if (f !== "mine" && f !== "withmine" && f !== "allnew") f = "mine";
+            document.querySelectorAll("#pv-top [data-pv-f]").forEach(function (b) {
+              b.setAttribute("aria-pressed", b.getAttribute("data-pv-f") === f ? "true" : "false");
+            });
+          } catch (e) {}
+        })();
+        </script>
         <div id="style-item-host" class="style-item-host" hidden></div>
         
         <div class="outfits-build-row outfits-row">
@@ -1387,7 +1477,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.4</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.5</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -2140,11 +2230,11 @@ window.notMenswear853 = function (e) {
 })();
     </script>
     <script type="wardrobe/app" data-src="app/01.4608886ffb.js"></script>
-    <script type="wardrobe/app" data-src="app/02.fe0979c957.js"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="0"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="1"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="2"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="3"></script>
+    <script type="wardrobe/app" data-src="app/02.adf7f69fdc.js"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="0"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="1"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="2"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="3"></script>
     <script>
       /* Offline caching (app side): register the service worker
          Luna ships alongside the site (app-shell precache +
@@ -2210,24 +2300,24 @@ window.notMenswear853 = function (e) {
       })();
     </script>
   
-<script src="app/25.4ce0a8be32.js" defer></script>
+<script src="app/25.44c6f329b2.js" defer></script>
 
     <script src="app/26.7505b30a4e.js" defer></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="4"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="5"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="6"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="7"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="8"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="9"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="10"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="11"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="12"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="13"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="14"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="15"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="16"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="17"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="18"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="4"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="5"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="6"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="7"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="8"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="9"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="10"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="11"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="12"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="13"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="14"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="15"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="16"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="17"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="18"></script>
   <script>
 /* Build .80.16 (audit P0.1): reach the Ideas studio and come back */
 (function () {
@@ -2308,9 +2398,9 @@ window.notMenswear853 = function (e) {
   setTimeout(function () { (window.afterLookahead803 || function (f) { f(); })(function () { (window.lazyAll802 || function (f) { f(); })(function () { ric(warm); }); }); }, 0);
 })();
 </script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="19"></script>
-    <script type="wardrobe/app" data-bsrc="app/bundle.271ef1a746.js" data-bi="20"></script>
-    <script>(window.__mod81 = window.__mod81 || {})["endless"] = "app/endless.59439f4366.js";</script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="19"></script>
+    <script type="wardrobe/app" data-bsrc="app/bundle.470dc7fd9f.js" data-bi="20"></script>
+    <script>(window.__mod81 = window.__mod81 || {})["endless"] = "app/endless.d52ba49b6d.js";</script>
     <script>(window.__mod81 = window.__mod81 || {})["endless-worker"] = "app/endless-worker.4040598b02.js";</script>
   </body>
 </html>

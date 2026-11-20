@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.4" />
+    <meta name="wardrobe-build" content="2026-11-20.86.5" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -131,6 +131,57 @@ window.notMenswear853 = function (e) {
   } catch (e) {}
 })();
     </script>
+    <script>
+/* .86.5: decide the route before first paint so a reload on Looks
+   never flashes the Home avatar. Session tab + hash on refresh;
+   hash-only deep links on a fresh launch; otherwise Home. */
+(function () {
+  function norm(t) {
+    t = String(t || "").replace(/^#/, "").split("/")[0].split("?")[0];
+    if (!t) return "";
+    if (t === "queue" || t === "favourites" || t === "ideas") return "looks";
+    if (t === "watches") return "wardrobe";
+    if (t === "profile") return "pinfo";
+    if (t === "wishlist") return "shopwish";
+    if (t === "icons" || t === "palettes" || t === "gaps" || t === "receipts") return "find";
+    if (t === "add" || t === "analyze" || t === "bulk") return "wardrobe";
+    if (t === "outfitideas") return "studio";
+    return t;
+  }
+  function navType() {
+    try {
+      var ne = performance.getEntriesByType && performance.getEntriesByType("navigation");
+      if (ne && ne.length) return ne[0].type || "";
+      if (performance.navigation) return performance.navigation.type === 1 ? "reload" : (performance.navigation.type === 2 ? "back_forward" : "navigate");
+    } catch (e) {}
+    return "";
+  }
+  var sess = "", route = null, hash = "";
+  try { sess = sessionStorage.getItem("wardrobe.tab") || ""; } catch (e) {}
+  try { route = JSON.parse(sessionStorage.getItem("wardrobe.route") || "null"); } catch (e) { route = null; }
+  try { hash = (location.hash || "").replace(/^#/, "").split("/")[0]; } catch (e) {}
+  var refresh = !!sess || navType() === "reload" || navType() === "back_forward";
+  var tab = norm(refresh ? (sess || hash || (route && route.tab) || "") : hash) || "today";
+  var looks = (route && route.looks) || {};
+  document.documentElement.setAttribute("data-boot-tab", tab);
+  window.__bootRoute865 = { tab: tab, looks: looks, scroll: (route && route.scroll) || 0 };
+})();
+    </script>
+    <style id="boot-route-865">
+      /* Hide the Home hero until JS switchTab finishes, when this load is not Home. */
+      html[data-boot-tab]:not([data-boot-tab="today"]) #panel-today,
+      html[data-boot-tab]:not([data-boot-tab="today"]) #today-hero,
+      html[data-boot-tab]:not([data-boot-tab="today"]) #today-img { display: none !important; visibility: hidden !important; }
+      html[data-boot-tab="looks"] #panel-looks { display: block !important; }
+      html[data-boot-tab="wardrobe"] #panel-wardrobe { display: block !important; }
+      html[data-boot-tab="find"] #panel-find { display: block !important; }
+      html[data-boot-tab="calendar"] #panel-calendar { display: block !important; }
+      html[data-boot-tab="studio"] #panel-studio { display: block !important; }
+      html[data-boot-tab="pinfo"] #panel-pinfo,
+      html[data-boot-tab="plocation"] #panel-plocation,
+      html[data-boot-tab="prules"] #panel-prules,
+      html[data-boot-tab="pcloud"] #panel-pcloud { display: block !important; }
+    </style>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://en.wikipedia.org https://wardrobe-sync.dyacobs.workers.dev https://wardrobe-tryon.dyacobs.workers.dev; worker-src 'self'; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png?v=donna1" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png?v=donna1" />
@@ -6776,9 +6827,27 @@ window.notMenswear853 = function (e) {
 
   </head>
   <body data-page="today">
+    <script>
+(function () {
+  var t = "today", titles = { today: "Donna", looks: "Looks", wardrobe: "Closet", find: "The Edit", calendar: "Calendar", studio: "Looks", pinfo: "Profile", plocation: "Profile", prules: "Profile", pcloud: "Profile", shopwish: "Wishlist", sale: "Sale", search: "Search" };
+  try { t = document.documentElement.getAttribute("data-boot-tab") || "today"; } catch (e) {}
+  document.body.setAttribute("data-page", t);
+  document.body.classList.toggle("home-view", t === "today");
+  var brand = document.getElementById("brand-home");
+  if (brand) brand.textContent = titles[t] || "Donna";
+})();
+    </script>
     <header class="masthead">
       <div class="wrap">
         <h1 class="brand" id="brand-home" title="Home">Donna</h1>
+    <script>
+(function () {
+  var t = document.documentElement.getAttribute("data-boot-tab") || "today";
+  var titles = { today: "Donna", looks: "Looks", wardrobe: "Closet", find: "The Edit", calendar: "Calendar", studio: "Looks", pinfo: "Profile", plocation: "Profile", prules: "Profile", pcloud: "Profile", shopwish: "Wishlist", sale: "Sale", search: "Search" };
+  var brand = document.getElementById("brand-home");
+  if (brand) brand.textContent = titles[t] || "Donna";
+})();
+    </script>
         <button type="button" class="btn-ink" id="shop-plus" aria-label="Add">+</button>
         <button type="button" class="navbtn profile-btn" id="tab-profile" data-tab="profile" data-section="me" aria-controls="panel-pinfo" aria-label="Profile — info, location, wardrobe rules, cloud and backup"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg></button>
         <div class="rule-double" aria-hidden="true"></div>
@@ -7397,6 +7466,27 @@ window.notMenswear853 = function (e) {
 
       <!-- ================= LOOKS ================= -->
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
+        <div id="pv-top">
+          <div class="pv-bar"><span class="pv-bar-l" aria-hidden="true"></span>
+          <div class="pv-seg" role="group" aria-label="Looks from">
+          <button type="button" class="pv-segb" data-pv-f="mine" aria-pressed="true">Mine</button>
+          <button type="button" class="pv-segb" data-pv-f="withmine" aria-pressed="false">Mix</button>
+          <button type="button" class="pv-segb" data-pv-f="allnew" aria-pressed="false">New</button></div>
+          <button type="button" class="pv-filter" id="pv-filter" aria-haspopup="dialog" aria-label="Filters"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="pv-dot" hidden></span></button></div>
+          <div class="pv-pills" id="pv-pills" hidden></div>
+          <div class="pv-ptr" id="pv-ptr" aria-hidden="true"><span></span></div>
+        </div>
+        <script>
+        (function () {
+          try {
+            var f = (window.__bootRoute865 && window.__bootRoute865.looks && window.__bootRoute865.looks.feed) || "mine";
+            if (f !== "mine" && f !== "withmine" && f !== "allnew") f = "mine";
+            document.querySelectorAll("#pv-top [data-pv-f]").forEach(function (b) {
+              b.setAttribute("aria-pressed", b.getAttribute("data-pv-f") === f ? "true" : "false");
+            });
+          } catch (e) {}
+        })();
+        </script>
         <div id="style-item-host" class="style-item-host" hidden></div>
         <!-- .80.19 (audit P1.9): one row — Mine/Inspo, Build, Ideas, Shuffle -->
         <div class="outfits-build-row outfits-row">
@@ -8171,7 +8261,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.4</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.5</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10946,7 +11036,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.4";
+var WARDROBE_BUILD = "2026-11-20.86.5";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -34430,6 +34520,11 @@ function persistTab() {
      that drop the hash or partition local storage between loads,
      so pull-to-refresh lands back on the page you were on. */
   try { sessionStorage.setItem("wardrobe.tab", currentTab); } catch (e) {}
+  try {
+    var feed = "mine";
+    if (window.outfitsMode === "inspo") feed = window.inspoView === "allnew" ? "allnew" : "withmine";
+    sessionStorage.setItem("wardrobe.route", JSON.stringify({ tab: currentTab, looks: { feed: feed }, scroll: window.scrollY || 0 }));
+  } catch (e) {}
   store.set("openIcon", currentTab === "icons" ? openIconId : null);
   try {
     var h;
@@ -34493,7 +34588,12 @@ function switchTab(name, opts) {
   var prevTab = currentTab;
   pageScroll[currentTab] = window.scrollY || 0;
   currentTab = name;
-  if (typeof viewTrack === "function") viewTrack(name); /* build .38 (2.11): the universal back history */
+  if (opts && opts.restore) {
+    /* This load opened on this tab — not a move from Home. */
+    viewCur = name;
+    viewHist = [];
+    if (typeof syncViewBack === "function") syncViewBack();
+  } else if (typeof viewTrack === "function") viewTrack(name); /* build .38 (2.11): the universal back history */
   var sec = sectionOf(name);
   /* Remember where he came from when he steps INTO Profile, so
      the section's close (×) returns him to that page. */
@@ -34562,6 +34662,20 @@ function switchTab(name, opts) {
   if (name === "looks" && typeof syncOutfitsToggle === "function") syncOutfitsToggle();
   if (typeof scrollActiveSubtabIntoView === "function") {
     requestAnimationFrame(function () { requestAnimationFrame(scrollActiveSubtabIntoView); });
+  }
+  try { document.documentElement.removeAttribute("data-boot-tab"); } catch (e865) {}
+  if (opts && opts.restore) {
+    try {
+      var r865 = window.__bootRoute865 || JSON.parse(sessionStorage.getItem("wardrobe.route") || "null");
+      var y865 = r865 && typeof r865.scroll === "number" ? r865.scroll : 0;
+      if (y865 > 0) {
+        var goY865 = function () { window.scrollTo(0, y865); };
+        goY865();
+        requestAnimationFrame(function () { requestAnimationFrame(goY865); });
+        setTimeout(goY865, 80);
+        setTimeout(goY865, 280);
+      }
+    } catch (e865s) {}
   }
 }
 /* ---------- Build .38 (2.11): the universal back ----------
@@ -41246,6 +41360,13 @@ function analyzeFilePiece(card, job, ix) {
     if (typeof dealAnotherToday === "function") dealAnotherToday();
   });
   window.outfitsMode = "mine";
+  window.inspoView = "withmine";
+  try {
+    var br865 = window.__bootRoute865 || JSON.parse(sessionStorage.getItem("wardrobe.route") || "null");
+    var fd865 = br865 && br865.looks && br865.looks.feed;
+    if (fd865 === "allnew") { window.outfitsMode = "inspo"; window.inspoView = "allnew"; }
+    else if (fd865 === "withmine") { window.outfitsMode = "inspo"; window.inspoView = "withmine"; }
+  } catch (e865m) {}
   window.syncOutfitsToggle = function () {
     var mine = document.getElementById("outfits-mine");
     var inspo = document.getElementById("outfits-inspo");
@@ -41268,7 +41389,7 @@ function analyzeFilePiece(card, job, ix) {
        (Shuffle still deals a fresh one) */
     if (typeof composerSyncFeed === "function") composerSyncFeed(false);
   };
-  window.inspoView = "withmine";
+  if (!window.inspoView) window.inspoView = "withmine";
   window.showInspoView = function (v) {
     if (v === "icons" || v === "palettes") {
       if (typeof window.openCurate === "function") window.openCurate(v);
@@ -45261,6 +45382,14 @@ window.inspoView = "withmine";
     window.switchTab = function (name) { var r = _st81.apply(this, arguments); if (name === "looks" || name === "ideas") window.endlessLoad81(); return r; };
     try { switchTab = window.switchTab; } catch (e) {}
   }
+  /* restoreTab can run before this wrapper exists, so a Looks-first
+     reload would otherwise wait 7s for the Mine|Mix|New chrome. */
+  try {
+    var alreadyLooks = (typeof currentTab !== "undefined" && (currentTab === "looks" || currentTab === "ideas"))
+      || (document.body && (document.body.getAttribute("data-page") === "looks" || document.body.getAttribute("data-page") === "ideas"))
+      || (window.__bootRoute865 && (window.__bootRoute865.tab === "looks" || window.__bootRoute865.tab === "ideas"));
+    if (alreadyLooks) window.endlessLoad81();
+  } catch (e) {}
   document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("#outfits-inspo, [data-inspo-view], #lf-row, [data-tab='looks'], [data-section='looks'], #section-ideas, [data-section='ideas']")) window.endlessLoad81(); }, true);
   window.addEventListener("load", function () {
     setTimeout(function () { (window.requestIdleCallback || function (f) { setTimeout(f, 200); })(function () { window.endlessLoad81(); }, { timeout: 5000 }); }, 7000);
@@ -46262,24 +46391,30 @@ window.inspoView = "withmine";
     var R = document.documentElement;
     if (!R.classList.contains("pv81")) return;
     var panel = document.getElementById("panel-looks");
-    if (!panel || document.getElementById("pv-top")) return;
+    if (!panel) return;
     S.lf.mine = S.likedOnly ? "liked" : "new"; S.lf.inspo = S.lf.mine;
     var FILTER_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>';
-    var top = document.createElement("div");
-    top.id = "pv-top";
-    top.innerHTML = '<div class="pv-bar"><span class="pv-bar-l" aria-hidden="true"></span>' +
-      '<div class="pv-seg" role="group" aria-label="Looks from">' +
-      '<button type="button" class="pv-segb" data-pv-f="mine" aria-pressed="true">Mine</button>' +
-      '<button type="button" class="pv-segb" data-pv-f="withmine" aria-pressed="false">Mix</button>' +
-      '<button type="button" class="pv-segb" data-pv-f="allnew" aria-pressed="false">New</button></div>' +
-      '<button type="button" class="pv-filter" id="pv-filter" aria-haspopup="dialog" aria-label="Filters">' + FILTER_SVG + '<span class="pv-dot" hidden></span></button></div>' +
-      '<div class="pv-pills" id="pv-pills" hidden></div>' +
-      '<div class="pv-ptr" id="pv-ptr" aria-hidden="true"><span></span></div>';
-    panel.insertBefore(top, panel.firstChild);
-    var fab = document.createElement("button");
-    fab.type = "button"; fab.id = "pv-fab"; fab.className = "pv-fab"; fab.setAttribute("aria-label", "Build a look");
-    fab.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
-    panel.appendChild(fab);
+    var top = document.getElementById("pv-top");
+    if (!top) {
+      top = document.createElement("div");
+      top.id = "pv-top";
+      top.innerHTML = '<div class="pv-bar"><span class="pv-bar-l" aria-hidden="true"></span>' +
+        '<div class="pv-seg" role="group" aria-label="Looks from">' +
+        '<button type="button" class="pv-segb" data-pv-f="mine" aria-pressed="true">Mine</button>' +
+        '<button type="button" class="pv-segb" data-pv-f="withmine" aria-pressed="false">Mix</button>' +
+        '<button type="button" class="pv-segb" data-pv-f="allnew" aria-pressed="false">New</button></div>' +
+        '<button type="button" class="pv-filter" id="pv-filter" aria-haspopup="dialog" aria-label="Filters">' + FILTER_SVG + '<span class="pv-dot" hidden></span></button></div>' +
+        '<div class="pv-pills" id="pv-pills" hidden></div>' +
+        '<div class="pv-ptr" id="pv-ptr" aria-hidden="true"><span></span></div>';
+      panel.insertBefore(top, panel.firstChild);
+    }
+    var fab = document.getElementById("pv-fab");
+    if (!fab) {
+      fab = document.createElement("button");
+      fab.type = "button"; fab.id = "pv-fab"; fab.className = "pv-fab"; fab.setAttribute("aria-label", "Build a look");
+      fab.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+      panel.appendChild(fab);
+    }
     function short(n) { var p = String(n || "").split(" "); return p.length > 1 ? p[p.length - 1] : p[0]; }
     function thumb(ic) { var l = (ic.looks || [])[0]; return (ic.photo || ic.img || (l && l.img)) || ""; }
     function curFeed() { return window.outfitsMode === "inspo" ? (window.inspoView === "allnew" ? "allnew" : "withmine") : "mine"; }
@@ -46302,6 +46437,7 @@ window.inspoView = "withmine";
       if (f === "mine") { window.outfitsMode = "mine"; if (typeof syncOutfitsToggle === "function") syncOutfitsToggle(); active = null; }
       else { window.outfitsMode = "inspo"; if (typeof syncOutfitsToggle === "function") syncOutfitsToggle(); if (typeof showInspoView === "function") showInspoView(f); }
       syncTop();
+      if (typeof persistTab === "function") persistTab();
     }
     function setLiked(on) {
       S.likedOnly = !!on; S.lf.mine = on ? "liked" : "new"; S.lf.inspo = S.lf.mine; save(true);
@@ -46311,6 +46447,11 @@ window.inspoView = "withmine";
       syncTop();
     }
     if (window.outfitsMode === "inspo" && window.inspoView !== "withmine" && window.inspoView !== "allnew") go("withmine");
+    else {
+      var bootFeed = (window.__bootRoute865 && window.__bootRoute865.looks && window.__bootRoute865.looks.feed) || (window.outfitsMode === "inspo" ? (window.inspoView || "withmine") : "mine");
+      if (bootFeed === "withmine" || bootFeed === "allnew") go(bootFeed);
+      else syncTop();
+    }
     top.addEventListener("click", function (e) {
       var b = e.target.closest("[data-pv-f]"); if (b) return go(b.getAttribute("data-pv-f"));
       if (e.target.closest("#pv-filter")) return openPrice();
