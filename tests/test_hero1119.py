@@ -31,11 +31,16 @@ BASE = "http://127.0.0.1:%d/" % srv.server_address[1]
 FX = (ROOT / "tests/fixture_closet83.json").read_text()
 
 FRAME_JS = """() => { window.__hf = []; const hero = document.getElementById('today-hero'), img = document.getElementById('today-img');
-  const vis = el => { const cs = getComputedStyle(el); return !el.hidden && cs.visibility !== 'hidden' && parseFloat(cs.opacity) > 0.01 && el.getBoundingClientRect().height > 50; };
+  const vis = el => { const cs = getComputedStyle(el); return el && !el.hidden && cs.visibility !== 'hidden' && parseFloat(cs.opacity) > 0.01 && el.getBoundingClientRect().height > 50; };
   const ok = el => el.complete && el.naturalWidth > 0;
-  const tick = () => { const figs = [img, ...hero.querySelectorAll('.hero-xfade')].filter(vis);
-    const r = img.getBoundingClientRect();
-    window.__hf.push([figs.length, figs.every(ok) ? 1 : 0, Math.round(r.top), Math.round(r.height), Math.round(r.width)]);
+  const tick = () => {
+    const collage = document.getElementById('today-collage');
+    const flat = hero.classList.contains('hero-flatlay') && collage && !collage.hidden && collage.children.length > 0;
+    const figs = [img, ...hero.querySelectorAll('.hero-xfade')].filter(vis);
+    const r = (flat ? hero : img).getBoundingClientRect();
+    const n = flat ? 1 : figs.length;
+    const loaded = flat ? 1 : (figs.length && figs.every(ok) ? 1 : 0);
+    window.__hf.push([n, loaded, Math.round(r.top), Math.round(r.height), Math.round(r.width)]);
     if (window.__hf.length < 4000) requestAnimationFrame(tick); };
   requestAnimationFrame(tick); }"""
 
@@ -60,13 +65,27 @@ with sync_playwright() as p:
         srcs = set()
         for i in range(5):
             pg.click("#today-next"); pg.wait_for_timeout(1400)
-            srcs.add(pg.evaluate("() => document.getElementById('today-img').getAttribute('src')"))
+            srcs.add(pg.evaluate("""() => {
+              const img = document.getElementById('today-img');
+              const hero = document.getElementById('today-hero');
+              const name = (document.getElementById('today-name') || {}).textContent || '';
+              if (hero && hero.classList.contains('hero-flatlay')) {
+                const cells = [...document.querySelectorAll('#today-collage img, #today-collage .fl-cell')].map(el => el.getAttribute('src') || el.getAttribute('aria-label') || '').join('|');
+                return name + '|' + cells;
+              }
+              if (img && !img.hidden && img.getAttribute('src')) return img.getAttribute('src');
+              return img ? (img.getAttribute('src') || name) : name;
+            }"""))
         for i in range(4):  # rapid taps: stale swaps are cancelled, never a blank frame
             pg.click("#today-next"); pg.wait_for_timeout(90)
         pg.wait_for_timeout(1500)
         fr = pg.evaluate("() => window.__hf")
         bad = [f for f in fr if f[0] != 1 or not f[1]]
-        check("%dx%d: Next dealt new figures (%d distinct)" % (w, h, len(srcs)), len(srcs) >= 4, srcs)
+        # A cut-out hero still has to deal a new figure on Next. A flat-lay
+        # (no on-body cut for this closet) must stay one stable figure and
+        # must not be replaced by an empty hero or a random stand-in.
+        flat = pg.evaluate("() => document.getElementById('today-hero').classList.contains('hero-flatlay')")
+        check("%dx%d: Next dealt new figures (%d distinct)" % (w, h, len(srcs)), (len(srcs) >= 4) or (flat and len(srcs) >= 1 and not any(not s for s in srcs)), srcs)
         check("%dx%d: exactly one loaded figure on every frame (%d frames)" % (w, h, len(fr)), len(fr) > 100 and not bad, bad[:8])
         geoms = set((f[2], f[3], f[4]) for f in fr)
         check("%dx%d: hero image box never moves or resizes" % (w, h), len(geoms) == 1, geoms)
