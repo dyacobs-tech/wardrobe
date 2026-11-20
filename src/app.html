@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.3" />
+    <meta name="wardrobe-build" content="2026-11-20.86.4" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8171,7 +8171,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.3</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.4</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10364,23 +10364,14 @@ function photoIsReady84(ph) {
   return false;
 }
 function lookHeroVisible84(look) {
+  /* .86.4: Home is an avatar of him, never a flat-lay of piece photos.
+     A look is showable only when we have an on-body render (and its
+     cut-out, once cutoutFor is in). */
   if (!look) return false;
   var ob = typeof onbodyForLook === "function" ? onbodyForLook(look) : null;
-  if (ob) {
-    try { if (typeof window.cutoutFor === "function") return !!window.cutoutFor(ob); } catch (e) {}
-    return true;
-  }
-  var pcs = look.fwPieces || look.pieces || [];
-  var top = false, bottom = false;
-  pcs.forEach(function (p) {
-    if (!p) return;
-    var ph = (typeof itemPhoto === "function" ? itemPhoto(p) : null) || p.photo || "";
-    if (!photoIsReady84(ph)) return;
-    var cat = String(p.category || "");
-    if (/Tees|Polos|Shirts|Sweaters/.test(cat)) top = true;
-    if (/Jeans|Trousers|Shorts|Bathing/.test(cat)) bottom = true;
-  });
-  return top && bottom;
+  if (!ob) return false;
+  try { if (typeof window.cutoutFor === "function") return !!window.cutoutFor(ob); } catch (e) {}
+  return true;
 }
 window.photoIsReady84 = photoIsReady84;
 window.lookHeroVisible84 = lookHeroVisible84;
@@ -10436,32 +10427,26 @@ function dressEmptyLook841() {
 }
 window.dressLevel841 = dressLevel841;
 window.lookFitsDress841 = lookFitsDress841;
-function homeComposerLooks75(count) {
+function homeComposerLooksAtLevel864(count, level) {
   if (typeof composerLooks !== "function") return [];
   var want = count || 8;
   var temp = (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78;
   var pools = homeOwnedPhotoPieces742();
   var pool = pools.own.length >= 3 ? pools.own : pools.withPhoto;
+  if (pool.length < 3) return [];
+  var fit864 = function (l) { return homeLookOk742(l) && lookFitsDress841(l, level) && lookHeroVisible84(l); };
+  var r = composerLooks({ count: Math.max(want, 16), temp: temp, only: pool, renderedFirst: true, strictKeys: true, level: level, filter: fit864 }) || [];
+  return r.filter(fit864);
+}
+function homeComposerLooks75(count) {
+  var want = count || 8;
+  var temp = (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78;
   var level853 = dressLevel841();
-  var fit861 = function (l) { return homeLookOk742(l) && lookFitsDress841(l, level853); };
-  var r = pool.length >= 3 ? (composerLooks({ count: Math.max(want, 16), temp: temp, only: pool, renderedFirst: true, level: level853, filter: fit861 }) || []) : [];
-  r = r.filter(function (l) { return homeLookOk742(l) && lookFitsDress841(l, level853); });
-  var vis = r.filter(lookHeroVisible84);
-  /* When warm unlayered looks have no loadable piece photos and no
-     on-body cut, backfill from the scored render pool so Home never
-     lands on a grey silhouette or empty flat-lay. */
-  if (vis.length < want && pool.length >= 3) {
-    var more = composerLooks({ count: want, temp: temp, only: pool, renderedFirst: true, strictKeys: true, level: level853, filter: fit861 }) || [];
-    var seen = {};
-    vis.forEach(function (l) { seen[l.composerKey || l.id || l.title] = 1; });
-    more.filter(function (l) { return homeLookOk742(l) && lookFitsDress841(l, level853); }).forEach(function (l) {
-      var k = l.composerKey || l.id || l.title;
-      if (!seen[k]) { vis.push(l); seen[k] = 1; }
-    });
-  }
+  var vis = homeComposerLooksAtLevel864(Math.max(want, 16), level853);
   /* In the heat, a visible hero that is clearly short-sleeve (a tee,
      an explicit short-sleeve name, or a seed polo) leads a long-sleeve
-     knit whose name never said so. */
+     knit whose name never said so. Trousers/jeans + tees/shirts/blazers
+     stay ahead of shorts, which stay occasional. */
   function warmTopRank84(look) {
     var top = null;
     (look.fwPieces || []).forEach(function (p) { if (p && /Tees|Polos|Shirts/.test(String(p.category || ""))) top = p; });
@@ -10476,15 +10461,34 @@ function homeComposerLooks75(count) {
     return 1;
   }
   function warmHeroRank84(look) {
+    var shorts = (look.fwPieces || []).some(function (p) { return p && /Shorts|Bathing/.test(String(p.category || "")); });
     var layered = (look.fwPieces || []).some(function (p) {
       var c = String(p && p.category || "");
       return /Blazers|Jackets|Sweaters|Coats|Vests/.test(c) || /overshirt/i.test(String(p && p.name || ""));
     });
-    return (layered ? 0 : 10) + warmTopRank84(look);
+    /* shorts are occasional in warm Palm Beach — below unlayered trousers looks */
+    return (shorts ? 0 : 8) + (layered ? 0 : 10) + warmTopRank84(look);
   }
-  var list = vis.length ? vis : r;
-  if (temp >= 72) list = list.slice().sort(function (a, b) { return warmHeroRank84(b) - warmHeroRank84(a); });
-  return list.slice(0, want);
+  if (temp >= 72) vis = vis.slice().sort(function (a, b) { return warmHeroRank84(b) - warmHeroRank84(a); });
+  /* .86.4: if this dress level has no on-body render, take the closest
+     rendered level rather than a piece-photo grid. Exact level stays first. */
+  if (vis.length < want) {
+    var seen = {};
+    vis.forEach(function (l) { seen[l.composerKey || l.id || l.title] = 1; });
+    for (var d = 1; d <= 6 && vis.length < want; d++) {
+      var nearby = [];
+      if (level853 - d >= 1) nearby.push(level853 - d);
+      if (level853 + d <= 7) nearby.push(level853 + d);
+      nearby.forEach(function (lv) {
+        if (vis.length >= want) return;
+        (homeComposerLooksAtLevel864(want, lv) || []).forEach(function (l) {
+          var k = l.composerKey || l.id || l.title;
+          if (!seen[k]) { vis.push(l); seen[k] = 1; }
+        });
+      });
+    }
+  }
+  return vis.slice(0, want);
 }
 function homeLookOk742(look) {
   if (!look || !look.fwPieces || !look.fwPieces.length) return true;
@@ -10600,7 +10604,7 @@ function composerOutfitToLook(o, i, renderPairs) {
   var names = pieces.map(function (p) { return p.name; });
   var bit = 0;
   for (var L = 7; L >= 1; L--) if (o.mask & (1 << L)) { bit = L; break; }
-  return {
+  var look864 = {
     id: (typeof newLookId === "function") ? newLookId() : ("look-" + Date.now() + "-" + i),
     title: title,
     meta: "From your closet",
@@ -10623,6 +10627,8 @@ function composerOutfitToLook(o, i, renderPairs) {
     tucked: (o.tucked === undefined ? o.tuck : o.tucked),
     tuckPrompt: o.tuckPrompt || ""
   };
+  if (typeof onbodyForLook === "function") look864.fwRender = onbodyForLook(look864) || null;
+  return look864;
 }
 /* Deal composed looks. opts: count, level (null = any outfit type;
    undefined = the app-wide outfit type), temp. */
@@ -10940,7 +10946,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.3";
+var WARDROBE_BUILD = "2026-11-20.86.4";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -29450,6 +29456,9 @@ function openingLook() {
   /* Build .74.2: a look saved earlier today with built-in or
      photo-less pieces is not restored — a fresh deal replaces it. */
   if (sess && sess.fwPieces && sess.fwPieces.length && !homeLookOk742(sess)) sess = null;
+  /* .86.4: a session look with no on-body render is not restored — Home
+     never reopens on a piece-photo grid. */
+  if (sess && typeof lookHeroVisible84 === "function" && !lookHeroVisible84(sess)) sess = null;
   /* In-session refresh: restore this session's opening look. When
      the navigation type cannot be read at all, a session look on
      record is treated the same way — staying put is the safe
@@ -29468,6 +29477,7 @@ function openingLook() {
      undone by the plan. An unresolvable plan (its look deleted)
      falls through to the normal deal, silently. */
   var plannedToday = planLookForDate(localTodayISO());
+  if (plannedToday && typeof lookHeroVisible84 === "function" && !lookHeroVisible84(plannedToday)) plannedToday = null;
   if (plannedToday) {
     todaySeedId = plannedToday.id;
     return plannedToday;
@@ -29485,7 +29495,7 @@ function openingLook() {
   var savedSrc = studioSource;
   if (savedSrc === "wardrobe") {
     var dur = store.get("todayOpeningCloset", null);
-    if (dur && dur.date === localTodayISO() && dur.look && dur.look.source === "wardrobe" && dur.look.fwPieces && dur.look.fwPieces.length && dur.look.swatches && dur.look.swatches.length && homeLookOk742(dur.look) && lookFitsFormality(dur.look)) {
+    if (dur && dur.date === localTodayISO() && dur.look && dur.look.source === "wardrobe" && dur.look.fwPieces && dur.look.fwPieces.length && dur.look.swatches && dur.look.swatches.length && homeLookOk742(dur.look) && lookFitsFormality(dur.look) && (typeof lookHeroVisible84 !== "function" || lookHeroVisible84(dur.look))) {
       todaySeedId = dur.look.id;
       return JSON.parse(JSON.stringify(dur.look));
     }
@@ -29504,12 +29514,14 @@ function openingLook() {
   if (clw && clw.length) {
     var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned(l); });
     var clwDeal = clwFresh.length ? clwFresh : clw;
-    var clwVis = (typeof lookHeroVisible84 === "function") ? clwDeal.filter(lookHeroVisible84) : [];
-    var openPick = clwVis[0] || clwDeal[0];
-    openPick.source = "wardrobe";
-    todaySeedId = openPick.id;
-    persistOpeningLook(openPick);
-    return openPick;
+    var clwVis = (typeof lookHeroVisible84 === "function") ? clwDeal.filter(lookHeroVisible84) : clwDeal;
+    var openPick = clwVis[0];
+    if (openPick) {
+      openPick.source = "wardrobe";
+      todaySeedId = openPick.id;
+      persistOpeningLook(openPick);
+      return openPick;
+    }
   }
   return null;
 }
@@ -30394,12 +30406,17 @@ function dealHeroForSource() {
       ? buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() + window._heroDealN })
       : buildClosetLooks()) || [];
   }
-  /* .85.3: only looks that fit the chosen dress level */
-  cl = (cl || []).filter(function (l) { return lookIsMine(l) && lookFitsDress841(l, dressLevel841()) && !(window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function" && !window.WardrobeRules.lookAllowed(l, { level: dressLevel841(), dow: (new Date()).getDay(), temp: (typeof currentWeather !== "undefined" && currentWeather) ? currentWeather.temp : undefined })); });
+  /* .86.4: only looks he can be seen in (on-body cut-out). The composer
+     already prefers the chosen dress level and widens to the closest
+     rendered level when that level has none — do not strip those back out. */
+  cl = (cl || []).filter(function (l) { return lookIsMine(l) && (typeof lookHeroVisible84 !== "function" || lookHeroVisible84(l)) && !(window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function" && !window.WardrobeRules.lookAllowed(l, { level: dressLevel841(), dow: (new Date()).getDay(), temp: (typeof currentWeather !== "undefined" && currentWeather) ? currentWeather.temp : undefined })); });
   var d861 = null;
   if (!cl.length) {
     try { d861 = dressDiag861(dressLevel841()); } catch (eD) { d861 = null; }
-    if (d861 && d861.looks && d861.looks.length) cl = d861.looks;
+    if (d861 && d861.looks && d861.looks.length) {
+      var dVis = d861.looks.filter(function (l) { return typeof lookHeroVisible84 !== "function" || lookHeroVisible84(l); });
+      if (dVis.length) cl = dVis;
+    }
   }
   if (!cl.length) {
     if (todayLook && !todayLook.dressEmpty && lookFitsDress841(todayLook, dressLevel841())) { renderToday(); return; }
@@ -30419,9 +30436,18 @@ function dealHeroForSource() {
       var curTitle = todayLook && todayLook.title;
       var pickW = null;
       var visList = (typeof lookHeroVisible84 === "function") ? dealList.filter(lookHeroVisible84) : dealList;
-      var from = visList.length ? visList : dealList;
+      var from = visList;
+      if (!from.length) {
+        if (todayLook && !todayLook.dressEmpty && (typeof lookHeroVisible84 !== "function" || lookHeroVisible84(todayLook))) { renderToday(); return; }
+        todayLook = dressEmptyLook841();
+        if (d861) todayLook.diag861 = { fit: d861.fit, ruled: d861.ruled, rules: d861.rules, pieces: d861.pieces };
+        todaySeedId = todayLook.id;
+        persistOpeningLook(todayLook);
+        renderToday();
+        return;
+      }
       for (var wi = 0; wi < from.length; wi++) { if (from[wi].title !== curTitle) { pickW = from[wi]; break; } }
-      pickW = pickW || from[0] || dealList[0];
+      pickW = pickW || from[0];
       todaySeedId = pickW.id;
       todayLook = pickW;
       todayLook.source = "wardrobe";
@@ -40885,20 +40911,13 @@ function analyzeFilePiece(card, job, ix) {
     var _renderToday73 = renderToday;
     renderToday = function () {
       _renderToday73();
-      if (!todayLook || !todayLook.composer || todayLook.fwRender) {
-        var c0 = document.getElementById("today-collage");
-        if (c0) c0.classList.remove("flatlay-host");
-        return;
+      /* .86.4: Home never paints a closet flat-lay. soloHero shows a
+         cut-out of him, or re-deals a rendered look. */
+      var c0 = document.getElementById("today-collage");
+      if (c0 && !c0.querySelector(".hero-empty861-box")) {
+        c0.classList.remove("flatlay-host");
       }
-      var img = document.getElementById("today-img");
-      var collage = document.getElementById("today-collage");
-      if (img) img.hidden = true;
-      if (collage) {
-        collage.innerHTML = flatlayHTML(todayLook, true);
-        collage.classList.add("flatlay-host");
-        collage.hidden = false;
-      }
-      composerMarkSeen([todayLook]);
+      if (todayLook && todayLook.composer) composerMarkSeen([todayLook]);
     };
   }
   /* Hero Dislike on a closet look: the pairing is dropped from the
@@ -44040,71 +44059,25 @@ window.inspoView = "withmine";
     if (src && typeof window.cutoutFor === "function" && !window.cutoutFor(src)) src = null;
     /* .78.2c: a render he gave a thumbs-down never comes back */
     if (src && typeof isDislikedImg === "function" && isDislikedImg(src)) src = null;
-    function paintClosetFlatlay782(look) {
-      if (!look || !collage) return false;
-      if (typeof window.lookHeroVisible84 === "function") {
-        var ob = typeof onbodyForLook === "function" ? onbodyForLook(look) : null;
-        if (ob) return false; /* a cut-out path should have been used */
-        if (!window.lookHeroVisible84(look)) return false;
-      }
-      var html = "";
-      try { if (typeof window.composerFlatlayHTML === "function") html = window.composerFlatlayHTML(look, true) || ""; } catch (e) { html = ""; }
-      if (!html || html.indexOf("<img ") === -1) {
-        var pcs = piecesOf(look).filter(function (p) { var ph = photoOf(p); return ph && !/^data:image\/svg/.test(ph) && !(typeof isCameraSelfieImg === "function" && isCameraSelfieImg(ph)) && !SELFIE782.test(ph); });
-        if (!pcs.length) return false;
-        html = '<span class="flatlay fl-n' + pcs.length + '">' + pcs.map(function (p) {
-          return '<span class="fl-cell"><img src="' + esc(photoOf(p)) + '" alt="' + esc(p.name || "") + '" decoding="async" /></span>';
-        }).join("") + "</span>";
-      }
-      collage.innerHTML = html;
-      collage.classList.add("flatlay-host");
-      collage.hidden = false;
-      hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
-      hero.classList.add("hero-flatlay");
-      if (img) { img.hidden = true; img.removeAttribute("data-render"); }
-      return true;
-    }
     if (!src) {
-      /* .84: no on-body cut — show crisp closet piece photos rather than
-         the grey silhouette, and rather than skipping 30 times only to
-         settle on a blank hero. */
-      if (paintClosetFlatlay782(todayLook)) {
-        skip = 0; booted782 = true; userDeal782 = false;
+      /* .86.4: Home never shows a closet flat-lay or a lone piece photo.
+         Re-deal a look he can be seen in; if none exist, a stand-in
+         cut-out of him, or the empty dress-level card. */
+      if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
+      hero.classList.remove("hero-flatlay");
+      if (skip < 30 && typeof dealAnotherToday === "function") { skip++; setTimeout(dealAnotherToday, 0); return; }
+      skip = 0; booted782 = true; userDeal782 = false;
+      if (guestHero782(true)) return;
+      if (typeof dressEmptyLook841 === "function") {
+        todayLook = dressEmptyLook841();
+        todaySeedId = todayLook.id;
+        try { soloHero(); } catch (e864) {}
         return;
       }
-      if ((dressLevel841() <= 2 || todayLook.__back853) && todayLook.fwPieces && todayLook.fwPieces.length) {
-        var flHtml = "";
-        try { if (typeof window.composerFlatlayHTML === "function") flHtml = window.composerFlatlayHTML(todayLook, true) || ""; } catch (eFl) {}
-        if (flHtml && flHtml.indexOf("<img ") !== -1 && collage) {
-          collage.innerHTML = flHtml; collage.classList.add("flatlay-host"); collage.hidden = false;
-          hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest"); hero.classList.add("hero-flatlay");
-          if (img) { img.hidden = true; img.removeAttribute("data-render"); }
-          skip = 0; booted782 = true; userDeal782 = false;
-          return;
-        }
-      }
-      /* Home only deals looks he can be seen in: skip one with no render */
-      var lkey = todayLook.composerKey || todayLook.id || todayLook.img || "", acc = null, dayIso = typeof localTodayISO === "function" ? localTodayISO() : "";
-      try { acc = JSON.parse(localStorage.getItem("wardrobe.ootdNoRender782") || "null"); } catch (e) {}
-      var accepted = acc && acc.date === dayIso && acc.key === lkey && !userDeal782;
-      if (!accepted && !anyRenderable782()) accepted = true; /* none of his looks has a render yet: don't churn */
-      if (!accepted && skip < 30 && typeof dealAnotherToday === "function") { skip++; setTimeout(dealAnotherToday, 0); return; }
-      /* nothing he can be seen in today: settle on this look for the day (stable across opens) */
-      if (!accepted && !userDeal782) { try { localStorage.setItem("wardrobe.ootdNoRender782", JSON.stringify({ date: dayIso, key: lkey })); } catch (e) {} if (typeof persistOpeningLook === "function") try { persistOpeningLook(todayLook); } catch (e) {} }
-      skip = 0; booted782 = true; userDeal782 = false;
-      /* nothing rendered to show: one photo, never a tile grid */
-      if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
-      /* .78.9e: the hero only ever shows a transparent cut-out — when this
-         look has none, one of his cut-outs stands in (never the plain
-         studio render, never a piece photo) */
-      if (guestHero782(true)) return;
-      var fb = (typeof lookImg === "function" && lookImg(todayLook)) || "";
-      if (SELFIE782.test(fb) || (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(fb))) fb = "";
-      if (!fb || /^data:image\/svg/.test(fb)) { var pp = piecesOf(todayLook).map(photoOf).filter(Boolean); fb = pp[0] || fb; }
-      if (fb && img.getAttribute("src") !== fb) img.setAttribute("src", fb);
-      img.removeAttribute("data-render"); hero.classList.remove("has-cut");
+      if (img) { img.hidden = true; img.removeAttribute("data-render"); }
       hero.classList.add("hero-solo");
-      img.hidden = false; placeHero(); return;
+      placeHero();
+      return;
     }
     /* .78.2c: the day's opening look is the first one he can be seen in —
        keep THAT as the outfit of the day so every app open shows it */
