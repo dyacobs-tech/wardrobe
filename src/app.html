@@ -44167,8 +44167,11 @@ window.inspoView = "withmine";
         openBgWhenWarm();
       }, { timeout: 600 });
     }
-    /* never compete with the hero itself */
-    if (him && !(him.complete && him.naturalWidth)) { var once = false, go = function () { if (once) return; once = true; run(); }; him.addEventListener("load", go, { once: true }); setTimeout(go, 6000); }
+    /* Wait only while a cut-out is actually loading. A flat-lay hides
+       #today-img, so waiting on its load event never fires and the
+       cut-out warm-up misses the first few seconds. */
+    var cutLoading = him && !him.hidden && him.getAttribute("src") && !(him.complete && him.naturalWidth);
+    if (cutLoading) { var once = false, go = function () { if (once) return; once = true; run(); }; him.addEventListener("load", go, { once: true }); him.addEventListener("error", go, { once: true }); setTimeout(go, 6000); }
     else run();
   }
   window.heroPrefetch784 = prefetch;
