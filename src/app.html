@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.1" />
+    <meta name="wardrobe-build" content="2026-11-20.86.2" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -5611,6 +5611,10 @@ window.notMenswear853 = function (e) {
       .hero-empty861-box .he861-acts button { min-height: 44px; padding: 0 18px; }
       html[data-theme="dark"] body #panel-today #today-hero.today-hero.hero-empty861, html[data-theme="dark"] body #panel-today #today-hero.hero-empty861 .hero-bg { background: var(--bg, #1c1916) !important; }
       html[data-theme="dark"] .hero-empty861-box { background: #2A2521; color: #F2ECE2; border-color: rgba(242, 236, 226, .14); box-shadow: none; }
+      /* .86.2: Shop the look covering the Edit — no Shop pill reads as pressed */
+      #panel-find[data-stl="1"] .edit-shop-tabs [data-edit-view][aria-pressed="true"] { background: transparent !important; color: inherit !important; border-color: var(--line, rgba(31,26,21,.18)) !important; }
+      .shop-look-head .stl-owned861 { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 2px; }
+      .shop-look-head .shop-look-fl861 { background: #F5F1E8; border-radius: 14px; overflow: hidden; }
       html body #panel-today #today-type-row.cdd-menu.dd-down861:not([hidden]) { top: calc(100% + 8px) !important; bottom: auto !important; max-height: var(--dd861-max, 60vh) !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
       html[data-theme="dark"] body #panel-today #today-type-row.cdd-menu:not([hidden]) { background: #2A2521 !important; color: #F2ECE2 !important; border-color: rgba(242, 236, 226, .14) !important; box-shadow: 0 10px 30px rgba(0, 0, 0, .5) !important; }
       html body #panel-today #today-type-row.cdd-menu:not([hidden])::before { display: none !important; }
@@ -8111,13 +8115,22 @@ window.notMenswear853 = function (e) {
             <p class="form-note" id="sync-regcode-note"></p>
           </div>
           <div>
-            <label class="field" for="sync-link-key">Use a key from another device</label>
+            <label class="field" for="sync-relink-code">Relink code — if this phone lost its key</label>
             <div class="loc-search-row">
-              <input type="text" id="sync-link-key" placeholder="Paste sync key" autocomplete="off" />
-              <button type="button" class="btn-ink" id="sync-link-btn">Link</button>
+              <input type="text" id="sync-relink-code" placeholder="XXXXX-XXXXX" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="11" />
+              <button type="button" class="btn-ink" id="sync-relink-btn">Restore</button>
+            </div>
+            <p class="form-note" id="sync-relink-note">Restores your closet, looks and worn log from the cloud. Nothing on this phone is uploaded until the restore finishes.</p>
+          </div>
+          <form id="sync-link-form" autocomplete="on" action="#" onsubmit="return false">
+            <label class="field" for="sync-link-key">Use a key from another device</label>
+            <input type="text" name="username" autocomplete="username" value="Donna sync key" readonly tabindex="-1" aria-hidden="true" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" />
+            <div class="loc-search-row">
+              <input type="password" name="password" id="sync-link-key" placeholder="Paste sync key" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
+              <button type="submit" class="btn-ink" id="sync-link-btn">Link</button>
             </div>
             <p class="form-note" id="sync-link-note"></p>
-          </div>
+          </form>
         </div>
         <div class="card data-card" id="data-card">
           <div class="card-head-info"><h3>Backup</h3></div>
@@ -8130,7 +8143,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.1</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.2</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10899,7 +10912,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.1";
+var WARDROBE_BUILD = "2026-11-20.86.2";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -30498,7 +30511,11 @@ function renderProfileHead() {
   if (nameEl) nameEl.textContent = profile.name || "";
   if (cityEl) cityEl.textContent = (typeof homeLoc !== "undefined" && homeLoc && homeLoc.name) || "";
   if (imgEl) {
-    if (profile.photo) { imgEl.src = profile.photo; imgEl.hidden = false; }
+    /* .86.2: an unresolved phone-vault reference ("idb:…" — the photo
+       never left the old phone) or a failed load hides the circle
+       instead of drawing a broken image. */
+    var _pp = profile.photo;
+    if (_pp && !/^(idb|blob):/.test(String(_pp))) { imgEl.onerror = function () { imgEl.hidden = true; }; imgEl.src = _pp; imgEl.hidden = false; }
     else { imgEl.removeAttribute("src"); imgEl.hidden = true; }
   }
 }
@@ -33113,6 +33130,7 @@ function shopPiecesForLook(look) {
 function openFindLookMode(look) {
   if (!look) return;
   if (!shopPiecesForLook(look).length) { toast("No pieces to find in this one."); return; }
+  if (lookAllOwned862(look)) { routeOwnedLook862(look); return; }
   findLookMode = look;
   /* The carried look persists on this device, so a refresh
      restores exactly what was on screen — image included. */
@@ -33142,6 +33160,16 @@ window.clearFindLookMode = clearFindLookMode;
 function syncShopLookToToday() {
   if (typeof todayLook === "undefined" || !todayLook) return;
   if (!shopPiecesForLook(todayLook).length) return;
+  /* .86.2: an all-owned look on Home is never carried into Shop, and
+     an earlier carried look is let go rather than left standing stale,
+     so The Edit opens on its own tabs (Saved, with its real count). */
+  if (lookAllOwned862(todayLook)) {
+    if (findLookMode) {
+      findLookMode = null; store.set("findLook", null); renderFindLookMode();
+      if (typeof window.editShow === "function") { try { window.editShow("saved"); } catch (eSh) {} }
+    }
+    return;
+  }
   if (findLookMode && findLookMode.id === todayLook.id && findLookMode.title === todayLook.title && lookImg(findLookMode) === lookImg(todayLook)) return;
   findLookMode = JSON.parse(JSON.stringify(todayLook));
   store.set("findLook", findLookMode);
@@ -34006,6 +34034,12 @@ function stlOwnedCats853(look) {
     var it = (typeof closetItemById === "function") ? closetItemById(p.id) : null;
     if (it || ownIds[p.id]) { var c = (it && it.category) || p.category || ""; out.cats[c] = 1; out.groups[stlGroup853(c)] = 1; out.items.push(it || p); }
   });
+  /* .86.2: pieces he tagged on an uploaded / selfie look are his too */
+  (look.taggedPieces || []).forEach(function (p) {
+    if (!p || !p.id) return;
+    var it = (typeof closetItemById === "function") ? closetItemById(p.id) : null;
+    if (it) { var c = it.category || p.category || ""; out.cats[c] = 1; out.groups[stlGroup853(c)] = 1; out.items.push(it); }
+  });
   var shopN = (look.shop && look.shop.length) || 0;
   if (look.source === "wardrobe" && !shopN && (!fw.length || out.items.length === fw.length)) out.all = true;
   return out;
@@ -34016,6 +34050,22 @@ function stlPieceOwned853(own, pc) {
   if (own.cats[c]) return true;
   var g = stlGroup853(c);
   return (g === "bottom" || g === "shoes") && !!own.groups[g];
+}
+/* .86.2: a look whose every piece is already in his closet has
+   nothing to buy — it belongs in Looks, never in Shop. */
+function lookAllOwned862(look) {
+  if (!look) return false;
+  var pcs = shopPiecesForLook(look);
+  if (!pcs.length) return false;
+  var own = stlOwnedCats853(look);
+  if (!own.items.length) return false;
+  return pcs.every(function (pc) { return stlPieceOwned853(own, pc); });
+}
+window.lookAllOwned862 = lookAllOwned862;
+function routeOwnedLook862(look) {
+  var saved = !!(look && typeof savedLooks !== "undefined" && savedLooks.some(function (l) { return l.id === look.id; }));
+  toast(saved ? "You own every piece of this look \u2014 it\u2019s in Looks." : "You own every piece of this look \u2014 nothing to shop.");
+  if (saved && typeof switchTab === "function") switchTab("looks");
 }
 function stlShoeOK853(e, look, shorts) {
   if (window.notMenswear853 && window.notMenswear853(e)) return false;
@@ -34044,6 +34094,14 @@ function renderFindLookMode() {
     if (nl) nl.hidden = false;
     return;
   }
+  /* .86.2: once his closet has loaded, a carried look he owns in full leaves Shop */
+  if (lookAllOwned862(findLookMode)) {
+    findLookMode = null;
+    try { store.set("findLook", null); } catch (eS2) {}
+    renderFindLookMode();
+    if (typeof window.editShow === "function") { try { window.editShow("saved"); } catch (eSh) {} }
+    return;
+  }
   box.hidden = false;
   var pf78 = document.getElementById("panel-find"); if (pf78) pf78.setAttribute("data-stl", "1");
   if (grid) grid.hidden = true;
@@ -34062,10 +34120,20 @@ function renderFindLookMode() {
   /* .85.3: him on-body when a render exists, never a flat product shot */
   var ob853 = "";
   try { if (!cut && typeof onbodyForLook === "function") ob853 = onbodyForLook(look) || ""; } catch (eOb) {}
-  var shown = cut || ob853 || img;
+  /* .86.2: never a raw selfie or phone photo as the look's picture —
+     the on-body render or its cut-out, else the pieces as a flat-lay */
+  var rawImg861 = !!img && (/^(data:image\/(jpe?g|png|heic|heif)|blob:|idb:)/i.test(img) || (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(img)) || /assets\/photos\/9a543e585d8b\./.test(img) || /^(uploaded|selfie|worn|photo|camera)$/i.test(look.source || "") || !!look.selfie);
+  /* .86.2: the same test guards every candidate — a cut-out or on-body
+     lookup that hands back the phone photo itself is not a render */
+  var isRaw862 = function (u) { return !!u && (/^(data:image\/(jpe?g|png|heic|heif)|blob:|idb:)/i.test(u) || (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(u)) || u === img && rawImg861); };
+  if (isRaw862(cut)) cut = "";
+  if (isRaw862(ob853)) ob853 = "";
+  var shown = cut || ob853 || (rawImg861 ? "" : img);
+  var fl861 = "";
+  if (!shown) { try { if (typeof window.composerFlatlayHTML === "function") fl861 = window.composerFlatlayHTML(look, true) || ""; } catch (eFl) { fl861 = ""; } if (fl861.indexOf("<img ") === -1) fl861 = ""; }
   var title = look.title || "Untitled";
   try { if (typeof displayTitleForLook === "function") title = displayTitleForLook(look, shown) || title; } catch (eTit) {}
-  var html = '<div class="shop-look-head' + (cut ? " has-cut" : "") + '">' + (shown ? '<img src="' + esc(shown) + '" alt="' + esc(look.imgAlt || title) + '" data-popout="' + esc(shown) + '" loading="lazy"' + (cut ? ' class="shop-look-cut"' : "") + " />" : "") +
+  var html = '<div class="shop-look-head' + (cut ? " has-cut" : "") + '">' + (shown ? '<img src="' + esc(shown) + '" alt="' + esc(look.imgAlt || title) + '" data-popout="' + esc(shown) + '" loading="lazy"' + (cut ? ' class="shop-look-cut"' : "") + " />" : (fl861 ? '<div class="shop-look-fl861">' + fl861 + "</div>" : "")) +
     '<div class="shop-look-titlerow"><h3>' + esc(title) + '</h3><button type="button" class="stl-clear" id="shop-clear-look">Clear look</button></div>' +
     '<p class="shop-honest">Prices checked ' + SHOP_CATALOGUE_CHECKED + ".</p>" +
     "</div>";
@@ -34192,6 +34260,8 @@ document.addEventListener("click", function (e) {
   var saved = null;
   try { saved = store.get("findLook", null); } catch (e) {}
   if (saved && shopPiecesForLook(saved).length) {
+    /* .86.2: a persisted all-owned look is let go at startup */
+    if (lookAllOwned862(saved)) { try { store.set("findLook", null); } catch (eS) {} return; }
     findLookMode = saved;
     lazyRender803("SHOP_CATALOGUE", "panel-find", renderFindLookMode);
   }
@@ -38588,6 +38658,33 @@ function syTrackChanges(onlyColl) {
 }
 var _syT = null, _syBusy = false, _syApplying = false, _syAgain = false;
 var _syForcePhotoPull741 = false;
+/* Build .86.2 — sync self-repair. A phone whose local store was wiped
+   (Home Screen icon re-added, storage cleared) or whose closet entry is
+   missing/corrupt, but which still holds a sync key, re-downloads from
+   the server DOWNLOAD-ONLY: nothing is uploaded (no seeds, no empty or
+   partial state, no deletes) until the device holds every server item.
+   Account b6ecfe241ff90b9d is download-only, always. */
+var SY_RO_ACCTS862 = ["b6ecfe241ff90b9d"];
+var _syRepair862 = false;
+function syRealItems862() {
+  try { return wardrobeItems.filter(function (i) { return i && i.id && String(i.id).indexOf("seed-") !== 0; }).length; } catch (e) { return 0; }
+}
+function syRepairReason862() {
+  if (!SY || !SY.key) return "";
+  if (SY.dl862 === SY.key) return "resume";
+  if (SY.linkRepair862 === SY.key) return "link";
+  try { if (store.poisoned("items")) return "corrupt"; } catch (e) {}
+  var raw = null;
+  try { raw = store.raw("items"); } catch (e) { raw = null; }
+  if ((raw === null || raw === undefined || raw === "") && SY.rep862 !== SY.key) return "missing";
+  if (SY.rep862 !== SY.key && syRealItems862() === 0) return "seeds";
+  return "";
+}
+function syDeviceLooksWiped862() {
+  var raw = null;
+  try { raw = store.raw("items"); } catch (e) { raw = null; }
+  return !raw || syRealItems862() === 0;
+}
 function schedSync() { clearTimeout(_syT); _syT = setTimeout(function () { syncNow(); }, 1500); }
 function syncStatusHTML() {
   return "<div><b>" + esc(SY.status) + "</b></div>" +
@@ -38821,6 +38918,8 @@ function syPutLocal(c, data) {
   else if (c === "items") {
     /* .86.1: a dress level shown empty is re-dealt once synced pieces land */
     try { if (typeof todayLook !== "undefined" && todayLook && todayLook.dressEmpty) { clearTimeout(window.__redeal861); window.__redeal861 = setTimeout(function () { try { if (todayLook && todayLook.dressEmpty && typeof dealHeroForSource === "function") dealHeroForSource(); } catch (e) {} }, 600); } } catch (e861) {}
+    /* .86.2: a carried Shop look he now owns in full (his pieces just landed) leaves Shop */
+    try { if (typeof findLookMode !== "undefined" && findLookMode) { clearTimeout(window.__stl862); window.__stl862 = setTimeout(function () { try { if (findLookMode && lookAllOwned862(findLookMode)) renderFindLookMode(); } catch (e) {} }, 700); } } catch (e862) {}
     var seeds = wardrobeItems.filter(function (i) { return i.id.indexOf("seed-") === 0; });
     var users = put(wardrobeItems.filter(function (i) { return i.id.indexOf("seed-") !== 0; }));
     wardrobeItems = applyEntryState(seeds.concat(users));
@@ -39089,7 +39188,7 @@ function syApplyDownload56(j) {
                forever and then push the old ones back up. Other
                collections keep last-writer-wins. Session deletes
                were already honoured above. */
-            if (!(_syForcePhotoPull741 && (x.coll === "items" || x.coll === "watches"))) return;
+            if (!(_syRepair862 || (_syForcePhotoPull741 && (x.coll === "items" || x.coll === "watches")))) return;
           }
           if (typeof x.data !== "object" || Array.isArray(x.data)) { syQuarantine(x, "record data is not an object"); return; }
           var _xrid = null;
@@ -39162,7 +39261,18 @@ function syncNow(isRetry, force) {
         try { regCode = store.get("regCode", "") || ""; } catch (e) {}
         if (!String(regCode).trim()) {
           _syRegNeed = true;
-          setSyncStatus("Sync needs the registration code — enter it under Cloud sync in Profile, then tap Sync now. Nothing on this device was changed.");
+          setSyncStatus(syDeviceLooksWiped862()
+            ? "This phone isn't linked to your closet — enter a relink code under Cloud sync to restore it. Nothing on this device was changed."
+            : "Sync needs the registration code — enter it under Cloud sync in Profile, then tap Sync now. Nothing on this device was changed.");
+          return;
+        }
+        /* .86.2: a phone that holds no closet of its own never creates
+           a new account by itself — that was how a wiped phone could
+           end up on an empty account instead of relinking. Only the
+           explicit two-tap "Start a new sync account" may do it. */
+        if (syDeviceLooksWiped862() && !SY.newOk862) {
+          _syRegNeed = true;
+          setSyncStatus("This phone isn't linked to your closet — enter a relink code under Cloud sync to restore it. No new account was created.");
           return;
         }
         setSyncStatus("Creating sync account…");
@@ -39190,7 +39300,7 @@ function syncNow(isRetry, force) {
            linked key is the only correct outcome. The link's own
            forced syncNow already queued a re-run via _syAgain. */
         if (!SY.key) {
-          SY.key = j0.key; SY.acct = j0.acct; SY.last = 0; SY.rej = 0;
+          SY.key = j0.key; SY.acct = j0.acct; SY.last = 0; SY.rej = 0; SY.newOk862 = 0; SY.rep862 = j0.key;
           /* First upload: everything local is dirty, stamped by
              the track (or now) — uploads happen in this same pass,
              before any download is applied. */
@@ -39202,6 +39312,22 @@ function syncNow(isRetry, force) {
           saveSY();
         }
       }
+      var _rep862 = syRepairReason862();
+      var dl862 = !!_rep862 || (SY.acct && SY_RO_ACCTS862.indexOf(SY.acct) !== -1);
+      var _srvItems862 = {};
+      if (_rep862 && SY.dl862 !== SY.key) {
+        if (_rep862 === "corrupt") {
+          /* The unreadable text is already kept in the corrupt-copy
+             store; drop the fallback so the server copy can land. */
+          try { store.clearPoison("items"); store.putRaw("items", null); } catch (e) {}
+        }
+        SY.linkRepair862 = "";
+        SY.dl862 = SY.key; SY.last = 0; SY.mf = {}; SY.st.m = 0; SY.dirty.m = 0; SY.snap.m = "";
+        SY_COLLS.forEach(function (c) { SY.snap[c] = {}; SY.st[c] = {}; SY.tomb[c] = {}; SY.dirty[c] = {}; });
+        saveSY();
+      } else if (_rep862 === "resume") {
+        SY.last = 0;
+      }
       syTrackChanges();
       /* Build .57 (B7): one-time migration, once per account per
          device (keyed on SY.key, so linked accounts run it too).
@@ -39212,7 +39338,7 @@ function syncNow(isRetry, force) {
          is force-migrated — their photos blob-ify on their next
          ordinary push. */
       try {
-        if (SY.key && SY.mig57 !== SY.key) {
+        if (SY.key && SY.mig57 !== SY.key && !dl862) {
           SY.mig57 = SY.key;
           try {
             syCollGet("items").forEach(function (r) {
@@ -39252,10 +39378,12 @@ function syncNow(isRetry, force) {
       var needRestore59 = !!(SY.key && SY.restore59 !== SY.key && (SY.lastOk || syHasUnsentTombs()));
       var needPhotoPull741 = !!(SY.key && SY.photoPull742 !== SY.key && (SY.lastOk || SY.last || needRestore59));
       var restoreFailed59 = false;
-      if (SY.lastOk || needRestore59 || needPhotoPull741) {
+      if (_rep862) { needRestore59 = false; needPhotoPull741 = false; setSyncStatus("Restoring your closet from the cloud…"); }
+      if (SY.lastOk || needRestore59 || needPhotoPull741 || dl862) {
         var _pg56 = 0;
-        var _dlSince = (needRestore59 || needPhotoPull741) ? 0 : SY.last;
-        _syForcePhotoPull741 = !!needPhotoPull741;
+        var _dlSince = (needRestore59 || needPhotoPull741 || _rep862) ? 0 : SY.last;
+        _syForcePhotoPull741 = !!(needPhotoPull741 || _rep862);
+        _syRepair862 = !!_rep862;
         var _vaultFails742 = (window.photoVault && window.photoVault.fails) || 0;
         while (_pg56 < 80) {
           _pg56++;
@@ -39278,6 +39406,10 @@ function syncNow(isRetry, force) {
           if (!_pj56 || typeof _pj56.now !== "number") { restoreFailed59 = true; break; }
           var _prev56 = _dlSince;
           var _pa56 = syApplyDownload56(_pj56);
+          if (_rep862) (Array.isArray(_pj56.recs) ? _pj56.recs : []).forEach(function (r) {
+            if (!r || r.coll !== "items") return;
+            if (r.deleted) delete _srvItems862[r.id]; else _srvItems862[r.id] = 1;
+          });
           down56 += _pa56.down; if (_pa56.changedAny) changedAny56 = true; if (_pa56.changedLooks) changedLooks56 = true;
           /* Build .74.1: persist closet/watch records BEFORE the
              position marker is saved. A previous pass could apply
@@ -39326,6 +39458,58 @@ function syncNow(isRetry, force) {
           }
           try { syRefresh(); } catch (e) {}
         }
+      }
+      _syRepair862 = false;
+      if (dl862) {
+        _syForcePhotoPull741 = false;
+        if (restoreFailed59) {
+          _syFailed = true;
+          clearTimeout(_syRetryT);
+          _syRetryT = setTimeout(function () { if (document.visibilityState === "visible" && !SY.rej) syncNow(false, true); }, 30000);
+          setSyncStatus("Restoring your closet — the download didn't finish; trying again shortly. Nothing was uploaded.");
+          return;
+        }
+        if (_rep862) {
+          var _need862 = Object.keys(_srvItems862), _have862 = 0, _ids862 = {};
+          syCollGet("items").forEach(function (r) { var id = syRecId("items", r); if (id) _ids862[id] = 1; });
+          _need862.forEach(function (id) { if (_ids862[id]) _have862++; });
+          var _ok862 = true;
+          try { _ok862 = persistAll() !== false; } catch (e) { _ok862 = false; }
+          if (_ok862 && window.photoVault && window.photoVault.flush && window.photoVault.hasDb && window.photoVault.hasDb()) {
+            await new Promise(function (res) { try { window.photoVault.flush(function () { res(); }); } catch (e) { res(); } });
+          }
+          if (!_ok862 || _have862 < _need862.length) {
+            _syFailed = true;
+            setSyncStatus("Restored " + _have862 + " of " + _need862.length + " closet pieces — finishing on the next sync. Nothing was uploaded.");
+            if (changedAny56) try { syRefresh(); } catch (e) {}
+            return;
+          }
+          /* Done: this device now holds the server's closet. What is
+             here counts as synced; nothing from the wiped state
+             (seeds, defaults) is ever uploaded. */
+          SY_COLLS.forEach(function (c) {
+            SY.dirty[c] = {}; SY.tomb[c] = {};
+            syCollGet(c).forEach(function (r) {
+              var id = syRecId(c, r); if (!id) return;
+              SY.snap[c][id] = syHsh(syWireRec(c, r));
+              if (!SY.st[c][id]) SY.st[c][id] = 1;
+            });
+          });
+          var _m862 = syMetaOf();
+          Object.keys(_m862).forEach(function (f) { SY.mf[f] = { h: syHsh(syWire(_m862[f])), t: (SY.mf[f] && SY.mf[f].t) || 0 }; });
+          SY.dirty.m = 0;
+          SY.dl862 = ""; SY.rep862 = SY.key; SY.mig57 = SY.key; SY.restore59 = SY.key; SY.photoPull741 = SY.key; SY.photoPull742 = SY.key;
+          SY.lastOk = Date.now(); SY.rej = 0; _syFailed = false; _syRegNeed = false;
+          saveSY();
+          setSyncStatus("Restored from the cloud ✓ " + _have862 + " closet pieces, " + savedLooks.length + " looks, " + wornLog.length + " worn");
+          try { syRefresh(); } catch (e) {}
+          try { if (typeof window.redeal862 === "function") window.redeal862(); } catch (e) {}
+          return;
+        }
+        SY.lastOk = Date.now(); SY.rej = 0; saveSY();
+        setSyncStatus("Synced ✓ " + down56 + " down · this account is download-only on this device");
+        if (changedAny56) try { syRefresh(); } catch (e) {}
+        return;
       }
       var changes = [], held = 0;
       var vaultGaps = !!(window.photoVault && window.photoVault.missing);
@@ -39614,9 +39798,47 @@ function newSyncAccount() {
   }
   _syNewArmed = false;
   if (note) note.textContent = "";
-  SY.key = null; SY.acct = null; SY.last = 0; SY.rej = 0;
+  SY.key = null; SY.acct = null; SY.last = 0; SY.rej = 0; SY.newOk862 = 1;
   saveSY();
   syncNow(false, true);
+}
+/* .86.2: one-time relink code (minted for the main account only; single
+   use, 10 minutes). Redeeming it gives this phone a NEW key for that
+   account, then the download-only self-repair brings the closet back. */
+var _syRelinkArmed862 = false, _syRelinkBusy862 = false;
+async function relinkWithCode862() {
+  var inp = document.getElementById("sync-relink-code");
+  var note = document.getElementById("sync-relink-note");
+  var say = function (t) { if (note) note.textContent = t; };
+  var v = String(inp && inp.value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!/^[A-Z2-9]{10}$/.test(v)) { _syRelinkArmed862 = false; say("Relink codes look like ABCDE-23456 (10 letters and digits). Nothing was changed."); return; }
+  if (SY.key && !SY.rej && !_syRelinkArmed862) {
+    _syRelinkArmed862 = true;
+    say("This phone already has a sync key. Replace it with the relinked account? Tap Restore again to confirm.");
+    return;
+  }
+  _syRelinkArmed862 = false;
+  if (_syRelinkBusy862) return;
+  _syRelinkBusy862 = true;
+  say("Checking the code…");
+  try {
+    var r = await syFetch(SYNC_URL + "/relink", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ code: v }) }, 20000);
+    var j = null; try { j = await r.json(); } catch (e) { j = null; }
+    if (r.status === 429) { say("Too many tries — wait 10 minutes and try again. Nothing was changed."); return; }
+    if (!r.ok || !j || !/^[0-9a-f]{48}$/.test(j.key || "")) { say("That code didn't work — it may have expired (codes last 10 minutes) or already been used. Nothing was changed."); return; }
+    if (SY_RO_ACCTS862.indexOf(j.acct) !== -1) { say("That code is for an account this phone can't use. Nothing was changed."); return; }
+    SY.key = j.key; SY.acct = j.acct || null; SY.last = 0; SY.lastOk = 0; SY.rej = 0;
+    SY.rep862 = ""; SY.dl862 = ""; SY.newOk862 = 0; SY.linkRepair862 = j.key;
+    _syRegNeed = false;
+    saveSY();
+    if (inp) inp.value = "";
+    var kf = document.getElementById("sync-key"); if (kf) kf.value = SY.key;
+    say("Relinked ✓ — restoring your closet, looks and worn log now…");
+    setSyncStatus("Restoring your closet from the cloud…");
+    syncNow(false, true);
+  } catch (e) {
+    say("Couldn't reach the sync server — check the connection and try again. Nothing was changed.");
+  } finally { _syRelinkBusy862 = false; }
 }
 /* Linking a second context: paste the other device's key. Local
    data merges into that account record-by-record by updatedAt —
@@ -39634,18 +39856,21 @@ function linkSyncKey() {
   }
   if (!_syLinkArmed) {
     _syLinkArmed = true;
-    if (note) note.textContent = "Link this device to that sync account? Local data will be merged into it — nothing is overwritten. Tap Link again to confirm.";
+    if (note) note.textContent = "Link this phone to that sync account? Your closet downloads first; nothing on this phone is uploaded until it's restored. Tap Link again to confirm.";
     return;
   }
   _syLinkArmed = false;
   if (note) note.textContent = "";
-  SY.key = v; SY.acct = null; SY.last = 0; SY.rej = 0;
-  syTrackChanges();
-  SY_COLLS.forEach(function (c) {
-    syCollGet(c).forEach(function (r) { var id = syRecId(c, r); if (id) SY.dirty[c][id] = 1; });
-  });
-  SY.dirty.m = 1;
+  /* .86.2: download-first. The old link marked every local record
+     (and the settings) dirty and uploaded them before downloading —
+     on a wiped phone that pushed seed items and default settings
+     into the real account. Now the link enters the self-repair:
+     download-only until this phone holds the account's closet. */
+  SY.key = v; SY.acct = null; SY.last = 0; SY.lastOk = 0; SY.rej = 0; SY.dl862 = "";
+  SY.rep862 = ""; SY.newOk862 = 0;
+  SY.linkRepair862 = v;
   saveSY();
+  var _kf862 = document.getElementById("sync-key"); if (_kf862) _kf862.value = v;
   /* Say so immediately: without this the status line kept
      showing whatever the boot pass last wrote (often the
      auto-created account) and the link looked like it failed. */
@@ -39682,7 +39907,9 @@ function linkSyncKey() {
     if (n) n.textContent = v ? "Code saved on this device — tap Sync now to create the account." : "Code cleared.";
   });
   var lb = document.getElementById("sync-link-btn");
-  if (lb) lb.addEventListener("click", linkSyncKey);
+  if (lb) lb.addEventListener("click", function (ev) { try { ev.preventDefault(); } catch (e) {} linkSyncKey(); });
+  var rlb = document.getElementById("sync-relink-btn");
+  if (rlb) rlb.addEventListener("click", relinkWithCode862);
   var na = document.getElementById("sync-new-acct");
   if (na) na.addEventListener("click", newSyncAccount);
   syShowRejected();
@@ -42059,6 +42286,9 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     var groups = {}, g = editState.group;
     /* .78.7: a saved piece with no photo anywhere is listed below the
        cards (still yours: Buy and Remove), never as an empty card. */
+    /* .86.2: the Saved count and the list agree — when the Price
+       filter hides some, say how many are shown of how many */
+    var shownN862 = list.length;
     var noPh = list.filter(function (sn) { return typeof vpPhotoFor === "function" && !vpPhotoFor(sn); });
     if (noPh.length) list = list.filter(function (sn) { return noPh.indexOf(sn) === -1; });
     list.forEach(function (sn) { var n = groupName(sn, g); (groups[n] = groups[n] || []).push(sn); });
@@ -42070,6 +42300,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
       return '<div class="edit-sec"><h3>' + esc(n) + '</h3><span class="edit-meta">' + groups[n].length + (groups[n].length === 1 ? " piece" : " pieces") + "</span></div>" +
         '<div class="edit-grid">' + groups[n].map(function (sn) { return cardHTML(sn, "saved"); }).join("") + "</div>";
     }).join("") : (noPh.length ? "" : '<p class="empty">' + ((typeof priceRangeActive === "function" && priceRangeActive()) ? "Nothing saved in " + esc(priceRangeLabel()) + "." : "Nothing saved matches.") + "</p>");
+    if (shownN862 !== all.length) out.innerHTML = '<p class="edit-meta edit-shown862">Showing ' + shownN862 + " of " + all.length + " saved" + ((typeof priceRangeActive === "function" && priceRangeActive()) ? " \u00b7 Price: " + esc(priceRangeLabel()) : "") + (editState.starred ? " \u00b7 starred only" : "") + (q ? " \u00b7 matching \u201c" + esc(q) + "\u201d" : "") + "</p>" + out.innerHTML;
     if (noPh.length) out.innerHTML += '<details class="edit-nophoto"><summary>' + noPh.length + (noPh.length === 1 ? " saved piece" : " saved pieces") + " without a photo</summary>" +
       noPh.map(function (sn) {
         remember(sn);
