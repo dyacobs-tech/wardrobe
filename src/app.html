@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-19.84.0" />
+    <meta name="wardrobe-build" content="2026-11-19.84.1" />
     <script>
 /* The clean Looks chrome and Curate are on for every deploy (html.pv81).
    The read-only guard (no sync writes, no render-worker posts, memory-only
@@ -5183,9 +5183,11 @@
         #bottombar.bottombar {
           transition: transform 250ms cubic-bezier(.2, .8, .2, 1) !important;
         }
+        /* .84.1: never translate the bar. On iOS a transform during scroll
+           detaches position:fixed and the pill floats mid-screen. */
         html.nav-away #bottombar.bottombar {
-          transform: translate3d(0, calc(100% + 12px), 0) !important;
-          pointer-events: none;
+          transform: none !important;
+          pointer-events: auto;
         }
       }
       @media (prefers-reduced-motion: reduce) {
@@ -6626,7 +6628,168 @@
       #panel-pinfo .profile-sec:first-child .profile-grid { grid-template-columns: 1fr !important; }
 
     </style>
-
+    <style id="pass841">
+      /* ================= Build .84.1 — Pass 1 layout ================= */
+      #today-hero { touch-action: pan-y; }
+      @media (max-width: 899px) {
+        html body::before {
+          content: "";
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          height: env(safe-area-inset-top, 0px);
+          background: var(--bg, #F6F2EA);
+          z-index: 90;
+          pointer-events: none;
+        }
+        html body .masthead {
+          background: var(--bg, #F6F2EA) !important;
+          z-index: 80 !important;
+          min-height: calc(44px + env(safe-area-inset-top, 0px));
+          padding-top: env(safe-area-inset-top, 0px) !important;
+          transform: none !important;
+        }
+        html body .masthead-slot {
+          display: block !important;
+          height: calc(44px + env(safe-area-inset-top, 0px)) !important;
+        }
+        body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) {
+          --hdr-h: calc(44px + env(safe-area-inset-top, 0px)) !important;
+        }
+        body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead {
+          background: var(--bg, #F6F2EA) !important;
+          pointer-events: none;
+          box-shadow: none !important;
+        }
+        body:is([data-page="wardrobe"], [data-page="watches"], [data-page="calendar"]) .masthead :is(button, a, h1, .brand) { pointer-events: auto; }
+        html body { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 24px) !important; }
+        html body #bottombar.bottombar {
+          position: fixed !important;
+          top: auto !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          width: 100% !important;
+          margin: 0 !important;
+          transform: none !important;
+          z-index: 70 !important;
+        }
+        html body #bottombar .nav-pill {
+          margin: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+          padding: 4px 8px !important;
+          box-sizing: border-box !important;
+          overflow: hidden !important;
+        }
+        html body #bottombar .nav-pill .navbtn {
+          font-size: 9px !important;
+          letter-spacing: 0 !important;
+          padding: 0 2px !important;
+        }
+        html body #bottombar .nav-pill .navbtn span {
+          font-size: 9px !important;
+          letter-spacing: 0 !important;
+        }
+      }
+      #panel-wardrobe .closet-top3.closet-row789 {
+        position: relative !important;
+        top: auto !important;
+        flex-wrap: wrap !important;
+        z-index: 1;
+      }
+      #panel-wardrobe .closet-row789 .closet-search789 {
+        flex: 1 1 160px !important;
+        min-width: 120px !important;
+      }
+      #panel-find .edit-shop-tabs.edit-tabs,
+      #panel-find .edit-tabs.edit-shop-tabs {
+        gap: 6px !important;
+      }
+      #panel-plocation #loc-search {
+        width: 100% !important;
+        text-overflow: clip !important;
+      }
+      #panel-plocation .loc-search-row { grid-template-columns: minmax(0, 1fr) auto !important; }
+      #watch-grid .item-card, #panel-wardrobe #watch-grid .item-card {
+        overflow: visible !important;
+        content-visibility: visible !important;
+        padding-bottom: 14px !important;
+      }
+      #watch-grid { padding-bottom: 8px; }
+      #watch-grid h4, #watch-grid .cname, #watch-grid .notes-line, #watch-grid p {
+        overflow: visible;
+        display: block;
+        -webkit-line-clamp: unset;
+      }
+      @media (min-width: 900px) {
+        #panel-wardrobe .item-grid .item-card { padding: 12px 14px 14px; overflow: hidden; }
+        #panel-wardrobe .item-grid .item-card .notes-line {
+          display: -webkit-box !important;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          margin: 0;
+        }
+      }
+      #pv-top .pv-bar { display: flex; align-items: center; gap: 8px; }
+      #pv-top .pv-bar .pv-fab {
+        position: static !important;
+        right: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        width: 36px; height: 36px; flex: none;
+        margin-left: 2px;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+      #panel-looks .cf-actions, .en-card .cf-actions {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        justify-content: flex-start !important;
+      }
+      #panel-looks .cf-actions [data-cf-like], #panel-looks .cf-actions [data-cf-dislike],
+      #panel-looks .cf-actions [data-en-like], #panel-looks .cf-actions [data-en-dislike],
+      .en-card .cf-actions [data-cf-like], .en-card .cf-actions [data-cf-dislike],
+      .en-card .cf-actions [data-en-like], .en-card .cf-actions [data-en-dislike] {
+        flex: 0 0 44px !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        height: 34px !important;
+        padding: 0 !important;
+      }
+      #panel-looks .en-rme, .en-card .en-rme, #panel-looks .cf-actions .en-rme {
+        flex: 1 0 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        white-space: nowrap !important;
+      }
+      .mine-empty-841 {
+        margin: 28px auto;
+        max-width: 360px;
+        text-align: center;
+        color: var(--dim);
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      .mine-empty-841 p { margin: 0 0 14px; }
+      .icon-browse { margin: 8px 0 18px; }
+      .icon-browse > summary {
+        cursor: pointer;
+        list-style: none;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: .04em;
+        color: var(--dim);
+        padding: 10px 2px;
+      }
+      .icon-browse > summary::-webkit-details-marker { display: none; }
+      .style-pane { background: transparent !important; display: block; }
+      .style-pane .style-cut, .style-pane .style-flatlay { width: 100%; display: block; background: transparent; }
+      .style-pane .flatlay { background: transparent !important; }
+      .style-quiet { display: block; margin-top: 4px; font-size: 12px; color: var(--dim); }
+      #panel-looks .cf-card, #panel-looks .en-card, #cf-grid .cf-card { content-visibility: visible; }
+    </style>
 
   </head>
   <body data-page="today">
@@ -7686,12 +7849,14 @@
           </div>
         </form>
 
-        <div id="icon-list-view">
-          <div class="icons-browser">
-            <div class="icon-list-main" id="icon-list"></div>
-            <!-- No A–Z rail: nine icons don't need an index. -->
+        <details id="icon-browse" class="icon-browse">
+          <summary>Browse all icons</summary>
+          <div id="icon-list-view">
+            <div class="icons-browser">
+              <div class="icon-list-main" id="icon-list"></div>
+            </div>
           </div>
-        </div>
+        </details>
 
         <div id="icon-detail" hidden></div>
 
@@ -7985,7 +8150,7 @@
           <div>
             <label class="field" for="loc-search">Traveling? Change location</label>
             <div class="loc-search-row">
-              <input type="search" id="loc-search" placeholder="City or town" autocomplete="off" />
+              <input type="search" id="loc-search" placeholder="City" aria-label="City or town" autocomplete="off" />
               <button type="button" class="btn-ink" id="loc-search-btn">Find</button>
             </div>
             <div id="loc-results"></div>
@@ -8038,7 +8203,7 @@
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-19.84.0</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-19.84.1</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10248,14 +10413,69 @@ function lookHeroVisible84(look) {
 }
 window.photoIsReady84 = photoIsReady84;
 window.lookHeroVisible84 = lookHeroVisible84;
+function dressLevel841() {
+  var n = (typeof formalityLevel !== "undefined") ? parseInt(formalityLevel, 10) : 4;
+  return (n >= 1 && n <= 7) ? n : 4;
+}
+function lookFitsDress841(look, level) {
+  if (!look || look.dressEmpty) return false;
+  var C = window.WardrobeComposer;
+  if (!C || typeof C.fitsLevel !== "function" || typeof C.profile !== "function") return true;
+  var tops = [], bottom = null, shoes = null, layer = null;
+  (look.fwPieces || []).forEach(function (p) {
+    if (!p) return;
+    var it = (p.id && typeof closetItemById === "function") ? (closetItemById(p.id) || p) : p;
+    var pr = null;
+    try { pr = C.profile(it, 0); } catch (e) { pr = null; }
+    if (!pr) return;
+    if (pr.role === "top") tops.push(pr);
+    else if (pr.role === "bottom" && !bottom) bottom = pr;
+    else if (pr.role === "shoes" && !shoes) shoes = pr;
+    else if (pr.role === "layer" && !layer) layer = pr;
+  });
+  var top = null;
+  if (tops.length === 1) top = tops[0];
+  else if (tops.length >= 2) {
+    var first = tops[0];
+    layer = layer || Object.assign({}, first, { role: "layer", kind: first.overshirt ? "overshirt" : (first.kind === "knit" ? "knit" : first.kind) });
+    top = tops[1];
+  }
+  if (!top || !bottom || !shoes) return false;
+  if (!C.fitsLevel(level, top, bottom, shoes, layer)) return false;
+  /* Home is stricter than the composer's wide mask: Swim/Pool and
+     Shorts & Tee are short bottoms, never a linen trouser or a sweater. */
+  if (level === 1 && bottom.kind !== "swim" && bottom.kind !== "shorts") return false;
+  if (level === 2 && bottom.kind !== "shorts" && bottom.kind !== "swim") return false;
+  if (level <= 2 && layer && layer.kind !== "overshirt") return false;
+  if (level <= 3 && top.kind === "knit" && !top.shortSleeve) return false;
+  return true;
+}
+function dressEmptyLook841() {
+  var labels = (typeof HERO_TYPE_LABELS !== "undefined" && HERO_TYPE_LABELS) || ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"];
+  var lv = dressLevel841();
+  var name = labels[lv - 1] || "this dress level";
+  return {
+    id: "dress-empty-" + lv,
+    title: "Nothing in your closet for " + name + ".",
+    meta: "From your closet",
+    desc: "",
+    dressEmpty: true,
+    dressLevel: lv,
+    swatches: [],
+    fwPieces: [],
+    source: "wardrobe",
+    composer: false
+  };
+}
 function homeComposerLooks75(count) {
   if (typeof composerLooks !== "function") return [];
   var want = count || 8;
   var temp = (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78;
+  var level = dressLevel841();
   var pools = homeOwnedPhotoPieces742();
   var pool = pools.own.length >= 3 ? pools.own : pools.withPhoto;
-  var r = pool.length >= 3 ? (composerLooks({ count: Math.max(want, 16), temp: temp, only: pool, renderedFirst: true }) || []) : [];
-  r = r.filter(function (l) { return homeLookOk742(l); });
+  var r = pool.length >= 3 ? (composerLooks({ count: Math.max(want, 24), temp: temp, only: pool, renderedFirst: true, level: level }) || []) : [];
+  r = r.filter(function (l) { return homeLookOk742(l) && lookFitsDress841(l, level); });
   var vis = r.filter(lookHeroVisible84);
   /* When warm unlayered looks have no loadable piece photos and no
      on-body cut, backfill from the scored render pool so Home never
@@ -10729,7 +10949,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-19.84.0";
+var WARDROBE_BUILD = "2026-11-19.84.1";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -22109,23 +22329,65 @@ function styleDeal(it, limit) {
   }
   return out;
 }
-function styleCardHTML(look, idx) {
-  var cstate = swapCardState(look);
-  if (cstate === "rendering" || cstate === "pending" || cstate === "failed" || cstate === "nosync") {
-    /* The not-yet-rendered states, never piece photographs: the
-       look's title and swatches with the slim state line —
-       spinner text only while a render is truly in flight. */
-    return '<button type="button" class="card option-card" data-style-idx="' + idx + '" role="listitem">' +
-      '<span class="pane swap-rendering pane-frame">' +
-      '<span class="swap-render-line">' + esc(swapCardLine(look)) + '</span></span>' +
-      '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
-      cardStripHTML(look.swatches) + "</span></button>";
+function stylePiecePhoto841(p) {
+  if (!p) return "";
+  var it = (p.id && typeof closetItemById === "function") ? (closetItemById(p.id) || p) : p;
+  var ph = "";
+  try { ph = (typeof itemPhoto === "function" ? itemPhoto(it) : "") || it.photo || p.photo || ""; } catch (e) { ph = p.photo || ""; }
+  if (!ph || /^data:image\/svg/.test(ph)) return "";
+  if (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(ph)) return "";
+  if (/assets\/photos\/9a543e585d8b\./.test(ph)) return "";
+  return ph;
+}
+function styleCutout841(look) {
+  try {
+    var ob = (typeof onbodyForLook === "function") ? onbodyForLook(look) : "";
+    if (ob && typeof window.cutoutFor === "function") {
+      var cut = window.cutoutFor(ob);
+      if (cut && !(typeof isCameraSelfieImg === "function" && isCameraSelfieImg(cut))) return cut;
+    }
+    if (look && look.fwRender && typeof window.cutoutFor === "function") {
+      var fw = (typeof fwRenderSrc === "function") ? fwRenderSrc(look) : look.fwRender;
+      var cut2 = fw && window.cutoutFor(fw);
+      if (cut2) return cut2;
+    }
+  } catch (e) {}
+  return "";
+}
+function styleFlatlay841(look) {
+  var pcs = (look && (look.fwPieces || look.pieces)) || [];
+  var cells = [];
+  pcs.forEach(function (p) {
+    if (!p) return;
+    var ph = stylePiecePhoto841(p);
+    var name = p.name || "";
+    if (ph) cells.push('<span class="fl-cell"><img src="' + esc(ph) + '" alt="' + esc(name) + '" decoding="async" /></span>');
+    else if (p.colourHex) cells.push('<span class="fl-cell fl-swatch" style="background:' + esc(p.colourHex) + '" role="img" aria-label="' + esc(name) + '"></span>');
+  });
+  if (!cells.length && look && look.swatches) {
+    look.swatches.forEach(function (s) {
+      if (s && s.hex) cells.push('<span class="fl-cell fl-swatch" style="background:' + esc(s.hex) + '" role="img" aria-label="' + esc(s.name || "") + '"></span>');
+    });
   }
-  var src = look.fwRender ? fwRenderSrc(look) : lookImg(look);
+  if (!cells.length) return "";
+  return '<span class="flatlay fl-n' + Math.min(4, cells.length) + ' style-flatlay">' + cells.slice(0, 4).join("") + "</span>";
+}
+function styleCardHTML(look, idx) {
+  /* Transparent cut-out, or a flat-lay of the pieces. Never a raw
+     mirror selfie, never a grey studio render, never a blank
+     "turn on sync" tile standing in for the outfit. */
+  var cut = styleCutout841(look);
+  var flat = cut ? "" : styleFlatlay841(look);
+  var note = "";
+  var cstate = (typeof swapCardState === "function") ? swapCardState(look) : "";
+  if (!cut && (cstate === "nosync" || cstate === "pending" || cstate === "rendering")) note = '<span class="style-quiet">Not rendered yet</span>';
+  var media = cut
+    ? '<img class="style-cut" src="' + esc(cut) + '" alt="' + esc(look.imgAlt || look.title || "") + '" loading="lazy" />'
+    : (flat || '<span class="style-flatlay style-flatlay-empty" aria-hidden="true"></span>');
   return '<button type="button" class="card option-card" data-style-idx="' + idx + '" role="listitem">' +
-    '<img src="' + esc(src) + '" alt="' + esc(look.imgAlt || "") + '" loading="lazy" />' +
+    '<span class="pane pane-frame style-pane">' + media + "</span>" +
     '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span>" +
-    cardStripHTML(look.swatches) + "</span></button>";
+    note + cardStripHTML(look.swatches) + "</span></button>";
 }
 function styleLooksChrome(hide) {
   /* On the clean Looks page (html.pv81) the Mine | Mix | New bar
@@ -26973,25 +27235,30 @@ document.getElementById("item-detail").addEventListener("click", function (e) {
     return;
   }
   if (act === "find") {
-    /* A brief for this piece — replace it, or buy another —
-       created through the same free-form brief store. */
-    finds.unshift({
-      id: "find-" + Date.now(),
-      desc: it.name,
-      cat: it.category,
-      size: profileSizeFor(it.category),
-      budget: "",
-      budgetTier: shopTierName(),
-      budgetNote: "",
-      colour: it.colourName || "",
-      details: "From your Closet — replace it, or buy another.",
-      iconId: null
-    });
-    store.set("finds", finds);
-    renderFinds();
-    clearFindLookMode();
+    /* Shop the look for this piece opens Searches with the query
+       already run — never the empty Saved page. */
+    var qFind = [it.colourName, it.name].filter(Boolean).join(" ").replace(/\s+/g, " ").trim() || it.name;
+    if (typeof clearFindLookMode === "function") clearFindLookMode();
     switchTab("find");
-    toast("Brief added — " + it.name + ".");
+    if (typeof window.editShow === "function") window.editShow("searches");
+    if (typeof window.editRunSearch === "function") window.editRunSearch(qFind);
+    else {
+      finds.unshift({
+        id: "find-" + Date.now(),
+        desc: it.name,
+        cat: it.category,
+        size: profileSizeFor(it.category),
+        budget: "",
+        budgetTier: shopTierName(),
+        budgetNote: "",
+        colour: it.colourName || "",
+        details: "From your Closet — replace it, or buy another.",
+        iconId: null
+      });
+      store.set("finds", finds);
+      if (typeof renderFinds === "function") renderFinds();
+    }
+    toast("Searching — " + it.name + ".");
     return;
   }
   if (act === "laundry") {
@@ -29768,6 +30035,13 @@ function renderLoc() {
 }
 function applyWeatherToToday() {
   if (todayTouched || !currentWeather || !todayLook) return;
+  /* The outfit of the day is locked once it has been dealt for this
+     date. A later weather read must not swap it — reopening the app
+     would otherwise show a different look than the one just on screen. */
+  try {
+    var locked = (typeof store !== "undefined") ? store.get("todayOpeningCloset", null) : null;
+    if (locked && locked.date === localTodayISO() && locked.look && locked.look.title) return;
+  } catch (eLock) {}
   /* A planned day keeps its planned hero — the weather refines
      unplanned days only. */
   if (planEntryFor(localTodayISO())) return;
@@ -30097,7 +30371,14 @@ function dealHeroForSource() {
       ? buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() + window._heroDealN })
       : buildClosetLooks()) || [];
   }
-  cl = cl.filter(lookIsMine);
+  cl = (cl || []).filter(function (l) { return lookIsMine(l) && lookFitsDress841(l, dressLevel841()); });
+  if (!cl.length) {
+    todayLook = dressEmptyLook841();
+    todaySeedId = todayLook.id;
+    persistOpeningLook(todayLook);
+    renderToday();
+    return;
+  }
   if (cl && cl.length) {
       /* Graduated (liked) closet looks are not dealt again; if
          every closet look has graduated, deal from the full list
@@ -34884,9 +35165,22 @@ function woreToday() {
      marking stays available in Calendar/planner and the pop-out. */
   var hero = document.getElementById("today-hero");
   if (hero) {
-    var sx = null, sy = null;
+    var sx = null, sy = null, lastSwipe841 = 0;
+    function heroSwipe841(dir) {
+      var now = Date.now();
+      if (now - lastSwipe841 < 380) return;
+      lastSwipe841 = now;
+      if (dir < 0) { if (typeof dealAnotherToday === "function") dealAnotherToday(); }
+      else if (typeof heroGoBack56 === "function") heroGoBack56();
+    }
+    function swipeFrom(dx, dy, target) {
+      if (target && target.closest && target.closest("button, a, input, textarea, .cdd, .cdd-menu")) return;
+      if (Math.abs(dx) < 36 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
+      heroSwipe841(dx < 0 ? -1 : 1);
+    }
     hero.addEventListener("touchstart", function (e) {
       if (e.touches.length !== 1) { sx = null; return; }
+      if (e.target.closest && e.target.closest("button, a, input, .cdd")) { sx = null; return; }
       sx = e.touches[0].clientX; sy = e.touches[0].clientY;
     }, { passive: true });
     hero.addEventListener("touchend", function (e) {
@@ -34894,14 +35188,23 @@ function woreToday() {
       var dx = e.changedTouches[0].clientX - sx;
       var dy = e.changedTouches[0].clientY - sy;
       sx = null;
-      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
-      if (dx < 0) { dealAnotherToday(); }
-      /* Build .56 (amendment): swipe right goes BACK to the look
-         dealt before this one — for the verdict the user meant
-         to give it. Like keeps its button. At the bottom of the
-         stack the gesture does nothing. */
-      else if (typeof heroGoBack56 === "function") { heroGoBack56(); }
+      swipeFrom(dx, dy, e.target);
     }, { passive: true });
+    /* Pointer covers iOS PWA, trackpad and mouse drag. touch-action: pan-y
+       keeps vertical scrolling; a clearly horizontal drag cycles the look. */
+    var px = null, py = null, pid = null;
+    hero.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      if (e.target.closest && e.target.closest("button, a, input, textarea, .cdd")) return;
+      px = e.clientX; py = e.clientY; pid = e.pointerId;
+    });
+    hero.addEventListener("pointerup", function (e) {
+      if (pid !== e.pointerId || px === null) return;
+      var dx = e.clientX - px, dy = e.clientY - py;
+      px = null; pid = null;
+      swipeFrom(dx, dy, e.target);
+    });
+    hero.addEventListener("pointercancel", function () { px = null; pid = null; });
   }
   /* Build .56 (amendment): the same swipe-right go-back on the
      Ideas deal surface — back to the previous six dealt. */
@@ -35677,7 +35980,8 @@ function renderWeekPlan() {
     var wornImg = "";
     for (var wi = 0; wi < worn.length; wi++) { if (worn[wi].img) { wornImg = worn[wi].img; break; } }
     var fc = (typeof dailyForecast !== "undefined" && dailyForecast) ? dailyForecast[iso] : null;
-    var fcTxt = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" + (fc.label ? " " + fc.label.replace("Thunderstorms", "T-storms").replace("Thunderstorm", "T-storm") : "") : "";
+    var fcFull = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" + (fc.label ? " " + fc.label : "") : "";
+    var fcTxt = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" : "";
     var cls = "wp-day" + (iso === todayIso ? " wp-today" : "") + (iso < todayIso ? " wp-past" : "") + (look ? " wp-planned" : "") + (worn.length ? " wp-hasworn" : "");
     /* Worn wins the CELL DISPLAY only — the plan underneath is
        untouched and still shows in the day sheet. */
@@ -35685,12 +35989,12 @@ function renderWeekPlan() {
     var imgTitle = wornImg ? worn[0].title : (look ? look.title : "");
     var aria = esc(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) +
       (worn.length ? " — wore: " + esc(worn.map(function (w) { return w.title; }).join(", ")) : "") +
-      (look ? " — planned: " + esc(look.title) : "");
+      (look ? " — planned: " + esc(look.title) : "") + (fcFull ? " — " + esc(fcFull) : "");
     html += '<div class="' + cls + '" data-plan-day="' + iso + '" role="button" tabindex="0" aria-label="' + aria + '">' +
       (worn.length > 1 ? '<span class="wp-worn-count">' + worn.length + '</span>' : "") +
       '<span class="wp-dow">' + esc(d.toLocaleDateString(undefined, { weekday: "short" })) + '</span>' +
       '<span class="wp-date">' + d.getDate() + '</span>' +
-      '<span class="wp-fc">' + esc(fcTxt) + '</span>' +
+      '<span class="wp-fc"' + (fcFull ? ' title="' + esc(fcFull) + '"' : "") + '>' + esc(fcTxt) + '</span>' +
       (img
         ? '<img class="wp-thumb" src="' + esc(img) + '" alt="' + esc(imgTitle) + '" loading="lazy" decoding="async" data-popout="' + esc(img) + '" data-popout-alt="' + esc(imgTitle) + '" />'
         : (worn.length ? '<span class="wp-empty" aria-hidden="true">✓</span>' : '<span class="wp-empty" aria-hidden="true">+</span>')) +
@@ -39597,19 +39901,60 @@ function analyzeFilePiece(card, job, ix) {
     /* .81: the next looks were dealt ahead, off the main thread (endless
        module); the synchronous deal is only the fallback */
     var looks = (window.__endless81 && window.__endless81.take) ? window.__endless81.take(n, exclude, fi) : null;
-    if (!looks) looks = composerLooks({ count: n, level: fi.level, exclude: exclude, only: fi.only, slot: "feed", renderedFirst: true, temp: fi.temp });
-    if (!looks.length) return 0;
+    if (!looks || !looks.length) looks = composerLooks({ count: n, level: fi.level, exclude: exclude, only: fi.only, slot: "feed", renderedFirst: false, temp: fi.temp });
+    if (looks && looks.length && typeof lookFitsDress841 === "function") {
+      var lvMine = fi.level;
+      if (lvMine) looks = looks.filter(function (l) { return lookFitsDress841(l, lvMine); });
+    }
+    if (!looks || !looks.length) return 0;
     var html = "";
     looks.forEach(function (l) { html += cardHTML(l, feedLooks.length); feedLooks.push(l); });
     grid.insertAdjacentHTML("beforeend", html);
     composerMarkSeen(looks);
     return looks.length;
   }
+  function mineEmpty841() {
+    var host = document.getElementById("outfits-mine-view");
+    if (!host) return;
+    var el = document.getElementById("mine-empty-841");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "mine-empty-841";
+      el.className = "mine-empty-841";
+      el.hidden = true;
+      el.innerHTML = '<p>No saved looks yet — build one with +</p><button type="button" class="btn-ink" data-mine-mix>See Mix</button>';
+      host.appendChild(el);
+      el.addEventListener("click", function (ev) {
+        var b = ev.target.closest && ev.target.closest("[data-mine-mix]");
+        if (!b) return;
+        var mix = document.querySelector("[data-pv-f='withmine']");
+        if (mix) mix.click();
+        else {
+          window.outfitsMode = "inspo";
+          if (typeof window.showInspoView === "function") window.showInspoView("withmine");
+          if (typeof syncOutfitsToggle === "function") syncOutfitsToggle();
+        }
+      });
+    }
+    var onMine = window.outfitsMode !== "inspo";
+    var cards = grid && grid.children ? grid.children.length : 0;
+    var savedN = 0;
+    try {
+      savedN = (typeof savedLooks !== "undefined" ? savedLooks : []).filter(function (l) { return l && (l.composer || l.fwPieces || l.verdict === "like"); }).length;
+    } catch (e) {}
+    var savedGrid = document.getElementById("saved-grid");
+    var savedShown = savedGrid && savedGrid.offsetParent && savedGrid.textContent && /No saved|No outfits/.test(savedGrid.textContent) ? 0 : (savedGrid && savedGrid.querySelector(".card, article, .option-card") ? 1 : 0);
+    el.hidden = !onMine || cards > 0 || savedN > 0 || savedShown > 0;
+  }
+  window.mineEmpty841 = mineEmpty841;
   function resetFeed() {
     feedLooks = [];
     grid.innerHTML = "";
     feedSig = stateSig();
+    var feedEl = document.getElementById("closet-feed");
+    if (feedEl && window.outfitsMode !== "inspo") feedEl.hidden = false;
     appendLooks(12);
+    mineEmpty841();
   }
   function syncFeed(force) {
     var want = feedWanted();
@@ -39624,6 +39969,7 @@ function analyzeFilePiece(card, job, ix) {
     var panel = document.getElementById("panel-studio");
     if (!(looksPanel && !looksPanel.hidden) && panel && panel.hidden && !force) return;
     if (force || !feedLooks.length || feedSig !== stateSig()) resetFeed();
+    if (typeof mineEmpty841 === "function") mineEmpty841();
   }
   window.__cfLooks81 = function () { return feedLooks; };
   window.__cfReset81 = function () { if (typeof feedWanted === "function" && !feedWanted()) { feedSig = null; return; } resetFeed(); };
@@ -40900,7 +41246,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
   }
 
   /* ---------- Saved ---------- */
-  var GROUPS = ["Category", "Colour", "Search", "Brand", "Store", "Price"];
+  var GROUPS = ["Category", "Colour", "Search", "Brand", "Store"];
   function band(p) { return typeof p !== "number" ? "No price" : p < 250 ? "Under $250" : p < 500 ? "$250–500" : p < 1000 ? "$500–1,000" : "$1,000+"; }
   var BAND_ORDER = ["Under $250", "$250–500", "$500–1,000", "$1,000+", "No price"];
   function savedList() {
@@ -42589,6 +42935,11 @@ window.inspoView = "withmine";
     return rs.length ? { cut: window.cutoutFor(rs[h % rs.length]), render: rs[h % rs.length] } : null;
   }
   function guestHero782(forceTitle) {
+    /* A composed closet look keeps its own title. The guest stand-in
+       ("From your closet") is only for a truly empty hero — never
+       painted over the outfit of the day, or a reload shows a
+       different name than the one just on screen. */
+    if (typeof todayLook !== "undefined" && todayLook && ((todayLook.fwPieces && todayLook.fwPieces.length) || todayLook.dressEmpty)) return false;
     if (userDeal782) { gOff782++; userDeal782 = false; }
     var g = guestSrc782(); if (!g) return false;
     var before = hero.classList.contains("hero-solo") ? img.getAttribute("src") : null;
@@ -42637,36 +42988,44 @@ window.inspoView = "withmine";
       if (img) { img.hidden = true; img.removeAttribute("data-render"); }
       return true;
     }
+    if (todayLook && todayLook.dressEmpty) {
+      skip = 0; booted782 = true; userDeal782 = false;
+      if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
+      hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
+      if (img) { img.hidden = true; img.removeAttribute("src"); img.removeAttribute("data-render"); }
+      var emptyNm = document.getElementById("today-name");
+      if (emptyNm) emptyNm.textContent = todayLook.title || "Nothing in your closet for this dress level.";
+      return;
+    }
     if (!src) {
-      /* .84: no on-body cut — show crisp closet piece photos rather than
-         the grey silhouette, and rather than skipping 30 times only to
-         settle on a blank hero. */
+      /* .84.1: this dress level's own pieces, as a flat-lay. Never a
+         random on-body cut-out from another level, and never a raw selfie. */
       if (paintClosetFlatlay782(todayLook)) {
         skip = 0; booted782 = true; userDeal782 = false;
         return;
       }
-      /* Home only deals looks he can be seen in: skip one with no render */
-      var lkey = todayLook.composerKey || todayLook.id || todayLook.img || "", acc = null, dayIso = typeof localTodayISO === "function" ? localTodayISO() : "";
-      try { acc = JSON.parse(localStorage.getItem("wardrobe.ootdNoRender782") || "null"); } catch (e) {}
-      var accepted = acc && acc.date === dayIso && acc.key === lkey && !userDeal782;
-      if (!accepted && !anyRenderable782()) accepted = true; /* none of his looks has a render yet: don't churn */
-      if (!accepted && skip < 30 && typeof dealAnotherToday === "function") { skip++; setTimeout(dealAnotherToday, 0); return; }
-      /* nothing he can be seen in today: settle on this look for the day (stable across opens) */
-      if (!accepted && !userDeal782) { try { localStorage.setItem("wardrobe.ootdNoRender782", JSON.stringify({ date: dayIso, key: lkey })); } catch (e) {} if (typeof persistOpeningLook === "function") try { persistOpeningLook(todayLook); } catch (e) {} }
+      var pcsFb = piecesOf(todayLook);
+      if (pcsFb.length && collage) {
+        collage.innerHTML = '<span class="flatlay fl-n' + pcsFb.length + '">' + pcsFb.map(function (p) {
+          var ph = photoOf(p);
+          if (ph && !/^data:image\/svg/.test(ph) && !(typeof isCameraSelfieImg === "function" && isCameraSelfieImg(ph)) && !SELFIE782.test(ph)) {
+            return '<span class="fl-cell"><img src="' + esc(ph) + '" alt="' + esc(p.name || "") + '" decoding="async" /></span>';
+          }
+          return '<span class="fl-cell fl-swatch" style="background:' + esc(p.colourHex || "#d9cfbd") + '" role="img" aria-label="' + esc(p.name || "") + '"></span>';
+        }).join("") + "</span>";
+        collage.classList.add("flatlay-host");
+        collage.hidden = false;
+        hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
+        hero.classList.add("hero-flatlay");
+        if (img) { img.hidden = true; img.removeAttribute("data-render"); }
+        skip = 0; booted782 = true; userDeal782 = false;
+        return;
+      }
       skip = 0; booted782 = true; userDeal782 = false;
-      /* nothing rendered to show: one photo, never a tile grid */
       if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
-      /* .78.9e: the hero only ever shows a transparent cut-out — when this
-         look has none, one of his cut-outs stands in (never the plain
-         studio render, never a piece photo) */
-      if (guestHero782(true)) return;
-      var fb = (typeof lookImg === "function" && lookImg(todayLook)) || "";
-      if (SELFIE782.test(fb) || (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(fb))) fb = "";
-      if (!fb || /^data:image\/svg/.test(fb)) { var pp = piecesOf(todayLook).map(photoOf).filter(Boolean); fb = pp[0] || fb; }
-      if (fb && img.getAttribute("src") !== fb) img.setAttribute("src", fb);
-      img.removeAttribute("data-render"); hero.classList.remove("has-cut");
-      hero.classList.add("hero-solo");
-      img.hidden = false; placeHero(); return;
+      hero.classList.remove("hero-solo", "has-cut", "lq-show", "hero-guest");
+      if (img) { img.hidden = true; img.removeAttribute("data-render"); }
+      return;
     }
     /* .78.2c: the day's opening look is the first one he can be seen in —
        keep THAT as the outfit of the day so every app open shows it */
@@ -42740,6 +43099,7 @@ window.inspoView = "withmine";
   function watchdog() {
     clearTimeout(wd); if (!wdT0) wdT0 = Date.now();
     wd = setTimeout(function () {
+      if (hero.classList.contains("hero-flatlay")) { wdT0 = 0; wdTries = 0; return; }
       if (!hero.classList.contains("hero-solo") || (typeof currentTab !== "undefined" && currentTab !== "today")) { wdT0 = 0; return; }
       if (heroOnScreen()) { wdTries = 0; wdT0 = 0; hero.querySelectorAll(".hero-xfade").forEach(function (x) { if (x.classList.contains("out")) x.remove(); }); return; }
       var src = img.getAttribute("src") || "", failed = img.complete && !img.naturalWidth && isCutSrc(src);
@@ -43242,7 +43602,7 @@ window.inspoView = "withmine";
      the service worker is told to keep the outfit of the day and the next
      five in Cache Storage. Nothing competes with the hero while it loads. */
   var warm = {}, warmQ = [], Q = null, dealing = false;
-  window.clearHeroLookahead = function () { Q = null; };
+  window.clearHeroLookahead = function () { Q = null; recentT = []; };
   var ric2 = window.requestIdleCallback || function (f) { return setTimeout(f, 300); };
   var warmP = [];
   function warmOne(src, hi) {
@@ -43600,7 +43960,8 @@ window.inspoView = "withmine";
     if (iv) iv.hidden = isMine;
     if (isMine) ensureSoon("renderSaved");
     else window.showInspoView(window.inspoView || "icons");
-    if (typeof composerSyncFeed === "function") composerSyncFeed(false);
+    var mineGrid841 = document.getElementById("cf-grid");
+    if (typeof composerSyncFeed === "function") composerSyncFeed(!!(isMine && mineGrid841 && !mineGrid841.children.length));
     window.prelayOutfits796();
   };
   window.showInspoView = function (v) {
@@ -44096,7 +44457,12 @@ window.inspoView = "withmine";
         '<input type="range" min="0" max="' + MAX + '" step="1" value="' + val + '" aria-label="' + escAttr(ic.name) + ' weighting" />' +
         '<span class="cw-val">' + (val === 0 ? "Off" : val) + "</span></label>";
     });
-    host.innerHTML = h || '<p class="cw-note">Icons are still loading\u2026</p>';
+    if (!h) {
+      host.innerHTML = '<p class="cw-note">Icons are still loading\u2026</p>';
+      if (typeof window.lazyOn802 === "function") window.lazyOn802("STYLE_ICONS", function () { if (!host.querySelector(".cw-row")) paintWeights(); });
+      return;
+    }
+    host.innerHTML = h;
   }
   function setSlider(id, val) {
     var w = loadWeights();
@@ -44585,6 +44951,7 @@ window.inspoView = "withmine";
     while (out.length < 8 && BUF[feed].length) {
       var o = BUF[feed].shift();
       if (f.keys[o.key] || S.hidden[o.key]) continue;
+      if (S.lens && (!o.src || o.src.t !== "icon" || o.src.id !== S.lens)) continue;
       var l = toLook(o, feed);
       if (l && lookPriceOk(l)) { out.push(l); S.recent.push(o.key); }
     }
@@ -44866,7 +45233,9 @@ window.inspoView = "withmine";
     var fab = document.createElement("button");
     fab.type = "button"; fab.id = "pv-fab"; fab.className = "pv-fab"; fab.setAttribute("aria-label", "Build a look");
     fab.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
-    panel.appendChild(fab);
+    var pvBar = top.querySelector(".pv-bar");
+    if (pvBar) pvBar.appendChild(fab);
+    else panel.appendChild(fab);
     function short(n) { var p = String(n || "").split(" "); return p.length > 1 ? p[p.length - 1] : p[0]; }
     function thumb(ic) { var l = (ic.looks || [])[0]; return (ic.photo || ic.img || (l && l.img)) || ""; }
     function curFeed() { return window.outfitsMode === "inspo" ? (window.inspoView === "allnew" ? "allnew" : "withmine") : "mine"; }
@@ -44875,7 +45244,14 @@ window.inspoView = "withmine";
       var f = curFeed();
       top.querySelectorAll("[data-pv-f]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-pv-f") === f ? "true" : "false"); });
       var ic = lensIcon(), pills = document.getElementById("pv-pills"), h = "";
-      if (ic) h += '<button type="button" class="pv-pill" data-pv-clear="lens" aria-label="Remove ' + E(ic.name) + ' inspiration">' + (thumb(ic) ? '<img src="' + E(thumb(ic)) + '" alt="" />' : "") + "<span>" + E(short(ic.name)) + '</span><b aria-hidden="true">\u00d7</b></button>';
+      var lensN = 0;
+      if (ic) {
+        var feedNow = F[f];
+        if (feedNow && feedNow.looks) lensN = feedNow.looks.filter(function (l) { return l && l.src && l.src.id === ic.id; }).length;
+        var mineGridN = document.getElementById("cf-grid");
+        if (f === "mine" && mineGridN) lensN = mineGridN.children.length;
+      }
+      if (ic) h += '<button type="button" class="pv-pill" data-pv-clear="lens" aria-label="Remove ' + E(ic.name) + ' inspiration">' + (thumb(ic) ? '<img src="' + E(thumb(ic)) + '" alt="" />' : "") + "<span>" + E(short(ic.name)) + (lensN ? " " + lensN : "") + '</span><b aria-hidden="true">\u00d7</b></button>';
       if (S.likedOnly) h += '<button type="button" class="pv-pill" data-pv-clear="liked" aria-label="Show all looks"><span>Liked</span><b aria-hidden="true">\u00d7</b></button>';
       if (f !== "mine" && priceActive()) h += '<button type="button" class="pv-pill" data-pv-clear="price" aria-label="Any price"><span>' + E(priceLabel()) + '</span><b aria-hidden="true">\u00d7</b></button>';
       pills.innerHTML = h; pills.hidden = !h;
@@ -45136,6 +45512,7 @@ function dealMine(q) {
     var extra = mineDeck.deal(q.n * 20, Object.assign({}, o, { recent: q.recent.concat(have2) })) || [];
     extra.forEach(function (x) { if (have2.indexOf(x.key) === -1) { have2.push(x.key); outs.push(x); } });
     outs.forEach(function (x) { var t = 0; (x.ids || []).forEach(function (id) { t += lensPiece(MINEI[id], q.lens); }); x._ls = t + rng() * 0.12; });
+    outs = outs.filter(function (x) { return x._ls >= 4; });
     outs.sort(function (a, b) { return b._ls - a._ls; });
     outs = outs.slice(0, q.n);
   } else if (outs.length && weightLenses(q).length) {
@@ -45353,10 +45730,21 @@ function dealInspo(q) {
     var ic = pickIcon(wt);
     return ic ? { t: "icon", ic: ic } : null;
   }
+  function lensScore(ids, lens) {
+    var t = 0;
+    (ids || []).forEach(function (id) { var p = byId[id]; if (p) t += lensPiece(p, lens); });
+    return t;
+  }
   function draw(src) {
     var cands = [];
     for (var j = 0; j < 40 && tries < MAX && cands.length < 6; j++) { tries++; var c = sampleOne(q, seen, src); if (c) cands.push(c); }
     if (!cands.length) return null;
+    /* A chosen Icon is a hard filter: the look has to actually
+       read as that icon, not merely be labelled with the name. */
+    if (q.lens) {
+      cands = cands.filter(function (c) { return lensScore(c.ids, q.lens) >= 4; });
+      if (!cands.length) return null;
+    }
     var best = pickW(cands, cands.map(function (c) { return Math.exp(0.9 * c.score); }));
     seen[best.key] = 1;
     return best;
@@ -45417,5 +45805,35 @@ self.onmessage = function (ev) {
   } catch (err) { self.postMessage({ type: "error", id: m.id, feed: m.feed, gen: m.gen, msg: String(err && err.message || err) }); }
 };
     </script><!--/endless81-->
+    <script>
+      /* .84.1: keep the bottom nav on the visual viewport. iOS Safari
+         reports a layout viewport taller than the screen while chrome
+         shows and hides; bottom:0 then sits mid-page. Pin to the gap. */
+      (function () {
+        var bar = document.getElementById("bottombar");
+        if (!bar) return;
+        function pin() {
+          if (document.documentElement.classList.contains("sheet-lock")) return;
+          var desktop = window.matchMedia && window.matchMedia("(min-width: 900px)").matches;
+          if (desktop) { bar.style.removeProperty("bottom"); return; }
+          var vv = window.visualViewport, gap = 0;
+          if (vv) gap = Math.max(0, Math.round(window.innerHeight - vv.offsetTop - vv.height));
+          bar.style.setProperty("position", "fixed", "important");
+          bar.style.setProperty("top", "auto", "important");
+          bar.style.setProperty("left", "0", "important");
+          bar.style.setProperty("right", "0", "important");
+          bar.style.setProperty("transform", "none", "important");
+          bar.style.setProperty("bottom", gap + "px", "important");
+        }
+        pin();
+        if (window.visualViewport) {
+          visualViewport.addEventListener("resize", pin);
+          visualViewport.addEventListener("scroll", pin);
+        }
+        window.addEventListener("scroll", pin, { passive: true });
+        window.addEventListener("resize", pin);
+        window.addEventListener("orientationchange", pin);
+      })();
+    </script>
   </body>
 </html>
