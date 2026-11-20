@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.6" />
+    <meta name="wardrobe-build" content="2026-11-20.86.7" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6455,14 +6455,34 @@ window.notMenswear853 = function (e) {
         font: 600 12.5px var(--font-ui); letter-spacing: .02em; cursor: pointer; white-space: nowrap;
       }
       #cw-levels[aria-disabled="true"] [data-cw-level] { opacity: .45; cursor: default; }
-      .cw-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) minmax(120px, 1.4fr) 36px; align-items: center; gap: 8px 10px; padding: 6px 0; min-height: 44px; }
+      .cw-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) minmax(120px, 1.4fr) 52px; align-items: center; gap: 8px 10px; padding: 6px 0; min-height: 44px; }
       .cw-row + .cw-row { border-top: 1px solid var(--border, rgba(26,22,18,.08)); }
-      .cw-av { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; object-position: center 18%; background: #E9E2D4; display: block; }
-      .cw-name { font: 600 14px/1.2 var(--font-ui); color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .cw-av, .cw-av-btn .cw-av { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; object-position: center 18%; background: #E9E2D4; display: block; }
+      .cw-av-btn { border: 0; background: none; padding: 0; margin: 0; cursor: pointer; border-radius: 50%; }
+      .cw-name { font: 600 14px/1.2 var(--font-ui); color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 0; background: none; padding: 0; margin: 0; text-align: left; cursor: pointer; font-family: inherit; }
+      .cw-name:focus, .cw-av-btn:focus { outline: 2px solid var(--honey-nav, #C29E74); outline-offset: 2px; }
       .cw-row input[type="range"] { width: 100%; accent-color: var(--honey-nav, #C29E74); height: 28px; }
       .cw-val { font: 600 12px var(--font-ui); color: var(--dim); text-align: right; letter-spacing: .02em; }
       .cw-note { margin: 10px 2px 4px; font-size: 12.5px; line-height: 1.45; color: var(--dim); }
-      .cw-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; }
+      .cw-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; align-items: center; }
+      .cw-search { position: relative; margin: 0 0 12px; }
+      .cw-search input[type="search"] { width: 100%; }
+      #cw-search-results { position: absolute; z-index: 6; left: 0; right: 0; top: 100%; margin-top: 4px; max-height: 50vh; overflow: auto; background: var(--surface, #fff); border: 1px solid var(--border-strong, rgba(26,22,18,.18)); border-radius: 14px; box-shadow: 0 10px 28px rgba(26,22,18,.14); padding: 6px; }
+      #cw-search-results[hidden] { display: none !important; }
+      #cw-search-results button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 10px 12px; border-radius: 10px; cursor: pointer; color: var(--text); font: 600 14px/1.25 var(--font-ui); }
+      #cw-search-results button:hover, #cw-search-results button:focus { background: var(--surface-alt, #f4efe6); }
+      #cw-search-results .cw-sr-meta { display: block; font: 500 12px/1.3 var(--font-ui); color: var(--dim); margin-top: 2px; }
+      /* Never show the old trailing icon list on Curate > Icons. */
+      #panel-find #icon-list-view, #curate-pages #icon-list-view, #panel-icons #icon-list-view { display: none !important; }
+      #panel-icons:not(.is-icon-page):not(.is-icon-add) #icon-search-card,
+      #panel-icons:not(.is-icon-add) #icon-form,
+      #panel-icons:not(.is-icon-page) #icon-detail,
+      #panel-icons:not(.is-icon-page):not(.is-icon-add) #icon-browse-head,
+      #icon-browse-combo, #icon-browse-hint { display: none !important; }
+      #curate-weights.is-icon-open { display: none !important; }
+      #panel-icons.is-icon-page, #panel-icons.is-icon-add { display: block !important; }
+      .icon-browse-head { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; }
+      .icon-browse-head h3 { margin: 0; font: 650 20px/1.2 var(--font-display); flex: 1; }
       @media (max-width: 420px) {
         .cw-row { grid-template-columns: 32px minmax(0, 1fr) 32px; grid-template-areas: "av name val" "sl sl sl"; gap: 4px 8px; padding: 8px 0; }
         .cw-row .cw-av { grid-area: av; width: 32px; height: 32px; }
@@ -7807,7 +7827,15 @@ window.notMenswear853 = function (e) {
 
       <!-- ================= STYLE ICONS ================= -->
       <section id="panel-icons" role="tabpanel" aria-labelledby="tab-icons" hidden>
-
+        <div class="icon-browse-head" id="icon-browse-head" hidden>
+          <button type="button" class="btn-ghost" id="icon-browse-back" aria-label="Back to weightings">← Back</button>
+          <h3 id="icon-browse-title">Icons</h3>
+        </div>
+        <p id="icon-browse-hint" hidden>Type to filter every icon, then tap one to open it. New icons you add also join the weightings.</p>
+        <div class="icon-browse-combo" id="icon-browse-combo" hidden>
+          <label class="field" for="icon-browse-q">Search icons</label>
+          <input type="search" id="icon-browse-q" placeholder="Search icons" autocomplete="off" aria-label="Search icons" />
+        </div>
         <div class="card add-form icon-tools" id="icon-search-card" >
           <button type="button" class="tools-toggle" id="icon-search-toggle" aria-expanded="false" aria-controls="icon-search-body"><span>Search for an icon</span><span class="tt-chev" aria-hidden="true">▾</span></button>
           <div class="tools-body" id="icon-search-body" hidden>
@@ -7974,9 +8002,16 @@ window.notMenswear853 = function (e) {
               <button type="button" data-cw-level="business" aria-pressed="false">Business</button>
               <button type="button" data-cw-level="formal" aria-pressed="false">Formal</button>
             </div>
-            <div class="cw-actions"><button type="button" class="btn-ghost" id="cw-apply-all">Apply these to every level</button></div>
+            <div class="cw-search" id="cw-search">
+              <label class="field" for="cw-search-q">Search or add an icon</label>
+              <input type="search" id="cw-search-q" placeholder="Search or add an icon" autocomplete="off" aria-label="Search or add an icon" aria-controls="cw-search-results" />
+              <div id="cw-search-results" hidden role="listbox" aria-label="Icon matches"></div>
+            </div>
+            <div class="cw-actions">
+              <button type="button" class="btn-ghost" id="cw-apply-all">Apply these to every level</button>
+            </div>
             <div id="cw-sliders"></div>
-            <p class="cw-note">These steer looks from your closet, Mix and New, and Shop the look. A single Icon in Looks still overrides. Wardrobe Rules always win.</p>
+            <p class="cw-note">These steer looks from your closet, Mix and New, and Shop the look. A single Icon in Looks still overrides. Wardrobe Rules always win, and a blazer or Business Casual / Formal / Black Tie look never uses sneakers or cupsole slip-ons.</p>
           </div>
           <div id="curate-pages"></div>
         </div>
@@ -8261,7 +8296,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.6</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.7</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10911,6 +10946,12 @@ function composerLooks(opts) {
       fresh.map(function (o, i) { return composerOutfitToLook(o, outs.length + i, null); }).filter(keep861).forEach(function (l) { if (looks.length < want) looks.push(l); });
     }
   }
+  /* .86.7: blend per-level icon weights into Home / composer ranking.
+     A weighting never revives a look that rules or the dress-shoe rule rejected. */
+  if (!opts.noIconWeights && window.iconWeights81 && typeof window.iconWeights81.scoreLook === "function") {
+    looks.forEach(function (l) { l._iconW = window.iconWeights81.scoreLook(l, level); });
+    looks.sort(function (a, b) { return (b._iconW || 0) - (a._iconW || 0); });
+  }
   return looks;
 }
 
@@ -11166,7 +11207,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.6";
+var WARDROBE_BUILD = "2026-11-20.86.7";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -28831,7 +28872,7 @@ function sortedIcons() {
 }
 function iconDetailHTML(ic) {
   var pal = ic.palette.map(function (hex) { return { name: hex, hex: hex }; });
-  return '<button type="button" class="btn-ghost icon-back" data-back-icons>← All icons</button>' +
+  return '<button type="button" class="btn-ghost icon-back" data-back-icons>← Back</button>' +
     '<article class="card icon-card icon-detail-card">' +
     (ic.custom ? '<span class="your-badge">Your icon</span>' : "") +
     '<p class="lane">' + esc(ic.lane) + "</p>" +
@@ -28857,23 +28898,44 @@ function iconDetailHTML(ic) {
     "</div></article>";
 }
 function showIconList() {
-  document.getElementById("icon-list-view").hidden = false;
+  var browsing = !!(document.getElementById("panel-icons") && document.getElementById("panel-icons").classList.contains("is-browse"));
+  document.getElementById("icon-list-view").hidden = !browsing;
   document.getElementById("icon-detail").hidden = true;
-  document.getElementById("icon-search-card").hidden = false;
-  document.getElementById("icon-form").hidden = false;
+  document.getElementById("icon-search-card").hidden = !browsing;
+  document.getElementById("icon-form").hidden = !browsing;
+  ["icon-browse-head", "icon-browse-hint", "icon-browse-combo"].forEach(function (id) {
+    var el = document.getElementById(id); if (el) el.hidden = !browsing;
+  });
 }
 function showIconDetail() {
   document.getElementById("icon-list-view").hidden = true;
   document.getElementById("icon-detail").hidden = false;
   document.getElementById("icon-search-card").hidden = true;
   document.getElementById("icon-form").hidden = true;
+  var browsing = !!(document.getElementById("panel-icons") && document.getElementById("panel-icons").classList.contains("is-browse"));
+  var head = document.getElementById("icon-browse-head");
+  if (head) head.hidden = !browsing;
+  ["icon-browse-hint", "icon-browse-combo"].forEach(function (id) {
+    var el = document.getElementById(id); if (el) el.hidden = true;
+  });
 }
 function renderIcons() {
   /* One flat list — nine icons need no A–Z apparatus: no letter
      groups, no jump rail. */
+  var wt = {}, lv = 4;
+  try {
+    if (window.iconWeights81 && window.iconWeights81.weightsForLevel) {
+      var g = document.querySelector("#cw-levels [data-cw-level][aria-pressed='true']");
+      var gid = g ? g.getAttribute("data-cw-level") : "smart";
+      lv = gid === "casual" ? 3 : gid === "business" ? 5 : gid === "formal" ? 6 : 4;
+      wt = window.iconWeights81.weightsForLevel(lv) || {};
+    }
+  } catch (e) { wt = {}; }
   document.getElementById("icon-list").innerHTML = sortedIcons().map(function (ic) {
+    var pct = Math.round(+wt[ic.id] || 0);
     return '<button type="button" class="icon-name-row" data-open-icon="' + ic.id + '">' +
       '<span class="nm">' + esc(ic.name) + '<span class="ln">' + esc(ic.lane) + (ic.custom ? " · Your icon" : "") + "</span></span>" +
+      '<span class="cw-w">' + pct + "%</span>" +
       '<span class="chev" aria-hidden="true">›</span></button>';
   }).join("");
   /* A detail page open across a re-render stays open — unless its
@@ -28888,6 +28950,14 @@ function renderIcons() {
     openIconId = null;
   }
   showIconList();
+  if (document.getElementById("panel-icons") && document.getElementById("panel-icons").classList.contains("is-browse") && typeof window.closeIconBrowse867 !== "undefined") {
+    try {
+      var qel = document.getElementById("icon-browse-q");
+      if (qel && qel.value) {
+        var ev = document.createEvent("Event"); ev.initEvent("input", true, true); qel.dispatchEvent(ev);
+      }
+    } catch (e) {}
+  }
 }
 function openIconDetail(id, opts) {
   var ic = iconById(id);
@@ -28923,7 +28993,15 @@ document.getElementById("icon-form-toggle").addEventListener("click", function (
 renderIcons();
 document.getElementById("panel-icons").addEventListener("click", function (e) {
   var backBtn = e.target.closest("[data-back-icons]");
-  if (backBtn) { closeIconDetail(); return; }
+  if (backBtn) {
+    var pan = document.getElementById("panel-icons");
+    if (pan && (pan.classList.contains("is-icon-page") || pan.classList.contains("is-icon-add")) && window.closeIconBrowse867) {
+      window.closeIconBrowse867();
+      return;
+    }
+    closeIconDetail();
+    return;
+  }
   var openBtn = e.target.closest("[data-open-icon]");
   if (openBtn) { openIconDetail(openBtn.getAttribute("data-open-icon")); return; }
   var lookBtn = e.target.closest("[data-icon-look]");
@@ -29184,6 +29262,9 @@ function addDirectoryIcon(id) {
   persistAll();
   syncIconSelect();
   renderIcons();
+  if (window.iconWeights81 && typeof window.iconWeights81.setState === "function") {
+    try { window.iconWeights81.setState(window.iconWeights81.state()); } catch (e) {}
+  }
   setToolsOpen("search", false);
   openIconDetail(icon.id);
   var sel = document.getElementById("style-direction");
@@ -29291,8 +29372,12 @@ document.getElementById("icon-form").addEventListener("submit", function (e) {
   persistAll();
   syncIconSelect();
   renderIcons();
+  if (window.iconWeights81 && typeof window.iconWeights81.setState === "function") {
+    try { window.iconWeights81.setState(window.iconWeights81.state()); } catch (e) {}
+  }
   setToolsOpen("form", false);
-  openIconDetail(icon.id);
+  if (window.openIconPage867) window.openIconPage867(icon.id);
+  else openIconDetail(icon.id);
   var sel = document.getElementById("style-direction");
   if (sel) sel.value = icon.id;
   renderDirectionPreview();
@@ -39326,7 +39411,7 @@ function syApplyMeta(meta) {
      and are ignored. */
   function ok(f) { return (f in d) && syValidMetaField(f, d[f]); }
   var t, seedState = false;
-  if (ok("profile") && (t = take("profile"))) { profile = syUnwire(d.profile); store.set("profile", profile); sySyncProfileForm(); if (typeof syncFindSize === "function") syncFindSize(); stamp("profile", t, profile); }
+  if (ok("profile") && (t = take("profile"))) { profile = syUnwire(d.profile); store.set("profile", profile); sySyncProfileForm(); if (typeof syncFindSize === "function") syncFindSize(); stamp("profile", t, profile); try { if (window.paintCurate81) window.paintCurate81(); if (window.endlessOnWeights81) window.endlessOnWeights81(); } catch (e) {} }
   if (ok("deletedIds") && (t = take("deletedIds"))) {
     /* Build .55 (3.5): union, never replace — a deletion made on
        either device survives the merge. */
@@ -45529,11 +45614,12 @@ window.inspoView = "withmine";
     </script>
     <script type="wardrobe/app">
 /* ================= Preview .81.2 — Curate + per-level icon weights =================
-   Icons and Palettes live in The Edit → Curate. Weight sliders are per dress
-   level (Casual / Smart Casual / Business / Formal), kept on this device with
-   the lens state (endless81). "Same for all levels" copies one set everywhere.
-   A single Icon pick in Looks still overrides. Wardrobe Rules, when present,
-   always veto before a weighting can boost a piece. */
+   Icons and Palettes live in The Edit → Curate. Weight sliders are 0–100% per
+   dress level (Casual / Smart Casual / Business / Formal). They persist in
+   profile.iconWeights (synced with Cloud sync) and a local endless81 copy.
+   A 0% weight has no influence. "Same for all levels" copies one set everywhere.
+   A single Icon pick in Looks still overrides. Wardrobe Rules, and the hard
+   dress-shoe rule, always veto before a weighting can boost a piece. */
 (function () {
   "use strict";
   var GROUPS = {
@@ -45543,7 +45629,7 @@ window.inspoView = "withmine";
     formal: { id: "formal", label: "Formal", levels: [6, 7] }
   };
   var GROUP_ORDER = ["casual", "smart", "business", "formal"];
-  var HIGH = 8, MID = 2, MAX = 10;
+  var HIGH = 80, MID = 20, MAX = 100;
   var LENS_WORDS = ["double-breasted", "blazer", "suit", "polo", "loafer", "linen", "knit", "sweater", "cardigan", "chino", "jean", "denim", "tee", "t-shirt", "shirt", "oxford", "trouser", "shorts", "suede", "boot", "sneaker", "overshirt", "jacket", "coat", "turtleneck", "roll-neck", "rollneck", "cashmere", "gurkha", "pleat", "leather", "tweed", "flannel", "corduroy", "camp collar", "henley", "espadrille", "driver", "derby", "chelsea", "field jacket", "safari", "bomber", "peacoat", "trench", "waistcoat", "cable"];
   var lensMemo = {};
   var cwLevel = "casual";
@@ -45593,18 +45679,51 @@ window.inspoView = "withmine";
   function normalize(raw) {
     var d = defaultState();
     if (!raw || typeof raw !== "object") return d;
-    var out = { mode: raw.mode === "all" ? "all" : "per", all: Object.assign({}, d.all, raw.all || {}), byLevel: {} };
+    var out = { mode: raw.mode === "all" ? "all" : "per", all: Object.assign({}, d.all, raw.all || {}), byLevel: {}, scale: 100, v: 2 };
     GROUP_ORDER.forEach(function (g) {
       out.byLevel[g] = Object.assign({}, d.byLevel[g], (raw.byLevel && raw.byLevel[g]) || {});
     });
     return out;
   }
+  function rawFromProfile() {
+    try { return (typeof profile !== "undefined" && profile && profile.iconWeights) || null; } catch (e) { return null; }
+  }
+  function isV2(raw) { return !!(raw && typeof raw === "object" && (raw.scale === 100 || raw.v === 2)); }
+  function mapMax(m) {
+    var x = 0;
+    Object.keys(m || {}).forEach(function (k) { var n = +m[k]; if (n > x) x = n; });
+    return x;
+  }
+  function scaleMap(m, factor) {
+    var o = {};
+    Object.keys(m || {}).forEach(function (k) { o[k] = clampW((+m[k] || 0) * factor); });
+    return o;
+  }
+  function upgradeWeights(raw) {
+    if (!raw || typeof raw !== "object") return raw;
+    if (isV2(raw)) return raw;
+    var mx = mapMax(raw.all);
+    GROUP_ORDER.forEach(function (g) { var n = mapMax(raw.byLevel && raw.byLevel[g]); if (n > mx) mx = n; });
+    if (mx > 10) return raw;
+    var out = { mode: raw.mode === "all" ? "all" : "per", all: scaleMap(raw.all, 10), byLevel: {} };
+    GROUP_ORDER.forEach(function (g) { out.byLevel[g] = scaleMap(raw.byLevel && raw.byLevel[g], 10); });
+    return out;
+  }
   function loadWeights() {
-    var S = readStore();
-    return normalize(S.weights);
+    var raw = rawFromProfile() || (readStore().weights);
+    return normalize(upgradeWeights(raw));
   }
   function saveWeights(w) {
+    w = normalize(w);
+    w.scale = 100;
+    w.v = 2;
     writeStore({ weights: w });
+    try {
+      if (typeof profile !== "undefined") {
+        profile.iconWeights = w;
+        if (typeof store !== "undefined") store.set("profile", profile);
+      }
+    } catch (e) {}
     if (window.endlessOnWeights81) window.endlessOnWeights81();
   }
   function clampW(n) {
@@ -45672,11 +45791,12 @@ window.inspoView = "withmine";
     return sc;
   }
   function rulesAllow(p, ctx) {
-    /* Hard Wardrobe Rules always win over a weighting bonus. */
+    /* Hard Wardrobe Rules, and the dress-shoe rule, always win over a weighting bonus. */
     try {
-      if (window.WardrobeRules && typeof window.WardrobeRules.check === "function" && p) {
+      if (p) {
         var packed = (p.fwPieces || p.t || p.top || p.pieces) ? p : { fwPieces: [{ name: p.name, category: p.category || p.cat || p.garment, colourName: p.colourName || p.colour, colourHex: p.colourHex || p.hex, hex: p.hex || p.colourHex }] };
-        if (window.WardrobeRules.check(packed, ctx || {}).ok === false) return false;
+        if (window.WardrobeRules && typeof window.WardrobeRules.check === "function" && window.WardrobeRules.check(packed, ctx || {}).ok === false) return false;
+        if (typeof formalShoesOk866 === "function" && (p.fwPieces || p.t || p.shoes || p.layer) && formalShoesOk866(packed, ctx || {}) === false) return false;
       }
     } catch (e) {}
     return true;
@@ -45695,7 +45815,7 @@ window.inspoView = "withmine";
       if (wv <= 0) return;
       var lens = iconLensOf(ic);
       if (!lens) return;
-      var pw = Math.pow(wv, 2.5);
+      var pw = Math.pow(wv / MAX, 2.5);
       acc += lensPiece(p, lens) * pw;
       tot += pw;
     });
@@ -45732,6 +45852,8 @@ window.inspoView = "withmine";
     if (pal) pal.hidden = sub !== "palettes";
     var w = document.getElementById("curate-weights");
     if (w) w.hidden = sub !== "icons";
+    if (sub !== "icons" && window.closeIconPage867) window.closeIconPage867();
+    if (sub !== "icons" && window.closeIconBrowse867) window.closeIconBrowse867();
     document.querySelectorAll("[data-curate-view]").forEach(function (b) {
       b.setAttribute("aria-pressed", b.getAttribute("data-curate-view") === sub ? "true" : "false");
     });
@@ -45761,11 +45883,12 @@ window.inspoView = "withmine";
     icons().forEach(function (ic) {
       var val = clampW(map[ic.id] != null ? map[ic.id] : MID);
       var thumb = (ic.photo || ic.img || ((ic.looks || [])[0] && (ic.looks || [])[0].img)) || "";
-      h += '<label class="cw-row" data-cw-icon="' + escAttr(ic.id) + '">' +
-        (thumb ? '<img class="cw-av" src="' + escAttr(thumb) + '" alt="" />' : '<span class="cw-av"></span>') +
-        '<span class="cw-name">' + escAttr(ic.name) + '</span>' +
+      h += '<div class="cw-row" data-cw-icon="' + escAttr(ic.id) + '">' +
+        '<button type="button" class="cw-av-btn" data-cw-open="' + escAttr(ic.id) + '" aria-label="Open ' + escAttr(ic.name) + '">' +
+        (thumb ? '<img class="cw-av" src="' + escAttr(thumb) + '" alt="" />' : '<span class="cw-av"></span>') + "</button>" +
+        '<button type="button" class="cw-name" data-cw-open="' + escAttr(ic.id) + '">' + escAttr(ic.name) + "</button>" +
         '<input type="range" min="0" max="' + MAX + '" step="1" value="' + val + '" aria-label="' + escAttr(ic.name) + ' weighting" />' +
-        '<span class="cw-val">' + (val === 0 ? "Off" : val) + "</span></label>";
+        '<span class="cw-val">' + val + "%</span></div>";
     });
     host.innerHTML = h || '<p class="cw-note">Icons are still loading\u2026</p>';
   }
@@ -45815,8 +45938,98 @@ window.inspoView = "withmine";
     topLens: topLens,
     lensOf: iconLensOf,
     rulesAllow: rulesAllow,
+    scoreLook: function (look, level, w) {
+      var t = 0;
+      ((look && look.fwPieces) || []).forEach(function (pc) { t += scorePiece(pc, level, w); });
+      return t;
+    },
+    pctLabel: function (n) { return clampW(n) + "%"; },
     seedNote: "Casual seeds to Squarzi (Alexander Skarsgård is not in the icon set). Business and Formal seed to Kraft and Beckham."
   };
+
+  function hideSearch867() {
+    var box = document.getElementById("cw-search-results");
+    if (box) { box.hidden = true; box.innerHTML = ""; }
+  }
+  function paintSearch867() {
+    var qel = document.getElementById("cw-search-q");
+    var box = document.getElementById("cw-search-results");
+    if (!qel || !box) return;
+    var q = qel.value.trim(), ql = q.toLowerCase();
+    var rows = [];
+    function hit(name, extra) {
+      var hay = (name + " " + (extra || "")).toLowerCase();
+      return !ql || hay.indexOf(ql) !== -1 || name.toLowerCase().split(/\s+/).some(function (w) { return ql && w.indexOf(ql) === 0; });
+    }
+    if (ql.length) {
+      icons().forEach(function (ic) {
+        if (!hit(ic.name, ic.lane)) return;
+        rows.push('<button type="button" data-cw-pick="' + escAttr(ic.id) + '">' + escAttr(ic.name) + '<span class="cw-sr-meta">In your weightings — open</span></button>');
+      });
+      var have = {};
+      icons().forEach(function (ic) { have[ic.id] = 1; });
+      var dir = (typeof ICON_DIRECTORY !== "undefined" && ICON_DIRECTORY) ? ICON_DIRECTORY : [];
+      dir.forEach(function (ic) {
+        if (!ic || have[ic.id] || !hit(ic.name, (ic.lane || "") + " " + (ic.keys || ""))) return;
+        rows.push('<button type="button" data-cw-add="' + escAttr(ic.id) + '">' + escAttr(ic.name) + '<span class="cw-sr-meta">Add to weightings' + (ic.lane ? " · " + escAttr(ic.lane) : "") + "</span></button>");
+      });
+    }
+    rows.push('<button type="button" data-cw-own="' + escAttr(q) + '">Add your own icon' + (q ? " — " + escAttr(q) : "") + '<span class="cw-sr-meta">Build a profile and include it in the weightings</span></button>');
+    box.innerHTML = rows.join("");
+    box.hidden = false;
+  }
+  function openIconPage867(id) {
+    hideSearch867();
+    var ic = document.getElementById("panel-icons");
+    var w = document.getElementById("curate-weights");
+    if (!ic || typeof openIconDetail !== "function") return;
+    ic.classList.remove("is-icon-add");
+    ic.classList.add("is-icon-page");
+    if (w) w.classList.add("is-icon-open");
+    var head = document.getElementById("icon-browse-head");
+    var title = document.getElementById("icon-browse-title");
+    if (head) head.hidden = false;
+    var named = (typeof iconById === "function" && iconById(id)) || null;
+    if (title) title.textContent = (named && named.name) || "Icon";
+    try { openIconDetail(id); } catch (e) {}
+    try { ic.scrollIntoView({ block: "start" }); } catch (e) {}
+  }
+  function openAddIcon867(prefill) {
+    hideSearch867();
+    var ic = document.getElementById("panel-icons");
+    var w = document.getElementById("curate-weights");
+    if (!ic) return;
+    ic.classList.remove("is-icon-page");
+    ic.classList.add("is-icon-add");
+    if (w) w.classList.add("is-icon-open");
+    var head = document.getElementById("icon-browse-head");
+    var title = document.getElementById("icon-browse-title");
+    if (head) head.hidden = false;
+    if (title) title.textContent = "Add your own icon";
+    var form = document.getElementById("icon-form");
+    if (form) form.hidden = false;
+    if (typeof setToolsOpen === "function") try { setToolsOpen("form", true); } catch (e) {}
+    if (prefill) {
+      var name = document.getElementById("icon-name");
+      if (name && !name.value) name.value = prefill;
+    }
+    try { ic.scrollIntoView({ block: "start" }); } catch (e) {}
+  }
+  function closeIconPage867() {
+    var ic = document.getElementById("panel-icons");
+    var w = document.getElementById("curate-weights");
+    if (ic) { ic.classList.remove("is-icon-page"); ic.classList.remove("is-icon-add"); }
+    if (w) w.classList.remove("is-icon-open");
+    var head = document.getElementById("icon-browse-head");
+    if (head) head.hidden = true;
+    if (typeof closeIconDetail === "function") try { closeIconDetail(); } catch (e) {}
+    if (typeof setToolsOpen === "function") try { setToolsOpen("form", false); } catch (e) {}
+    hideSearch867();
+    paintWeights();
+  }
+  window.openIconBrowse867 = function () { var q = document.getElementById("cw-search-q"); if (q) { try { q.focus(); } catch (e) {} paintSearch867(); } };
+  window.closeIconBrowse867 = closeIconPage867;
+  window.openIconPage867 = openIconPage867;
 
   window.paintCurate81 = function () {
     mountPanels();
@@ -45857,6 +46070,22 @@ window.inspoView = "withmine";
     if (b) { showSub(b.getAttribute("data-curate-view")); if (typeof persistTab === "function") persistTab(); return; }
     b = t.closest("#cw-apply-all");
     if (b) { applySameToAll(); return; }
+    var openBtn = t.closest("[data-cw-open]");
+    if (openBtn) { openIconPage867(openBtn.getAttribute("data-cw-open")); return; }
+    if (t.closest("#icon-browse-back")) { closeIconPage867(); return; }
+    var pick = t.closest("[data-cw-pick]");
+    if (pick) { openIconPage867(pick.getAttribute("data-cw-pick")); return; }
+    var add = t.closest("[data-cw-add]");
+    if (add) {
+      hideSearch867();
+      if (typeof addDirectoryIcon === "function") addDirectoryIcon(add.getAttribute("data-cw-add"));
+      paintWeights();
+      openIconPage867(add.getAttribute("data-cw-add"));
+      return;
+    }
+    var own = t.closest("[data-cw-own]");
+    if (own) { openAddIcon867(own.getAttribute("data-cw-own") || ""); return; }
+    if (!t.closest("#cw-search")) hideSearch867();
   });
   document.addEventListener("change", function (e) {
     if (!e.target) return;
@@ -45865,13 +46094,17 @@ window.inspoView = "withmine";
     if (row && e.target.matches("input[type=range]")) setSlider(row.getAttribute("data-cw-icon"), e.target.value);
   });
   document.addEventListener("input", function (e) {
+    if (e.target && e.target.id === "cw-search-q") { paintSearch867(); return; }
     var row = e.target && e.target.closest && e.target.closest(".cw-row");
     if (!row || !e.target.matches("input[type=range]")) return;
     var lab = row.querySelector(".cw-val");
     var v = clampW(e.target.value);
-    if (lab) lab.textContent = v === 0 ? "Off" : String(v);
+    if (lab) lab.textContent = v + "%";
   });
 
+  document.addEventListener("focusin", function (e) {
+    if (e.target && e.target.id === "cw-search-q") paintSearch867();
+  });
   if (document.readyState !== "loading") { mountPanels(); window.flushCurate81(); }
   else document.addEventListener("DOMContentLoaded", function () { mountPanels(); window.flushCurate81(); });
 })();
@@ -46605,9 +46838,9 @@ window.inspoView = "withmine";
       var h = '<button type="button" class="pv-ic pv-none" data-pv-lens="" aria-pressed="' + (cur ? "false" : "true") + '"><span>None</span></button>';
       list.forEach(function (ic) {
         var t = thumb(ic), w = +wt[ic.id] || 0;
-        h += '<button type="button" class="pv-ic' + (w <= 0 ? " pv-ic-off" : "") + '" data-pv-lens="' + E(ic.id) + '" aria-pressed="' + (cur === ic.id ? "true" : "false") + '" title="' + E(ic.name) + (w ? " · weight " + w : " · off") + '">' +
+        h += '<button type="button" class="pv-ic' + (w <= 0 ? " pv-ic-off" : "") + '" data-pv-lens="' + E(ic.id) + '" aria-pressed="' + (cur === ic.id ? "true" : "false") + '" title="' + E(ic.name) + (w ? " · " + w + "%" : " · 0%") + '">' +
           (t ? '<img class="pv-av" src="' + E(t) + '" alt="" loading="lazy" decoding="async" />' : '<span class="pv-av"></span>') + "<span>" + E(short(ic.name)) + "</span>" +
-          (w ? '<i class="pv-w" aria-hidden="true">' + w + "</i>" : "") + "</button>";
+          (w ? '<i class="pv-w" aria-hidden="true">' + w + "%</i>" : "") + "</button>";
       });
       host.innerHTML = h;
       var sw = sh.querySelector("#pvf-liked"); sw.setAttribute("aria-checked", S.likedOnly ? "true" : "false");
@@ -46834,8 +47067,10 @@ function dealMine(q) {
     var extraW = mineDeck.deal(q.n * 20, Object.assign({}, o, { recent: (q.recent || []).concat(haveW) })) || [];
     extraW.forEach(function (x) { if (haveW.indexOf(x.key) === -1) { haveW.push(x.key); outs.push(x); } });
     var Lset = weightLenses(q), tw = 0;
-    Lset.forEach(function (L) { L.pw = Math.pow(L.w, 2.5); tw += L.pw; });
-    var focus = Lset.filter(function (L) { return L.w >= 8; });
+    var wMax = (q.weights && (q.weights.scale === 100 || q.weights.v === 2)) ? 100 : 10;
+    var focusAt = wMax === 100 ? 80 : 8;
+    Lset.forEach(function (L) { L.pw = Math.pow((L.w || 0) / wMax, 2.5); tw += L.pw; });
+    var focus = Lset.filter(function (L) { return L.w >= focusAt; });
     outs.forEach(function (x) {
       var scores = {}, t = 0, othersMax = -1e9;
       Lset.forEach(function (L) {
