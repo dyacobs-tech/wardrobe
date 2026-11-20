@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.85.3" />
+    <meta name="wardrobe-build" content="2026-11-20.86.0" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -3107,6 +3107,96 @@ window.notMenswear853 = function (e) {
       .trip-card .tc-meta { font-size: 12.5px; color: var(--dim); line-height: 1.4; }
       .trip-form { display: grid; gap: 8px; margin-top: 16px; }
       .trip-form .tf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      /* .86.0 trip planner — same tokens as the rest of the Calendar */
+      #trips-wrap .trip-form[hidden], #trips-wrap #trip-list[hidden], #trips-wrap #trip-detail[hidden] { display: none !important; }
+      #trips-wrap .tp-empty { display: grid; justify-items: center; gap: 12px; padding: 48px 12px 24px; text-align: center; }
+      #trips-wrap .tp-empty-note { margin: 0; color: var(--dim); font-size: 14px; line-height: 1.45; max-width: 300px; }
+      #trips-wrap .tp-empty .btn-ink { min-width: 200px; }
+      #trips-wrap .tp-create { width: 100%; margin-top: 4px; }
+      #trips-wrap .tp-form { display: grid; gap: 16px; margin-top: 8px; padding-bottom: 12px; }
+      #trips-wrap .tp-sec { display: grid; gap: 8px; min-width: 0; }
+      #trips-wrap .tp-sec label.field { margin: 0; }
+      #trips-wrap .tp-opt-l { text-transform: none; letter-spacing: 0; font-weight: 500; }
+      #trips-wrap .tp-form input[type="text"], #trips-wrap .tp-form input[type="date"], #trips-wrap .tp-form input[type="number"] { box-sizing: border-box; width: 100%; min-width: 0; }
+      #trips-wrap .tp-from { margin: 0; }
+      #trips-wrap .tp-stop { display: flex; align-items: center; gap: 8px; min-width: 0; }
+      #trips-wrap .tp-stop .tp-city { flex: 1 1 auto; }
+      #trips-wrap .tp-step-u { font-size: 13px; color: var(--dim); flex: none; }
+      #trips-wrap .tp-x { flex: none; width: 32px; height: 32px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--dim); font: inherit; font-size: 18px; line-height: 1; cursor: pointer; }
+      #trips-wrap .tp-wx { margin: -2px 0 0; font-size: 13px; color: var(--dim); }
+      #trips-wrap .tp-wx-edit { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--dim); }
+      #trips-wrap .tp-wx-edit input { width: 64px !important; }
+      #trips-wrap .tp-link { background: none; border: none; padding: 0; font: inherit; font-size: 13px; font-weight: 600; color: var(--brass); cursor: pointer; text-align: left; justify-self: start; }
+      #trips-wrap .tp-hint { margin: 0; font-size: 12.5px; color: var(--dim); line-height: 1.4; }
+      #trips-wrap .tp-center { text-align: center; }
+      #trips-wrap .tp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+      #trips-wrap .tp-chip { height: 32px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--dim); font: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .03em; padding: 0 12px; cursor: pointer; }
+      #trips-wrap .tp-chip[aria-pressed="true"] { background: var(--ink-btn); color: var(--accent-ink); border-color: transparent; }
+      #trips-wrap .tp-row2 { grid-template-columns: 1fr 1fr; }
+      #trips-wrap .tp-row2 > div { display: grid; gap: 8px; justify-items: start; }
+      #trips-wrap .tp-step { display: inline-flex; align-items: center; gap: 0; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); flex: none; }
+      #trips-wrap .tp-step button { width: 34px; height: 32px; border: none; background: none; font: inherit; font-size: 18px; color: var(--text); cursor: pointer; line-height: 1; }
+      #trips-wrap .tp-step button:disabled { color: var(--border); cursor: default; }
+      #trips-wrap .tp-step-v { min-width: 22px; text-align: center; font-weight: 600; font-size: 14px; font-variant-numeric: tabular-nums; }
+      #trips-wrap .tp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+      #trips-wrap .tp-cell { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-width: 0; }
+      #trips-wrap .tp-cell-l { font-size: 13px; color: var(--text); min-width: 0; }
+      #trips-wrap .tp-share-head { display: flex; align-items: baseline; justify-content: space-between; }
+      #trips-wrap .tp-share-v { font-family: var(--font-display); font-size: 22px; }
+      #trips-wrap input[type="range"][data-tp-share] { width: 100%; accent-color: #C29E74; margin: 0; }
+      #trips-wrap .tp-share-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); }
+      #trips-wrap .tp-budget { display: grid; gap: 6px; margin-top: 4px; }
+      #trips-wrap .tp-dollar { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+      #trips-wrap .tp-go { width: 100%; }
+      #trips-wrap .tp-plan { display: grid; gap: 10px; }
+      #trips-wrap .tp-plan .tp-name { font-family: var(--font-display); font-size: 20px; margin: 0; }
+      #trips-wrap .tp-plan .meta { margin: -6px 0 0; }
+      #trips-wrap .tp-stops { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 13px; }
+      #trips-wrap .tp-stops li { display: flex; justify-content: space-between; gap: 8px; }
+      #trips-wrap .tp-stops li span:last-child { color: var(--dim); text-align: right; }
+      #trips-wrap .tp-sum, #trips-wrap .tp-counts { margin: 0; font-size: 13.5px; }
+      #trips-wrap .tp-counts { color: var(--dim); font-size: 12.5px; margin-top: -6px; }
+      #trips-wrap .tp-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+      #trips-wrap .tp-day { display: grid; gap: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
+      #trips-wrap .tp-day-head { margin: 4px 0 0; font-family: var(--font-display); font-size: 16px; font-weight: 600; display: flex; gap: 8px; align-items: baseline; }
+      #trips-wrap .tp-day-wx { margin-left: auto; font-family: var(--font-ui); font-size: 12.5px; font-weight: 500; color: var(--dim); }
+      #trips-wrap .tp-slot { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-alt); padding: 10px 12px; display: grid; gap: 8px; min-width: 0; }
+      #trips-wrap .tp-slot-head { display: flex; align-items: center; gap: 8px; }
+      #trips-wrap .tp-lv { font-size: 12px; color: var(--dim); }
+      #trips-wrap .tp-flag { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--brass); }
+      #trips-wrap .tp-look { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 10px; align-items: start; }
+      #trips-wrap .tp-fig { margin: 0; border-radius: 12px; overflow: hidden; background: #F6F2EA; }
+      #trips-wrap .tp-avatar { aspect-ratio: 9 / 16; display: flex; align-items: flex-end; justify-content: center; }
+      #trips-wrap .tp-avatar img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; }
+      #trips-wrap .tp-flat { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px; background: var(--surface); }
+      #trips-wrap .tp-fl { width: 100%; height: 52px; aspect-ratio: auto; object-fit: contain; background: #F6F2EA; border-radius: 6px; display: block; overflow: hidden; font-size: 0; color: transparent; }
+      #trips-wrap .tp-look-title { margin: 0 0 4px; font-weight: 600; font-size: 14px; line-height: 1.3; }
+      #trips-wrap .tp-pieces { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+      #trips-wrap .tp-piece { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12.5px; line-height: 1.3; }
+      #trips-wrap .tp-th { width: 30px; height: 30px; flex: none; object-fit: contain; background: #F6F2EA; border-radius: 6px; display: inline-block; overflow: hidden; font-size: 0; color: transparent; }
+      #trips-wrap .tp-nophoto { background: var(--bg-deep); }
+      #trips-wrap .tp-pn { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+      #trips-wrap .tp-new { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--ink-btn); color: var(--accent-ink); white-space: nowrap; }
+      #trips-wrap .tp-wear { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 999px; background: rgba(194,158,116,.22); color: var(--brass); white-space: nowrap; }
+      #trips-wrap .tp-wear.over { background: var(--brass); color: #fff; }
+      #trips-wrap .tp-swap { flex: none; background: none; border: none; padding: 4px 2px; font: inherit; font-size: 12px; font-weight: 600; color: var(--brass); cursor: pointer; }
+      #trips-wrap .tp-swaps { display: grid; gap: 4px; padding: 6px 0 2px; }
+      #trips-wrap .tp-swap-row { display: grid; gap: 4px; }
+      #trips-wrap .tp-opt { display: flex; align-items: center; gap: 6px; text-align: left; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: 4px 6px; font: inherit; font-size: 12.5px; color: var(--text); cursor: pointer; }
+      #trips-wrap .tp-tuck { margin: 6px 0 0; font-size: 11.5px; color: var(--dim); }
+      #trips-wrap .tp-pack { gap: 8px; }
+      #trips-wrap .tp-pk-w { margin-left: auto; color: var(--dim); font-size: 12px; }
+      #trips-wrap .tp-buy { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 4px 10px; min-width: 0; width: 100%; box-sizing: border-box; }
+      #trips-wrap .tp-buy .w-main { min-width: 0; }
+      #trips-wrap .tp-buy .w-name { white-space: normal; overflow-wrap: anywhere; }
+      #trips-wrap .tp-buy-acts { grid-column: 2; display: flex; gap: 6px; }
+      #trips-wrap .tp-plan, #trips-wrap .tp-plan > * { min-width: 0; max-width: 100%; }
+      #trips-wrap .tp-buy .tp-th { width: 44px; height: 44px; }
+      #trips-wrap .tp-buy .btn-ghost { min-height: 32px; padding: 4px 10px; font-size: 12px; flex: none; text-decoration: none; }
+      #trips-wrap .tp-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+      #trips-wrap .tp-actions .btn-ink { grid-column: 1 / -1; }
+      #trips-wrap .tp-actions .btn-ink:disabled { opacity: .55; }
+      #trips-wrap .tp-del { color: #8a2f22; }
       .trip-form .tf-pool { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); }
       .profile-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
       .profile-photo { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); flex: none; }
@@ -7324,29 +7414,7 @@ window.notMenswear853 = function (e) {
           <div id="trip-detail" hidden>
             <div id="capsule-out"></div>
           </div>
-          <form class="trip-form" id="trip-form">
-            <h3 class="fav-head">New trip</h3>
-            <div>
-              <label class="field" for="trip-name">Name</label>
-              <input type="text" id="trip-name" autocomplete="off" />
-            </div>
-            <div class="tf-row">
-              <div>
-                <label class="field" for="trip-start">Start</label>
-                <input type="date" id="trip-start" />
-              </div>
-              <div>
-                <label class="field" for="trip-end">End</label>
-                <input type="date" id="trip-end" />
-              </div>
-            </div>
-            <div>
-              <label class="field" for="trip-dests">Destinations</label>
-              <input type="text" id="trip-dests" autocomplete="off" />
-            </div>
-            <label class="tf-pool"><input type="checkbox" id="trip-pool" /> Beach / pool days</label>
-            <button type="submit" class="btn-ink">Create trip</button>
-          </form>
+          <div class="trip-form tp-form" id="trip-form" hidden></div>
         </div>
       </section>
 
@@ -8047,7 +8115,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.85.3</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.0</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10794,7 +10862,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.85.3";
+var WARDROBE_BUILD = "2026-11-20.86.0";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -35547,6 +35615,7 @@ function buildCapsule(key) {
   var out = document.getElementById("capsule-out");
   if (!trip || !out) return;
   currentCapsule = key;
+  if (trip.v === 2 && window.tripPlan86) { window.tripPlan86.show(trip); return; }
   /* Outfits from his closet, organized BY DAY: each day carries
      its slots (Day / Pool / Night on a beach trip; Day / Après
      in the cold), each slot built from his closet pieces at the
@@ -35715,7 +35784,7 @@ function calNavReset() {
 function calShowList() {
   var list = document.getElementById("trip-list"), det = document.getElementById("trip-detail"), form = document.getElementById("trip-form");
   if (list) list.hidden = false;
-  if (form) form.hidden = false;
+  if (form) form.hidden = true; /* .86.0: the setup sheet opens from Create trip */
   if (det) { det.hidden = true; var co = document.getElementById("capsule-out"); if (co) co.innerHTML = ""; }
   renderTripList();
 }
@@ -35744,12 +35813,17 @@ function tripDatesLabel(t) {
 function renderTripList() {
   var el = document.getElementById("trip-list");
   if (!el) return;
-  el.innerHTML = allTripKeys().map(function (k) {
+  var keys86 = allTripKeys();
+  if (!keys86.length) {
+    el.innerHTML = '<div class="tp-empty"><p class="tp-empty-note">No trips yet. Plan one and DONNA packs it from your closet.</p><button type="button" class="btn-ink" data-tp-create>Create trip</button></div>';
+    return;
+  }
+  el.innerHTML = keys86.map(function (k) {
     var t = tripDef(k);
     if (!t) return "";
     var dests = (t.legs && t.legs.length) ? t.legs.join(" · ") : "";
     return '<button type="button" class="trip-card" data-trip-open="' + esc(k) + '"><span class="tc-name">' + esc(t.name) + '</span><span class="tc-meta">' + esc(tripDatesLabel(t)) + (dests ? " · " + esc(dests) : "") + "</span></button>";
-  }).join("");
+  }).join("") + '<button type="button" class="btn-ghost tp-create" data-tp-create>Create trip</button>';
 }
 document.getElementById("panel-calendar").addEventListener("click", function (e) {
   var b = e.target.closest("[data-calview]");
@@ -35762,31 +35836,781 @@ document.getElementById("panel-calendar").addEventListener("click", function (e)
   if (v === "trips") calShowList();
   calViewApply();
 });
+/* ================= Build .86.0 — Trip planner (user-created) =================
+   Trips are his own: nothing is planned until he taps Create trip. The
+   setup sheet collects stops (with a weather read), days, dress levels,
+   the closet share (0–100%), an optional Edit budget, piece counts and
+   how often a piece may be re-worn. Generate packs a capsule with the
+   same composer (WardrobeComposer) every other screen uses, so the hard
+   rules hold here too: tuck rules, pool slides only at the pool, no
+   shorts above Casual and only now and then at Casual. Everything stays
+   editable — swap a piece, save, change the settings, delete the trip. */
 (function () {
-  var form = document.getElementById("trip-form");
-  if (!form) return;
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    var name = (document.getElementById("trip-name").value || "").trim();
-    var start = document.getElementById("trip-start").value || "";
-    var end = document.getElementById("trip-end").value || "";
-    var dests = (document.getElementById("trip-dests").value || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
-    if (!name || !start || !end) { toast("A trip needs a name, a start and an end date."); return; }
-    var a = planDateOfISO(start), b = planDateOfISO(end);
-    var days = Math.round((b - a) / 86400000) + 1;
-    if (days < 1) { toast("The end date is before the start."); return; }
-    if (days > 31) days = 31;
-    var pool = document.getElementById("trip-pool").checked;
-    var id = "trip-" + name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now().toString(36);
-    userTrips.push({ id: id, key: id, name: name, start: start, end: end, legs: dests.length ? dests : [name], days: days,
-      slots: pool ? ["Day", "Pool", "Night"] : ["Day", "Night"], temp: 75, nightTemp: 68,
-      weather: "Dealt at a mild-weather default (75°F days) — outfits build from your closet with light layers.",
-      essentials: ["Sunglasses", "Passport", "Charger", "A light layer for evenings"], note: "" });
+  "use strict";
+  var LEVELS = ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"];
+  var WEAR_PRESETS = { fewer: { top: 1, bottom: 2, shoe: 3, layer: 2 }, balanced: { top: 2, bottom: 3, shoe: 4, layer: 3 }, light: { top: 3, bottom: 5, shoe: 7, layer: 5 } };
+  var BUCKETS = [["top", "tops", "Tops"], ["bottom", "bottoms", "Bottoms"], ["shoe", "shoes", "Shoes"], ["layer", "layers", "Layers"]];
+  var TP = { form: null, editId: null, cur: null, dirty: false, tab: "days", swap: null, cat: null, catLoading: null, busy: false, delArm: false, wx: {} };
+  function Cx() { return window.WardrobeComposer; }
+  function lvName(l) { return LEVELS[l - 1] || ""; }
+  function num(v, a, b, d) { v = parseInt(v, 10); if (!isFinite(v)) v = d; return Math.max(a, Math.min(b, v)); }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function closetList() { return (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : []; }
+  function rngOf(seed) { var a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+  /* ---------- settings ---------- */
+  function defaultForm() {
+    var o = (typeof currentLoc !== "undefined" && currentLoc && currentLoc.name) ? currentLoc : null;
+    var f = { name: "", origin: o ? { name: String(o.name).split(",")[0], lat: o.lat, lon: o.lon } : null, start: "",
+      stops: [{ city: "", days: 7 }], travelDay: true,
+      dayLevel: 3, evening: 4, poolDays: 0, dressy: 0, dressyLevel: 6,
+      share: 100, buy: false, budget: "", exclude: [],
+      wearPreset: "balanced", wear: clone(WEAR_PRESETS.balanced), counts: null, seed: 1 };
+    f.counts = defaultCounts(f);
+    return f;
+  }
+  function totalDays(f) { return f.stops.reduce(function (t, s) { return t + num(s.days, 1, 30, 1); }, 0); }
+  function stopWx(f, i) { var s = f.stops[i] || {}; return s.wx || null; }
+  function stopHi(f, i) { var w = stopWx(f, i); return w ? w.hi : 72; }
+  function stopLo(f, i) { var w = stopWx(f, i); return w ? w.lo : 60; }
+  function slotsOf(f) {
+    var days = [], d = 0;
+    f.stops.forEach(function (s, si) { for (var k = 0; k < num(s.days, 1, 30, 1); k++) { days.push({ day: d, stop: si }); d++; } });
+    var N = days.length;
+    var poolN = num(f.poolDays, 0, N, 0), dressyN = num(f.dressy, 0, N, 0);
+    var warm = days.slice().sort(function (a, b) { return (stopHi(f, b.stop) - stopHi(f, a.stop)) || (a.day - b.day); });
+    var pool = {}; warm.slice(0, poolN).forEach(function (x) { pool[x.day] = 1; });
+    var dressy = {}; for (var i = N - 1; i >= 0 && dressyN > 0; i--, dressyN--) dressy[i] = 1;
+    var originHi = f.origin && f.origin.wx ? f.origin.wx.hi : null;
+    var out = [];
+    days.forEach(function (x) {
+      var hi = stopHi(f, x.stop), lo = stopLo(f, x.stop);
+      var travel = !!(f.travelDay && f.origin && x.day === 0);
+      out.push({ day: x.day, stop: x.stop, kind: travel ? "travel" : "day", label: travel ? "Travel" : "Day",
+        level: travel ? Math.max(3, Math.min(4, f.dayLevel)) : f.dayLevel, temp: travel && originHi != null ? Math.min(hi, originHi) : hi });
+      if (pool[x.day]) out.push({ day: x.day, stop: x.stop, kind: "pool", label: "Pool", level: 1, temp: Math.max(hi, 80) });
+      if (dressy[x.day]) out.push({ day: x.day, stop: x.stop, kind: "dressy", label: "Dressy dinner", level: f.dressyLevel, temp: lo + 4 });
+      else if (f.evening) out.push({ day: x.day, stop: x.stop, kind: "evening", label: "Evening", level: f.evening, temp: lo + 4 });
+    });
+    return out;
+  }
+  function defaultCounts(f) {
+    var sl = slotsOf(f), n = sl.length, w = f.wear;
+    var layerSlots = sl.filter(function (s) { return s.kind !== "pool" && (s.temp < 66 || s.level >= 5); }).length;
+    var groups = {}; sl.forEach(function (s) { groups[s.level <= 1 ? "p" : s.level <= 3 ? "c" : "s"] = 1; });
+    var g = Object.keys(groups).length;
+    return {
+      tops: Math.max(1, Math.ceil(n / w.top)),
+      bottoms: Math.max(g, Math.ceil(n / w.bottom)),
+      shoes: Math.max(g, Math.min(n, Math.ceil(n / w.shoe))),
+      layers: layerSlots ? Math.max(1, Math.ceil(layerSlots / w.layer)) : 0,
+      acc: 2
+    };
+  }
+
+  /* ---------- weather: Open-Meteo (the app's own provider) ---------- */
+  function isoAdd(iso, n) { var d = planDateOfISO(iso); d.setDate(d.getDate() + n); return planISOOf(d); }
+  function seasonal(lat, iso) {
+    var m = (iso ? planDateOfISO(iso) : new Date()).getMonth() + 1, a = Math.abs(lat || 30);
+    var ph = Math.cos(2 * Math.PI * (m - 7) / 12); if (lat < 0) ph = -ph;
+    var hi = Math.round(88 - 0.75 * Math.max(0, a - 15) + 0.4 * a * ph);
+    return { hi: hi, lo: hi - 14, src: "seasonal" };
+  }
+  function geocode(q) {
+    var k = "g:" + q.toLowerCase();
+    if (TP.wx[k]) return Promise.resolve(TP.wx[k]);
+    return fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(q) + "&count=1&language=en&format=json")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { var r = j && j.results && j.results[0]; if (!r) return null; TP.wx[k] = { name: r.name, lat: r.latitude, lon: r.longitude, country: r.country || "" }; return TP.wx[k]; })
+      .catch(function () { return null; });
+  }
+  function forecast(lat, lon, from, days) {
+    var to = isoAdd(from, days - 1);
+    var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto&start_date=" + from + "&end_date=" + to;
+    return fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var d = j && j.daily; if (!d || !d.temperature_2m_max || !d.temperature_2m_max.length) return null;
+      function avg(a) { var v = a.filter(function (x) { return typeof x === "number"; }); return v.length ? v.reduce(function (t, x) { return t + x; }, 0) / v.length : null; }
+      var hi = avg(d.temperature_2m_max), lo = avg(d.temperature_2m_min);
+      if (hi == null || lo == null) return null;
+      var rain = (d.precipitation_probability_max || []).filter(function (p) { return p >= 50; }).length;
+      return { hi: Math.round(hi), lo: Math.round(lo), src: "forecast", rain: rain, of: d.temperature_2m_max.length };
+    }).catch(function () { return null; });
+  }
+  function wxFor(place, startISO, days) {
+    if (!place || !place.lat) return Promise.resolve(null);
+    var today = planISOOf(new Date());
+    var lead = startISO ? Math.round((planDateOfISO(startISO) - planDateOfISO(today)) / 864e5) : null;
+    if (lead !== null && lead >= 0 && lead <= 14) {
+      return forecast(place.lat, place.lon, startISO, Math.max(1, Math.min(days, 16 - lead))).then(function (w) { return w || seasonal(place.lat, startISO); });
+    }
+    return Promise.resolve(seasonal(place.lat, startISO || null));
+  }
+  function stopStartISO(f, i) {
+    if (!f.start) return null;
+    var off = 0; for (var k = 0; k < i; k++) off += num(f.stops[k].days, 1, 30, 1);
+    return isoAdd(f.start, off);
+  }
+  function lookupAll(f) {
+    var jobs = f.stops.map(function (s, i) {
+      var q = String(s.city || "").trim();
+      if (!q) { s.wx = null; return Promise.resolve(); }
+      return geocode(q).then(function (g) {
+        if (!g) { s.place = null; if (!s.wx || s.wx.src !== "manual") s.wx = { hi: 72, lo: 60, src: "unknown" }; return; }
+        s.place = g;
+        if (s.wx && s.wx.src === "manual") return;
+        return wxFor(g, stopStartISO(f, i), num(s.days, 1, 30, 1)).then(function (w) { if (w) s.wx = w; });
+      });
+    });
+    if (f.origin && f.origin.lat) jobs.push(wxFor(f.origin, f.start || null, 1).then(function (w) { if (w) f.origin.wx = w; }));
+    return Promise.all(jobs);
+  }
+  function wxLabel(w) {
+    if (!w) return "";
+    var t = w.hi + "° / " + w.lo + "°";
+    if (w.src === "forecast") return t + " · forecast" + (w.rain ? " · rain " + w.rain + " of " + w.of + " days" : "");
+    if (w.src === "seasonal") return t + " · typical for the season";
+    if (w.src === "manual") return t + " · set by you";
+    return t + " · place not found";
+  }
+
+  /* ---------- The Edit catalogue as candidate pieces ---------- */
+  function catItem(e) {
+    var n = String(e.name || "").toLowerCase(), c = e.cat, cat = null;
+    if (c === "knitwear") cat = /polo/.test(n) ? "Polos" : /t-shirt|\btee\b/.test(n) ? "Tees" : "Sweaters";
+    else if (c === "shirt") cat = /polo/.test(n) ? "Polos" : /t-shirt|\btee\b/.test(n) ? "Tees" : "Shirts";
+    else if (c === "shoes") cat = "Shoes";
+    else if (c === "trousers") cat = "Trousers";
+    else if (c === "jeans") cat = "Jeans";
+    else if (c === "shorts") cat = /swim|trunk/.test(n) ? "Bathing suits" : "Shorts";
+    else if (c === "swim") cat = "Bathing suits";
+    else if (c === "blazer") cat = "Blazers";
+    else if (c === "outerwear") cat = "Jackets";
+    else if (c === "sunglasses") cat = "Sunglasses";
+    else if (c === "belt") cat = "Belts";
+    if (!cat || !e.img || !e.url) return null;
+    /* the catalogue has a few mis-filed rows (a cap under chinos, a polo
+       under loafers) — a piece must read as what it is filed as */
+    if (/\b(cap|hat|beanie|bucket|sock|socks|bag|tote|wallet)\b/.test(n) && !/Sunglasses|Belts/.test(cat)) return null;
+    if (cat === "Shoes" && !/loafer|sneaker|shoe|boot|espadrille|derby|oxford|mule|driver|moccasin|sandal|slide|gatsby|trainer|runner|monk|chukka|penny|deck|boat|plimsoll|slip-on|vans|blucher|court|tennis|suede/.test(n)) return null;
+    if (/Polos|Tees|Shirts|Sweaters/.test(cat) && /loafer|sneaker|shoe|boot|trouser|chino|jean|short\b/.test(n)) return null;
+    var it = { id: "buy:" + (e.sku || e.url), name: (e.brand ? e.brand + " " : "") + e.name, category: cat, colourName: e.colour || "", colourHex: e.hex || "",
+      photo: e.img, buy: true, price: e.price, url: e.url, brand: e.brand || "", gap: e.gap ? 1 : 0, pairs: (e.pairs || []).length };
+    if (cat === "Shoes" && /sandal|flip[-\s]?flop|slide/.test(n)) it.occasionOnly = ["Pool"];
+    return it;
+  }
+  function loadCatalog() {
+    if (TP.cat) return Promise.resolve(TP.cat);
+    if (TP.catLoading) return TP.catLoading;
+    TP.catLoading = fetch("assets/edit-catalog.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var list = (j && typeof window.editNormalizeCatalog === "function") ? window.editNormalizeCatalog(j) : [];
+      TP.cat = list.map(catItem).filter(Boolean);
+      return TP.cat;
+    }).catch(function () { TP.catLoading = null; return []; });
+    return TP.catLoading;
+  }
+  function ownedKeys() {
+    var k = {};
+    closetList().forEach(function (i) {
+      if (!i) return;
+      if (i.name) k["n:" + String(i.name).toLowerCase()] = 1;
+      ["url", "link", "productUrl", "sku"].forEach(function (f) { if (i[f]) k["u:" + String(i[f]).toLowerCase()] = 1; });
+    });
+    return k;
+  }
+  function bucketOfProf(p) {
+    if (!p) return null;
+    if (p.role === "layer" || p.kind === "knit" || p.overshirt) return "layer";
+    if (p.role === "top") return "top";
+    if (p.role === "bottom") return "bottom";
+    if (p.role === "shoes") return "shoe";
+    if (p.role === "acc") return "acc";
+    return null;
+  }
+  function buyCandidates(f, cat, slots) {
+    var C = Cx(), own = ownedKeys(), ex = {}; (f.exclude || []).forEach(function (x) { ex[x] = 1; });
+    var budget = parseFloat(f.budget) || 0;
+    var levels = {}; slots.forEach(function (s) { levels[s.level] = 1; });
+    var maxT = Math.max.apply(null, slots.map(function (s) { return s.temp; })), minT = Math.min.apply(null, slots.map(function (s) { return s.temp; }));
+    var pool = slots.some(function (s) { return s.level === 1; });
+    var per = { top: [], bottom: [], shoe: [], layer: [], acc: [] };
+    cat.forEach(function (it) {
+      if (ex[it.id] || own["n:" + it.name.toLowerCase()] || own["u:" + String(it.url).toLowerCase()]) return;
+      if (budget && it.price > budget) return;
+      if (window.notMenswear853 && window.notMenswear853({ url: it.url, name: it.name, cat: it.category })) return;
+      var p = null; try { p = C.profile(it, 0); } catch (e) { p = null; }
+      var b = bucketOfProf(p); if (!b) return;
+      if (b !== "acc") {
+        var fits = false; for (var L = p.lo; L <= p.hi; L++) if (levels[L]) fits = true;
+        if (!fits) return;
+        if (p.swim && !pool) return;
+        if (minT >= 74 && (p.warm >= 2 || /Coats|Jackets/.test(it.category))) return;
+        if (maxT < 58 && (p.kind === "shorts" || p.swim)) return;
+      }
+      it._rank = it.gap * 2 + Math.min(it.pairs, 6) * 0.35 + (p.neutral ? 0.6 : 0) - (it.price || 0) / 1500 + (p.swim && pool ? 3 : 0);
+      per[b].push(it);
+    });
+    var out = [];
+    Object.keys(per).forEach(function (b) {
+      per[b].sort(function (x, y) { return y._rank - x._rank; });
+      out = out.concat(per[b].slice(0, b === "acc" ? 6 : 10));
+    });
+    return out;
+  }
+
+  /* ---------- the optimizer ---------- */
+  function tempOk(c, t, lv) {
+    var l = c.l;
+    if (t >= 70 && l && (l.kind === "coat" || l.warm >= 3)) return false;
+    if (t >= 74 && l && l.warm >= 2) return false;
+    if (t >= 84 && (c.t.warm >= 2 || (l && l.warm >= 2))) return false;
+    if (t >= 72 && lv <= 3 && l && /knit|coat|jacket|blazer|suit/.test(l.kind)) return false;
+    if (t >= 72 && lv === 4 && l && /knit|coat|jacket/.test(l.kind)) return false;
+    if (t < 72 && lv === 4 && c.b.kind === "shorts") return false;
+    if (t < 62 && !l && c.t.shortSleeve) return false;
+    if (t < 58 && (c.b.kind === "shorts" || c.b.kind === "swim" || c.s.kind === "espadrille" || c.s.kind === "sandal")) return false;
+    if (t < 50 && !l) return false;
+    return true;
+  }
+  function lookFromParts(parts, level) {
+    var ids = [parts.layer, parts.top, parts.bottom, parts.shoe].filter(Boolean);
+    var pcs = ids.map(pieceById).filter(Boolean);
+    var upper = pieceById(parts.layer || parts.top), bottom = pieceById(parts.bottom);
+    var title = "";
+    try { title = composerPieceTitle(upper) + " & " + composerPieceTitle(bottom); } catch (e) { title = (upper && upper.name || "") + " & " + (bottom && bottom.name || ""); }
+    return { title: title, source: "wardrobe", composerLevel: level, composerKey: Cx().comboKey(ids.slice()),
+      fwPieces: pcs.map(function (p) { return { id: p.id, name: p.name, photo: p.photo || null, colourHex: p.colourHex || null, category: p.category }; }) };
+  }
+  var buyIndex = {};
+  function pieceById(id) {
+    if (!id) return null;
+    if (String(id).indexOf("buy:") === 0) return buyIndex[id] || (TP.cur && TP.cur.plan && TP.cur.plan.buys && TP.cur.plan.buys[id]) || null;
+    return (typeof closetItemById === "function") ? closetItemById(id) : null;
+  }
+  function generate(f, cat) {
+    var C = Cx();
+    var slots = slotsOf(f);
+    var counts = f.counts || defaultCounts(f);
+    var cap = { top: counts.tops, bottom: counts.bottoms, shoe: counts.shoes, layer: counts.layers };
+    var total = cap.top + cap.bottom + cap.shoe + cap.layer;
+    var share = num(f.share, 0, 100, 100);
+    var targetBuys = Math.round(total * (100 - share) / 100);
+    var maxOwned = total - targetBuys;
+    var budget = parseFloat(f.budget) || 0;
+    var owned = closetList().filter(function (i) { return i && i.id && i.photo && !i.laundry; });
+    var cands = (f.buy || share < 100) ? buyCandidates(f, cat || [], slots) : [];
+    cands.forEach(function (it) { buyIndex[it.id] = it; });
+    var deck = C.build(owned.concat(cands.filter(function (i) { return !/Sunglasses|Belts/.test(i.category); })));
+    var prof = {}; deck.prof.forEach(function (p) { prof[p.id] = p; });
+    var byId = {}; owned.concat(cands).forEach(function (i) { byId[i.id] = i; });
+    var wear = f.wear;
+    var prefs = {}; try { prefs = (composerEffectivePrefs() || {}).items || {}; } catch (e) {}
+    var rng = rngOf(f.seed || 1);
+    var st = { inCap: {}, cnt: { top: 0, bottom: 0, shoe: 0, layer: 0 }, owned: 0, buys: 0, spent: 0, wears: {}, keys: {}, shorts: 0 };
+    var casualN = slots.filter(function (s) { return s.level === 3; }).length;
+    var shortsCap = Math.round(casualN * 0.15);
+    var order = slots.map(function (s, i) {
+      var all = deck.forLevel(s.level), strict = all.filter(function (c) { return c.mask & (1 << s.level); });
+      if (strict.length) all = strict;
+      var warmOk = all.filter(function (c) { return tempOk(c, s.temp, s.level); });
+      s._c = warmOk.length ? warmOk : all;
+      return i;
+    });
+    order.sort(function (a, b) { return slots[a]._c.length - slots[b]._c.length || a - b; });
+    function score(c, s, relax) {
+      var ids = c.ids, sc = c.score, add = { top: 0, bottom: 0, shoe: 0, layer: 0 }, addOwned = 0, addBuy = 0, addCost = 0, fresh = 0, allOwned = true;
+      for (var i = 0; i < ids.length; i++) {
+        var id = ids[i], b = bucketOfProf(prof[id]), it = byId[id];
+        if (!b || !it) return null;
+        if (it.buy) allOwned = false;
+        if (!st.inCap[id]) { add[b]++; fresh++; if (it.buy) { addBuy++; addCost += it.price || 0; } else addOwned++; }
+        else sc += 2.2;
+        var w = st.wears[id] || 0;
+        if (relax < 1 && w + 1 > wear[b]) return null;
+        sc -= 0.25 * w + (prefs[id] ? -0.3 * prefs[id] : 0);
+      }
+      if (relax < 2) {
+        for (var k in add) if (st.cnt[k] + add[k] > cap[k]) return null;
+        if (st.owned + addOwned > maxOwned) return null;
+      }
+      if (st.buys + addBuy > targetBuys) return null;
+      if (budget && st.spent + addCost > budget) return null;
+      if (addBuy && st.buys < targetBuys) sc += 1.5 * Math.min(addBuy, targetBuys - st.buys);
+      sc -= 0.4 * fresh;
+      if (st.keys[c.key]) sc -= 3;
+      if (c.b.kind === "shorts" && s.level >= 3) { if (st.shorts >= shortsCap) return null; sc -= 0.2; }
+      if (allOwned && typeof onbodySrc === "function" && onbodySrc(c.key)) sc += 1.6;
+      return sc + rng() * 0.6;
+    }
+    var notes = [];
+    order.forEach(function (i) {
+      var s = slots[i], pick = null;
+      for (var relax = 0; relax < 3 && !pick; relax++) {
+        var ranked = [];
+        s._c.forEach(function (c) { var v = score(c, s, relax); if (v !== null) ranked.push([v, c]); });
+        ranked.sort(function (a, b) { return b[0] - a[0]; });
+        for (var r = 0; r < ranked.length && r < 25; r++) {
+          var c = ranked[r][1];
+          var parts = { top: c.t.id, bottom: c.b.id, shoe: c.s.id, layer: c.l ? c.l.id : null };
+          var ok = true;
+          try {
+            if (window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function") ok = window.WardrobeRules.lookAllowed(lookFromParts(parts, s.level), { temp: s.temp, level: s.level });
+          } catch (e) { ok = true; }
+          if (ok) { pick = { c: c, parts: parts, relax: relax }; break; }
+        }
+      }
+      if (!pick) { s.empty = true; return; }
+      var c = pick.c;
+      c.ids.forEach(function (id) {
+        var b = bucketOfProf(prof[id]), it = byId[id];
+        if (!st.inCap[id]) { st.inCap[id] = 1; st.cnt[b]++; if (it.buy) { st.buys++; st.spent += it.price || 0; } else st.owned++; }
+        st.wears[id] = (st.wears[id] || 0) + 1;
+      });
+      st.keys[c.key] = 1;
+      if (c.b.kind === "shorts" && s.level >= 3) st.shorts++;
+      s.parts = pick.parts; s.key = c.key; s.relaxed = pick.relax; s.tuckPrompt = c.tuckPrompt || "";
+    });
+    /* accessories: his own first, then The Edit when buying is on */
+    var acc = deck.accs.map(function (p) { return p.id; }).filter(function (id) { return byId[id] && !byId[id].buy; }).slice(0, counts.acc);
+    if (acc.length < counts.acc && f.buy) {
+      cands.filter(function (it) { return /Sunglasses|Belts/.test(it.category); }).forEach(function (it) {
+        if (acc.length >= counts.acc) return;
+        if (acc.some(function (id) { return byId[id] && byId[id].category === it.category; })) return;
+        if (budget && st.spent + (it.price || 0) > budget) return;
+        acc.push(it.id); st.spent += it.price || 0;
+      });
+    }
+    /* at 100% closet with buying on: the pieces that would stretch it most */
+    var extras = [];
+    if (f.buy && targetBuys === 0) {
+      var filled = slots.filter(function (s) { return s.parts; });
+      cands.filter(function (it) { return !/Sunglasses|Belts/.test(it.category) && prof[it.id]; }).forEach(function (it) {
+        var p = prof[it.id], b = bucketOfProf(p), n = 0;
+        filled.forEach(function (s) {
+          var pr = { top: prof[s.parts.top], bottom: prof[s.parts.bottom], shoe: prof[s.parts.shoe], layer: s.parts.layer ? prof[s.parts.layer] : null };
+          if (b === "layer") pr.layer = p.role === "layer" ? p : Object.assign({}, p, { role: "layer", kind: p.overshirt ? "overshirt" : "knit" }); else pr[b] = p;
+          if (!pr.top || !pr.bottom || !pr.shoe) return;
+          var c = { t: pr.top, b: pr.bottom, s: pr.shoe, l: pr.layer };
+          if (C.evaluate(pr.top, pr.bottom, pr.shoe, pr.layer) && C.fitsLevel(s.level, pr.top, pr.bottom, pr.shoe, pr.layer) && tempOk(c, s.temp, s.level)) n++;
+        });
+        if (n) extras.push([n, it]);
+      });
+      extras.sort(function (a, b) { return b[0] - a[0] || (a[1].price - b[1].price); });
+      var room = budget ? budget - st.spent : Infinity, chosen = [], seenCat = {};
+      extras.forEach(function (x) { if (chosen.length >= 4 || seenCat[x[1].category] || x[1].price > room) return; seenCat[x[1].category] = 1; room -= x[1].price; chosen.push({ id: x[1].id, fits: x[0] }); });
+      extras = chosen;
+    }
+    var buys = {};
+    Object.keys(st.inCap).concat(acc).concat(extras.map(function (x) { return x.id; })).forEach(function (id) {
+      var it = byId[id]; if (!it || !it.buy) return;
+      buys[id] = { id: id, name: it.name, brand: it.brand, category: it.category, colourName: it.colourName, colourHex: it.colourHex, photo: it.photo, price: it.price, url: it.url, buy: true };
+    });
+    slots.forEach(function (s) { delete s._c; });
+    return { at: Date.now(), slots: slots, acc: acc, extras: extras, buys: buys, targetBuys: targetBuys, maxOwned: maxOwned, cap: cap, notes: notes };
+  }
+
+  /* ---------- derived numbers ---------- */
+  function planStats(trip) {
+    var p = trip.plan, wears = {}, pieces = {}, b = { top: [], bottom: [], shoe: [], layer: [] };
+    p.slots.forEach(function (s) { if (!s.parts) return; ["layer", "top", "bottom", "shoe"].forEach(function (k) { var id = s.parts[k]; if (!id) return; wears[id] = (wears[id] || 0) + 1; if (!pieces[id]) { pieces[id] = 1; b[bucketOfId(id)].push(id); } }); });
+    var ids = Object.keys(pieces), own = ids.filter(function (id) { return id.indexOf("buy:") !== 0; }).length;
+    var buyIds = ids.filter(function (id) { return id.indexOf("buy:") === 0; }).concat((p.acc || []).filter(function (id) { return id.indexOf("buy:") === 0; }));
+    var spent = buyIds.reduce(function (t, id) { var it = p.buys[id]; return t + (it && it.price || 0); }, 0);
+    return { wears: wears, ids: ids, b: b, own: own, buyIds: buyIds, spent: spent, outfits: p.slots.filter(function (s) { return s.parts; }).length, empty: p.slots.filter(function (s) { return !s.parts; }).length };
+  }
+  function bucketOfId(id) {
+    var it = pieceById(id); var p = null;
+    try { p = it ? Cx().profile(it, 0) : null; } catch (e) {}
+    var b = bucketOfProf(p);
+    return (b && b !== "acc") ? b : "top";
+  }
+  function photoOf(it) { return it && it.photo ? it.photo : ""; }
+  function thumb(it, cls) {
+    if (!it) return '<span class="' + cls + ' tp-nophoto"></span>';
+    var ph = photoOf(it);
+    return ph ? '<img class="' + cls + '" src="' + esc(ph) + '" alt="' + esc(it.name || "") + '" loading="lazy" decoding="async" />' : '<span class="' + cls + ' tp-nophoto" style="background:' + esc(it.colourHex || "#d8cfc0") + '"></span>';
+  }
+  function money(v) { return "$" + Math.round(v || 0).toLocaleString("en-US"); }
+  function dayDate(trip, d) {
+    if (!trip.form.start) return "";
+    var dt = planDateOfISO(isoAdd(trip.form.start, d));
+    return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  }
+  function slotRender(s) {
+    if (!s.parts) return null;
+    var ids = [s.parts.layer, s.parts.top, s.parts.bottom, s.parts.shoe].filter(Boolean);
+    if (ids.some(function (id) { return id.indexOf("buy:") === 0; })) return null;
+    var src = null;
+    try { src = onbodyForLook(lookFromParts(s.parts, s.level)); } catch (e) { src = null; }
+    if (!src) return null;
+    try { if (typeof window.cutoutFor === "function") { var cut = window.cutoutFor(src); if (cut) return cut; } } catch (e) {}
+    return src;
+  }
+
+  /* ---------- the plan view ---------- */
+  function tripName(f) {
+    if (f.name && f.name.trim()) return f.name.trim();
+    var cities = f.stops.map(function (s) { return String(s.city || "").trim(); }).filter(Boolean);
+    if (!cities.length) return "New trip";
+    return (f.origin && f.travelDay ? f.origin.name + " to " : "") + cities.join(" · ");
+  }
+  function metaLine(trip) {
+    var f = trip.form, n = totalDays(f), bits = [];
+    if (f.start) { var a = planDateOfISO(f.start), e = planDateOfISO(isoAdd(f.start, n - 1)); var fm = function (d) { return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); }; bits.push(fm(a) + " – " + fm(e)); }
+    bits.push(n + (n === 1 ? " day" : " days"));
+    return bits.join(" · ");
+  }
+  function show(trip) {
+    TP.cur = clone(trip); TP.dirty = !trip.saved; TP.swap = null; TP.delArm = false;
+    Object.keys(TP.cur.plan.buys || {}).forEach(function (id) { buyIndex[id] = TP.cur.plan.buys[id]; });
+    var list = document.getElementById("trip-list"), det = document.getElementById("trip-detail"), form = document.getElementById("trip-form");
+    if (list) list.hidden = true; if (form) form.hidden = true; if (det) det.hidden = false;
+    render();
+  }
+  function render() {
+    var out = document.getElementById("capsule-out"), t = TP.cur;
+    if (!out || !t) return;
+    var f = t.form, p = t.plan, S = planStats(t);
+    var sharePct = S.ids.length ? Math.round(100 * S.own / S.ids.length) : 100;
+    var h = '<article class="card tp-plan" data-tp-plan="' + esc(t.id) + '">';
+    h += '<h4 class="tp-name">' + esc(t.name) + '</h4><p class="meta">' + esc(metaLine(t)) + "</p>";
+    h += '<ul class="tp-stops">' + (f.origin && f.travelDay ? '<li><span>From ' + esc(f.origin.name) + "</span>" + (f.origin.wx ? "<span>" + esc(f.origin.wx.hi + "° / " + f.origin.wx.lo + "°") + "</span>" : "") + "</li>" : "") +
+      f.stops.map(function (s) { return "<li><span>" + esc(s.city) + " · " + num(s.days, 1, 30, 1) + (num(s.days, 1, 30, 1) === 1 ? " day" : " days") + "</span><span>" + esc(wxLabel(s.wx)) + "</span></li>"; }).join("") + "</ul>";
+    h += '<p class="tp-sum" data-tp-sum><b>' + S.ids.length + "</b> pieces · <b>" + S.outfits + "</b> outfits · <b>" + sharePct + "%</b> from your closet" + (S.buyIds.length ? " · <b>" + S.buyIds.length + "</b> to buy, " + money(S.spent) : "") + "</p>";
+    var counts = BUCKETS.map(function (b) { return S.b[b[0]].length + " " + b[2].toLowerCase(); }).join(" · ") + ((p.acc || []).length ? " · " + p.acc.length + (p.acc.length === 1 ? " accessory" : " accessories") : "");
+    h += '<p class="tp-counts" data-tp-counts>' + esc(counts) + "</p>";
+    if (S.empty) h += '<p class="capsule-note">' + S.empty + (S.empty === 1 ? " outfit" : " outfits") + " couldn’t be made from what you have" + (p.slots.some(function (s) { return !s.parts && s.level === 1; }) ? " — no swim shorts in your closet yet. Turn on Suggest pieces to buy to add some." : ".") + "</p>";
+    if (p.slots.some(function (s) { return s.relaxed; })) h += '<p class="capsule-note">A few outfits needed more re-wears or pieces than you set — they are marked.</p>';
+    var tabs = [["days", "Day by day"], ["pack", "Packing"]];
+    if (S.buyIds.length || (p.extras || []).length) tabs.push(["buy", "To buy"]);
+    if (TP.tab === "buy" && tabs.length < 3) TP.tab = "days";
+    h += '<div class="tp-tabs" role="group">' + tabs.map(function (x) { return '<button type="button" class="tp-chip" data-tp-tab="' + x[0] + '" aria-pressed="' + (TP.tab === x[0]) + '">' + x[1] + "</button>"; }).join("") + "</div>";
+    if (TP.tab === "days") h += daysHTML(t, S);
+    else if (TP.tab === "pack") h += packHTML(t, S);
+    else h += buyHTML(t, S);
+    h += '<div class="tp-actions">' +
+      '<button type="button" class="btn-ink" data-tp-save' + (TP.dirty ? "" : " disabled") + ">" + (t.saved ? (TP.dirty ? "Save changes" : "Saved") : "Save trip") + "</button>" +
+      '<button type="button" class="btn-ghost" data-tp-edit>Edit settings</button>' +
+      '<button type="button" class="btn-ghost" data-tp-regen>Shuffle outfits</button>' +
+      (t.saved ? '<button type="button" class="btn-ghost tp-del" data-tp-del>' + (TP.delArm ? "Tap again to delete" : "Delete trip") + "</button>" : '<button type="button" class="btn-ghost" data-tp-discard>Discard</button>') +
+      "</div></article>";
+    out.innerHTML = h;
+  }
+  function daysHTML(t, S) {
+    var f = t.form, p = t.plan, h = "", byDay = {};
+    p.slots.forEach(function (s, i) { (byDay[s.day] = byDay[s.day] || []).push(i); });
+    Object.keys(byDay).map(Number).sort(function (a, b) { return a - b; }).forEach(function (d) {
+      var first = p.slots[byDay[d][0]], st = f.stops[first.stop] || {};
+      var dd = dayDate(t, d);
+      h += '<section class="tp-day"><h5 class="tp-day-head">Day ' + (d + 1) + (dd ? " · " + esc(dd) : "") + " · " + esc(st.city || "") + (st.wx ? '<span class="tp-day-wx">' + st.wx.hi + "° / " + st.wx.lo + "°</span>" : "") + "</h5>";
+      byDay[d].forEach(function (i) { h += slotHTML(t, S, i); });
+      h += "</section>";
+    });
+    return h;
+  }
+  function slotHTML(t, S, i) {
+    var s = t.plan.slots[i], f = t.form;
+    var h = '<div class="tp-slot" data-tp-slot="' + i + '"><div class="tp-slot-head"><span class="capsule-slot-label">' + esc(s.label) + '</span><span class="tp-lv">' + esc(lvName(s.level)) + " · " + s.temp + "°</span>" + (s.relaxed ? '<span class="tp-flag">Over your limits</span>' : "") + "</div>";
+    if (!s.parts) return h + '<p class="capsule-note">No ' + esc(lvName(s.level)) + " outfit from these pieces" + (s.level === 1 ? " — add swim shorts to your closet, or turn on Suggest pieces to buy." : ".") + "</p></div>";
+    var look = lookFromParts(s.parts, s.level), ren = slotRender(s);
+    var ids = [s.parts.layer, s.parts.top, s.parts.bottom, s.parts.shoe].filter(Boolean);
+    var fig = ren ? '<figure class="tp-fig tp-avatar"><img src="' + esc(ren) + '" alt="' + esc(look.title) + '" loading="lazy" decoding="async" data-popout="' + esc(ren) + '" data-popout-alt="' + esc(look.title) + '" /></figure>'
+      : '<figure class="tp-fig tp-flat">' + ids.map(function (id) { return thumb(pieceById(id), "tp-fl"); }).join("") + "</figure>";
+    h += '<div class="tp-look">' + fig + '<div class="tp-look-body"><p class="tp-look-title">' + esc(look.title) + '</p><ul class="tp-pieces">';
+    [["layer", "Layer"], ["top", "Top"], ["bottom", "Bottom"], ["shoe", "Shoes"]].forEach(function (r) {
+      var id = s.parts[r[0]];
+      if (!id && r[0] !== "layer") return;
+      if (!id) { h += '<li class="tp-piece tp-nolayer"><span class="tp-pn">No layer</span><button type="button" class="tp-swap" data-tp-swap="' + i + '|layer">Add</button></li>'; return; }
+      var it = pieceById(id), b = bucketOfId(id), w = S.wears[id] || 0, cap = f.wear[b] || 1;
+      h += '<li class="tp-piece">' + thumb(it, "tp-th") + '<span class="tp-pn">' + esc(it ? it.name : "Piece no longer in your closet") +
+        (id.indexOf("buy:") === 0 ? ' <span class="tp-new">New · ' + money(it && it.price) + "</span>" : "") +
+        (w > 1 ? ' <span class="tp-wear' + (w > cap ? " over" : "") + '">Worn ' + w + "×</span>" : "") + '</span><button type="button" class="tp-swap" data-tp-swap="' + i + "|" + r[0] + '">Swap</button></li>';
+      if (TP.swap && TP.swap.slot === i && TP.swap.role === r[0]) h += swapHTML(t, i, r[0]);
+    });
+    if (!s.parts.layer && TP.swap && TP.swap.slot === i && TP.swap.role === "layer") h += swapHTML(t, i, "layer");
+    h += "</ul>" + (s.tuckPrompt ? '<p class="tp-tuck">' + esc(s.tuckPrompt) + "</p>" : "") + "</div></div></div>";
+    return h;
+  }
+  function profOf(id, asLayer) {
+    var it = pieceById(id); if (!it) return null;
+    var p = null; try { p = Cx().profile(it, 0); } catch (e) { return null; }
+    if (asLayer && p.role !== "layer") p = Object.assign({}, p, { role: "layer", kind: p.overshirt ? "overshirt" : "knit" });
+    return p;
+  }
+  function swapOptions(t, i, role) {
+    var s = t.plan.slots[i], C = Cx(), S = planStats(t), packed = {};
+    S.ids.forEach(function (id) { packed[id] = 1; });
+    var pool = closetList().filter(function (x) { return x && x.photo && !x.laundry; }).map(function (x) { return x.id; })
+      .concat(Object.keys(t.plan.buys || {}));
+    var opts = [];
+    if (role === "layer" && s.parts.layer) {
+      var pr0 = { t: profOf(s.parts.top), b: profOf(s.parts.bottom), s: profOf(s.parts.shoe), l: null };
+      if (pr0.t && pr0.b && pr0.s && C.evaluate(pr0.t, pr0.b, pr0.s, null) && C.fitsLevel(s.level, pr0.t, pr0.b, pr0.s, null) && tempOk(pr0, s.temp, s.level)) opts.push({ id: "", rank: 5 });
+    }
+    pool.forEach(function (id) {
+      if (id === s.parts[role]) return;
+      var cand = profOf(id, role === "layer"); if (!cand) return;
+      var b = bucketOfProf(profOf(id));
+      if (role === "layer" ? !(cand.role === "layer" && (b === "layer")) : b !== role) return;
+      var pr = { t: profOf(s.parts.top), b: profOf(s.parts.bottom), s: profOf(s.parts.shoe), l: s.parts.layer ? profOf(s.parts.layer, true) : null };
+      pr[{ top: "t", bottom: "b", shoe: "s", layer: "l" }[role]] = cand;
+      if (!pr.t || !pr.b || !pr.s) return;
+      if ([pr.t, pr.b, pr.s, pr.l].filter(Boolean).some(function (x, ix, a) { return a.some(function (y, iy) { return iy !== ix && y.id === x.id; }); })) return;
+      if (!C.evaluate(pr.t, pr.b, pr.s, pr.l) || !C.fitsLevel(s.level, pr.t, pr.b, pr.s, pr.l) || !tempOk(pr, s.temp, s.level)) return;
+      var parts = Object.assign({}, s.parts); parts[role] = id;
+      try { if (window.WardrobeRules && window.WardrobeRules.lookAllowed && !window.WardrobeRules.lookAllowed(lookFromParts(parts, s.level), { temp: s.temp, level: s.level })) return; } catch (e) {}
+      var ren = (id.indexOf("buy:") !== 0) && !!slotRender({ parts: parts, level: s.level });
+      opts.push({ id: id, rank: (packed[id] ? 3 : 0) + (ren ? 2 : 0) });
+    });
+    opts.sort(function (a, b) { return b.rank - a.rank; });
+    return opts.slice(0, 10);
+  }
+  function swapHTML(t, i, role) {
+    var opts = swapOptions(t, i, role);
+    if (!opts.length) return '<li class="tp-swaps"><p class="capsule-note">Nothing else in your closet works here.</p><button type="button" class="tp-swap" data-tp-swapx>Close</button></li>';
+    return '<li class="tp-swaps"><div class="tp-swap-row">' + opts.map(function (o) {
+      if (!o.id) return '<button type="button" class="tp-opt" data-tp-pick="' + i + "|" + role + '|"><span class="tp-th tp-nophoto"></span><span>No layer</span></button>';
+      var it = pieceById(o.id);
+      return '<button type="button" class="tp-opt" data-tp-pick="' + i + "|" + role + "|" + esc(o.id) + '">' + thumb(it, "tp-th") + "<span>" + esc(it.name) + (o.rank >= 3 ? " · packed" : "") + "</span></button>";
+    }).join("") + '</div><button type="button" class="tp-swap" data-tp-swapx>Close</button></li>';
+  }
+  function packHTML(t, S) {
+    var p = t.plan, h = "", key = t.id;
+    if (!t.saved) h += '<p class="capsule-note">Save the trip to tick pieces off as you pack.</p>';
+    BUCKETS.forEach(function (b) {
+      var ids = S.b[b[0]]; if (!ids.length) return;
+      h += '<h5 class="capsule-check-head">' + b[2] + " · " + ids.length + '</h5><ul class="pack-list">' + ids.map(function (id) {
+        var it = pieceById(id), lab = it ? it.name : id, on = t.saved && packIsOn(key, lab);
+        return '<li><button type="button" class="pack-item tp-pack" data-tp-pack="' + esc(lab) + '" aria-pressed="' + (on ? "true" : "false") + '"><span class="pk-box" aria-hidden="true">' + (on ? "✓" : "") + "</span>" + thumb(it, "tp-th") + "<span>" + esc(lab) + '</span><span class="tp-pk-w">' + (S.wears[id] || 0) + "×</span></button></li>";
+      }).join("") + "</ul>";
+    });
+    if ((p.acc || []).length) h += '<h5 class="capsule-check-head">Accessories · ' + p.acc.length + '</h5><ul class="pack-list">' + p.acc.map(function (id) {
+      var it = pieceById(id), lab = it ? it.name : id, on = t.saved && packIsOn(key, lab);
+      return '<li><button type="button" class="pack-item tp-pack" data-tp-pack="' + esc(lab) + '" aria-pressed="' + (on ? "true" : "false") + '"><span class="pk-box" aria-hidden="true">' + (on ? "✓" : "") + "</span>" + thumb(it, "tp-th") + "<span>" + esc(lab) + "</span></button></li>";
+    }).join("") + "</ul>";
+    return h;
+  }
+  function buyHTML(t, S) {
+    var p = t.plan, f = t.form, h = "";
+    var budget = parseFloat(f.budget) || 0;
+    if (S.buyIds.length) {
+      h += '<h5 class="capsule-check-head">In this plan · ' + money(S.spent) + (budget ? " of " + money(budget) : "") + "</h5>";
+      h += S.buyIds.map(function (id) { return buyRow(p.buys[id], (S.wears[id] || 0) ? "Worn " + S.wears[id] + "× on this trip" : "Accessory"); }).join("");
+    }
+    if ((p.extras || []).length) {
+      h += '<h5 class="capsule-check-head">Would stretch this capsule</h5>';
+      h += p.extras.map(function (x) { return buyRow(p.buys[x.id], "Works in " + x.fits + (x.fits === 1 ? " outfit" : " outfits") + " here"); }).join("");
+    }
+    return h;
+  }
+  function buyRow(it, sub) {
+    if (!it) return "";
+    return '<div class="wish-row tp-buy">' + thumb(it, "tp-th") + '<span class="w-main"><span class="w-name">' + esc(it.name) + '</span><span class="w-sub">' + money(it.price) + " · " + esc(sub) + '</span></span><span class="tp-buy-acts"><a class="btn-ghost" href="' + esc(it.url) + '" target="_blank" rel="noopener">View</a><button type="button" class="btn-ghost" data-tp-nobuy="' + esc(it.id) + '">Not this</button></span></div>';
+  }
+
+  /* ---------- the setup sheet ---------- */
+  function stepper(field, val, min, max) {
+    return '<span class="tp-step"><button type="button" data-tp-step="' + field + '" data-d="-1" aria-label="Fewer"' + (val <= min ? " disabled" : "") + '>−</button><span class="tp-step-v" data-tp-v="' + field + '">' + val + '</span><button type="button" data-tp-step="' + field + '" data-d="1" aria-label="More"' + (val >= max ? " disabled" : "") + ">+</button></span>";
+  }
+  function chips(field, opts, cur) {
+    return '<div class="tp-chips">' + opts.map(function (o) { return '<button type="button" class="tp-chip" data-tp-chip="' + field + '" data-v="' + o[0] + '" aria-pressed="' + (String(cur) === String(o[0])) + '">' + esc(o[1]) + "</button>"; }).join("") + "</div>";
+  }
+  function renderForm() {
+    var el = document.getElementById("trip-form"), f = TP.form;
+    if (!el || !f) return;
+    var N = totalDays(f), sl = slotsOf(f);
+    var h = "";
+    h += '<div class="tp-sec"><label class="field" for="tp-name">Name</label><input type="text" id="tp-name" data-tp-field="name" autocomplete="off" placeholder="' + esc(tripName(Object.assign({}, f, { name: "" }))) + '" value="' + esc(f.name) + '" /></div>';
+    h += '<div class="tp-sec"><label class="field">Where to</label>';
+    if (f.origin) h += '<p class="tp-from"><label class="tf-pool"><input type="checkbox" data-tp-check="travelDay"' + (f.travelDay ? " checked" : "") + " /> Travel day from " + esc(f.origin.name) + "</label></p>";
+    f.stops.forEach(function (s, i) {
+      h += '<div class="tp-stop"><input type="text" class="tp-city" data-tp-city="' + i + '" placeholder="City" autocomplete="off" value="' + esc(s.city) + '" aria-label="Destination ' + (i + 1) + '" />' +
+        stepper("stop" + i, num(s.days, 1, 30, 1), 1, 30) + '<span class="tp-step-u">days</span>' +
+        (f.stops.length > 1 ? '<button type="button" class="tp-x" data-tp-rmstop="' + i + '" aria-label="Remove stop">×</button>' : "") + "</div>" +
+        (s.wx ? '<p class="tp-wx" data-tp-wx="' + i + '">' + esc(wxLabel(s.wx)) + ' <button type="button" class="tp-link" data-tp-wxedit="' + i + '">Change</button></p>' : "") +
+        (TP.wxEdit === i ? '<p class="tp-wx-edit">Days <input type="number" inputmode="numeric" data-tp-wxhi="' + i + '" value="' + (s.wx ? s.wx.hi : 72) + '" />° · nights <input type="number" inputmode="numeric" data-tp-wxlo="' + i + '" value="' + (s.wx ? s.wx.lo : 60) + '" />°</p>' : "");
+    });
+    h += '<button type="button" class="tp-link" data-tp-addstop>+ Add a stop</button></div>';
+    h += '<div class="tp-sec"><label class="field" for="tp-start">Start date <span class="tp-opt-l">(optional)</span></label><input type="date" id="tp-start" data-tp-field="start" value="' + esc(f.start) + '" /><p class="tp-hint">' + N + (N === 1 ? " day" : " days") + " · " + sl.length + " outfits</p></div>";
+    h += '<div class="tp-sec"><label class="field">Daytime</label>' + chips("dayLevel", [[2, "Shorts & Tee"], [3, "Casual"], [4, "Smart Casual"], [5, "Business Casual"]], f.dayLevel) + "</div>";
+    h += '<div class="tp-sec"><label class="field">Evenings</label>' + chips("evening", [[0, "None"], [3, "Casual"], [4, "Smart Casual"], [5, "Business Casual"], [6, "Formal"]], f.evening) + "</div>";
+    h += '<div class="tp-sec tp-row2"><div><label class="field">Pool days</label>' + stepper("poolDays", num(f.poolDays, 0, N, 0), 0, N) + '</div><div><label class="field">Dressy dinners</label>' + stepper("dressy", num(f.dressy, 0, N, 0), 0, N) + "</div></div>";
+    if (num(f.dressy, 0, N, 0) > 0) h += '<div class="tp-sec">' + chips("dressyLevel", [[5, "Business Casual"], [6, "Formal"], [7, "Black Tie"]], f.dressyLevel) + "</div>";
+    h += '<div class="tp-sec"><div class="tp-share-head"><label class="field" for="tp-share">From my closet</label><span class="tp-share-v" data-tp-sharev>' + f.share + '%</span></div><input type="range" id="tp-share" min="0" max="100" step="10" value="' + f.share + '" data-tp-share /><div class="tp-share-ends"><span>Shop more</span><span>Only my closet</span></div></div>';
+    h += '<div class="tp-sec"><label class="tf-pool"><input type="checkbox" data-tp-check="buy"' + (f.buy ? " checked" : "") + " /> Suggest pieces to buy from The Edit</label>" +
+      (f.buy ? '<div class="tp-budget"><label class="field" for="tp-budget">Budget <span class="tp-opt-l">(optional)</span></label><span class="tp-dollar">$<input type="number" id="tp-budget" inputmode="numeric" min="0" step="50" data-tp-field="budget" value="' + esc(f.budget) + '" placeholder="No limit" /></span></div>' : "") +
+      (f.share < 100 && f.buy ? '<p class="tp-hint">About ' + Math.round((100 - f.share) / 100 * (f.counts.tops + f.counts.bottoms + f.counts.shoes + f.counts.layers)) + " of the pieces come from The Edit — menswear only, nothing you own.</p>" : "") + "</div>";
+    h += '<div class="tp-sec"><label class="field">How much re-wear</label>' + chips("wearPreset", [["fewer", "Fewer re-wears"], ["balanced", "Balanced"], ["light", "Pack light"]], f.wearPreset) +
+      '<div class="tp-grid">' + BUCKETS.map(function (b) { return '<div class="tp-cell"><span class="tp-cell-l">' + b[2] + " worn up to</span>" + stepper("wear." + b[0], f.wear[b[0]], 1, 10) + "</div>"; }).join("") + "</div></div>";
+    h += '<div class="tp-sec"><label class="field">Pieces to pack</label><div class="tp-grid">' +
+      BUCKETS.map(function (b) { return '<div class="tp-cell"><span class="tp-cell-l">' + b[2] + "</span>" + stepper("counts." + b[1], f.counts[b[1]], 0, 30) + "</div>"; }).join("") +
+      '<div class="tp-cell"><span class="tp-cell-l">Accessories</span>' + stepper("counts.acc", f.counts.acc, 0, 8) + "</div></div>" +
+      '<p class="tp-hint" data-tp-total>' + (f.counts.tops + f.counts.bottoms + f.counts.shoes + f.counts.layers) + " pieces for " + sl.length + ' outfits · <button type="button" class="tp-link" data-tp-resetcounts>Suggest counts</button></p></div>';
+    h += '<button type="button" class="btn-ink tp-go" data-tp-generate' + (TP.busy ? " disabled" : "") + ">" + (TP.busy ? "Building your trip…" : "Generate") + "</button>";
+    h += '<p class="tp-hint tp-center">Nothing is bought — you pick what to keep.</p>';
+    el.innerHTML = h;
+  }
+  function openForm(f, editId) {
+    TP.form = f; TP.editId = editId || null; TP.wxEdit = null; TP.busy = false;
+    var list = document.getElementById("trip-list"), det = document.getElementById("trip-detail"), form = document.getElementById("trip-form");
+    if (list) list.hidden = true; if (det) det.hidden = true; if (form) form.hidden = false;
+    renderForm();
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  function setPath(o, path, v) { var ps = path.split("."); var x = o; for (var i = 0; i < ps.length - 1; i++) x = x[ps[i]]; x[ps[ps.length - 1]] = v; }
+  function getPath(o, path) { return path.split(".").reduce(function (x, k) { return x == null ? x : x[k]; }, o); }
+  function recount() { TP.form.counts = defaultCounts(TP.form); }
+  function refreshWx(i) {
+    var f = TP.form;
+    lookupAll(f).then(function () { if (TP.form === f) { recount(); renderForm(); } });
+  }
+  function doGenerate() {
+    var f = TP.form;
+    if (!f.stops.some(function (s) { return String(s.city || "").trim(); })) { toast("Add where you’re going first."); var c = document.querySelector("[data-tp-city]"); if (c) c.focus(); return; }
+    f.stops = f.stops.filter(function (s) { return String(s.city || "").trim(); });
+    TP.busy = true; renderForm();
+    var need = f.buy || f.share < 100;
+    Promise.all([lookupAll(f), need ? loadCatalog() : Promise.resolve([])]).then(function (r) {
+      setTimeout(function () {
+        var plan = null;
+        try { plan = generate(f, r[1]); } catch (e) { TP.busy = false; renderForm(); toast("Couldn’t build that trip — try fewer limits."); return; }
+        TP.busy = false;
+        var base = TP.editId ? (userTrips.filter(function (x) { return x && x.id === TP.editId; })[0] || null) : null;
+        var id = base ? base.id : "trip-" + (tripName(f).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40) || "trip") + "-" + Date.now().toString(36);
+        var n = totalDays(f);
+        var trip = { id: id, key: id, v: 2, name: tripName(f), start: f.start || "", end: f.start ? isoAdd(f.start, n - 1) : "", days: n,
+          legs: f.stops.map(function (s) { return s.city; }), form: clone(f), plan: plan, saved: !!base };
+        if (!f.start) trip.dates = n + (n === 1 ? " day" : " days");
+        calNavPush();
+        currentCapsule = base ? base.id : null;
+        TP.tab = "days";
+        show(trip);
+        TP.dirty = true; render();
+        try { window.scrollTo(0, 0); } catch (e) {}
+      }, 30);
+    });
+  }
+  function saveCur() {
+    var t = TP.cur; if (!t) return;
+    t.saved = true;
+    var rec = clone(t);
+    var ix = -1; userTrips.forEach(function (x, i) { if (x && x.id === rec.id) ix = i; });
+    if (ix >= 0) userTrips[ix] = rec; else userTrips.push(rec);
     saveUserTrips();
-    form.reset();
-    calOpenTrip(id);
-    toast("Trip created — " + name + ".");
+    currentCapsule = rec.id;
+    TP.dirty = false; render();
+    toast("Trip saved — " + rec.name + ".");
+  }
+  function deleteCur() {
+    var t = TP.cur; if (!t) return;
+    var ix = -1; userTrips.forEach(function (x, i) { if (x && x.id === t.id) ix = i; });
+    if (ix >= 0) { try { syDeliberateDelete("trips", userTrips[ix]); } catch (e) {} userTrips.splice(ix, 1); saveUserTrips(); }
+    packedItems = packedItems.filter(function (p) { return p.trip !== t.id; }); savePacked();
+    TP.cur = null; currentCapsule = null;
+    calShowList();
+    toast("Trip deleted.");
+  }
+
+  /* ---------- events ---------- */
+  var wrap = document.getElementById("trips-wrap");
+  if (!wrap) return;
+  wrap.addEventListener("click", function (e) {
+    var b;
+    if ((b = e.target.closest("[data-tp-create]"))) { calNavPush(); currentCapsule = null; openForm(defaultForm(), null); return; }
+    var f = TP.form;
+    if ((b = e.target.closest("[data-tp-step]")) && f) {
+      var field = b.getAttribute("data-tp-step"), d = parseInt(b.getAttribute("data-d"), 10);
+      if (/^stop\d+$/.test(field)) { var si = parseInt(field.slice(4), 10); f.stops[si].days = num(f.stops[si].days + d, 1, 30, 1); recount(); refreshWx(); }
+      else if (field === "poolDays" || field === "dressy") { f[field] = num((f[field] || 0) + d, 0, totalDays(f), 0); recount(); }
+      else if (field.indexOf("wear.") === 0) { setPath(f, field, num(getPath(f, field) + d, 1, 10, 1)); f.wearPreset = ""; recount(); }
+      else if (field.indexOf("counts.") === 0) { setPath(f, field, num(getPath(f, field) + d, 0, field === "counts.acc" ? 8 : 30, 0)); }
+      renderForm(); return;
+    }
+    if ((b = e.target.closest("[data-tp-chip]")) && f) {
+      var k = b.getAttribute("data-tp-chip"), v = b.getAttribute("data-v");
+      if (k === "wearPreset") { f.wearPreset = v; f.wear = clone(WEAR_PRESETS[v]); }
+      else f[k] = parseInt(v, 10);
+      recount(); renderForm(); return;
+    }
+    if ((b = e.target.closest("[data-tp-addstop]")) && f) { if (f.stops.length < 6) f.stops.push({ city: "", days: 3 }); recount(); renderForm(); var ins = document.querySelectorAll("[data-tp-city]"); if (ins.length) ins[ins.length - 1].focus(); return; }
+    if ((b = e.target.closest("[data-tp-rmstop]")) && f) { f.stops.splice(parseInt(b.getAttribute("data-tp-rmstop"), 10), 1); recount(); renderForm(); return; }
+    if ((b = e.target.closest("[data-tp-wxedit]")) && f) { var wi = parseInt(b.getAttribute("data-tp-wxedit"), 10); TP.wxEdit = TP.wxEdit === wi ? null : wi; renderForm(); return; }
+    if ((b = e.target.closest("[data-tp-resetcounts]")) && f) { recount(); renderForm(); return; }
+    if ((b = e.target.closest("[data-tp-generate]")) && f) { if (!TP.busy) doGenerate(); return; }
+    var t = TP.cur;
+    if (!t) return;
+    if ((b = e.target.closest("[data-tp-tab]"))) { TP.tab = b.getAttribute("data-tp-tab"); TP.swap = null; render(); return; }
+    if ((b = e.target.closest("[data-tp-swap]"))) { var sp = b.getAttribute("data-tp-swap").split("|"); var ns = { slot: parseInt(sp[0], 10), role: sp[1] }; TP.swap = (TP.swap && TP.swap.slot === ns.slot && TP.swap.role === ns.role) ? null : ns; render(); return; }
+    if ((b = e.target.closest("[data-tp-swapx]"))) { TP.swap = null; render(); return; }
+    if ((b = e.target.closest("[data-tp-pick]"))) {
+      var pk = b.getAttribute("data-tp-pick").split("|"), s = t.plan.slots[parseInt(pk[0], 10)];
+      s.parts[pk[1]] = pk.slice(2).join("|") || null;
+      var C = Cx(), tp = profOf(s.parts.top), lp = s.parts.layer ? profOf(s.parts.layer, true) : null;
+      var ids = [s.parts.top, s.parts.bottom, s.parts.shoe, s.parts.layer].filter(Boolean);
+      s.key = C.comboKey(ids); s.relaxed = 0;
+      try { var tk = C.tuckOf(tp, lp); s.tuckPrompt = C.tuckPromptOf(tp, lp, tk); } catch (er) {}
+      TP.swap = null; TP.dirty = true; render(); return;
+    }
+    if ((b = e.target.closest("[data-tp-pack]"))) {
+      if (!t.saved) { toast("Save the trip first."); return; }
+      packToggle(t.id, b.getAttribute("data-tp-pack")); render(); return;
+    }
+    if ((b = e.target.closest("[data-tp-nobuy]"))) {
+      var nid = b.getAttribute("data-tp-nobuy");
+      var f3 = clone(t.form); f3.exclude = (f3.exclude || []).concat([nid]);
+      loadCatalog().then(function (cat) {
+        var plan = generate(f3, cat);
+        t.form = f3; t.plan = plan; TP.swap = null; TP.dirty = true;
+        Object.keys(plan.buys || {}).forEach(function (id) { buyIndex[id] = plan.buys[id]; });
+        render();
+      });
+      return;
+    }
+    if ((b = e.target.closest("[data-tp-save]"))) { saveCur(); return; }
+    if ((b = e.target.closest("[data-tp-edit]"))) { calNavPush(); openForm(clone(t.form), t.saved ? t.id : null); return; }
+    if ((b = e.target.closest("[data-tp-regen]"))) {
+      var f2 = clone(t.form); f2.seed = ((f2.seed || 1) * 7 + 13) % 100000;
+      var need = f2.buy || f2.share < 100;
+      (need ? loadCatalog() : Promise.resolve([])).then(function (cat) {
+        var plan = generate(f2, cat);
+        t.form = f2; t.plan = plan; TP.swap = null; TP.dirty = true;
+        Object.keys(plan.buys || {}).forEach(function (id) { buyIndex[id] = plan.buys[id]; });
+        render();
+      });
+      return;
+    }
+    if ((b = e.target.closest("[data-tp-discard]"))) { TP.cur = null; calShowList(); return; }
+    if ((b = e.target.closest("[data-tp-del]"))) { if (!TP.delArm) { TP.delArm = true; render(); return; } deleteCur(); return; }
   });
+  wrap.addEventListener("input", function (e) {
+    var f = TP.form; if (!f) return;
+    var el = e.target;
+    if (el.hasAttribute("data-tp-share")) {
+      f.share = num(el.value, 0, 100, 100);
+      var v = wrap.querySelector("[data-tp-sharev]"); if (v) v.textContent = f.share + "%";
+      return;
+    }
+    if (el.hasAttribute("data-tp-field")) { f[el.getAttribute("data-tp-field")] = el.value; return; }
+    if (el.hasAttribute("data-tp-city")) { var i = parseInt(el.getAttribute("data-tp-city"), 10); f.stops[i].city = el.value; return; }
+  });
+  wrap.addEventListener("change", function (e) {
+    var f = TP.form; if (!f) return;
+    var el = e.target;
+    if (el.hasAttribute("data-tp-share")) { f.share = num(el.value, 0, 100, 100); if (f.share < 100) f.buy = true; renderForm(); return; }
+    if (el.hasAttribute("data-tp-check")) { var k = el.getAttribute("data-tp-check"); f[k] = !!el.checked; if (k === "buy" && !f.buy) f.share = 100; recount(); renderForm(); return; }
+    if (el.hasAttribute("data-tp-city")) { var i = parseInt(el.getAttribute("data-tp-city"), 10); f.stops[i].city = el.value; f.stops[i].wx = null; refreshWx(); return; }
+    if (el.getAttribute("data-tp-field") === "start") { f.start = el.value; f.stops.forEach(function (s) { if (s.wx && s.wx.src !== "manual") s.wx = null; }); refreshWx(); return; }
+    var hi = el.getAttribute("data-tp-wxhi"), lo = el.getAttribute("data-tp-wxlo");
+    if (hi !== null || lo !== null) {
+      var s = f.stops[parseInt(hi !== null ? hi : lo, 10)];
+      var w = s.wx ? clone(s.wx) : { hi: 72, lo: 60 };
+      if (hi !== null) w.hi = num(el.value, -20, 120, 72); else w.lo = num(el.value, -30, 110, 60);
+      w.src = "manual"; s.wx = w; recount(); renderForm(); return;
+    }
+  });
+  wrap.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target && e.target.hasAttribute && e.target.hasAttribute("data-tp-city")) { e.preventDefault(); e.target.blur(); }
+  });
+  window.tripPlan86 = { show: show, open: function () { openForm(defaultForm(), null); }, form: function () { return TP.form; }, cur: function () { return TP.cur; }, generate: generate, slotsOf: slotsOf, defaultCounts: defaultCounts };
 })();
 
 /* ---------- Week planner — seven days on the Calendar ----------
