@@ -159,7 +159,8 @@ def main() -> int:
               const dress = items.find(i => /Dress T-Shirt/i.test(i.name));
               const blazer = items.find(i => /Navy.*Blazer|Navy Jersey Blazer|Maker06/i.test(i.name)) || items.find(i => i.category === 'Blazers');
               const trousers = items.find(i => i.category === 'Trousers');
-              const shoes = items.find(i => i.category === 'Shoes');
+              const shoes = items.find(i => i.category === 'Shoes' && !shoeIsCasual866(i));
+              if (!shoes) throw new Error('Tuck checks need dress shoes that may be worn with a blazer');
               const cases = {
                 shirtUntucked: shirt && blazer && !R.lookAllowed({ t: Object.assign({role:'top', kind:'shirt'}, shirt), b: trousers, s: shoes, l: Object.assign({role:'layer', kind:'blazer'}, blazer), tucked: false }),
                 flannelTucked: flannel && !R.lookAllowed({ t: flannel, b: trousers, s: shoes, tucked: true }),

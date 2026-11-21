@@ -56,7 +56,7 @@ with sync_playwright() as p:
     saved = pg.evaluate("savedLooks.filter(function(l){return l.onMe})[0] || null")
     assert saved and saved["img"].startswith(TRY + "/r/"), saved
     assert pg.evaluate("lookIsMine(savedLooks.filter(function(l){return l.onMe})[0]) && savedLookHome(savedLooks.filter(function(l){return l.onMe})[0]) === 'outfits'")
-    assert "saved to outfits" in pg.locator("#emulate-view [data-emulate-onme-save]").inner_text().lower()
+    assert "saved to looks" in pg.locator("#emulate-view [data-emulate-onme-save]").inner_text().lower()
     pg.evaluate("renderSaved()")
     assert pg.locator('#saved-grid img[src="%s"]' % (TRY + "/r/" + JOB + ".jpg")).count() >= 1, "not in Outfits -> Mine grid"
     pg.reload(); pg.wait_for_timeout(2500)

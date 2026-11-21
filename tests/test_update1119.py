@@ -131,7 +131,23 @@ def main():
 
         # LRU cap: images carry size/time stamps; a trim to half the bytes drops the oldest
         pg.reload(wait_until="load"); pg.wait_for_timeout(5000)
+        # A fresh wardrobe may have no eligible Home photo. Exercise the
+        # cache with real served renders before asserting its eviction order.
+        urls = ["assets/onbody/" + path.name for path in sorted((ROOT / "assets/onbody").glob("*.webp"))[:3]]
+        assert len(urls) == 3
+        pg.evaluate("""async urls => {
+          for (const url of urls) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Fixture image unavailable");
+            await response.arrayBuffer();
+          }
+        }""", urls)
         onbody = re.search(r"ONBODY_CACHE = NS \+ '([^']+)'", (ROOT / "sw.js").read_text()).group(1)
+        pg.wait_for_function("""async ({name, urls}) => {
+          const cache = await caches.open(name);
+          const hits = await Promise.all(urls.map(url => cache.match(new URL(url, location.href).href)));
+          return hits.every(hit => hit && Number(hit.headers.get('x-sw-size')) > 0);
+        }""", arg={"name": onbody, "urls": urls})
         lru = pg.evaluate("""async (name) => {
           const c = await caches.open(name); let ks = await c.keys();
           const rs = await Promise.all(ks.map(k => c.match(k)));
