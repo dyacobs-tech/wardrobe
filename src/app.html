@@ -47849,16 +47849,15 @@ window.inspoView = "withmine";
       ? '<span class="flatlay onbody-split ob-n' + Math.min(4, cells.length) + '"><span class="ob-figure en-render"><img src="' + E(l.render) + '" alt="' + E(l.title + " on David") + '" loading="lazy" decoding="async" /></span><span class="ob-pieces">' + cells.slice(0, 4).join("") + "</span></span>"
       : '<span class="flatlay fl-n' + cells.length + ' en-flat">' + cells.join("") + "</span>";
     var liked = isLiked(l.key);
-    var buy = l.shop.length ? (l.shop.length === 1 ? "1 new piece" : l.shop.length + " new pieces") + " \u00b7 " + money(l.total) : "";
     var sl = srcLine(l);
     var rq = !l.render && S.rq.some(function (r) { return r.key === l.key; });
     return '<article class="card option-card cf-card en-card" role="listitem" data-en-i="' + i + '">' +
       '<div class="cf-media en-media">' + media + "</div>" +
-      /* a ready-made outfit on him: the picture and the item boxes say it
-         all; only what it would cost stays (no title, no "On you") */
-      '<span class="oc-body' + (l.render ? ' en-body-min' : '') + '">' + (l.render ? "" : '<span class="oc-title">' + E(l.title) + "</span>") +
-      (sl && !l.render ? '<span class="en-src">' + E(sl) + "</span>" : "") +
-      (buy ? '<span class="en-total">' + E(buy) + "</span>" : "") + "</span>" +
+      /* .86.39 (David): the item boxes carry each price, so no total line;
+         a ready-made outfit on him has no text at all (no style title,
+         no "On you"), just the picture, the boxes and the buttons */
+      (l.render ? "" : '<span class="oc-body"><span class="oc-title">' + E(l.title) + "</span>" +
+      (sl ? '<span class="en-src">' + E(sl) + "</span>" : "") + "</span>") +
       '<span class="cf-actions"><button type="button" class="chip" data-cf-like="' + i + '" data-en-like="' + i + '" aria-pressed="' + (liked ? "true" : "false") + '">Like</button>' +
       (PV ? '<button type="button" class="pv-edit" data-pv-edit="' + i + '" aria-label="Edit">Edit</button>' : "") +
       '<button type="button" class="chip" data-cf-dislike="' + i + '" data-en-dislike="' + i + '" aria-pressed="false">Dislike</button>' +
