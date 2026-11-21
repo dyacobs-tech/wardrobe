@@ -61,6 +61,10 @@ def main() -> int:
             route.abort()
 
         ctx.route(re.compile(r"https?://[^/]*workers\.dev/.*"), block_worker)
+        # Exercise the asynchronous weather update on both opens with the same forecast.
+        ctx.route("**/v1/forecast?**", lambda r: r.fulfill(json={
+            "current": {"temperature_2m": 70, "weather_code": 0}, "daily": {"time": []}
+        }))
         # A named Home outfit needs a photograph keyed to these closet IDs.
         ctx.add_init_script(
             "(() => { if (localStorage.getItem('wardrobe.items')) return;"

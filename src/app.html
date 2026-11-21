@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.23" />
+    <meta name="wardrobe-build" content="2026-11-21.86.24" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8425,7 +8425,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.23</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.24</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11417,7 +11417,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.23";
+var WARDROBE_BUILD = "2026-11-21.86.24";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -29977,9 +29977,6 @@ function persistOpeningLook(look) {
 function openingLook() {
   var nav = navTypeToday();
   var sess = sessionOpeningLook();
-  /* A stored closet-built look only restores while Today is
-     still in Only-my-wardrobe mode; another mode deals its own. */
-  if (sess && sess.fwPieces && sess.fwPieces.length && !sess.img && studioSource !== "wardrobe") sess = null;
   /* Build .74.2: a look saved earlier today with built-in or
      photo-less pieces is not restored — a fresh deal replaces it. */
   if (sess && sess.fwPieces && sess.fwPieces.length && !homeLookOk742(sess)) sess = null;
@@ -29991,6 +29988,7 @@ function openingLook() {
      record is treated the same way — staying put is the safe
      reading of an ambiguous load. */
   if (sess && (nav === "reload" || nav === "back_forward" || nav === "") && lookFitsFormality(sess)) {
+    todayTouched = true;
     todaySeedId = sess._seedId || sess.id;
     var restored = JSON.parse(JSON.stringify(sess));
     delete restored._seedId;
@@ -30009,23 +30007,13 @@ function openingLook() {
     todaySeedId = plannedToday.id;
     return plannedToday;
   }
-  /* Fresh open: deal a new opening look in the saved source
-     mode — one setting shared by the Today "Build from" selector
-     and the Ideas source boxes, default Combo. Only my wardrobe
-     BUILDS the outfit of the day from his Closet (the verified
-     render of him in the dealt pairing, when it has one), then
-     refines it by the day's weather when it lands. Only inspo /
-     Combo deal from the render deck, under the no-repeat rules
-     below. */
-  /* One source-mode setting: the live value, shared by every
-     control — no second copy to disagree with. */
-  var savedSrc = studioSource;
-  if (savedSrc === "wardrobe") {
-    var dur = store.get("todayOpeningCloset", null);
-    if (dur && dur.date === localTodayISO() && dur.look && dur.look.source === "wardrobe" && dur.look.fwPieces && dur.look.fwPieces.length && dur.look.swatches && dur.look.swatches.length && homeLookOk742(dur.look) && lookFitsFormality(dur.look) && (typeof lookHeroVisible84 !== "function" || lookHeroVisible84(dur.look))) {
-      todaySeedId = dur.look.id;
-      return JSON.parse(JSON.stringify(dur.look));
-    }
+  // Home keeps the day's eligible wardrobe look across source changes elsewhere.
+  var dur = store.get("todayOpeningCloset", null);
+  if (dur && dur.date === localTodayISO() && dur.look && dur.look.fwPieces && dur.look.fwPieces.length &&
+      homeLookOk742(dur.look) && lookFitsFormality(dur.look) && lookHeroVisible84(dur.look)) {
+    todayTouched = true;
+    todaySeedId = dur.look.id;
+    return JSON.parse(JSON.stringify(dur.look));
   }
   /* Build .75: Home is wardrobe-only. Never deal starter / DEAL_POOL
      looks on a fresh open. Prefer a composed closet look, persist it
@@ -30569,9 +30557,7 @@ function applyWeatherToToday() {
        the current location: temperature and conditions choose
        the weight and formality (knit + loafers when cool, tee +
        espadrilles when hot, layers when cold). */
-    if (typeof buildClosetLooks !== "function") return;
-    var doyW = dayOfYear();
-    var wl = buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: doyW });
+    var wl = homeComposerLooks75(8);
     /* Build .38 (2.7): the weather re-pick respects graduation —
        a liked look inside its cooldown is never weather-dealt
        back onto the hero. (Dislikes can't occur here: closet
