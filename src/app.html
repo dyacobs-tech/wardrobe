@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.42" />
+    <meta name="wardrobe-build" content="2026-11-21.86.43" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8666,7 +8666,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.42</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.43</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10258,7 +10258,14 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       excluded[chosen] = 1;
       pc.ids.forEach(function (id) { localExp[id] = (localExp[id] || 0) + 1; });
       var acc = null;
-      if (this.accs.length && rng() < 0.35) acc = this.accs[Math.floor(rng() * this.accs.length)];
+      /* .86.43: accessories follow two rules (David added 19 belts and 14
+         sunglasses on 21 Nov, and the deal began pairing any of them with any
+         outfit). A belt is never added at random: belts stay in the Closet and
+         in packing lists until they have matching rules. Sunglasses and hats
+         are for the day: Pool / Beach and Daytime only, never a night level. */
+      var accPool = this.accsLoose || (this.accsLoose = this.accs.filter(function (a) { return a.kind !== "belts"; }));
+      if (lv >= 3) accPool = this.accsNight || (this.accsNight = accPool.filter(function (a) { return a.kind !== "sunglasses" && a.kind !== "hats"; }));
+      if (accPool.length && rng() < 0.35) acc = accPool[Math.floor(rng() * accPool.length)];
       picked.push({ _i: chosen, key: pc.key, ids: pc.ids.slice(), top: pc.t, bottom: pc.b, shoes: pc.s, layer: pc.l, acc: acc, score: pc.score, mask: pc.mask, tuck: pc.tuck, tucked: pc.tuck, tuckPrompt: pc.tuckPrompt });
     }
     return picked;
@@ -11815,7 +11822,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.42";
+var WARDROBE_BUILD = "2026-11-21.86.43";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -45386,6 +45393,10 @@ window.inspoView = "withmine";
     try { if (typeof window.flatlayHTML841 === "function") return window.flatlayHTML841(look, true, true); } catch (e) {}
     return "";
   }
+  function mediaSplit(look) {
+    try { if (typeof window.flatlayHTML841 === "function") return window.flatlayHTML841(look, false, false); } catch (e) {}
+    return "";
+  }
   function core(items) { return items.filter(function (it) { return !/watch|belt|sunglass|bag|hat|scarf|accessor|jewel/i.test(String(it.category || "")); }); }
   function titleFor(items, fallback) {
     if (fallback && !/^logged outfit$/i.test(fallback)) return fallback;
@@ -45448,7 +45459,8 @@ window.inspoView = "withmine";
     host.innerHTML = '<div class="options-grid cf-grid lk-grid841">' + gList.map(function (g, i) {
       var look = lookFor(g.key, g.items, g.title);
       var n = g.dates.length;
-      return '<article class="card option-card cf-card lk-card841"><button type="button" class="cf-media" data-g841-open="' + i + '" aria-label="' + E(look.title) + '">' + media(look) + "</button>" +
+      /* .86.43 (David): a go-to shows him wearing it AND its pieces beside him; pieces alone until it has a render */
+      return '<article class="card option-card cf-card lk-card841 lk-goto843"><button type="button" class="cf-media" data-g841-open="' + i + '" aria-label="' + E(look.title) + '">' + mediaSplit(look) + "</button>" +
         '<span class="oc-body"><span class="oc-title">' + E(look.title) + "</span>" +
         '<span class="lk-sub841">Worn ' + (n > 1 ? n + "× · last " : "") + E(dateLabel(g.dates[0] || "")) + "</span></span>" +
         '<span class="cf-actions"><button type="button" class="lk-x841" data-g841-hide="' + i + '" aria-label="Not a go-to">Not a go-to</button></span></article>';

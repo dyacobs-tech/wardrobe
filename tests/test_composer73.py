@@ -86,6 +86,16 @@ ENGINE_JS = """([items, extras]) => {
     pg.forEach((o, i) => { if (firstNew < 0 && o.ids.includes('new-1')) firstNew = page * 6 + i; r2.push(o.key); o.ids.forEach(id => { e2[id] = (e2[id] || 0) + 1; }); });
   }
   out.newPieceAt = firstNew;
+  // .86.43: belts in the closet are never attached to an outfit at random
+  const d3 = C.build(items.concat([{ id: 'belt-1', name: 'Brown Leather Belt', category: 'Belts', colourName: 'Brown', colourHex: '#663218' },
+                                   { id: 'belt-2', name: 'Navy Woven Belt', category: 'Belts', colourName: 'Navy', colourHex: '#1b1a25' }]));
+  let beltDealt = 0; const r3 = [];
+  for (let page = 0; page < 20; page++) d3.deal(6, { level: null, temp: 68, recent: r3 }).forEach(o => { r3.push(o.key); if (o.acc) beltDealt++; });
+  out.beltsInDeck = d3.accs.length; out.beltDealt = beltDealt;
+  // sunglasses: on Daytime looks sometimes, never on a night level
+  const d4 = C.build(items.concat(extras, [{ id: 'sun-1', name: 'Tortoise Round Sunglasses', category: 'Sunglasses', colourName: 'Tortoise', colourHex: '#6b4423' }]));
+  const sunAt = (lvl) => { let n = 0, tot = 0; const r = []; for (let pg = 0; pg < 30; pg++) d4.deal(6, { level: lvl, temp: 68, recent: r }).forEach(o => { r.push(o.key); tot++; if (o.acc && o.acc.id === 'sun-1') n++; }); return [n, tot]; };
+  out.sunDay = sunAt(2); out.sunNight = sunAt(3).concat(sunAt(5), sunAt(6));
   out.newPiecePlaceable = !!d2.coverage(null)['new-1'];
   // levels
   out.levels = {};
@@ -156,6 +166,8 @@ def main() -> int:
             check("all 83 pieces shown within 600 deals", eng["shown"] == len(FIXTURE), eng["shown"])
             check("a new piece is placeable", eng["newPiecePlaceable"])
             check("a new piece is dealt within the first pages", 0 <= eng["newPieceAt"] < 60, eng["newPieceAt"])
+            check("belts are in the deck for packing but never dealt at random", eng["beltsInDeck"] == 2 and eng["beltDealt"] == 0, (eng["beltsInDeck"], eng["beltDealt"]))
+            check("sunglasses go with Daytime looks, never a night level", eng["sunDay"][1] > 20 and eng["sunDay"][0] > 0 and eng["sunNight"][0] == 0 and eng["sunNight"][2] == 0 and eng["sunNight"][4] == 0, (eng["sunDay"], eng["sunNight"]))
             for L, v in eng["levels"].items():
                 check(f"outfit type {L} deals", v["dealt"] >= 1 and v["inLevel"], v)
             check("a disliked combo never returns", not eng["bannedReturned"])
