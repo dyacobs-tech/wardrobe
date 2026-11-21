@@ -6258,6 +6258,9 @@ window.notMenswear853 = function (e) {
       .fb830-open { width: 100%; min-height: 48px; margin: 0 0 14px; }
       /* .86.34: dress level 4 is retired (old Smart Casual → Nighttime Casual) */
       [data-studio-type="4"][hidden] { display: none !important; }
+      /* .86.41: Home's menu forced every option to show (display:flex !important
+         on #today-type-row .cdd-opt), so "Nighttime Casual" appeared twice */
+      html body #panel-today #today-type-row .cdd-opt[hidden], html body .cdd-opt[data-studio-type="4"][hidden], html body [data-studio-type="4"][hidden] { display: none !important; }
       /* .86.37: Looks dress-level + temperature dropdowns */
       .lk-ctl837 { display: flex; gap: 8px; padding: 6px 16px 4px; }
       .lk-dd837 { position: relative; flex: 1 1 0; min-width: 0; }
