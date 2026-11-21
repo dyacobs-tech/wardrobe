@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.20" />
+    <meta name="wardrobe-build" content="2026-11-21.86.21" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8432,7 +8432,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.20</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.21</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9722,11 +9722,12 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     return "The " + who + " is worn untucked.";
   }
 
-  function Deck(items, renderKeys) {
+  function Deck(items, renderKeys, onlyLevel) {
     this.items = (items || []).filter(function (i) { return i && i.id && !i.laundry; });
     this.prof = this.items.map(profile);
     var tops = [], bottoms = [], shoes = [], layers = [], accs = [];
     this.prof.forEach(function (p) {
+      if (onlyLevel && p.role !== "acc" && (onlyLevel < p.lo || onlyLevel > p.hi)) return;
       if (p.role === "top") tops.push(p);
       else if (p.role === "bottom") bottoms.push(p);
       else if (p.role === "shoes") shoes.push(p);
@@ -9748,6 +9749,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     this.tops = tops; this.bottoms = bottoms; this.shoes = shoes; this.layerOpts = layerOpts; this.accs = accs;
     var combos = [];
     function addCombo(t, bt, s, ly) {
+      if (onlyLevel && !fitsLevel(onlyLevel, t, bt, s, ly)) return;
       var ev = evaluate(t, bt, s, ly);
       if (!ev) return;
       var mask = 0;
@@ -10039,7 +10041,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     comboKey: comboKey,
     applyVerdict: applyVerdict,
     pairKeys: pairKeys,
-    build: function (items, renderKeys) { return new Deck(items, renderKeys); }
+    build: function (items, renderKeys, onlyLevel) { return new Deck(items, renderKeys, onlyLevel); }
   };
 })(typeof window !== "undefined" ? window : globalThis);/*</composer73>*/
 
@@ -10725,15 +10727,16 @@ function composerClosetSig(list) {
   try { if (window.WardrobeRules && typeof window.WardrobeRules.signature === "function") sig += "\n#rules:" + window.WardrobeRules.signature(); } catch (e) {}
   return sig;
 }
-function composerDeck(only, slotName, renderKeys) {
+function composerDeck(only, slotName, renderKeys, onlyLevel) {
   var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
   if (only) list = only;
   var sig = composerClosetSig(list);
   var slot = slotName || (only ? "home" : "all");
+  if (onlyLevel) sig += "\n#level:" + onlyLevel;
   if (renderKeys) sig += "\n#renders:" + Object.keys(renderKeys).join(",");
   var c = composerDeckCache[slot] || {};
   if (c.sig !== sig || !c.deck) {
-    c = { sig: sig, deck: window.WardrobeComposer.build(list, renderKeys) };
+    c = { sig: sig, deck: window.WardrobeComposer.build(list, renderKeys, onlyLevel) };
     composerDeckCache[slot] = c;
   }
   return c.deck;
@@ -11102,8 +11105,10 @@ function composerOutfitToLook(o, i, renderPairs) {
 function composerLooks(opts) {
   opts = opts || {};
   if (!window.WardrobeComposer) return [];
-  var deck = composerDeck(opts.only || null, opts.slot || null, opts.renderKeys);
   var level = opts.level === undefined ? ((typeof formalityLevel !== "undefined") ? formalityLevel : 4) : opts.level;
+  // Reuse the small photo index across levels. Limit a full closet search to the requested level.
+  var onlyLevel = !opts.renderKeys && typeof level === "number" ? level : null;
+  var deck = composerDeck(opts.only || null, opts.slot || null, opts.renderKeys, onlyLevel);
   var p = composerPrefs();
   var recent = p.recent.slice();
   if (opts.exclude) recent = recent.concat(opts.exclude);
@@ -11419,7 +11424,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.20";
+var WARDROBE_BUILD = "2026-11-21.86.21";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
