@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.12" />
+    <meta name="wardrobe-build" content="2026-11-20.86.13" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6151,22 +6151,20 @@ window.notMenswear853 = function (e) {
         }
       }
 
-      /* ================= Build .86.11 — Instagram-style shrink then hide; seat on the visible bottom =================
-         The honey pill shrinks toward the safe-area as he scrolls down, then
-         slides off with a fade. Scroll up, or return to the top, brings it
-         back. Body padding stays --bb-h so the page does not jump.
-         A seat offset pins the bar to the visual viewport bottom on every
-         tab (The Edit had been sitting ~100px high on iPhone when a
-         containing block or visual-viewport gap lifted it). */
+      /* ================= Build .86.13 — bar stays on the bottom safe-area =================
+         .86.11's visualViewport seater wrote a positive `bottom` during
+         iOS momentum / URL-bar collapse, which lifted the pill mid-screen.
+         The bar is always `position:fixed; bottom:env(safe-area-inset-bottom)`.
+         Shrink/hide use only transform + opacity. */
       @media (max-width: 899px) {
         html body #bottombar.bottombar {
           position: fixed !important;
           left: 0 !important;
           right: 0 !important;
           top: auto !important;
-          bottom: var(--nav-seat-bottom, 0px) !important;
-          transform: translate3d(0, var(--nav-hide-y, 0px), 0) !important;
-          opacity: var(--nav-hide-op, 1) !important;
+          bottom: env(safe-area-inset-bottom, 0px) !important;
+          transform: translate3d(0, 0, 0) !important;
+          opacity: 1 !important;
           transition: transform 320ms cubic-bezier(.22, .8, .28, 1), opacity 280ms cubic-bezier(.22, .8, .28, 1) !important;
         }
         html body #bottombar .nav-pill {
@@ -6177,8 +6175,10 @@ window.notMenswear853 = function (e) {
         }
         html.nav-away body #bottombar.bottombar,
         html.sheet-lock body #bottombar.bottombar {
-          --nav-hide-y: calc(100% + env(safe-area-inset-bottom, 0px) + 16px);
-          --nav-hide-op: 0;
+          /* 100% must live on the bar itself — a custom property set on
+             <html> resolves the percentage to 0 and the hide is a no-op. */
+          transform: translate3d(0, calc(100% + env(safe-area-inset-bottom, 0px) + 16px), 0) !important;
+          opacity: 0 !important;
           pointer-events: none !important;
         }
       }
@@ -8383,7 +8383,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.12</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.13</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11332,7 +11332,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.12";
+var WARDROBE_BUILD = "2026-11-20.86.13";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -44268,24 +44268,23 @@ window.inspoView = "withmine";
 })();
     </script>
     <script type="wardrobe/app">
-/* Build .86.11 — Instagram-style shrink then hide, on every scroller,
-   and seat the bar on the visible bottom (same safe-area spot on every tab). */
+/* Build .86.13 — Instagram-style shrink then hide, on every scroller.
+   The bar is anchored to the bottom safe-area in CSS; this script only
+   drives --nav-scale / --nav-hide-y / --nav-hide-op. A downward fling
+   must travel HIDE_PX after the shrink before the bar hides; an upward
+   fling must travel SHOW_PX before it returns — mid-scroll momentum
+   ticks and overscroll bounce do not pop it back. */
 (function () {
   var root = document.documentElement;
-  var lastY = 0, lastSrc = null, ticking = false, shrink = 0, seated = 0, hideTravel = 0;
+  var lastY = 0, lastSrc = null, ticking = false, shrink = 0, hideTravel = 0, showTravel = 0;
   var mq = window.matchMedia ? window.matchMedia("(max-width: 899px)") : null;
   var reduceMq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
-  var THRESH = 6, TOP = 24, BOTTOM = 28, SHRINK_PX = 90, HIDE_PX = 70;
+  var THRESH = 6, TOP = 24, BOTTOM = 28, SHRINK_PX = 90, HIDE_PX = 70, SHOW_PX = 70;
   function reduced() { return !!(reduceMq && reduceMq.matches); }
   function phone() { return !(mq && !mq.matches); }
   function typing() {
     var a = document.activeElement;
     return !!(a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable));
-  }
-  function visibleBottom() {
-    var vv = window.visualViewport;
-    if (vv && vv.height) return vv.offsetTop + vv.height;
-    return window.innerHeight || document.documentElement.clientHeight || 0;
   }
   function scrollSource(target) {
     if (!target || target === document || target === document.documentElement || target === document.body || target === window) {
@@ -44305,8 +44304,6 @@ window.inspoView = "withmine";
   function apply() {
     var scale = reduced() ? 1 : (1 - 0.16 * shrink);
     root.style.setProperty("--nav-scale", String(Math.round(scale * 1000) / 1000));
-    root.style.setProperty("--nav-hide-y", root.classList.contains("nav-away") || root.classList.contains("sheet-lock") ? "calc(100% + env(safe-area-inset-bottom, 0px) + 16px)" : "0px");
-    root.style.setProperty("--nav-hide-op", (root.classList.contains("nav-away") || root.classList.contains("sheet-lock")) ? "0" : "1");
   }
   function show() {
     shrink = 0; hideTravel = 0;
@@ -44323,53 +44320,34 @@ window.inspoView = "withmine";
     if (root.classList.contains("nav-away")) root.classList.remove("nav-away");
     apply();
   }
-  function probe() {
-    var el = document.getElementById("nav-seat-probe");
-    if (!el) {
-      el = document.createElement("div");
-      el.id = "nav-seat-probe";
-      el.setAttribute("aria-hidden", "true");
-      el.style.cssText = "position:fixed;left:0;bottom:0;width:0;height:0;margin:0;padding:0;border:0;visibility:hidden;pointer-events:none;z-index:-1;";
-      (document.body || root).appendChild(el);
-    }
-    return el;
-  }
-  function seat() {
-    if (!phone()) {
-      if (seated) { root.style.setProperty("--nav-seat-bottom", "0px"); seated = 0; }
-      return;
-    }
-    if (root.classList.contains("nav-away") || root.classList.contains("sheet-lock")) return;
-    var pr = probe().getBoundingClientRect();
-    var want = visibleBottom();
-    var gap = want - pr.bottom;
-    if (Math.abs(gap) < 1) return;
-    /* Probe is always bottom:0, so gap is the ICB shortfall — do not accumulate. */
-    var next = -gap;
-    if (Math.abs(next) > 240) return;
-    if (Math.abs(next - seated) < 0.5) return;
-    seated = next;
-    root.style.setProperty("--nav-seat-bottom", (Math.round(next * 10) / 10) + "px");
-  }
   function step(src) {
     ticking = false;
     if (!phone()) { show(); return; }
     if (root.classList.contains("sheet-lock") || typing()) { lastSrc = src.el; lastY = src.y; return; }
-    var y = src.y, max = src.max;
+    var rawY = src.y, max = src.max;
+    var overscroll = rawY < 0 || (max > 0 && rawY > max);
+    var y = rawY;
     if (y < 0) y = 0;
     if (y > max) y = max;
-    if (src.el !== lastSrc) { lastSrc = src.el; lastY = y; }
+    if (src.el !== lastSrc) { lastSrc = src.el; lastY = y; hideTravel = 0; showTravel = 0; }
     var dy = y - lastY;
     lastY = y;
-    if (y <= TOP || (max > 0 && y >= max - BOTTOM)) { hideTravel = 0; show(); return; }
+    /* Rubber-band / momentum bounce is not a user scroll-up. */
+    if (overscroll) return;
+    if (y <= TOP) { hideTravel = 0; showTravel = 0; show(); return; }
+    /* At the real end, only reveal if he has stopped going down. */
+    if (max > 0 && y >= max - BOTTOM && dy <= 0) { hideTravel = 0; showTravel = 0; show(); return; }
     if (dy > THRESH) {
+      showTravel = 0;
       if (reduced()) { hide(); return; }
       if (shrink < 1) { hideTravel = 0; setShrink(shrink + dy / SHRINK_PX); }
       else { hideTravel += dy; if (hideTravel >= HIDE_PX) hide(); }
     } else if (dy < -THRESH) {
       hideTravel = 0;
-      if (root.classList.contains("nav-away")) show();
-      else if (shrink > 0 && !reduced()) setShrink(shrink + dy / SHRINK_PX);
+      if (root.classList.contains("nav-away")) {
+        showTravel += -dy;
+        if (showTravel >= SHOW_PX) show();
+      } else if (shrink > 0 && !reduced()) setShrink(shrink + dy / SHRINK_PX);
       else show();
     }
   }
@@ -44382,33 +44360,38 @@ window.inspoView = "withmine";
   }
   document.addEventListener("scroll", onScroll, { passive: true, capture: true });
   window.addEventListener("scroll", onScroll, { passive: true });
-  if (window.visualViewport) {
-    visualViewport.addEventListener("scroll", function () { seat(); }, { passive: true });
-    visualViewport.addEventListener("resize", function () { seat(); });
-  }
-  window.addEventListener("resize", function () { seat(); });
-  window.addEventListener("pageshow", function () { seat(); show(); });
-  function laterSeat() { requestAnimationFrame(function () { requestAnimationFrame(seat); }); }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", laterSeat);
-  else laterSeat();
+  /* visualViewport scroll/resize must not move the bar — it stays
+     pinned with bottom:env(safe-area-inset-bottom) in CSS. */
+  window.addEventListener("pageshow", function () { show(); });
   window.__navShow = show;
-  window.__navSeat = seat;
+  window.__navSeat = function () { /* .86.13: seater removed */ };
   window.__navState = function () {
-    return { shrink: shrink, away: root.classList.contains("nav-away"), scale: root.style.getPropertyValue("--nav-scale"), seat: root.style.getPropertyValue("--nav-seat-bottom") };
+    var bar = document.getElementById("bottombar");
+    var r = bar ? bar.getBoundingClientRect() : null;
+    var vv = window.visualViewport;
+    return {
+      shrink: shrink, away: root.classList.contains("nav-away"),
+      scale: root.style.getPropertyValue("--nav-scale"),
+      hideY: root.style.getPropertyValue("--nav-hide-y"),
+      bottom: r ? Math.round(r.bottom * 10) / 10 : null,
+      top: r ? Math.round(r.top * 10) / 10 : null,
+      layoutH: window.innerHeight || 0,
+      vvH: vv && vv.height ? Math.round(vv.height) : null,
+      vvTop: vv && vv.offsetTop != null ? Math.round(vv.offsetTop) : null
+    };
   };
   window.__navSet = function (opts) {
     opts = opts || {};
     if (opts.shrink != null && !opts.away) setShrink(opts.shrink);
     if (opts.away) hide();
     if (opts.show) show();
-    if (opts.seat) seat();
     return window.__navState();
   };
   function wrapSwitch() {
-    if (typeof window.switchTab !== "function" || window.switchTab.__nav8611) return;
+    if (typeof window.switchTab !== "function" || window.switchTab.__nav8613) return;
     var _st = window.switchTab;
-    window.switchTab = function () { show(); var r = _st.apply(this, arguments); laterSeat(); return r; };
-    window.switchTab.__nav8611 = true;
+    window.switchTab = function () { show(); return _st.apply(this, arguments); };
+    window.switchTab.__nav8613 = true;
   }
   wrapSwitch();
   setTimeout(wrapSwitch, 0);
