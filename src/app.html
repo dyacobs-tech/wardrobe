@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.22" />
+    <meta name="wardrobe-build" content="2026-11-21.86.23" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -5006,6 +5006,7 @@ window.notMenswear853 = function (e) {
       /* On-body render + the pieces beside it */
       .flatlay.onbody-split { display: grid !important; grid-template-columns: 44% 1fr !important; grid-template-rows: 1fr !important; gap: 4px !important; width: 100%; height: 100%; padding: 0 !important; }
       .onbody-split .ob-figure { display: block; height: 100%; min-height: 0; background: #F6F2EA; overflow: hidden; border-radius: 12px; }
+      #cf-grid .cf-media > .mine-avatar { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
       .onbody-split .ob-figure img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
       .onbody-split .ob-pieces { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 4px; min-height: 0; }
       .onbody-split.ob-n1 .ob-pieces, .onbody-split.ob-n2 .ob-pieces { grid-template-columns: 1fr; }
@@ -8424,7 +8425,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.22</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.23</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11416,7 +11417,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.22";
+var WARDROBE_BUILD = "2026-11-21.86.23";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -41507,8 +41508,13 @@ function analyzeFilePiece(card, job, ix) {
   }
   /* The flat-lay: every piece's own cleaned photograph on cream,
      outer layer first, then top, bottom, shoes, the watch last. */
-  function flatlayHTML(look, withWatch) {
+  function flatlayHTML(look, withWatch, avatarCard) {
     var ob = (typeof onbodyForLook === "function") ? onbodyForLook(look) : null;
+    var shown = ob;
+    try { if (ob && typeof window.cutoutFor === "function") shown = window.cutoutFor(ob) || ob; } catch (e) {}
+    if (shown && avatarCard) {
+      return '<img class="mine-avatar" src="' + esc(shown) + '" alt="' + esc((look.title || "Outfit") + " on David") + '" data-onbody="1" loading="lazy" decoding="async" />';
+    }
     var cells = (look.fwPieces || []).map(function (p) {
       var ph = itemPhoto(p);
       /* Build .74.2: every synced closet photo is held as a vault
@@ -41537,8 +41543,6 @@ function analyzeFilePiece(card, job, ix) {
       /* Build .75: David wearing it, with the pieces beside him.
          .80.11: prefer the transparent cut-out so the card sits on
          cream, not a grey studio box. */
-      var shown = ob;
-      try { if (typeof window.cutoutFor === "function") { var cut = window.cutoutFor(ob); if (cut) shown = cut; } } catch (e) {}
       var side = cells.filter(function (c) { return c.indexOf("fl-swatch") === -1; }).slice(0, 4);
       return '<span class="flatlay onbody-split ob-n' + side.length + '"><span class="ob-figure"><img src="' + esc(shown) + '" alt="' + esc((look.title || "Outfit") + " on David") + '" data-onbody="1" decoding="async" /></span>' +
         '<span class="ob-pieces">' + side.join("") + "</span></span>";
@@ -41625,7 +41629,7 @@ function analyzeFilePiece(card, job, ix) {
   function stateSig() { return [studioSource, feedLevel(), composerDeckCache.sig ? composerDeckCache.sig.length : 0, (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0)].join("/"); }
   function cardHTML(look, idx) {
     return '<article class="card option-card cf-card" role="listitem" data-cf-idx="' + idx + '">' +
-      '<button type="button" class="cf-media" data-cf-open="' + idx + '" aria-label="' + esc(look.title) + '">' + flatlayHTML(look, true) + "</button>" +
+      '<button type="button" class="cf-media" data-cf-open="' + idx + '" aria-label="' + esc(look.title) + '">' + flatlayHTML(look, true, currentTab === "looks") + "</button>" +
       '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span></span>" +
       '<span class="cf-actions"><button type="button" class="chip" data-cf-like="' + idx + '" aria-pressed="' + (look.verdict === "like" ? "true" : "false") + '">Like</button>' +
       (window.__cfEdit81 ? window.__cfEdit81(idx) : "") +
@@ -41684,13 +41688,14 @@ function analyzeFilePiece(card, job, ix) {
     }
     if (!looks && workerFeed38() && !feedLooks.length) { feedSkeleton38(); waitForWorker38(); return 0; }
     if (!looks && workerFeed38()) return 0;
-    if (!looks) looks = composerLooks({ count: n, level: fi.level, exclude: exclude, only: fi.only, slot: "feed", renderedFirst: true, temp: fi.temp });
+    if (!looks) looks = composerLooks({ count: n, level: fi.level, exclude: exclude, only: fi.only, slot: "feed", renderedFirst: true, strictKeys: true, temp: fi.temp });
     if (!looks.length) return 0;
     dropSkeleton38();
     var html = "";
     looks.forEach(function (l) { html += cardHTML(l, feedLooks.length); feedLooks.push(l); });
     grid.insertAdjacentHTML("beforeend", html);
     composerMarkSeen(looks);
+    scheduleMinePage();
     return looks.length;
   }
   function resetFeed() {
@@ -41752,20 +41757,22 @@ function analyzeFilePiece(card, job, ix) {
       if (ol && typeof openLookLayer === "function") openLookLayer(ol);
     }
   });
+  var nextPageFrame = 0;
+  function scheduleMinePage() {
+    if (nextPageFrame) return;
+    nextPageFrame = requestAnimationFrame(function () {
+      nextPageFrame = 0;
+      if (feed.hidden || !feedLooks.length || !sentinel.getClientRects().length) return;
+      if (sentinel.getBoundingClientRect().top < innerHeight + 900) appendLooks(8);
+    });
+  }
+  window.__cfBufferReady = scheduleMinePage;
   if ("IntersectionObserver" in window) {
-    /* .81: a sentinel that stays in view after a batch lands keeps
-       loading (the observer only fires on a change) */
-    var cfIO = new IntersectionObserver(function (entries) {
-      if (!entries[0].isIntersecting || feed.hidden || !feedLooks.length) return;
-      appendLooks(8);
-      requestAnimationFrame(function () { cfIO.unobserve(sentinel); cfIO.observe(sentinel); });
-    }, { rootMargin: "1400px 0px" });
-    cfIO.observe(sentinel);
+    new IntersectionObserver(function (entries) {
+      if (entries.some(function (entry) { return entry.isIntersecting; })) scheduleMinePage();
+    }, { rootMargin: "900px 0px" }).observe(sentinel);
   } else {
-    window.addEventListener("scroll", function () {
-      if (feed.hidden || !feedLooks.length) return;
-      if (sentinel.getBoundingClientRect().top < window.innerHeight + 900) appendLooks(8);
-    }, { passive: true });
+    window.addEventListener("scroll", scheduleMinePage, { passive: true });
   }
 
   /* Wardrobe mode: Give me ideas / Six more ideas / a source tap
@@ -47018,6 +47025,7 @@ window.inspoView = "withmine";
           WHY[m.feed] = m.looks.length ? null : (m.why || "any");
           if (m.feed !== "mine") onBuffer(m.feed);
           else if (pendingMine && m.looks.length) { pendingMine = false; if (window.__cfReset81) window.__cfReset81(); }
+          else if (m.looks.length && window.__cfBufferReady) window.__cfBufferReady();
         }
         if (!WHY[m.feed]) fill(m.feed); else onBuffer(m.feed, true);
       }
@@ -47050,7 +47058,9 @@ window.inspoView = "withmine";
       var shown = (window.__cfLooks81 ? window.__cfLooks81() : []).map(function (l) { return l.composerKey; });
       var buf = BUF.mine.map(function (o) { return o.key; });
       q.level = fi.level; q.temp = fi.temp; q.prefs = typeof composerEffectivePrefs === "function" ? composerEffectivePrefs() : { items: {}, pairs: {} };
-      q.exposure = p.exposure; q.recent = p.recent.concat(shown, buf); q.banned = p.banned;
+      q.exposure = p.exposure; q.recent = p.recent;
+      q.banned = Object.assign({}, p.banned);
+      shown.concat(buf).forEach(function (key) { q.banned[key] = 1; });
       q.onlyKeys = typeof onbodyKeys === "function" ? onbodyKeys() : null;
     } else {
       q.level = level(); q.prefs = S.prefs; q.banned = S.hidden; q.price = priceState();
@@ -47868,13 +47878,18 @@ function setData(d) {
 /* ---------- mine: the composer Deck, as composerLooks deals ---------- */
 function slim(o) {
   function s(p) { return p ? { id: p.id } : null; }
-  return { key: o.key, mask: o.mask, ids: o.ids, top: s(o.top), bottom: s(o.bottom), shoes: s(o.shoes), layer: s(o.layer), acc: s(o.acc) };
+  return { key: o.key, mask: o.mask, ids: o.ids, top: s(o.top), bottom: s(o.bottom), shoes: s(o.shoes),
+    layer: s(o.layer), acc: s(o.acc), tuck: o.tuck, tucked: o.tucked, tuckPrompt: o.tuckPrompt };
 }
 function dealMine(q) {
   if (!mineDeck) return [];
   var o = { level: q.level, temp: typeof q.temp === "number" ? q.temp : null, prefs: q.prefs, exposure: q.exposure, recent: q.recent, banned: q.banned };
   var outs = [];
-  if (q.onlyKeys) outs = mineDeck.deal(q.n, Object.assign({}, o, { onlyKeys: q.onlyKeys })) || [];
+  function rank(a, b) {
+    var rendered = Number(!!(q.onlyKeys && q.onlyKeys[b.key])) - Number(!!(q.onlyKeys && q.onlyKeys[a.key]));
+    return rendered || b._ls - a._ls;
+  }
+  if (q.onlyKeys) outs = mineDeck.deal(q.n, Object.assign({}, o, { onlyKeys: q.onlyKeys, strictKeys: true })) || [];
   if (outs.length < q.n) {
     var have = outs.map(function (x) { return x.key; });
     var more = mineDeck.deal(q.n - outs.length, Object.assign({}, o, { recent: q.recent.concat(have) })) || [];
@@ -47886,7 +47901,7 @@ function dealMine(q) {
     var extra = mineDeck.deal(q.n * 20, Object.assign({}, o, { recent: q.recent.concat(have2) })) || [];
     extra.forEach(function (x) { if (have2.indexOf(x.key) === -1) { have2.push(x.key); outs.push(x); } });
     outs.forEach(function (x) { var t = 0; (x.ids || []).forEach(function (id) { t += lensPiece(MINEI[id], q.lens); }); x._ls = t + rng() * 0.12; });
-    outs.sort(function (a, b) { return b._ls - a._ls; });
+    outs.sort(rank);
     outs = outs.slice(0, q.n);
   } else if (outs.length && weightLenses(q).length) {
     /* no single Icon override: blend per-level icon weights into the re-rank */
@@ -47919,7 +47934,7 @@ function dealMine(q) {
       }
       x._ls = t + rng() * 0.12;
     });
-    outs.sort(function (a, b) { return b._ls - a._ls; });
+    outs.sort(rank);
     outs = outs.slice(0, q.n);
   }
   return outs.map(slim);
