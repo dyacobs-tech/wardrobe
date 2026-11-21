@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.13" />
+    <meta name="wardrobe-build" content="2026-11-20.86.14" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8383,7 +8383,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.13</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.14</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11332,7 +11332,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.13";
+var WARDROBE_BUILD = "2026-11-20.86.14";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -34904,6 +34904,17 @@ function scrollActiveSubtabIntoView() {
   if (b.right > vw - 4) scroller.scrollLeft += (b.right - (vw - 4));
   if (b.left < 4) scroller.scrollLeft -= (4 - b.left);
 }
+/* .86.14: a tab that is already painted keeps its mounted DOM; the
+   refresh runs after the first paint, on idle, instead of before it. */
+var _heavy38 = {};
+function deferHeavy38(key, fn, hasContent) {
+  if (!hasContent) { try { fn(); } catch (e) {} return; }
+  if (_heavy38[key]) { clearTimeout(_heavy38[key].t); }
+  var h = _heavy38[key] = { t: 0 };
+  requestAnimationFrame(function () {
+    (window.requestIdleCallback || function (f) { return setTimeout(f, 30); })(function () { _heavy38[key] = null; try { fn(); } catch (e) {} }, { timeout: 700 });
+  });
+}
 function switchTab(name, opts) {
   /* Consolidated destinations: the old Queue and Yours pages are
      states and filters inside My Looks now — old links and stored
@@ -34982,7 +34993,10 @@ function switchTab(name, opts) {
     else if (window.scrollY) window.scrollTo({ top: 0, behavior: "smooth" });
   }
   if (name === "looks" && !styleNavLock && typeof clearStyleItemView === "function" && styleItemCtx) clearStyleItemView();
-  if ((name === "looks" || name === "outfitideas") && typeof renderSaved === "function") renderSaved();
+  if ((name === "looks" || name === "outfitideas") && typeof renderSaved === "function") {
+    var _sg38 = document.getElementById("saved-grid");
+    deferHeavy38("renderSaved", renderSaved, !!(_sg38 && _sg38.children.length) && !(opts && opts.restore));
+  }
   if (name === "wardrobe" && typeof wardFilter !== "undefined" && wardFilter === "Watches" && typeof renderWardrobe === "function") renderWardrobe();
   if (name === "sale" && typeof renderSaleItems === "function") renderSaleItems();
   if (name === "shopwish" && typeof renderShopWishlist === "function") renderShopWishlist();
@@ -34995,7 +35009,7 @@ function switchTab(name, opts) {
   if (name === "emulate" && typeof renderEmulate === "function") renderEmulate();
   if (name === "find" && typeof renderReceiptsSection === "function") renderReceiptsSection();
   if ((name === "wardrobe" || name === "add") && typeof analyzeRefreshUI === "function") analyzeRefreshUI();
-  if (name === "calendar") { if (typeof renderWeekPlan === "function") renderWeekPlan(); if (typeof calViewApply === "function") calViewApply(); }
+  if (name === "calendar") { if (typeof calViewApply === "function") deferHeavy38("calViewApply", calViewApply, !!window.__calHas38); }
   persistTab();
   if (typeof syncPageTitle === "function") syncPageTitle(name);
   if (name === "find" && window._pendingCurate) {
@@ -37561,13 +37575,15 @@ function closePlanSheet() {
     }
   }
   renderWeekPlan();
+  window.__calHas38 = true;
   /* Opening the Calendar re-reads the live plan and forecast —
-     both can move while other pages are in front. */
+     both can move while other pages are in front. .86.14: the painted
+     calendar shows first; the re-read runs on idle right after. */
   var prevSwitchPlan = window.switchTab;
   if (typeof prevSwitchPlan === "function") {
     window.switchTab = function (name, opts) {
       prevSwitchPlan(name, opts);
-      if (name === "calendar") { renderWeekPlan(); if (typeof renderWornLog === "function") renderWornLog(); }
+      if (name === "calendar") deferHeavy38("calPlan", function () { renderWeekPlan(); if (typeof renderWornLog === "function") renderWornLog(); }, true);
     };
   }
 })();
@@ -37579,7 +37595,7 @@ function closePlanSheet() {
   window.renderSaved = function () {
     orig();
     renderWishlist();
-    renderWornLog();
+    if (typeof currentTab !== "undefined" && currentTab === "calendar") renderWornLog();
     renderRecentlyRemoved();
   };
 })();
@@ -41448,14 +41464,53 @@ function analyzeFilePiece(card, job, ix) {
     return { only: feedOnly && feedOnly.length >= 3 ? feedOnly : null, level: feedLevel(), temp: (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78 };
   }
   window.__cfInputs81 = feedInputs;
+  /* .86.14: the Mine deck is dealt by the endless worker. Before it is
+     ready the grid shows a skeleton at once and fills the moment the
+     worker hands looks back — the main-thread deal (seconds on a phone)
+     is only the last resort when no worker can run. */
+  var cfWait = null;
+  function workerFeed38() { return typeof Worker !== "undefined" && !!(window.__mod81 && window.__mod81.endless) && !window.__cfNoWorker38; }
+  function feedSkeleton38() {
+    if (grid.querySelector(".en-skel") || grid.querySelector(".cf-card")) return;
+    var h = "", i;
+    for (i = 0; i < 6; i++) h += '<article class="card option-card cf-card en-card en-skel" aria-hidden="true"><div class="cf-media en-media en-skel-media"></div><span class="oc-body"><span class="en-skel-line"></span><span class="en-skel-line short"></span></span></article>';
+    grid.insertAdjacentHTML("afterbegin", h);
+  }
+  function dropSkeleton38() { var sk = grid.querySelectorAll(".en-skel"); for (var i = 0; i < sk.length; i++) sk[i].remove(); }
+  function waitForWorker38() {
+    if (cfWait) return;
+    var tries = 0;
+    if (typeof window.endlessLoad81 === "function") window.endlessLoad81();
+    cfWait = setInterval(function () {
+      tries++;
+      if (!feedWanted() || feedLooks.length) { clearInterval(cfWait); cfWait = null; if (!feedLooks.length) dropSkeleton38(); return; }
+      var st = (window.__endless81 && window.__endless81.stats) ? window.__endless81.stats() : null;
+      var have = st && st.buf ? st.buf.mine : 0;
+      if (window.__endless81 && window.__endless81.take && have >= 4) {
+        clearInterval(cfWait); cfWait = null;
+        resetFeed();
+        return;
+      }
+      if (tries > 90) { clearInterval(cfWait); cfWait = null; window.__cfNoWorker38 = true; resetFeed(); }
+    }, 250);
+  }
   function appendLooks(n) {
     var exclude = feedLooks.map(function (l) { return l.composerKey; });
     var fi = feedInputs();
     /* .81: the next looks were dealt ahead, off the main thread (endless
        module); the synchronous deal is only the fallback */
-    var looks = (window.__endless81 && window.__endless81.take) ? window.__endless81.take(n, exclude, fi) : null;
+    var take = (window.__endless81 && window.__endless81.take) ? window.__endless81.take : null;
+    var looks = null;
+    if (take) {
+      var st0 = window.__endless81.stats ? window.__endless81.stats() : null;
+      var have0 = st0 && st0.buf ? st0.buf.mine : 0;
+      looks = take(feedLooks.length ? n : Math.min(n, Math.max(4, have0 || 0)), exclude, fi);
+    }
+    if (!looks && workerFeed38() && !feedLooks.length) { feedSkeleton38(); waitForWorker38(); return 0; }
+    if (!looks && workerFeed38()) return 0;
     if (!looks) looks = composerLooks({ count: n, level: fi.level, exclude: exclude, only: fi.only, slot: "feed", renderedFirst: true, temp: fi.temp });
     if (!looks.length) return 0;
+    dropSkeleton38();
     var html = "";
     looks.forEach(function (l) { html += cardHTML(l, feedLooks.length); feedLooks.push(l); });
     grid.insertAdjacentHTML("beforeend", html);
@@ -45885,14 +45940,21 @@ window.inspoView = "withmine";
     if (typeof window.editFetchCatalog === "function") window.editFetchCatalog();
     if (typeof window.endlessShow81 === "function") window.endlessShow81(f);
   }, true);
-  window.addEventListener("load", function () {
+  /* .86.14: this script runs after the window load event, so a load
+     listener never fired and the module only loaded on the first Looks
+     tap — which then dealt the Mine deck on the main thread (seconds).
+     Preload on idle shortly after first paint, whether or not load
+     has already happened. */
+  function preload38() {
     setTimeout(function () {
       (window.requestIdleCallback || function (fn) { setTimeout(fn, 200); })(function () {
         window.endlessLoad81();
         if (typeof window.editFetchCatalog === "function") window.editFetchCatalog();
       }, { timeout: 2500 });
-    }, 1500);
-  });
+    }, 1200);
+  }
+  if (document.readyState === "complete") preload38();
+  else window.addEventListener("load", preload38);
 })();
     </script>
     <script type="wardrobe/app">
@@ -47107,11 +47169,13 @@ window.inspoView = "withmine";
     var mode = f.mode;
     if (mode === "liked") return;
     var out = [];
+    /* HAN-38: first fill is 4 cards (fast first paint); the rest follows next frame */
+    var CAP = f.looks.length ? 8 : 4;
     /* With mine: the On you renders lead */
     if (feed === "withmine" && !S.lens && f.rendered && f.rendered.length) {
-      while (out.length < 8 && f.rendered.length) { var r = f.rendered.shift(); if (!f.keys[r.key] && !S.hidden[r.key] && lookPriceOk(r)) out.push(r); }
+      while (out.length < CAP && f.rendered.length) { var r = f.rendered.shift(); if (!f.keys[r.key] && !S.hidden[r.key] && lookPriceOk(r)) out.push(r); }
     }
-    while (out.length < 8 && BUF[feed].length) {
+    while (out.length < CAP && BUF[feed].length) {
       var o = BUF[feed].shift();
       if (f.keys[o.key] || S.hidden[o.key]) continue;
       var l = toLook(o, feed);
@@ -47119,6 +47183,7 @@ window.inspoView = "withmine";
     }
     appendCards(feed, out);
     if (out.length) save();
+    if (CAP === 4 && out.length === 4) requestAnimationFrame(function () { requestAnimationFrame(function () { onBuffer(feed); }); });
     if (!f.looks.length && WHY[feed]) {
       var NOUN = { top: "tops", bottom: "trousers", shoes: "shoes", layer: "jackets" };
       f.empty.hidden = false;
