@@ -6766,6 +6766,22 @@ window.notMenswear853 = function (e) {
         -webkit-mask: var(--pencil) center / contain no-repeat;
         mask: var(--pencil) center / contain no-repeat;
       }
+      /* .86.39 (David: "too big"): smaller Like / Edit / Dislike on the
+         outfit cards: 32px circles, smaller icons; an invisible ring keeps
+         a 40px tap area */
+      .pv81 #panel-looks .cf-actions { gap: 10px; padding-bottom: 8px; }
+      .pv81 #panel-looks .cf-actions [data-cf-like],
+      .pv81 #panel-looks .cf-actions [data-cf-dislike],
+      .pv81 #panel-looks .cf-actions .pv-edit {
+        flex: 0 0 32px !important; width: 32px !important; min-width: 32px !important; max-width: 32px !important;
+        height: 32px !important; min-height: 32px !important; position: relative; overflow: visible !important;
+      }
+      .pv81 #panel-looks .cf-actions [data-cf-like]::after,
+      .pv81 #panel-looks .cf-actions [data-cf-dislike]::after,
+      .pv81 #panel-looks .cf-actions .pv-edit::after { content: ""; position: absolute; inset: -4px; }
+      .pv81 #panel-looks .cf-actions [data-cf-like]::before,
+      .pv81 #panel-looks .cf-actions [data-cf-dislike]::before { width: 14px; height: 14px; }
+      .pv81 #panel-looks .cf-actions .pv-edit::before { width: 18px; height: 18px; }
       /* Render me, when present, wraps under the three icon buttons */
       .pv81 #panel-looks .cf-actions .en-rme { flex: 1 0 100% !important; width: auto !important; min-width: 0; max-width: none; height: 36px; min-height: 36px; }
       .swap-sec.pv-flash { outline: 2px solid var(--honey-nav, #a4804f); outline-offset: 4px; border-radius: 10px; }

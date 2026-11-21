@@ -82,6 +82,13 @@ def main():
     # cut-out and zoom copies: 40 MB is ~1,600 renders and keeps the whole
     # site well under the Pages size limit (checked below).
     check(size < 40 * 1024 * 1024, "render pool is %.1f MB (< 40 MB)" % (size / 1048576))
+    # every cut-out has its zoom copy (Home prefetches it) and a placeholder
+    cut = json.loads((ROOT / "assets/onbody-cut/manifest.json").read_text())["map"]
+    lqm = json.loads((ROOT / "assets/onbody-cut/lq.json").read_text())["lq"]
+    no_hq = [f for f in cut if not (ROOT / "assets/onbody-cut-hq" / f).exists()]
+    no_lq = [f for f in cut if f[:-5] not in lqm]
+    check(not no_hq, "every cut-out has a zoom copy (%d missing: %s)" % (len(no_hq), no_hq[:4]))
+    check(not no_lq, "every cut-out has a placeholder (%d missing: %s)" % (len(no_lq), no_lq[:4]))
     site = sum(f.stat().st_size for f in (ROOT / "assets").rglob("*") if f.is_file())
     check(site < 900 * 1024 * 1024, "published assets are %.0f MB (< 900 MB)" % (site / 1048576))
 
@@ -118,13 +125,16 @@ def main():
           /* .78.2c: the Home hero is the render itself (#today-img), no collage */
           const im0 = document.getElementById('today-img'); const im = im0 && !im0.hidden && /\/onbody\//.test(im0.getAttribute('data-render') || im0.getAttribute('src') || '') ? im0 : null;
           const ids = (todayLook && todayLook.fwPieces || []).map(p => p.id);
+          /* .84: built-in library pieces (his tees, polos) are his clothes; what
+             must not appear is a piece that is not in his closet at all */
+          const notMine = ids.filter(i => !(typeof closetItemById === 'function' && closetItemById(i))).length;
           return { src: im ? (im.getAttribute('data-render') || im.getAttribute('src')) : null, ok: im ? (im.complete && im.naturalWidth > 0) : false,
-                   key: todayLook && todayLook.composerKey, ids, seed: ids.filter(i => String(i).indexOf('seed-') === 0).length,
+                   key: todayLook && todayLook.composerKey, ids, seed: notMine,
                    sw: c ? c.querySelectorAll('.fl-swatch').length : -1 };
         }""")
         check(bool(home["src"]) and home["src"].startswith("assets/onbody/"), "Home OOTD shows an on-body render (%s)" % home["src"])
         check(home["ok"], "the Home render loads")
-        check(home["seed"] == 0 and len(home["ids"]) >= 3, "Home OOTD uses only his own pieces (%d pieces, %d seed: %s)" % (len(home["ids"]), home["seed"], home["key"]))
+        check(home["seed"] == 0 and len(home["ids"]) >= 3, "Home OOTD uses only pieces in his closet (%d pieces, %d not in it: %s)" % (len(home["ids"]), home["seed"], home["key"]))
         check(home["sw"] == 0, "no swatch cells on Home")
         pg.click("#section-ideas")
         pg.wait_for_timeout(300)
