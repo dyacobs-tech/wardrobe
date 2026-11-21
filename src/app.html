@@ -6238,6 +6238,20 @@ window.notMenswear853 = function (e) {
       @media (max-width: 899px) and (prefers-reduced-motion: reduce) {
         html body #bottombar .nav-pill { transition: none; }
       }
+      /* .86.30: feedback sheet */
+      .fb830 { position: fixed; inset: 0; z-index: 9000; background: rgba(20,16,12,.35); display: flex; align-items: flex-end; justify-content: center; }
+      .fb830[hidden] { display: none; }
+      .fb830-card { width: min(100%, 560px); max-height: 92vh; overflow: auto; background: var(--bg, #F6F2EA); color: inherit; border-radius: 22px 22px 0 0; padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; }
+      .fb830-top { display: flex; align-items: center; justify-content: space-between; }
+      .fb830-top h3 { margin: 0; }
+      .fb830-x { width: 44px; height: 44px; border: 0; background: transparent; font-size: 26px; color: inherit; cursor: pointer; }
+      .fb830-ctx { margin: 0; color: var(--dim, #777); font-size: 13px; }
+      .fb830 textarea { width: 100%; box-sizing: border-box; min-height: 120px; border-radius: 14px; border: 1px solid var(--line, rgba(0,0,0,.15)); padding: 12px; font: inherit; font-size: 16px; background: transparent; color: inherit; }
+      .fb830-shot { display: flex; align-items: center; gap: 12px; }
+      .fb830-shot img { max-height: 120px; border-radius: 8px; }
+      .fb830-pick { min-height: 44px; display: inline-flex; align-items: center; cursor: pointer; }
+      .fb830-send { min-height: 48px; }
+      .fb830-open { width: 100%; min-height: 48px; margin: 0 0 14px; }
       /* .86.29: Saved ideas row under the Mine feed (all widths) */
       #saved-grid.saved-collapsed829 { display: none !important; }
       .saved-toggle829 {
@@ -8310,6 +8324,7 @@ window.notMenswear853 = function (e) {
 
       <!-- ================= PROFILE ================= -->
       <section id="panel-pinfo" role="tabpanel" aria-labelledby="tab-pinfo" hidden>
+        <button type="button" class="btn-ink fb830-open" id="fb830-open">Send feedback to Claude</button>
         <div class="card theme-card" id="theme-card">
           <h3 class="fav-head">Appearance</h3>
           <div class="theme-toggle" role="group" aria-label="Appearance">
@@ -34180,6 +34195,8 @@ var editSearches = store.get("editSearches", []);
    preference ("p-<sku>", v like|dislike|"" — cleared, never deleted,
    so a star on one device and a hide on another both land). */
 var askSync = store.get("askSync", []);
+/* .86.30: notes David sends to Claude from inside the app (synced) */
+var feedbackNotes = store.get("feedbackNotes", []);
 if (!Array.isArray(askSync)) askSync = [];
 if (!Array.isArray(editSearches)) editSearches = [];
 /* Build .86.8: every render of him — the synced "rendered" collection (records: on-demand renders {id,u,t,title,pieces,ids,lv}, and {id,hide} gallery-hide markers) */
@@ -39159,7 +39176,7 @@ window.blobStore = (function () {
      one just because it dealt a look more recently. */
 var SYNC_URL = "https://wardrobe-sync.dyacobs.workers.dev";
 try { SYNC_URL = localStorage.getItem("wardrobe.syncurl") || SYNC_URL; } catch (e) {}
-var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed", "receipts", "shopwish", "pricedrops", "edits", "searches", "ask", "rendered", "blobs"];
+var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed", "receipts", "shopwish", "pricedrops", "edits", "searches", "ask", "rendered", "feedback", "blobs"];
 function syBlank() {
   var o = { key: null, acct: null, last: 0, snap: {}, st: {}, tomb: {}, dirty: {}, status: "Not synced yet", lastOk: 0 };
   SY_COLLS.forEach(function (c) { o.snap[c] = {}; o.st[c] = {}; o.tomb[c] = {}; o.dirty[c] = {}; });
@@ -39296,6 +39313,7 @@ function syCollGet(c) {
     case "searches": return editSearches;
     case "ask": return askSync;
     case "rendered": return renderedLooks;
+    case "feedback": return feedbackNotes;
     case "blobs": return [];
   }
   return [];
@@ -39322,7 +39340,7 @@ function syMetaOf() {
    vanished ids become tombstones. Runs on every tracked store
    write (hinted to the affected collection) and in full at boot
    and at the start of every sync, so no write path is missed. */
-var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops", editMeta: "edits", editSearches: "searches", askSync: "ask", renderedLooks: "rendered" };
+var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops", editMeta: "edits", editSearches: "searches", askSync: "ask", renderedLooks: "rendered", feedbackNotes: "feedback" };
 var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox", shopwish: "shopWishlist", pricedrops: "priceDrops", edits: "editMeta", searches: "editSearches", ask: "askSync", rendered: "renderedLooks" };
 var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, priceRange: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
 function syTrackChanges(onlyColl) {
@@ -39646,6 +39664,7 @@ function syPutLocal(c, data) {
   else if (c === "searches") { editSearches = put(editSearches); store.set("editSearches", editSearches); if (typeof editOnSync === "function") editOnSync(); }
   else if (c === "rendered") { renderedLooks = put(renderedLooks); store.set("renderedLooks", renderedLooks); if (typeof window.renderedOnSync867 === "function") window.renderedOnSync867(); }
   else if (c === "ask") { askSync = put(askSync); store.set("askSync", askSync); if (typeof window.askOnSync === "function") window.askOnSync(); }
+  else if (c === "feedback") { feedbackNotes = put(feedbackNotes); store.set("feedbackNotes", feedbackNotes); }
   else if (c === "worn") wornLog = put(wornLog);
   else if (c === "inspo") inspoImages = put(inspoImages);
   else if (c === "finds") finds = put(finds);
@@ -39697,6 +39716,7 @@ function syRemoveLocal(c, id) {
   else if (c === "searches") { editSearches = drop(editSearches); store.set("editSearches", editSearches); if (typeof editOnSync === "function") editOnSync(); }
   else if (c === "rendered") { renderedLooks = drop(renderedLooks); store.set("renderedLooks", renderedLooks); if (typeof window.renderedOnSync867 === "function") window.renderedOnSync867(); }
   else if (c === "ask") { askSync = drop(askSync); store.set("askSync", askSync); if (typeof window.askOnSync === "function") window.askOnSync(); }
+  else if (c === "feedback") { feedbackNotes = drop(feedbackNotes); store.set("feedbackNotes", feedbackNotes); }
   else if (c === "worn") wornLog = drop(wornLog);
   else if (c === "inspo") inspoImages = drop(inspoImages);
   else if (c === "finds") finds = drop(finds);
@@ -44569,6 +44589,90 @@ window.inspoView = "withmine";
 })();
     </script>
     <script type="wardrobe/app">
+/* .86.30: Send feedback to Claude. A note (dictation works), an optional
+   screenshot, and the screen he was on are saved to the synced
+   "feedback" list, which Claude reads at the start of each session.
+   Open it from Profile or with a two-finger long-press anywhere. */
+(function () {
+  function visiblePanel() {
+    var ps = [].slice.call(document.querySelectorAll("[id^=panel-]")).filter(function (e) { return !e.hidden && e.getBoundingClientRect().height > 0; });
+    return ps.map(function (e) { return e.id.replace("panel-", ""); }).join(",");
+  }
+  function lookNow() {
+    try {
+      if (typeof currentLook !== "undefined" && currentLook && document.querySelector(".look-layer:not([hidden]), #outfit-view:not([hidden])")) return currentLook.title || "";
+      if (typeof todayLook !== "undefined" && todayLook && /today/.test(visiblePanel())) return todayLook.title || "";
+    } catch (e) {}
+    return "";
+  }
+  function shrink(file, done) {
+    var fr = new FileReader();
+    fr.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var w = Math.min(600, img.naturalWidth), h = Math.round(img.naturalHeight * w / img.naturalWidth);
+        var c = document.createElement("canvas"); c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        try { done(c.toDataURL("image/jpeg", 0.72)); } catch (e) { done(""); }
+      };
+      img.onerror = function () { done(""); };
+      img.src = fr.result;
+    };
+    fr.onerror = function () { done(""); };
+    fr.readAsDataURL(file);
+  }
+  var sheet = null, ctx = null, shot = "";
+  function build() {
+    sheet = document.createElement("div");
+    sheet.className = "fb830"; sheet.hidden = true;
+    sheet.setAttribute("role", "dialog"); sheet.setAttribute("aria-modal", "true"); sheet.setAttribute("aria-labelledby", "fb830-h");
+    sheet.innerHTML = '<div class="fb830-card"><div class="fb830-top"><h3 id="fb830-h">Feedback for Claude</h3>' +
+      '<button type="button" class="fb830-x" aria-label="Close">\u00D7</button></div>' +
+      '<p class="fb830-ctx"></p>' +
+      '<textarea id="fb830-note" rows="5" placeholder="What should change?" aria-label="Your note"></textarea>' +
+      '<div class="fb830-shot"><label class="btn-ghost fb830-pick">Attach screenshot<input type="file" accept="image/*" hidden></label><img alt="" hidden></div>' +
+      '<button type="button" class="btn-ink fb830-send">Send</button></div>';
+    document.body.appendChild(sheet);
+    sheet.querySelector(".fb830-x").addEventListener("click", close);
+    sheet.addEventListener("click", function (e) { if (e.target === sheet) close(); });
+    sheet.querySelector("input[type=file]").addEventListener("change", function (e) {
+      var f = e.target.files && e.target.files[0]; if (!f) return;
+      shrink(f, function (d) { shot = d; var im = sheet.querySelector(".fb830-shot img"); im.src = d; im.hidden = !d; });
+    });
+    sheet.querySelector(".fb830-send").addEventListener("click", send);
+  }
+  function open() {
+    if (!sheet) build();
+    ctx = { screen: visiblePanel(), hash: location.hash, look: lookNow(), build: (typeof WARDROBE_BUILD !== "undefined" ? WARDROBE_BUILD : ""), w: innerWidth, h: innerHeight, standalone: !!(window.navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches)) };
+    shot = ""; var im = sheet.querySelector(".fb830-shot img"); im.hidden = true; im.removeAttribute("src");
+    sheet.querySelector("textarea").value = "";
+    sheet.querySelector(".fb830-ctx").textContent = (ctx.look ? ctx.look + " \u00B7 " : "") + (ctx.screen || "app") + " \u00B7 " + ctx.build;
+    sheet.hidden = false; document.documentElement.classList.add("sheet-lock");
+    setTimeout(function () { try { sheet.querySelector("textarea").focus(); } catch (e) {} }, 50);
+  }
+  function close() { if (!sheet) return; sheet.hidden = true; document.documentElement.classList.remove("sheet-lock"); }
+  function send() {
+    var note = sheet.querySelector("textarea").value.trim();
+    if (!note && !shot) { sheet.querySelector("textarea").focus(); return; }
+    var rec = { id: "fb-" + Date.now(), at: new Date().toISOString(), note: note, screen: ctx.screen, hash: ctx.hash, look: ctx.look, build: ctx.build, viewport: ctx.w + "x" + ctx.h, standalone: ctx.standalone };
+    if (shot) rec.img = shot;
+    feedbackNotes = (feedbackNotes || []).concat([rec]);
+    var ok = true; try { ok = store.set("feedbackNotes", feedbackNotes) !== false; } catch (e) { ok = false; }
+    close();
+    if (typeof toast === "function") toast(window.__PV81 ? "Preview is read-only: feedback is only saved from the live app." : ok ? "Sent to Claude \u2713" : "Couldn\u2019t save that note. Storage is full.");
+  }
+  document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("#fb830-open")) { e.preventDefault(); open(); } });
+  /* two-finger long-press, anywhere */
+  var t = null, sx = 0, sy = 0;
+  document.addEventListener("touchstart", function (e) {
+    if (e.touches.length !== 2) { clearTimeout(t); t = null; return; }
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    clearTimeout(t); t = setTimeout(function () { t = null; if (!sheet || sheet.hidden) open(); }, 650);
+  }, { passive: true });
+  document.addEventListener("touchmove", function (e) { if (!t) return; var p = e.touches[0]; if (Math.abs(p.clientX - sx) > 12 || Math.abs(p.clientY - sy) > 12) { clearTimeout(t); t = null; } }, { passive: true });
+  document.addEventListener("touchend", function () { clearTimeout(t); t = null; }, { passive: true });
+  window.openFeedback830 = open;
+})();
 /* Use an icon row below the top of a phone page. Separate thresholds keep
    elastic scrolling from alternating the layout at its boundary. */
 (function () {
