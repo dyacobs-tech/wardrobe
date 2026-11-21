@@ -29,6 +29,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))  # noqa: E402
+from wardrobe_fixture import garments_for_all_levels, photographed_closet
 from buildinfo import CURRENT_BUILD
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,7 +49,7 @@ if (window.matchMedia) {
 }
 """
 
-ENGINE_JS = """(items) => {
+ENGINE_JS = """([items, extras]) => {
   const C = window.WardrobeComposer;
   const out = { ok: !!C };
   if (!C) return out;
@@ -62,7 +63,7 @@ ENGINE_JS = """(items) => {
   // 100 pages of 6 with the seen ring
   let recent = [], exposure = {}, seen = new Set(), dups = 0;
   for (let page = 0; page < 100; page++) {
-    deck.deal(6, { level: null, recent, exposure }).forEach(o => {
+    deck.deal(6, { level: null, temp: 68, recent, exposure }).forEach(o => {
       if (seen.has(o.key)) dups++;
       seen.add(o.key); recent.push(o.key);
       o.ids.forEach(id => { exposure[id] = (exposure[id] || 0) + 1; });
@@ -83,9 +84,10 @@ ENGINE_JS = """(items) => {
   out.newPiecePlaceable = !!d2.coverage(null)['new-1'];
   // levels
   out.levels = {};
+  const allLevels = C.build(items.concat(extras));
   for (let L = 1; L <= 7; L++) {
-    const pg = deck.deal(6, { level: L });
-    out.levels[L] = { pool: deck.uniqueCount(L), dealt: pg.length, inLevel: pg.every(o => (o.mask & (1 << L)) || L >= 6) };
+    const pg = allLevels.deal(6, { level: L });
+    out.levels[L] = { pool: allLevels.uniqueCount(L), dealt: pg.length, inLevel: pg.every(o => (o.mask & (1 << L))) };
   }
   // banned never returns
   const first = deck.deal(1, { level: 4 })[0];
@@ -126,7 +128,9 @@ def main() -> int:
             ctx = browser.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2,
                                       is_mobile=True, has_touch=True, service_workers="block")
             ctx.add_init_script(STANDALONE_INIT)
-            seed = {"items": [dict(i, addedISO="2026-11-17", photo=FIXTURE_PHOTO) for i in FIXTURE], "todaySource": "wardrobe", "formality": 4}
+            # These two blue receipt rows describe the same garment, which the app merges.
+            ui_items = [i for i in photographed_closet() if i["id"] != "rcptbuy-1dnqhzg17"]
+            seed = {"items": ui_items, "todaySource": "wardrobe", "formality": 4}
             ctx.add_init_script("(() => { if (localStorage.getItem('wardrobe.items')) return; const S = %s;"
                                 " for (const k in S) localStorage.setItem('wardrobe.' + k, JSON.stringify(S[k])); })();" % json.dumps(seed))
             ctx.route(BLOCK, lambda r: r.abort())
@@ -137,7 +141,7 @@ def main() -> int:
             page.wait_for_timeout(1500)
             check("build is .73", page.evaluate("window.WARDROBE_BUILD") == BUILD)
 
-            eng = page.evaluate(ENGINE_JS, FIXTURE)
+            eng = page.evaluate(ENGINE_JS, [FIXTURE, garments_for_all_levels()])
             check("composer present", eng.get("ok"))
             check("83-piece closet makes thousands of outfits", eng["combos"] >= 5000, eng["combos"])
             check("every outfit is unique", eng["uniqueKeys"] == eng["combos"])
@@ -152,7 +156,7 @@ def main() -> int:
             check("a disliked combo never returns", not eng["bannedReturned"])
 
             closet_n = page.evaluate("wardrobeItems.filter(i => !String(i.id).startsWith('seed-')).length")
-            check("fixture closet loaded", closet_n == len(FIXTURE), closet_n)
+            check("fixture closet loaded", closet_n == len(ui_items), closet_n)
             page.wait_for_timeout(1500)
             home = page.evaluate("""() => ({ composer: !!(todayLook && todayLook.composer), key: todayLook && todayLook.composerKey,
                 cells: document.querySelectorAll('#today-collage .flatlay .fl-cell').length,
@@ -171,17 +175,18 @@ def main() -> int:
             check("hero Dislike bans the combo (and only his on-body render), not a piece photo", home["key"] in after["banned"] and all("/onbody/" in x for x in added), (added, home["key"], after))
 
             page.locator("#section-ideas").click(); page.wait_for_timeout(250)
-            page.locator("#outfits-mine").click(); page.wait_for_timeout(700)
+            page.locator('[data-pv-f="mine"]').click()
+            page.wait_for_function("() => __cfLooks81().length >= 12")
             n0 = page.evaluate("document.querySelectorAll('#cf-grid .cf-card').length")
             check("Outfits Mine closet feed shows", n0 >= 12 and not page.evaluate("document.getElementById('closet-feed').hidden"), n0)
-            for _ in range(3):
-                page.evaluate("window.scrollTo(0, document.body.scrollHeight)"); page.wait_for_timeout(500)
+            page.locator("#cf-sentinel").scroll_into_view_if_needed()
+            page.wait_for_function("n => __cfLooks81().length > n", arg=n0)
             n1 = page.evaluate("document.querySelectorAll('#cf-grid .cf-card').length")
             check("infinite scroll appends", n1 > n0, f"{n0} -> {n1}")
-            check("feed cards have flat-lays", page.evaluate("document.querySelectorAll('#cf-grid .cf-card .flatlay').length") == n1)
-            page.locator("#outfits-inspo").click(); page.wait_for_timeout(300)
+            check("every card has an avatar or the outfit's piece grid", page.evaluate("document.querySelectorAll('#cf-grid .cf-card .cf-media > .flatlay, #cf-grid .cf-card .cf-media > .mine-avatar').length") == n1)
+            page.locator('[data-pv-f="withmine"]').click(); page.wait_for_timeout(300)
             check("Inspo hides the closet feed", page.evaluate("document.getElementById('closet-feed').hidden"))
-            page.locator("#outfits-mine").click(); page.wait_for_timeout(300)
+            page.locator('[data-pv-f="mine"]').click(); page.wait_for_timeout(300)
             check("no JS errors", not errors, errors[:3])
             ctx.close(); browser.close()
     finally:

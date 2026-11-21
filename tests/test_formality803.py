@@ -29,6 +29,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from wardrobe_fixture import garments_for_all_levels, photographed_closet
 from buildinfo import CURRENT_BUILD  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,7 +52,7 @@ ENGINE_JS = """(items) => {
   const out = { ok: !!C && typeof C.tuckOf === 'function' };
   if (!C) return out;
   const deck = C.build(items);
-  const blazerOf = (o) => !!(o.layer && (o.layer.kind === 'blazer' || o.layer.kind === 'suit'));
+  const blazerOf = (o) => !!(o.layer && ['blazer', 'suit', 'dinner'].includes(o.layer.kind));
   out.rates = {};
   for (let L = 1; L <= 7; L++) {
     let n = 0, b = 0, recent = [], exposure = {};
@@ -148,7 +149,7 @@ def main() -> int:
             )
             ctx.add_init_script(STANDALONE_INIT)
             seed = {
-                "items": [dict(i, addedISO="2026-11-17", photo=FIXTURE_PHOTO) for i in FIXTURE],
+                "items": photographed_closet(),
                 "todaySource": "wardrobe",
                 "formality": 5,
             }
@@ -171,7 +172,7 @@ def main() -> int:
                   currentWeather = Object.assign({}, currentWeather || {}, { temp: 74, label: 'Clear', rain: 0 });
                 } }"""
             )
-            eng = page.evaluate(ENGINE_JS, FIXTURE)
+            eng = page.evaluate(ENGINE_JS, FIXTURE + garments_for_all_levels())
             check("composer and tuck helpers present", eng.get("ok"), str(eng.get("ok")))
             rates = eng.get("rates") or {}
             for L in (1, 2, 3, 4):

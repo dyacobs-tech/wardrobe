@@ -24,6 +24,7 @@ import http.server, json, os, re, socketserver, sys, threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))  # noqa: E402
+from wardrobe_fixture import garments_for_all_levels
 from buildinfo import CURRENT_BUILD
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,7 +65,7 @@ def main():
         with sync_playwright() as p:
             b = p.chromium.launch()
             ctx = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, service_workers="block")
-            items = [dict(i, addedISO="2026-11-17", photo=PH) for i in FIXTURE + EXTRA]
+            items = [dict(i, addedISO="2026-11-17", photo=PH) for i in FIXTURE + EXTRA + garments_for_all_levels()]
             seed = {"items": items, "todaySource": "wardrobe", "formality": 4}
             ctx.add_init_script("(() => { if (localStorage.getItem('wardrobe.items')) return; const S = %s;"
                                 " for (const k in S) localStorage.setItem('wardrobe.' + k, JSON.stringify(S[k])); })();" % json.dumps(seed))
@@ -74,6 +75,7 @@ def main():
             pg.goto(url, wait_until="load"); pg.wait_for_timeout(2000)
             check("build", pg.evaluate("WARDROBE_BUILD") == BUILD, pg.evaluate("WARDROBE_BUILD"))
 
+            pg.wait_for_function("() => typeof window.poolOnlyRepair788 === 'function'")
             f = pg.evaluate("""() => ({ s1: itemOccasionOnly(closetItemById('pool-s1')), s2: itemOccasionOnly(closetItemById('pool-s2')),
               others: wardrobeItems.filter(i => i.category === 'Shoes' && !/^pool-/.test(i.id)).filter(i => itemPoolOnly(i)).map(i => i.name),
               stored: JSON.parse(localStorage.getItem('wardrobe.items')).filter(i => /^pool-/.test(i.id)).map(i => i.occasionOnly) })""")

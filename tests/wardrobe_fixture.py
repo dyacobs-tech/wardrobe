@@ -10,3 +10,20 @@ def photographed_closet():
         dict(item, addedISO=item.get("addedISO") or "2026-11-17", photo="assets/icon-192.png")
         for item in items if not str(item.get("id", "")).startswith("seed-")
     ]
+
+
+def garments_for_all_levels():
+    """Formal and summer garments missing from the original synthetic closet."""
+    items = []
+    for name, category, colour in [
+        ("Black patent Oxford shoes", "Shoes", "Black"),
+        ("Black leather oxford dress shoes", "Shoes", "Black"),
+        ("Tuxedo trousers", "Trousers", "Black"),
+        ("White tuxedo dress shirt", "Shirts", "White"),
+        ("Black shawl collar dinner jacket", "Suits", "Black"),
+        ("Navy suit jacket", "Suits", "Navy"),
+        ("Grey wool dress trousers", "Trousers", "Grey"),
+        ("Olive tailored shorts", "Shorts", "Olive"),
+    ]:
+        items.append(dict(id=name, name=name, category=category, colourName=colour))
+    return items

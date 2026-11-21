@@ -4,22 +4,13 @@ import sys
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+from wardrobe_fixture import garments_for_all_levels
 
 
 def main():
     url = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000/"
     items = json.loads(Path(__file__).with_name("fixture_closet83.json").read_text())
-    for name, category, colour in [
-        ("Black patent Oxford shoes", "Shoes", "Black"),
-        ("Black leather oxford dress shoes", "Shoes", "Black"),
-        ("Tuxedo trousers", "Trousers", "Black"),
-        ("White tuxedo dress shirt", "Shirts", "White"),
-        ("Black shawl collar dinner jacket", "Suits", "Black"),
-        ("Navy suit jacket", "Suits", "Navy"),
-        ("Grey wool dress trousers", "Trousers", "Grey"),
-        ("Olive tailored shorts", "Shorts", "Olive"),
-    ]:
-        items.append(dict(id=name, name=name, category=category, colourName=colour))
+    items.extend(garments_for_all_levels())
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch()

@@ -59,11 +59,10 @@ TYPE_JS = """() => {
 
 TOGGLE_JS = """() => {
   const panel = document.getElementById('panel-looks');
-  const bar = document.querySelector('#panel-looks .outfits-toggle');
-  const mine = document.getElementById('outfits-mine');
-  const inspo = document.getElementById('outfits-inspo');
-  if (!panel || !bar || !mine || !inspo) return { error: 'no outfits toggle', present: [!!panel, !!bar, !!mine, !!inspo] };
-  const els = [mine, inspo];
+  const bar = document.querySelector('#pv-top .pv-seg');
+  const els = [...panel.querySelectorAll('[data-pv-f]')];
+  const [mine, inspo] = els;
+  if (!bar || els.length !== 4) return {error: 'Missing source controls'};
   const rects = els.map(e => {
     const r = e.getBoundingClientRect();
     return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height,
@@ -74,18 +73,14 @@ TOGGLE_JS = """() => {
   const heights = rects.map(r => r.height);
   const docW = document.documentElement.clientWidth;
   const barR = bar.getBoundingClientRect();
-  /* .80.19: the toggle shares one row with Build / Ideas / Shuffle — the
-     row (first to last visible control) is what is centred */
-  const rowEl = document.querySelector('#panel-looks .outfits-row');
-  const rowKids = rowEl ? [...rowEl.children].filter(k => k.offsetParent !== null).map(k => k.getBoundingClientRect()) : [];
-  const rowL = rowKids.length ? Math.min(...rowKids.map(k => k.left)) : rects[0].left;
-  const rowR = rowKids.length ? Math.max(...rowKids.map(k => k.right)) : rects[1].right;
-  const mid = (rowL + rowR) / 2;
+  const first = rects[0], last = rects[rects.length - 1];
+  const controlsFit = first.left >= 0 && last.right <= docW + 1 &&
+    rects.every((r,i) => r.width > 0 && r.height > 0 && (!i || r.left >= rects[i-1].right - 1));
   const overflow = document.documentElement.scrollWidth - docW;
   const bodyOverflow = document.body.scrollWidth - docW;
   const feed = document.getElementById('closet-feed');
   const mineView = document.getElementById('outfits-mine-view');
-  const inspoView = document.getElementById('outfits-inspo-view');
+  const inspoView = document.getElementById('panel-withmine');
   return {
     build: window.WARDROBE_BUILD || null,
     panelShown: !panel.hidden && panel.offsetParent !== null,
@@ -96,8 +91,7 @@ TOGGLE_JS = """() => {
     heightClose: (Math.max(...heights) - Math.min(...heights)) <= 2,
     heights,
     widths,
-    centered: Math.abs(mid - docW / 2) <= 8,
-    padEqual: rowEl ? Math.abs(rowL - (docW - rowR)) <= 8 : Math.abs(barR.left - (docW - barR.right)) <= 8,
+    controlsFit,
     noHorizOverflow: overflow <= 1 && bodyOverflow <= 1,
     overflow, bodyOverflow, docW,
     minePressed: mine.getAttribute('aria-pressed') === 'true',
@@ -247,14 +241,12 @@ def main() -> int:
                     str(info),
                 )
                 check(
-                    f"{name}: Mine/Inspo toggle is two equal chips in one centered row",
+                    f"{name}: all four Looks sources fit in one row",
                     info
-                    and info.get("count") == 2
+                    and info.get("count") == 4
                     and info.get("sameRow")
-                    and info.get("equalWidth")
                     and info.get("heightClose")
-                    and info.get("centered")
-                    and info.get("padEqual"),
+                    and info.get("controlsFit"),
                     str(info),
                 )
                 check(
@@ -272,7 +264,7 @@ def main() -> int:
                     page.screenshot(path=str(AUDIT / "outfits-390-build75-ideas63.png"), full_page=False)
                     print(f"  wrote {AUDIT / 'outfits-390-build75-ideas63.png'}")
 
-                page.locator("#outfits-inspo").click()
+                page.locator('[data-pv-f="withmine"]').click()
                 page.wait_for_timeout(300)
                 insp = page.evaluate(TOGGLE_JS)
                 check(
@@ -284,7 +276,7 @@ def main() -> int:
                     and insp.get("feedHidden"),
                     str(insp),
                 )
-                page.locator("#outfits-mine").click()
+                page.locator('[data-pv-f="mine"]').click()
                 page.wait_for_timeout(300)
 
                 outfits_nav = nav_bbox(page)
@@ -326,8 +318,8 @@ def main() -> int:
             open_outfits(page)
             desk = page.evaluate(TOGGLE_JS)
             check(
-                "1280x800: Mine/Inspo toggle in one row, no overflow",
-                desk and desk.get("count") == 2 and desk.get("sameRow") and desk.get("noHorizOverflow"),
+                "1280x800: four Looks sources in one row, no overflow",
+                desk and desk.get("count") == 4 and desk.get("sameRow") and desk.get("noHorizOverflow"),
                 str(desk),
             )
             page.screenshot(path=str(AUDIT / "outfits-1280x800-build75.png"), full_page=False)
