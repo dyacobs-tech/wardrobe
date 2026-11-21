@@ -6804,6 +6804,10 @@ window.notMenswear853 = function (e) {
       .pv81 #panel-looks .cf-actions [data-cf-like]::after,
       .pv81 #panel-looks .cf-actions [data-cf-dislike]::after,
       .pv81 #panel-looks .cf-actions .pv-edit::after { content: ""; position: absolute; inset: -4px; }
+      /* the hidden label is still a flex item: no gap, or the icon sits off-centre */
+      .pv81 #panel-looks .cf-actions [data-cf-like],
+      .pv81 #panel-looks .cf-actions [data-cf-dislike],
+      .pv81 #panel-looks .cf-actions .pv-edit { gap: 0 !important; }
       .pv81 #panel-looks .cf-actions [data-cf-like]::before,
       .pv81 #panel-looks .cf-actions [data-cf-dislike]::before { width: 14px; height: 14px; }
       .pv81 #panel-looks .cf-actions .pv-edit::before { width: 18px; height: 18px; }
