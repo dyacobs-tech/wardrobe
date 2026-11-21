@@ -118,7 +118,8 @@ def main() -> int:
             check("manifest start_url relative", man.get("start_url") in ("./", "."), str(man.get("start_url")))
 
         # ---- the five sections (build .39: Calendar is its own tab) -------
-        for sel, panel in [("#section-closet", "panel-wardrobe"), ("#section-ideas", "panel-looks"),
+        # .86.42: Home · Looks · Inspo · Shop · Calendar (Closet is inside Looks)
+        for sel, panel in [("#section-ideas", "panel-looks"), ("#section-inspo", "panel-looks"),
                            ("#tab-find", "panel-find"), ("#tab-today", "panel-today"),
                            ("#section-calendar", "panel-calendar")]:
             try:
@@ -148,7 +149,8 @@ def main() -> int:
                 check(f"page {sel} fits the screen width", False, str(e)[:120])
 
         # ---- closet: Mark worn was removed in .75 ---------------------------
-        page.click("#section-closet")
+        page.click("#section-ideas")
+        page.click('#panel-looks [data-lk-go="wardrobe"]')
         page.wait_for_timeout(600)
         wore = page.evaluate("""() => ({
           btn: !!document.querySelector("[data-item-wore]"),

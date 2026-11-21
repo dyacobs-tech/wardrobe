@@ -175,7 +175,6 @@ def main() -> int:
             check("hero Dislike bans the combo (and only his on-body render), not a piece photo", home["key"] in after["banned"] and all("/onbody/" in x for x in added), (added, home["key"], after))
 
             page.locator("#section-ideas").click(); page.wait_for_timeout(250)
-            page.locator('[data-pv-f="mine"]').click()
             page.wait_for_function("() => __cfLooks81().length >= 12")
             n0 = page.evaluate("document.querySelectorAll('#cf-grid .cf-card').length")
             check("Outfits Mine closet feed shows", n0 >= 12 and not page.evaluate("document.getElementById('closet-feed').hidden"), n0)
@@ -184,9 +183,9 @@ def main() -> int:
             n1 = page.evaluate("document.querySelectorAll('#cf-grid .cf-card').length")
             check("infinite scroll appends", n1 > n0, f"{n0} -> {n1}")
             check("every card has an avatar or the outfit's piece grid", page.evaluate("document.querySelectorAll('#cf-grid .cf-card .cf-media > .flatlay, #cf-grid .cf-card .cf-media > .mine-avatar').length") == n1)
-            page.locator('[data-pv-f="withmine"]').click(); page.wait_for_timeout(300)
+            page.locator('#section-inspo').click(); page.wait_for_timeout(300)  # .86.42: Mix lives in Inspo
             check("Inspo hides the closet feed", page.evaluate("document.getElementById('closet-feed').hidden"))
-            page.locator('[data-pv-f="mine"]').click(); page.wait_for_timeout(300)
+            page.locator('#section-ideas').click(); page.wait_for_timeout(300)
             check("no JS errors", not errors, errors[:3])
             ctx.close(); browser.close()
     finally:

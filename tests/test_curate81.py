@@ -211,13 +211,13 @@ def main():
         # Looks Filters sheet uses the same Icons data + current-level weights
         pg.set_viewport_size({"width": 390, "height": 844})
         pg.wait_for_timeout(200)
-        pg.click("#section-ideas")
+        pg.click("#section-inspo")   # .86.42: the filter sits on Inspo's Ideas header
         pg.wait_for_timeout(900)
-        check("Looks page is open", pg.evaluate("""() => {
-          const f = document.getElementById('pv-filter');
+        check("Inspo page is open", pg.evaluate("""() => {
+          const f = document.querySelector('.ins-filter841');
           return !!f && f.offsetParent !== null;
         }"""))
-        pg.click("#pv-filter")
+        pg.click(".ins-filter841")
         pg.wait_for_timeout(500)
         filt = pg.evaluate("""() => {
           const host = document.getElementById('pvf-icons');

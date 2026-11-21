@@ -59,9 +59,11 @@ TYPE_JS = """() => {
 
 TOGGLE_JS = """() => {
   const panel = document.getElementById('panel-looks');
-  const bar = document.querySelector('#pv-top .pv-seg');
-  const els = [...panel.querySelectorAll('[data-pv-f]')];
-  const [mine, inspo] = els;
+  /* .86.42: the Looks control is Outfits | Closet | Go-to's | Liked; the
+     feed source (Mine / Mix) is still tracked on the hidden data-pv-f buttons */
+  const bar = document.querySelector('#panel-looks .lk-seg841');
+  const els = [...panel.querySelectorAll('.lk-segw841 [data-lk-go]')];
+  const [mine, inspo] = [...panel.querySelectorAll('[data-pv-f]')];
   if (!bar || els.length !== 4) return {error: 'Missing source controls'};
   const rects = els.map(e => {
     const r = e.getBoundingClientRect();
@@ -264,7 +266,7 @@ def main() -> int:
                     page.screenshot(path=str(AUDIT / "outfits-390-build75-ideas63.png"), full_page=False)
                     print(f"  wrote {AUDIT / 'outfits-390-build75-ideas63.png'}")
 
-                page.locator('[data-pv-f="withmine"]').click()
+                page.locator('#section-inspo').click()
                 page.wait_for_timeout(300)
                 insp = page.evaluate(TOGGLE_JS)
                 check(
@@ -276,7 +278,7 @@ def main() -> int:
                     and insp.get("feedHidden"),
                     str(insp),
                 )
-                page.locator('[data-pv-f="mine"]').click()
+                page.locator('#section-ideas').click()
                 page.wait_for_timeout(300)
 
                 outfits_nav = nav_bbox(page)

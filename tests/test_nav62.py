@@ -129,7 +129,7 @@ def main() -> int:
                     str(home and home["transform"]),
                 )
                 # Closet
-                page.locator("#section-closet").click()
+                page.locator("#section-ideas").click(); page.locator('#panel-looks [data-lk-go="wardrobe"]').click()
                 page.wait_for_timeout(250)
                 closet = bbox(page)
                 check(
@@ -188,7 +188,7 @@ def main() -> int:
                 page.locator("#tab-today").click()
                 page.wait_for_timeout(200)
                 page.screenshot(path=str(out / f"{engine}-{name}-home.png"), full_page=False)
-                page.locator("#section-closet").click()
+                page.locator("#section-ideas").click(); page.locator('#panel-looks [data-lk-go="wardrobe"]').click()
                 page.wait_for_timeout(200)
                 page.screenshot(path=str(out / f"{engine}-{name}-closet.png"), full_page=False)
                 ctx.close()
@@ -244,7 +244,7 @@ def main() -> int:
                             home and nearly(home["bottom"], vh) and nearly(home["height"], 102) and home["position"] in ("fixed", "absolute") and (home["position"]=="fixed" or home.get("slotPosition")=="fixed"),
                             str(home) + f" vh={vh}",
                         )
-                        page.locator("#section-closet").click()
+                        page.locator("#section-ideas").click(); page.locator('#panel-looks [data-lk-go="wardrobe"]').click()
                         page.wait_for_timeout(250)
                         closet = bbox(page)
                         check(

@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.41" />
+    <meta name="wardrobe-build" content="2026-11-21.86.42" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -164,6 +164,9 @@ window.notMenswear853 = function (e) {
   var tab = norm(refresh ? (sess || hash || (route && route.tab) || "") : hash) || "today";
   var looks = (route && route.looks) || {};
   document.documentElement.setAttribute("data-boot-tab", tab);
+  /* .86.41: Outfits, Go-to's, Liked and Inspo are modes of the Looks page */
+  var LKM = { looks: "outfits", gotos: "gotos", liked: "liked", inspo: "inspo" };
+  if (LKM[tab]) document.documentElement.setAttribute("data-lkm", LKM[tab]);
   window.__bootRoute865 = { tab: tab, looks: looks, scroll: (route && route.scroll) || 0 };
   /* .86.8: a reload on Looks → Rendered opens Rendered directly */
   if (tab === "looks" && looks.feed === "rendered") { window.renderedOn867 = true; document.documentElement.classList.add("rnd867"); }
@@ -174,7 +177,10 @@ window.notMenswear853 = function (e) {
       html[data-boot-tab]:not([data-boot-tab="today"]) #panel-today,
       html[data-boot-tab]:not([data-boot-tab="today"]) #today-hero,
       html[data-boot-tab]:not([data-boot-tab="today"]) #today-img { display: none !important; visibility: hidden !important; }
-      html[data-boot-tab="looks"] #panel-looks { display: block !important; }
+      html[data-boot-tab="looks"] #panel-looks,
+      html[data-boot-tab="gotos"] #panel-looks,
+      html[data-boot-tab="liked"] #panel-looks,
+      html[data-boot-tab="inspo"] #panel-looks { display: block !important; }
       html[data-boot-tab="wardrobe"] #panel-wardrobe { display: block !important; }
       html[data-boot-tab="find"] #panel-find { display: block !important; }
       html[data-boot-tab="calendar"] #panel-calendar { display: block !important; }
@@ -6791,6 +6797,56 @@ window.notMenswear853 = function (e) {
         -webkit-mask: var(--pencil) center / contain no-repeat;
         mask: var(--pencil) center / contain no-repeat;
       }
+      /* .86.41: Looks segments, Looks-page modes, Inspo */
+      .lk-segw841 { padding: 8px 16px 6px; }
+      .lk-seg841 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 3px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border-strong); }
+      .lk-seg841 button { height: 36px; min-height: 36px; padding: 0 6px; border: 0; border-radius: 999px; background: transparent; color: var(--dim); font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+      .lk-seg841 button[aria-selected="true"] { background: var(--ink-btn); color: var(--accent-ink); }
+      html.pv81 #panel-looks .pv-bar { display: none !important; }
+      html[data-lkm="inspo"] #panel-looks > .lk-segw841 { display: none !important; }
+      html[data-lkm="gotos"] #panel-looks > :not(.lk-segw841):not(#lk-gotos841),
+      html[data-lkm="liked"] #panel-looks > :not(.lk-segw841):not(#lk-liked841) { display: none !important; }
+      html:not([data-lkm="gotos"]) #lk-gotos841, html:not([data-lkm="liked"]) #lk-liked841 { display: none !important; }
+      html:not([data-lkm="inspo"]) #ins-top841, html:not([data-lkm="inspo"]) #ins-head841, html:not([data-lkm="inspo"]) #pv-pills { display: none !important; }
+      html[data-lkm="inspo"] #outfits-mine-view, html[data-lkm="inspo"] #rendered-view, html[data-lkm="inspo"] #style-item-host { display: none !important; }
+      #panel-gotos, #panel-liked, #panel-inspo { display: none !important; }
+      #ins-top841 { padding-top: 10px; }
+      .ins-row841 { display: flex; gap: 10px; overflow-x: auto; padding: 2px 16px 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      .ins-row841::-webkit-scrollbar { display: none; }
+      .ins-ic841 { flex: 0 0 66px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0; border: 0; background: none; color: var(--text); font: inherit; cursor: pointer; }
+      .ins-ph841 { width: 58px; height: 58px; border-radius: 50%; overflow: hidden; background: var(--surface); border: 2px solid var(--border); }
+      .ins-ph841 img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+      .ins-ic841[aria-pressed="true"] .ins-ph841 { border-color: var(--honey-nav, #a4804f); box-shadow: 0 0 0 2px var(--honey-nav, #a4804f); }
+      .ins-nm841 { font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+      .ins-w841 { width: 44px; height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; }
+      .ins-w841 b { display: block; height: 3px; background: var(--honey-nav, #a4804f); }
+      .ins-icon841 { margin: 0 16px 8px; padding: 12px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); }
+      .ins-ich841 { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+      .ins-ich841 b { display: block; font-size: 17px; }
+      .ins-ich841 span { color: var(--dim); font-size: 12.5px; }
+      .ins-x841 { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-strong); background: transparent; color: var(--text); font-size: 18px; line-height: 1; cursor: pointer; }
+      .ins-strip841 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+      .ins-strip841 img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; border-radius: 10px; display: block; }
+      .ins-pal841 { display: flex; gap: 6px; margin-bottom: 8px; }
+      .ins-pal841 i { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border); }
+      .ins-wt841 { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 600; }
+      .ins-wt841 input { flex: 1; accent-color: var(--honey-nav, #a4804f); }
+      .ins-wt841 output { min-width: 26px; text-align: right; }
+      #ins-head841 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px 10px; }
+      #ins-head841 h3 { flex: 1 0 100%; margin: 0; font-size: 19px; line-height: 1.2; }
+      #ins-head841 .ins-mini841 { margin-right: auto; }
+      html[data-lkm="inspo"] #pv-pills [data-pv-clear="lens"] { display: none !important; }
+      .lk-card841 [data-l841-unlike] { background: var(--ink-btn) !important; color: var(--accent-ink) !important; border-color: var(--ink-btn) !important; }
+      .ins-mini841 { display: inline-flex; padding: 2px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border-strong); }
+      .ins-mini841 button { height: 30px; padding: 0 11px; border: 0; border-radius: 999px; background: transparent; color: var(--dim); font: inherit; font-size: 12.5px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+      .ins-mini841 button[aria-pressed="true"] { background: var(--ink-btn); color: var(--accent-ink); }
+      #ins-head841 .ins-filter841 { flex: 0 0 auto; }
+      .lk-host841 { padding-bottom: 80px; }
+      .lk-h841 { margin: 14px 16px 8px; font-size: 19px; line-height: 1.2; }
+      .lk-empty841 { margin: 18px 16px; }
+      .lk-sub841 { display: block; font-size: 12px; color: var(--dim); margin-top: 2px; }
+      .lk-x841 { height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border-strong); background: transparent; color: var(--dim); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+      .wore841 { margin-top: 8px; }
       /* .86.39 (David: "too big"): smaller Like / Edit / Dislike on the
          outfit cards: 32px circles, smaller icons; an invisible ring keeps
          a 40px tap area */
@@ -7732,6 +7788,9 @@ window.notMenswear853 = function (e) {
       </section>
 
       <!-- ================= LOOKS ================= -->
+      <section id="panel-gotos" role="tabpanel" aria-label="Go-to's" hidden></section>
+      <section id="panel-liked" role="tabpanel" aria-label="Liked" hidden></section>
+      <section id="panel-inspo" role="tabpanel" aria-label="Inspo" hidden></section>
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
         <div id="pv-top">
           <div class="pv-bar"><span class="pv-bar-l" aria-hidden="true"></span>
@@ -8547,7 +8606,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.41</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.42</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8576,9 +8635,9 @@ window.notMenswear853 = function (e) {
     <nav class="bottombar" id="bottombar" aria-label="Donna sections">
       <div class="nav-pill" role="presentation">
       <button type="button" class="navbtn" id="tab-today" data-tab="today" data-section="today" aria-controls="panel-today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><span>Home</span></button>
-      <button type="button" class="navbtn" id="section-closet" data-section="closet"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7.2a2 2 0 1 0-2-2"/><path d="M12 7.2v1.6L3.6 14.6a1.4 1.4 0 0 0 .8 2.6h15.2a1.4 1.4 0 0 0 .8-2.6L12 8.8"/></svg><span>Closet</span></button>
-      <button type="button" class="navbtn" id="section-ideas" data-section="ideas"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Looks</span></button>
-      <button type="button" class="navbtn" id="tab-find" data-tab="find" data-section="find" aria-controls="panel-find"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>The Edit</span></button>
+            <button type="button" class="navbtn" id="section-ideas" data-section="ideas"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7.2a2 2 0 1 0-2-2"/><path d="M12 7.2v1.6L3.6 14.6a1.4 1.4 0 0 0 .8 2.6h15.2a1.4 1.4 0 0 0 .8-2.6L12 8.8"/></svg><span>Looks</span></button>
+      <button type="button" class="navbtn" id="section-inspo" data-section="inspo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Inspo</span></button>
+      <button type="button" class="navbtn" id="tab-find" data-tab="find" data-section="find" aria-controls="panel-find"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Shop</span></button>
       <button type="button" class="navbtn" id="section-calendar" data-section="calendar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Calendar</span></button>
       </div>
     </nav>
@@ -11696,7 +11755,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.41";
+var WARDROBE_BUILD = "2026-11-21.86.42";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -11727,9 +11786,10 @@ applyTheme(currentTheme(), false);
 })();
 var PAGE_TITLES = {
   today: "", wardrobe: "Closet", looks: "Looks", watches: "Closet",
-  wearing: "Today", gaps: "The Edit", studio: "Looks",
+  gotos: "Looks", liked: "Looks", inspo: "Inspo",
+  wearing: "Today", gaps: "Shop", studio: "Looks",
   outfitideas: "Looks", icons: "Icons", palettes: "Palettes",
-  myinspo: "My Inspo", find: "The Edit", brands: "Brands", sale: "Sale",
+  myinspo: "My Inspo", find: "Shop", brands: "Brands", sale: "Sale",
   shopwish: "Wishlist", purchased: "Purchased", receipts: "Receipts",
   search: "Search", calendar: "Calendar", pinfo: "Profile",
   plocation: "Profile", prules: "Profile", pcloud: "Profile", add: "Add", bulk: "Add", analyze: "Add"
@@ -31476,7 +31536,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "wardrobeRules", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "dislikedLooks", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "priceRange", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches", "editBoard", "editView"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "wardrobeRules", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "dislikedLooks", "gotoHidden", "likedInspo", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "priceRange", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches", "editBoard", "editView"];
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
@@ -31497,7 +31557,7 @@ document.getElementById("data-export").addEventListener("click", function () {
    that fails puts everything back. "Nothing was changed" is only
    ever said when it is true. */
 var BACKUP_VERSION = 1;
-var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "dislikedLooks", "recentlyRemoved", "dealtImgs", "weekPlan", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches"];
+var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "dislikedLooks", "gotoHidden", "likedInspo", "recentlyRemoved", "dealtImgs", "weekPlan", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches"];
 var BACKUP_OBJECT_KEYS = ["profile", "overrides", "lazyRenders"];
 function readBackupFile(text) {
   var payload = JSON.parse(text);
@@ -31563,7 +31623,7 @@ function applyBackupData(data, opts) {
     var coll = (typeof SY_KEY_COLL !== "undefined") ? SY_KEY_COLL[k] : null;
     if (typeof SY !== "undefined" && SY) {
       if (coll && SY.st && SY.st[coll]) Object.keys(SY.st[coll]).forEach(function (id) { var s = SY.st[coll][id]; if (typeof s === "number" && (best === null || s > best)) best = s; });
-      var mfField = { profile: "profile", deletedIds: "deletedIds", overrides: "overrides", dislikedImgs: "dislikedImgs", dislikedLooks: "dislikedLooks", recentlyRemoved: "recentlyRemoved", findBudget: "findBudget", shopTier: "shopTier", priceRange: "priceRange", homeLocation: "homeLocation", currentLocation: "currentLocation", formality: "formality", studioSettings: "studioSettings", lastOpeningImg: "lastOpeningImg" }[k];
+      var mfField = { profile: "profile", deletedIds: "deletedIds", overrides: "overrides", dislikedImgs: "dislikedImgs", dislikedLooks: "dislikedLooks", gotoHidden: "gotoHidden", likedInspo: "likedInspo", recentlyRemoved: "recentlyRemoved", findBudget: "findBudget", shopTier: "shopTier", priceRange: "priceRange", homeLocation: "homeLocation", currentLocation: "currentLocation", formality: "formality", studioSettings: "studioSettings", lastOpeningImg: "lastOpeningImg" }[k];
       if (mfField && SY.mf && SY.mf[mfField] && typeof SY.mf[mfField].t === "number" && (best === null || SY.mf[mfField].t > best)) best = SY.mf[mfField].t;
     }
     return best;
@@ -35221,7 +35281,7 @@ document.addEventListener("click", function (e) {
    names the page), in the on-device store (for the home-screen
    app, whose refresh can drop the hash), and an open icon's
    detail page is kept the same way. */
-var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "bulk", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "purchased", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "prules", "pcloud", "wearing", "myinspo"];
+var TABS = ["today", "inspo", "gotos", "liked", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyze", "bulk", "palettes", "looks", "icons", "emulate", "brands", "brand", "find", "receipts", "purchased", "search", "sale", "shopwish", "calendar", "pinfo", "plocation", "prules", "pcloud", "wearing", "myinspo"];
 /* Pages grouped under the top sections. Studio is the homepage
    section: its first page is Today (the outfit of the day, as
    Studio's cover page), then Ideas (the Create-a-Look studio).
@@ -35243,17 +35303,19 @@ var TABS = ["today", "studio", "outfitideas", "wardrobe", "add", "gaps", "analyz
    and every switchTab("…") call still resolve. */
 var SECTIONS = {
   today: ["today"],
-  closet: ["wardrobe", "add", "analyze", "bulk", "wearing"],
+  closet: [],
   calendar: ["calendar"],
-  ideas: ["looks", "studio", "outfitideas", "icons", "emulate", "palettes", "myinspo"],
+  /* .86.41: Looks = Outfits | Closet | Go-to's | Liked; Inspo is its own tab */
+  ideas: ["looks", "wardrobe", "gotos", "liked", "add", "analyze", "bulk", "wearing", "studio", "outfitideas", "emulate", "myinspo"],
+  inspo: ["inspo", "icons", "palettes"],
   find: ["find", "receipts", "purchased", "search", "brands", "brand", "sale", "shopwish", "gaps"],
   me: ["pinfo", "plocation", "prules", "pcloud"]
 };
-var sectionHome = { today: "today", closet: "wardrobe", ideas: "looks", find: "find", me: "pinfo", calendar: "calendar" };
+var sectionHome = { today: "today", closet: "wardrobe", ideas: "looks", inspo: "inspo", find: "find", me: "pinfo", calendar: "calendar" };
 /* Section tabs always open the section's FIRST page — the nav
    must be learnable. Last-page memory survives only in the
    refresh-restore path (restoreTab), never on a tab tap. */
-var SECTION_FIRST = { today: "today", closet: "wardrobe", ideas: "looks", find: "find", me: "pinfo", calendar: "calendar" };
+var SECTION_FIRST = { today: "today", closet: "wardrobe", ideas: "looks", inspo: "inspo", find: "find", me: "pinfo", calendar: "calendar" };
 /* Scroll position per page, restored on return — a round trip
    from a long list (Closet, Icons, My Looks) no longer restarts
    at the top. */
@@ -35374,7 +35436,7 @@ function switchTab(name, opts) {
     t.setAttribute("aria-selected", t.getAttribute("data-tab") === name ? "true" : "false");
   });
   var subnav = document.getElementById("subnav");
-  var grouped = SECTIONS[sec].length > 1 && sec !== "ideas" && sec !== "find" && sec !== "closet";
+  var grouped = SECTIONS[sec].length > 1 && sec !== "ideas" && sec !== "find" && sec !== "closet" && sec !== "inspo";
   subnav.hidden = !grouped;
   if (grouped) {
     document.querySelectorAll(".subnav-group").forEach(function (g) {
@@ -39597,6 +39659,8 @@ function syMetaOf() {
     overrides: entryOverrides,
     dislikedImgs: dislikedImgs,
     dislikedLooks: (typeof dislikedLooks !== "undefined" ? dislikedLooks : []),
+    gotoHidden: store.get("gotoHidden", []) || [],
+    likedInspo: store.get("likedInspo", []) || [],
     recentlyRemoved: recentlyRemoved,
     findBudget: budgetLevel,
     shopTier: shopTier,
@@ -39617,7 +39681,7 @@ function syMetaOf() {
    and at the start of every sync, so no write path is missed. */
 var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops", editMeta: "edits", editSearches: "searches", askSync: "ask", renderedLooks: "rendered", feedbackNotes: "feedback" };
 var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox", shopwish: "shopWishlist", pricedrops: "priceDrops", edits: "editMeta", searches: "editSearches", ask: "askSync", rendered: "renderedLooks" };
-var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, dislikedLooks: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, priceRange: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1, wardrobeRules: 1 };
+var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, dislikedLooks: 1, gotoHidden: 1, likedInspo: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, priceRange: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1, wardrobeRules: 1 };
 function syTrackChanges(onlyColl) {
   var now = Date.now(), ch = false, mig = false;
   var colls = onlyColl ? [onlyColl] : SY_COLLS;
@@ -40021,7 +40085,7 @@ function syValidMetaField(f, v) {
   function plain(o) { return !!o && typeof o === "object" && !Array.isArray(o); }
   switch (f) {
     case "profile": case "overrides": return plain(v);
-    case "deletedIds": case "dislikedImgs": case "dislikedLooks":
+    case "deletedIds": case "dislikedImgs": case "dislikedLooks": case "gotoHidden":
       return Array.isArray(v) && v.every(function (x) { return typeof x === "string"; });
     case "recentlyRemoved":
       return Array.isArray(v) && v.every(function (x) { return plain(x) && typeof x.id === "string"; });
@@ -40032,6 +40096,7 @@ function syValidMetaField(f, v) {
       return v === null || plain(v);
     case "lastOpeningImg": return v === null || typeof v === "string";
     case "wardrobeRules": return Array.isArray(v) && v.every(function (r) { return plain(r) && typeof r.text === "string"; });
+    case "likedInspo": return Array.isArray(v) && v.every(function (x) { return plain(x) && typeof x.key === "string"; });
   }
   return true;
 }
@@ -40059,6 +40124,11 @@ function syApplyMeta(meta) {
      and are ignored. */
   function ok(f) { return (f in d) && syValidMetaField(f, d[f]); }
   var t, seedState = false;
+  if (ok("gotoHidden") && (t = take("gotoHidden"))) { var gh = syUnwire(d.gotoHidden); store.set("gotoHidden", gh); stamp("gotoHidden", t, gh); }
+  if (ok("likedInspo") && (t = take("likedInspo"))) {
+    var li = syUnwire(d.likedInspo); store.set("likedInspo", li); stamp("likedInspo", t, li);
+    try { if (window.__enLiked841) window.__enLiked841.merge(li); } catch (e) {}
+  }
   if (ok("dislikedLooks") && (t = take("dislikedLooks"))) {
     dislikedLooks = syUnwire(d.dislikedLooks).filter(function (k) { return typeof k === "string" && k.length < 400; });
     store.set("dislikedLooks", dislikedLooks);
@@ -41838,6 +41908,7 @@ function analyzeFilePiece(card, job, ix) {
   }
   /* The flat-lay: every piece's own cleaned photograph on cream,
      outer layer first, then top, bottom, shoes, the watch last. */
+  window.flatlayHTML841 = function (look, withWatch, avatarCard) { return flatlayHTML(look, withWatch, avatarCard); };
   function flatlayHTML(look, withWatch, avatarCard) {
     var ob = (typeof onbodyForLook === "function") ? onbodyForLook(look) : null;
     var shown = ob;
@@ -41975,6 +42046,8 @@ function analyzeFilePiece(card, job, ix) {
   var feedSig = null;
   function feedLevel() { return (typeof studioTypeAny !== "undefined" && studioTypeAny) ? null : ((typeof formalityLevel !== "undefined") ? formalityLevel : 4); }
   function feedWanted() {
+    /* .86.42: Inspo, Go-to's and Liked are Looks-page modes without the Mine feed */
+    if (typeof currentTab !== "undefined" && (currentTab === "inspo" || currentTab === "gotos" || currentTab === "liked")) return false;
     if (typeof currentTab !== "undefined" && currentTab === "looks") {
       /* .80.19: Liked shows only his liked looks (no fresh feed) */
       return window.outfitsMode !== "inspo" && !(typeof looksFilter !== "undefined" && looksFilter === "liked");
@@ -45078,6 +45151,362 @@ window.inspoView = "withmine";
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", arm); else arm();
 })();
+/* .86.41: one Looks tab, Inspo (David, 21 Nov).
+   Bottom bar: Home · Looks · Inspo · Shop · Calendar.
+   Looks = Outfits | Closet | Go-to's | Liked. Outfits, Go-to's and Liked are
+   modes of the Looks page (html[data-lkm]); Closet is the Closet page with
+   the same segments on top. Inspo is the Looks page in "inspo" mode: his
+   icons (weights shown, tap one to steer and open his page) and Ideas for
+   you: With mine (default) / All new = the old Mix / New feeds. */
+(function () {
+  var R = document.documentElement;
+  var MODES = { looks: "outfits", gotos: "gotos", liked: "liked", inspo: "inspo" };
+  var SEGS = [["looks", "Outfits"], ["wardrobe", "Closet"], ["gotos", "Go-to's"], ["liked", "Liked"]];
+  function $(id) { return document.getElementById(id); }
+  function E(s) { return typeof esc === "function" ? esc(s) : String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function cur() { return typeof currentTab !== "undefined" ? currentTab : ""; }
+
+  /* ---------- segments: Outfits | Closet | Go-to's | Liked ---------- */
+  function segHTML() {
+    return '<div class="lk-seg841" role="tablist" aria-label="Looks">' + SEGS.map(function (s) {
+      return '<button type="button" role="tab" data-lk-go="' + s[0] + '" aria-selected="false">' + s[1] + "</button>";
+    }).join("") + "</div>";
+  }
+  function mountSegs() {
+    ["panel-looks", "panel-wardrobe"].forEach(function (id) {
+      var el = $(id); if (!el || el.querySelector(":scope > .lk-segw841")) return;
+      var w = document.createElement("div"); w.className = "lk-segw841"; w.innerHTML = segHTML();
+      el.insertBefore(w, el.firstChild);
+    });
+  }
+  function paintSegs() {
+    var t = cur();
+    [].forEach.call(document.querySelectorAll("[data-lk-go]"), function (b) { b.setAttribute("aria-selected", b.getAttribute("data-lk-go") === t ? "true" : "false"); });
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-lk-go]"); if (!b) return;
+    var t = b.getAttribute("data-lk-go"); if (t !== cur() && typeof switchTab === "function") switchTab(t);
+  });
+
+  /* ---------- the Looks page modes ---------- */
+  function pvClick(f) { var b = document.querySelector('#pv-top [data-pv-f="' + f + '"]'); if (b) b.click(); }
+  function applyMode(name) {
+    var m = MODES[name];
+    if (!m) { R.removeAttribute("data-lkm"); return; }
+    R.setAttribute("data-lkm", m);
+    ["panel-gotos", "panel-liked", "panel-inspo"].forEach(function (id) { var el = $(id); if (el) el.hidden = true; });
+    var pl = $("panel-looks"); if (pl) pl.hidden = false;
+    mountSegs(); paintSegs();
+    /* the Mine feed belongs to Outfits only */
+    var cf = $("closet-feed");
+    if (cf && m !== "outfits") cf.hidden = true;
+    else if (m === "outfits" && typeof window.composerSyncFeed === "function") { try { window.composerSyncFeed(false); } catch (e) {} }
+    if (m === "inspo") enterInspo();
+    else if (m === "outfits") { if (window.outfitsMode === "inspo" || window.renderedOn867) pvClick("mine"); }
+    else if (m === "gotos") renderGotos();
+    else if (m === "liked") { if (window.endlessLoad81) window.endlessLoad81(); renderLiked(); }
+  }
+
+  /* ---------- Inspo ---------- */
+  var IKEY = "wardrobe.insFeed841", insFeed = "withmine", insLens = null;
+  try { if (sessionStorage.getItem(IKEY) === "allnew") insFeed = "allnew"; } catch (e) {}
+  function lvl() { var v = (typeof formalityLevel !== "undefined") ? parseInt(formalityLevel, 10) : 2; return v === 4 ? 3 : v; }
+  function icons() { try { return (typeof allIcons === "function" ? allIcons() : []).filter(function (ic) { return ic && ic.id; }); } catch (e) { return []; } }
+  function weightOf(id) {
+    try {
+      var W = window.iconWeights81; if (!W) return 0;
+      var st = W.state(), g = W.groupForLevel(lvl());
+      var m = st.mode === "all" ? (st.all || {}) : ((st.byLevel && st.byLevel[g]) || st.all || {});
+      return Math.max(0, Math.min(100, +m[id] || 0));
+    } catch (e) { return 0; }
+  }
+  function setWeight(id, v) {
+    try {
+      var W = window.iconWeights81; if (!W) return;
+      var st = W.state(), g = W.groupForLevel(lvl());
+      if (st.mode === "all") { st.all = st.all || {}; st.all[id] = v; }
+      else { st.byLevel = st.byLevel || {}; st.byLevel[g] = st.byLevel[g] || {}; st.byLevel[g][id] = v; }
+      W.setState(st);
+      if (window.endlessOnWeights81) window.endlessOnWeights81();
+    } catch (e) {}
+  }
+  function photoOf(ic) {
+    var L = ic.looks || ic.photos || [];
+    var p = ic.portrait || ic.photo || ic.img || (L[0] && (L[0].img || L[0].src));
+    return p || "";
+  }
+  function insChrome() {
+    var panel = $("panel-looks"), top = $("pv-top");
+    if (!panel || !top || $("ins-top841")) return;
+    var a = document.createElement("div"); a.id = "ins-top841";
+    a.innerHTML = '<div class="ins-row841" id="ins-row841" role="list" aria-label="Your icons"></div><div class="ins-icon841" id="ins-icon841" hidden></div>';
+    panel.insertBefore(a, top);
+    var h = document.createElement("div"); h.id = "ins-head841";
+    h.innerHTML = '<h3 id="ins-title841">Ideas for you</h3><div class="ins-mini841" role="group" aria-label="Ideas from">' +
+      '<button type="button" data-ins-feed="withmine">With mine</button><button type="button" data-ins-feed="allnew">All new</button></div>';
+    top.parentNode.insertBefore(h, top.nextSibling);
+    /* the filter (price) on the Ideas header: a stand-in that taps the
+       original (its sheet and state live with the feed's top bar) */
+    var fb = $("pv-filter");
+    if (fb) {
+      var px = document.createElement("button"); px.type = "button"; px.className = "pv-filter ins-filter841"; px.setAttribute("aria-haspopup", "dialog"); px.setAttribute("aria-label", "Filters");
+      px.innerHTML = fb.innerHTML;
+      px.addEventListener("click", function () { var o = $("pv-filter"); if (o) o.click(); });
+      h.appendChild(px);
+      var mirror = function () { var o = $("pv-filter"); if (!o) return; var od = o.querySelector(".pv-dot"), pd = px.querySelector(".pv-dot"); if (od && pd) pd.hidden = od.hidden; px.setAttribute("aria-label", o.getAttribute("aria-label") || "Filters"); };
+      try { new MutationObserver(mirror).observe(fb, { attributes: true, subtree: true }); } catch (e) {}
+      mirror();
+    }
+  }
+  function paintRow() {
+    var row = $("ins-row841"); if (!row) return;
+    var list = icons().map(function (ic) { return { ic: ic, w: weightOf(ic.id) }; });
+    list.sort(function (a, b) { return b.w - a.w; });
+    row.innerHTML = list.map(function (x) {
+      var nm = String(x.ic.name || x.ic.id).split(" ").slice(-1)[0];
+      return '<button type="button" role="listitem" class="ins-ic841" data-ins-icon="' + E(x.ic.id) + '" aria-pressed="' + (insLens === x.ic.id) + '">' +
+        '<span class="ins-ph841">' + (photoOf(x.ic) ? '<img src="' + E(photoOf(x.ic)) + '" alt="" loading="lazy" decoding="async">' : "") + "</span>" +
+        '<span class="ins-nm841">' + E(nm) + '</span><span class="ins-w841"><b style="width:' + x.w + '%"></b></span></button>';
+    }).join("");
+  }
+  function paintIconPage() {
+    var box = $("ins-icon841"), title = $("ins-title841"); if (!box) return;
+    var ic = insLens ? icons().filter(function (x) { return x.id === insLens; })[0] : null;
+    if (title) title.textContent = ic ? "On you, in his style" : "Ideas for you";
+    if (!ic) { box.hidden = true; box.innerHTML = ""; return; }
+    var L = (ic.looks || []).slice(0, 3), pal = (ic.palette || []).slice(0, 6), w = weightOf(ic.id);
+    box.innerHTML = '<div class="ins-ich841"><div><b>' + E(ic.name || ic.id) + "</b>" + (ic.lane ? "<span>" + E(ic.lane) + "</span>" : "") + "</div>" +
+      '<button type="button" class="ins-x841" data-ins-clear aria-label="Back to all your icons">×</button></div>' +
+      (L.length ? '<div class="ins-strip841">' + L.map(function (l) { return '<img src="' + E(l.img || l.src || "") + '" alt="' + E(l.caption || "") + '" loading="lazy" decoding="async">'; }).join("") + "</div>" : "") +
+      (pal.length ? '<div class="ins-pal841">' + pal.map(function (c) { return '<i style="background:' + E(typeof c === "string" ? c : (c.hex || "")) + '"></i>'; }).join("") + "</div>" : "") +
+      '<label class="ins-wt841"><span>His weight in your looks</span><input type="range" min="0" max="100" step="1" value="' + w + '" data-ins-weight="' + E(ic.id) + '"><output>' + w + "</output></label>";
+    box.hidden = false;
+  }
+  function syncMini() {
+    [].forEach.call(document.querySelectorAll("[data-ins-feed]"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-ins-feed") === insFeed ? "true" : "false"); });
+  }
+  function setLens(id) {
+    insLens = id || null;
+    if (window.endlessLens81) window.endlessLens81.set(insLens);
+    paintRow(); paintIconPage();
+  }
+  function enterInspo() {
+    insChrome(); paintRow(); paintIconPage(); syncMini();
+    if (window.endlessLoad81) window.endlessLoad81();
+    pvClick(insFeed);
+  }
+  function leaveInspo() {
+    if (insLens && window.endlessLens81) window.endlessLens81.set(null);
+    insLens = null;
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    var f = t.closest && t.closest("[data-ins-feed]");
+    if (f) { insFeed = f.getAttribute("data-ins-feed"); try { sessionStorage.setItem(IKEY, insFeed); } catch (er) {} syncMini(); pvClick(insFeed); return; }
+    var ic = t.closest && t.closest("[data-ins-icon]");
+    if (ic) { var id = ic.getAttribute("data-ins-icon"); setLens(insLens === id ? null : id); var p = $("ins-icon841"); if (p && !p.hidden && p.scrollIntoView) p.scrollIntoView({ block: "nearest", behavior: "smooth" }); return; }
+    if (t.closest && t.closest("[data-ins-clear]")) { setLens(null); return; }
+  });
+  document.addEventListener("input", function (e) {
+    var r = e.target.closest && e.target.closest("[data-ins-weight]"); if (!r) return;
+    var o = r.parentNode.querySelector("output"); if (o) o.textContent = r.value;
+  });
+  document.addEventListener("change", function (e) {
+    var r = e.target.closest && e.target.closest("[data-ins-weight]"); if (!r) return;
+    setWeight(r.getAttribute("data-ins-weight"), parseInt(r.value, 10) || 0); paintRow();
+  });
+
+  /* ---------- cards for Go-to's and Liked ---------- */
+  function media(look) {
+    try { if (typeof window.flatlayHTML841 === "function") return window.flatlayHTML841(look, true, true); } catch (e) {}
+    return "";
+  }
+  function core(items) { return items.filter(function (it) { return !/watch|belt|sunglass|bag|hat|scarf|accessor|jewel/i.test(String(it.category || "")); }); }
+  function titleFor(items, fallback) {
+    if (fallback && !/^logged outfit$/i.test(fallback)) return fallback;
+    var up = items.filter(function (i) { return /Blazers|Jackets|Coats/.test(i.category || ""); })[0] || items.filter(function (i) { return /Tees|Polos|Shirts|Sweaters/.test(i.category || ""); })[0];
+    var lo = items.filter(function (i) { return /Trousers|Jeans|Shorts|Chinos/.test(i.category || ""); })[0];
+    var nm = function (i) { return typeof composerPieceTitle === "function" ? composerPieceTitle(i) : i.name; };
+    return up && lo ? nm(up) + " & " + nm(lo) : (items[0] ? items[0].name : "Outfit");
+  }
+  function lookFor(key, items, title) {
+    var look = null;
+    try {
+      var d = typeof composerDeck === "function" ? composerDeck(null, "lk841") : null;
+      var c = d && d.combos ? d.combos.filter(function (x) { return x.key === key; })[0] : null;
+      if (c && typeof composerOutfitToLook === "function") look = composerOutfitToLook(c, 0);
+    } catch (e) { look = null; }
+    if (!look) look = { id: "goto-" + key, title: title, fwPieces: items, composerKey: key };
+    if (title && look) look.title = title;
+    return look;
+  }
+  function dateLabel(iso) {
+    try { var d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); } catch (e) { return iso; }
+  }
+
+  /* ---------- Go-to's: outfits he has worn (one tap removes one) ---------- */
+  function gotoHidden() { var a = (typeof store !== "undefined" && store.get("gotoHidden", [])) || []; var m = {}; a.forEach(function (k) { m[k] = 1; }); return m; }
+  function setGotoHidden(key, on) {
+    var a = (store.get("gotoHidden", []) || []).filter(function (k) { return typeof k === "string"; });
+    var at = a.indexOf(key);
+    if (on && at === -1) a.push(key); else if (!on && at !== -1) a.splice(at, 1); else return;
+    store.set("gotoHidden", a);
+  }
+  function gotoEntries() {
+    var log = (typeof wornLog !== "undefined" && Array.isArray(wornLog)) ? wornLog : [];
+    var hid = gotoHidden(), by = {}, out = [];
+    log.forEach(function (en) {
+      if (!en) return;
+      var ids = (en.pieceIds || []).map(function (p) { return p && typeof p === "object" ? p.id : p; }).filter(Boolean);
+      var items = ids.map(function (id) { return typeof closetItemById === "function" ? closetItemById(id) : null; }).filter(Boolean);
+      var c = core(items);
+      if (c.length < 2) return;
+      var key = c.map(function (i) { return i.id; }).sort().join("|");
+      if (hid[key]) return;
+      var g = by[key];
+      if (!g) { g = by[key] = { key: key, items: items, dates: [], title: titleFor(c, en.title) }; out.push(g); }
+      if (en.date) g.dates.push(en.date);
+    });
+    out.forEach(function (g) { g.dates.sort().reverse(); });
+    out.sort(function (a, b) { return (b.dates[0] || "") < (a.dates[0] || "") ? -1 : 1; });
+    return out;
+  }
+  window.gotoEntries841 = gotoEntries;
+  var gList = [];
+  function renderGotos() {
+    var host = ensureHost("lk-gotos841"); if (!host) return;
+    gList = gotoEntries();
+    if (!gList.length) {
+      host.innerHTML = '<p class="meta lk-empty841">No go-to’s yet. Open any outfit and tap <b>Wore it</b>; outfits you wear land here.</p>';
+      return;
+    }
+    host.innerHTML = '<div class="options-grid cf-grid lk-grid841">' + gList.map(function (g, i) {
+      var look = lookFor(g.key, g.items, g.title);
+      var n = g.dates.length;
+      return '<article class="card option-card cf-card lk-card841"><button type="button" class="cf-media" data-g841-open="' + i + '" aria-label="' + E(look.title) + '">' + media(look) + "</button>" +
+        '<span class="oc-body"><span class="oc-title">' + E(look.title) + "</span>" +
+        '<span class="lk-sub841">Worn ' + (n > 1 ? n + "× · last " : "") + E(dateLabel(g.dates[0] || "")) + "</span></span>" +
+        '<span class="cf-actions"><button type="button" class="lk-x841" data-g841-hide="' + i + '" aria-label="Not a go-to">Not a go-to</button></span></article>';
+    }).join("") + "</div>";
+  }
+
+  /* ---------- Liked: closet outfits and Inspo outfits he liked ---------- */
+  var lCloset = [], lInspo = [];
+  function renderLiked() {
+    var host = ensureHost("lk-liked841"); if (!host) return;
+    lCloset = (typeof savedLooks !== "undefined" ? savedLooks : []).filter(function (l) { return l && l.verdict === "like"; });
+    lCloset.sort(function (a, b) { return String(b.likedAt || "") < String(a.likedAt || "") ? -1 : 1; });
+    lInspo = (window.__enLiked841 && window.__enLiked841.list) ? window.__enLiked841.list() : [];
+    if (!lCloset.length && !lInspo.length) {
+      host.innerHTML = '<p class="meta lk-empty841">Nothing liked yet. Tap the thumbs-up on any outfit in Outfits or Inspo and it lands here.</p>';
+      return;
+    }
+    var h = "";
+    if (lCloset.length) {
+      h += '<h3 class="lk-h841">From your closet</h3><div class="options-grid cf-grid lk-grid841">' + lCloset.map(function (l, i) {
+        return '<article class="card option-card cf-card lk-card841"><button type="button" class="cf-media" data-l841-open="' + i + '" aria-label="' + E(l.title || "Outfit") + '">' + media(l) + "</button>" +
+          '<span class="oc-body"><span class="oc-title">' + E(l.title || "Outfit") + "</span></span>" +
+          '<span class="cf-actions"><button type="button" class="chip" data-cf-like="0" data-l841-unlike="' + i + '" aria-pressed="true" aria-label="Unlike">Like</button></span></article>';
+      }).join("") + "</div>";
+    }
+    if (lInspo.length) {
+      h += '<h3 class="lk-h841">With new pieces</h3><div class="options-grid cf-grid en-grid lk-grid841">' + lInspo.map(function (l, i) {
+        var c = window.__enLiked841.card(l, i, l.feed || "withmine");
+        c = c.replace(/<button[^>]*class="pv-edit"[^>]*>[^<]*<\/button>/g, "").replace(/<button[^>]*data-en-rme[^>]*>[^<]*<\/button>/g, "").replace(/<button[^>]*data-cf-dislike[^>]*>[^<]*<\/button>/g, "");
+        return c.replace(/data-en-like="\d+"/, 'data-i841-unlike="' + i + '"');
+      }).join("") + "</div>";
+    }
+    host.innerHTML = h;
+  }
+  function ensureHost(id) {
+    var panel = $("panel-looks"); if (!panel) return null;
+    var el = $(id);
+    if (!el) { el = document.createElement("div"); el.id = id; el.className = "lk-host841"; panel.appendChild(el); }
+    return el;
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target, b;
+    if ((b = t.closest && t.closest("[data-g841-hide]"))) {
+      e.preventDefault(); e.stopPropagation();
+      var g = gList[+b.getAttribute("data-g841-hide")]; if (!g) return;
+      setGotoHidden(g.key, true); renderGotos();
+      if (typeof showUndoToast === "function") showUndoToast("Removed from go-to’s.", function () { setGotoHidden(g.key, false); renderGotos(); });
+      return;
+    }
+    if ((b = t.closest && t.closest("[data-g841-open]"))) {
+      var gg = gList[+b.getAttribute("data-g841-open")]; if (!gg) return;
+      if (typeof openLookLayer === "function") openLookLayer(lookFor(gg.key, gg.items, gg.title));
+      return;
+    }
+    if ((b = t.closest && t.closest("[data-l841-open]"))) {
+      var l = lCloset[+b.getAttribute("data-l841-open")]; if (l && typeof openLookLayer === "function") openLookLayer(l);
+      return;
+    }
+    if ((b = t.closest && t.closest("[data-l841-unlike]"))) {
+      e.preventDefault(); e.stopPropagation();
+      var ul = lCloset[+b.getAttribute("data-l841-unlike")]; if (!ul) return;
+      if (typeof unlikeLookById === "function") unlikeLookById(ul.id);
+      renderLiked();
+      return;
+    }
+    if ((b = t.closest && t.closest("[data-i841-unlike]"))) {
+      e.preventDefault(); e.stopPropagation();
+      var il = lInspo[+b.getAttribute("data-i841-unlike")]; if (!il || !window.__enLiked841) return;
+      window.__enLiked841.unlike(il.key); renderLiked();
+      return;
+    }
+  }, true);
+
+  /* ---------- Wore it: any opened outfit can be logged as worn ---------- */
+  function addWoreButton(look) {
+    try {
+      var layer = $("look-layer"); if (!layer || layer.hidden || !look) return;
+      var host = layer.querySelector(".look-actions") || $("look-layer-body"); if (!host || host.querySelector("[data-wore841]")) return;
+      var b = document.createElement("button"); b.type = "button"; b.className = "btn-ghost wore841"; b.setAttribute("data-wore841", "1"); b.textContent = "Wore it";
+      b.addEventListener("click", function () {
+        var items = (look.fwPieces || []).map(function (p) { return p && p.id && typeof closetItemById === "function" ? (closetItemById(p.id) || p) : p; }).filter(Boolean);
+        if (items.length < 2 || typeof recordWorn !== "function") { if (typeof toast === "function") toast("Only outfits from your closet can be logged."); return; }
+        var ok = recordWorn({ date: typeof localTodayISO === "function" ? localTodayISO() : new Date().toISOString().slice(0, 10), title: look.title || titleFor(items, ""),
+          img: (typeof onbodyForLook === "function" && onbodyForLook(look)) || look.img || "", pieces: items.map(function (i) { return i.name; }),
+          pieceIds: items.map(function (i) { return i.id; }), pieceDetails: items.map(function (i) { return { name: i.name, category: i.category }; }), lookId: look.id || null });
+        if (typeof toast === "function") toast(ok === null ? "Already logged today." : "Logged — it’s in Looks › Go-to’s.");
+        b.disabled = true; b.textContent = "Worn today";
+      });
+      host.appendChild(b);
+    } catch (e) {}
+  }
+  if (typeof openLookLayer === "function") {
+    var _oll = openLookLayer;
+    openLookLayer = function (look) { var r = _oll.apply(this, arguments); setTimeout(function () { addWoreButton(look); }, 0); return r; };
+    window.openLookLayer = openLookLayer;
+  }
+
+  /* ---------- go-to's lift their pieces and pairings in every deal ---------- */
+  if (typeof composerEffectivePrefs === "function") {
+    var _cep = composerEffectivePrefs;
+    composerEffectivePrefs = function () {
+      var eff = _cep.apply(this, arguments);
+      try { gotoEntries().forEach(function (g) { window.WardrobeComposer.applyVerdict(eff, core(g.items).map(function (i) { return i.id; }), "like"); }); } catch (e) {}
+      return eff;
+    };
+  }
+
+  /* ---------- switchTab ---------- */
+  if (typeof window.switchTab === "function") {
+    var _st = window.switchTab;
+    window.switchTab = function (name) {
+      if (name !== "inspo" && R.getAttribute("data-lkm") === "inspo") leaveInspo();
+      var r = _st.apply(this, arguments);
+      applyMode(cur());
+      if (cur() === "wardrobe") { mountSegs(); paintSegs(); }
+      return r;
+    };
+    try { switchTab = window.switchTab; } catch (e) {}
+  }
+  mountSegs();
+  if (MODES[cur()] || cur() === "wardrobe") applyMode(cur());
+  window.addEventListener("wardrobe:synced", function () { if (cur() === "gotos") renderGotos(); if (cur() === "liked") renderLiked(); });
+})();
 /* .86.30: Send feedback to Claude. A note (dictation works), an optional
    screenshot, and the screen he was on are saved to the synced
    "feedback" list, which Claude reads at the start of each session.
@@ -46718,18 +47147,18 @@ window.inspoView = "withmine";
   };
   if (typeof window.switchTab === "function") {
     var _st81 = window.switchTab;
-    window.switchTab = function (name) { var r = _st81.apply(this, arguments); if (name === "looks" || name === "ideas") window.endlessLoad81(); return r; };
+    window.switchTab = function (name) { var r = _st81.apply(this, arguments); if (name === "looks" || name === "ideas" || name === "inspo" || name === "liked") window.endlessLoad81(); return r; };
     try { switchTab = window.switchTab; } catch (e) {}
   }
   /* restoreTab can run before this wrapper exists, so a Looks-first
      reload would otherwise wait 7s for the Mine|Mix|New chrome. */
   try {
-    var alreadyLooks = (typeof currentTab !== "undefined" && (currentTab === "looks" || currentTab === "ideas"))
+    var alreadyLooks = (typeof currentTab !== "undefined" && (currentTab === "looks" || currentTab === "ideas" || currentTab === "inspo" || currentTab === "liked"))
       || (document.body && (document.body.getAttribute("data-page") === "looks" || document.body.getAttribute("data-page") === "ideas"))
-      || (window.__bootRoute865 && (window.__bootRoute865.tab === "looks" || window.__bootRoute865.tab === "ideas"));
+      || (window.__bootRoute865 && (window.__bootRoute865.tab === "looks" || window.__bootRoute865.tab === "ideas" || window.__bootRoute865.tab === "inspo" || window.__bootRoute865.tab === "liked"));
     if (alreadyLooks) window.endlessLoad81();
   } catch (e) {}
-  document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("#outfits-inspo, [data-inspo-view], #lf-row, [data-tab='looks'], [data-section='looks'], #section-ideas, [data-section='ideas']")) window.endlessLoad81(); }, true);
+  document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("#outfits-inspo, [data-inspo-view], #lf-row, [data-tab='looks'], [data-section='looks'], #section-ideas, #section-inspo, [data-section='inspo'], [data-section='ideas']")) window.endlessLoad81(); }, true);
   /* .86.12: an early New tap is not dropped if the module is still loading.
      Paint a skeleton at once, remember the feed, and kick the catalogue fetch. */
   window.paintEndlessSkeleton81 = function (feed) {
@@ -47629,6 +48058,13 @@ window.inspoView = "withmine";
   S.lf = S.lf && typeof S.lf === "object" ? S.lf : { mine: "new", inspo: "new" };
   S.price = S.price && typeof S.price === "object" ? S.price : { mode: "piece", lo: 0, hi: null };
   S.liked = Array.isArray(S.liked) ? S.liked : [];
+  /* .86.41: liked Inspo outfits sync (store "likedInspo", a meta key);
+     this device's list and the synced one are merged by key */
+  try {
+    var syncedLiked = (typeof store !== "undefined" && store.get("likedInspo", [])) || [];
+    var haveL = {}; S.liked.forEach(function (x) { if (x && x.key) haveL[x.key] = 1; });
+    (Array.isArray(syncedLiked) ? syncedLiked : []).forEach(function (x) { if (x && x.key && !haveL[x.key]) { haveL[x.key] = 1; S.liked.push(x); } });
+  } catch (e) {}
   S.prefs = S.prefs && typeof S.prefs === "object" ? S.prefs : {};
   S.prefs.items = S.prefs.items || {}; S.prefs.pairs = S.prefs.pairs || {};
   S.hidden = S.hidden && typeof S.hidden === "object" ? S.hidden : {};
@@ -47639,7 +48075,7 @@ window.inspoView = "withmine";
   var saveT = null;
   function save(now) {
     clearTimeout(saveT);
-    var f = function () { if (S.recent.length > 1500) S.recent = S.recent.slice(-1500); try { store.set("endless81", S); } catch (e) {} };
+    var f = function () { if (S.recent.length > 1500) S.recent = S.recent.slice(-1500); try { store.set("endless81", S); store.set("likedInspo", S.liked.slice(0, 600)); } catch (e) {} };
     if (now) f(); else saveT = setTimeout(f, 1200);
   }
   function E(s) { return (typeof esc === "function") ? esc(s) : String(s == null ? "" : s); }
@@ -47990,6 +48426,12 @@ window.inspoView = "withmine";
       "</span></article>";
   }
   function isLiked(key) { return S.liked.some(function (x) { return x.key === key; }); }
+  window.__enLiked841 = {
+    list: function () { return S.liked.filter(function (x) { return x && !S.hidden[x.key]; }).map(function (x) { var l = rehydrate(x); if (l) l.feed = x.feed; return l; }).filter(Boolean); },
+    card: function (l, i, feed) { return cardHTML(l, i, feed); },
+    unlike: function (key) { S.liked = S.liked.filter(function (x) { return x.key !== key; }); save(true); },
+    merge: function (arr) { var have = {}; S.liked.forEach(function (x) { have[x.key] = 1; }); (arr || []).forEach(function (x) { if (x && x.key && !have[x.key]) { have[x.key] = 1; S.liked.push(x); } }); save(true); }
+  };
 
   /* ---------- the two Inspo feeds ---------- */
   var F = {};
@@ -48104,7 +48546,7 @@ window.inspoView = "withmine";
         S.liked.unshift(likeRec(l));
         if (window.WardrobeComposer) window.WardrobeComposer.applyVerdict(S.prefs, l.pieces.map(function (p) { return p.id; }), "like");
         save(true); b.setAttribute("aria-pressed", "true");
-        if (typeof toast === "function") toast("Liked \u2014 it's in Inspo \u203a " + (feed === "withmine" ? "With mine" : "All new") + " \u203a Liked.");
+        if (typeof toast === "function") toast("Liked \u2014 it's in Looks \u203a Liked.");
       }
       return;
     }

@@ -339,7 +339,7 @@ def run() -> int:
             check("back chevron hidden on Home at first opportunity", st["backHidden"], "")
 
             # Bar identical on every tab.
-            tab_ids = ["tab-today", "section-closet", "section-ideas", "tab-find", "section-calendar"]
+            tab_ids = ["tab-today", "section-ideas", "section-inspo", "tab-find", "section-calendar"]
             boxes = {"after-load": after_load}
             for tid in tab_ids:
                 page.locator(f"#{tid}").click()

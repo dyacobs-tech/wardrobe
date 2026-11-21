@@ -26,7 +26,7 @@ BLOCK = re.compile(r"https?://[^/]*workers\.dev/.*")
 
 # (section button, first landing tab, tabs to visit)
 SECTIONS = [
-    ("#section-closet", "tab-wardrobe", []),
+    ("#section-ideas", "tab-wardrobe", []),  # .86.42: Closet is inside Looks
     ("#tab-profile", "tab-pinfo", ["tab-pinfo", "tab-plocation", "tab-prules", "tab-pcloud"]),
 ]
 
@@ -186,7 +186,9 @@ def main() -> int:
                 for section_sel, _first, tabs in SECTIONS:
                     page.locator(section_sel).click()
                     page.wait_for_timeout(250)
-                    if section_sel == "#section-closet":
+                    if section_sel == "#section-ideas":
+                        page.locator('#panel-looks [data-lk-go="wardrobe"]').click()
+                        page.wait_for_timeout(250)
                         hidden = page.evaluate("() => { const g = document.getElementById('subnav-closet'); const w = document.getElementById('tab-watches'); return { subnavHidden: !g || !!g.hidden || getComputedStyle(g).display === 'none', watchesTab: !!(w && !w.hidden && w.offsetParent) }; }")
                         check(
                             f"{name}: Closet has no Watches top tab",

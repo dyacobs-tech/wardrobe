@@ -83,7 +83,7 @@ def run(browser):
     # .86.39 Mix: ready-made outfits on him carry no style title ("Palm
     # Beach" read as a location) and join only at a ticked level
     page.evaluate("() => window.dressLevels838.set([5])")
-    page.locator('#pv-top .pv-bar >> text=Mix').tap()
+    page.locator('#section-inspo').tap()   # .86.42: Mix lives in Inspo (With mine)
     page.wait_for_function("() => document.querySelectorAll('#panel-withmine .en-card .en-render').length >= 2", timeout=20000)
     page.wait_for_timeout(500)
     made = page.evaluate("""() => [...document.querySelectorAll('#panel-withmine .en-card')].filter(c => c.querySelector('.en-render'))

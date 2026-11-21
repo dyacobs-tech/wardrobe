@@ -294,7 +294,7 @@ def main() -> int:
                 page.screenshot(path=str(SHOTS / f"{name}-home.png"), full_page=False)
 
                 # Closet two-tab row (Closet, Watches)
-                page.locator("#section-closet").click()
+                page.locator("#section-ideas").click(); page.locator('#panel-looks [data-lk-go="wardrobe"]').click()
                 page.wait_for_timeout(280)
                 closet = page.evaluate(CLOSET_JS)
                 check(

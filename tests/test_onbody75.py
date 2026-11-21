@@ -138,7 +138,6 @@ def main():
         check(home["sw"] == 0, "no swatch cells on Home")
         pg.click("#section-ideas")
         pg.wait_for_timeout(300)
-        pg.click('[data-pv-f="mine"]')
         pg.wait_for_selector("#cf-grid .mine-avatar")
         mine = pg.evaluate("""() => { const g = document.getElementById('cf-grid'); if (!g) return [0,0,0];
           return [g.querySelectorAll('.cf-card').length, g.querySelectorAll('.cf-card img[data-onbody]').length, g.querySelectorAll('.fl-swatch').length]; }""")
