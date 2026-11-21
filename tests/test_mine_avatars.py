@@ -11,7 +11,37 @@ URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000/"
 CARDS = "#cf-grid article:has([data-cf-open])"
 
 
+STATE_JS = """() => ({
+  looks: window.__cfLooks81 ? __cfLooks81().length : null,
+  cards: document.querySelectorAll('#cf-grid article').length,
+  skeletons: document.querySelectorAll('#cf-grid .en-skel').length,
+  empty: !!document.querySelector('#cf-grid .mine-empty829'),
+  tab: typeof currentTab !== 'undefined' ? currentTab : null,
+  mode: document.documentElement.getAttribute('data-lkm'),
+  renders: (window.ONBODY && ONBODY.map) ? Object.keys(ONBODY.map).length : null,
+  avatarWidth: (document.querySelector('#cf-grid .mine-avatar') || {}).naturalWidth || 0 })"""
+
+
+def wait(page, js, what, where, errors, arg=None):
+    """wait_for_function that says which step stalled and what the feed looked like.
+
+    This file failed once in CI (21 Nov, run 197) with a bare 30s timeout and
+    passed on the commits either side; the message now names the engine, the
+    dress level, the step and the feed state.
+    """
+    try:
+        page.wait_for_function(js, arg=arg)
+    except Exception as e:
+        try:
+            state = page.evaluate(STATE_JS)
+        except Exception as e2:  # the page itself is gone
+            state = "unreadable: %s" % e2
+        raise AssertionError("FAIL %s: timed out waiting for %s; feed state %s; page errors %s" % (where, what, state, errors[:3])) from e
+
+
 def check(browser, level):
+    where = "%s, dress level %s" % (browser.browser_type.name, level)
+    errors = []
     ctx = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True,
                               has_touch=True, service_workers="block")
     ctx.route("**/*", lambda route: route.continue_() if route.request.url.startswith(URL)
@@ -20,19 +50,20 @@ def check(browser, level):
                         json.dumps(json.dumps(photographed_closet())) + ");" +
                         f"localStorage.setItem('wardrobe.formality','{level}')")
     page = ctx.new_page()
+    page.on("pageerror", lambda e: errors.append(str(e)[:200]))
     page.goto(URL, wait_until="domcontentloaded")
     page.locator("#section-ideas").tap()
     if level == 5:
-        page.wait_for_function("() => window.__cfLooks81 && __cfLooks81().length >= 4")
+        wait(page, "() => window.__cfLooks81 && __cfLooks81().length >= 4", "four dealt looks", where, errors)
     else:
         # a level with few renders: wait until the feed has settled
-        page.wait_for_function("() => window.__cfLooks81 && (document.querySelector('#cf-grid .mine-empty829') || (__cfLooks81().length >= 1 && !document.querySelector('#cf-grid .en-skel')))")
+        wait(page, "() => window.__cfLooks81 && (document.querySelector('#cf-grid .mine-empty829') || (__cfLooks81().length >= 1 && !document.querySelector('#cf-grid .en-skel')))", "the feed to settle", where, errors)
         page.wait_for_timeout(1500)
     cards = page.locator(CARDS)
     if level == 5:
         first = cards.first.locator("img.mine-avatar")
         expect(first).to_be_visible()
-        page.wait_for_function("() => document.querySelector('#cf-grid .mine-avatar')?.naturalWidth > 20")
+        wait(page, "() => document.querySelector('#cf-grid .mine-avatar')?.naturalWidth > 20", "the first avatar image to load", where, errors)
         verified = cards.evaluate_all("""cards => cards.slice(0, 8).map(card => {
           const button = card.querySelector('[data-cf-open]');
           const look = __cfLooks81()[Number(button.dataset.cfOpen)];
@@ -51,7 +82,7 @@ def check(browser, level):
         page.locator("#look-layer-close").tap()
         count = cards.count()
         cards.last.scroll_into_view_if_needed()
-        page.wait_for_function("n => __cfLooks81().length > n", arg=count)
+        wait(page, "n => __cfLooks81().length > n", "more looks after scrolling to the last card (had %d)" % count, where, errors, arg=count)
         assert page.evaluate("() => new Set(__cfLooks81().map(l => l.composerKey)).size === __cfLooks81().length")
         print(f"Confirmed {len(verified)} exact outfit portraits, detail and additional unique cards")
     else:
