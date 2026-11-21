@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.26" />
+    <meta name="wardrobe-build" content="2026-11-21.86.27" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8425,7 +8425,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.26</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.27</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11417,7 +11417,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.26";
+var WARDROBE_BUILD = "2026-11-21.86.27";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -48001,7 +48001,7 @@ function affinity(p, src) {
 }
 function gapRole(g) { var c = String(g.cat || ""); return /Trousers|Jeans|Shorts/.test(c) ? "bottom" : c === "Shoes" ? "shoes" : /Blazer|Jacket|Coat|Suit/.test(c) ? "layer" : "top"; }
 function gapMatch(p, g) { return hexDist(p.hex, g.hex) < 70 && (gapRole(g) === p.role || (gapRole(g) === "layer" && p.role === "layer")); }
-function sampleOne(q, seen, src) {
+function sampleOne(q, seen, src, wantShorts) {
   var withMine = q.feed === "withmine", pr = q.price;
   var tEff = typeof q.temp === "number" ? q.temp : 78;
   var warm = tEff >= 72;
@@ -48035,6 +48035,7 @@ function sampleOne(q, seen, src) {
       pool = pool.filter(function (p) { return (p.price || 0) <= cap; });
     }
     if (sl === gapSlot && fromShop[sl]) { var gm = pool.filter(function (p) { return gapMatch(p, src.g); }); if (gm.length) pool = gm; else return null; }
+    if (wantShorts && sl === "bottom") pool = pool.filter(function (p) { return p.kind === "shorts"; });
     if (!pool.length) { WHY[sl] = (WHY[sl] || 0) + 1; return null; }
     var w = pool.map(function (p) {
       var x = (q.prefs.items[p.id] || 0) * 0.8 + affinity(p, src);
@@ -48105,9 +48106,18 @@ function dealInspo(q) {
     var ic = pickIcon(wt);
     return ic ? { t: "icon", ic: ic } : null;
   }
+  // In warm Casual feeds, try shorts once per eight outfits if the closet,
+  // catalogue, selected style and budget can make a valid combination.
+  var warmCasual = q.level === 3 && (typeof q.temp !== "number" || q.temp >= 72);
+  var shortsSlot = Math.floor(rng() * 8);
   function draw(src) {
     var cands = [];
-    for (var j = 0; j < 40 && tries < MAX && cands.length < 6; j++) { tries++; var c = sampleOne(q, seen, src); if (c) cands.push(c); }
+    var tryShorts = warmCasual && out.length % 8 === shortsSlot;
+    for (var j = 0; j < 40 && tries < MAX && cands.length < 6; j++) {
+      tries++;
+      var c = sampleOne(q, seen, src, tryShorts && (j < 30 || cands.length > 0));
+      if (c) cands.push(c);
+    }
     if (!cands.length) return null;
     var best = pickW(cands, cands.map(function (c) { return Math.exp(0.9 * c.score); }));
     seen[best.key] = 1;
