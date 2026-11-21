@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.7" />
+    <meta name="wardrobe-build" content="2026-11-20.86.8" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -165,6 +165,8 @@ window.notMenswear853 = function (e) {
   var looks = (route && route.looks) || {};
   document.documentElement.setAttribute("data-boot-tab", tab);
   window.__bootRoute865 = { tab: tab, looks: looks, scroll: (route && route.scroll) || 0 };
+  /* .86.8: a reload on Looks → Rendered opens Rendered directly */
+  if (tab === "looks" && looks.feed === "rendered") { window.renderedOn867 = true; document.documentElement.classList.add("rnd867"); }
 })();
     </script>
     <style id="boot-route-865">
@@ -6503,6 +6505,43 @@ window.notMenswear853 = function (e) {
       .pv-seg { display: inline-grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border-strong); min-width: 0; }
       .pv-segb { height: 36px; min-height: 36px; min-width: 76px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--dim); font: inherit; font-size: 13.5px; font-weight: 600; white-space: nowrap; cursor: pointer; }
       .pv-segb[aria-pressed="true"] { background: var(--ink-btn); color: var(--accent-ink); }
+      /* .86.8: four segments (Mine | Mix | New | Rendered) — content-sized so the bar still fits a phone */
+      .pv-seg { display: inline-flex; }
+      .pv-segb { min-width: 0; padding: 0 12px; font-size: 13px; }
+      html.rnd867 #outfits-mine-view, html.rnd867 #outfits-inspo-view, html.rnd867 #lf-row { display: none !important; }
+      html.rnd867 #pv-filter { visibility: hidden; }
+      html:not(.rnd867) #rendered-view { display: none !important; }
+      #rendered-view { padding: 4px 0 96px; }
+      .rnd-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; margin: 0 -2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      .rnd-chips::-webkit-scrollbar { display: none; }
+      .rnd-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+      .rnd-chip i { font-style: normal; font-size: 11.5px; opacity: .6; }
+      .rnd-chip[aria-pressed="true"] { background: var(--ink-btn); color: var(--accent-ink); border-color: transparent; }
+      .rnd-count { margin: 2px 2px 10px; font-size: 12.5px; color: var(--dim); }
+      .rnd-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+      @media (min-width: 760px) { .rnd-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; } }
+      .rnd-card { display: flex; flex-direction: column; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; min-width: 0; }
+      .rnd-fig { display: block; border-radius: 12px; overflow: hidden; background: #F6F2EA; aspect-ratio: 386 / 760; border: 1px solid var(--border); }
+      .rnd-fig img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+      .rnd-cap { font-size: 11.5px; line-height: 1.25; color: var(--dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .rnd-more { display: flex; justify-content: center; padding: 14px 0; }
+      .rnd-empty { text-align: center; padding: 28px 18px; }
+      #rnd-sheet { z-index: 125; }
+      #rnd-sheet [hidden] { display: none !important; }
+      .rnd-sheet-card { width: 100%; max-width: 520px; max-height: 94dvh; overflow-y: auto; }
+      .rnd-stage { display: flex; justify-content: center; border-radius: 14px; background: #F6F2EA; margin: 10px 0 12px; overflow: hidden; }
+      .rnd-stage img { display: block; width: 100%; height: min(50dvh, 460px); object-fit: contain; }
+      html[data-theme="dark"] .rnd-stage, html[data-theme="dark"] .rnd-fig { background: #2b2824; }
+      .rnd-sheet-card .rnd-acts, .rnd-sheet-card .rnd-confirm { position: sticky; bottom: 0; background: var(--surface); padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); margin-top: 4px; border-top: 1px solid var(--border); }
+      .rnd-meta { margin: 0; }
+      .rnd-h { margin: 6px 0 4px; }
+      .rnd-pieces { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 4px; }
+      .rnd-pieces li { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; line-height: 1.35; padding: 5px 0; border-bottom: 1px solid var(--border); }
+      .rnd-pieces li em { font-style: normal; color: var(--dim); font-size: 12.5px; flex: none; }
+      .rnd-acts, .rnd-confirm .look-actions { justify-content: center; }
+      .rnd-confirm p { margin: 4px 0 10px; font-size: 14px; line-height: 1.4; }
+      .rnd-danger { background: #b3261e !important; border-color: #b3261e !important; color: #fff !important; }
+      .rnd-del { color: #b3261e; }
       .pv-filter { position: relative; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
       .pv-filter svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
       .pv-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--honey-nav, #a4804f); box-shadow: 0 0 0 2px var(--surface); }
@@ -7491,7 +7530,8 @@ window.notMenswear853 = function (e) {
           <div class="pv-seg" role="group" aria-label="Looks from">
           <button type="button" class="pv-segb" data-pv-f="mine" aria-pressed="true">Mine</button>
           <button type="button" class="pv-segb" data-pv-f="withmine" aria-pressed="false">Mix</button>
-          <button type="button" class="pv-segb" data-pv-f="allnew" aria-pressed="false">New</button></div>
+          <button type="button" class="pv-segb" data-pv-f="allnew" aria-pressed="false">New</button>
+          <button type="button" class="pv-segb" data-pv-f="rendered" aria-pressed="false">Rendered</button></div>
           <button type="button" class="pv-filter" id="pv-filter" aria-haspopup="dialog" aria-label="Filters"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="pv-dot" hidden></span></button></div>
           <div class="pv-pills" id="pv-pills" hidden></div>
           <div class="pv-ptr" id="pv-ptr" aria-hidden="true"><span></span></div>
@@ -7500,7 +7540,7 @@ window.notMenswear853 = function (e) {
         (function () {
           try {
             var f = (window.__bootRoute865 && window.__bootRoute865.looks && window.__bootRoute865.looks.feed) || "mine";
-            if (f !== "mine" && f !== "withmine" && f !== "allnew") f = "mine";
+            if (f !== "mine" && f !== "withmine" && f !== "allnew" && f !== "rendered") f = "mine";
             document.querySelectorAll("#pv-top [data-pv-f]").forEach(function (b) {
               b.setAttribute("aria-pressed", b.getAttribute("data-pv-f") === f ? "true" : "false");
             });
@@ -7543,6 +7583,7 @@ window.notMenswear853 = function (e) {
           </div>
           <div id="inspo-host"><div id="panel-withmine" class="en-view" hidden><div class="options-grid cf-grid en-grid" id="en-grid-withmine" role="list"></div><p class="meta en-empty" hidden></p><div class="cf-sentinel en-sentinel" aria-hidden="true"></div></div><div id="panel-allnew" class="en-view" hidden><div class="options-grid cf-grid en-grid" id="en-grid-allnew" role="list"></div><p class="meta en-empty" hidden></p><div class="cf-sentinel en-sentinel" aria-hidden="true"></div></div><div id="panel-onyou" hidden></div></div>
         </div>
+        <div id="rendered-view" aria-label="Rendered looks"></div>
       </section>
 
       <!-- ================= CALENDAR ================= -->
@@ -8296,7 +8337,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.7</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.8</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8669,6 +8710,9 @@ window.notMenswear853 = function (e) {
           <a class="btn-ghost" id="tryon-open" target="_blank" rel="noopener">Full size</a>
         </div>
       </div>
+    </div>
+    <div class="info-pop-backdrop" id="rnd-sheet" hidden>
+      <div class="card info-pop-card rnd-sheet-card" role="dialog" aria-modal="true" aria-label="Rendered look"></div>
     </div>
     <div class="look-layer" id="look-layer" hidden>
       <div class="look-layer-bar"><button type="button" class="btn-ghost" id="look-layer-close">← Back</button><button type="button" class="btn-ghost tryon-btn" id="tryon-look-btn" hidden>See it on me</button></div>
@@ -11207,7 +11251,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.7";
+var WARDROBE_BUILD = "2026-11-20.86.8";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -20859,7 +20903,7 @@ function emulateOnMeStart() {
     run.state = state; run.text = text;
     if (state === "error") { if (typeof currentTab === "undefined" || currentTab === "emulate") renderEmulate(); return; }
     emulateOnMeBtn(text || "Dressing you\u2026", true);
-  }, function () { return emulateOnMeRun === run; });
+  }, function () { return emulateOnMeRun === run; }, function () { return { title: ic.name + " \u2014 " + boardCaption(ic, lk), ids: plan.filter(function (p) { return p.own; }).map(function (p) { return p.own.id; }), src: "emulate" }; });
 }
 function emulateOnMeSave() {
   var t = emulateResolve();
@@ -33938,6 +33982,9 @@ var editSearches = store.get("editSearches", []);
 var askSync = store.get("askSync", []);
 if (!Array.isArray(askSync)) askSync = [];
 if (!Array.isArray(editSearches)) editSearches = [];
+/* Build .86.8: every render of him — the synced "rendered" collection (records: on-demand renders {id,u,t,title,pieces,ids,lv}, and {id,hide} gallery-hide markers) */
+var renderedLooks = store.get("renderedLooks", []);
+if (!Array.isArray(renderedLooks)) renderedLooks = [];
 function saveShopWishlist() { store.set("shopWishlist", shopWishlist); }
 /* Build .45 — wishlist price-drop records, written server-side by
    the weekly checker into the pricedrops sync collection. The app
@@ -34739,6 +34786,7 @@ function persistTab() {
   try {
     var feed = "mine";
     if (window.outfitsMode === "inspo") feed = window.inspoView === "allnew" ? "allnew" : "withmine";
+    if (window.renderedOn867) feed = "rendered";
     sessionStorage.setItem("wardrobe.route", JSON.stringify({ tab: currentTab, looks: { feed: feed }, scroll: window.scrollY || 0 }));
   } catch (e) {}
   store.set("openIcon", currentTab === "icons" ? openIconId : null);
@@ -38810,7 +38858,7 @@ window.blobStore = (function () {
      one just because it dealt a look more recently. */
 var SYNC_URL = "https://wardrobe-sync.dyacobs.workers.dev";
 try { SYNC_URL = localStorage.getItem("wardrobe.syncurl") || SYNC_URL; } catch (e) {}
-var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed", "receipts", "shopwish", "pricedrops", "edits", "searches", "ask", "blobs"];
+var SY_COLLS = ["looks", "queue", "items", "watches", "worn", "inspo", "finds", "palettes", "icons", "plan", "anchors", "trips", "packed", "receipts", "shopwish", "pricedrops", "edits", "searches", "ask", "rendered", "blobs"];
 function syBlank() {
   var o = { key: null, acct: null, last: 0, snap: {}, st: {}, tomb: {}, dirty: {}, status: "Not synced yet", lastOk: 0 };
   SY_COLLS.forEach(function (c) { o.snap[c] = {}; o.st[c] = {}; o.tomb[c] = {}; o.dirty[c] = {}; });
@@ -38946,6 +38994,7 @@ function syCollGet(c) {
     case "edits": return editMeta;
     case "searches": return editSearches;
     case "ask": return askSync;
+    case "rendered": return renderedLooks;
     case "blobs": return [];
   }
   return [];
@@ -38972,8 +39021,8 @@ function syMetaOf() {
    vanished ids become tombstones. Runs on every tracked store
    write (hinted to the affected collection) and in full at boot
    and at the start of every sync, so no write path is missed. */
-var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops", editMeta: "edits", editSearches: "searches", askSync: "ask" };
-var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox", shopwish: "shopWishlist", pricedrops: "priceDrops", edits: "editMeta", searches: "editSearches", ask: "askSync" };
+var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops", editMeta: "edits", editSearches: "searches", askSync: "ask", renderedLooks: "rendered" };
+var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox", shopwish: "shopWishlist", pricedrops: "priceDrops", edits: "editMeta", searches: "editSearches", ask: "askSync", rendered: "renderedLooks" };
 var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, priceRange: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1 };
 function syTrackChanges(onlyColl) {
   var now = Date.now(), ch = false, mig = false;
@@ -39294,6 +39343,7 @@ function syPutLocal(c, data) {
   else if (c === "pricedrops") { priceDrops = put(priceDrops); store.set("priceDrops", priceDrops); if (typeof renderShopWishlist === "function") renderShopWishlist(); }
   else if (c === "edits") { editMeta = put(editMeta); store.set("editMeta", editMeta); if (typeof editOnSync === "function") editOnSync(); }
   else if (c === "searches") { editSearches = put(editSearches); store.set("editSearches", editSearches); if (typeof editOnSync === "function") editOnSync(); }
+  else if (c === "rendered") { renderedLooks = put(renderedLooks); store.set("renderedLooks", renderedLooks); if (typeof window.renderedOnSync867 === "function") window.renderedOnSync867(); }
   else if (c === "ask") { askSync = put(askSync); store.set("askSync", askSync); if (typeof window.askOnSync === "function") window.askOnSync(); }
   else if (c === "worn") wornLog = put(wornLog);
   else if (c === "inspo") inspoImages = put(inspoImages);
@@ -39344,6 +39394,7 @@ function syRemoveLocal(c, id) {
   else if (c === "pricedrops") { priceDrops = drop(priceDrops); store.set("priceDrops", priceDrops); if (typeof renderShopWishlist === "function") renderShopWishlist(); }
   else if (c === "edits") { editMeta = drop(editMeta); store.set("editMeta", editMeta); if (typeof editOnSync === "function") editOnSync(); }
   else if (c === "searches") { editSearches = drop(editSearches); store.set("editSearches", editSearches); if (typeof editOnSync === "function") editOnSync(); }
+  else if (c === "rendered") { renderedLooks = drop(renderedLooks); store.set("renderedLooks", renderedLooks); if (typeof window.renderedOnSync867 === "function") window.renderedOnSync867(); }
   else if (c === "ask") { askSync = drop(askSync); store.set("askSync", askSync); if (typeof window.askOnSync === "function") window.askOnSync(); }
   else if (c === "worn") wornLog = drop(wornLog);
   else if (c === "inspo") inspoImages = drop(inspoImages);
@@ -41945,7 +41996,7 @@ function tryonErrorText(status, body) {
 }
 /* The job runner shared by the sheet and the Build page.
    onState(state, text, url): state is loading | done | error. */
-function tryonJob(itemsPromise, onState, isLive) {
+function tryonJob(itemsPromise, onState, isLive, meta) {
   var started = Date.now();
   function live() { return !isLive || isLive(); }
   function stepText(j) {
@@ -41957,11 +42008,11 @@ function tryonJob(itemsPromise, onState, isLive) {
     if (!items || !items.length) { onState("error", "There's no photo of this piece to try on yet."); return; }
     items = items.slice(0, 6);
     var ck = tryonCacheKey(items);
-    if (tryonCache[ck] && tryonCache[ck].u) { onState("done", "", tryonCache[ck].u, true); return; }
+    if (tryonCache[ck] && tryonCache[ck].u) { try { if (window.renderedCapture867) window.renderedCapture867(ck, tryonCache[ck].u, items, meta, false); } catch (e) {} onState("done", "", tryonCache[ck].u, true); return; }
     var key = tryonKey();
     if (!key) { onState("error", tryonErrorText(401)); return; }
     var headers = { "authorization": "Bearer " + key, "content-type": "application/json" };
-    function finish(j) { tryonCachePut(ck, j.resultUrl); onState("done", "", j.resultUrl); }
+    function finish(j) { tryonCachePut(ck, j.resultUrl); try { if (window.renderedCapture867) window.renderedCapture867(ck, j.resultUrl, items, meta, true); } catch (e) {} onState("done", "", j.resultUrl); }
     function poll(id) {
       if (!live()) return;
       if (Date.now() - started > 8 * 60 * 1000) { onState("error", "This one is taking too long. Try again later."); return; }
@@ -42045,7 +42096,7 @@ function tryonStart(itemsPromise, title, buyUrl, opts) {
       return;
     }
     tryonShow(state, text);
-  }, function () { return run === tryonRun; });
+  }, function () { return run === tryonRun; }, { title: title || "", ids: opts.closetIds || [], src: "onyou" });
 }
 function tryonForEntry(e, withCloset) {
   if (!e) return;
@@ -42279,7 +42330,7 @@ function vpOnMe(key, run) {
       return;
     }
     st.textContent = text || (state === "error" ? "Couldn't render that right now." : "Putting it on you\u2026");
-  }, function () { return run === vpRun; });
+  }, function () { return run === vpRun; }, { title: (typeof tryonEntryName === "function" ? tryonEntryName(vpEntryFor(r.e)) : ""), ids: [], src: "piece" });
 }
 /* Is there already a render of him in this piece on this device?
    (the try-on cache key is built from the same garment image ref) */
@@ -42977,7 +43028,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
         onme = { sig: sig, state: fb ? "done" : "error", url: fb, text: text, fallback: !!fb };
       } else onme = { sig: sig, state: "loading", url: null, text: text, fallback: false };
       syncOnMeCard();
-    }, function () { return run === buildRun; });
+    }, function () { return run === buildRun; }, function () { return { title: boardTitle(), ids: closet.map(function (i) { return i.id; }), src: "build" }; });
   }
   /* .78.8c: Pool-only closet pieces (pool slides) only on a swim board */
   function poolOkRef(ref) {
@@ -45613,6 +45664,333 @@ window.inspoView = "withmine";
 })();
     </script>
     <script type="wardrobe/app">
+/* ================= Build .86.8 — Looks · Rendered =================
+   One gallery of every render of him, newest first:
+     (a) on-demand renders (See it on me / Render me in this look) — AUTO-SAVED
+         into the synced "rendered" collection (store key renderedLooks);
+     (b) saved looks that have a picture of him;
+     (c) Worn Today entries with their picture;
+     (d) the on-body pool of his closet looks, filtered by his Wardrobe Rules
+         and the dress-shoe hard rule.
+   Renders never enter Home rotation: Home still deals from the composer.
+   Delete only removes a render from this gallery (on-demand records are
+   deleted; saved/worn/pool entries get a synced hide record). */
+(function () {
+  var PAGE = 45, shown = PAGE, level = "all", items = [], lastSig = "", openKey = null, confirming = false, io = null;
+  var counts867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 }, raw867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 };
+  var CHIPS = [["all", "All", null], ["casual", "Casual", [1, 2, 3]], ["smart", "Smart Casual", [4]], ["business", "Business Casual", [5]], ["formal", "Formal", [6]], ["tie", "Black Tie", [7]]];
+  var LVN = { 1: "Swim / Pool", 2: "Shorts & Tee", 3: "Casual", 4: "Smart Casual", 5: "Business Casual", 6: "Formal", 7: "Black Tie" };
+  var SRC = { ondemand: "See it on me", saved: "Saved look", worn: "Worn", pool: "From your closet" };
+  function $(id) { return document.getElementById(id); }
+  function E(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function H(s) { return (typeof tryonHash === "function") ? tryonHash(String(s)) : String(s).length + ""; }
+  function canon(s) { s = String(s || ""); if (s.indexOf("data:") === 0) return "data:" + s.length + ":" + s.slice(-48); return s.split("?")[0].split("#")[0]; }
+  function closetIt(id) { try { return typeof closetItemById === "function" ? closetItemById(id) : null; } catch (e) { return null; } }
+  function pieceOf(id) { var it = closetIt(id); return it ? { n: it.name || "", c: it.category || "", i: it.id } : null; }
+  function levelOfLook(look) {
+    if (typeof lookFitsDress841 !== "function") return null;
+    for (var L = 7; L >= 1; L--) { try { if (lookFitsDress841(look, L)) return L; } catch (e) {} }
+    return null;
+  }
+  function levelOfIds(ids) {
+    var fw = [];
+    (ids || []).forEach(function (id) { var it = closetIt(id); if (it) fw.push({ id: it.id, name: it.name, category: it.category }); });
+    if (fw.length < 3) return null;
+    return levelOfLook({ fwPieces: fw });
+  }
+  function levelFromNames(names) {
+    var t = (names || []).join(" ").toLowerCase();
+    if (!t) return null;
+    if (/tuxedo|dinner jacket|bow tie|black tie/.test(t)) return 7;
+    var tail = /blazer|sport coat|suit jacket|\bsuit\b|tailored jacket/.test(t);
+    var dress = /loafer|oxford|derby|monk|velvet|dress shoe|penny|tassel/.test(t);
+    if (tail && dress) return 6;
+    if (tail) return 5;
+    if (/swim|trunk|bathing/.test(t)) return 1;
+    if (/shorts|\btee\b|t-shirt|sneaker|jeans|denim|slipper|slide/.test(t)) return 3;
+    return 4;
+  }
+  function chipFor(lv) {
+    if (!lv) return null;
+    for (var i = 1; i < CHIPS.length; i++) if (CHIPS[i][2].indexOf(lv) !== -1) return CHIPS[i][0];
+    return null;
+  }
+  function tsFromId(id) { var m = String(id || "").match(/(\d{12,14})/); return m ? parseInt(m[1], 10) : 0; }
+  function tsOf(v) { if (typeof v === "number") return v; if (!v) return 0; var d = Date.parse(v); return isNaN(d) ? 0 : d; }
+  function when(ts) {
+    if (!ts || ts < 1e11) return "";
+    var d = new Date(ts), n = new Date();
+    var same = d.toDateString() === n.toDateString();
+    var y = new Date(n.getTime() - 86400000).toDateString() === d.toDateString();
+    var tm = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    if (same) return "Today " + tm;
+    if (y) return "Yesterday " + tm;
+    return d.toLocaleDateString([], { month: "short", day: "numeric" });
+  }
+  /* ---- (a) capture: every finished on-demand render lands here ---- */
+  function addRecord(rec) {
+    if (!rec || !rec.id) return false;
+    if (!Array.isArray(renderedLooks)) renderedLooks = [];
+    if (renderedLooks.some(function (r) { return r && r.id === rec.id; })) return false;
+    renderedLooks.unshift(rec);
+    if (renderedLooks.length > 600) renderedLooks.length = 600;
+    try { store.set("renderedLooks", renderedLooks); } catch (e) {}
+    return true;
+  }
+  window.renderedCapture867 = function (ck, url, jobItems, meta, fresh) {
+    try {
+      if (!url || typeof url !== "string") return;
+      var m = (typeof meta === "function" ? meta() : meta) || {};
+      var id = "rnd-" + H(url);
+      if (!fresh) { try { if (SY && SY.tomb && SY.tomb.rendered && SY.tomb.rendered[id]) return; } catch (e) {} }
+      var pcs = (jobItems || []).map(function (it) { return { n: String(it.name || "").slice(0, 120), c: String(it.slot || "") }; });
+      var ids = (m.ids || []).filter(Boolean);
+      var names = pcs.map(function (p) { return p.n; }).filter(Boolean);
+      var lv = levelOfIds(ids) || levelFromNames(names.concat(m.title ? [m.title] : []));
+      var rec = { id: id, u: url, t: Date.now(), title: String(m.title || names.slice(0, 3).join(" · ") || "Render of you").slice(0, 160), pieces: pcs, ids: ids.slice(0, 12), lv: lv || null, k: ck || "", src: m.src || "tryon" };
+      if (addRecord(rec)) {
+        if (fresh) { try { toast("Saved to Looks \u2192 Rendered."); } catch (e) {} }
+        if (window.renderedOn867) schedule();
+      }
+    } catch (e) {}
+  };
+  /* one-time: renders that only ever lived in this device's caches */
+  function backfill() {
+    try {
+      if (store.get("renderedBackfill867", false)) return;
+      var n = 0;
+      if (typeof emulateOnMeCache !== "undefined") Object.keys(emulateOnMeCache || {}).forEach(function (k) {
+        var c = emulateOnMeCache[k]; if (!c || !c.u) return;
+        var names = c.names || [];
+        var rec = { id: "rnd-" + H(c.u), u: c.u, t: c.t || Date.now(), title: String(c.title || "Render of you").slice(0, 160), pieces: names.map(function (x) { return { n: x, c: "" }; }), ids: (c.own || []).map(function (o) { return o.id; }).filter(Boolean), lv: levelOfIds((c.own || []).map(function (o) { return o.id; })) || levelFromNames(names), k: "", src: "emulate" };
+        if (addRecord(rec)) n++;
+      });
+      if (typeof tryonCache !== "undefined") Object.keys(tryonCache || {}).forEach(function (k) {
+        var c = tryonCache[k]; if (!c || !c.u) return;
+        var rec = { id: "rnd-" + H(c.u), u: c.u, t: c.t || Date.now(), title: "Earlier try-on", pieces: [], ids: [], lv: null, k: k, src: "earlier" };
+        if (addRecord(rec)) n++;
+      });
+      store.set("renderedBackfill867", true);
+      window.__renderedBackfilled867 = n;
+    } catch (e) {}
+  }
+  /* ---- gallery data ---- */
+  var poolCache = { sig: "", list: [] };
+  function poolItems() {
+    var R = window.WardrobeRules, rs = "";
+    try { rs = R && R.getActive ? JSON.stringify(R.getActive()).length : ""; } catch (e) {}
+    var keysMap = (typeof onbodyKeys === "function") ? onbodyKeys() : null;
+    var keys = keysMap ? Object.keys(keysMap) : [];
+    var sig = (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0) + "|" + keys.length + "|" + rs;
+    if (poolCache.sig === sig) return poolCache.list;
+    var out = [], raw = keys.length;
+    keys.forEach(function (key, idx) {
+      var ids = key.split("|"), fw = [], ok = true;
+      ids.forEach(function (id) { var it = closetIt(id); if (!it) { ok = false; return; } fw.push({ id: it.id, itemId: it.id, name: it.name, category: it.category }); });
+      if (!ok || fw.length < 2) return;
+      var look = { composerKey: key, fwPieces: fw };
+      var L = levelOfLook(look);
+      if (!L) return;
+      try { if (R && typeof R.lookAllowed === "function" && !R.lookAllowed(look, { level: L })) return; } catch (e) {}
+      try { if (typeof formalShoesOk866 === "function" && !formalShoesOk866(look, { level: L })) return; } catch (e) {}
+      var names = fw.map(function (p) { return p.name; });
+      out.push({ key: "pool:" + key, src: "pool", img: keysMap[key], title: names.slice(0, 2).join(" + "), ts: idx, lv: L, pieces: fw.map(function (p) { return { n: p.name, c: p.category, i: p.id }; }), ids: ids });
+    });
+    poolCache = { sig: sig, list: out, raw: raw };
+    return out;
+  }
+  function collect() {
+    var out = [], seen = {}, hidden = {};
+    raw867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 }; counts867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 };
+    (renderedLooks || []).forEach(function (r) { if (r && r.hide) hidden[r.hide] = 1; });
+    function add(it) {
+      raw867[it.src]++;
+      if (!it.img || hidden[it.key]) return;
+      var ik = canon(it.img);
+      if (seen[ik]) return;
+      seen[ik] = 1; counts867[it.src]++; out.push(it);
+    }
+    (renderedLooks || []).forEach(function (r) {
+      if (!r || r.hide || !r.u) return;
+      add({ key: "r:" + r.id, src: "ondemand", rec: r, img: r.u, title: r.title || "Render of you", ts: r.t || 0, lv: r.lv || null, pieces: r.pieces || [], ids: r.ids || [] });
+    });
+    (typeof savedLooks !== "undefined" ? savedLooks : []).forEach(function (l) {
+      if (!l || l.source === "uploaded") return;
+      var img = "";
+      try { img = (typeof lookImg === "function") ? lookImg(l) : l.img; } catch (e) { img = l.img || ""; }
+      if (!img || img.indexOf("composer:") === 0 || img.indexOf("blob:") === 0) return;
+      var pcs = (l.fwPieces && l.fwPieces.length) ? l.fwPieces.map(function (p) { var c = closetIt(p.id || p.itemId); return { n: (c && c.name) || p.name || "", c: (c && c.category) || p.category || "", i: (c && c.id) || "" }; })
+        : (l.anchorNames && l.anchorNames.length ? l.anchorNames.map(function (n) { return { n: n, c: "" }; }) : (l.swatches || []).map(function (s) { return { n: s.name || "", c: s.role || "" }; }));
+      var ids = pcs.map(function (p) { return p.i; }).filter(Boolean);
+      var lv = levelOfIds(ids);
+      if (!lv && typeof RENDER_FORMALITY !== "undefined" && RENDER_FORMALITY[img]) lv = RENDER_FORMALITY[img];
+      if (!lv) lv = levelFromNames([l.title || ""].concat(pcs.map(function (p) { return p.n; })));
+      add({ key: "saved:" + l.id, src: "saved", look: l, img: img, title: l.title || "Saved look", ts: tsOf(l.createdAt) || tsOf(l.likedAt) || tsFromId(l.id), lv: lv, pieces: pcs, ids: ids });
+    });
+    (typeof wornLog !== "undefined" ? wornLog : []).forEach(function (e) {
+      if (!e || !e.img || e.selfie === true) return;
+      var ids = (e.pieceIds || []).map(function (p) { return (p && typeof p === "object") ? p.id : p; }).filter(Boolean);
+      var pcs = (e.pieceDetails && e.pieceDetails.length) ? e.pieceDetails.map(function (d) { return { n: d.name || "", c: d.category || "" }; }) : (e.pieces || []).map(function (n) { return { n: n, c: "" }; });
+      var lv = levelOfIds(ids) || levelFromNames([e.title || ""].concat(pcs.map(function (p) { return p.n; })));
+      var ts = tsOf(e.date); if (ts && String(e.date).length <= 10) ts += 12 * 3600000;
+      add({ key: "worn:" + (e.id || (e.lookId + "@" + e.date)), src: "worn", entry: e, img: e.img, title: e.title || "Worn", ts: ts || tsFromId(e.id), lv: lv, pieces: pcs, ids: ids });
+    });
+    poolItems().forEach(add);
+    out.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+    return out;
+  }
+  function sigNow() {
+    var last = (renderedLooks && renderedLooks[0] && renderedLooks[0].id) || "";
+    return [renderedLooks ? renderedLooks.length : 0, last, typeof savedLooks !== "undefined" ? savedLooks.length : 0, typeof wornLog !== "undefined" ? wornLog.length : 0, typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0, (typeof ONBODY !== "undefined" && ONBODY.map) ? Object.keys(ONBODY.map).length : 0].join("/");
+  }
+  /* ---- paint ---- */
+  function paint() {
+    var host = $("rendered-view");
+    if (!host) return;
+    lastSig = sigNow();
+    items = collect();
+    var cc = { all: items.length };
+    CHIPS.forEach(function (c) { if (c[2]) cc[c[0]] = 0; });
+    items.forEach(function (it) { var k = chipFor(it.lv); if (k) cc[k]++; });
+    if (level !== "all" && !cc[level]) level = "all";
+    var list = level === "all" ? items : items.filter(function (it) { return chipFor(it.lv) === level; });
+    var h = '<div class="rnd-chips" role="group" aria-label="Dress level">';
+    CHIPS.forEach(function (c) {
+      if (c[0] !== "all" && !cc[c[0]]) return;
+      h += '<button type="button" class="rnd-chip" data-rnd-lv="' + c[0] + '" aria-pressed="' + (level === c[0] ? "true" : "false") + '">' + E(c[1]) + '<i>' + cc[c[0]] + "</i></button>";
+    });
+    h += "</div>";
+    if (!list.length) {
+      h += '<div class="card empty rnd-empty"><p>No renders yet.</p><p class="meta">Tap See it on me on a look or a piece and the render lands here, on every device.</p></div>';
+    } else {
+      h += '<p class="rnd-count">' + list.length + " render" + (list.length === 1 ? "" : "s") + " of you \u00b7 newest first</p>";
+      h += '<div class="rnd-grid" id="rnd-grid">';
+      list.slice(0, shown).forEach(function (it) {
+        h += '<button type="button" class="rnd-card" data-rnd-key="' + E(it.key) + '" data-rnd-src="' + it.src + '" aria-label="Open ' + E(it.title) + '"><span class="rnd-fig"><img src="' + E(it.img) + '" alt="" loading="lazy" decoding="async" /></span><span class="rnd-cap">' + E(it.title) + "</span></button>";
+      });
+      h += "</div>";
+      if (list.length > shown) h += '<div class="rnd-more" id="rnd-more"><button type="button" class="btn-ghost" data-rnd-more>Show more</button></div>';
+    }
+    host.innerHTML = h;
+    host.__list = list;
+    var more = $("rnd-more");
+    if (more && "IntersectionObserver" in window) {
+      if (io) try { io.disconnect(); } catch (e) {}
+      io = new IntersectionObserver(function (es) { if (es.some(function (x) { return x.isIntersecting; })) { shown += PAGE; paint(); } }, { rootMargin: "600px" });
+      io.observe(more);
+    }
+  }
+  var tmr = null;
+  function schedule() { clearTimeout(tmr); tmr = setTimeout(function () { if (window.renderedOn867) paint(); }, 60); }
+  window.paintRendered867 = function () { paint(); };
+  window.renderedOnSync867 = schedule;
+  window.renderedState867 = function () { return { items: items.map(function (i) { return { key: i.key, src: i.src, lv: i.lv, title: i.title, ts: i.ts }; }), counts: counts867, raw: raw867, level: level, pool: poolCache.list.length, poolRaw: poolCache.raw || 0 }; };
+  /* ---- the full-size sheet ---- */
+  function find(key) { for (var i = 0; i < items.length; i++) if (items[i].key === key) return items[i]; return null; }
+  function lookIdFor(it) { return it.src === "saved" ? it.look.id : "look-rnd-" + H(canon(it.img)); }
+  function isSaved(it) {
+    if (it.src === "saved") return true;
+    var id = lookIdFor(it);
+    return (typeof savedLooks !== "undefined" ? savedLooks : []).some(function (l) { return l && l.id === id; }) || (it.src === "worn" && it.entry && it.entry.lookId && savedLooks.some(function (l) { return l && l.id === it.entry.lookId; }));
+  }
+  function openSheet(key) {
+    var it = find(key), sh = $("rnd-sheet");
+    if (!it || !sh) return;
+    openKey = key; confirming = false;
+    paintSheet(it);
+    sh.hidden = false;
+    var card = sh.querySelector(".rnd-sheet-card"); if (card) card.scrollTop = 0;
+  }
+  function paintSheet(it) {
+    var sh = $("rnd-sheet"); if (!sh) return;
+    var lv = it.lv ? LVN[it.lv] : "";
+    var meta = [lv, SRC[it.src] + (it.src === "worn" && it.entry ? " " + it.entry.date : ""), it.src === "pool" ? "" : when(it.ts)].filter(Boolean).join(" \u00b7 ");
+    var rows = (it.pieces || []).filter(function (p) { return p && p.n; }).map(function (p) { return "<li><span>" + E(p.n) + "</span>" + (p.c ? "<em>" + E(p.c) + "</em>" : "") + "</li>"; }).join("");
+    var saved = isSaved(it);
+    var acts;
+    if (confirming) {
+      acts = '<div class="rnd-confirm" role="alertdialog" aria-label="Remove from Rendered"><p><b>Remove from Rendered?</b> It only leaves this gallery. Saved looks, worn history and your closet stay as they are.</p>' +
+        '<div class="look-actions"><button type="button" class="btn-ink rnd-danger" data-rnd-act="delete-yes">Remove</button><button type="button" class="btn-ghost" data-rnd-act="delete-no">Keep</button></div></div>';
+    } else {
+      acts = '<div class="look-actions rnd-acts"><button type="button" class="btn-ink" data-rnd-act="save"' + (saved ? " disabled" : "") + ">" + (saved ? "Saved" : "Save") + '</button><button type="button" class="btn-ghost" data-rnd-act="wear">Wear today</button><button type="button" class="btn-ghost rnd-del" data-rnd-act="delete">Delete</button></div>';
+    }
+    sh.querySelector(".rnd-sheet-card").innerHTML =
+      '<div class="principles-head"><h3 class="type-title">' + E(it.title) + '</h3><button type="button" class="info-pop-close" data-rnd-act="close" aria-label="Close">&times;</button></div>' +
+      '<p class="meta rnd-meta">' + E(meta) + "</p>" +
+      '<div class="rnd-stage"><img src="' + E(it.img) + '" alt="You wearing ' + E(it.title) + '" /></div>' +
+      (rows ? '<h5 class="rnd-h">Pieces</h5><ul class="rnd-pieces">' + rows + "</ul>" : "") + acts;
+  }
+  function closeSheet() { var sh = $("rnd-sheet"); if (sh) sh.hidden = true; openKey = null; confirming = false; }
+  function lookFor(it) {
+    if (it.src === "saved") return it.look;
+    var pcs = it.pieces || [];
+    return { id: lookIdFor(it), title: it.title, imgAlt: it.title, img: it.img, source: "tryon", onMe: true, createdAt: Date.now(),
+      fwPieces: pcs.filter(function (p) { return p.i; }).map(function (p) { return { id: p.i, itemId: p.i, name: p.n, category: p.c }; }),
+      shopPieces: [], swatches: pcs.map(function (p) { return { name: p.n, hex: "#888888", role: p.c || "Piece" }; }) };
+  }
+  function doSave(it) {
+    if (isSaved(it)) return;
+    if (typeof saveLook === "function") saveLook(lookFor(it));
+    try { toast("Saved \u2014 it's in Looks \u2192 Mine."); } catch (e) {}
+  }
+  function doWear(it) {
+    if (!isSaved(it) && typeof saveLook === "function") saveLook(lookFor(it));
+    var lid = (it.src === "worn" && it.entry && it.entry.lookId) || lookIdFor(it);
+    var ids = (it.ids || []).filter(function (id) { return !!closetIt(id); });
+    var names = (it.pieces || []).map(function (p) { return p.n; }).filter(Boolean);
+    var entry = (typeof recordWorn === "function") ? recordWorn({ date: localTodayISO(), title: it.title, img: it.img, pieces: names, pieceIds: ids, lookId: lid }) : null;
+    try { persistAll(); } catch (e) {}
+    try { if (typeof renderWornLog === "function") renderWornLog(); if (typeof renderWardrobe === "function") renderWardrobe(); } catch (e) {}
+    try { toast(entry ? "Worn today \u2014 logged." : "Already logged as worn today."); } catch (e) {}
+  }
+  function doDelete(it) {
+    if (it.src === "ondemand") {
+      var rid = it.rec.id;
+      try { if (typeof syDeliberateDelete === "function") syDeliberateDelete("rendered", rid); } catch (e) {}
+      renderedLooks = renderedLooks.filter(function (r) { return !(r && r.id === rid); });
+    } else {
+      addRecord({ id: "hide-" + H(it.key), hide: it.key, t: Date.now() });
+    }
+    try { store.set("renderedLooks", renderedLooks); } catch (e) {}
+    closeSheet(); paint();
+    try { toast("Removed from Rendered."); } catch (e) {}
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target; if (!t || !t.closest) return;
+    var b = t.closest("[data-rnd-lv]");
+    if (b) { level = b.getAttribute("data-rnd-lv"); shown = PAGE; paint(); return; }
+    b = t.closest("[data-rnd-more]"); if (b) { shown += PAGE; paint(); return; }
+    b = t.closest("[data-rnd-key]"); if (b) { openSheet(b.getAttribute("data-rnd-key")); return; }
+    if (t.id === "rnd-sheet") { closeSheet(); return; }
+    b = t.closest("[data-rnd-act]");
+    if (b) {
+      var a = b.getAttribute("data-rnd-act"), it = find(openKey);
+      if (a === "close") { closeSheet(); return; }
+      if (!it) return;
+      if (a === "save") { doSave(it); paintSheet(it); }
+      else if (a === "wear") { doWear(it); paintSheet(it); }
+      else if (a === "delete") { confirming = true; paintSheet(it); }
+      else if (a === "delete-no") { confirming = false; paintSheet(it); }
+      else if (a === "delete-yes") { doDelete(it); }
+    }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { var sh = $("rnd-sheet"); if (sh && !sh.hidden) closeSheet(); } });
+  setInterval(function () {
+    try {
+      if (!window.renderedOn867) return;
+      var sh = $("rnd-sheet"); if (sh && !sh.hidden) return;
+      if (document.body && document.body.getAttribute("data-page") !== "looks") return;
+      if (sigNow() !== lastSig) paint();
+    } catch (e) {}
+  }, 2500);
+  window.addEventListener("load", function () {
+    setTimeout(backfill, 3500);
+    setTimeout(function () { if (window.renderedOn867) paint(); }, 600);
+  });
+  if (window.renderedOn867) setTimeout(paint, 0);
+})();
+    </script>
+    <script type="wardrobe/app">
 /* ================= Preview .81.2 — Curate + per-level icon weights =================
    Icons and Palettes live in The Edit → Curate. Weight sliders are 0–100% per
    dress level (Casual / Smart Casual / Business / Formal). They persist in
@@ -46745,6 +47123,7 @@ window.inspoView = "withmine";
      floating + builds a look; each card keeps a quiet Edit. Every feed
      just keeps loading as he scrolls. */
   function redeal() {
+    if (window.renderedOn867) { if (typeof window.paintRendered867 === "function") window.paintRendered867(); return; }
     var f = window.outfitsMode === "inspo" ? (window.inspoView === "allnew" ? "allnew" : "withmine") : "mine";
     if (f === "mine") { gen.mine++; BUF.mine = []; asking.mine = false; pendingMine = true; fill("mine"); }
     else { S.recent = S.recent.concat(shownKeys(f)); reset(f); if (F[f]) F[f].sig = null; rebuild(f); }
@@ -46766,7 +47145,8 @@ window.inspoView = "withmine";
         '<div class="pv-seg" role="group" aria-label="Looks from">' +
         '<button type="button" class="pv-segb" data-pv-f="mine" aria-pressed="true">Mine</button>' +
         '<button type="button" class="pv-segb" data-pv-f="withmine" aria-pressed="false">Mix</button>' +
-        '<button type="button" class="pv-segb" data-pv-f="allnew" aria-pressed="false">New</button></div>' +
+        '<button type="button" class="pv-segb" data-pv-f="allnew" aria-pressed="false">New</button>' +
+        '<button type="button" class="pv-segb" data-pv-f="rendered" aria-pressed="false">Rendered</button></div>' +
         '<button type="button" class="pv-filter" id="pv-filter" aria-haspopup="dialog" aria-label="Filters">' + FILTER_SVG + '<span class="pv-dot" hidden></span></button></div>' +
         '<div class="pv-pills" id="pv-pills" hidden></div>' +
         '<div class="pv-ptr" id="pv-ptr" aria-hidden="true"><span></span></div>';
@@ -46781,7 +47161,7 @@ window.inspoView = "withmine";
     }
     function short(n) { var p = String(n || "").split(" "); return p.length > 1 ? p[p.length - 1] : p[0]; }
     function thumb(ic) { var l = (ic.looks || [])[0]; return (ic.photo || ic.img || (l && l.img)) || ""; }
-    function curFeed() { return window.outfitsMode === "inspo" ? (window.inspoView === "allnew" ? "allnew" : "withmine") : "mine"; }
+    function curFeed() { if (window.renderedOn867) return "rendered"; return window.outfitsMode === "inspo" ? (window.inspoView === "allnew" ? "allnew" : "withmine") : "mine"; }
     function lensIcon() { var id = S.lens; return id ? iconList().filter(function (x) { return x.id === id; })[0] || null : null; }
     function syncTop() {
       var f = curFeed();
@@ -46798,6 +47178,15 @@ window.inspoView = "withmine";
     window.pvSyncTop81 = syncTop;
     window.pvSyncLens81 = function () { syncTop(); if (sheet && !sheet.hidden) window.pvPaintSheet81(sheet); };
     function go(f) {
+      if (f === "rendered") {
+        window.renderedOn867 = true; document.documentElement.classList.add("rnd867");
+        window.outfitsMode = "mine"; if (typeof syncOutfitsToggle === "function") syncOutfitsToggle(); active = null;
+        syncTop();
+        if (typeof window.paintRendered867 === "function") window.paintRendered867();
+        if (typeof persistTab === "function") persistTab();
+        return;
+      }
+      if (window.renderedOn867) { window.renderedOn867 = false; document.documentElement.classList.remove("rnd867"); }
       if (f === "mine") { window.outfitsMode = "mine"; if (typeof syncOutfitsToggle === "function") syncOutfitsToggle(); active = null; }
       else { window.outfitsMode = "inspo"; if (typeof syncOutfitsToggle === "function") syncOutfitsToggle(); if (typeof showInspoView === "function") showInspoView(f); }
       syncTop();
@@ -46813,7 +47202,7 @@ window.inspoView = "withmine";
     if (window.outfitsMode === "inspo" && window.inspoView !== "withmine" && window.inspoView !== "allnew") go("withmine");
     else {
       var bootFeed = (window.__bootRoute865 && window.__bootRoute865.looks && window.__bootRoute865.looks.feed) || (window.outfitsMode === "inspo" ? (window.inspoView || "withmine") : "mine");
-      if (bootFeed === "withmine" || bootFeed === "allnew") go(bootFeed);
+      if (bootFeed === "withmine" || bootFeed === "allnew" || bootFeed === "rendered") go(bootFeed);
       else syncTop();
     }
     top.addEventListener("click", function (e) {

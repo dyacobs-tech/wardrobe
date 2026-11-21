@@ -28,12 +28,12 @@ return out;}
 function tryonSyncLookBtn(look){var b=tryonEl("tryon-look-btn");if(b)b.hidden=!tryonLookPieces(look).length;}
 function tryonLookItems(look){var pcs=tryonLookPieces(look);return Promise.all(pcs.map(function(pc){return tryonImageRef(pc.img);})).then(function(refs){var items=[],seen={};refs.forEach(function(ref,i){if(ref&&!seen[pcs[i].slot]){seen[pcs[i].slot]=1;items.push({slot:pcs[i].slot,image:ref,name:pcs[i].name||""});}});items.sort(function(a,b){return(TRYON_ORDER[a.slot]||0)-(TRYON_ORDER[b.slot]||0);});return items;});}
 function tryonErrorText(status,body){var err=body&&body.error;if(status===401)return"Turn on sync in Profile first — try-on uses the same account.";if(err==="not_configured")return"Try-on isn't switched on yet. It will work as soon as the render service is connected.";if(err==="daily_cap")return"That's today's try-on limit. It resets overnight.";if(err==="garment_image")return"Couldn't read that product's photo. Try another listing.";if(body&&body.message)return body.message;return"Couldn't render that right now. Try again in a minute.";}
-function tryonJob(itemsPromise,onState,isLive){var started=Date.now();function live(){return!isLive||isLive();}
+function tryonJob(itemsPromise,onState,isLive,meta){var started=Date.now();function live(){return!isLive||isLive();}
 function stepText(j){if(!j||j.steps<=1)return"Putting it on you… about 20 seconds.";return"Dressing you — piece "+Math.max(1,j.step)+" of "+j.steps+"…";}
 Promise.resolve(itemsPromise).then(function(items){if(!live())return;if(!items||!items.length){onState("error","There's no photo of this piece to try on yet.");return;}
-items=items.slice(0,6);var ck=tryonCacheKey(items);if(tryonCache[ck]&&tryonCache[ck].u){onState("done","",tryonCache[ck].u,true);return;}
+items=items.slice(0,6);var ck=tryonCacheKey(items);if(tryonCache[ck]&&tryonCache[ck].u){try{if(window.renderedCapture867)window.renderedCapture867(ck,tryonCache[ck].u,items,meta,false);}catch(e){}onState("done","",tryonCache[ck].u,true);return;}
 var key=tryonKey();if(!key){onState("error",tryonErrorText(401));return;}
-var headers={"authorization":"Bearer "+key,"content-type":"application/json"};function finish(j){tryonCachePut(ck,j.resultUrl);onState("done","",j.resultUrl);}
+var headers={"authorization":"Bearer "+key,"content-type":"application/json"};function finish(j){tryonCachePut(ck,j.resultUrl);try{if(window.renderedCapture867)window.renderedCapture867(ck,j.resultUrl,items,meta,true);}catch(e){}onState("done","",j.resultUrl);}
 function poll(id){if(!live())return;if(Date.now()-started>8*60*1000){onState("error","This one is taking too long. Try again later.");return;}
 fetch(TRYON_URL+"/tryon/"+id,{headers:{"authorization":"Bearer "+key}}).then(function(r){return r.json().then(function(b){return{status:r.status,body:b};});}).then(function(x){if(!live())return;if(x.status!==200){onState("error",tryonErrorText(x.status,x.body));return;}
 var j=x.body;if(j.status==="done"&&j.resultUrl){finish(j);return;}
@@ -52,7 +52,7 @@ tryonJob(itemsPromise,function(state,text,url){if(state==="done"){showImg(url,fa
 if(state==="error"){var fb=opts.noFallback?null:tryonNearestOnbody(opts.closetIds||[],opts.slot||null,opts.hex||null);tryonShow("error",text);if(fb){if(note){note.textContent=text+" Closest look on you:";note.hidden=false;}
 showImg(fb,true);}
 return;}
-tryonShow(state,text);},function(){return run===tryonRun;});}
+tryonShow(state,text);},function(){return run===tryonRun;},{title:title||"",ids:opts.closetIds||[],src:"onyou"});}
 function tryonForEntry(e,withCloset){if(!e)return;var slot=tryonSlotForEntry(e),mine=slot==="outer"?"layer":slot;var hex=(typeof buildShopColour==="function")?buildShopColour(e).hex:null;var pieces=withCloset?tryonWithClosetPieces(e):[];var title=tryonEntryName(e)+(pieces.length?" with "+pieces.map(function(p){return p.name;}).join(", "):"");tryonStart(withCloset?tryonPiecesItems([e],pieces):tryonEntryItems(e),title,e.url,{product:e,withCloset:!!withCloset,slot:mine,hex:hex,closetIds:pieces.map(function(p){return p.id;})});}
 document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)return;if(t.closest("#tryon-close")||t.id==="tryon-sheet"){tryonClose();return;}
 if(t.closest("#tryon-withmine")){if(tryonCurrent&&tryonCurrent.product)tryonForEntry(tryonCurrent.product,true);return;}
