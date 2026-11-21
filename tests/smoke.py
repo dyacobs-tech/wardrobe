@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+from wardrobe_fixture import photographed_closet
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000/"
 HERE = Path(__file__).resolve().parent
@@ -60,22 +61,13 @@ def main() -> int:
             route.abort()
 
         ctx.route(re.compile(r"https?://[^/]*workers\.dev/.*"), block_worker)
-        # Home is wardrobe-only in .75: seed a closet that includes
-        # bottoms so the outfit of the day can be composed without
-        # falling back to starter / DEAL_POOL renders.
-        fixture_path = HERE / "fixture_closet83.json"
-        if fixture_path.exists():
-            seed_items = json.loads(fixture_path.read_text())
-            # .74.2/.75: Home deals only photographed pieces, so each fixture
-            # piece carries a tiny valid photo (the fixture file stays photo-free).
-            px = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-            seed_items = [dict(i, photo=i.get("photo") or px) for i in seed_items]
-            ctx.add_init_script(
-                "(() => { if (localStorage.getItem('wardrobe.items')) return;"
-                " localStorage.setItem('wardrobe.items', JSON.stringify(%s));"
-                " localStorage.setItem('wardrobe.todaySource', JSON.stringify('wardrobe'));"
-                " })();" % json.dumps(seed_items)
-            )
+        # A named Home outfit needs a photograph keyed to these closet IDs.
+        ctx.add_init_script(
+            "(() => { if (localStorage.getItem('wardrobe.items')) return;"
+            " localStorage.setItem('wardrobe.items', JSON.stringify(%s));"
+            " localStorage.setItem('wardrobe.todaySource', JSON.stringify('wardrobe'));"
+            " })();" % json.dumps(photographed_closet())
+        )
         page = ctx.new_page()
         page.on("pageerror", lambda e: errors.append(f"pageerror: {e}"))
         page.on("console", lambda m: errors.append(f"console.{m.type}: {m.text}")
@@ -184,7 +176,8 @@ def main() -> int:
         html = page.content()
         code = page.evaluate("""async () => { const urls = [...document.querySelectorAll('script[src],link[rel=stylesheet]')].map(e => e.src || e.href).filter(u => u && u.indexOf(location.origin) === 0);
           const out = []; for (const u of urls) { try { out.push(await (await fetch(u)).text()); } catch (e) {} } return out.join('\\n'); }""")
-        hay = (html + "\n" + code)
+        # The same public host is also embedded in a JS regex inside the bundle.
+        hay = re.sub(r"\\+\.", ".", html + "\n" + code)
         for allowed in BASELINE.get("pii_allow", []):
             hay = hay.replace(allowed, "")
         low = hay.lower()

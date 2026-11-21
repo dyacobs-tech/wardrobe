@@ -16,22 +16,15 @@ import threading
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+from wardrobe_fixture import photographed_closet
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from buildinfo import CURRENT_BUILD  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-HERE = Path(__file__).resolve().parent
 SHOTS = Path("/workspace/han31-shots")
 SHOTS.mkdir(parents=True, exist_ok=True)
 
-LIVE = json.loads((HERE / "fixture_closet_live.json").read_text())
-UPLOADED = [
-    dict(i, addedISO=i.get("addedISO") or "2026-11-17",
-         photo=i.get("photo") or i.get("src") or "assets/icon-192.png")
-    for i in LIVE
-    if not str(i.get("id") or "").startswith("seed-")
-]
 
 LABELS = ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"]
 fails: list[str] = []
@@ -176,7 +169,7 @@ def main():
             has_touch=True,
             service_workers="block",
         )
-        ctx.add_init_script(seed_js(UPLOADED))
+        ctx.add_init_script(seed_js(photographed_closet()))
         ctx.route("**/*.workers.dev/**", lambda r: r.abort())
         errors = []
         pg = ctx.new_page()

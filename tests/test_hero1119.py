@@ -13,6 +13,7 @@ from __future__ import annotations
 import functools, http.server, json, socketserver, sys, threading, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from wardrobe_fixture import photographed_closet
 
 ROOT = Path(__file__).resolve().parents[1]
 fails: list[str] = []
@@ -28,7 +29,7 @@ Q = type("Q", (http.server.SimpleHTTPRequestHandler,), {"log_message": lambda *a
 srv = socketserver.ThreadingTCPServer(("127.0.0.1", 0), functools.partial(Q, directory=str(ROOT)))
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 BASE = "http://127.0.0.1:%d/" % srv.server_address[1]
-FX = (ROOT / "tests/fixture_closet83.json").read_text()
+FX = json.dumps(photographed_closet())
 
 FRAME_JS = """() => { window.__hf = []; const hero = document.getElementById('today-hero'), img = document.getElementById('today-img');
   const vis = el => { const cs = getComputedStyle(el); return !el.hidden && cs.visibility !== 'hidden' && parseFloat(cs.opacity) > 0.01 && el.getBoundingClientRect().height > 50; };
@@ -75,7 +76,7 @@ with sync_playwright() as p:
         ctx = new_ctx(b, w, h); pg = ctx.new_page()
         pg.goto(BASE, wait_until="load"); pg.wait_for_timeout(4500)
         m = pg.evaluate("""() => { const R = s => document.querySelector(s).getBoundingClientRect();
-          return { row: R('#today-simple-actions').bottom, nav: R('#bottombar').top, kicker: R('#panel-today .today-kicker').top, img: R('#today-img').bottom }; }""")
+          return { row: R('#today-simple-actions').bottom, nav: R('#bottombar .nav-pill').top, kicker: R('#panel-today .today-kicker').top, img: R('#today-img').bottom }; }""")
         gap = m["nav"] - m["row"]
         check("%dx%d: controls sit %dpx above the nav (12-36)" % (w, h, gap), 12 <= gap <= 36, m)
         check("%dx%d: caption starts below the figure" % (w, h), m["kicker"] >= m["img"], m)

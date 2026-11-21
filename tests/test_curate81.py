@@ -253,7 +253,7 @@ def main():
           const ford = host.querySelector('[data-pv-lens=ford]');
           return { first, fordOff: ford && ford.classList.contains('pv-ic-off'), fordBadge: !!(ford && ford.querySelector('.pv-w')), squarziBadge: host.querySelector('[data-pv-lens=squarzi] .pv-w') && host.querySelector('[data-pv-lens=squarzi] .pv-w').textContent };
         }""")
-        check("Filters dims weight-0 icons and badges the rest", filt2.get("first") == "squarzi" and filt2.get("fordOff") and filt2.get("squarziBadge") == "8" and not filt2.get("fordBadge"), filt2)
+        check("Filters dims weight-0 icons and badges the rest", filt2.get("first") == "squarzi" and filt2.get("fordOff") and filt2.get("squarziBadge") == "8%" and not filt2.get("fordBadge"), filt2)
         pg.screenshot(path=str(SHOTS / "390-light-looks-filters-icons.png"), full_page=False)
         # restore seeded per-level defaults so later engine tests use the same weights
         pg.evaluate("() => window.iconWeights81.resetDefaults()")
