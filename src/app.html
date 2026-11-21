@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.29" />
+    <meta name="wardrobe-build" content="2026-11-21.86.30" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6687,6 +6687,13 @@ window.notMenswear853 = function (e) {
       /* the one floating + */
       .pv-fab { position: fixed; right: max(16px, calc((100vw - 1180px) / 2)); bottom: calc(var(--bb-h, 76px) + 16px + env(safe-area-inset-bottom, 0px)); z-index: 40; width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--honey-nav, #a4804f); color: var(--honey-ink-on, #fff); box-shadow: 0 6px 18px rgba(30, 26, 23, .28); display: flex; align-items: center; justify-content: center; cursor: pointer; transform: translateY(calc(-1 * var(--pv-fab-dy, 0px))); transition: transform .2s ease, opacity .2s ease; }
       .pv-fab.pv-fab-away, .pv-fab.pv-fab-tuck { transform: translateY(90px); opacity: 0; pointer-events: none; }
+      /* .86.30: the + travels with the nav; scrolling down through cards
+         tucks it away so it never sits over a title */
+      @media (max-width: 899px) {
+        .pv-fab { transition: transform 240ms cubic-bezier(.2,.7,.2,1), opacity 200ms ease-out; }
+        html.nav-compact .pv-fab, html.nav-away .pv-fab { transform: translateY(90px); opacity: 0; pointer-events: none; }
+      }
+      @media (max-width: 899px) and (prefers-reduced-motion: reduce) { .pv-fab { transition: none; } }
       .pv-fab svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
       #panel-looks[hidden] .pv-fab { display: none; }
       .pv81 #panel-looks #cf-grid, .pv81 #panel-looks .en-grid { padding-bottom: 72px; } /* + height 48 + 24 gap */
@@ -8448,7 +8455,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.29</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.30</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11440,7 +11447,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.29";
+var WARDROBE_BUILD = "2026-11-21.86.30";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -44587,7 +44594,7 @@ window.inspoView = "withmine";
      then glides it off the bottom edge; any scroll up brings it back at
      full size. Only the pill moves (transform/opacity); #bottombar stays
      fixed to the bottom safe area, so the bar can never sit mid-screen. */
-  var state = "full", lastEl = null, lastY = 0, downRun = 0, upRun = 0;
+  var state = "full", lastEl = null, lastY = 0, downRun = 0, upRun = 0, lastYOf = new WeakMap();
   function setState(next) {
     if (!mq.matches) next = "full";
     if (next === state) return;
@@ -44606,8 +44613,12 @@ window.inspoView = "withmine";
       ticking = false;
       var src = scrollSource(target);
       var y = src.y;
-      if (src.el !== lastEl) { lastEl = src.el; lastY = y; downRun = 0; upRun = 0; return; }
-      var dy = y - lastY; lastY = y;
+      if (src.el !== lastEl) {
+        /* first event on this scroller: measure from where it last was
+           (the top, for a fresh page), so a single big swipe still counts */
+        lastEl = src.el; lastY = lastYOf.has(src.el) ? lastYOf.get(src.el) : 0; downRun = 0; upRun = 0;
+      }
+      var dy = y - lastY; lastY = y; lastYOf.set(src.el, y);
       if (y <= 12) { show(); return; }
       /* rubber-banding past the end must not count as a direction */
       if (y < 0 || y > src.max + 1) return;
