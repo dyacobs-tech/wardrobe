@@ -6222,6 +6222,7 @@ window.notMenswear853 = function (e) {
           width: 232px; height: 42px;
         }
         /* the .78.2b rule moved the whole bar; only the pill may move now */
+        #saved-grid.saved-collapsed829 { display: none !important; }
         html.nav-away body #bottombar.bottombar { transform: none !important; }
         html.nav-away body #bottombar .nav-pill {
           transform: translate3d(0, calc(100% + 12px + env(safe-area-inset-bottom, 0px)), 0);
@@ -6237,6 +6238,16 @@ window.notMenswear853 = function (e) {
       @media (max-width: 899px) and (prefers-reduced-motion: reduce) {
         html body #bottombar .nav-pill { transition: none; }
       }
+      /* .86.29: Saved ideas row under the Mine feed (all widths) */
+      #saved-grid.saved-collapsed829 { display: none !important; }
+      .saved-toggle829 {
+        display: flex; align-items: center; gap: 8px; width: 100%; min-height: 48px;
+        margin: 18px 0 10px; padding: 0 16px; border: 1px solid var(--line, rgba(0,0,0,.12));
+        border-radius: 999px; background: transparent; color: inherit; font: inherit; font-weight: 600; text-align: left; cursor: pointer;
+      }
+      .saved-toggle829[hidden] { display: none; }
+      .saved-toggle829 .st829-n { color: var(--dim, #777); font-weight: 500; }
+      .saved-toggle829 .st829-c { margin-left: auto; }
 
       /* Build .80.10 — The Edit phone pills, Closet gaps, shop-look cut-out */
       @media (max-width: 899px) {
@@ -8437,7 +8448,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.28</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.29</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -30305,6 +30316,11 @@ document.addEventListener("click", function (e) {
     if (typeof switchTab === "function") switchTab("prules");
     return;
   }
+  if (t.closest("[data-he861-cloud]")) {
+    e.preventDefault(); e.stopPropagation();
+    if (typeof switchTab === "function") switchTab("pcloud");
+    return;
+  }
   if (t.closest("[data-he861-closet]")) {
     e.preventDefault(); e.stopPropagation();
     if (typeof switchTab === "function") switchTab("wardrobe");
@@ -41611,7 +41627,33 @@ function analyzeFilePiece(card, job, ix) {
   feed.innerHTML = '<div class="cf-head"><h3 class="fav-head">From your closet</h3><button type="button" class="btn-ghost" id="cf-shuffle">Shuffle</button></div>' +
     '<div class="options-grid cf-grid" id="cf-grid" role="list"></div><div class="cf-sentinel" id="cf-sentinel" aria-hidden="true"></div>';
   /* .80.19: under the New / Liked / All filter when it heads Mine */
-  if (mineHost) mineHost.appendChild(feed);
+  if (mineHost) {
+    /* .86.29: his avatar outfits lead Mine; saved ideas (many are old
+       saved photos that cannot be shown) sit below, behind one row. */
+    var sg829 = document.getElementById("saved-grid");
+    if (sg829 && sg829.parentNode === mineHost) {
+      mineHost.insertBefore(feed, sg829);
+      var tg829 = document.createElement("button");
+      tg829.type = "button"; tg829.className = "saved-toggle829"; tg829.id = "saved-toggle829";
+      tg829.setAttribute("aria-expanded", "false"); tg829.setAttribute("aria-controls", "saved-grid");
+      mineHost.insertBefore(tg829, sg829);
+      sg829.classList.add("saved-collapsed829");
+      var label829 = function () {
+        var n = sg829.querySelectorAll("article.saved-card").length;
+        var open = !sg829.classList.contains("saved-collapsed829");
+        tg829.hidden = !n;
+        tg829.innerHTML = "<span>Saved ideas</span><span class=\"st829-n\">" + n + "</span><span class=\"st829-c\" aria-hidden=\"true\">" + (open ? "\u25B4" : "\u25BE") + "</span>";
+      };
+      tg829.addEventListener("click", function () {
+        var open = sg829.classList.toggle("saved-collapsed829") === false;
+        tg829.setAttribute("aria-expanded", open ? "true" : "false"); label829();
+      });
+      new MutationObserver(label829).observe(sg829, { childList: true });
+      label829();
+      var ls829 = document.getElementById("looks-search");
+      if (ls829) ls829.addEventListener("input", function () { if (ls829.value.trim()) { sg829.classList.remove("saved-collapsed829"); tg829.setAttribute("aria-expanded", "true"); label829(); } });
+    } else mineHost.appendChild(feed);
+  }
   else result.parentNode.insertBefore(feed, result.nextSibling);
   var grid = feed.querySelector("#cf-grid");
   var sentinel = feed.querySelector("#cf-sentinel");
@@ -41674,8 +41716,13 @@ function analyzeFilePiece(card, job, ix) {
       if (tries > 90) { clearInterval(cfWait); cfWait = null; window.__cfNoWorker38 = true; resetFeed(); }
     }, 250);
   }
+  /* .86.29: two outfits with the same title read as duplicates, so the
+     feed shows each title once (rendered looks come first, so the one
+     with his avatar wins). Skipped keys are not dealt again. */
+  var dupSkip829 = [];
+  function titleKey829(l) { return String((l && l.title) || "").trim().toLowerCase().replace(/\s+/g, " "); }
   function appendLooks(n) {
-    var exclude = feedLooks.map(function (l) { return l.composerKey; });
+    var exclude = feedLooks.map(function (l) { return l.composerKey; }).concat(dupSkip829);
     var fi = feedInputs();
     /* .81: the next looks were dealt ahead, off the main thread (endless
        module); the synchronous deal is only the fallback */
@@ -41691,6 +41738,15 @@ function analyzeFilePiece(card, job, ix) {
     if (!looks) looks = composerLooks({ count: n, level: fi.level, exclude: exclude, only: fi.only, slot: "feed", renderedFirst: true, strictKeys: true, temp: fi.temp });
     if (!looks.length) return 0;
     dropSkeleton38();
+    var seenT829 = {};
+    feedLooks.forEach(function (l) { seenT829[titleKey829(l)] = 1; });
+    var dealt829 = looks.length;
+    looks = looks.filter(function (l) {
+      var k = titleKey829(l);
+      if (k && seenT829[k]) { if (l.composerKey) dupSkip829.push(l.composerKey); return false; }
+      seenT829[k] = 1; return true;
+    });
+    if (!looks.length) { if (dealt829) scheduleMinePage(); return 0; }
     var html = "";
     looks.forEach(function (l) { html += cardHTML(l, feedLooks.length); feedLooks.push(l); });
     grid.insertAdjacentHTML("beforeend", html);
@@ -41699,7 +41755,7 @@ function analyzeFilePiece(card, job, ix) {
     return looks.length;
   }
   function resetFeed() {
-    feedLooks = [];
+    feedLooks = []; dupSkip829 = [];
     grid.innerHTML = "";
     feedSig = stateSig();
     appendLooks(12);
@@ -44821,6 +44877,23 @@ window.inspoView = "withmine";
       /* a level shown empty is re-checked once the closet finishes loading */
       if (!hero.__retry861) { hero.__retry861 = 1; [2500, 7000].forEach(function (ms) { setTimeout(function () { try { if (todayLook && todayLook.dressEmpty && typeof dealHeroForSource === "function") dealHeroForSource(); } catch (e) {} }, ms); }); }
       var nm861 = (typeof HERO_TYPE_LABELS !== "undefined" && HERO_TYPE_LABELS[lv861 - 1]) || "this level";
+      /* .86.29: a device without his synced closet (a browser opened from
+         a link, or a wiped app) only has the built-in starter pieces. Say
+         that, and offer Cloud sync, instead of "add a piece". */
+      var noCloset829 = false;
+      try {
+        var own829 = (typeof wardrobeItems !== "undefined" && wardrobeItems || []).filter(function (i) { return i && i.id && String(i.id).indexOf("seed-") !== 0; });
+        noCloset829 = !(typeof SY !== "undefined" && SY && SY.key) || !own829.length;
+      } catch (eN) { noCloset829 = false; }
+      if (collage && noCloset829) {
+        collage.classList.remove("flatlay-host");
+        collage.hidden = false;
+        collage.innerHTML = '<div class="hero-empty861-box"><p class="he861-k">' + esc(nm861) + '</p><p class="he861-t">Your closet isn\u2019t on this device</p>' +
+          '<p class="he861-s">Open DONNA from your Home Screen, or link this device in Cloud sync.</p>' +
+          '<div class="he861-acts"><button type="button" class="btn-ink" data-he861-cloud>Open Cloud sync</button></div></div>';
+        var emNm829 = document.getElementById("today-name"); if (emNm829) emNm829.textContent = "Link your closet";
+        return;
+      }
       if (collage) {
         collage.classList.remove("flatlay-host");
         collage.hidden = false;
