@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.8" />
+    <meta name="wardrobe-build" content="2026-11-20.86.9" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8337,7 +8337,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.8</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.9</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11251,7 +11251,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.8";
+var WARDROBE_BUILD = "2026-11-20.86.9";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -45664,17 +45664,21 @@ window.inspoView = "withmine";
 })();
     </script>
     <script type="wardrobe/app">
-/* ================= Build .86.8 — Looks · Rendered =================
-   One gallery of every render of him, newest first:
-     (a) on-demand renders (See it on me / Render me in this look) — AUTO-SAVED
-         into the synced "rendered" collection (store key renderedLooks);
-     (b) saved looks that have a picture of him;
-     (c) Worn Today entries with their picture;
-     (d) the on-body pool of his closet looks, filtered by his Wardrobe Rules
-         and the dress-shoe hard rule.
+/* ================= Build .86.9 — Looks · Rendered =================
+   One gallery of every AVATAR render of him (pipeline only), newest first:
+     (a) on-demand FASHN / wardrobe-tryon outputs — AUTO-SAVED into the synced
+         "rendered" collection;
+     (b) a saved look only when its picture is itself a pipeline avatar;
+     (c) Worn Today photos are not a source — even a studio render that only
+         lives in the worn log stays out (David: avatars only, no selfies);
+     (d) the on-body pool (assets/onbody), filtered by Wardrobe Rules and the
+         dress-shoe hard rule.
+   Nothing else: no camera / mirror selfies, no assets/photos, no
+   assets/wardrobe-look (those are the 1376×1824 selfie try-ons), no user
+   photos, no data:/blob:/idb: captures.
    Renders never enter Home rotation: Home still deals from the composer.
    Delete only removes a render from this gallery (on-demand records are
-   deleted; saved/worn/pool entries get a synced hide record). */
+   deleted; saved/pool entries get a synced hide record). */
 (function () {
   var PAGE = 45, shown = PAGE, level = "all", items = [], lastSig = "", openKey = null, confirming = false, io = null;
   var counts867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 }, raw867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 };
@@ -45774,6 +45778,22 @@ window.inspoView = "withmine";
       window.__renderedBackfilled867 = n;
     } catch (e) {}
   }
+
+  /* .86.9: only a render produced by the try-on / on-body pipeline. */
+  function isPipelineAvatar867(url) {
+    if (!url || typeof url !== "string") return false;
+    var s = url.split("?")[0].split("#")[0];
+    try { if (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(s)) return false; } catch (e) {}
+    if (/^assets\/onbody\//.test(s) || /\/assets\/onbody\//.test(s)) return true;
+    if (/wardrobe-tryon\.dyacobs\.workers\.dev\/r\//.test(s)) return true;
+    try {
+      var base = (typeof TRYON_URL === "string" && TRYON_URL) ? String(TRYON_URL).replace(/\/$/, "") : "";
+      if (base && s.indexOf(base + "/r/") === 0) return true;
+    } catch (e2) {}
+    if (/fashn\.ai\//.test(s)) return true;
+    return false;
+  }
+  window.isPipelineAvatar867 = isPipelineAvatar867;
   /* ---- gallery data ---- */
   var poolCache = { sig: "", list: [] };
   function poolItems() {
@@ -45806,6 +45826,7 @@ window.inspoView = "withmine";
     function add(it) {
       raw867[it.src]++;
       if (!it.img || hidden[it.key]) return;
+      if (!isPipelineAvatar867(it.img)) return;
       var ik = canon(it.img);
       if (seen[ik]) return;
       seen[ik] = 1; counts867[it.src]++; out.push(it);
