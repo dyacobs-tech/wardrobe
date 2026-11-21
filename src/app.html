@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.18" />
+    <meta name="wardrobe-build" content="2026-11-21.86.19" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6447,7 +6447,10 @@ window.notMenswear853 = function (e) {
       .inspo-subtabs .cal-subtab { padding: 0 4px; font-size: 12px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
       @media (min-width: 700px) { .inspo-subtabs .cal-subtab { padding: 0 18px; font-size: 12.5px; } }
       /* Mine: New = the endless closet feed; Liked = saved likes; All = saved first, then the feed */
-      #outfits-mine-view[data-lf="new"] > .looks-tools, #outfits-mine-view[data-lf="new"] > #saved-grid { display: none !important; }
+      #outfits-mine-view[data-lf="new"] > .looks-tools,
+      #outfits-mine-view[data-lf="new"] > #saved-grid:not(:has([data-lookbook-idea])),
+      #outfits-mine-view[data-lf="new"] > #saved-grid > :not([data-lookbook-idea]) { display: none !important; }
+      #outfits-mine-view[data-lf="new"] > #saved-grid:has([data-lookbook-idea]) { margin-bottom: 14px; }
       #outfits-mine-view[data-lf="liked"] > #closet-feed { display: none !important; }
       #outfits-mine-view[data-lf="all"] { display: flex; flex-direction: column; }
       #outfits-mine-view[data-lf="all"][hidden] { display: none; }
@@ -8419,7 +8422,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.18</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.19</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11406,7 +11409,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.18";
+var WARDROBE_BUILD = "2026-11-21.86.19";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -28056,7 +28059,7 @@ function saveLook(look) {
     return !!pim53 && !!other && imgsEquivalent(other, pim53);
   });
   if (dupe) {
-    toast("Already saved — it's in " + savedHomeName(look) + ".");
+    toast("Already saved in Looks → Mine.");
     return;
   }
   if (savedLooks.some(function (l) { return l.id === look.id; })) look.id = newLookId();
@@ -28064,7 +28067,7 @@ function saveLook(look) {
   savedLooks.unshift(look);
   renderSaved();
   var keptLook = persistAll();
-  toast(keptLook ? "Saved — find it in " + savedHomePath(look) : "Saved on screen, but storage is full — it won't survive a reload. Export a backup from Profile.");
+  toast(keptLook ? "Saved to Looks → Mine." : "Saved on screen, but storage is full — it won't survive a reload. Export a backup from Profile.");
 }
 /* The render each grid card is actually showing, by look id — kept so
    opening a card shows the same outfit the tile showed. */
@@ -28117,14 +28120,16 @@ function renderSaved() {
   });
   queuedOnly.forEach(function (q) { if (q.fwRender) assigned[q.id] = gridPhotoForLook(q, fwRenderSrc(q)); else if (q.img) assigned[q.id] = gridPhotoForLook(q, q.img); });
   var universe = dedupeLooksByPhoto56(all.concat(queuedOnly));
-  /* Build .50: this panel is My Outfits — only looks with at
-     least one mapped owned piece render here. Zero-owned saved
-     looks render in Ideas → Outfit Ideas (renderOutfitIdeas,
-     refreshed at every exit of this function). */
-  universe = universe.filter(function (l) { return savedLookHome(l) === "outfits"; });
-  /* Build .53: quarantined renders and verdict images never display in My Outfits. */
-  universe = universe.filter(function (l) { var im = lookPicturedImg(l) || l.img || ""; return !(im && (isQuarantinedImg(im) || isDislikedImg(im))); });
-  if (typeof lookIsMine === "function") universe = universe.filter(lookIsMine);
+  /* Mine includes saved ideas while the existing classifier still drives
+     the underlying collections. Unowned seed and queue-only looks keep
+     their existing placement. */
+  var lookbookIdeas = new Set(savedLooks.filter(function (l) { return l.iconSpec || l.refLook || savedLookHome(l) === "ideas"; }));
+  universe = universe.filter(function (l) {
+    var img = lookPicturedImg(l) || l.img || "";
+    if (img && (isQuarantinedImg(img) || isDislikedImg(img))) return false;
+    return lookbookIdeas.has(l) ||
+      (savedLookHome(l) === "outfits" && (typeof lookIsMine !== "function" || lookIsMine(l)));
+  });
   var shown = universe.filter(function (l) {
     if (looksFilter === "queued" && !queueIds[l.id]) return false;
     if (looksFilter === "worn" && !l.worn) return false;
@@ -28156,6 +28161,11 @@ function renderSaved() {
      — the same outfit, its true photo. */
   SEED_LOOKS.forEach(function (s) { assigned[s.id] = gridPhotoForLook(s, s.img); });
   savedLooks.forEach(function (l) {
+    if (lookbookIdeas.has(l)) {
+      var picture = l.fwRender ? fwRenderSrc(l) : l.img;
+      assigned[l.id] = picture ? gridPhotoForLook(l, picture) : "";
+      return;
+    }
     if (l.refLook && l.img) { assigned[l.id] = gridPhotoForLook(l, l.img); return; }
     /* A From wardrobe look's own photograph is its verified
        render — in its watch variant now — never a palette-matched
@@ -28166,7 +28176,7 @@ function renderSaved() {
     assigned[l.id] = gridPhotoForLook(l, l.img || (rankedPhotoLooks(l.swatches)[0] || {}).img || "");
   });
   gridImgById = assigned;
-  shown = shown.filter(function (l) { return !!assigned[l.id]; });
+  shown = shown.filter(function (l) { return !!assigned[l.id] || lookbookIdeas.has(l); });
   if (!shown.length) {
     grid.innerHTML = '<p class="meta">' + ((q || looksFilter !== "all" || universe.length)
       ? "No outfits match — try a different search or filter."
@@ -28175,7 +28185,7 @@ function renderSaved() {
     return;
   }
   grid.innerHTML = shown.map(function (l) {
-    var img = assigned[l.id] || lookImg(l);
+    var img = lookbookIdeas.has(l) ? assigned[l.id] : (assigned[l.id] || lookImg(l));
     var alt = "";
     RENDER_POOL.forEach(function (r) { if (r.img === img && r.imgAlt) alt = r.imgAlt; });
     var isSaved = savedLooks.indexOf(l) !== -1;
@@ -28186,7 +28196,7 @@ function renderSaved() {
         ? '<button type="button" class="danger" data-delete-look="' + l.id + '" aria-pressed="false">Remove</button>'
         : '<button type="button" class="danger" data-remove-seed="' + l.id + '" aria-pressed="false">Remove</button>');
     var openAttr = isQueuedOnly ? 'data-fav-open="' + l.id + '"' : 'data-open-look="' + l.id + '"';
-    return '<article class="card saved-card">' +
+    return '<article class="card saved-card"' + (lookbookIdeas.has(l) ? ' data-lookbook-idea' : '') + '>' +
       '<button type="button" class="card-menu-btn" data-menu-btn aria-label="Actions for ' + esc(displayTitleForLook(l, img)) + '" aria-haspopup="true" aria-expanded="false">•••</button>' +
       '<div class="card-menu" hidden>' +
       '<button type="button" ' + openAttr + '>Open</button>' +
@@ -41590,7 +41600,7 @@ function analyzeFilePiece(card, job, ix) {
   feed.innerHTML = '<div class="cf-head"><h3 class="fav-head">From your closet</h3><button type="button" class="btn-ghost" id="cf-shuffle">Shuffle</button></div>' +
     '<div class="options-grid cf-grid" id="cf-grid" role="list"></div><div class="cf-sentinel" id="cf-sentinel" aria-hidden="true"></div>';
   /* .80.19: under the New / Liked / All filter when it heads Mine */
-  if (mineHost) { var lf0 = mineHost.querySelector(".looks-filter"); mineHost.insertBefore(feed, lf0 ? lf0.nextSibling : mineHost.firstChild); }
+  if (mineHost) mineHost.appendChild(feed);
   else result.parentNode.insertBefore(feed, result.nextSibling);
   var grid = feed.querySelector("#cf-grid");
   var sentinel = feed.querySelector("#cf-sentinel");
@@ -45587,8 +45597,8 @@ window.inspoView = "withmine";
     document.querySelectorAll(".info-pop-backdrop:not([hidden])").forEach(function (b) { out.push({ el: b.querySelector(".info-pop-card, .principles") || b, close: function () { var x = b.querySelector(".info-pop-close"); if (x) x.click(); else b.hidden = true; } }); });
     var ll = document.getElementById("look-layer"); if (ll && !ll.hidden) out.push({ el: ll, close: function () { var x = document.getElementById("look-layer-close"); if (x) x.click(); } });
     var ov = document.getElementById("outfit-view"); if (ov && !ov.hidden) out.push({ el: document.getElementById("ov-scroll") || ov, close: function () { var x = document.getElementById("ov-close"); if (x) x.click(); } });
-    if (itemOpen()) out.push({ el: document.querySelector("#item-detail > .item-detail-card"), close: function () { var x = document.querySelector('#item-detail [data-item-act="close"]'); if (x) x.click(); } });
-    if (iconOpen()) out.push({ el: document.querySelector("#icon-detail > .icon-detail-card"), close: function () { var x = document.querySelector("#icon-detail [data-back-icons]"); if (x) x.click(); } });
+    if (itemOpen() && getComputedStyle(document.getElementById("item-detail")).position === "fixed") out.push({ el: document.querySelector("#item-detail > .item-detail-card"), close: function () { var x = document.querySelector('#item-detail [data-item-act="close"]'); if (x) x.click(); } });
+    if (iconOpen() && getComputedStyle(document.getElementById("icon-detail")).position === "fixed") out.push({ el: document.querySelector("#icon-detail > .icon-detail-card"), close: function () { var x = document.querySelector("#icon-detail [data-back-icons]"); if (x) x.click(); } });
     document.querySelectorAll(".cdd-menu:not([hidden]):not(#today-type-row)").forEach(function (m) { out.push({ el: m, close: function () { if (typeof closeAllCdd === "function") closeAllCdd(); else m.hidden = true; } }); });
     /* only sheets actually on screen — an item sheet left open on a tab
        the user has switched away from must not keep the page locked */
@@ -45652,6 +45662,7 @@ window.inspoView = "withmine";
     } else { clearTimeout(lockT); unlock(); }
   }
   function soon() { if (!pending) { pending = true; requestAnimationFrame(sync); } }
+  window.addEventListener("resize", soon, { passive: true });
   new MutationObserver(soon).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["hidden"], childList: true });
   /* tap on the dim backdrop of the item / icon sheet closes it */
   document.addEventListener("click", function (e) {
