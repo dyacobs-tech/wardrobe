@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.14" />
+    <meta name="wardrobe-build" content="2026-11-21.86.15" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6151,23 +6151,22 @@ window.notMenswear853 = function (e) {
         }
       }
 
-      /* ================= Build .86.13 — bar stays on the bottom safe-area =================
-         .86.11's visualViewport seater wrote a positive `bottom` during
-         iOS momentum / URL-bar collapse, which lifted the pill mid-screen.
-         The bar is always `position:fixed; bottom:env(safe-area-inset-bottom)`.
-         Shrink/hide use only transform + opacity. */
+      /* The wrapper is fixed at the viewport edge. Its existing bottom
+         padding keeps the pill above the home indicator; a bottom offset
+         would count that safe-area inset twice. */
       @media (max-width: 899px) {
         html body #bottombar.bottombar {
           position: fixed !important;
           left: 0 !important;
           right: 0 !important;
           top: auto !important;
-          bottom: env(safe-area-inset-bottom, 0px) !important;
+          bottom: 0 !important;
           transform: translate3d(0, 0, 0) !important;
           opacity: 1 !important;
           transition: transform 320ms cubic-bezier(.22, .8, .28, 1), opacity 280ms cubic-bezier(.22, .8, .28, 1) !important;
         }
         html body #bottombar .nav-pill {
+          margin-top: 12px;
           transform: scale(var(--nav-scale, 1));
           transform-origin: 50% 100%;
           transition: transform 320ms cubic-bezier(.22, .8, .28, 1);
@@ -8383,7 +8382,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.14</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.15</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11332,7 +11331,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.14";
+var WARDROBE_BUILD = "2026-11-21.86.15";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -44415,8 +44414,7 @@ window.inspoView = "withmine";
   }
   document.addEventListener("scroll", onScroll, { passive: true, capture: true });
   window.addEventListener("scroll", onScroll, { passive: true });
-  /* visualViewport scroll/resize must not move the bar — it stays
-     pinned with bottom:env(safe-area-inset-bottom) in CSS. */
+  /* Keep viewport scroll/resize from changing the CSS anchor. */
   window.addEventListener("pageshow", function () { show(); });
   window.__navShow = show;
   window.__navSeat = function () { /* .86.13: seater removed */ };
