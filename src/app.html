@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.11" />
+    <meta name="wardrobe-build" content="2026-11-20.86.12" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6421,6 +6421,15 @@ window.notMenswear853 = function (e) {
       #outfits-mine-view[data-lf="all"] > #closet-feed { order: 2; }
       .en-view[hidden] { display: none !important; }
       .en-grid { min-height: 40px; }
+      .en-card { content-visibility: auto; contain-intrinsic-size: auto 340px; }
+      .en-card.en-skel { content-visibility: visible; pointer-events: none; }
+      .en-skel-media { background: linear-gradient(90deg, #F0EBE1 0%, #F7F3EB 45%, #F0EBE1 90%); background-size: 200% 100%; animation: enSkel 1.1s ease-in-out infinite; }
+      .en-skel-line { display: block; height: 10px; width: 78%; margin: 8px 12px 0; border-radius: 6px; background: #E8E2D6; }
+      .en-skel-line.short { width: 44%; margin-top: 6px; margin-bottom: 12px; }
+      @keyframes enSkel { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+      @media (prefers-reduced-motion: reduce) { .en-skel-media { animation: none; } }
+      html[data-theme="dark"] .en-skel-media { background: linear-gradient(90deg, #2A2622 0%, #35302B 45%, #2A2622 90%); background-size: 200% 100%; }
+      html[data-theme="dark"] .en-skel-line { background: #3A3530; }
       .en-card .en-media { display: block; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 12px 12px 0 0; background: #F6F2EA; }
       .en-card .flatlay { background: #F6F2EA !important; }
       .en-card .flatlay .fl-cell { background: #F6F2EA !important; }
@@ -8374,7 +8383,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.11</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.12</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11323,7 +11332,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.11";
+var WARDROBE_BUILD = "2026-11-20.86.12";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -42594,15 +42603,35 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     });
     return out;
   };
+  window.editCatalogUrl = function () {
+    var b = (typeof WARDROBE_BUILD !== "undefined" && WARDROBE_BUILD) || "";
+    return "assets/edit-catalog-lite.json" + (b ? "?v=" + encodeURIComponent(b) : "");
+  };
+  /* .86.12: one in-memory + HTTP-cached fetch of the slim catalogue.
+     The full edit-catalog.json still ships; New / Shop read the lite file
+     (same products, without sizes/imgUrl) so a cold load is ~40% smaller. */
+  window.editFetchCatalog = function () {
+    if (window.__editCatList && window.__editCatList.length) return Promise.resolve(window.__editCatList);
+    if (window.__editCatP) return window.__editCatP;
+    window.__editCatP = fetch(window.editCatalogUrl(), { cache: "default" }).then(function (r) {
+      return r && r.ok ? r.json() : null;
+    }).then(function (j) {
+      if (!j) { window.__editCatP = null; return []; }
+      var list = window.editNormalizeCatalog ? window.editNormalizeCatalog(j) : (j.products || []);
+      window.__editCatList = list;
+      return list;
+    }).catch(function () { window.__editCatP = null; return []; });
+    return window.__editCatP;
+  };
   window.editLoadCatalog = function (tries) {
     /* Build .80.6: a failed or empty fetch (a dropped connection on a
        reopen) retries twice instead of leaving the Edit empty all session */
     tries = tries || 0;
     function again() { if (tries < 2 && !EDIT_CATALOG.length) setTimeout(function () { editLoadCatalog(tries + 1); }, tries ? 4000 : 1500); }
     try {
-      fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) {
-        if (!j) { again(); return; }
-        EDIT_CATALOG = editNormalizeCatalog(j);
+      window.editFetchCatalog().then(function (list) {
+        if (!list || !list.length) { again(); return; }
+        EDIT_CATALOG = list;
         /* gap fillers (trousers above all) also lead Shop the look */
         var gu = {};
         EDIT_CATALOG.forEach(function (e) { if (e.gap) gu[e.url] = (e.cat === "trousers" ? 2 : 1); });
@@ -45847,8 +45876,39 @@ window.inspoView = "withmine";
     if (alreadyLooks) window.endlessLoad81();
   } catch (e) {}
   document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("#outfits-inspo, [data-inspo-view], #lf-row, [data-tab='looks'], [data-section='looks'], #section-ideas, [data-section='ideas']")) window.endlessLoad81(); }, true);
+  /* .86.12: an early New tap is not dropped if the module is still loading.
+     Paint a skeleton at once, remember the feed, and kick the catalogue fetch. */
+  window.paintEndlessSkeleton81 = function (feed) {
+    var grid = document.getElementById("en-grid-" + feed);
+    if (!grid || grid.querySelector(".en-card:not(.en-skel)") || grid.querySelector(".en-skel")) return;
+    var h = "", i;
+    for (i = 0; i < 6; i++) h += '<article class="card option-card cf-card en-card en-skel" aria-hidden="true"><div class="cf-media en-media en-skel-media"></div><span class="oc-body"><span class="en-skel-line"></span><span class="en-skel-line short"></span></span></article>';
+    grid.insertAdjacentHTML("afterbegin", h);
+  };
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("#pv-top [data-pv-f]");
+    if (!b) return;
+    var f = b.getAttribute("data-pv-f");
+    if (f !== "allnew" && f !== "withmine") return;
+    window.__pendingEndless = f;
+    window.outfitsMode = "inspo";
+    window.inspoView = f;
+    var top = document.getElementById("pv-top");
+    if (top) top.querySelectorAll("[data-pv-f]").forEach(function (x) { x.setAttribute("aria-pressed", x.getAttribute("data-pv-f") === f ? "true" : "false"); });
+    if (typeof syncOutfitsToggle === "function") syncOutfitsToggle();
+    else if (typeof showInspoView === "function") showInspoView(f);
+    window.paintEndlessSkeleton81(f);
+    window.endlessLoad81();
+    if (typeof window.editFetchCatalog === "function") window.editFetchCatalog();
+    if (typeof window.endlessShow81 === "function") window.endlessShow81(f);
+  }, true);
   window.addEventListener("load", function () {
-    setTimeout(function () { (window.requestIdleCallback || function (f) { setTimeout(f, 200); })(function () { window.endlessLoad81(); }, { timeout: 5000 }); }, 7000);
+    setTimeout(function () {
+      (window.requestIdleCallback || function (fn) { setTimeout(fn, 200); })(function () {
+        window.endlessLoad81();
+        if (typeof window.editFetchCatalog === "function") window.editFetchCatalog();
+      }, { timeout: 2500 });
+    }, 1500);
   });
 })();
     </script>
@@ -46736,17 +46796,23 @@ window.inspoView = "withmine";
     if (typeof pieceIsSwim === "function" && pieceIsSwim(it)) it.sw = 1;
     return it;
   }
+  function adoptCatalog(list) {
+    list = (list || []).filter(function (e) { return e && e.sku; });
+    if (!list.length) return false;
+    var before = CATALOG.length;
+    CATALOG = list;
+    byKey = {}; CATALOG.forEach(function (e) { byKey["sku:" + e.sku] = e; });
+    catAt = Date.now();
+    return CATALOG.length !== before || !before;
+  }
   function loadCatalog(cb) {
     if (CATALOG.length && Date.now() - catAt < 10 * 60 * 1000) return cb && cb(false);
-    fetch("assets/edit-catalog.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    var done = function (list) { cb && cb(adoptCatalog(list)); };
+    if (typeof window.editFetchCatalog === "function") window.editFetchCatalog().then(done).catch(function () { cb && cb(false); });
+    else fetch((typeof window.editCatalogUrl === "function" ? window.editCatalogUrl() : "assets/edit-catalog-lite.json"), { cache: "default" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (!j) return cb && cb(false);
       var list = typeof window.editNormalizeCatalog === "function" ? window.editNormalizeCatalog(j) : (j.products || []);
-      var raw = {}; (j.products || []).forEach(function (p) { if (p && p.sku) raw[p.sku] = p; });
-      var before = CATALOG.length;
-      CATALOG = list.filter(function (e) { return e && e.sku; }).map(function (e) { var r = raw[e.sku] || {}; return Object.assign({}, e, { cat: r.cat || e.cat, hex: e.hex || r.hex }); });
-      byKey = {}; CATALOG.forEach(function (e) { byKey["sku:" + e.sku] = e; });
-      catAt = Date.now();
-      cb && cb(CATALOG.length !== before);
+      done(list);
     }).catch(function () { cb && cb(false); });
   }
   function ownItems() {
@@ -46994,15 +47060,17 @@ window.inspoView = "withmine";
     if (ph && /^blob:[0-9a-f]{16,}/.test(ph)) { var bs = window.blobStore; var bh = bs && bs.cache ? bs.cache[ph.slice(5)] : undefined; return bh || ph; }
     return ph || "";
   }
-  function cellHTML(p) {
+  function cellHTML(p, eager) {
+    var load = eager ? ' loading="eager" decoding="async" fetchpriority="low"' : ' loading="lazy" decoding="async"';
     if (!p.shop) {
       var ph = ownPhoto(p.it);
-      return ph ? '<span class="fl-cell en-own"><img src="' + E(ph) + '" alt="' + E(p.name) + '" loading="lazy" decoding="async" /></span>' : '<span class="fl-cell fl-swatch" style="background:' + E(p.it.colourHex || "#d9cfbd") + '" role="img" aria-label="' + E(p.name) + '"></span>';
+      return ph ? '<span class="fl-cell en-own"><img src="' + E(ph) + '" alt="' + E(p.name) + '"' + load + " /></span>" : '<span class="fl-cell fl-swatch" style="background:' + E(p.it.colourHex || "#d9cfbd") + '" role="img" aria-label="' + E(p.name) + '"></span>';
     }
-    return '<a class="fl-cell en-shop" href="' + E(p.url || "#") + '" target="_blank" rel="noopener" aria-label="' + E(p.name + " — " + money(p.price || 0) + ", shop") + '"><img src="' + E(p.img) + '" alt="" loading="lazy" decoding="async" /><span class="en-pr"><span class="f">' + E(money(p.price || 0)) + '</span><span class="k">' + E(kmoney(p.price || 0)) + "</span></span></a>";
+    return '<a class="fl-cell en-shop" href="' + E(p.url || "#") + '" target="_blank" rel="noopener" aria-label="' + E(p.name + " — " + money(p.price || 0) + ", shop") + '"><img src="' + E(p.img) + '" alt=""' + load + ' /><span class="en-pr"><span class="f">' + E(money(p.price || 0)) + '</span><span class="k">' + E(kmoney(p.price || 0)) + "</span></span></a>";
   }
   function cardHTML(l, i, feed) {
-    var cells = l.pieces.map(cellHTML);
+    var eager = i < 6;
+    var cells = l.pieces.map(function (p) { return cellHTML(p, eager); });
     var media = l.render
       ? '<span class="flatlay onbody-split ob-n' + Math.min(4, cells.length) + '"><span class="ob-figure en-render"><img src="' + E(l.render) + '" alt="' + E(l.title + " on David") + '" loading="lazy" decoding="async" /></span><span class="ob-pieces">' + cells.slice(0, 4).join("") + "</span></span>"
       : '<span class="flatlay fl-n' + cells.length + ' en-flat">' + cells.join("") + "</span>";
@@ -47045,6 +47113,8 @@ window.inspoView = "withmine";
   function lfMode() { return window.outfitsMode === "inspo" ? (S.lf.inspo || "new") : (S.lf.mine || "new"); }
   function appendCards(feed, looks) {
     var f = F[feed]; if (!looks.length) return;
+    var sk = f.grid.querySelectorAll(".en-skel");
+    if (sk.length) { for (var si = 0; si < sk.length; si++) sk[si].remove(); }
     var html = "";
     looks.forEach(function (l) { f.keys[l.key] = 1; html += cardHTML(l, f.looks.length, feed); f.looks.push(l); });
     f.grid.insertAdjacentHTML("beforeend", html);
@@ -47088,6 +47158,7 @@ window.inspoView = "withmine";
     var f = feedEl(feed); if (!f) return;
     f.mode = lfMode();
     f.looks = []; f.keys = {}; f.grid.innerHTML = ""; f.empty.hidden = true;
+    if (typeof window.paintEndlessSkeleton81 === "function") window.paintEndlessSkeleton81(feed);
     f.rendered = feed === "withmine" ? renderedLooks() : [];
     if (f.mode === "liked" || f.mode === "all") {
       var liked = S.liked.filter(function (x) { return x.feed === feed && !S.hidden[x.key]; }).map(function (x) { return rehydrate(x); }).filter(function (l) { return l && lookPriceOk(l); });
@@ -47108,10 +47179,15 @@ window.inspoView = "withmine";
     active = v;
     syncRow();
     var f = feedEl(v); if (!f) return;
-    loadCatalog(function (changed) { if (changed) { sendData(); } });
-    var sig = lfMode() + "|" + JSON.stringify(priceState());
-    if (!f.looks.length || f.sig !== sig) requestAnimationFrame(function () { rebuild(v); });
-    fill(v);
+    if (typeof window.paintEndlessSkeleton81 === "function") window.paintEndlessSkeleton81(v);
+    var kick = function (changed) {
+      if (changed && W) sendData();
+      var sig = lfMode() + "|" + JSON.stringify(priceState());
+      if (!f.looks.length || f.sig !== sig) requestAnimationFrame(function () { rebuild(v); });
+      fill(v);
+    };
+    if (CATALOG.length && Date.now() - catAt < 10 * 60 * 1000) kick(false);
+    else loadCatalog(kick);
   };
 
   /* ---------- actions ---------- */
@@ -47306,6 +47382,11 @@ window.inspoView = "withmine";
     if (n !== lastItems) { lastItems = n; if (W) sendData(); }
   }, 4000);
   loadCatalog(function () { startWorker(); });
+  if (window.__pendingEndless === "allnew" || window.__pendingEndless === "withmine") {
+    var pend = window.__pendingEndless;
+    window.__pendingEndless = null;
+    setTimeout(function () { if (typeof window.endlessShow81 === "function") window.endlessShow81(pend); }, 0);
+  }
   applyMine();
   if (window.outfitsMode === "inspo" && (window.inspoView === "withmine" || window.inspoView === "allnew")) window.endlessShow81(window.inspoView);
 
