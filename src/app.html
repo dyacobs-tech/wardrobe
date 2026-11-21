@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.17" />
+    <meta name="wardrobe-build" content="2026-11-21.86.18" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -2911,6 +2911,30 @@ window.notMenswear853 = function (e) {
       .wp-current-name { font-weight: 600; font-size: 14px; line-height: 1.25; }
       .wp-current-sub { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
       .wp-current .btn-ghost { flex: none; }
+      .wp-month-open { margin-top: 12px; min-height: 42px; }
+      .wp-month-nav, .wp-outfit-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+      .wp-month-nav button, .wp-outfit-nav button { min-height: 42px; }
+      .wp-month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+      .wp-weekday { text-align: center; font-size: 12px; color: var(--dim); }
+      .wp-month-date { padding: 4px 0; display: grid; justify-items: center; align-content: start; gap: 2px;
+        min-width: 0; min-height: 48px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); }
+      .wp-month-date[aria-current="date"] { border-color: var(--text); font-weight: bold; }
+      .wp-month-count { background: var(--text); color: var(--bg); border-radius: 12px; min-width: 17px; font-size: 11px; line-height: 16px; }
+      #calendar-photo-nav:not([hidden]) { position: absolute; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
+        display: flex; align-items: center; gap: 10px; padding: 4px; white-space: nowrap; color: var(--text); background: var(--surface); border-radius: 99px; }
+      #calendar-photo-nav button { min-height: 44px; min-width: 44px; }
+      .wp-entries { display: grid; gap: 6px; margin: 8px 0 12px; }
+      .wp-choice { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 7px 10px;
+        border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface); text-align: left; }
+      .wp-choice[aria-pressed="true"] { border-color: var(--text); font-weight: 650; }
+      .wp-choice small { flex: none; color: var(--dim); }
+      .wp-outfit { display: flex; gap: 14px; align-items: flex-start; margin: 8px 0 16px; overflow-wrap: anywhere; }
+      .wp-outfit .wp-open-photo { flex: 0 0 min(34%, 116px); background: none; padding: 0; border: 0; cursor: zoom-in; }
+      .wp-outfit img { display: block; width: 100%; height: auto; max-height: 164px; object-fit: contain; border-radius: 6px; }
+      .wp-outfit ul { margin: 4px 0 0; padding-inline-start: 19px; }
+      .wp-outfit li + li { margin-top: 3px; }
+      .wp-outfit [data-plan-clear] { margin-top: 8px; }
+      #plan-sheet .info-pop-card { overscroll-behavior: contain; }
       .wp-deal { width: 100%; margin-bottom: 12px; }
       .wp-pick-label { font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); margin: 0 0 8px; }
       .wp-pick-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -7659,6 +7683,7 @@ window.notMenswear853 = function (e) {
             </span>
           </div>
           <div class="wp-grid" id="week-plan-grid"></div>
+          <button type="button" class="btn-ghost wp-month-open" id="plan-month-open" aria-haspopup="dialog">View month</button>
         </div>
         <div id="worn-wrap" hidden>
           <h3 class="fav-head">What I wore</h3>
@@ -8394,7 +8419,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.17</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.18</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8747,6 +8772,11 @@ window.notMenswear853 = function (e) {
     </div>
     <div class="popout" id="photo-popout" hidden>
       <img id="popout-img" alt="" />
+      <div id="calendar-photo-nav" hidden>
+        <button type="button" class="btn-ghost" data-calendar-photo="-1" aria-label="Previous outfit photo">‹</button>
+        <span aria-live="polite"></span>
+        <button type="button" class="btn-ghost" data-calendar-photo="1" aria-label="Next outfit photo">›</button>
+      </div>
       <button type="button" class="popout-close" id="popout-close" aria-label="Close full-size photo">&times;</button>
     </div>
     <div class="info-pop-backdrop" id="tryon-sheet" hidden>
@@ -11376,7 +11406,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.17";
+var WARDROBE_BUILD = "2026-11-21.86.18";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -37389,14 +37419,14 @@ document.getElementById("panel-calendar").addEventListener("click", function (e)
    covers that date (dailyForecast — past week through the
    forecast horizon; nothing beyond it, never an invented one),
    and the planned look's own photograph or an empty slot.
-   Tapping the slot opens the plan sheet (the shared bottom
-   sheet): pick a liked/queued look, deal a fresh one in, or
-   clear the day. Tapping the photograph itself opens the
-   standard photo pop-out — the global data-popout rule, which
-   stops the tap before it reaches the slot. Past days keep
-   their plan, greyed; nothing is auto-deleted. */
+   The entire slot opens its day. The week, month, and day sheet
+   share the same count of worn and planned outfits. */
 var planWeekOffset = 0;
 var planSheetDate = null;
+var planMonth = null;
+var planReturnDay = null;
+var planPhotoEntries = [];
+var planPhotoIndex = 0;
 function planISOOf(d) {
   var m = d.getMonth() + 1, day = d.getDate();
   return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (day < 10 ? "0" : "") + day;
@@ -37418,6 +37448,18 @@ function wornForDate(iso) {
      list — one wear, one entry. */
   return mergedWornEntries(iso);
 }
+function calendarOutfits(worn, planned) {
+  var entries = worn.map(function (entry) { return { worn: entry, title: entry.title || "Logged outfit", image: entry.img || "" }; });
+  if (planned) {
+    var photo = lookImg(planned);
+    var match = entries.find(function (item) {
+      return item.worn.lookId && item.worn.lookId === planned.id && (!item.image || item.image === photo || item.image === planned.img);
+    });
+    if (match) match.plan = planned;
+    else entries.push({ plan: planned, title: planned.title, image: photo });
+  }
+  return entries;
+}
 function renderWeekPlan() {
   var grid = document.getElementById("week-plan-grid");
   if (!grid) return;
@@ -37432,25 +37474,22 @@ function renderWeekPlan() {
     var iso = planISOOf(d);
     var look = planLookForDate(iso);
     var worn = wornForDate(iso);
-    var wornImg = "";
-    for (var wi = 0; wi < worn.length; wi++) { if (worn[wi].img) { wornImg = worn[wi].img; break; } }
+    var entries = calendarOutfits(worn, look);
+    var cover = entries.find(function (item) { return item.image; });
     var fc = (typeof dailyForecast !== "undefined" && dailyForecast) ? dailyForecast[iso] : null;
     var fcTxt = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" + (fc.label ? " " + fc.label.replace("Thunderstorms", "T-storms").replace("Thunderstorm", "T-storm") : "") : "";
     var cls = "wp-day" + (iso === todayIso ? " wp-today" : "") + (iso < todayIso ? " wp-past" : "") + (look ? " wp-planned" : "") + (worn.length ? " wp-hasworn" : "");
-    /* Worn wins the CELL DISPLAY only — the plan underneath is
-       untouched and still shows in the day sheet. */
-    var img = wornImg || (look ? lookImg(look) : "");
-    var imgTitle = wornImg ? worn[0].title : (look ? look.title : "");
+    var img = cover && cover.image, imgTitle = cover && cover.title;
     var aria = esc(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) +
       (worn.length ? " — wore: " + esc(worn.map(function (w) { return w.title; }).join(", ")) : "") +
       (look ? " — planned: " + esc(look.title) : "");
     html += '<div class="' + cls + '" data-plan-day="' + iso + '" role="button" tabindex="0" aria-label="' + aria + '">' +
-      (worn.length > 1 ? '<span class="wp-worn-count">' + worn.length + '</span>' : "") +
+      (entries.length > 1 ? '<span class="wp-worn-count">' + entries.length + '</span>' : "") +
       '<span class="wp-dow">' + esc(d.toLocaleDateString(undefined, { weekday: "short" })) + '</span>' +
       '<span class="wp-date">' + d.getDate() + '</span>' +
       '<span class="wp-fc">' + esc(fcTxt) + '</span>' +
       (img
-        ? '<img class="wp-thumb" src="' + esc(img) + '" alt="' + esc(imgTitle) + '" loading="lazy" decoding="async" data-popout="' + esc(img) + '" data-popout-alt="' + esc(imgTitle) + '" />'
+        ? '<img class="wp-thumb" src="' + esc(img) + '" alt="' + esc(imgTitle) + '" loading="lazy" decoding="async" />'
         : (worn.length ? '<span class="wp-empty" aria-hidden="true">✓</span>' : '<span class="wp-empty" aria-hidden="true">+</span>')) +
       "</div>";
   }
@@ -37500,38 +37539,72 @@ function dealPlanLook() {
   }
   return null;
 }
-function openPlanSheet(iso) {
+function showCalendarSheet(title, html, focusSelector) {
   var sheet = document.getElementById("plan-sheet");
-  var body = document.getElementById("plan-sheet-body");
-  var title = document.getElementById("plan-sheet-title");
-  if (!sheet || !body) return;
-  planSheetDate = iso;
-  var d = planDateOfISO(iso);
-  if (title) title.textContent = d.toLocaleDateString(undefined, { weekday: "long" }) + " · " + d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
-  var planned = planLookForDate(iso);
-  var wornDay = wornForDate(iso);
-  var cands = planCandidates();
-  var html = "";
-  if (wornDay.length) {
-    html += '<p class="wp-pick-label">Worn</p>' + wornDay.map(function (en) {
-      return '<div class="worn-row' + (en.selfie ? " selfie" : "") + '">' + (en.img ? '<img src="' + esc(en.img) + '" alt="" loading="lazy" data-popout="' + esc(en.img) + '" />' : "") +
-        '<span class="w-main"><span class="w-name">' + esc(en.title) + '</span>' +
-        '<span class="w-sub">' + esc(fmtDateShort(en.date)) + (en.pieces && en.pieces.length ? " · " + esc(en.pieces.join(", ")) : "") + (en.watch ? " · Watch: " + esc(en.watch) : "") + "</span></span></div>";
-    }).join("");
+  document.getElementById("plan-sheet-title").textContent = title;
+  document.getElementById("plan-sheet-body").innerHTML = html;
+  sheet.hidden = false;
+  var card = sheet.querySelector(".info-pop-card");
+  card.scrollTop = 0;
+  (sheet.querySelector(focusSelector || "#plan-sheet-close") || card).focus({ preventScroll: true });
+}
+function openPlanMonth(date, focusSelector) {
+  planSheetDate = null;
+  planMonth = new Date(date.getFullYear(), date.getMonth(), 1, 12);
+  var year = planMonth.getFullYear(), month = planMonth.getMonth();
+  var count = new Date(year, month + 1, 0).getDate();
+  var byDate = new Map(), today = localTodayISO();
+  mergedWornEntries(null).forEach(function (w) {
+    if (!byDate.has(w.date)) byDate.set(w.date, []);
+    byDate.get(w.date).push(w);
+  });
+  var html = '<div class="wp-month-nav"><button type="button" class="btn-ghost" data-month-step="-1" aria-label="Previous month">‹</button>' +
+    '<button type="button" class="btn-ghost" data-month-today>Today</button>' +
+    '<button type="button" class="btn-ghost" data-month-step="1" aria-label="Next month">›</button></div><div class="wp-month-grid">';
+  for (var w = 0; w < 7; w++) html += '<span class="wp-weekday">' + esc(new Date(2024, 0, 1 + w, 12).toLocaleDateString(undefined, { weekday: "short" })) + '</span>';
+  for (var i = 1; i <= count; i++) {
+    var d = new Date(year, month, i, 12), iso = planISOOf(d);
+    var n = calendarOutfits(byDate.get(iso) || [], planLookForDate(iso)).length;
+    var label = d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) + ", " + n + (n === 1 ? " outfit" : " outfits");
+    html += '<button type="button" class="wp-month-date" data-month-day="' + iso + '" aria-label="' + esc(label) + '"' +
+      (iso === today ? ' aria-current="date"' : '') + (i === 1 ? ' style="grid-column-start:' + ((d.getDay() + 6) % 7 + 1) + '"' : '') + '>' +
+      i + (n ? '<span class="wp-month-count">' + n + '</span>' : '') + '</button>';
   }
-  if (iso < localTodayISO()) {
-    /* A past day is a record, not a plan (build .28): worn
-       outfits only — no Deal a fresh one, no Liked & queued
-       picker, no plan controls. The stored plan for the day is
-       untouched; it simply isn't presented. */
-    if (!wornDay.length) html += '<p class="wp-pick-label">Nothing worn logged for this day.</p>';
+  showCalendarSheet(planMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" }), html + '</div>', focusSelector);
+}
+function calendarPieces(item) {
+  var worn = item.worn;
+  if (worn && worn.pieces && worn.pieces.length) return worn.pieces;
+  var look = item.plan;
+  if (!look && worn && worn.lookId) look = savedLooks.find(function (l) { return l.id === worn.lookId && (worn.synthetic || (l.title === worn.title && (!worn.img || l.img === worn.img || lookImg(l) === worn.img))); });
+  if (!look) return [];
+  if (look.fwPieces && look.fwPieces.length) return look.fwPieces.map(function (piece) { return piece.name; }).filter(Boolean);
+  return lookPieces(look).map(pieceDescription);
+}
+function openPlanSheet(iso, selected, focusSelector) {
+  planSheetDate = iso;
+  var d = planDateOfISO(iso), past = iso < localTodayISO();
+  var entries = calendarOutfits(wornForDate(iso), planLookForDate(iso));
+  var index = selected >= 0 && selected < entries.length ? selected : 0, item = entries[index];
+  var html = planMonth ? '<button type="button" class="btn-ghost" data-month-back>‹ Back to month</button>' : '';
+  if (item) {
+    html += '<div class="wp-entries" role="group" aria-label="Outfits">' + entries.map(function (entry, i) {
+      var status = entry.worn ? (entry.plan ? "Planned and worn" : "Worn") : "Planned";
+      return '<button type="button" class="wp-choice" data-outfit-index="' + i + '" aria-pressed="' + (i === index) + '"><span>' +
+        esc(entry.title) + '</span><small>' + status + '</small></button>';
+    }).join("") + '</div>';
+    if (entries.length > 1) html += '<div class="wp-outfit-nav"><button type="button" class="btn-ghost" data-outfit-step="-1" aria-label="Previous outfit">‹</button>' +
+      '<span aria-live="polite">Outfit ' + (index + 1) + ' of ' + entries.length + '</span><button type="button" class="btn-ghost" data-outfit-step="1" aria-label="Next outfit">›</button></div>';
+    var pieces = calendarPieces(item);
+    html += '<div class="wp-outfit">' + (item.image ? '<button type="button" class="wp-open-photo" data-calendar-zoom aria-label="Enlarge ' + esc(item.title) + '"><img src="' + esc(item.image) + '" alt="" decoding="async" /></button>' : '') +
+      '<div><strong>' + esc(item.title) + '</strong>' + (pieces.length ? '<ul>' + pieces.map(function (piece) { return '<li>' + esc(piece) + '</li>'; }).join("") + '</ul>' : '<p class="meta">No pieces recorded.</p>') +
+      (item.worn && item.worn.watch ? '<p>Watch · ' + esc(item.worn.watch) + '</p>' : '') +
+      (item.plan && !past ? '<button type="button" class="btn-ghost" data-plan-clear>Remove plan</button>' : '') + '</div></div>';
   } else {
-    if (planned) {
-      var pimg = lookImg(planned);
-      html += '<div class="wp-current"><img src="' + esc(pimg) + '" alt="" data-popout="' + esc(pimg) + '" data-popout-alt="' + esc(planned.imgAlt || planned.title) + '" loading="lazy" />' +
-        '<span class="wp-current-main"><span class="wp-current-name">' + esc(planned.title) + '</span><span class="wp-current-sub">Planned</span></span>' +
-        '<button type="button" class="btn-ghost" data-plan-clear>Remove</button></div>';
-    }
+    html += '<p class="meta">No outfits recorded for this day.</p>';
+  }
+  if (!past) {
+    var cands = planCandidates();
     html += '<button type="button" class="btn-accent wp-deal" data-plan-deal>Deal a fresh one</button>';
     if (cands.length) {
       html += '<p class="wp-pick-label">Liked &amp; queued</p><div class="wp-pick-grid">' + cands.map(function (l) {
@@ -37541,17 +37614,18 @@ function openPlanSheet(iso) {
       html += '<p class="wp-pick-label">No liked or queued looks yet</p>';
     }
   }
-  body.innerHTML = html;
-  sheet.hidden = false;
-  var c = document.getElementById("plan-sheet-close");
-  if (c) c.focus();
+  showCalendarSheet(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" }), html, focusSelector);
 }
 function closePlanSheet() {
-  var sheet = document.getElementById("plan-sheet");
-  if (sheet) sheet.hidden = true;
-  planSheetDate = null;
+  var opener = planMonth ? document.getElementById("plan-month-open") : document.querySelector('[data-plan-day="' + planSheetDate + '"]');
+  document.getElementById("plan-sheet").hidden = true;
+  planSheetDate = planMonth = planReturnDay = null;
+  if (opener) opener.focus({ preventScroll: true });
 }
 (function weekPlannerInit() {
+  document.getElementById("plan-month-open").addEventListener("click", function () {
+    openPlanMonth(planWeekOffset ? planMonday(planWeekOffset) : new Date());
+  });
   var wrap = document.getElementById("week-plan-wrap");
   if (wrap) {
     wrap.addEventListener("click", function (e) {
@@ -37572,8 +37646,39 @@ function closePlanSheet() {
     document.getElementById("plan-sheet-close").addEventListener("click", closePlanSheet);
     sheet.addEventListener("click", function (e) {
       if (e.target === sheet) { closePlanSheet(); return; }
+      var button = e.target.closest("button");
+      if (!button) return;
+      if (button.hasAttribute("data-month-step")) {
+        var step = Number(button.dataset.monthStep);
+        openPlanMonth(new Date(planMonth.getFullYear(), planMonth.getMonth() + step, 1, 12), '[data-month-step="' + step + '"]');
+        return;
+      }
+      if (button.hasAttribute("data-month-today")) { openPlanMonth(new Date()); planReturnDay = localTodayISO(); openPlanSheet(planReturnDay); return; }
+      if (button.hasAttribute("data-month-day")) { planReturnDay = button.dataset.monthDay; openPlanSheet(planReturnDay); return; }
+      if (button.hasAttribute("data-month-back")) { openPlanMonth(planMonth, '[data-month-day="' + planReturnDay + '"]'); return; }
       if (!planSheetDate) return;
       var iso = planSheetDate;
+      if (button.hasAttribute("data-calendar-zoom")) {
+        var currentIndex = Number(sheet.querySelector('.wp-choice[aria-pressed="true"]').dataset.outfitIndex);
+        planPhotoEntries = calendarOutfits(wornForDate(iso), planLookForDate(iso)).map(function (entry, index) {
+          return { image: entry.image, title: entry.title, index: index };
+        }).filter(function (entry) { return entry.image; });
+        planPhotoIndex = planPhotoEntries.findIndex(function (entry) { return entry.index === currentIndex; });
+        showPlanPhoto();
+        document.getElementById("popout-close").focus();
+        return;
+      }
+      if (button.hasAttribute("data-outfit-index")) {
+        openPlanSheet(iso, Number(button.dataset.outfitIndex), '[data-outfit-index="' + button.dataset.outfitIndex + '"]');
+        return;
+      }
+      if (button.hasAttribute("data-outfit-step")) {
+        var choices = sheet.querySelectorAll("[data-outfit-index]");
+        var current = Number(sheet.querySelector('.wp-choice[aria-pressed="true"]').dataset.outfitIndex);
+        var delta = Number(button.dataset.outfitStep);
+        openPlanSheet(iso, (current + delta + choices.length) % choices.length, '[data-outfit-step="' + delta + '"]');
+        return;
+      }
       if (e.target.closest("[data-plan-clear]")) {
         clearPlanForDate(iso);
         closePlanSheet();
@@ -37604,19 +37709,8 @@ function closePlanSheet() {
         }
       }
     });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sheet.hidden) closePlanSheet(); });
-    /* Swipe down dismisses, like the other (i) sheets. */
-    var card = sheet.querySelector(".info-pop-card");
-    if (card) {
-      var psy = null;
-      card.addEventListener("touchstart", function (e) { psy = e.touches.length === 1 ? e.touches[0].clientY : null; }, { passive: true });
-      card.addEventListener("touchend", function (e) {
-        if (psy === null || !e.changedTouches.length) return;
-        var dy = e.changedTouches[0].clientY - psy;
-        psy = null;
-        if (dy > 70) closePlanSheet();
-      }, { passive: true });
-    }
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sheet.hidden && document.getElementById("photo-popout").hidden) closePlanSheet(); });
+
   }
   renderWeekPlan();
   window.__calHas38 = true;
@@ -37853,11 +37947,32 @@ function openPopout(src, alt) {
   document.body.style.overflow = "hidden";
   placePopoutClose();
 }
+function showPlanPhoto() {
+  var entry = planPhotoEntries[planPhotoIndex];
+  if (!entry) return;
+  openPopout(entry.image, entry.title);
+  var nav = document.getElementById("calendar-photo-nav");
+  nav.hidden = planPhotoEntries.length < 2;
+  nav.querySelector("span").textContent = (planPhotoIndex + 1) + " of " + planPhotoEntries.length;
+}
+document.getElementById("calendar-photo-nav").addEventListener("click", function (e) {
+  e.stopPropagation();
+  var button = e.target.closest("[data-calendar-photo]");
+  if (!button || !planPhotoEntries.length) return;
+  planPhotoIndex = (planPhotoIndex + Number(button.dataset.calendarPhoto) + planPhotoEntries.length) % planPhotoEntries.length;
+  showPlanPhoto();
+});
 function closePopout() {
   if (!popoutEl) return;
   popoutEl.hidden = true;
   popoutImg.removeAttribute("src");
   document.body.style.overflow = "";
+  if (planPhotoEntries.length) {
+    var entry = planPhotoEntries[planPhotoIndex];
+    planPhotoEntries = [];
+    document.getElementById("calendar-photo-nav").hidden = true;
+    if (planSheetDate && entry) openPlanSheet(planSheetDate, entry.index, "[data-calendar-zoom]");
+  }
 }
 window.openPopout = openPopout;
 document.addEventListener("click", function (e) {
