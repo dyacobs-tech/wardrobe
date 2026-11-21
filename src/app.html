@@ -8349,9 +8349,9 @@ window.notMenswear853 = function (e) {
               <label class="cw-all"><input type="checkbox" id="cw-same" /> Same for all levels</label>
             </div>
             <div id="cw-levels" role="group" aria-label="Dress level">
-              <button type="button" data-cw-level="casual" aria-pressed="true">Casual</button>
-              <button type="button" data-cw-level="smart" aria-pressed="false">Smart Casual</button>
-              <button type="button" data-cw-level="business" aria-pressed="false">Business</button>
+              <button type="button" data-cw-level="casual" aria-pressed="true">Daytime</button>
+              <button type="button" data-cw-level="smart" aria-pressed="false">Nighttime Casual</button>
+              <button type="button" data-cw-level="business" aria-pressed="false">Nighttime Dressy</button>
               <button type="button" data-cw-level="formal" aria-pressed="false">Formal</button>
             </div>
             <div class="cw-search" id="cw-search">
@@ -38528,7 +38528,7 @@ function syncStudioSelectors() {
   if (dv) dv.textContent = (typeof dressForKey !== "undefined" && dressForKey && typeof DRESS_FOR !== "undefined" && DRESS_FOR[dressForKey]) ? DRESS_FOR[dressForKey].label : "Any";
   var anyDress = document.querySelector("[data-dress-any]");
   if (anyDress) anyDress.setAttribute("aria-pressed", (typeof dressForKey !== "undefined" && dressForKey) ? "false" : "true");
-  var typeName = studioTypeAny ? "Any" : (STUDIO_TYPE_LABELS[formalityLevel - 1] || "Smart Casual");
+  var typeName = studioTypeAny ? "Any" : (STUDIO_TYPE_LABELS[formalityLevel - 1] || "Daytime");
   var tv = document.getElementById("type-sel-val");
   if (tv) tv.textContent = typeName;
   var iv = document.getElementById("ideas-type-label");
@@ -47785,8 +47785,11 @@ window.inspoView = "withmine";
 (function () {
   "use strict";
   var GROUPS = {
-    casual: { id: "casual", label: "Casual", levels: [1, 2, 3] },
-    smart: { id: "smart", label: "Nighttime Casual", levels: [4] },
+    /* .86.42: grouped by David's dress levels (ids kept, so saved weights
+       stay valid): Daytime with Pool / Beach; Nighttime Casual on its own;
+       Nighttime Dressy; Formal with Black Tie */
+    casual: { id: "casual", label: "Daytime", levels: [1, 2] },
+    smart: { id: "smart", label: "Nighttime Casual", levels: [3, 4] },
     business: { id: "business", label: "Nighttime Dressy", levels: [5] },
     formal: { id: "formal", label: "Formal", levels: [6, 7] }
   };
@@ -47817,7 +47820,8 @@ window.inspoView = "withmine";
     var mid = midMap(), by = {};
     GROUP_ORDER.forEach(function (g) { by[g] = Object.assign({}, mid); });
     /* Casual leans Squarzi — Alexander Skarsgård is not in the icon set (see the HAN-14 report). Business and Formal lean Kraft + Beckham. */
-    if (by.casual.squarzi !== undefined) by.casual.squarzi = HIGH;
+    /* .86.42: Nighttime Casual (its own group now) leans Squarzi too */
+    ["casual", "smart"].forEach(function (g) { if (by[g].squarzi !== undefined) by[g].squarzi = HIGH; });
     ["business", "formal"].forEach(function (g) {
       if (by[g].kraft !== undefined) by[g].kraft = HIGH;
       if (by[g].beckham !== undefined) by[g].beckham = HIGH;
@@ -47875,6 +47879,21 @@ window.inspoView = "withmine";
     var raw = rawFromProfile() || (readStore().weights);
     return normalize(upgradeWeights(raw));
   }
+  /* .86.42: Nighttime Casual used to share the casual weights; it now has
+     its own group, which starts from them once (so its looks don't change) */
+  function migrate842() {
+    try {
+      if (typeof store === "undefined" || store.get("cwMig842", false)) return;
+      var raw = rawFromProfile(); if (!raw) return;          /* his saved weights not here yet: try again later */
+      var st = normalize(upgradeWeights(raw));
+      var sm = (raw.byLevel && raw.byLevel.smart) || {}, vals = Object.keys(sm).map(function (k) { return +sm[k]; });
+      var untouched = !vals.length || vals.every(function (v) { return v === vals[0]; });
+      if (untouched && st.byLevel && st.byLevel.casual) { st.byLevel.smart = JSON.parse(JSON.stringify(st.byLevel.casual)); saveWeights(st); }
+      store.set("cwMig842", true);
+    } catch (e) {}
+  }
+  setTimeout(migrate842, 0); setTimeout(migrate842, 4000);
+  window.addEventListener("wardrobe:synced", migrate842);
   function saveWeights(w) {
     w = normalize(w);
     w.scale = 100;
@@ -49366,8 +49385,8 @@ function dealMine(q) {
 function priceOk(p, pr) { if (!pr || pr.mode !== "piece") return true; var v = p.price; if (!(v > 0)) return pr.lo <= 0 && pr.hi == null; return v >= (pr.lo || 0) && (pr.hi == null || v <= pr.hi); }
 function groupForLevel(level) {
   var n = +level || 0;
-  if (n <= 3) return "casual";
-  if (n === 4) return "smart";
+  if (n <= 2) return "casual";          /* .86.42: Daytime (and Pool / Beach) */
+  if (n === 3 || n === 4) return "smart"; /* Nighttime Casual */
   if (n === 5) return "business";
   return "formal";
 }
