@@ -96,8 +96,11 @@ def main():
         c, pg = ctx_for(rendered)
         pg.goto(BASE, wait_until="load")
         pg.wait_for_timeout(2500)
-        n = pg.evaluate("Object.keys(ONBODY.map).length")
-        check(n >= len(man["r"]), "page knows %d renders at boot" % n)
+        allowed = pg.evaluate("""rows => rows.filter(e => !onbodyFileBanned(e.f) &&
+          !onbodyKeyBanned866(e.k)).map(e => [e.k, 'assets/onbody/' + e.f])""", man["r"])
+        mapped = pg.evaluate("Object.entries(onbodyKeys())")
+        check(dict(mapped) == dict(allowed) and len(allowed) >= 300,
+              "all %d eligible outfit photos are available" % len(allowed))
         home = pg.evaluate("""() => {
           const c = document.getElementById('today-collage');
           /* .78.2c: the Home hero is the render itself (#today-img), no collage */
@@ -113,8 +116,8 @@ def main():
         check(home["sw"] == 0, "no swatch cells on Home")
         pg.click("#section-ideas")
         pg.wait_for_timeout(300)
-        pg.click("#outfits-mine")
-        pg.wait_for_timeout(1500)
+        pg.click('[data-pv-f="mine"]')
+        pg.wait_for_selector("#cf-grid .mine-avatar")
         mine = pg.evaluate("""() => { const g = document.getElementById('cf-grid'); if (!g) return [0,0,0];
           return [g.querySelectorAll('.cf-card').length, g.querySelectorAll('.cf-card img[data-onbody]').length, g.querySelectorAll('.fl-swatch').length]; }""")
         check(mine[0] > 0 and mine[1] > 0, "Outfits > Mine shows on-body renders (%d of %d cards)" % (mine[1], mine[0]))
@@ -128,7 +131,7 @@ def main():
           const has = await caches.has('wardrobe-onbody-v3');
           let webp = 0, man = 0;
           if (has) { const k = await (await caches.open('wardrobe-onbody-v3')).keys();
-            webp = k.filter(r => r.url.includes('/assets/onbody/') && r.url.endsWith('.webp')).length;
+            webp = k.filter(r => /\/assets\/onbody(?:-cut)?\//.test(r.url) && r.url.endsWith('.webp')).length;
             man = k.filter(r => r.url.endsWith('manifest.json')).length; }
           return { ctl, has, webp, man };
         }""")
@@ -138,13 +141,13 @@ def main():
         check("ONBODY_CACHE" in swsrc and "keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE" in swsrc, "render cache survives activate")
         c.close()
 
-        # 4: no renders for this closet -> photo flat-lay
+        # An unmatched closet opens on the explicit empty state.
         c, pg = ctx_for(plain)
         pg.goto(BASE, wait_until="load")
-        pg.wait_for_timeout(2500)
-        fl = pg.evaluate("""() => { const c = document.getElementById('today-collage'), im = document.getElementById('today-img');
-          return { tiles: c && !c.hidden ? c.querySelectorAll('.fl-cell').length : 0, img: !!(im && !im.hidden && im.getAttribute('src')), ob: /\/onbody\//.test(im.getAttribute('src') || '') }; }""")
-        check(fl["tiles"] == 0 and fl["img"] and not fl["ob"], "fallback: no render, so the hero shows a photo, never a tile grid (%s)" % fl)
+        pg.wait_for_selector('#today-hero.hero-empty861 .hero-empty861-box')
+        check(pg.locator("#today-collage .fl-cell").count() == 0 and
+              pg.locator("#today-hero [data-he861-level]").is_visible(),
+              "an unmatched dress level offers another level without a misleading portrait")
         c.close()
         b.close()
     check(not errors, "no page errors %s" % errors[:3])

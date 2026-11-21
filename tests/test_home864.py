@@ -186,7 +186,8 @@ def main():
         print("OPENING", json.dumps({k: st[k] for k in st}, indent=2))
 
         # Render inventory per dress level (owned on-body keys that fit)
-        inv = pg.evaluate("""() => {
+        manifest = json.loads((ROOT / "assets/onbody/manifest.json").read_text())
+        inv = pg.evaluate("""rows => {
           const labels = (typeof HERO_TYPE_LABELS !== 'undefined' && HERO_TYPE_LABELS) || [];
           const map = (typeof ONBODY !== 'undefined' && ONBODY.map) || {};
           const own = {};
@@ -211,11 +212,13 @@ def main():
             const exact = (typeof homeComposerLooksAtLevel864 === 'function') ? (homeComposerLooksAtLevel864(24, lv) || []) : [];
             dealt[name] = { exactRenderedDeals: exact.length, titles: exact.slice(0, 5).map(l => l.title) };
           });
-          return { totalMap: Object.keys(map).length, owned: Object.keys(own).length, byLevel: out, deals: dealt };
-        }""")
+          const eligible = rows.filter(e => !onbodyFileBanned(e.f) && !onbodyKeyBanned866(e.k));
+          return { complete: eligible.every(e => map[e.k] === 'assets/onbody/' + e.f),
+                   eligible: eligible.length, totalMap: Object.keys(map).length, owned: Object.keys(own).length, byLevel: out, deals: dealt };
+        }""", manifest["r"])
         print("RENDERS", json.dumps(inv, indent=2))
         report["inventory"] = inv
-        check("closet has on-body renders", (inv or {}).get("totalMap", 0) >= 400, inv.get("totalMap") if inv else None)
+        check("closet has on-body renders", inv["complete"] and inv["totalMap"] == inv["eligible"] and inv["eligible"] >= 300, inv.get("totalMap") if inv else None)
         sc = (inv or {}).get("byLevel", {}).get("Smart Casual", {}).get("ownedRenders", 0)
         check("Smart Casual has owned renders", sc >= 1, sc)
 
