@@ -51,8 +51,26 @@ def run(browser):
     assert first["avatar"] and first["pieces"] >= 3 and first["fig"] > 150, cards
     if worn["loose"]:
         assert any((not c["avatar"]) and c["flat"] >= 2 for c in cards), cards
+    # Liked: a photo look (no pieces, no render) shows its colours and what each is, never a lone watch;
+    # a liked rendered outfit shows the whole avatar inside its box
+    page.evaluate("""() => {
+      savedLooks.push({ id: 'look-photo-1', title: 'Racing Green & Stone', img: 'assets/photos/113a3f5b339f.webp', source: 'combo', verdict: 'like', likedAt: 2,
+        swatches: [{ name: 'Diamine Green', hex: '#1d5c43', role: 'Crew-neck knit' }, { name: 'Ecru', hex: '#d8c9a8', role: 'Chinos' }, { name: 'Brown', hex: '#7c4226', role: 'Suede loafers' }] });
+      const l = Object.assign({}, __cfLooks81()[0], { id: 'look-rendered-1', verdict: 'like', likedAt: 3 }); savedLooks.push(l);
+    }""")
+    page.evaluate("() => window.scrollTo(0, 0)")
+    page.locator('#panel-looks [data-lk-go="liked"]').tap()
+    page.wait_for_function("() => document.querySelectorAll('#lk-liked841 .lk-card841').length >= 2")
+    liked = page.evaluate("""() => [...document.querySelectorAll('#lk-liked841 .lk-card841')].map(c => { const m = c.querySelector('.cf-media'), a = m.querySelector('.mine-avatar');
+      const mr = m.getBoundingClientRect(), ar = a ? a.getBoundingClientRect() : null;
+      return { title: c.querySelector('.oc-title').textContent, bands: [...m.querySelectorAll('.lk-sw843 .lk-swb843 b')].map(b => b.textContent), cells: m.querySelectorAll('.fl-cell').length,
+        watchOnly: m.querySelectorAll('.fl-cell').length === 1 && !!m.querySelector('.fl-watch'), avatarFits: ar ? (ar.height <= mr.height + 1 && ar.width <= mr.width + 1) : null }; })""")
+    photo = [c for c in liked if c["title"] == "Racing Green & Stone"][0]
+    assert photo["bands"] == ["Crew-neck knit", "Chinos", "Suede loafers"] and photo["cells"] == 0, liked
+    assert not any(c["watchOnly"] for c in liked), liked
+    assert any(c["avatarFits"] is True for c in liked) and not any(c["avatarFits"] is False for c in liked), liked
     assert not errors, errors
-    print("Confirmed go-to's: avatar with %d pieces beside it; an unrendered go-to shows its pieces" % first["pieces"])
+    print("Confirmed go-to's: avatar with %d pieces beside it; an unrendered go-to shows its pieces; Liked shows colours for photo looks and a fitted avatar" % first["pieces"])
     ctx.close()
 
 
