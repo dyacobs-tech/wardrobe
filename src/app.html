@@ -6798,6 +6798,10 @@ window.notMenswear853 = function (e) {
         mask: var(--pencil) center / contain no-repeat;
       }
       /* .86.42: Inspo segments (Icons | Dress me) and Dress me */
+      html[data-lkm="inspo"][data-insv="dress"] #rendered-view { display: block !important; }
+      html[data-lkm="inspo"]:not([data-insv="dress"]) #rendered-view { display: none !important; }
+      .ins-dress841 { padding-bottom: 8px !important; }
+      html[data-lkm="inspo"][data-insv="dress"] #rendered-view::before { content: "Your renders & try-ons"; display: block; margin: 14px 16px 8px; font-family: var(--font-display); font-size: 19px; }
       .lk-seg841.ins-seg841 { margin: 0 16px 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
       html[data-lkm="inspo"][data-insv="dress"] .pv-fab { display: none !important; }
       html[data-lkm="inspo"][data-insv="dress"] #ins-row841, html[data-lkm="inspo"][data-insv="dress"] #ins-icon841,
@@ -45690,7 +45694,11 @@ window.inspoView = "withmine";
 
   /* ---------- Inspo: Icons | Dress me ---------- */
   function setView(v) {
-    if (v === "dress") { R.setAttribute("data-insv", "dress"); ensureHost(); paint(); }
+    if (v === "dress") {
+      R.setAttribute("data-insv", "dress"); ensureHost(); paint();
+      /* his renders and try-ons (the old Looks > Rendered) live under Dress me */
+      try { if (typeof window.paintRendered867 === "function") window.paintRendered867(); } catch (e) {}
+    }
     else R.removeAttribute("data-insv");
     [].forEach.call(document.querySelectorAll("[data-ins-seg]"), function (b) { b.setAttribute("aria-selected", b.getAttribute("data-ins-seg") === (v === "dress" ? "dress" : "icons") ? "true" : "false"); });
   }
@@ -45702,7 +45710,11 @@ window.inspoView = "withmine";
       top.insertBefore(sg, top.firstChild);
     }
     var box = $("ins-dress841");
-    if (!box) { box = document.createElement("div"); box.id = "ins-dress841"; box.className = "ins-dress841"; $("panel-looks").appendChild(box); }
+    if (!box) {
+      box = document.createElement("div"); box.id = "ins-dress841"; box.className = "ins-dress841";
+      var rv = $("rendered-view"), pl = $("panel-looks");
+      if (rv && rv.parentNode === pl) pl.insertBefore(box, rv); else pl.appendChild(box);
+    }
     return box;
   }
   document.addEventListener("click", function (e) {
@@ -45728,6 +45740,20 @@ window.inspoView = "withmine";
   }
   if (typeof currentTab !== "undefined" && currentTab === "inspo") setTimeout(ensureHost, 0);
 
+  /* ---------- the pencil on any outfit card opens it in Dress me ---------- */
+  window.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-pv-edit]"); if (!b) return;
+    var card = b.closest(".cf-card"); if (!card) return;
+    var look = null;
+    if (card.classList.contains("en-card")) {
+      var feed = card.closest("#panel-allnew") ? "allnew" : "withmine";
+      look = window.__enLookAt841 ? window.__enLookAt841(feed, +b.getAttribute("data-pv-edit")) : null;
+    }
+    else { var o = card.querySelector("[data-cf-open]"), L = window.__cfLooks81 ? window.__cfLooks81() : []; look = o ? L[+o.getAttribute("data-cf-open")] : null; }
+    if (!look) return;   /* unknown card: the old swap flow still runs */
+    e.preventDefault(); e.stopImmediatePropagation();
+    window.dressMe841(look);
+  }, true);
   /* ---------- "Dress me" on any opened outfit ---------- */
   function addDressButton(look) {
     try {
@@ -48689,6 +48715,7 @@ window.inspoView = "withmine";
     return out;
   };
   window.__enOwnPhoto841 = function (it) { return ownPhoto(it); };
+  window.__enLookAt841 = function (feed, i) { var f = F[feed]; return (f && f.looks && f.looks[i]) || null; };
   window.__enLiked841 = {
     list: function () { return S.liked.filter(function (x) { return x && !S.hidden[x.key]; }).map(function (x) { var l = rehydrate(x); if (l) l.feed = x.feed; return l; }).filter(Boolean); },
     card: function (l, i, feed) { return cardHTML(l, i, feed); },
