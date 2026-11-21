@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.40" />
+    <meta name="wardrobe-build" content="2026-11-21.86.41" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6781,6 +6781,14 @@ window.notMenswear853 = function (e) {
       .pv81 #panel-looks .cf-actions [data-cf-like]::before,
       .pv81 #panel-looks .cf-actions [data-cf-dislike]::before { width: 14px; height: 14px; }
       .pv81 #panel-looks .cf-actions .pv-edit::before { width: 18px; height: 18px; }
+      /* .86.41: Home's outfit image takes only the room its caption leaves,
+         so the caption and its buttons are never cut off at the bottom of
+         the page (David's phone, 21 Nov: the Like / Next / level buttons
+         were cut in half). --home-room is measured in JS. */
+      html body #panel-today #today-hero.today-hero img#today-img { max-height: min(78vh, 1200px, var(--home-room, 1200px)) !important; }
+      @media (min-width: 1024px) and (min-resolution: 2dppx) {
+        html body #panel-today #today-hero.today-hero img#today-img { max-height: min(78vh, 600px, var(--home-room, 600px)) !important; }
+      }
       /* Render me, when present, wraps under the three icon buttons */
       .pv81 #panel-looks .cf-actions .en-rme { flex: 1 0 100% !important; width: auto !important; min-width: 0; max-width: none; height: 36px; min-height: 36px; }
       .swap-sec.pv-flash { outline: 2px solid var(--honey-nav, #a4804f); outline-offset: 4px; border-radius: 10px; }
@@ -8509,7 +8517,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.40</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.41</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11658,7 +11666,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.40";
+var WARDROBE_BUILD = "2026-11-21.86.41";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -45015,6 +45023,30 @@ window.inspoView = "withmine";
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
   window.addEventListener("pageshow", paint);
   setInterval(function () { if (row && document.getElementById("panel-looks") && !document.getElementById("panel-looks").hidden) paint(); }, 4000);
+})();
+/* .86.41: fit Home's outfit image to the room the caption leaves */
+(function () {
+  var t = 0;
+  function fit() {
+    var panel = document.getElementById("panel-today"), hero = document.getElementById("today-hero"), img = document.getElementById("today-img");
+    if (!panel || panel.hidden || !hero || !img) return;
+    var cap = hero.querySelector(".today-caption"); if (!cap) return;
+    var top = img.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+    /* the caption's bottom padding (room for the nav bar) may run past the
+       page edge; its buttons may not */
+    var padB = parseFloat(getComputedStyle(cap).paddingBottom) || 0;
+    var room = Math.floor(panel.clientHeight - (cap.offsetHeight - padB) - top - 2);
+    if (room > 160) panel.style.setProperty("--home-room", room + "px"); else panel.style.removeProperty("--home-room");
+  }
+  function soon() { clearTimeout(t); t = setTimeout(fit, 60); }
+  function arm() {
+    var panel = document.getElementById("panel-today"), cap = document.querySelector("#today-hero .today-caption");
+    if (window.ResizeObserver) { var ro = new ResizeObserver(soon); if (panel) ro.observe(panel); if (cap) ro.observe(cap); }
+    var img = document.getElementById("today-img"); if (img) img.addEventListener("load", soon);
+    window.addEventListener("resize", soon); window.addEventListener("orientationchange", soon); window.addEventListener("pageshow", soon);
+    fit(); setTimeout(fit, 400); setTimeout(fit, 1500);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", arm); else arm();
 })();
 /* .86.30: Send feedback to Claude. A note (dictation works), an optional
    screenshot, and the screen he was on are saved to the synced
