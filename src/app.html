@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.39" />
+    <meta name="wardrobe-build" content="2026-11-21.86.40" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6274,7 +6274,6 @@ window.notMenswear853 = function (e) {
       .lk-opt837[aria-checked="true"] { font-weight: 600; }
       .lk-tick837 { width: 16px; text-align: center; }
       .lk-hint837 { margin-left: auto; color: var(--dim, #777); font-size: 12.5px; }
-      .lk-sec837 { margin: 6px 12px 2px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--dim, #777); }
       .lk-dd837[data-kind="temp"] .lk-menu837 { max-height: min(70vh, 560px); overflow-y: auto; overscroll-behavior: contain; }
       /* .86.29: Saved ideas row under the Mine feed (all widths) */
       #saved-grid.saved-collapsed829 { display: none !important; }
@@ -8510,7 +8509,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.39</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.40</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10118,7 +10117,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
      outfit is usually one bad pairing, not a bad piece). */
   function applyVerdict(prefs, ids, verdict) {
     prefs.items = prefs.items || {}; prefs.pairs = prefs.pairs || {};
-    var di = verdict === "like" ? 0.35 : -0.15, dp = verdict === "like" ? 0.5 : -1.1;
+    /* .86.40: a dislike bans that outfit (disliked list) and leaves its
+       pieces as they were; its pairings drop a little, not hard */
+    var di = verdict === "like" ? 0.35 : 0, dp = verdict === "like" ? 0.5 : -0.4;
     ids.forEach(function (id) { prefs.items[id] = Math.max(-3, Math.min(3, (prefs.items[id] || 0) + di)); });
     pairKeys(ids).forEach(function (k) { prefs.pairs[k] = Math.max(-4, Math.min(3, (prefs.pairs[k] || 0) + dp)); });
     return prefs;
@@ -11213,6 +11214,7 @@ function composerPrefs() {
   p.banned = p.banned && typeof p.banned === "object" ? p.banned : {};
   p.exposure = p.exposure && typeof p.exposure === "object" ? p.exposure : {};
   p.likedKeys = p.likedKeys && typeof p.likedKeys === "object" ? p.likedKeys : {};
+  try { if (typeof dislikedLooks !== "undefined") dislikedLooks.forEach(function (k) { if (!p.banned[k]) p.banned[k] = 1; }); } catch (e) {}
   return p;
 }
 function composerSavePrefs(p) {
@@ -11263,8 +11265,8 @@ function composerVerdict(look, verdict) {
   var p = composerPrefs();
   var ids = composerLookIds(look);
   window.WardrobeComposer.applyVerdict(p, ids, verdict);
-  if (verdict === "dislike") p.banned[look.composerKey] = Date.now();
-  if (verdict === "like") p.likedKeys[look.composerKey] = Date.now();
+  if (verdict === "dislike") { p.banned[look.composerKey] = Date.now(); if (typeof setLookDisliked === "function") setLookDisliked(look.composerKey, true); }
+  if (verdict === "like") { p.likedKeys[look.composerKey] = Date.now(); delete p.banned[look.composerKey]; if (typeof setLookDisliked === "function") setLookDisliked(look.composerKey, false); }
   composerSavePrefs(p);
 }
 var COMPOSER_NOUN = { Tees: "Tee", Polos: "Polo", Sweaters: "Knit", Shirts: "Shirt", "Button downs": "Shirt", Trousers: "Trousers", Jeans: "Jeans", Shorts: "Shorts", "Bathing suits": "Swim Shorts", Blazers: "Blazer", Suits: "Suit", Jackets: "Jacket", Coats: "Coat", "Leather jackets": "Leather Jacket", Vests: "Vest", Shoes: "Shoes" };
@@ -11656,7 +11658,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.39";
+var WARDROBE_BUILD = "2026-11-21.86.40";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -20273,6 +20275,28 @@ function generateComboLook(opts) {
    deck, the dealer, brief builds, closet builds, Today, the
    daily look) leaves disliked photographs out from then on.
    A removed look is never dealt again. */
+/* .86.40: disliked OUTFITS (David, 21 Nov: "discard disliked entire looks;
+   the individual items should remain as options"). One synced list of
+   outfit keys (the sorted piece ids) that every feed skips: Home, Mine,
+   Mix, New and the ready-made outfits. The pieces stay in play. */
+var dislikedLooks = (store.get("dislikedLooks", []) || []).filter(function (k) { return typeof k === "string" && k.length < 400; });
+function isDislikedLook(key) { return !!key && dislikedLooks.indexOf(key) !== -1; }
+function dislikedLookMap() { var m = {}; dislikedLooks.forEach(function (k) { m[k] = 1; }); return m; }
+function setLookDisliked(key, on) {
+  if (!key || typeof key !== "string") return;
+  var at = dislikedLooks.indexOf(key);
+  if (on !== false && at === -1) { dislikedLooks.push(key); if (dislikedLooks.length > 3000) dislikedLooks = dislikedLooks.slice(-3000); }
+  else if (on === false && at !== -1) dislikedLooks.splice(at, 1);
+  else return;
+  store.set("dislikedLooks", dislikedLooks);
+}
+window.setLookDisliked = setLookDisliked; window.isDislikedLook = isDislikedLook; window.dislikedLookMap = dislikedLookMap;
+(function () {
+  /* once: the outfits already disliked on this device (composer bans) */
+  if (store.get("dislikedLooksMig840", false)) return;
+  try { var raw = store.get("composerPrefs", null); Object.keys((raw && raw.banned) || {}).forEach(function (k) { setLookDisliked(k, true); }); } catch (e) {}
+  store.set("dislikedLooksMig840", true);
+})();
 var dislikedImgs = (store.get("dislikedImgs", []) || []).filter(function (img) { return typeof img === "string"; });
 /* Build .56 verification fix: lifting a ban matches canonically
    too — the stored entry may be the -watch variant of the photo
@@ -31414,7 +31438,7 @@ function profileSizeFor(cat) {
    pair is the half that works from a static page today, and the
    file it writes is the same payload a sync endpoint would
    carry.) */
-var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "wardrobeRules", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "priceRange", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches", "editBoard", "editView"];
+var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "wardrobeRules", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "dislikedLooks", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "priceRange", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches", "editBoard", "editView"];
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
@@ -31435,7 +31459,7 @@ document.getElementById("data-export").addEventListener("click", function () {
    that fails puts everything back. "Nothing was changed" is only
    ever said when it is true. */
 var BACKUP_VERSION = 1;
-var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "recentlyRemoved", "dealtImgs", "weekPlan", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches"];
+var BACKUP_ARRAY_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "queue", "deletedIds", "inspoImages", "wornLog", "dislikedImgs", "dislikedLooks", "recentlyRemoved", "dealtImgs", "weekPlan", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches"];
 var BACKUP_OBJECT_KEYS = ["profile", "overrides", "lazyRenders"];
 function readBackupFile(text) {
   var payload = JSON.parse(text);
@@ -31501,7 +31525,7 @@ function applyBackupData(data, opts) {
     var coll = (typeof SY_KEY_COLL !== "undefined") ? SY_KEY_COLL[k] : null;
     if (typeof SY !== "undefined" && SY) {
       if (coll && SY.st && SY.st[coll]) Object.keys(SY.st[coll]).forEach(function (id) { var s = SY.st[coll][id]; if (typeof s === "number" && (best === null || s > best)) best = s; });
-      var mfField = { profile: "profile", deletedIds: "deletedIds", overrides: "overrides", dislikedImgs: "dislikedImgs", recentlyRemoved: "recentlyRemoved", findBudget: "findBudget", shopTier: "shopTier", priceRange: "priceRange", homeLocation: "homeLocation", currentLocation: "currentLocation", formality: "formality", studioSettings: "studioSettings", lastOpeningImg: "lastOpeningImg" }[k];
+      var mfField = { profile: "profile", deletedIds: "deletedIds", overrides: "overrides", dislikedImgs: "dislikedImgs", dislikedLooks: "dislikedLooks", recentlyRemoved: "recentlyRemoved", findBudget: "findBudget", shopTier: "shopTier", priceRange: "priceRange", homeLocation: "homeLocation", currentLocation: "currentLocation", formality: "formality", studioSettings: "studioSettings", lastOpeningImg: "lastOpeningImg" }[k];
       if (mfField && SY.mf && SY.mf[mfField] && typeof SY.mf[mfField].t === "number" && (best === null || SY.mf[mfField].t > best)) best = SY.mf[mfField].t;
     }
     return best;
@@ -39534,6 +39558,7 @@ function syMetaOf() {
     deletedIds: deletedIds,
     overrides: entryOverrides,
     dislikedImgs: dislikedImgs,
+    dislikedLooks: (typeof dislikedLooks !== "undefined" ? dislikedLooks : []),
     recentlyRemoved: recentlyRemoved,
     findBudget: budgetLevel,
     shopTier: shopTier,
@@ -39554,7 +39579,7 @@ function syMetaOf() {
    and at the start of every sync, so no write path is missed. */
 var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops", editMeta: "edits", editSearches: "searches", askSync: "ask", renderedLooks: "rendered", feedbackNotes: "feedback" };
 var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox", shopwish: "shopWishlist", pricedrops: "priceDrops", edits: "editMeta", searches: "editSearches", ask: "askSync", rendered: "renderedLooks" };
-var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, priceRange: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1, wardrobeRules: 1 };
+var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, dislikedLooks: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, priceRange: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1, wardrobeRules: 1 };
 function syTrackChanges(onlyColl) {
   var now = Date.now(), ch = false, mig = false;
   var colls = onlyColl ? [onlyColl] : SY_COLLS;
@@ -39958,7 +39983,7 @@ function syValidMetaField(f, v) {
   function plain(o) { return !!o && typeof o === "object" && !Array.isArray(o); }
   switch (f) {
     case "profile": case "overrides": return plain(v);
-    case "deletedIds": case "dislikedImgs":
+    case "deletedIds": case "dislikedImgs": case "dislikedLooks":
       return Array.isArray(v) && v.every(function (x) { return typeof x === "string"; });
     case "recentlyRemoved":
       return Array.isArray(v) && v.every(function (x) { return plain(x) && typeof x.id === "string"; });
@@ -39996,6 +40021,11 @@ function syApplyMeta(meta) {
      and are ignored. */
   function ok(f) { return (f in d) && syValidMetaField(f, d[f]); }
   var t, seedState = false;
+  if (ok("dislikedLooks") && (t = take("dislikedLooks"))) {
+    dislikedLooks = syUnwire(d.dislikedLooks).filter(function (k) { return typeof k === "string" && k.length < 400; });
+    store.set("dislikedLooks", dislikedLooks);
+    stamp("dislikedLooks", t, dislikedLooks);
+  }
   if (ok("wardrobeRules") && (t = take("wardrobeRules"))) {
     wardrobeRules = syUnwire(d.wardrobeRules).map(function (r) { return window.WardrobeRules && WardrobeRules.normalize ? WardrobeRules.normalize(r) : r; }).filter(Boolean);
     store.set("wardrobeRules", wardrobeRules);
@@ -44865,39 +44895,9 @@ window.inspoView = "withmine";
   try { var saved = JSON.parse(sessionStorage.getItem(KEY) || "null"); if (Array.isArray(saved) && saved.length) sel = saved.filter(function (id) { return BANDS.some(function (b) { return b.id === id; }); }); } catch (e) {}
   if (!sel.length) sel = ["now"];
   function band(id) { for (var i = 0; i < BANDS.length; i++) if (BANDS[i].id === id) return BANDS[i]; return null; }
-  function hereTemp() { return (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? Math.round(currentWeather.temp) : null; }
-  /* .86.39: Where — the place Looks dresses for (David: location as a
-     dropdown, not on the cards). Looks only and this session only: Home,
-     the synced current location and Home's deal are untouched. "Now" is
-     the weather at that place; a trip uses its planned temperature. */
-  var PKEY = "wardrobe.lookPlace839", place = null, wxc = {};
-  try { place = JSON.parse(sessionStorage.getItem(PKEY) || "null"); } catch (e) { place = null; }
-  function shortName(n) { return String(n || "").split(",")[0].trim(); }
-  function places() {
-    var out = [], seen = {};
-    function add(pl) { var k = pl.trip ? "trip:" + pl.id : Math.round(pl.lat * 50) + "," + Math.round(pl.lon * 50); if (seen[k]) return; seen[k] = 1; out.push(pl); }
-    try { if (typeof currentLoc !== "undefined" && currentLoc && currentLoc.name) add({ id: "here", name: shortName(currentLoc.name), lat: +currentLoc.lat, lon: +currentLoc.lon, here: true }); } catch (e) {}
-    try { if (typeof homeLoc !== "undefined" && homeLoc && homeLoc.name) add({ id: "home", name: shortName(homeLoc.name), lat: +homeLoc.lat, lon: +homeLoc.lon }); } catch (e) {}
-    try { if (typeof QUICK_LOCS !== "undefined") Object.keys(QUICK_LOCS).forEach(function (k) { var q = QUICK_LOCS[k]; add({ id: k, name: shortName(q.name), lat: q.lat, lon: q.lon }); }); } catch (e) {}
-    try { (typeof userTrips !== "undefined" && Array.isArray(userTrips) ? userTrips : []).forEach(function (t) { if (t && t.name && typeof t.temp === "number") add({ id: t.id, name: shortName(t.name), trip: true, temp: Math.round(t.temp) }); }); } catch (e) {}
-    return out;
-  }
-  function curPlace() { if (place && !place.here) { var hit = places().filter(function (pl) { return pl.id === place.id; })[0]; if (hit) return hit; } return places()[0] || null; }
-  function placeTemp(pl) {
-    if (!pl || pl.here) return hereTemp();
-    if (pl.trip) return pl.temp;
-    var c = wxc[pl.id]; return c && typeof c.t === "number" ? c.t : null;
-  }
-  function fetchPlace(pl, done) {
-    if (!pl || pl.here || pl.trip || !window.fetch) return;
-    var c = wxc[pl.id]; if (c && (c.loading || Date.now() - c.at < 30 * 60000)) return;
-    wxc[pl.id] = { t: c ? c.t : null, at: c ? c.at : 0, loading: true };
-    fetch("https://api.open-meteo.com/v1/forecast?latitude=" + pl.lat + "&longitude=" + pl.lon + "&current=temperature_2m&temperature_unit=fahrenheit&timezone=auto")
-      .then(function (r) { return r.json(); })
-      .then(function (d) { var t = d && d.current && d.current.temperature_2m; wxc[pl.id] = { t: typeof t === "number" ? Math.round(t) : null, at: Date.now() }; if (done) done(); })
-      .catch(function () { wxc[pl.id] = { t: null, at: 0 }; });
-  }
-  function nowTemp() { return placeTemp(curPlace()); }
+  /* .86.39: location is not chosen here; it lives in Profile (current
+     location) and Travel (David, 21 Nov). Now = today's weather where he is. */
+  function nowTemp() { return (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? Math.round(currentWeather.temp) : null; }
   function tempOf(id) { return id === "now" ? nowTemp() : (band(id) ? band(id).mid : null); }
   /* the next deal's temperature; advance=true moves to the next chosen band */
   window.tempForDeal834 = function (advance) {
@@ -44906,9 +44906,8 @@ window.inspoView = "withmine";
     return t;
   };
   function tempLabel() {
-    if (sel.length === 1 && sel[0] === "now") { var t = nowTemp(), pl = curPlace(); return (pl ? pl.name : "Now") + (t !== null ? " · " + t + "°" : ""); }
-    var cpl = curPlace();
-    return sel.map(function (id) { return id === "now" && cpl && !cpl.here ? cpl.name : band(id).label; }).join(" + ");
+    if (sel.length === 1 && sel[0] === "now") { var t = nowTemp(); return "Now" + (t !== null ? " · " + t + "°" : ""); }
+    return sel.map(function (id) { return band(id).label; }).join(" + ");
   }
   function levelLabel() {
     var ls = levelsSel();
@@ -44960,13 +44959,8 @@ window.inspoView = "withmine";
       var ls = levelsSel();
       return LEVELS.map(function (l) { var on = ls.indexOf(l[0]) !== -1; return '<button type="button" role="menuitemcheckbox" aria-checked="' + on + '" class="lk-opt837" data-level="' + l[0] + '"><span class="lk-tick837">' + (on ? "✓" : "") + "</span>" + l[1] + "</button>"; }).join("");
     }
-    var cp = curPlace();
-    var where = '<p class="lk-sec837">Where</p>' + places().map(function (pl) {
-      var on = !!(cp && cp.id === pl.id), t = placeTemp(pl);
-      return '<button type="button" role="menuitemradio" aria-checked="' + on + '" class="lk-opt837" data-place="' + pl.id + '"><span class="lk-tick837">' + (on ? "✓" : "") + "</span>" + pl.name +
-        '<span class="lk-hint837">' + (pl.trip ? "trip · " : "") + (t !== null ? t + "°" : "") + "</span></button>";
-    }).join("") + '<p class="lk-sec837">Temperature</p>';
-    return where + BANDS.map(function (b) {
+
+    return BANDS.map(function (b) {
       var on = sel.indexOf(b.id) !== -1, t = b.id === "now" ? nowTemp() : null;
       return '<button type="button" role="menuitemcheckbox" aria-checked="' + on + '" class="lk-opt837" data-band="' + b.id + '"><span class="lk-tick837">' + (on ? "✓" : "") + "</span>" + b.label +
         '<span class="lk-hint837">' + (b.id === "now" ? (t !== null ? t + "°" : "") : b.hint) + "</span></button>";
@@ -44997,7 +44991,6 @@ window.inspoView = "withmine";
       if (b) {
         var d = b.parentNode, m = d.querySelector(".lk-menu837"), open = m.hidden;
         closeAll(d); m.innerHTML = menuHTML(d.getAttribute("data-kind")); m.hidden = !open; b.setAttribute("aria-expanded", open ? "true" : "false");
-        if (open && d.getAttribute("data-kind") === "temp") places().forEach(function (pl) { fetchPlace(pl, paint); });
         return;
       }
       var o = e.target.closest(".lk-opt837"); if (!o) return;
@@ -45006,16 +44999,6 @@ window.inspoView = "withmine";
         var lv = parseInt(o.getAttribute("data-level"), 10), ls = levelsSel(), at2 = ls.indexOf(lv);
         if (at2 === -1) ls.push(lv); else if (ls.length > 1) ls.splice(at2, 1); else return;
         window.dressLevels838.set(ls);
-        return;
-      }
-      if (o.hasAttribute("data-place")) {
-        /* a place dresses for its weather now: the temperature goes back to Now */
-        var pl = places().filter(function (x) { return x.id === o.getAttribute("data-place"); })[0];
-        if (!pl) return;
-        place = pl.here ? null : { id: pl.id };
-        try { sessionStorage.setItem(PKEY, JSON.stringify(place)); } catch (e) {}
-        fetchPlace(pl, function () { paint(); refreshFeeds(); });
-        window.tempBands834.set(["now"]);
         return;
       }
       var id = o.getAttribute("data-band"), next = sel.slice(), at = next.indexOf(id);
@@ -45835,7 +45818,7 @@ window.inspoView = "withmine";
   }
   function unbanComposer(look) {
     if (!look || !look.composer || typeof composerPrefs !== "function") return;
-    try { var p = composerPrefs(); if (p.banned) delete p.banned[look.composerKey]; composerSavePrefs(p); } catch (e) {}
+    try { var p = composerPrefs(); if (p.banned) delete p.banned[look.composerKey]; composerSavePrefs(p); if (typeof setLookDisliked === "function") setLookDisliked(look.composerKey, false); } catch (e) {}
   }
   var pending = null;
   document.addEventListener("click", function (e) {
@@ -47587,6 +47570,8 @@ window.inspoView = "withmine";
   S.prefs = S.prefs && typeof S.prefs === "object" ? S.prefs : {};
   S.prefs.items = S.prefs.items || {}; S.prefs.pairs = S.prefs.pairs || {};
   S.hidden = S.hidden && typeof S.hidden === "object" ? S.hidden : {};
+  /* .86.40: once, the looks already hidden in Mix / New join the synced disliked list */
+  try { if (typeof store !== "undefined" && !store.get("dislikedLooksMig840b", false) && window.setLookDisliked) { Object.keys(S.hidden).forEach(function (k) { window.setLookDisliked(k, true); }); store.set("dislikedLooksMig840b", true); } } catch (e) {}
   S.recent = Array.isArray(S.recent) ? S.recent : [];
   S.rq = Array.isArray(S.rq) ? S.rq : [];
   var saveT = null;
@@ -47717,7 +47702,7 @@ window.inspoView = "withmine";
       /* the Mine feed keeps only rendered looks (feed module, .86.32) */
       q.renderedOnly = !!document.getElementById("outfits-mine-view");
     } else {
-      q.level = level(); q.prefs = S.prefs; q.banned = S.hidden; q.price = priceState();
+      q.level = level(); q.prefs = S.prefs; q.banned = Object.assign({}, S.hidden, window.dislikedLookMap ? window.dislikedLookMap() : {}); q.price = priceState();
       q.temp = (typeof fi.temp === "number") ? fi.temp : ((typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78);
       q.recent = S.recent.concat(BUF[feed].map(function (o) { return o.key; }), shownKeys(feed));
     }
@@ -47981,11 +47966,11 @@ window.inspoView = "withmine";
     var CAP = f.looks.length ? 8 : 4;
     /* With mine: the On you renders lead */
     if (feed === "withmine" && !S.lens && f.rendered && f.rendered.length) {
-      while (out.length < CAP && f.rendered.length) { var r = f.rendered.shift(); if (!f.keys[r.key] && !S.hidden[r.key] && lookPriceOk(r) && renderedFits838(r)) out.push(r); }
+      while (out.length < CAP && f.rendered.length) { var r = f.rendered.shift(); if (!f.keys[r.key] && !S.hidden[r.key] && !(window.isDislikedLook && window.isDislikedLook(r.key)) && lookPriceOk(r) && renderedFits838(r)) out.push(r); }
     }
     while (out.length < CAP && BUF[feed].length) {
       var o = BUF[feed].shift();
-      if (f.keys[o.key] || S.hidden[o.key]) continue;
+      if (f.keys[o.key] || S.hidden[o.key] || (window.isDislikedLook && window.isDislikedLook(o.key))) continue;
       var l = toLook(o, feed);
       if (l && lookPriceOk(l)) { out.push(l); S.recent.push(o.key); }
     }
@@ -48067,6 +48052,7 @@ window.inspoView = "withmine";
       var i = +b.getAttribute("data-en-dislike"), dl = f.looks[i]; if (!dl) return;
       /* hide + de-weight only: nothing is deleted, Undo brings it back */
       S.hidden[dl.key] = Date.now();
+      if (typeof window.setLookDisliked === "function") window.setLookDisliked(dl.key, true);
       if (window.WardrobeComposer) window.WardrobeComposer.applyVerdict(S.prefs, dl.pieces.map(function (p) { return p.id; }), "dislike");
       save(true);
       var card = b.closest(".en-card"), rep = null;
@@ -48074,7 +48060,7 @@ window.inspoView = "withmine";
       if (rep && card && f.mode !== "liked") { f.looks[i] = rep; f.keys[rep.key] = 1; card.outerHTML = cardHTML(rep, i, feed); }
       else if (card) card.remove();
       fill(feed);
-      if (typeof showUndoToast === "function") showUndoToast("Hidden \u2014 " + dl.title + ".", function () { delete S.hidden[dl.key]; save(true); if (typeof toast === "function") toast("Undone \u2014 it's back in the rotation."); });
+      if (typeof showUndoToast === "function") showUndoToast("Hidden \u2014 " + dl.title + ".", function () { delete S.hidden[dl.key]; if (typeof window.setLookDisliked === "function") window.setLookDisliked(dl.key, false); save(true); if (typeof toast === "function") toast("Undone \u2014 it's back in the rotation."); });
       return;
     }
     b = t.closest("[data-en-rme]");
