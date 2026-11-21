@@ -6274,6 +6274,8 @@ window.notMenswear853 = function (e) {
       .lk-opt837[aria-checked="true"] { font-weight: 600; }
       .lk-tick837 { width: 16px; text-align: center; }
       .lk-hint837 { margin-left: auto; color: var(--dim, #777); font-size: 12.5px; }
+      .lk-sec837 { margin: 6px 12px 2px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--dim, #777); }
+      .lk-dd837[data-kind="temp"] .lk-menu837 { max-height: min(70vh, 560px); overflow-y: auto; overscroll-behavior: contain; }
       /* .86.29: Saved ideas row under the Mine feed (all widths) */
       #saved-grid.saved-collapsed829 { display: none !important; }
       .saved-toggle829 {
@@ -44847,7 +44849,39 @@ window.inspoView = "withmine";
   try { var saved = JSON.parse(sessionStorage.getItem(KEY) || "null"); if (Array.isArray(saved) && saved.length) sel = saved.filter(function (id) { return BANDS.some(function (b) { return b.id === id; }); }); } catch (e) {}
   if (!sel.length) sel = ["now"];
   function band(id) { for (var i = 0; i < BANDS.length; i++) if (BANDS[i].id === id) return BANDS[i]; return null; }
-  function nowTemp() { return (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? Math.round(currentWeather.temp) : null; }
+  function hereTemp() { return (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? Math.round(currentWeather.temp) : null; }
+  /* .86.39: Where — the place Looks dresses for (David: location as a
+     dropdown, not on the cards). Looks only and this session only: Home,
+     the synced current location and Home's deal are untouched. "Now" is
+     the weather at that place; a trip uses its planned temperature. */
+  var PKEY = "wardrobe.lookPlace839", place = null, wxc = {};
+  try { place = JSON.parse(sessionStorage.getItem(PKEY) || "null"); } catch (e) { place = null; }
+  function shortName(n) { return String(n || "").split(",")[0].trim(); }
+  function places() {
+    var out = [], seen = {};
+    function add(pl) { var k = pl.trip ? "trip:" + pl.id : Math.round(pl.lat * 50) + "," + Math.round(pl.lon * 50); if (seen[k]) return; seen[k] = 1; out.push(pl); }
+    try { if (typeof currentLoc !== "undefined" && currentLoc && currentLoc.name) add({ id: "here", name: shortName(currentLoc.name), lat: +currentLoc.lat, lon: +currentLoc.lon, here: true }); } catch (e) {}
+    try { if (typeof homeLoc !== "undefined" && homeLoc && homeLoc.name) add({ id: "home", name: shortName(homeLoc.name), lat: +homeLoc.lat, lon: +homeLoc.lon }); } catch (e) {}
+    try { if (typeof QUICK_LOCS !== "undefined") Object.keys(QUICK_LOCS).forEach(function (k) { var q = QUICK_LOCS[k]; add({ id: k, name: shortName(q.name), lat: q.lat, lon: q.lon }); }); } catch (e) {}
+    try { (typeof userTrips !== "undefined" && Array.isArray(userTrips) ? userTrips : []).forEach(function (t) { if (t && t.name && typeof t.temp === "number") add({ id: t.id, name: shortName(t.name), trip: true, temp: Math.round(t.temp) }); }); } catch (e) {}
+    return out;
+  }
+  function curPlace() { if (place && !place.here) { var hit = places().filter(function (pl) { return pl.id === place.id; })[0]; if (hit) return hit; } return places()[0] || null; }
+  function placeTemp(pl) {
+    if (!pl || pl.here) return hereTemp();
+    if (pl.trip) return pl.temp;
+    var c = wxc[pl.id]; return c && typeof c.t === "number" ? c.t : null;
+  }
+  function fetchPlace(pl, done) {
+    if (!pl || pl.here || pl.trip || !window.fetch) return;
+    var c = wxc[pl.id]; if (c && (c.loading || Date.now() - c.at < 30 * 60000)) return;
+    wxc[pl.id] = { t: c ? c.t : null, at: c ? c.at : 0, loading: true };
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=" + pl.lat + "&longitude=" + pl.lon + "&current=temperature_2m&temperature_unit=fahrenheit&timezone=auto")
+      .then(function (r) { return r.json(); })
+      .then(function (d) { var t = d && d.current && d.current.temperature_2m; wxc[pl.id] = { t: typeof t === "number" ? Math.round(t) : null, at: Date.now() }; if (done) done(); })
+      .catch(function () { wxc[pl.id] = { t: null, at: 0 }; });
+  }
+  function nowTemp() { return placeTemp(curPlace()); }
   function tempOf(id) { return id === "now" ? nowTemp() : (band(id) ? band(id).mid : null); }
   /* the next deal's temperature; advance=true moves to the next chosen band */
   window.tempForDeal834 = function (advance) {
@@ -44856,8 +44890,9 @@ window.inspoView = "withmine";
     return t;
   };
   function tempLabel() {
-    if (sel.length === 1 && sel[0] === "now") { var t = nowTemp(); return "Now" + (t !== null ? " · " + t + "°" : ""); }
-    return sel.map(function (id) { return band(id).label; }).join(" + ");
+    if (sel.length === 1 && sel[0] === "now") { var t = nowTemp(), pl = curPlace(); return (pl ? pl.name : "Now") + (t !== null ? " · " + t + "°" : ""); }
+    var cpl = curPlace();
+    return sel.map(function (id) { return id === "now" && cpl && !cpl.here ? cpl.name : band(id).label; }).join(" + ");
   }
   function levelLabel() {
     var ls = levelsSel();
@@ -44909,7 +44944,13 @@ window.inspoView = "withmine";
       var ls = levelsSel();
       return LEVELS.map(function (l) { var on = ls.indexOf(l[0]) !== -1; return '<button type="button" role="menuitemcheckbox" aria-checked="' + on + '" class="lk-opt837" data-level="' + l[0] + '"><span class="lk-tick837">' + (on ? "✓" : "") + "</span>" + l[1] + "</button>"; }).join("");
     }
-    return BANDS.map(function (b) {
+    var cp = curPlace();
+    var where = '<p class="lk-sec837">Where</p>' + places().map(function (pl) {
+      var on = !!(cp && cp.id === pl.id), t = placeTemp(pl);
+      return '<button type="button" role="menuitemradio" aria-checked="' + on + '" class="lk-opt837" data-place="' + pl.id + '"><span class="lk-tick837">' + (on ? "✓" : "") + "</span>" + pl.name +
+        '<span class="lk-hint837">' + (pl.trip ? "trip · " : "") + (t !== null ? t + "°" : "") + "</span></button>";
+    }).join("") + '<p class="lk-sec837">Temperature</p>';
+    return where + BANDS.map(function (b) {
       var on = sel.indexOf(b.id) !== -1, t = b.id === "now" ? nowTemp() : null;
       return '<button type="button" role="menuitemcheckbox" aria-checked="' + on + '" class="lk-opt837" data-band="' + b.id + '"><span class="lk-tick837">' + (on ? "✓" : "") + "</span>" + b.label +
         '<span class="lk-hint837">' + (b.id === "now" ? (t !== null ? t + "°" : "") : b.hint) + "</span></button>";
@@ -44940,6 +44981,7 @@ window.inspoView = "withmine";
       if (b) {
         var d = b.parentNode, m = d.querySelector(".lk-menu837"), open = m.hidden;
         closeAll(d); m.innerHTML = menuHTML(d.getAttribute("data-kind")); m.hidden = !open; b.setAttribute("aria-expanded", open ? "true" : "false");
+        if (open && d.getAttribute("data-kind") === "temp") places().forEach(function (pl) { fetchPlace(pl, paint); });
         return;
       }
       var o = e.target.closest(".lk-opt837"); if (!o) return;
@@ -44948,6 +44990,16 @@ window.inspoView = "withmine";
         var lv = parseInt(o.getAttribute("data-level"), 10), ls = levelsSel(), at2 = ls.indexOf(lv);
         if (at2 === -1) ls.push(lv); else if (ls.length > 1) ls.splice(at2, 1); else return;
         window.dressLevels838.set(ls);
+        return;
+      }
+      if (o.hasAttribute("data-place")) {
+        /* a place dresses for its weather now: the temperature goes back to Now */
+        var pl = places().filter(function (x) { return x.id === o.getAttribute("data-place"); })[0];
+        if (!pl) return;
+        place = pl.here ? null : { id: pl.id };
+        try { sessionStorage.setItem(PKEY, JSON.stringify(place)); } catch (e) {}
+        fetchPlace(pl, function () { paint(); refreshFeeds(); });
+        window.tempBands834.set(["now"]);
         return;
       }
       var id = o.getAttribute("data-band"), next = sel.slice(), at = next.indexOf(id);
