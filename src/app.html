@@ -6238,6 +6238,29 @@ window.notMenswear853 = function (e) {
           overflow: hidden; clip-path: inset(50%); white-space: nowrap;
         }
         html.sheet-lock body #bottombar.bottombar { visibility: hidden !important; }
+        /* .86.41 (David: "framey"): the shrink is transform-only. The pill
+           keeps its size (no width/height animation, no layout per frame);
+           it scales down from its bottom edge, the labels fade out and the
+           icons settle to the middle, all on the compositor. */
+        html body #bottombar .nav-pill {
+          transition: transform 240ms cubic-bezier(.2,.7,.2,1), opacity 200ms ease-out !important;
+          transform-origin: 50% 100%;
+          backface-visibility: hidden;
+        }
+        html.nav-compact body #bottombar .nav-pill {
+          width: min(calc(100% - 32px), 300px) !important; height: 44px !important;
+          transform: scale(.8);
+        }
+        html body #bottombar .navbtn span { transition: opacity 150ms ease-out; }
+        html.nav-compact body #bottombar .navbtn span {
+          position: static; width: auto; height: auto; overflow: visible; clip-path: none; opacity: 0;
+        }
+        html body #bottombar .nav-pill svg { transition: transform 240ms cubic-bezier(.2,.7,.2,1); }
+        html.nav-compact body #bottombar .nav-pill svg { transform: translateY(7px) scale(1.15); }
+        html.nav-away body #bottombar .nav-pill {
+          transform: translate3d(0, calc(100% + 12px + env(safe-area-inset-bottom, 0px)), 0) scale(.8);
+          opacity: 0;
+        }
       }
       @media (max-width: 899px) and (prefers-reduced-motion: reduce) {
         html body #bottombar .nav-pill { transition: none; }

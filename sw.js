@@ -60,7 +60,7 @@ const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
 // builds (activate drops files no longer listed), precached on install.
 const CODE_CACHE = NS + 'wardrobe-code-v1';
 const CODE_RE = /\/app\/[^\/]+\.[0-9a-f]{10}\.(js|css|json)$/;
-const CODE_FILES = ['./app/app.5ea7615f87.css', './app/00-brand-list.27a288fac9.js', './app/01.25d1ca2c3c.js', './app/02.224ece68bd.js', './app/25.318a5abe99.js', './app/26.44c6f329b2.js', './app/27.a6437f4596.js', './app/bundle.c6e7098ac5.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json', './app/endless.a9560722a4.js', './app/endless-worker.b78472a424.js'];
+const CODE_FILES = ['./app/app.d6b3ae9438.css', './app/00-brand-list.27a288fac9.js', './app/01.25d1ca2c3c.js', './app/02.224ece68bd.js', './app/25.318a5abe99.js', './app/26.44c6f329b2.js', './app/27.a6437f4596.js', './app/bundle.c6e7098ac5.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json', './app/endless.a9560722a4.js', './app/endless-worker.b78472a424.js'];
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
