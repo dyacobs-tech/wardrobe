@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.25" />
+    <meta name="wardrobe-build" content="2026-11-21.86.26" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -5426,7 +5426,7 @@ window.notMenswear853 = function (e) {
       /* .80.32: on phones the whole caption group (label, title, place and
          weather, swatches, buttons) sits low as one block: the button row
          ends 26px above the floating nav pill; the figure takes the rest */
-      @media (max-width: 899px) { body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption { padding-bottom: calc(var(--nav-band, 0px) + 12px) !important; } }
+      @media (max-width: 899px) { body[data-page="today"] #panel-today .today-hero.hero-solo .today-caption { padding-bottom: calc(var(--nav-caption-band, var(--nav-band, 0px)) + 12px) !important; } }
       #panel-today .today-hero.hero-solo #today-name { cursor: pointer; }
       /* the outfit view */
       .outfit-view { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; flex-direction: column; }
@@ -8425,7 +8425,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.25</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.26</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11417,7 +11417,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.25";
+var WARDROBE_BUILD = "2026-11-21.86.26";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -30388,33 +30388,35 @@ function renderToday() {
   if (!todayLook) return;
   var img = document.getElementById("today-img");
   var collage = document.getElementById("today-collage");
-  var heroPieces = (todayLook.fwPieces || []).filter(function (p) { return p.photo; });
-  if (todayLook.fwRender) {
-    /* The dealt top has a verified render: the hero is him wearing
-       this exact outfit — his top, his shoes, the suggested
-       bottom — tappable to full size like every photo of him. */
-    if (collage) { collage.hidden = true; collage.innerHTML = ""; }
-    img.hidden = false;
-    img.src = fwRenderSrc(todayLook);
-    img.alt = todayLook.imgAlt || "";
-    img.setAttribute("data-popout", fwRenderSrc(todayLook));
-    img.setAttribute("data-popout-alt", todayLook.imgAlt || "");
-  } else if (heroPieces.length) {
-    /* No render for this pairing: his actual pieces — their own
-       photographs, never a render of some other outfit wearing
-       their names. */
-    img.hidden = true;
-    if (collage) {
-      collage.innerHTML = heroPieces.slice(0, 3).map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" />'; }).join("");
-      collage.hidden = false;
+  if (!img.hasAttribute("data-avatar-managed")) {
+    var heroPieces = (todayLook.fwPieces || []).filter(function (p) { return p.photo; });
+    if (todayLook.fwRender) {
+      /* The dealt top has a verified render: the hero is him wearing
+         this exact outfit — his top, his shoes, the suggested
+         bottom — tappable to full size like every photo of him. */
+      if (collage) { collage.hidden = true; collage.innerHTML = ""; }
+      img.hidden = false;
+      img.src = fwRenderSrc(todayLook);
+      img.alt = todayLook.imgAlt || "";
+      img.setAttribute("data-popout", fwRenderSrc(todayLook));
+      img.setAttribute("data-popout-alt", todayLook.imgAlt || "");
+    } else if (heroPieces.length) {
+      /* No render for this pairing: his actual pieces — their own
+         photographs, never a render of some other outfit wearing
+         their names. */
+      img.hidden = true;
+      if (collage) {
+        collage.innerHTML = heroPieces.slice(0, 3).map(function (p) { return '<img src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy" />'; }).join("");
+        collage.hidden = false;
+      }
+    } else {
+      if (collage) { collage.hidden = true; collage.innerHTML = ""; }
+      img.hidden = false;
+      img.src = lookImg(todayLook);
+      img.alt = todayLook.imgAlt || "";
+      img.setAttribute("data-popout", lookImg(todayLook));
+      img.setAttribute("data-popout-alt", todayLook.imgAlt || "");
     }
-  } else {
-    if (collage) { collage.hidden = true; collage.innerHTML = ""; }
-    img.hidden = false;
-    img.src = lookImg(todayLook);
-    img.alt = todayLook.imgAlt || "";
-    img.setAttribute("data-popout", lookImg(todayLook));
-    img.setAttribute("data-popout-alt", todayLook.imgAlt || "");
   }
   document.getElementById("today-name").textContent = displayTitleForLook(todayLook) || todayLook.title;
   var sug = document.getElementById("today-suggest");
@@ -44627,7 +44629,8 @@ window.inspoView = "withmine";
   }
 
   /* ---------- the hero ---------- */
-  var skip = 0, prevSrc = null;
+  img.setAttribute("data-avatar-managed", "");
+  var skip = 0;
   /* Nov 19 (no flutter): a new hero image is fetched and DECODED off-screen
      while the current one stays exactly where it is; only then is it
      swapped in, in one frame, with a short fade-in of the new figure (no
@@ -44666,7 +44669,7 @@ window.inspoView = "withmine";
     nx.src = shown;
     img.parentNode.insertBefore(nx, img.nextSibling);
     heroDecoded(nx).then(function () {
-      if (cancel()) { nx.remove(); return; }
+      if (cancel() || !nx.naturalWidth) { nx.remove(); return; }
       requestAnimationFrame(function () {
         if (cancel()) { nx.remove(); return; }
         /* one frame: old figure off, new figure on (never both: cut-outs are
@@ -44701,6 +44704,10 @@ window.inspoView = "withmine";
     var bb = document.getElementById("bottombar");
     var band = bb && bb.getBoundingClientRect().height ? Math.max(0, Math.round(window.innerHeight - bb.getBoundingClientRect().top)) : 0;
     hero.style.setProperty("--nav-band", band + "px");
+    var pill = bb && bb.querySelector(".nav-pill");
+    if (pill && pill.getClientRects().length) {
+      hero.style.setProperty("--nav-caption-band", Math.max(0, window.innerHeight - pill.getBoundingClientRect().top) + "px");
+    }
   }
   var booted782 = false, userDeal782 = false, rcache = { sig: "", v: false };
   function anyRenderable782() {
@@ -44835,7 +44842,6 @@ window.inspoView = "withmine";
     if ((!booted782 || !userDeal782) && skip > 0 && typeof persistOpeningLook === "function") try { persistOpeningLook(todayLook); } catch (e) {}
     booted782 = true; userDeal782 = false;
     skip = 0;
-    var prev = prevSrc; prevSrc = null;
     if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
     /* .78.5b: his cut-out on the closet backdrop when one exists */
     var shown = (typeof window.cutoutFor === "function" && window.cutoutFor(src)) || src;
@@ -44853,14 +44859,7 @@ window.inspoView = "withmine";
   if (typeof renderToday === "function") {
     var _rt782 = renderToday;
     renderToday = function () {
-      prevSrc = hero.classList.contains("hero-solo") ? img.getAttribute("src") : null;
-      var prevReady = !!(prevSrc && !/^data:/.test(prevSrc) && img.complete && img.naturalWidth > 0);
       var out = _rt782.apply(this, arguments);
-      /* Nov 19 (no flutter): the base renderToday points the hero at the raw
-         studio render, which the cut-out guard hides — a blank frame on every
-         deal. Put the on-screen cut-out back in the same task (nothing has
-         painted yet); soloHero then swaps to the new one once it is decoded. */
-      if (prevReady && img.getAttribute("src") !== prevSrc) { img.setAttribute("src", prevSrc); img.hidden = false; }
       try { soloHero(); } catch (e) {} try { if (typeof watchdog === "function") watchdog(); } catch (e) {} return out;
     };
   }
