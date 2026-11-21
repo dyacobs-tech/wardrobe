@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.19" />
+    <meta name="wardrobe-build" content="2026-11-21.86.20" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6187,6 +6187,13 @@ window.notMenswear853 = function (e) {
         }
       }
 
+      @media (max-width: 899px) {
+        #panel-today #today-simple-actions { gap: clamp(5px, 2vw, 10px) !important; }
+        #panel-today .hero-icon-btn, #panel-today #today-simple-actions .hero-type-cell .hero-cdd-btn {
+          height: 44px !important; min-height: 44px !important; max-height: 44px !important;
+        }
+        #panel-today .thumb-btn::before { width: 20px; height: 20px; flex: 0 0 20px; }
+      }
       /* The wrapper is fixed at the viewport edge. Its existing bottom
          padding keeps the pill above the home indicator; a bottom offset
          would count that safe-area inset twice. */
@@ -6197,9 +6204,10 @@ window.notMenswear853 = function (e) {
           right: 0 !important;
           top: auto !important;
           bottom: 0 !important;
-          transform: translate3d(0, 0, 0) !important;
+          transform: none !important;
+          will-change: auto;
           opacity: 1 !important;
-          transition: transform 320ms cubic-bezier(.22, .8, .28, 1), opacity 280ms cubic-bezier(.22, .8, .28, 1) !important;
+          transition: opacity 240ms ease-out !important;
         }
         html body #bottombar .nav-pill {
           margin-top: 12px;
@@ -6210,11 +6218,13 @@ window.notMenswear853 = function (e) {
         }
         html.nav-away body #bottombar.bottombar,
         html.sheet-lock body #bottombar.bottombar {
-          /* 100% must live on the bar itself — a custom property set on
-             <html> resolves the percentage to 0 and the hide is a no-op. */
-          transform: translate3d(0, calc(100% + env(safe-area-inset-bottom, 0px) + 16px), 0) !important;
+          transform: none !important;
           opacity: 0 !important;
           pointer-events: none !important;
+        }
+        html.nav-away body #bottombar .nav-pill,
+        html.sheet-lock body #bottombar .nav-pill {
+          transform: translateY(calc(100% + env(safe-area-inset-bottom, 0px) + 16px)) scale(var(--nav-scale, 1));
         }
       }
       @media (max-width: 899px) and (prefers-reduced-motion: reduce) {
@@ -8422,7 +8432,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.19</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.20</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11409,7 +11419,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.19";
+var WARDROBE_BUILD = "2026-11-21.86.20";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -44503,7 +44513,7 @@ window.inspoView = "withmine";
   var lastY = 0, lastSrc = null, ticking = false, shrink = 0, hideTravel = 0, showTravel = 0;
   var mq = window.matchMedia ? window.matchMedia("(max-width: 899px)") : null;
   var reduceMq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
-  var THRESH = 6, TOP = 24, BOTTOM = 28, SHRINK_PX = 90, HIDE_PX = 70, SHOW_PX = 70;
+  var THRESH = 6, TOP = 24, SHRINK_PX = 90, HIDE_PX = 70, SHOW_PX = 70;
   function reduced() { return !!(reduceMq && reduceMq.matches); }
   function phone() { return !(mq && !mq.matches); }
   function typing() {
@@ -44555,12 +44565,12 @@ window.inspoView = "withmine";
     if (y > max) y = max;
     if (src.el !== lastSrc) { lastSrc = src.el; lastY = y; hideTravel = 0; showTravel = 0; }
     var dy = y - lastY;
+    if (overscroll) { lastY = y; return; }
+    if (y <= TOP) { lastY = y; hideTravel = 0; showTravel = 0; show(); return; }
+    /* Accumulate small touchpad and slow-drag deltas. At the bottom an
+       idle frame or rubber-band rebound must not reveal the bar. */
+    if (Math.abs(dy) <= THRESH) return;
     lastY = y;
-    /* Rubber-band / momentum bounce is not a user scroll-up. */
-    if (overscroll) return;
-    if (y <= TOP) { hideTravel = 0; showTravel = 0; show(); return; }
-    /* At the real end, only reveal if he has stopped going down. */
-    if (max > 0 && y >= max - BOTTOM && dy <= 0) { hideTravel = 0; showTravel = 0; show(); return; }
     if (dy > THRESH) {
       showTravel = 0;
       if (reduced()) { hide(); return; }
@@ -44576,11 +44586,10 @@ window.inspoView = "withmine";
     }
   }
   function onScroll(e) {
-    if (!ticking) {
-      var src = scrollSource(e && e.target);
-      ticking = true;
-      requestAnimationFrame(function () { step(src); });
-    }
+    if (ticking) return;
+    var target = e && e.target;
+    ticking = true;
+    requestAnimationFrame(function () { step(scrollSource(target)); });
   }
   document.addEventListener("scroll", onScroll, { passive: true, capture: true });
   window.addEventListener("scroll", onScroll, { passive: true });
