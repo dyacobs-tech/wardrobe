@@ -130,8 +130,10 @@ def main() -> int:
               stored: !!localStorage.getItem('wardrobe.wardrobeRules'),
               inKeys: (typeof DATA_KEYS !== 'undefined') && DATA_KEYS.indexOf('wardrobeRules') !== -1
             })""")
-            check("three seed rules on a fresh profile", seeds["n"] == 3 and seeds["parsed"] and seeds["enabled"], seeds)
-            check("seed ids are stable", set(seeds["ids"]) == {"seed-tuck-blazer", "seed-tuck-dress-tee", "seed-tuck-flannel"}, seeds["ids"])
+            # .86.31+: a fresh profile gets the 3 built-in rules plus David's added rules
+            EXPECT = 3 + 4
+            check("seed rules on a fresh profile", seeds["n"] == EXPECT and seeds["parsed"] and seeds["enabled"], seeds)
+            check("seed ids are stable", set(seeds["ids"]) == {"seed-tuck-blazer", "seed-tuck-dress-tee", "seed-tuck-flannel", "dj-sweater-over-shirt-70", "dj-eleventy-no-sweater", "dj-eleventy-untucked", "dj-malibu-tees-only"}, seeds["ids"])
             check("seed rules stored for backup", seeds["stored"] and seeds["inKeys"])
             check("blazer seed understood", any("shirts, polos and knits must be tucked under blazers" in t for t in seeds["texts"]), seeds["texts"][:1])
 
@@ -199,10 +201,10 @@ def main() -> int:
             check("Rules sub-page opens", page.evaluate("currentTab") == "prules" and page.locator("#panel-prules").is_visible())
             check("page heading is centred Wardrobe Rules", page.locator("#prules-title").is_visible())
             cards = page.locator(".rule-card")
-            check("seed rules are listed", cards.count() == 3, cards.count())
+            check("seed rules are listed", cards.count() == EXPECT, cards.count())
             check("each rule shows its interpretation", page.evaluate("""() => {
               const cards = [...document.querySelectorAll('.rule-card')];
-              return cards.length === 3 && cards.every(c => {
+              return cards.length === 7 && cards.every(c => {
                 const u = c.querySelector('.rule-understood');
                 return u && /Understood as:/.test(u.textContent || '');
               });
@@ -239,7 +241,7 @@ def main() -> int:
             check("live preview parses a new rule", "Understood as:" in (prev.inner_text() if prev.is_visible() else ""))
             page.locator("#rule-add").click()
             page.wait_for_timeout(250)
-            check("adding a rule lists it", page.locator(".rule-card").count() == 4)
+            check("adding a rule lists it", page.locator(".rule-card").count() == EXPECT + 1)
             page.fill("#rule-input", "Keep the Italian attitude")
             page.locator("#rule-add").click()
             page.wait_for_timeout(250)
