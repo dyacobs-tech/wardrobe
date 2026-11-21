@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-20.86.9" />
+    <meta name="wardrobe-build" content="2026-11-20.86.10" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8337,7 +8337,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-20.86.9</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-20.86.10</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9430,13 +9430,20 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       else { p.lo = 2; p.hi = 5; p.kind = "shoe"; }
     } else if (LAYER_CATS[cat]) {
       p.role = "layer";
-      if (cat === "Suits") { p.lo = 5; p.hi = 7; p.kind = "suit"; p.warm = 1; }
+      if (cat === "Suits") {
+        p.kind = "suit"; p.warm = 1;
+        /* .86.10: only a tuxedo / dinner suit is Black Tie; a day suit stops at Formal */
+        if (/tuxedo|dinner/.test(n)) { p.lo = 6; p.hi = 7; p.kind = "dinner"; }
+        else { p.lo = 5; p.hi = 6; }
+      }
       else if (cat === "Blazers") {
         p.kind = "blazer"; p.warm = 1;
         if (/knit|jersey|unstructured/.test(n)) { p.lo = 4; p.hi = 5; }
-        else if (/linen|seersucker/.test(n)) { p.lo = 4; p.hi = 6; p.warm = -1; }
+        else if (/linen|seersucker/.test(n)) { p.lo = 4; p.hi = 5; p.warm = -1; }
         else if (p.pattern) { p.lo = 4; p.hi = 5; }
-        else if (/velvet|tuxedo|dinner|dolce|burgundy|black|midnight/.test(n)) { p.lo = 5; p.hi = 7; }
+        else if (/tuxedo|dinner jacket|dinner-jacket|\bdinner\b|shawl collar|evening jacket/.test(n) || (/velvet/.test(n) && /tuxedo|dinner|evening|shawl/.test(n))) {
+          p.lo = 6; p.hi = 7; p.kind = "dinner";
+        }
         else { p.lo = 4; p.hi = 6; }
       }
       else if (cat === "Coats") { p.lo = 3; p.hi = 7; p.kind = "coat"; p.warm = 3; }
@@ -9520,6 +9527,45 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     return { lo: lo, hi: hi, score: score };
   }
 
+  /* .86.10 — dress levels mean what they say.
+     Black Tie: dinner jacket / tuxedo + formal trousers + patent or velvet shoes.
+     Formal: suit or tailoring with dress trousers and dress shoes.
+     A sport blazer + chinos is Business Casual at most — never Formal or Black Tie. */
+  function pieceName867(p) { return String((p && (p.n || p.name)) || "").toLowerCase(); }
+  function isDinnerLayer867(layer) {
+    if (!layer) return false;
+    if (layer.kind === "dinner") return true;
+    var n = pieceName867(layer);
+    if (/tuxedo|dinner jacket|dinner-jacket|\bdinner\b|shawl collar|evening jacket/.test(n)) return true;
+    if (/velvet/.test(n) && /tuxedo|dinner|evening|shawl/.test(n)) return true;
+    return false;
+  }
+  function isCasualTrousers867(bottom) {
+    if (!bottom) return true;
+    if (bottom.kind === "chinos" || bottom.kind === "jeans" || bottom.kind === "shorts" || bottom.kind === "swim" || bottom.kind === "linen") return true;
+    var n = pieceName867(bottom);
+    return /chino|\bjeans?\b|denim|twill|seersucker|drawstring|jogger|5-pocket|five-pocket|linen/.test(n) && !/tuxedo/.test(n);
+  }
+  function isFormalTrousers867(bottom) {
+    if (!bottom || isCasualTrousers867(bottom)) return false;
+    var n = pieceName867(bottom);
+    return /dress|wool|flannel|tailored|pleat|tuxedo|pinstripe|finstripe/.test(n);
+  }
+  function isBlackTieTrousers867(bottom) {
+    if (!isFormalTrousers867(bottom)) return false;
+    var n = pieceName867(bottom);
+    if (/tuxedo|dinner/.test(n)) return true;
+    return bottom.fam === "black" || bottom.fam === "navy" || /black|midnight|navy/.test(n);
+  }
+  function isBlackTieShoes867(shoes) {
+    if (!shoes) return false;
+    if (typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes)) return false;
+    var n = pieceName867(shoes);
+    /* Velvet house slippers (furlane) are not black-tie dress shoes;
+       patent, opera pumps, and velvet loafers are. */
+    return /patent|opera|pump/.test(n) || (/velvet/.test(n) && /loafer|pump|oxford|dress/.test(n) && !/furlane|concho/.test(n));
+  }
+
   /* Structural rules per outfit type. */
   function fitsLevel(L, top, bottom, shoes, layer) {
     var lk = layer ? layer.kind : "";
@@ -9534,8 +9580,20 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       if (typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes)) return false;
       return true;
     }
-    if (L === 6) return (lk === "blazer" || lk === "suit") && (top.kind === "shirt" && !top.casualShirt || top.kind === "polo" && !top.shortSleeve || top.kind === "knit" && /turtle|roll/.test(top.n)) && !(typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes));
-    if (L === 7) return (lk === "blazer" || lk === "suit") && layer.hi >= 7 && top.kind !== "tee" && !(typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes));
+    if (L === 6) {
+      if (isDinnerLayer867(layer)) return false;
+      if (lk !== "blazer" && lk !== "suit") return false;
+      if (!isFormalTrousers867(bottom)) return false;
+      if (typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes)) return false;
+      return (top.kind === "shirt" && !top.casualShirt) || (top.kind === "polo" && !top.shortSleeve) || (top.kind === "knit" && /turtle|roll/.test(top.n));
+    }
+    if (L === 7) {
+      if (!isDinnerLayer867(layer)) return false;
+      if (!isBlackTieTrousers867(bottom)) return false;
+      if (!isBlackTieShoes867(shoes)) return false;
+      if (top.kind === "tee" || top.casualShirt || top.shortSleeve) return false;
+      return true;
+    }
     return true;
   }
 
@@ -9642,19 +9700,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     this._lv = this._lv || {};
     if (this._lv[level]) return this._lv[level];
     var out = this.combos.filter(function (c) { return c.mask & bit; });
-    /* Formal / Black Tie when the closet has few pieces that dressy:
-       the true matches first, topped up with the most formal the
-       closet can do — a tailored jacket over a dress shirt or knit
-       polo on a Business Casual base (scored a notch lower). */
-    if (level >= 6 && out.length < 1500) {
-      var have = {};
-      out.forEach(function (c) { have[c.key] = 1; });
-      var extra = this.forLevel(level - 1).filter(function (c) {
-        return !have[c.key] && c.l && (c.l.kind === "blazer" || c.l.kind === "suit") && c.t.kind !== "tee" && !c.t.casualShirt && !c.t.shortSleeve && c.s.kind !== "sneaker" && c.s.kind !== "espadrille" && c.s.kind !== "boat" && c.b.kind !== "jeans";
-      });
-      out = out.concat(extra.map(function (c) { return Object.assign({}, c, { score: c.score - 0.6 }); }));
-      if (!out.length) out = this.forLevel(level - 1);
-    }
+    /* .86.10: if Formal or Black Tie has few true matches, show fewer
+       — never top the level up with a sport blazer and chinos. */
     this._lv[level] = out;
     return out;
   };
@@ -9850,6 +9897,10 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     profile: profile,
     evaluate: evaluate,
     fitsLevel: fitsLevel,
+    isDinnerLayer867: isDinnerLayer867,
+    isFormalTrousers867: isFormalTrousers867,
+    isBlackTieTrousers867: isBlackTieTrousers867,
+    isBlackTieShoes867: isBlackTieShoes867,
     isFlannelPiece: isFlannelPiece,
     isDressTee: isDressTee,
     isTailoredLayer: isTailoredLayer,
@@ -10769,24 +10820,8 @@ function homeComposerLooks75(count) {
     return (shorts ? 0 : 8) + (layered ? 0 : 10) + warmTopRank84(look);
   }
   if (temp >= 72) vis = vis.slice().sort(function (a, b) { return warmHeroRank84(b) - warmHeroRank84(a); });
-  /* .86.4: if this dress level has no on-body render, take the closest
-     rendered level rather than a piece-photo grid. Exact level stays first. */
-  if (vis.length < want) {
-    var seen = {};
-    vis.forEach(function (l) { seen[l.composerKey || l.id || l.title] = 1; });
-    for (var d = 1; d <= 6 && vis.length < want; d++) {
-      var nearby = [];
-      if (level853 - d >= 1) nearby.push(level853 - d);
-      if (level853 + d <= 7) nearby.push(level853 + d);
-      nearby.forEach(function (lv) {
-        if (vis.length >= want) return;
-        (homeComposerLooksAtLevel864(want, lv) || []).forEach(function (l) {
-          var k = l.composerKey || l.id || l.title;
-          if (!seen[k]) { vis.push(l); seen[k] = 1; }
-        });
-      });
-    }
-  }
+  /* .86.10: if Formal or Black Tie has no true looks, show the empty
+     state rather than a sport blazer and chinos from a nearby level. */
   return vis.slice(0, want);
 }
 function homeLookOk742(look) {
@@ -11251,7 +11286,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-20.86.9";
+var WARDROBE_BUILD = "2026-11-20.86.10";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -29706,6 +29741,10 @@ function lookHasTailoredLayer(look) {
 function lookFitsFormality(look, level) {
   if (!look) return false;
   if (level === undefined) level = formalityLevel;
+  /* .86.10: same dress-level rules as Home / Looks / Rendered chips.
+     A sport blazer + chinos is not Formal or Black Tie. */
+  if (look.dressEmpty) return false;
+  if (typeof lookFitsDress841 === "function") return lookFitsDress841(look, level);
   var tailored = lookHasTailoredLayer(look);
   if (level <= 4 && tailored) return false;
   if (level >= 6 && !tailored) return false;
@@ -29860,6 +29899,7 @@ function openingLook() {
       ? buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() })
       : buildClosetLooks()) || [];
   }
+  if (typeof lookFitsDress841 === "function") clw = (clw || []).filter(function (l) { return lookFitsDress841(l, dressLevel841()); });
   if (typeof lookIsMine === "function") clw = clw.filter(lookIsMine);
   if (clw && clw.length) {
     var clwFresh = clw.filter(function (l) { return !isGraduatedLook(l) && !lookPhotoBanned(l); });
@@ -30756,10 +30796,9 @@ function dealHeroForSource() {
       ? buildClosetLooks({ temp: currentWeather.temp, rainy: isRainy(), salt: dayOfYear() + window._heroDealN })
       : buildClosetLooks()) || [];
   }
-  /* .86.4: only looks he can be seen in (on-body cut-out). The composer
-     already prefers the chosen dress level and widens to the closest
-     rendered level when that level has none — do not strip those back out. */
-  cl = (cl || []).filter(function (l) { return lookIsMine(l) && (typeof lookHeroVisible84 !== "function" || lookHeroVisible84(l)) && !(window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function" && !window.WardrobeRules.lookAllowed(l, { level: dressLevel841(), dow: (new Date()).getDay(), temp: (typeof currentWeather !== "undefined" && currentWeather) ? currentWeather.temp : undefined })); });
+  /* .86.10: only looks he can be seen in at this dress level. Never
+     fill Formal or Black Tie with a nearby sport-blazer look. */
+  cl = (cl || []).filter(function (l) { return lookIsMine(l) && (typeof lookFitsDress841 !== "function" || lookFitsDress841(l, dressLevel841())) && (typeof lookHeroVisible84 !== "function" || lookHeroVisible84(l)) && !(window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function" && !window.WardrobeRules.lookAllowed(l, { level: dressLevel841(), dow: (new Date()).getDay(), temp: (typeof currentWeather !== "undefined" && currentWeather) ? currentWeather.temp : undefined })); });
   var d861 = null;
   if (!cl.length) {
     try { d861 = dressDiag861(dressLevel841()); } catch (eD) { d861 = null; }
@@ -45664,21 +45703,14 @@ window.inspoView = "withmine";
 })();
     </script>
     <script type="wardrobe/app">
-/* ================= Build .86.9 — Looks · Rendered =================
-   One gallery of every AVATAR render of him (pipeline only), newest first:
-     (a) on-demand FASHN / wardrobe-tryon outputs — AUTO-SAVED into the synced
-         "rendered" collection;
-     (b) a saved look only when its picture is itself a pipeline avatar;
-     (c) Worn Today photos are not a source — even a studio render that only
-         lives in the worn log stays out (David: avatars only, no selfies);
-     (d) the on-body pool (assets/onbody), filtered by Wardrobe Rules and the
-         dress-shoe hard rule.
-   Nothing else: no camera / mirror selfies, no assets/photos, no
-   assets/wardrobe-look (those are the 1376×1824 selfie try-ons), no user
-   photos, no data:/blob:/idb: captures.
-   Renders never enter Home rotation: Home still deals from the composer.
-   Delete only removes a render from this gallery (on-demand records are
-   deleted; saved/pool entries get a synced hide record). */
+/* ================= Build .86.10 — Looks · Rendered =================
+   Only the avatar renders he triggers with See it on me (icon page,
+   Looks → New, The Edit / Shop, Build). Auto-saved into the synced
+   "rendered" collection. The closet on-body pool is not a source.
+   Deduped by outfit key + image, newest first. Pipeline URLs only
+   (no selfies, no Worn Today photos, no assets/photos).
+   Renders never enter Home rotation. Delete removes a record from
+   this gallery only (confirm first). */
 (function () {
   var PAGE = 45, shown = PAGE, level = "all", items = [], lastSig = "", openKey = null, confirming = false, io = null;
   var counts867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 }, raw867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 };
@@ -45705,11 +45737,14 @@ window.inspoView = "withmine";
   function levelFromNames(names) {
     var t = (names || []).join(" ").toLowerCase();
     if (!t) return null;
-    if (/tuxedo|dinner jacket|bow tie|black tie/.test(t)) return 7;
-    var tail = /blazer|sport coat|suit jacket|\bsuit\b|tailored jacket/.test(t);
-    var dress = /loafer|oxford|derby|monk|velvet|dress shoe|penny|tassel/.test(t);
-    if (tail && dress) return 6;
-    if (tail) return 5;
+    var dinner = /tuxedo|dinner jacket|dinner-jacket|\bdinner\b|shawl collar|evening jacket/.test(t) || (/velvet/.test(t) && /tuxedo|dinner|evening|shawl/.test(t));
+    var formalTrous = /tuxedo|dress (pant|trouser)|wool (pant|trouser)|flannel (pant|trouser)|pleat/.test(t) && !/chino|twill|jeans|seersucker/.test(t);
+    var btShoe = /patent|opera|pump/.test(t) || (/velvet|furlane/.test(t) && !/concho/.test(t));
+    if (dinner && formalTrous && btShoe) return 7;
+    var suit = /\bsuit\b|suit jacket|tailored jacket/.test(t);
+    var dressShoe = /oxford|derby|monk|loafer|penny|tassel|edward green|belgian|baudoin|dress shoe/.test(t) && !/sneaker|runner|espadrille/.test(t);
+    if ((suit || /\bblazer\b/.test(t)) && formalTrous && dressShoe) return 6;
+    if (/\bblazer\b|sport coat|suit jacket|\bsuit\b/.test(t)) return 5;
     if (/swim|trunk|bathing/.test(t)) return 1;
     if (/shorts|\btee\b|t-shirt|sneaker|jeans|denim|slipper|slide/.test(t)) return 3;
     return 4;
@@ -45823,40 +45858,28 @@ window.inspoView = "withmine";
     var out = [], seen = {}, hidden = {};
     raw867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 }; counts867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 };
     (renderedLooks || []).forEach(function (r) { if (r && r.hide) hidden[r.hide] = 1; });
-    function add(it) {
+    function outfitKeyOf(r) {
+      var ids = (r.ids || []).filter(Boolean).slice().sort();
+      if (ids.length) return ids.join("|");
+      if (r.k) return "k:" + r.k;
+      return "";
+    }
+    function add(it, rec) {
       raw867[it.src]++;
       if (!it.img || hidden[it.key]) return;
       if (!isPipelineAvatar867(it.img)) return;
       var ik = canon(it.img);
       if (seen[ik]) return;
-      seen[ik] = 1; counts867[it.src]++; out.push(it);
+      var ok = rec ? outfitKeyOf(rec) : "";
+      if (ok && seen["o:"+ok]) return;
+      seen[ik] = 1; if (ok) seen["o:"+ok] = 1; counts867[it.src]++; out.push(it);
     }
-    (renderedLooks || []).forEach(function (r) {
-      if (!r || r.hide || !r.u) return;
-      add({ key: "r:" + r.id, src: "ondemand", rec: r, img: r.u, title: r.title || "Render of you", ts: r.t || 0, lv: r.lv || null, pieces: r.pieces || [], ids: r.ids || [] });
+    /* .86.10: on-demand See-it-on-me records only, newest first, then dedupe */
+    var recs = (renderedLooks || []).filter(function (r) { return r && !r.hide && r.u; }).slice().sort(function (a, b) { return (b.t || 0) - (a.t || 0); });
+    recs.forEach(function (r) {
+      add({ key: "r:" + r.id, src: "ondemand", rec: r, img: r.u, title: r.title || "Render of you", ts: r.t || 0, lv: r.lv || null, pieces: r.pieces || [], ids: r.ids || [] }, r);
     });
-    (typeof savedLooks !== "undefined" ? savedLooks : []).forEach(function (l) {
-      if (!l || l.source === "uploaded") return;
-      var img = "";
-      try { img = (typeof lookImg === "function") ? lookImg(l) : l.img; } catch (e) { img = l.img || ""; }
-      if (!img || img.indexOf("composer:") === 0 || img.indexOf("blob:") === 0) return;
-      var pcs = (l.fwPieces && l.fwPieces.length) ? l.fwPieces.map(function (p) { var c = closetIt(p.id || p.itemId); return { n: (c && c.name) || p.name || "", c: (c && c.category) || p.category || "", i: (c && c.id) || "" }; })
-        : (l.anchorNames && l.anchorNames.length ? l.anchorNames.map(function (n) { return { n: n, c: "" }; }) : (l.swatches || []).map(function (s) { return { n: s.name || "", c: s.role || "" }; }));
-      var ids = pcs.map(function (p) { return p.i; }).filter(Boolean);
-      var lv = levelOfIds(ids);
-      if (!lv && typeof RENDER_FORMALITY !== "undefined" && RENDER_FORMALITY[img]) lv = RENDER_FORMALITY[img];
-      if (!lv) lv = levelFromNames([l.title || ""].concat(pcs.map(function (p) { return p.n; })));
-      add({ key: "saved:" + l.id, src: "saved", look: l, img: img, title: l.title || "Saved look", ts: tsOf(l.createdAt) || tsOf(l.likedAt) || tsFromId(l.id), lv: lv, pieces: pcs, ids: ids });
-    });
-    (typeof wornLog !== "undefined" ? wornLog : []).forEach(function (e) {
-      if (!e || !e.img || e.selfie === true) return;
-      var ids = (e.pieceIds || []).map(function (p) { return (p && typeof p === "object") ? p.id : p; }).filter(Boolean);
-      var pcs = (e.pieceDetails && e.pieceDetails.length) ? e.pieceDetails.map(function (d) { return { n: d.name || "", c: d.category || "" }; }) : (e.pieces || []).map(function (n) { return { n: n, c: "" }; });
-      var lv = levelOfIds(ids) || levelFromNames([e.title || ""].concat(pcs.map(function (p) { return p.n; })));
-      var ts = tsOf(e.date); if (ts && String(e.date).length <= 10) ts += 12 * 3600000;
-      add({ key: "worn:" + (e.id || (e.lookId + "@" + e.date)), src: "worn", entry: e, img: e.img, title: e.title || "Worn", ts: ts || tsFromId(e.id), lv: lv, pieces: pcs, ids: ids });
-    });
-    poolItems().forEach(add);
+    /* saved looks, Worn Today and the closet pool are not sources */
     out.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
     return out;
   }
@@ -45882,7 +45905,7 @@ window.inspoView = "withmine";
     });
     h += "</div>";
     if (!list.length) {
-      h += '<div class="card empty rnd-empty"><p>No renders yet.</p><p class="meta">Tap See it on me on a look or a piece and the render lands here, on every device.</p></div>';
+      h += '<div class="card empty rnd-empty"><p>No renders yet.</p><p class="meta">Tap See it on me on a look, an icon, or a piece — in Looks, The Edit, Shop or Build — and the render lands here, on every device.</p></div>';
     } else {
       h += '<p class="rnd-count">' + list.length + " render" + (list.length === 1 ? "" : "s") + " of you \u00b7 newest first</p>";
       h += '<div class="rnd-grid" id="rnd-grid">';
