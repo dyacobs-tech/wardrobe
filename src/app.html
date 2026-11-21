@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.38" />
+    <meta name="wardrobe-build" content="2026-11-21.86.39" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8492,7 +8492,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.38</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.39</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11628,7 +11628,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.38";
+var WARDROBE_BUILD = "2026-11-21.86.39";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -47789,6 +47789,24 @@ window.inspoView = "withmine";
     if (s.t === "gap") return "Fills gap: " + String(s.name || "").toLowerCase();
     return l.feed === "allnew" ? "Your colours" : "";
   }
+  /* .86.39: a ready-made outfit on him joins Mix only at a ticked dress
+     level (it used to show polo looks at Nighttime Dressy) and only if it
+     keeps his rules (it showed the Malibu linen pants with polos) */
+  function renderedFits838(r) {
+    var fw = (r.pieces || []).map(function (pc) { return pc.it || (pc.e ? catItem(pc.e) : null); }).filter(Boolean);
+    if (fw.length < (r.pieces || []).length) return true;   /* a piece we cannot read: do not hide it */
+    var lv = level();
+    var ls = lv == null ? [null] : (window.dressLevels838 ? window.dressLevels838.get() : [lv]);
+    var temps = (window.tempBands834 && window.tempBands834.temps) ? window.tempBands834.temps() : [];
+    var temp = temps.length ? temps[0] : ((typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : undefined);
+    return ls.some(function (L) {
+      try {
+        if (L != null && typeof lookFitsDress841 === "function" && !lookFitsDress841({ fwPieces: fw }, L)) return false;
+        if (window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function" && !window.WardrobeRules.lookAllowed({ fwPieces: fw }, { level: L, temp: temp, dow: (new Date()).getDay() })) return false;
+        return true;
+      } catch (e) { return true; }
+    });
+  }
   /* the On you renders, as With mine looks */
   function renderedLooks() {
     var src = (typeof INSPO_ONBODY !== "undefined" && INSPO_ONBODY.looks) || [];
@@ -47799,7 +47817,14 @@ window.inspoView = "withmine";
       });
       var own = (r.owned || []).map(piece).filter(Boolean);
       var key = (r.owned || []).concat((r.shop || []).map(function (sp) { return "sku:" + sp.sku; })).slice().sort().join("|");
-      return { key: key, feed: "withmine", render: "assets/inspo-cut/" + r.f, pieces: own.concat(shop), shop: shop, total: shop.reduce(function (a, p) { return a + (p.price || 0); }, 0), title: (typeof ION_STYLE !== "undefined" && ION_STYLE[r.style]) || "On you", src: null, rid: r.id };
+      /* .86.38: named by its pieces, not the old style tag ("Palm Beach"),
+         which read as a location on every card (David, 21 Nov) */
+      var all = own.concat(shop);
+      function catOf(pc) { return String((pc.it && pc.it.category) || (pc.e && (pc.e.category || pc.e.cat)) || pc.name || ""); }
+      var up = all.filter(function (pc) { return /Blazer|Jacket|Coat|Suit/i.test(catOf(pc)); })[0] || all.filter(function (pc) { return /Shirt|Polo|Tee|Sweater|Knit|Top/i.test(catOf(pc)); })[0];
+      var lo = all.filter(function (pc) { return /Trouser|Jean|Short|Chino|Pant/i.test(catOf(pc)); })[0];
+      var ttl = up && lo ? up.name + " & " + lo.name : "On you";
+      return { key: key, feed: "withmine", render: "assets/inspo-cut/" + r.f, pieces: all, shop: shop, total: shop.reduce(function (a, p) { return a + (p.price || 0); }, 0), title: ttl, src: null, rid: r.id };
     }).filter(function (l) { return l.shop.length && l.pieces.length; });
   }
 
@@ -47829,8 +47854,10 @@ window.inspoView = "withmine";
     var rq = !l.render && S.rq.some(function (r) { return r.key === l.key; });
     return '<article class="card option-card cf-card en-card" role="listitem" data-en-i="' + i + '">' +
       '<div class="cf-media en-media">' + media + "</div>" +
-      '<span class="oc-body"><span class="oc-title">' + E(l.title) + "</span>" +
-      (sl ? '<span class="en-src">' + E(sl) + "</span>" : "") +
+      /* a ready-made outfit on him: the picture and the item boxes say it
+         all; only what it would cost stays (no title, no "On you") */
+      '<span class="oc-body' + (l.render ? ' en-body-min' : '') + '">' + (l.render ? "" : '<span class="oc-title">' + E(l.title) + "</span>") +
+      (sl && !l.render ? '<span class="en-src">' + E(sl) + "</span>" : "") +
       (buy ? '<span class="en-total">' + E(buy) + "</span>" : "") + "</span>" +
       '<span class="cf-actions"><button type="button" class="chip" data-cf-like="' + i + '" data-en-like="' + i + '" aria-pressed="' + (liked ? "true" : "false") + '">Like</button>' +
       (PV ? '<button type="button" class="pv-edit" data-pv-edit="' + i + '" aria-label="Edit">Edit</button>' : "") +
@@ -47877,7 +47904,7 @@ window.inspoView = "withmine";
     var CAP = f.looks.length ? 8 : 4;
     /* With mine: the On you renders lead */
     if (feed === "withmine" && !S.lens && f.rendered && f.rendered.length) {
-      while (out.length < CAP && f.rendered.length) { var r = f.rendered.shift(); if (!f.keys[r.key] && !S.hidden[r.key] && lookPriceOk(r)) out.push(r); }
+      while (out.length < CAP && f.rendered.length) { var r = f.rendered.shift(); if (!f.keys[r.key] && !S.hidden[r.key] && lookPriceOk(r) && renderedFits838(r)) out.push(r); }
     }
     while (out.length < CAP && BUF[feed].length) {
       var o = BUF[feed].shift();
@@ -48550,14 +48577,18 @@ function weightLenses(q) {
   });
   return out;
 }
-function iconShare(feed, wt) {
+function iconShare(feed, wt, W) {
   var tot = 0, on = 0, maxW = 0;
+  /* .86.39: weights are 0-100 since v2 (were 0-10); "8+" means 80+ there.
+     The old fixed 8 made every default 20 count as a strong icon, so
+     icon looks always took the large share whatever was set. */
+  var hiAt = (W && (W.scale === 100 || W.v === 2)) ? 80 : 8;
   ICONS.forEach(function (ic) { var w = +wt[ic.id] || 0; if (w > 0) { tot += w; on++; if (w > maxW) maxW = w; } });
   if (!on || tot <= 0) return 0;
   /* When an icon is set to 8+, Icons take a clear majority of New and a
      substantial share of Mix. Uniform mid weights stay modest so the
      contrast is visible. Zero total still means no icon-seeded looks. */
-  var high = maxW >= 8;
+  var high = maxW >= hiAt;
   if (feed === "allnew") return high ? 0.70 : 0.32;
   return high ? 0.50 : 0.16;
 }
@@ -48574,7 +48605,7 @@ function inspiration(feed, q) {
      Icon picks are weighted per dress level; a zero total weight drops
      the icon group (no icon-seeded looks). */
   var wt = weightsFor(q);
-  var iShare = iconShare(feed, wt);
+  var iShare = iconShare(feed, wt, q && q.weights);
   var g = feed === "allnew" ? [["icon", iShare], ["palette", PLATES.length ? 0.25 : 0], ["style", 0.2], ["gap", GAPS.length ? 0.2 : 0]]
     : [["style", 0.6], ["gap", GAPS.length ? 0.25 : 0], ["icon", iShare]];
   var t = pickW(g, g.map(function (x) { return x[1]; }))[0];
@@ -48696,7 +48727,7 @@ function dealInspo(q) {
   var seen = {}; (q.recent || []).forEach(function (k) { seen[k] = 1; });
   var out = [], tries = 0, MAX = 9000;
   var wt = weightsFor(q);
-  var iconTarget = q.lens ? q.n : Math.round((q.n || 0) * iconShare(q.feed, wt));
+  var iconTarget = q.lens ? q.n : Math.round((q.n || 0) * iconShare(q.feed, wt, q.weights));
   function lensSrc() {
     return { t: "icon", ic: { id: q.lens.id, name: q.lens.name, palette: q.lens.hex, formality: q.lens.formality, lens: q.lens } };
   }

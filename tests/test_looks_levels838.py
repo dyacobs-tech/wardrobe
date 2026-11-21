@@ -80,8 +80,20 @@ def run(browser):
     page.wait_for_function("() => __cfLooks81().length >= 4", timeout=6000)
     assert page.locator(LABEL).text_content() == "Day +2"
 
+    # .86.39 Mix: ready-made outfits on him carry no style title ("Palm
+    # Beach" read as a location) and join only at a ticked level
+    page.evaluate("() => window.dressLevels838.set([5])")
+    page.locator('#pv-top .pv-bar >> text=Mix').tap()
+    page.wait_for_function("() => document.querySelectorAll('#panel-withmine .en-card .en-render').length >= 2", timeout=20000)
+    page.wait_for_timeout(500)
+    made = page.evaluate("""() => [...document.querySelectorAll('#panel-withmine .en-card')].filter(c => c.querySelector('.en-render'))
+      .map(c => ({ title: !!c.querySelector('.oc-title'), src: !!c.querySelector('.en-src'), alt: c.querySelector('.en-render img').alt }))""")
+    assert made, "no ready-made outfits at Nighttime Dressy"
+    assert not any(m["title"] or m["src"] for m in made), made
+    assert all(any(w in m["alt"].lower() for w in ("blazer", "jacket", "sport coat", "sportcoat", "suit")) for m in made), made
+
     assert not errors, errors
-    print("Confirmed multi-select dress level: ticks, label, Home sync, mixed avatar-only feed")
+    print("Confirmed multi-select dress level: ticks, label, Home sync, mixed avatar-only feed; Mix ready-made looks follow the level")
     ctx.close()
 
 
