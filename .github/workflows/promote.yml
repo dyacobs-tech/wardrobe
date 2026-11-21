@@ -3,9 +3,9 @@ name: Promote preview to live
 # Daily (04:00 ET) or on demand: fast-forward main to preview when preview
 # is ahead, its tests pass, and main has nothing preview lacks. Never a
 # force-push; a diverged main stops the promotion with an error.
+# The daily 04:00 ET schedule was removed on 21 Nov 2026 at David's request:
+# nothing goes live without his explicit OK. Run by hand from Actions only.
 on:
-  schedule:
-    - cron: "0 9 * * *"
   workflow_dispatch:
 
 permissions:
