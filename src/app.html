@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.33" />
+    <meta name="wardrobe-build" content="2026-11-21.86.34" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6256,6 +6256,8 @@ window.notMenswear853 = function (e) {
       .fb830-pick { min-height: 44px; display: inline-flex; align-items: center; cursor: pointer; }
       .fb830-send { min-height: 48px; }
       .fb830-open { width: 100%; min-height: 48px; margin: 0 0 14px; }
+      /* .86.34: dress level 4 is retired (old Smart Casual → Nighttime Casual) */
+      [data-studio-type="4"][hidden] { display: none !important; }
       /* .86.29: Saved ideas row under the Mine feed (all widths) */
       #saved-grid.saved-collapsed829 { display: none !important; }
       .saved-toggle829 {
@@ -7197,11 +7199,11 @@ window.notMenswear853 = function (e) {
               <div class="cdd cdd-up">
                 <button type="button" class="cdd-btn hero-cdd-btn" id="today-type-btn" data-cdd-manual aria-haspopup="true" aria-expanded="false" aria-label="Outfit type"><span class="cdd-label" id="today-type-label">Casual</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
                 <div class="cdd-menu" id="today-type-row" hidden role="menu" aria-label="Outfit type">
-                  <button type="button" class="cdd-opt" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
-                  <button type="button" class="cdd-opt" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
-                  <button type="button" class="cdd-opt" data-studio-type="3" aria-pressed="false">Casual</button>
-                  <button type="button" class="cdd-opt" data-studio-type="4" aria-pressed="false">Smart Casual</button>
-                  <button type="button" class="cdd-opt" data-studio-type="5" aria-pressed="false">Business Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="1" aria-pressed="false">Pool / Beach</button>
+                  <button type="button" class="cdd-opt" data-studio-type="2" aria-pressed="false">Daytime</button>
+                  <button type="button" class="cdd-opt" data-studio-type="3" aria-pressed="false">Nighttime Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="4" aria-pressed="false" hidden>Nighttime Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="5" aria-pressed="false">Nighttime Dressy</button>
                   <button type="button" class="cdd-opt" data-studio-type="6" aria-pressed="false">Formal</button>
                   <button type="button" class="cdd-opt" data-studio-type="7" aria-pressed="false">Black Tie</button>
                 </div>
@@ -7241,11 +7243,11 @@ window.notMenswear853 = function (e) {
                 <button type="button" class="btn-ghost ideas-type-btn" id="ideas-type-btn" data-cdd-manual aria-haspopup="true" aria-expanded="false" aria-label="Outfit type"><span class="cdd-label" id="ideas-type-label">Smart Casual</span><span class="cdd-chev" aria-hidden="true">▾</span></button>
                 <div class="cdd-menu" id="ideas-type-menu" hidden role="menu" aria-label="Outfit type">
                   <button type="button" class="cdd-opt" data-studio-type-any aria-pressed="false">Any</button>
-                  <button type="button" class="cdd-opt" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
-                  <button type="button" class="cdd-opt" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
-                  <button type="button" class="cdd-opt" data-studio-type="3" aria-pressed="false">Casual</button>
-                  <button type="button" class="cdd-opt" data-studio-type="4" aria-pressed="false">Smart Casual</button>
-                  <button type="button" class="cdd-opt" data-studio-type="5" aria-pressed="false">Business Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="1" aria-pressed="false">Pool / Beach</button>
+                  <button type="button" class="cdd-opt" data-studio-type="2" aria-pressed="false">Daytime</button>
+                  <button type="button" class="cdd-opt" data-studio-type="3" aria-pressed="false">Nighttime Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="4" aria-pressed="false" hidden>Nighttime Casual</button>
+                  <button type="button" class="cdd-opt" data-studio-type="5" aria-pressed="false">Nighttime Dressy</button>
                   <button type="button" class="cdd-opt" data-studio-type="6" aria-pressed="false">Formal</button>
                   <button type="button" class="cdd-opt" data-studio-type="7" aria-pressed="false">Black Tie</button>
                 </div>
@@ -7281,11 +7283,11 @@ window.notMenswear853 = function (e) {
                 <button type="button" class="sel-row" id="type-sel-toggle" aria-expanded="false" aria-controls="studio-type-row"><span class="sel-name">Outfit type</span><span class="sel-val" id="type-sel-val">Smart Casual</span><span class="sel-chev" aria-hidden="true">▾</span></button>
                 <div class="sel-opts studio-type-row" id="studio-type-row" role="group" aria-label="Outfit type" hidden>
                   <button type="button" data-studio-type-any aria-pressed="false">Any</button>
-                  <button type="button" data-studio-type="1" aria-pressed="false">Swim/Pool</button>
-                  <button type="button" data-studio-type="2" aria-pressed="false">Shorts &amp; Tee</button>
-                  <button type="button" data-studio-type="3" aria-pressed="false">Casual</button>
-                  <button type="button" data-studio-type="4" aria-pressed="false">Smart Casual</button>
-                  <button type="button" data-studio-type="5" aria-pressed="false">Business Casual</button>
+                  <button type="button" data-studio-type="1" aria-pressed="false">Pool / Beach</button>
+                  <button type="button" data-studio-type="2" aria-pressed="false">Daytime</button>
+                  <button type="button" data-studio-type="3" aria-pressed="false">Nighttime Casual</button>
+                  <button type="button" data-studio-type="4" aria-pressed="false" hidden>Nighttime Casual</button>
+                  <button type="button" data-studio-type="5" aria-pressed="false">Nighttime Dressy</button>
                   <button type="button" data-studio-type="6" aria-pressed="false">Formal</button>
                   <button type="button" data-studio-type="7" aria-pressed="false">Black Tie</button>
                 </div>
@@ -8474,7 +8476,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.33</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.34</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9495,7 +9497,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if (TOP_CATS[cat]) {
       p.role = "top";
       if (cat === "Tees") {
-        p.lo = 1; p.hi = 4; p.kind = "tee"; p.shortSleeve = !/long-sleeve|long sleeve/.test(n); p.warm = -1;
+        p.lo = 1; p.hi = 5; p.kind = "tee"; p.shortSleeve = !/long-sleeve|long sleeve/.test(n); p.warm = -1; /* .86.34: a tee may go under a blazer (Nighttime Dressy) */
         p.dressTee = /silk|fine[-\s]?gauge|merceris|merceriz|lisle|filo|cashmere|merino|fil\s*d['’]?ecosse|dress\s*t-?shirt|dress\s*tee/i.test(n);
         if (p.dressTee) p.hi = 5;
       }
@@ -9504,8 +9506,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         /* Knit / merino / cashmere describe the cloth, not the sleeve.
            Only an explicit long-sleeve word marks a polo as long-sleeve. */
         var poloLS = /long-sleeve|long sleeve|longsleeve/.test(n);
-        if (poloLS) { p.lo = 3; p.hi = 6; p.shortSleeve = false; p.warm = /cashmere|wool/.test(n) ? 1 : 0; }
-        else { p.lo = 1; p.hi = 4; p.shortSleeve = true; p.warm = -1; }
+        if (poloLS) { p.lo = 2; p.hi = 6; p.shortSleeve = false; p.warm = /cashmere|wool/.test(n) ? 1 : 0; }
+        else { p.lo = 1; p.hi = 5; p.shortSleeve = true; p.warm = -1; }
       } else if (cat === "Sweaters") {
         p.kind = "knit"; p.warm = 2;
         if (/turtle|roll/.test(n)) { p.lo = 3; p.hi = 6; } else { p.lo = 3; p.hi = 5; }
@@ -9529,13 +9531,13 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       p.role = "bottom";
       if (cat === "Bathing suits") { p.lo = 1; p.hi = 1; p.kind = "swim"; p.warm = -3; }
       else if (cat === "Shorts") { p.lo = 1; p.hi = 3; p.kind = "shorts"; p.warm = -3; if (/swim/.test(n)) p.hi = 2; } /* .85.3: shorts stop at Casual — never Smart Casual and up */
-      else if (cat === "Jeans") { p.lo = 2; p.hi = 4; p.kind = "jeans"; }
+      else if (cat === "Jeans") { p.lo = 2; p.hi = (p.fam === "white" || /\b(white|cream|ecru|ivory|off-white|natural)\b/.test(n)) ? 5 : 4; p.kind = "jeans"; } /* .86.34: white or cream jeans reach Nighttime Dressy */
       else {
         p.kind = "trousers";
-        if (/linen/.test(n)) { p.lo = 1; p.hi = 4; p.warm = -2; p.kind = "linen"; }
+        if (/linen/.test(n)) { p.lo = 1; p.hi = 5; p.warm = -2; p.kind = "linen"; }
         else if (/seersucker/.test(n)) { p.lo = 3; p.hi = /dress/.test(n) ? 6 : 5; p.warm = -2; }
         else if (/5-pocket|five-pocket|jogger|drawstring/.test(n)) { p.lo = 2; p.hi = 4; }
-        else if (/chino|twill|cotton/.test(n)) { p.lo = 3; p.hi = 5; p.kind = "chinos"; }
+        else if (/chino|twill|cotton/.test(n)) { p.lo = 2; p.hi = 5; p.kind = "chinos"; }
         else if (/dress|wool|flannel|tailored|pleat|tuxedo/.test(n) && !/seersucker/.test(n)) { p.lo = 4; p.hi = /tuxedo/.test(n) ? 7 : 6; p.warm = /flannel|wool/.test(n) ? 1 : 0; }
         else { p.lo = 3; p.hi = 6; }
         if (p.hi === 6 && (p.fam === "navy" || p.fam === "black" || p.fam === "grey") && /dress|tailored|wool|tuxedo/.test(n)) p.hi = 7;
@@ -9711,14 +9713,38 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   /* Structural rules per outfit type. */
   function fitsLevel(L, top, bottom, shoes, layer) {
     var lk = layer ? layer.kind : "";
+    /* .86.34 — David's dress levels (21 Nov 2026):
+       1 Pool / Beach · 2 Daytime · 3 Nighttime Casual · (4 retired → 3)
+       5 Nighttime Dressy · 6 Formal · 7 Black Tie */
+    if (L === 4) L = 3;
     if (L === 1) return !layer && (bottom.kind === "swim" || bottom.kind === "shorts" || bottom.kind === "linen") && (top.kind === "tee" || top.shortSleeve || /linen/.test(top.n));
-    if (L === 2) return (bottom.kind === "shorts" || bottom.kind === "swim") && (top.kind === "tee" || top.kind === "polo" || /linen/.test(top.n) || top.shortSleeve) && (!layer || lk === "overshirt");
-    if (L === 3) return lk !== "blazer" && lk !== "suit";
-    /* .80.34: Smart Casual never wears a blazer or suit — overshirts,
-       knits, polos, tees, linen shirts, and shorts in the heat. */
-    if (L === 4) return lk !== "blazer" && lk !== "suit" && bottom.kind !== "shorts" && bottom.kind !== "swim";
+    if (L === 2) {
+      /* Daytime: shorts, jeans, chinos or linen trousers with a tee or polo; no layer.
+         Temperature: no shorts below 68°F; at 88°F and up only shorts or linen. */
+      if (layer) return false;
+      if (!(top.kind === "tee" || top.kind === "polo")) return false;
+      var bk = bottom.kind;
+      if (!(bk === "shorts" || bk === "jeans" || bk === "chinos" || bk === "linen")) return false;
+      var tmp = (typeof root.__levelTemp834 === "number") ? root.__levelTemp834 : (root.currentWeather && typeof root.currentWeather.temp === "number" ? root.currentWeather.temp : null);
+      if (tmp !== null && bk === "shorts" && tmp < 68) return false;
+      if (tmp !== null && tmp >= 88 && !(bk === "shorts" || bk === "linen")) return false;
+      return true;
+    }
+    if (L === 3) {
+      /* Nighttime Casual: trousers or jeans with a tee, polo, sweater or button-down;
+         never a blazer (a blazer makes it Nighttime Dressy) */
+      if (lk === "blazer" || lk === "suit" || lk === "dinner") return false;
+      if (bottom.kind === "shorts" || bottom.kind === "swim") return false;
+      if (layer && !(lk === "knit" || lk === "overshirt" || lk === "coat")) return false;
+      return top.kind === "tee" || top.kind === "polo" || top.kind === "knit" || top.kind === "shirt" || top.kind === "overshirt";
+    }
     if (L === 5) {
-      if (top.kind === "tee" || bottom.kind === "shorts" || bottom.kind === "swim") return false;
+      /* Nighttime Dressy: always a blazer, with a polo, tee or button-down;
+         non-jean trousers (white or cream jeans are fine); dress shoes */
+      if (!(lk === "blazer" || lk === "suit")) return false;
+      if (bottom.kind === "shorts" || bottom.kind === "swim") return false;
+      if (bottom.kind === "jeans" && !(bottom.fam === "white" || /\b(white|cream|ecru|ivory|off-white|natural)\b/.test(String(bottom.n || "")))) return false;
+      if (!(top.kind === "tee" || top.kind === "polo" || top.kind === "shirt")) return false;
       if (typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes)) return false;
       return true;
     }
@@ -11052,7 +11078,7 @@ function lookFitsDress841(look, level) {
     top = tops[1];
   }
   if (!bottom) return false;
-  if (level <= 2) {
+  if (level === 1) {
     if (bottom.kind !== "swim" && bottom.kind !== "shorts") return false;
     if (level === 1 && bottom.kind !== "swim" && !/swim|trunk/.test(bottom.n || "")) return false;
     if (layer && layer.kind !== "overshirt" && !/linen/.test(layer.n || "")) return false;
@@ -11063,11 +11089,11 @@ function lookFitsDress841(look, level) {
   if (!top || !shoes) return false;
   if (typeof formalShoesOk866 === "function" && !formalShoesOk866(look, { level: level })) return false;
   if (!C.fitsLevel(level, top, bottom, shoes, layer)) return false;
-  if (level <= 3 && top.kind === "knit" && !top.shortSleeve) return false;
+  if (level <= 2 && top.kind === "knit" && !top.shortSleeve) return false;
   return true;
 }
 function dressEmptyLook841() {
-  var labels = (typeof HERO_TYPE_LABELS !== "undefined" && HERO_TYPE_LABELS) || ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"];
+  var labels = (typeof HERO_TYPE_LABELS !== "undefined" && HERO_TYPE_LABELS) || ["Pool / Beach", "Daytime", "Nighttime Casual", "Nighttime Casual", "Nighttime Dressy", "Formal", "Black Tie"];
   var lv = dressLevel841();
   var name = labels[lv - 1] || "this dress level";
   return { id: "dress-empty-" + lv, title: "No " + name + " looks in your closet yet", meta: "From your closet", desc: "", dressEmpty: true, dressLevel: lv, swatches: [], fwPieces: [], source: "wardrobe", composer: false };
@@ -11587,7 +11613,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.33";
+var WARDROBE_BUILD = "2026-11-21.86.34";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -18919,10 +18945,9 @@ Object.defineProperty(window, "RENDER_POOL", { configurable: true, enumerable: t
    deal widens to the nearest levels rather than repeat one. */
 var FORMALITY_LEVELS = [
   { level: 1, name: "Swim / Pool", desc: "Swim trunks, poolside — the most casual end of the meter." },
-  { level: 2, name: "Shorts & Tee", desc: "Pool, beach, errands." },
-  { level: 3, name: "Casual", desc: "Jeans or shorts with a polo, sneakers — everyday." },
-  { level: 4, name: "Smart Casual", desc: "Chinos, linen shirt, loafers — dinner out and drinks." },
-  { level: 5, name: "Business Casual", desc: "Blazer, trousers, open collar — work lunch and meetings." },
+  { level: 2, name: "Daytime", desc: "Shorts, jeans, chinos or linen with a tee or polo." },
+  { level: 3, name: "Nighttime Casual", desc: "Trousers or jeans with a tee, polo, sweater or button-down." },
+  { level: 5, name: "Nighttime Dressy", desc: "Always a blazer, with a polo, tee or button-down; non-jean trousers." },
   { level: 6, name: "Formal", desc: "Suit and tie — business events and weddings." },
   { level: 7, name: "Black Tie", desc: "Tuxedo and bow tie — galas and formal dinners." }
 ];
@@ -19420,7 +19445,8 @@ var RENDER_FORMALITY = {
   "assets/photos/449f2f6ce68d.webp": 7,
   "assets/photos/6ba0a4fb8d8e.webp": 7
 };
-var formalityLevel = store.get("formality", 4);
+var formalityLevel = store.get("formality", 2);
+if (parseInt(formalityLevel, 10) === 4) { formalityLevel = 3; try { store.set("formality", 3); } catch (e834) {} } /* .86.34: level 4 retired */
 if (!(formalityLevel >= 1 && formalityLevel <= 7)) formalityLevel = 4;
 function formalityOf(img) { return RENDER_FORMALITY[img] || 4; }
 function formalityInfo(level) { return FORMALITY_LEVELS[level - 1] || FORMALITY_LEVELS[3]; }
@@ -30554,7 +30580,7 @@ document.addEventListener("click", function (e) {
 document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAllCdd(); });
 /* Button labels track the one shared settings: outfit type from
    formalityLevel, build-from from studioSource. */
-var HERO_TYPE_LABELS = ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"];
+var HERO_TYPE_LABELS = ["Pool / Beach", "Daytime", "Nighttime Casual", "Nighttime Casual", "Nighttime Dressy", "Formal", "Black Tie"];
 var SOURCE_SHORT_LABELS = { wardrobe: "Wardrobe", inspo: "Inspo", combo: "Combo" };
 function syncHeroControls() {
   var tl = document.getElementById("today-type-label");
@@ -35840,7 +35866,7 @@ document.getElementById("dress-for").addEventListener("click", function (e) {
 });
 
 /* ---------- Formality chips (11) ---------- */
-var FSHORT = ["Swim", "Shorts", "Casual", "Smart", "Business", "Formal", "Black Tie"];
+var FSHORT = ["Pool", "Day", "Night", "Night", "Dressy", "Formal", "Black Tie"];
 function buildFormalityChips(rangeId) {
   var range = document.getElementById(rangeId);
   if (!range || range.getAttribute("data-chips")) return;
@@ -36843,7 +36869,7 @@ document.getElementById("panel-calendar").addEventListener("click", function (e)
    editable — swap a piece, save, change the settings, delete the trip. */
 (function () {
   "use strict";
-  var LEVELS = ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"];
+  var LEVELS = ["Pool / Beach", "Daytime", "Nighttime Casual", "Nighttime Casual", "Nighttime Dressy", "Formal", "Black Tie"];
   var WEAR_PRESETS = { fewer: { top: 1, bottom: 2, shoe: 3, layer: 2 }, balanced: { top: 2, bottom: 3, shoe: 4, layer: 3 }, light: { top: 3, bottom: 5, shoe: 7, layer: 5 } };
   var BUCKETS = [["top", "tops", "Tops"], ["bottom", "bottoms", "Bottoms"], ["shoe", "shoes", "Shoes"], ["layer", "layers", "Layers"]];
   var TP = { form: null, editId: null, cur: null, dirty: false, tab: "days", swap: null, cat: null, catLoading: null, busy: false, delArm: false, wx: {} };
@@ -37429,10 +37455,10 @@ document.getElementById("panel-calendar").addEventListener("click", function (e)
     });
     h += '<button type="button" class="tp-link" data-tp-addstop>+ Add a stop</button></div>';
     h += '<div class="tp-sec"><label class="field" for="tp-start">Start date <span class="tp-opt-l">(optional)</span></label><input type="date" id="tp-start" data-tp-field="start" value="' + esc(f.start) + '" /><p class="tp-hint">' + N + (N === 1 ? " day" : " days") + " · " + sl.length + " outfits</p></div>";
-    h += '<div class="tp-sec"><label class="field">Daytime</label>' + chips("dayLevel", [[2, "Shorts & Tee"], [3, "Casual"], [4, "Smart Casual"], [5, "Business Casual"]], f.dayLevel) + "</div>";
-    h += '<div class="tp-sec"><label class="field">Evenings</label>' + chips("evening", [[0, "None"], [3, "Casual"], [4, "Smart Casual"], [5, "Business Casual"], [6, "Formal"]], f.evening) + "</div>";
+    h += '<div class="tp-sec"><label class="field">Daytime</label>' + chips("dayLevel", [[1, "Pool / Beach"], [2, "Daytime"]], f.dayLevel) + "</div>";
+    h += '<div class="tp-sec"><label class="field">Evenings</label>' + chips("evening", [[0, "None"], [3, "Nighttime Casual"], [5, "Nighttime Dressy"], [6, "Formal"]], f.evening) + "</div>";
     h += '<div class="tp-sec tp-row2"><div><label class="field">Pool days</label>' + stepper("poolDays", num(f.poolDays, 0, N, 0), 0, N) + '</div><div><label class="field">Dressy dinners</label>' + stepper("dressy", num(f.dressy, 0, N, 0), 0, N) + "</div></div>";
-    if (num(f.dressy, 0, N, 0) > 0) h += '<div class="tp-sec">' + chips("dressyLevel", [[5, "Business Casual"], [6, "Formal"], [7, "Black Tie"]], f.dressyLevel) + "</div>";
+    if (num(f.dressy, 0, N, 0) > 0) h += '<div class="tp-sec">' + chips("dressyLevel", [[5, "Nighttime Dressy"], [6, "Formal"], [7, "Black Tie"]], f.dressyLevel) + "</div>";
     h += '<div class="tp-sec"><div class="tp-share-head"><label class="field" for="tp-share">From my closet</label><span class="tp-share-v" data-tp-sharev>' + f.share + '%</span></div><input type="range" id="tp-share" min="0" max="100" step="10" value="' + f.share + '" data-tp-share /><div class="tp-share-ends"><span>Shop more</span><span>Only my closet</span></div></div>';
     h += '<div class="tp-sec"><label class="tf-pool"><input type="checkbox" data-tp-check="buy"' + (f.buy ? " checked" : "") + " /> Suggest pieces to buy from The Edit</label>" +
       (f.buy ? '<div class="tp-budget"><label class="field" for="tp-budget">Budget <span class="tp-opt-l">(optional)</span></label><span class="tp-dollar">$<input type="number" id="tp-budget" inputmode="numeric" min="0" step="50" data-tp-field="budget" value="' + esc(f.budget) + '" placeholder="No limit" /></span></div>' : "") +
@@ -38278,7 +38304,7 @@ syncStudioType();
    Outfit type to the default range (the meter resting at Smart
    Casual). */
 var studioTypeAny = false;
-var STUDIO_TYPE_LABELS = ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"];
+var STUDIO_TYPE_LABELS = ["Pool / Beach", "Daytime", "Nighttime Casual", "Nighttime Casual", "Nighttime Dressy", "Formal", "Black Tie"];
 function closeStudioSel(which) {
   [["dress-sel-toggle", "dress-for"], ["type-sel-toggle", "studio-type-row"]].forEach(function (pair) {
     if (which && pair[1] !== which) return;
@@ -46471,8 +46497,11 @@ window.inspoView = "withmine";
 (function () {
   var PAGE = 45, shown = PAGE, level = "all", items = [], lastSig = "", openKey = null, confirming = false, io = null;
   var counts867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 }, raw867 = { ondemand: 0, saved: 0, worn: 0, pool: 0 };
-  var CHIPS = [["all", "All", null], ["casual", "Casual", [1, 2, 3]], ["smart", "Smart Casual", [4]], ["business", "Business Casual", [5]], ["formal", "Formal", [6]], ["tie", "Black Tie", [7]]];
-  var LVN = { 1: "Swim / Pool", 2: "Shorts & Tee", 3: "Casual", 4: "Smart Casual", 5: "Business Casual", 6: "Formal", 7: "Black Tie" };
+  /* .86.34: icon-weight groups keep their stored ids; "casual" still means
+     Pool/Beach, Daytime and Nighttime Casual (his Squarzi weighting) and
+     the retired level 4 ("smart") has no chip */
+  var CHIPS = [["all", "All", null], ["casual", "Casual", [1, 2, 3]], ["business", "Nighttime Dressy", [5]], ["formal", "Formal", [6]], ["tie", "Black Tie", [7]]];
+  var LVN = { 1: "Pool / Beach", 2: "Daytime", 3: "Nighttime Casual", 4: "Nighttime Casual", 5: "Nighttime Dressy", 6: "Formal", 7: "Black Tie" };
   var SRC = { ondemand: "See it on me", saved: "Saved look", worn: "Worn", pool: "From your closet" };
   function $(id) { return document.getElementById(id); }
   function E(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -46803,8 +46832,8 @@ window.inspoView = "withmine";
   "use strict";
   var GROUPS = {
     casual: { id: "casual", label: "Casual", levels: [1, 2, 3] },
-    smart: { id: "smart", label: "Smart Casual", levels: [4] },
-    business: { id: "business", label: "Business", levels: [5] },
+    smart: { id: "smart", label: "Nighttime Casual", levels: [4] },
+    business: { id: "business", label: "Nighttime Dressy", levels: [5] },
     formal: { id: "formal", label: "Formal", levels: [6, 7] }
   };
   var GROUP_ORDER = ["casual", "smart", "business", "formal"];

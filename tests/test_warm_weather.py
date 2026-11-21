@@ -262,11 +262,11 @@ def main():
           if (typeof currentWeather !== 'undefined') {
             currentWeather = Object.assign({}, currentWeather || {}, { temp: 78, label: 'Clear', rain: 0, feels: 78 });
           }
-          if (typeof formalityLevel !== 'undefined') formalityLevel = 3;
+          if (typeof formalityLevel !== 'undefined') formalityLevel = 2;
         }""")
 
         after = {}
-        for level, key in ((3, "casual"), (4, "smart")):
+        for level, key in ((2, "casual"), (3, "smart")):  # .86.34: Daytime, Nighttime Casual
             after[key] = pg.evaluate(CLASSIFY_JS, {"level": level, "temp": 78, "n": 80})
             print("MINE", key, json.dumps(after[key]))
 
@@ -280,8 +280,8 @@ def main():
         check("casual short-sleeve is the majority (>=70%)", cfree["ss"] >= 70, cfree)
         check("casual unlayered is the majority (>=75%)", cfree["unlayered"] >= 75, cfree)
         check("casual has plenty of T-shirt + jeans/trousers (>=25%)", cfree["teeBottom"] >= 25, cfree)
-        check("casual shorts are occasional (5-20%, target 10-15%)", 5 <= cfree["shorts"] <= 20, cfree)
-        check("smart-casual deals no shorts", sfree["shorts"] == 0, sfree)
+        check("daytime includes shorts on a warm day (>=5%)", cfree["shorts"] >= 5, cfree)
+        check("nighttime casual deals no shorts", sfree["shorts"] == 0, sfree)
         check("smart-casual short-sleeve is the majority (>=60%)", sfree["ss"] >= 60, sfree)
         check("smart-casual unlayered is the majority (>=70%)", sfree["unlayered"] >= 70, sfree)
         check("smart-casual has T-shirt + jeans/trousers (>=20%)", sfree["teeBottom"] >= 20, sfree)
@@ -334,7 +334,7 @@ def main():
             weights = pg.evaluate("() => window.iconWeights81 && window.iconWeights81.state ? window.iconWeights81.state() : null")
             for feed in ("withmine", "allnew"):
                 feeds[feed] = {}
-                for level, key in ((3, "casual"), (4, "smart")):
+                for level, key in ((2, "casual"), (3, "smart")):  # .86.34: Daytime, Nighttime Casual
                     try:
                         feeds[feed][key] = pg.evaluate(FEED_JS, {"feed": feed, "level": level, "temp": 78, "n": 80, "weights": weights})
                     except Exception as e:
@@ -349,11 +349,11 @@ def main():
                     check("%s casual short-sleeve majority (>=55%%)" % label, cf.get("ss", 0) >= 55, cf)
                     check("%s casual unlayered majority (>=65%%)" % label, cf.get("unlayered", 0) >= 65, cf)
                     check("%s casual 0 pool slides outside pool" % label, cf.get("poolSlide", 0) == 0, cf)
-                    check("%s casual shorts are occasional (5-20%%)" % label, 5 <= cf.get("shorts", 0) <= 20, cf)
+                    check("%s daytime includes shorts (>=5%%)" % label, cf.get("shorts", 0) >= 5, cf)
                 if sf.get("n"):
                     check("%s smart-casual unlayered majority (>=55%%)" % label, sf.get("unlayered", 0) >= 55, sf)
                     check("%s smart-casual 0 pool slides outside pool" % label, sf.get("poolSlide", 0) == 0, sf)
-                    check("%s smart-casual deals no shorts" % label, sf.get("shorts", 0) == 0, sf)
+                    check("%s nighttime casual deals no shorts" % label, sf.get("shorts", 0) == 0, sf)
 
         # Polo classification: a knit short-sleeve polo is not treated as long-sleeve
         polo = pg.evaluate("""() => {

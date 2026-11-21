@@ -26,7 +26,7 @@ SHOTS = Path("/workspace/han31-shots")
 SHOTS.mkdir(parents=True, exist_ok=True)
 
 
-LABELS = ["Swim/Pool", "Shorts & Tee", "Casual", "Smart Casual", "Business Casual", "Formal", "Black Tie"]
+LABELS = ["Pool / Beach", "Daytime", "Nighttime Casual", "Nighttime Casual", "Nighttime Dressy", "Formal", "Black Tie"]  # .86.34
 fails: list[str] = []
 
 
@@ -219,17 +219,17 @@ def main():
         print("RENDERS", json.dumps(inv, indent=2))
         report["inventory"] = inv
         check("closet has on-body renders", inv["complete"] and inv["totalMap"] == inv["eligible"] and inv["eligible"] >= 300, inv.get("totalMap") if inv else None)
-        sc = (inv or {}).get("byLevel", {}).get("Smart Casual", {}).get("ownedRenders", 0)
-        check("Smart Casual has owned renders", sc >= 1, sc)
+        sc = (inv or {}).get("byLevel", {}).get("Nighttime Casual", {}).get("ownedRenders", 0)
+        check("Nighttime Casual has owned renders", sc >= 1, sc)
 
-        # Cycle Next several times at Smart Casual (level 4)
-        set_level(pg, 4)
+        # Cycle Next several times at Nighttime Casual (level 3; .86.34 retired level 4)
+        set_level(pg, 3)
         titles = []
         srcs = []
         for i in range(8):
             st = wait_hero(pg)
             ok, detail = hero_ok(st, allow_empty=False)
-            check("Next %d at Smart Casual is a cut-out" % (i + 1), ok, detail)
+            check("Next %d at Nighttime Casual is a cut-out" % (i + 1), ok, detail)
             titles.append(st.get("title"))
             srcs.append(st.get("src"))
             report["next"].append(st)
@@ -267,8 +267,8 @@ def main():
                 pg.screenshot(path=str(path), full_page=False)
                 report["shots"].append(str(path))
                 print("SHOT", path, st.get("title"), st.get("src") or ("empty" if st.get("empty") else ""))
-            # Extra: Smart Casual after a few Nexts, the situation in David's shot
-            set_level(pg, 4)
+            # Extra: Nighttime Casual after a few Nexts, the situation in David's shot
+            set_level(pg, 3)
             for _ in range(3):
                 nxt = pg.query_selector("#today-next")
                 if nxt and nxt.is_visible():
