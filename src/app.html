@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.37" />
+    <meta name="wardrobe-build" content="2026-11-21.86.38" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8492,7 +8492,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.37</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.38</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11628,7 +11628,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.37";
+var WARDROBE_BUILD = "2026-11-21.86.38";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -41886,7 +41886,8 @@ function analyzeFilePiece(card, job, ix) {
     var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
     return src === "wardrobe" || src === "combo";
   }
-  function stateSig() { return [studioSource, feedLevel(), (window.tempBands834 ? window.tempBands834.get().join("+") : "now"), composerDeckCache.sig ? composerDeckCache.sig.length : 0, (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0)].join("/"); }
+  function feedLevels838() { return feedLevel() === null ? null : (window.dressLevels838 ? window.dressLevels838.get() : null); }
+  function stateSig() { return [studioSource, feedLevel(), (feedLevels838() || []).join("+"), (window.tempBands834 ? window.tempBands834.get().join("+") : "now"), composerDeckCache.sig ? composerDeckCache.sig.length : 0, (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0)].join("/"); }
   function cardHTML(look, idx) {
     return '<article class="card option-card cf-card" role="listitem" data-cf-idx="' + idx + '">' +
       '<button type="button" class="cf-media" data-cf-open="' + idx + '" aria-label="' + esc(look.title) + '">' + flatlayHTML(look, true, currentTab === "looks" || !!mineHost) + "</button>" +
@@ -41901,7 +41902,7 @@ function analyzeFilePiece(card, job, ix) {
   function feedInputs() {
     var feedPool = (typeof homeOwnedPhotoPieces742 === "function") ? homeOwnedPhotoPieces742() : null;
     var feedOnly = feedPool ? (feedPool.own.length >= 3 ? feedPool.own : feedPool.withPhoto) : null;
-    return { only: feedOnly && feedOnly.length >= 3 ? feedOnly : null, level: feedLevel(), temp: (typeof window.tempForDeal834 === "function" && window.tempForDeal834() !== null) ? window.tempForDeal834(true) : (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78 };
+    return { only: feedOnly && feedOnly.length >= 3 ? feedOnly : null, level: feedLevel(), levels: feedLevels838(), temps: (window.tempBands834 && window.tempBands834.temps) ? window.tempBands834.temps() : null, temp: (typeof window.tempForDeal834 === "function" && window.tempForDeal834() !== null) ? window.tempForDeal834(true) : (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78 };
   }
   window.__cfInputs81 = feedInputs;
   /* .86.14: the Mine deck is dealt by the endless worker. Before it is
@@ -41942,7 +41943,7 @@ function analyzeFilePiece(card, job, ix) {
     if (!mineHost) return;
     try { dropSkeleton38(); } catch (eS) {}
     if (grid.querySelector("article, .mine-empty829")) return;
-    grid.innerHTML = '<p class="meta mine-empty829 span-all">No outfits rendered on you for this dress level yet.</p>';
+    grid.innerHTML = '<p class="meta mine-empty829 span-all">No outfits rendered on you for ' + ((window.dressLevels838 && window.dressLevels838.get().length > 1) ? "these dress levels" : "this dress level") + ' yet.</p>';
   }
   function titleKey829(l) { return String((l && l.title) || "").trim().toLowerCase().replace(/\s+/g, " "); }
   function appendLooks(n) {
@@ -44820,6 +44821,19 @@ window.inspoView = "withmine";
   ];
   var LEVELS = [[1, "Pool / Beach"], [2, "Daytime"], [3, "Nighttime Casual"], [5, "Nighttime Dressy"], [6, "Formal"], [7, "Black Tie"]];
   var KEY = "wardrobe.tempBands837", sel = ["now"], rr = 0;
+  /* .86.38: dress level is multi-select too. The list always holds Home's
+     level (formalityLevel); Looks deals across every level in it. */
+  var LKEY = "wardrobe.dressLevels838", lrr = 0;
+  function curFormal() { var lv = (typeof formalityLevel !== "undefined") ? parseInt(formalityLevel, 10) : 2; if (lv === 4) lv = 3; return LEVELS.some(function (l) { return l[0] === lv; }) ? lv : 2; }
+  function levelsSel() {
+    var cur = curFormal(), list = null;
+    try { list = JSON.parse(localStorage.getItem(LKEY) || "null"); } catch (e) {}
+    if (!Array.isArray(list)) list = [];
+    list = LEVELS.map(function (l) { return l[0]; }).filter(function (lv) { return list.indexOf(lv) !== -1; });
+    return list.indexOf(cur) === -1 ? [cur] : list;
+  }
+  function levelName(lv) { for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i][0] === lv) return LEVELS[i][1]; return "Daytime"; }
+  var SHORT = { 1: "Pool", 2: "Day", 3: "Casual", 5: "Dressy", 6: "Formal", 7: "Black Tie" };
   try { var saved = JSON.parse(sessionStorage.getItem(KEY) || "null"); if (Array.isArray(saved) && saved.length) sel = saved.filter(function (id) { return BANDS.some(function (b) { return b.id === id; }); }); } catch (e) {}
   if (!sel.length) sel = ["now"];
   function band(id) { for (var i = 0; i < BANDS.length; i++) if (BANDS[i].id === id) return BANDS[i]; return null; }
@@ -44836,17 +44850,38 @@ window.inspoView = "withmine";
     return sel.map(function (id) { return band(id).label; }).join(" + ");
   }
   function levelLabel() {
-    var lv = (typeof formalityLevel !== "undefined") ? parseInt(formalityLevel, 10) : 2; if (lv === 4) lv = 3;
-    for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i][0] === lv) return LEVELS[i][1];
-    return "Daytime";
+    var ls = levelsSel();
+    if (ls.length === 1) return levelName(ls[0]);
+    var two = ls.length === 2 ? SHORT[ls[0]] + " + " + SHORT[ls[1]] : "";
+    if (two && two.length <= 15) return two;
+    return SHORT[ls[0]] + " +" + (ls.length - 1);
   }
+  window.dressLevels838 = {
+    get: function () { return levelsSel(); },
+    set: function (list) {
+      var keep = LEVELS.map(function (l) { return l[0]; }).filter(function (lv) { return (list || []).indexOf(lv) !== -1; });
+      if (!keep.length) return;
+      try { localStorage.setItem(LKEY, JSON.stringify(keep)); } catch (e) {}
+      if (keep.indexOf(curFormal()) === -1 && typeof setFormality === "function") setFormality(keep[0], { silent: true });
+      paint(); refreshFeeds();
+    }
+  };
+  /* the next deal's level for the one-at-a-time fallbacks */
+  window.levelForDeal838 = function (advance) { var ls = levelsSel(), lv = ls[lrr % ls.length]; if (advance) lrr++; return lv; };
+  /* several quick ticks re-deal once: every reset queues fresh deals in the
+     worker, and stale ones would hold the screen empty for seconds */
+  var rfT = 0;
   function refreshFeeds() {
-    rr = 0;
-    try { if (typeof window.endlessOnWeights81 === "function") window.endlessOnWeights81(); } catch (e) {}
-    try { if (typeof window.__cfReset81 === "function") window.__cfReset81(); } catch (e) {}
+    rr = 0; lrr = 0;
+    clearTimeout(rfT);
+    rfT = setTimeout(function () {
+      try { if (typeof window.endlessOnWeights81 === "function") window.endlessOnWeights81(); } catch (e) {}
+      try { if (typeof window.__cfReset81 === "function") window.__cfReset81(); } catch (e) {}
+    }, 300);
   }
   window.tempBands834 = {
     get: function () { return sel.slice(); },
+    temps: function () { var out = []; sel.forEach(function (id) { var t = tempOf(id); if (t !== null && out.indexOf(t) === -1) out.push(t); }); return out; },
     set: function (ids) {
       sel = (ids || []).filter(function (id) { return !!band(id); }); if (!sel.length) sel = ["now"];
       try { sessionStorage.setItem(KEY, JSON.stringify(sel)); } catch (e) {}
@@ -44861,8 +44896,8 @@ window.inspoView = "withmine";
   }
   function menuHTML(kind) {
     if (kind === "level") {
-      var cur = levelLabel();
-      return LEVELS.map(function (l) { var on = l[1] === cur; return '<button type="button" role="menuitemradio" aria-checked="' + on + '" class="lk-opt837" data-level="' + l[0] + '"><span class="lk-tick837">' + (on ? "✓" : "") + "</span>" + l[1] + "</button>"; }).join("");
+      var ls = levelsSel();
+      return LEVELS.map(function (l) { var on = ls.indexOf(l[0]) !== -1; return '<button type="button" role="menuitemcheckbox" aria-checked="' + on + '" class="lk-opt837" data-level="' + l[0] + '"><span class="lk-tick837">' + (on ? "✓" : "") + "</span>" + l[1] + "</button>"; }).join("");
     }
     return BANDS.map(function (b) {
       var on = sel.indexOf(b.id) !== -1, t = b.id === "now" ? nowTemp() : null;
@@ -44899,9 +44934,11 @@ window.inspoView = "withmine";
       }
       var o = e.target.closest(".lk-opt837"); if (!o) return;
       if (o.hasAttribute("data-level")) {
-        var lv = parseInt(o.getAttribute("data-level"), 10);
-        if (typeof setFormality === "function") setFormality(lv, { silent: true });
-        closeAll(); paint(); refreshFeeds(); return;
+        /* a tick adds or removes a level; the last one cannot be removed */
+        var lv = parseInt(o.getAttribute("data-level"), 10), ls = levelsSel(), at2 = ls.indexOf(lv);
+        if (at2 === -1) ls.push(lv); else if (ls.length > 1) ls.splice(at2, 1); else return;
+        window.dressLevels838.set(ls);
+        return;
       }
       var id = o.getAttribute("data-band"), next = sel.slice(), at = next.indexOf(id);
       if (at === -1) next.push(id); else next.splice(at, 1);
@@ -44911,6 +44948,8 @@ window.inspoView = "withmine";
        only a tap that is really outside closes the menus */
     document.addEventListener("click", function (e) { if (!row || !e.target.isConnected || row.contains(e.target)) return; closeAll(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAll(); });
+    /* scrolling the feed closes an open menu (a scroll inside the menu does not) */
+    window.addEventListener("scroll", function () { if (row && row.querySelector(".lk-menu837:not([hidden])")) closeAll(); }, { passive: true });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
   window.addEventListener("pageshow", paint);
@@ -47597,6 +47636,8 @@ window.inspoView = "withmine";
       q.banned = Object.assign({}, p.banned);
       shown.concat(buf).forEach(function (key) { q.banned[key] = 1; });
       q.onlyKeys = typeof onbodyKeys === "function" ? onbodyKeys() : null;
+      /* the Mine feed keeps only rendered looks (feed module, .86.32) */
+      q.renderedOnly = !!document.getElementById("outfits-mine-view");
     } else {
       q.level = level(); q.prefs = S.prefs; q.banned = S.hidden; q.price = priceState();
       q.temp = (typeof fi.temp === "number") ? fi.temp : ((typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78);
@@ -47604,6 +47645,9 @@ window.inspoView = "withmine";
     }
     q.lens = lensData();
     if (window.iconWeights81 && window.iconWeights81.state) q.weights = window.iconWeights81.state();
+    /* .86.38: Looks may ask for several dress levels and temperatures at once */
+    if (q.level != null && window.dressLevels838) q.levels = window.dressLevels838.get();
+    if (window.tempBands834 && window.tempBands834.temps) q.temps = window.tempBands834.temps();
     try { W.postMessage(q); } catch (e) { asking[feed] = false; }
   }
   function fillAll() { ["mine", "withmine", "allnew"].forEach(function (f) { if (f === "mine" || active === f || BUF[f].length < 8) fill(f); }); }
@@ -48419,13 +48463,18 @@ function slim(o) {
 function dealMine(q) {
   if (!mineDeck) return [];
   var o = { level: q.level, temp: typeof q.temp === "number" ? q.temp : null, prefs: q.prefs, exposure: q.exposure, recent: q.recent, banned: q.banned };
+  /* .86.38: Mine shows only looks rendered on him, so when the page says
+     so every hand (the wider re-rank hands too) is dealt from the rendered
+     pool (~500 combos) instead of the whole closet (~250,000): the same
+     looks reach the screen, seconds sooner */
+  if (q.renderedOnly && q.onlyKeys) o = Object.assign(o, { onlyKeys: q.onlyKeys, strictKeys: true });
   var outs = [];
   function rank(a, b) {
     var rendered = Number(!!(q.onlyKeys && q.onlyKeys[b.key])) - Number(!!(q.onlyKeys && q.onlyKeys[a.key]));
     return rendered || b._ls - a._ls;
   }
   if (q.onlyKeys) outs = mineDeck.deal(q.n, Object.assign({}, o, { onlyKeys: q.onlyKeys, strictKeys: true })) || [];
-  if (outs.length < q.n) {
+  if (outs.length < q.n && !o.strictKeys) {
     var have = outs.map(function (x) { return x.key; });
     var more = mineDeck.deal(q.n - outs.length, Object.assign({}, o, { recent: q.recent.concat(have) })) || [];
     more.forEach(function (x) { if (have.indexOf(x.key) === -1) outs.push(x); });
@@ -48656,13 +48705,19 @@ function dealInspo(q) {
     var ic = pickIcon(wt);
     return ic ? { t: "icon", ic: ic } : null;
   }
-  // In warm Casual feeds, try shorts once per eight outfits if the closet,
-  // catalogue, selected style and budget can make a valid combination.
+  // In warm Daytime feeds, try shorts on a temperature-set share of looks
+  // if the closet, catalogue, selected style and budget allow a valid one.
   var warmCasual = q.level === 2 && (typeof q.temp !== "number" || q.temp >= 72);   /* .86.37: Daytime */
-  var shortsSlot = Math.floor(rng() * 8);
+  /* .86.38: Daytime is the shorts level (David: "shorts + tees, polos"),
+     and the hotter it is the more often shorts are tried: every 2nd look
+     from 85°F, every 3rd at 75-84°F, every 5th at 72-74°F. A random start
+     keeps the share in the short hands a mixed-level deal asks for. */
+  var tq = typeof q.temp === "number" ? q.temp : 78;
+  var shortsEvery = !warmCasual ? 0 : tq >= 85 ? 2 : tq >= 75 ? 3 : 5;
+  var shortsSlot = Math.floor(rng() * (shortsEvery || 1));
   function draw(src) {
     var cands = [];
-    var tryShorts = warmCasual && out.length % 8 === shortsSlot;
+    var tryShorts = !!shortsEvery && (out.length + shortsSlot) % shortsEvery === 0;
     for (var j = 0; j < 40 && tries < MAX && cands.length < 6; j++) {
       tries++;
       var c = sampleOne(q, seen, src, tryShorts && (j < 30 || cands.length > 0));
@@ -48695,6 +48750,27 @@ function dealInspo(q) {
   return out;
 }
 
+/* .86.38: several dress levels and/or temperatures: deal a share for each
+   pair and interleave them, so one page mixes every choice */
+function dealAll(m) {
+  var fn = m.feed === "mine" ? dealMine : dealInspo;
+  var lv = (Array.isArray(m.levels) && m.levels.length > 1 && m.level != null) ? m.levels : null;
+  var tp = (Array.isArray(m.temps) && m.temps.length > 1) ? m.temps : null;
+  if (!lv && !tp) return fn(m);
+  var pairs = [];
+  (lv || [m.level]).forEach(function (l) { (tp || [m.temp]).forEach(function (t) { pairs.push([l, t]); }); });
+  for (var i = pairs.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)), x = pairs[i]; pairs[i] = pairs[j]; pairs[j] = x; }
+  if (pairs.length > m.n) pairs = pairs.slice(0, m.n);
+  var per = Math.max(1, Math.ceil(m.n / pairs.length));
+  var hands = pairs.map(function (pr) { try { return fn(Object.assign({}, m, { level: pr[0], temp: pr[1], n: per })) || []; } catch (e) { return []; } });
+  var out = [], seen = {};
+  for (var k = 0; out.length < m.n; k++) {
+    var any = false;
+    hands.forEach(function (h) { var l = h[k]; if (!l) return; any = true; var key = l.key || l.composerKey || (l.ids || []).join("|"); if (seen[key] || out.length >= m.n) return; seen[key] = 1; out.push(l); });
+    if (!any) break;
+  }
+  return out;
+}
 self.onmessage = function (ev) {
   var m = ev.data || {};
   try {
@@ -48702,7 +48778,7 @@ self.onmessage = function (ev) {
     if (m.type === "deal") {
       var t1 = Date.now();
       WHY = {};
-      var looks = m.feed === "mine" ? dealMine(m) : dealInspo(m);
+      var looks = dealAll(m);
       var why = null; if (!looks.length) { var mx = 0; Object.keys(WHY).forEach(function (k) { if (WHY[k] > mx) { mx = WHY[k]; why = k; } }); }
       self.postMessage({ type: "dealt", id: m.id, feed: m.feed, gen: m.gen, looks: looks, why: why, ms: Date.now() - t1 });
     }

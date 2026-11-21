@@ -76,7 +76,14 @@ def main():
     check(all((ROOT / "assets/onbody" / f).exists() for f in files), "every manifest file exists")
     check(all(e["k"] == "|".join(sorted(e["k"].split("|"))) for e in man["r"]), "keys are sorted composer keys")
     size = sum((ROOT / "assets/onbody" / f).stat().st_size for f in files)
-    check(size < 12 * 1024 * 1024, "render pool is %.1f MB (< 12 MB)" % (size / 1048576))
+    # Renders are cached on the phone only as they are viewed (sw.js
+    # ONBODY_CACHE), never precached, so this budget guards the published
+    # site, not the device. ~25 KB per render here, plus ~135 KB for its
+    # cut-out and zoom copies: 40 MB is ~1,600 renders and keeps the whole
+    # site well under the Pages size limit (checked below).
+    check(size < 40 * 1024 * 1024, "render pool is %.1f MB (< 40 MB)" % (size / 1048576))
+    site = sum(f.stat().st_size for f in (ROOT / "assets").rglob("*") if f.is_file())
+    check(site < 900 * 1024 * 1024, "published assets are %.0f MB (< 900 MB)" % (site / 1048576))
 
     rendered = items_with_photos(ROOT / "tests/fixture_onbody.json")
     plain = items_with_photos(ROOT / "tests/fixture_closet83.json", prefix="x")
@@ -96,6 +103,11 @@ def main():
         c, pg = ctx_for(rendered)
         pg.goto(BASE, wait_until="load")
         pg.wait_for_timeout(2500)
+        # WebKit on CI can still be hydrating the hero's pieces at 2.5 s
+        try:
+            pg.wait_for_function("() => typeof todayLook !== 'undefined' && todayLook && (todayLook.fwPieces || []).length >= 3", timeout=10000)
+        except Exception:
+            pass
         allowed = pg.evaluate("""rows => rows.filter(e => !onbodyFileBanned(e.f) &&
           !onbodyKeyBanned866(e.k)).map(e => [e.k, 'assets/onbody/' + e.f])""", man["r"])
         mapped = pg.evaluate("Object.entries(onbodyKeys())")
@@ -112,7 +124,7 @@ def main():
         }""")
         check(bool(home["src"]) and home["src"].startswith("assets/onbody/"), "Home OOTD shows an on-body render (%s)" % home["src"])
         check(home["ok"], "the Home render loads")
-        check(home["seed"] == 0 and len(home["ids"]) >= 3, "Home OOTD uses only his own pieces")
+        check(home["seed"] == 0 and len(home["ids"]) >= 3, "Home OOTD uses only his own pieces (%d pieces, %d seed: %s)" % (len(home["ids"]), home["seed"], home["key"]))
         check(home["sw"] == 0, "no swatch cells on Home")
         pg.click("#section-ideas")
         pg.wait_for_timeout(300)
