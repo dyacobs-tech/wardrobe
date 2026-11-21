@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.15" />
+    <meta name="wardrobe-build" content="2026-11-21.86.16" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8382,7 +8382,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.15</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.16</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9667,7 +9667,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     return "The " + who + " is worn untucked.";
   }
 
-  function Deck(items) {
+  function Deck(items, renderKeys) {
     this.items = (items || []).filter(function (i) { return i && i.id && !i.laundry; });
     this.prof = this.items.map(profile);
     var tops = [], bottoms = [], shoes = [], layers = [], accs = [];
@@ -9685,8 +9685,49 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       if (t.kind === "knit") layerOpts.push(Object.assign({}, t, { role: "layer", kind: "knit" }));
       if (t.overshirt) layerOpts.push(Object.assign({}, t, { role: "layer", kind: "overshirt" }));
     });
+    if (root.WardrobeRules) {
+      this.prof.concat(layerOpts).forEach(function (piece) {
+        if (piece && !piece.__wrClass) Object.defineProperty(piece, "__wrClass", { value: root.WardrobeRules.classify(piece) });
+      });
+    }
     this.tops = tops; this.bottoms = bottoms; this.shoes = shoes; this.layerOpts = layerOpts; this.accs = accs;
     var combos = [];
+    function addCombo(t, bt, s, ly) {
+      var ev = evaluate(t, bt, s, ly);
+      if (!ev) return;
+      var mask = 0;
+      for (var L = ev.lo; L <= ev.hi; L++) if (fitsLevel(L, t, bt, s, ly)) mask |= (1 << L);
+      if (!mask) return;
+      var cids = ly ? [t.id, bt.id, s.id, ly.id] : [t.id, bt.id, s.id];
+      var tucked = tuckOf(t, ly);
+      /* .80.35: wardrobe rules override the default tuck (HAN-12 tuckOf). */
+      if (root.WardrobeRules && typeof root.WardrobeRules.applyTuck === "function") {
+        var over = root.WardrobeRules.applyTuck(tucked, t, ly);
+        if (over === true || over === false) tucked = over;
+      }
+      combos.push({ t: t, b: bt, s: s, l: ly, mask: mask, score: ev.score, ids: cids, key: comboKey(cids), tuck: tucked, tucked: tucked, tuckPrompt: tuckPromptOf(t, ly, tucked) });
+    }
+    /* Home can only display combinations in the render manifest. Resolve
+       those few keys against this closet before running the same rules. */
+    if (renderKeys) {
+      var byId = new Map(this.prof.map(function (piece) { return [piece.id, piece]; }));
+      var layerById = new Map(layerOpts.filter(Boolean).map(function (piece) { return [piece.id, piece]; }));
+      Object.keys(renderKeys).forEach(function (key) {
+        var pieces = key.split("|").map(function (id) { return byId.get(id); });
+        if ((pieces.length !== 3 && pieces.length !== 4) || pieces.some(function (piece) { return !piece; })) return;
+        var bottom = pieces.find(function (piece) { return piece.role === "bottom"; });
+        var shoe = pieces.find(function (piece) { return piece.role === "shoes"; });
+        if (!bottom || !shoe) return;
+        var upper = pieces.filter(function (piece) { return piece !== bottom && piece !== shoe; });
+        upper.forEach(function (top, index) {
+          if (top.role !== "top") return;
+          var layer = upper.length === 2 ? layerById.get(upper[1 - index].id) : null;
+          if (upper.length === 1 || layer) addCombo(top, bottom, shoe, layer);
+        });
+      });
+      this.combos = combos;
+      return;
+    }
     /* .80.6: whole branches that evaluate() would reject for every
        shoe / layer are skipped (a layer only narrows the range and only
        adds statements and patterns), so the deck and its order are
@@ -9706,19 +9747,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       for (var d = 0; d < layerOpts.length; d++) {
       var t = t0, bt = b0, s = s0, ly = layerOpts[d];
       if (ly && ly.id === t.id) continue;
-      var ev = evaluate(t, bt, s, ly);
-      if (!ev) continue;
-      var mask = 0;
-      for (var L = ev.lo; L <= ev.hi; L++) if (fitsLevel(L, t, bt, s, ly)) mask |= (1 << L);
-      if (!mask) continue;
-      var cids = ly ? [t.id, bt.id, s.id, ly.id] : [t.id, bt.id, s.id];
-      var tucked = tuckOf(t, ly);
-      /* .80.35: wardrobe rules override the default tuck (HAN-12 tuckOf). */
-      if (root.WardrobeRules && typeof root.WardrobeRules.applyTuck === "function") {
-        var over = root.WardrobeRules.applyTuck(tucked, t, ly);
-        if (over === true || over === false) tucked = over;
-      }
-      combos.push({ t: t, b: bt, s: s, l: ly, mask: mask, score: ev.score, ids: cids, key: comboKey(cids), tuck: tucked, tucked: tucked, tuckPrompt: tuckPromptOf(t, ly, tucked) });
+      addCombo(t, bt, s, ly);
     }}}
     this.combos = combos;
   }
@@ -9955,7 +9984,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     comboKey: comboKey,
     applyVerdict: applyVerdict,
     pairKeys: pairKeys,
-    build: function (items) { return new Deck(items); }
+    build: function (items, renderKeys) { return new Deck(items, renderKeys); }
   };
 })(typeof window !== "undefined" ? window : globalThis);/*</composer73>*/
 
@@ -10532,7 +10561,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   function comboAllowedStructural(top, bottom, shoes, layer, rules) {
     if (typeof formalShoesOk866 === "function" && !formalShoesOk866({ t: top, b: bottom, s: shoes, l: layer, shoes: shoes, layer: layer })) return false;
     var list = rules || active;
-    var pieces = pieceList(top, bottom, shoes, layer);
+    var pieces;
     for (var i = 0; i < list.length; i++) {
       var rule = list[i];
       if (!rule || rule.enabled === false || !rule.parsed) continue;
@@ -10541,6 +10570,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         var c = cs[j];
         if (!c || c.type === "tuck") continue;
         if ((c.type === "ban_category" || c.type === "ban_colour") && c.when) continue;
+        if (!pieces) pieces = pieceList(top, bottom, shoes, layer);
         var why = checkConstraint(c, pieces, {}, null);
         if (why) return false;
       }
@@ -10640,14 +10670,15 @@ function composerClosetSig(list) {
   try { if (window.WardrobeRules && typeof window.WardrobeRules.signature === "function") sig += "\n#rules:" + window.WardrobeRules.signature(); } catch (e) {}
   return sig;
 }
-function composerDeck(only, slotName) {
+function composerDeck(only, slotName, renderKeys) {
   var list = (typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems : [];
   if (only) list = only;
   var sig = composerClosetSig(list);
   var slot = slotName || (only ? "home" : "all");
+  if (renderKeys) sig += "\n#renders:" + Object.keys(renderKeys).join(",");
   var c = composerDeckCache[slot] || {};
   if (c.sig !== sig || !c.deck) {
-    c = { sig: sig, deck: window.WardrobeComposer.build(list) };
+    c = { sig: sig, deck: window.WardrobeComposer.build(list, renderKeys) };
     composerDeckCache[slot] = c;
   }
   return c.deck;
@@ -10830,7 +10861,9 @@ function homeComposerLooksAtLevel864(count, level) {
   var pool = pools.own.length >= 3 ? pools.own : pools.withPhoto;
   if (pool.length < 3) return [];
   var fit864 = function (l) { return homeLookOk742(l) && lookFitsDress841(l, level) && lookHeroVisible84(l); };
-  var r = composerLooks({ count: Math.max(want, 16), temp: temp, only: pool, renderedFirst: true, strictKeys: true, level: level, filter: fit864 }) || [];
+  var renderKeys = onbodyKeys();
+  if (!renderKeys) return [];
+  var r = composerLooks({ slot: "homeRendered", renderKeys: renderKeys, count: Math.max(want, 16), temp: temp, only: pool, renderedFirst: true, strictKeys: true, level: level, filter: fit864 }) || [];
   return r.filter(fit864);
 }
 function homeComposerLooks75(count) {
@@ -11014,7 +11047,7 @@ function composerOutfitToLook(o, i, renderPairs) {
 function composerLooks(opts) {
   opts = opts || {};
   if (!window.WardrobeComposer) return [];
-  var deck = composerDeck(opts.only || null, opts.slot || null);
+  var deck = composerDeck(opts.only || null, opts.slot || null, opts.renderKeys);
   var level = opts.level === undefined ? ((typeof formalityLevel !== "undefined") ? formalityLevel : 4) : opts.level;
   var p = composerPrefs();
   var recent = p.recent.slice();
@@ -11036,7 +11069,7 @@ function composerLooks(opts) {
   var outs = [];
   /* Build .75: outfits David has been rendered wearing come first. */
   if (opts.renderedFirst && typeof onbodyKeys === "function") {
-    var keys = onbodyKeys();
+    var keys = opts.renderKeys || onbodyKeys();
     if (keys) outs = deck.deal(want, Object.assign({}, dealOpts, { onlyKeys: keys })) || [];
   }
   if (outs.length < want) {
@@ -11331,7 +11364,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.15";
+var WARDROBE_BUILD = "2026-11-21.86.16";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
