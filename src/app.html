@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.28" />
+    <meta name="wardrobe-build" content="2026-11-21.86.29" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6213,8 +6213,20 @@ window.notMenswear853 = function (e) {
         html body #bottombar .nav-pill svg {
           width: 20px; height: 20px; flex: 0 0 20px;
         }
+        html body #bottombar .nav-pill {
+          transition: width 200ms cubic-bezier(.2,.7,.2,1), height 200ms cubic-bezier(.2,.7,.2,1),
+            transform 260ms cubic-bezier(.2,.7,.2,1), opacity 220ms ease-out;
+          will-change: transform;
+        }
         html.nav-compact body #bottombar .nav-pill {
-          width: 240px; height: 44px;
+          width: 232px; height: 42px;
+        }
+        /* the .78.2b rule moved the whole bar; only the pill may move now */
+        html.nav-away body #bottombar.bottombar { transform: none !important; }
+        html.nav-away body #bottombar .nav-pill {
+          transform: translate3d(0, calc(100% + 12px + env(safe-area-inset-bottom, 0px)), 0);
+          opacity: 0;
+          pointer-events: none;
         }
         html.nav-compact body #bottombar .navbtn span {
           position: absolute; width: 1px; height: 1px;
@@ -11417,7 +11429,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.28";
+var WARDROBE_BUILD = "2026-11-21.86.29";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -44515,10 +44527,20 @@ window.inspoView = "withmine";
     }
     return { el: window, y: window.scrollY || document.documentElement.scrollTop || 0, max: Math.max(0, (document.documentElement.scrollHeight || 0) - (window.innerHeight || 0)) };
   }
-  function setCompact(compact) {
-    root.classList.toggle("nav-compact", mq.matches && compact);
+  /* .86.29: Instagram-style. Scrolling down shrinks the pill to icons,
+     then glides it off the bottom edge; any scroll up brings it back at
+     full size. Only the pill moves (transform/opacity); #bottombar stays
+     fixed to the bottom safe area, so the bar can never sit mid-screen. */
+  var state = "full", lastEl = null, lastY = 0, downRun = 0, upRun = 0;
+  function setState(next) {
+    if (!mq.matches) next = "full";
+    if (next === state) return;
+    state = next;
+    root.classList.toggle("nav-compact", next !== "full");
+    root.classList.toggle("nav-away", next === "away");
   }
-  function show() { setCompact(false); }
+  function setCompact(compact) { setState(compact ? "compact" : "full"); }
+  function show() { downRun = 0; upRun = 0; setState("full"); }
   function onScroll(e) {
     if (ticking || !mq.matches || root.classList.contains("sheet-lock")) return;
     var target = e.target;
@@ -44526,9 +44548,19 @@ window.inspoView = "withmine";
     ticking = true;
     requestAnimationFrame(function () {
       ticking = false;
-      var y = scrollSource(target).y;
-      if (y >= 56) setCompact(true);
-      else if (y <= 12) show();
+      var src = scrollSource(target);
+      var y = src.y;
+      if (src.el !== lastEl) { lastEl = src.el; lastY = y; downRun = 0; upRun = 0; return; }
+      var dy = y - lastY; lastY = y;
+      if (y <= 12) { show(); return; }
+      /* rubber-banding past the end must not count as a direction */
+      if (y < 0 || y > src.max + 1) return;
+      if (dy > 0) { downRun += dy; upRun = 0; }
+      else if (dy < 0) { upRun -= dy; downRun = 0; }
+      if (src.max - y <= 4) { setState("compact"); return; }
+      if (upRun > 6) { setState("full"); return; }
+      if (y >= 56 && downRun > 6 && state === "full") setState("compact");
+      if (state === "compact" && downRun > 140) setState("away");
     });
   }
   document.addEventListener("scroll", onScroll, { passive: true, capture: true });
@@ -44542,13 +44574,13 @@ window.inspoView = "withmine";
     var r = bar && bar.getBoundingClientRect();
     var vv = window.visualViewport;
     return {
-      shrink: root.classList.contains("nav-compact") ? 1 : 0, away: false, scale: "1", hideY: "0px",
+      shrink: root.classList.contains("nav-compact") ? 1 : 0, away: root.classList.contains("nav-away"), scale: "1", hideY: "0px",
       bottom: r && Math.round(r.bottom), top: r && Math.round(r.top), layoutH: window.innerHeight,
       vvH: vv && Math.round(vv.height), vvTop: vv && Math.round(vv.offsetTop)
     };
   };
   window.__navSet = function (opts) {
-    setCompact(!!(opts && !opts.show && (opts.shrink || opts.away)));
+    setState(opts && !opts.show && opts.away ? "away" : opts && !opts.show && opts.shrink ? "compact" : "full");
     return window.__navState();
   };
   function wrapSwitch() {
