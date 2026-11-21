@@ -9839,7 +9839,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       var tucked = tuckOf(t, ly);
       /* .80.35: wardrobe rules override the default tuck (HAN-12 tuckOf). */
       if (root.WardrobeRules && typeof root.WardrobeRules.applyTuck === "function") {
-        var over = root.WardrobeRules.applyTuck(tucked, t, ly);
+        var over = root.WardrobeRules.applyTuck(tucked, t, ly, undefined, bt);
         if (over === true || over === false) tucked = over;
       }
       combos.push({ t: t, b: bt, s: s, l: ly, mask: mask, score: ev.score, ids: cids, key: comboKey(cids), tuck: tucked, tucked: tucked, tuckPrompt: tuckPromptOf(t, ly, tucked) });
@@ -10304,12 +10304,17 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     else if (/\balways tucked\b|\bmust be tucked\b|\bare tucked\b|\bis tucked\b|\bshould be tucked\b|\bget tucked\b|\bstay tucked\b|\balways tuck\b|\btucked in\b|\btucked\b/.test(t)) tuckVerb = true;
     if (tuckVerb !== null) {
       var layer = layerFrom(t);
-      var garments = garmentsFrom(t, !!layer);
+      /* .86.39: a bottom condition, "never tucked into shorts" (David) */
+      var bm = t.match(/\b(?:into|with|in|over)\s+(?:the\s+|his\s+|my\s+)?(shorts|jeans|trousers|chinos|pants)\b/);
+      var bottom = bm ? (bm[1] === "chinos" || bm[1] === "pants" ? "trousers" : bm[1]) : null;
+      var garments = garmentsFrom(t, !!layer).filter(function (k) { return !bottom || (k !== "shorts" && k !== "jeans" && k !== "trousers" && k !== "swim"); });
       if (!garments.length && /t[\s-]*shirts?|\btees?\b/.test(t)) garments = [/dress/.test(t) ? "dress-tee" : (/casual/.test(t) ? "casual-tee" : "tee")];
       if (!garments.length) garments = ["any-top"];
       var tuckRef = looksLikeItemRef(raw);
       var tuckName = itemNameWords(t) || (tuckRef ? (closetLoaded() ? "missing" : "pending") : null);
-      return tuckName ? { type: "tuck", garments: garments, layer: layer, tuck: tuckVerb, name: tuckName, text831: t, itemRef: tuckRef } : { type: "tuck", garments: garments, layer: layer, tuck: tuckVerb };
+      var tc = tuckName ? { type: "tuck", garments: garments, layer: layer, tuck: tuckVerb, name: tuckName, text831: t, itemRef: tuckRef } : { type: "tuck", garments: garments, layer: layer, tuck: tuckVerb };
+      if (bottom) tc.bottom = bottom;
+      return tc;
     }
 
     /* ---- never / always pair ---- */
@@ -10417,7 +10422,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if (p.type === "tuck") {
       var pend = (p.name === "pending" || p.name === "missing") ? (String(p.text831 || "").match(/\bthe\s+(.+?)\s+(?:is|are|must|should|stays?|gets?)\b/) || [])[1] : null;
       var g = Array.isArray(p.name) && p.name.length ? "the " + p.name.join(" ") : pend ? "the " + pend : labelList(p.garments);
-      var layer = p.layer ? " under " + labelKind(p.layer === "sport-coat" ? "blazer" : p.layer) : "";
+      var layer = (p.layer ? " under " + labelKind(p.layer === "sport-coat" ? "blazer" : p.layer) : "") + (p.bottom ? (p.tuck === "optional" ? " with " : " into ") + labelKind(p.bottom) : "");
       if (p.tuck === "optional") return g + " may be untucked" + layer;
       if (p.tuck === false) return g + " must never be tucked" + layer;
       return g + " must be tucked" + layer;
@@ -10681,11 +10686,12 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
      Returns true, false, "optional", or null (no rule applies).
      A more specific garment rule overrides a general one; a later
      rule of equal specificity overrides an earlier one. */
-  function tuckOverride(top, layer, rules) {
+  function tuckOverride(top, layer, rules, bottom) {
     var list = rules || active;
     if (!top) return null;
     var topCls = classify(top);
     var layerCls = layer ? classify(layer) : null;
+    var bottomCls = bottom ? classify(bottom) : null;
     var best = null, bestSpec = -1, bestIdx = -1;
     list.forEach(function (rule, idx) {
       if (!rule || rule.enabled === false) return;
@@ -10694,8 +10700,10 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         if (c.layer) {
           if (!layerCls || !hasKind(layerCls, c.layer)) return;
         }
+        if (c.bottom && (!bottomCls || !hasKind(bottomCls, c.bottom))) return;
         var spec = tuckSpec(c, topCls);
         if (spec < 0) return;
+        if (c.bottom && spec < 1000) spec += 2;
         if (spec > bestSpec || (spec === bestSpec && idx >= bestIdx)) {
           best = c.tuck;
           bestSpec = spec;
@@ -10708,8 +10716,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
 
   /* Apply rules over a default tuck flag (HAN-12 or inferred).
      "optional" leaves the default in place. */
-  function applyTuck(defaultTuck, top, layer, rules) {
-    var over = tuckOverride(top, layer, rules);
+  function applyTuck(defaultTuck, top, layer, rules, bottom) {
+    var over = tuckOverride(top, layer, rules, bottom);
     if (over === null || over === "optional") return defaultTuck;
     return over;
   }
@@ -10722,6 +10730,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       var layer = pieces.filter(function (p) { return p.role === "layer" || hasKind(p, "any-layer"); })[0];
       if (!top) return null;
       if (c.layer && (!layer || !hasKind(layer, c.layer))) return null;
+      if (c.bottom && !pieces.some(function (p) { return hasKind(p, c.bottom); })) return null;
       if (tuckSpec(c, top) < 0) return null;
       if (c.tuck === "optional") return null;
       if (c.tuck === true && tucked === false) return "this look leaves " + labelList(c.garments) + " untucked";
@@ -10875,7 +10884,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     { id: "dj-sweater-over-shirt-70", text: "Never wear a sweater over a button-down shirt at 70\u00B0F or warmer." },
     { id: "dj-eleventy-no-sweater", text: "Never wear the Eleventy suede western shirt with a sweater." },
     { id: "dj-eleventy-untucked", text: "The Eleventy suede western shirt is never tucked." },
-    { id: "dj-malibu-tees-only", text: "Never wear the Pool House New York Malibu linen pants with a polo or a button-down shirt." }
+    { id: "dj-malibu-tees-only", text: "Never wear the Pool House New York Malibu linen pants with a polo or a button-down shirt." },
+    { id: "dj-untucked-with-shorts", text: "Polos and T-shirts are never tucked into shorts." }
   ];
 
   function seedRules() {

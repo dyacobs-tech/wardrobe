@@ -131,9 +131,9 @@ def main() -> int:
               inKeys: (typeof DATA_KEYS !== 'undefined') && DATA_KEYS.indexOf('wardrobeRules') !== -1
             })""")
             # .86.31+: a fresh profile gets the 3 built-in rules plus David's added rules
-            EXPECT = 3 + 4
+            EXPECT = 3 + 5
             check("seed rules on a fresh profile", seeds["n"] == EXPECT and seeds["parsed"] and seeds["enabled"], seeds)
-            check("seed ids are stable", set(seeds["ids"]) == {"seed-tuck-blazer", "seed-tuck-dress-tee", "seed-tuck-flannel", "dj-sweater-over-shirt-70", "dj-eleventy-no-sweater", "dj-eleventy-untucked", "dj-malibu-tees-only"}, seeds["ids"])
+            check("seed ids are stable", set(seeds["ids"]) == {"seed-tuck-blazer", "seed-tuck-dress-tee", "seed-tuck-flannel", "dj-sweater-over-shirt-70", "dj-eleventy-no-sweater", "dj-eleventy-untucked", "dj-malibu-tees-only", "dj-untucked-with-shorts"}, seeds["ids"])
             check("seed rules stored for backup", seeds["stored"] and seeds["inKeys"])
             check("blazer seed understood", any("shirts, polos and knits must be tucked under blazers" in t for t in seeds["texts"]), seeds["texts"][:1])
 
@@ -204,7 +204,7 @@ def main() -> int:
             check("seed rules are listed", cards.count() == EXPECT, cards.count())
             check("each rule shows its interpretation", page.evaluate("""() => {
               const cards = [...document.querySelectorAll('.rule-card')];
-              return cards.length === 7 && cards.every(c => {
+              return cards.length === 8 && cards.every(c => {
                 const u = c.querySelector('.rule-understood');
                 return u && /Understood as:/.test(u.textContent || '');
               });
