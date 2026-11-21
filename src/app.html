@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.43" />
+    <meta name="wardrobe-build" content="2026-11-21.86.44" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -996,6 +996,7 @@ window.notMenswear853 = function (e) {
       @media (min-width: 640px) { .wear-stats { grid-template-columns: 1fr 1fr; } }
       .wear-stats div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 5px; font-size: 14.5px; }
       .wear-stats dt { color: var(--dim); } .wear-stats dd { margin: 0; font-weight: 600; }
+      .wear-stats .link-btn844 { appearance: none; background: none; border: 0; padding: 0; margin: 0; font: inherit; font-weight: 600; color: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 0; }
       .data-card { padding: 22px; margin-top: 22px; display: grid; gap: 12px; }
       .data-card h3 { font-family: var(--font-display); font-size: 28px; font-weight: 600; margin: 0; line-height: 1.1; }
       .data-card p { margin: 0; font-size: 14px; color: var(--dim); max-width: 62ch; }
@@ -7724,6 +7725,11 @@ window.notMenswear853 = function (e) {
               <input type="text" id="item-name" placeholder="" required />
             </div>
             <div>
+              <label class="field" for="item-brand">Brand</label>
+              <input type="text" id="item-brand" placeholder="" list="item-brand-list" autocomplete="off" autocapitalize="words" />
+              <datalist id="item-brand-list"></datalist>
+            </div>
+            <div>
               <label class="field" for="item-cat">Category</label>
               <select id="item-cat">
                 <option>Shoes</option><option>Shirts</option><option>Tees</option><option>Polos</option>
@@ -8674,7 +8680,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.43</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.44</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9675,10 +9681,89 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   /* Formality ranges on the app's seven outfit types:
      1 Swim/Pool · 2 Shorts & Tee · 3 Casual · 4 Smart Casual ·
      5 Business Casual · 6 Formal · 7 Black Tie. */
+  /* ---- .86.44 belts (David, 21 Nov): "Plain belts should always match
+     shoes unless I have beltless pants or white sneakers - multicolor belts
+     should try and be in harmony with the shoes." ----
+     A plain belt is one colour; a multicolour belt is beaded, needlepoint, a
+     woven polo belt, striped, or named with two colours ("Blue & Orange").
+     Tan, cognac, rust, oxblood and honey leathers read as one brown family.
+     Trousers with a drawstring, elastic waist or side adjusters, and swim
+     trunks, take no belt (also any piece whose notes say "no belt"). */
+  var BELT_MULTI_RE = /beaded|needlepoint|polo belt|ribbon|striped?\b|multi[- ]?colou?r|\s&\s/;
+  var BELT_CASUAL_RE = /beaded|needlepoint|woven|braided|stretch|elastic|polo belt|ribbon|canvas|rope/;
+  var BELTLESS_RE = /drawstring|draw-string|elasticated|elastic waist|pull-on|jogger|side[- ]adjust|side tabs?\b|beltless|no belt/;
+  var BELT_HARDWARE_RE = /(silver|gold|brass|gunmetal|nickel|metal)[a-z -]{0,14}(buckle|keeper|tip|hardware)[^.;]*/g;
+  var LEATHER_TONES = { brown: 1, beige: 1, orange: 1, burgundy: 1, yellow: 1 };
+  function famsIn(text) {
+    var out = [], t = String(text || "").toLowerCase();
+    for (var i = 0; i < FAMILIES.length; i++) if (FAMILIES[i][0].test(t) && out.indexOf(FAMILIES[i][1]) === -1) out.push(FAMILIES[i][1]);
+    return out;
+  }
+  function beltProfile(p, item, name, colourName, notes) {
+    var extra = (item.extraColours || []).map(function (c) { return (c && c.name && String(c.name).indexOf("Nearest Wada:") !== 0) ? c.name : ""; }).join(" ").toLowerCase();
+    var plainName = name.replace(BELT_HARDWARE_RE, " ");
+    var words = (plainName + " " + colourName + " " + extra + " " + notes.replace(BELT_HARDWARE_RE, " ").replace(/added from your photo[^.]*\.?/g, " "));
+    /* the buckle is not the belt's colour: "Brown Leather Belt, Engraved Silver Buckle" is brown */
+    var own = famsIn(colourName)[0] || famsIn(plainName)[0];
+    if (own) { p.fam = own; p.neutral = true; }
+    p.multi = BELT_MULTI_RE.test(name) || BELT_MULTI_RE.test(colourName) || /\S/.test(extra);
+    p.casualBelt = BELT_CASUAL_RE.test(name + " " + notes);
+    p.suede = /suede/.test(name + " " + notes);
+    p.beltFams = p.multi ? famsIn(words) : [p.fam];
+    if (!p.beltFams.length) p.beltFams = [p.fam];
+  }
+  function beltShoeFam(s) {
+    /* shoe colours with no family word of their own ("greige", "taupe", "camo") are brown-leather tones, not whatever the photo's hex says */
+    if (/greige|taupe|mushroom|\bsand\b|stone|khaki|camel|\btan\b|cognac|tobacco|chocolate|espresso|camo/.test(s.n || "")) return "brown";
+    return LEATHER_TONES[s.fam] ? "brown" : s.fam === "blue" ? "navy" : s.fam === "olive" ? "green" : s.fam;
+  }
+  function whiteSneaker(s) { return !!s && s.kind === "sneaker" && (s.fam === "white" || s.L >= 85); }
+  function keyHash(k) { var h = 2166136261; k = String(k || ""); for (var i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  /* The belt for one outfit, or null. c = { t, b, s, l, key }; lv = dress level (0 = any). */
+  function beltFor(belts, c, lv) {
+    if (!belts || !belts.length || !c || !c.s || !c.b) return null;
+    if (lv === 1 || lv === 7) return null;                         /* swim; black tie */
+    if (c.b.beltless || c.b.kind === "swim") return null;
+    var s = c.s, free = whiteSneaker(s), want = beltShoeFam(s), suedeShoe = /suede/.test(s.n || "");
+    var dressy = lv >= 5 || (!lv && isTailoredLayer(c.l));
+    var h = keyHash(c.key);
+    var plain = null, plainScore = -1e9, multi = null, multiScore = -1e9;
+    function vary(b) { return ((h + b.idx * 7919) % 97) / 97 * 0.8; }                /* steady variety between near-equal belts */
+    belts.forEach(function (b) {
+      if (dressy && (b.casualBelt || b.multi)) return;              /* blazer-and-up looks take a plain leather belt */
+      var sc;
+      if (b.multi) {
+        var f = b.beltFams;
+        var withShoes = f.indexOf(s.fam) !== -1 || f.indexOf(want) !== -1 || (want === "brown" && f.some(function (x) { return LEATHER_TONES[x]; }));
+        if (!withShoes) return;                                     /* multicolour: in harmony with the shoes, or not at all */
+        sc = 1 + ((f.indexOf(c.t.fam) !== -1 || f.indexOf(c.b.fam) !== -1) ? 1.5 : 0) + vary(b);
+        if (sc > multiScore) { multiScore = sc; multi = b; }
+        return;
+      }
+      if (free) sc = 2 + (b.casualBelt ? 1 : 0) + (b.fam === "brown" || b.fam === "navy" ? 0.5 : 0);
+      else if (b.fam === want) sc = 4 - Math.abs(b.L - s.L) / 14 + (b.suede === suedeShoe ? 0.9 : -0.5) - (b.casualBelt && lv >= 4 ? 0.6 : 0);
+      else return;                                                  /* a plain belt always matches the shoes */
+      sc += vary(b);
+      if (sc > plainScore) { plainScore = sc; plain = b; }
+    });
+    /* The matching plain belt is the default. A multicolour belt that suits the shoes takes its
+       place on some casual outfits: about a third by day, fewer in the evening. */
+    if (multi && (!plain || (h % 100) < (lv && lv <= 2 ? 35 : 15))) return multi;
+    if (plain || free) return plain;
+    /* no belt in the shoes' colour (cream loafers, a red shoe): the nearest plain leather by lightness */
+    belts.forEach(function (b) {
+      if (b.multi || b.casualBelt || !LEATHER_TONES[b.fam]) return;
+      var sc2 = 1 - Math.abs(b.L - s.L) / 14 + vary(b);
+      if (sc2 > plainScore) { plainScore = sc2; plain = b; }
+    });
+    return plain;
+  }
+
   function profile(item, idx) {
     var cat = item.category || "";
     var name = String(item.name || "").toLowerCase();
     var colourName = String(item.colourName || "").toLowerCase();
+    var notes844 = String(item.notes || "").toLowerCase();
     var n = name + " " + colourName;
     var hsl = hexToHsl(item.colourHex);
     var fc = familyOf(colourName + " " + name, hsl);
@@ -9793,7 +9878,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       else { p.lo = 2; p.hi = 4; p.kind = "jacket"; p.warm = 2; }
     } else if (ACC_CATS[cat]) {
       p.role = "acc"; p.lo = 1; p.hi = 7; p.kind = cat.toLowerCase();
+      if (cat === "Belts") beltProfile(p, item, name, colourName, notes844);
     }
+    if (p.role === "bottom") p.beltless = p.kind === "swim" || !!item.nb || BELTLESS_RE.test(name + " " + notes844);
     if (/cashmere|wool|flannel|corduroy/.test(n) && p.warm < 1 && p.role !== "shoes") p.warm = 1;
     /* A jacket or coat named as a blazer or sport coat is tailoring,
        not a casual layer — Casual / Smart Casual will not deal it. */
@@ -10009,6 +10096,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       });
     }
     this.tops = tops; this.bottoms = bottoms; this.shoes = shoes; this.layerOpts = layerOpts; this.accs = accs;
+    this.belts = accs.filter(function (a) { return a.kind === "belts"; });
     var combos = [];
     function addCombo(t, bt, s, ly) {
       if (onlyLevel && !fitsLevel(onlyLevel, t, bt, s, ly)) return;
@@ -10266,15 +10354,14 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       excluded[chosen] = 1;
       pc.ids.forEach(function (id) { localExp[id] = (localExp[id] || 0) + 1; });
       var acc = null;
-      /* .86.43: accessories follow two rules (David added 19 belts and 14
-         sunglasses on 21 Nov, and the deal began pairing any of them with any
-         outfit). A belt is never added at random: belts stay in the Closet and
-         in packing lists until they have matching rules. Sunglasses and hats
-         are for the day: Pool / Beach and Daytime only, never a night level. */
+      /* .86.43/.86.44: accessories. Sunglasses and hats are for the day
+         (Pool / Beach and Daytime only) and join about a third of outfits.
+         The belt is never random: beltFor() applies David's belt rules. */
       var accPool = this.accsLoose || (this.accsLoose = this.accs.filter(function (a) { return a.kind !== "belts"; }));
       if (lv >= 3) accPool = this.accsNight || (this.accsNight = accPool.filter(function (a) { return a.kind !== "sunglasses" && a.kind !== "hats"; }));
       if (accPool.length && rng() < 0.35) acc = accPool[Math.floor(rng() * accPool.length)];
-      picked.push({ _i: chosen, key: pc.key, ids: pc.ids.slice(), top: pc.t, bottom: pc.b, shoes: pc.s, layer: pc.l, acc: acc, score: pc.score, mask: pc.mask, tuck: pc.tuck, tucked: pc.tuck, tuckPrompt: pc.tuckPrompt });
+      var belt = beltFor(this.belts, pc, lv);
+      picked.push({ _i: chosen, key: pc.key, ids: pc.ids.slice(), top: pc.t, bottom: pc.b, shoes: pc.s, layer: pc.l, acc: acc, belt: belt, score: pc.score, mask: pc.mask, tuck: pc.tuck, tucked: pc.tuck, tuckPrompt: pc.tuckPrompt });
     }
     return picked;
   };
@@ -10298,6 +10385,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   }
 
   root.WardrobeComposer = {
+    beltFor: beltFor,
     version: 1,
     profile: profile,
     evaluate: evaluate,
@@ -11464,7 +11552,7 @@ function composerPieceTitle(item) {
 function composerOutfitToLook(o, i, renderPairs) {
   var byId = {};
   (typeof wardrobeItems !== "undefined" ? wardrobeItems : []).forEach(function (it) { byId[it.id] = it; });
-  var order = [o.layer, o.top, o.bottom, o.shoes, o.acc].filter(Boolean);
+  var order = [o.layer, o.top, o.bottom, o.shoes, o.belt, o.acc].filter(Boolean);   /* .86.44: the matched belt is one of the outfit's pieces */
   var pieces = order.map(function (p) { return byId[p.id]; }).filter(Boolean);
   var upper = o.layer ? byId[o.layer.id] : byId[o.top.id];
   var bottom = byId[o.bottom.id];
@@ -11830,7 +11918,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.43";
+var WARDROBE_BUILD = "2026-11-21.86.44";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -27859,6 +27947,8 @@ function wardBrandList() {
 }
 function wardBrandKey(item) {
   var name = (item && item.name) || "";
+  var typed844 = String((item && item.brand) || "").trim();
+  if (typed844) return typed844;
   var list = wardBrandList();
   for (var i = 0; i < list.length; i++) {
     if (name === list[i] || name.indexOf(list[i] + " ") === 0) return list[i];
@@ -27937,7 +28027,7 @@ function renderWardrobe() {
     if (staleSet && !staleSet[i.id]) return false;
     if (wardFilter !== "All" && i.category !== wardFilter) return false;
     if (!q) return true;
-    var hay = (i.name + " " + i.category + " " + (i.colourName || "") + " " + (i.notes || "")).toLowerCase();
+    var hay = (i.name + " " + (i.brand || "") + " " + i.category + " " + (i.colourName || "") + " " + (i.notes || "")).toLowerCase();
     return hay.indexOf(q) !== -1;
   });
   /* Alphabetical on both keys (build .28): All sorts type →
@@ -27994,7 +28084,7 @@ function renderWardrobe() {
       (i.photo ? '<img class="photo" src="' + i.photo + '" alt="Photograph of ' + esc(i.name) + '" loading="lazy" decoding="async" />' : '<div class="photo card-photo-ph" role="img" aria-label="No photograph yet for ' + esc(i.name) + '" style="background:' + esc(i.colourHex || "#c9bda6") + ";color:" + contrastInk(i.colourHex || "#c9bda6") + '"><span>' + esc(i.category || "Piece") + "</span></div>") +
       '<span class="cat">' + esc(i.category) + "</span>" + (i.shopBought ? ' <span class="shop-bought-badge">Bought via Shop the look</span>' : "") +
       '<div class="item-idrow">' +
-      '<h4 class="item-name">' + esc(i.name) + "</h4>" +
+      '<h4 class="item-name">' + esc(itemDisplayName844(i)) + "</h4>" +
       '<div class="item-colorrow"><div class="item-colors">' + colours.map(function (c) {
         return '<span class="cdot" style="background:' + c.hex + '" title="' + esc(c.name) + '"></span>';
       }).join("") + '<span class="cname">' + esc(colours.map(function (c) { return c.name; }).join(" · ")) + "</span></div>" +
@@ -28053,12 +28143,13 @@ function renderItemDetail() {
     '<div><span class="type-label">' + esc(it.category) + "</span>" +
     (it.shopBought ? ' <span class="shop-bought-badge">Bought via Shop the look</span>' : "") +
     (it.laundry ? ' <span class="laundry-badge">In laundry</span>' : "") + "</div>" +
-    "<h3>" + esc(it.name) + "</h3>" +
+    "<h3>" + esc(itemDisplayName844(it)) + "</h3>" +
     '<div class="item-colors">' + colours.map(function (c) {
       return '<span class="cdot" style="background:' + c.hex + '" title="' + esc(c.name) + '"></span>';
     }).join("") + '<span class="cname">' + esc(colours.map(function (c) { return c.name; }).join(" · ")) + "</span></div>" +
     (it.notes ? '<p class="notes-line">' + esc(it.notes) + "</p>" : "") +
     '<dl class="wear-stats">' +
+    '<div><dt>Brand</dt><dd>' + (itemBrand844(it) ? esc(itemBrand844(it)) : '<button type="button" class="link-btn844" data-item-act="edit">Add brand</button>') + "</dd></div>" +
     "<div><dt>Cost</dt><dd>" + (it.price ? "$" + it.price : "Not recorded") + "</dd></div>" +
     "<div><dt>Status</dt><dd>" + (it.laundry ? "In laundry" : "In the closet") + "</dd></div>" +
     "</dl>" +
@@ -28247,9 +28338,34 @@ function endItemEdit() {
   var at = document.getElementById("add-form-title");
   if (at) at.textContent = "Add";
 }
+/* .86.44 (David, 21 Nov): "You need to allow me to input Brand into the
+   app." The Add / Edit form has a Brand field; it suggests the brands
+   already in his closet. The brand shows on the piece's page and, when the
+   name does not already carry it, in front of the name on the closet card;
+   the closet sorts and its A-Z rail jump by it. */
+function itemBrand844(it) { return String((it && it.brand) || "").trim(); }
+function itemDisplayName844(it) {
+  var nm = String((it && it.name) || ""), br = itemBrand844(it);
+  if (!br || nm.toLowerCase().indexOf(br.toLowerCase()) !== -1) return nm;
+  return br + " " + nm;
+}
+function fillBrandList844() {
+  var dl = document.getElementById("item-brand-list"); if (!dl) return;
+  var seen = {}, out = [];
+  (typeof wardrobeItems !== "undefined" && wardrobeItems ? wardrobeItems : []).forEach(function (i) {
+    /* a typed brand, or the known brand his piece's name starts with */
+    var b = itemBrand844(i);
+    if (!b && typeof wardBrandKey === "function") { var k = wardBrandKey(i); if (k && k !== i.name) b = k; }
+    if (b && !seen[b.toLowerCase()]) { seen[b.toLowerCase()] = 1; out.push(b); }
+  });
+  out.sort(function (a, b) { return a.localeCompare(b); });
+  dl.innerHTML = out.map(function (b) { return '<option value="' + esc(b) + '"></option>'; }).join("");
+}
+(function () { var bi = document.getElementById("item-brand"); if (bi) bi.addEventListener("focus", fillBrandList844); })();
 function startItemEdit(it) {
   editingItemId = it.id;
   document.getElementById("item-name").value = it.name;
+  document.getElementById("item-brand").value = itemBrand844(it);
   document.getElementById("item-cat").value = it.category;
   document.getElementById("item-colour-name").value = (it.colourName || "").split("·")[0].trim();
   document.getElementById("item-colour").value = it.colourHex || "#232d3f";
@@ -28279,6 +28395,7 @@ document.getElementById("add-form").addEventListener("submit", function (e) {
   e.preventDefault();
   var name = document.getElementById("item-name").value.trim();
   if (!name) return;
+  var brand844 = document.getElementById("item-brand").value.trim();
   var colourName = document.getElementById("item-colour-name").value.trim();
   var colourHex = document.getElementById("item-colour").value;
   var wada = nearestWada(colourHex);
@@ -28289,6 +28406,7 @@ document.getElementById("add-form").addEventListener("submit", function (e) {
     var it = closetItemById(editingItemId);
     if (it) {
       it.name = name;
+      it.brand = brand844;
       it.category = document.getElementById("item-cat").value;
       /* The form shows only the first part of the colour name
          ("Cream" of "Cream · forest green trim"). If that part was
@@ -28313,6 +28431,7 @@ document.getElementById("add-form").addEventListener("submit", function (e) {
     wardrobeItems.unshift({
       id: "item-" + Date.now(),
       name: name,
+      brand: brand844,
       category: document.getElementById("item-cat").value,
       colourName: colourName || wada.name,
       colourHex: colourHex,
@@ -48466,6 +48585,9 @@ window.inspoView = "withmine";
     if (i.occasionOnly) o.occasionOnly = i.occasionOnly;
     if (typeof itemPoolOnly === "function" && itemPoolOnly(i)) o.po = 1;
     if (typeof pieceIsSwim === "function" && pieceIsSwim(i)) o.sw = 1;
+    /* .86.44: the belt rules read a belt's other colours and notes, and a trouser's "drawstring" / "side adjusters" / "no belt" */
+    if (i.category === "Belts") { o.notes = String(i.notes || "").slice(0, 240); if (i.extraColours && i.extraColours.length) o.extraColours = i.extraColours.map(function (c) { return { name: c && c.name }; }); }
+    else if (/^(Trousers|Jeans|Shorts)$/.test(i.category || "") && /drawstring|draw-string|elastic|pull-on|jogger|side[- ]adjust|side tab|beltless|no belt/i.test(String(i.notes || ""))) o.nb = 1;
     return o;
   }
   function iconsLite() {
@@ -48515,7 +48637,7 @@ window.inspoView = "withmine";
     /* .86.42 (David): products photographed on a model (e.mdl, tagged in the
        catalogue) stay in the Shop but never in an outfit's item boxes */
     var shop = CATALOG.filter(function (e) { return e && !e.mdl; }).map(catItem).filter(Boolean);
-    var sig = mine.length + "/" + own.length + "/" + shop.length + "/" + mine.map(function (i) { return i.id; }).join(",");
+    var sig = mine.length + "/" + own.length + "/" + shop.length + "/" + mine.map(function (i) { return i.id + (i.nb ? "~nb" : "") + (i.notes ? "~" + i.notes.length : ""); }).join(",");
     if (sig === dataSig) return;
     dataSig = sig; ready = false;
     BUF.mine = []; BUF.withmine = []; BUF.allnew = [];
@@ -49394,7 +49516,7 @@ function setData(d) {
   STYLE_FAM = {};
   OWN.forEach(function (p) { STYLE_FAM[p.fam] = (STYLE_FAM[p.fam] || 0) + 1; });
   if (self.WardrobeRules && self.WardrobeRules.setActive) self.WardrobeRules.setActive(d.rules || []);
-  var sig = (d.mine || []).map(function (i) { return i.id + "~" + i.category + "~" + i.name + "~" + i.colourHex; }).join("\n");
+  var sig = (d.mine || []).map(function (i) { return i.id + "~" + i.category + "~" + i.name + "~" + i.colourHex + (i.nb ? "~nb" : "") + (i.notes ? "~" + i.notes.length : ""); }).join("\n");
   if (sig !== mineSig) { mineSig = sig; mineDeck = (d.mine && d.mine.length >= 3) ? C.build(d.mine) : null; }
 }
 
@@ -49402,7 +49524,7 @@ function setData(d) {
 function slim(o) {
   function s(p) { return p ? { id: p.id } : null; }
   return { key: o.key, mask: o.mask, ids: o.ids, top: s(o.top), bottom: s(o.bottom), shoes: s(o.shoes),
-    layer: s(o.layer), acc: s(o.acc), tuck: o.tuck, tucked: o.tucked, tuckPrompt: o.tuckPrompt };
+    layer: s(o.layer), acc: s(o.acc), belt: s(o.belt), tuck: o.tuck, tucked: o.tucked, tuckPrompt: o.tuckPrompt };
 }
 function dealMine(q) {
   if (!mineDeck) return [];

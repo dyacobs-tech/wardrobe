@@ -96,6 +96,52 @@ ENGINE_JS = """([items, extras]) => {
   const d4 = C.build(items.concat(extras, [{ id: 'sun-1', name: 'Tortoise Round Sunglasses', category: 'Sunglasses', colourName: 'Tortoise', colourHex: '#6b4423' }]));
   const sunAt = (lvl) => { let n = 0, tot = 0; const r = []; for (let pg = 0; pg < 30; pg++) d4.deal(6, { level: lvl, temp: 68, recent: r }).forEach(o => { r.push(o.key); tot++; if (o.acc && o.acc.id === 'sun-1') n++; }); return [n, tot]; };
   out.sunDay = sunAt(2); out.sunNight = sunAt(3).concat(sunAt(5), sunAt(6));
+  // .86.44 belt rules (David, 21 Nov): plain belts match the shoes; no belt with beltless
+  // trousers; white sneakers lift the rule; multicolour belts only in harmony with the shoes
+  const P = (o, i) => C.profile(Object.assign({ colourHex: '#777777' }, o), 900 + i);
+  const BELTS = [
+    { id: 'bb-brown', name: 'Dark Brown Leather Belt', category: 'Belts', colourName: 'Dark Brown' },
+    { id: 'bb-black', name: 'Black Leather Belt', category: 'Belts', colourName: 'Black' },
+    { id: 'bb-navy', name: 'Navy Pebbled Leather Belt', category: 'Belts', colourName: 'Navy' },
+    { id: 'bb-grey', name: 'Charcoal Leather Belt', category: 'Belts', colourName: 'Charcoal' },
+    { id: 'bb-buckle', name: 'Brown Leather Belt, Engraved Silver Buckle', category: 'Belts', colourName: 'Brown' },
+    { id: 'bb-suede', name: 'Tobacco Suede Belt', category: 'Belts', colourName: 'Tobacco' },
+    { id: 'bb-woven', name: 'Navy Woven Stretch Belt', category: 'Belts', colourName: 'Navy' },
+    { id: 'bb-multi', name: 'Blue & Orange Beaded Belt', category: 'Belts', colourName: 'Blue', notes: 'Beaded zigzag pattern on dark leather; brass buckle.' },
+    { id: 'bb-polo', name: 'Navy, Red & Tan Woven Polo Belt', category: 'Belts', colourName: 'Navy', notes: 'Woven diamonds with tan leather ends; silver buckle.' } ].map(P);
+  const beltTop = P({ id: 't1', name: 'White Oxford Shirt', category: 'Shirts', colourName: 'White' }, 50);
+  const beltChino = P({ id: 'b1', name: 'Beige Stretch Chino', category: 'Trousers', colourName: 'Beige' }, 51);
+  const beltShoe = (name, colourName) => P({ id: 's-' + name, name, category: 'Shoes', colourName }, 52);
+  const pick = (s, b, lv, belts, key) => { const r = C.beltFor(belts || BELTS, { t: beltTop, b: b || beltChino, s, l: null, key: key || 'k' }, lv); return r ? r.id : null; };
+  const beltKeys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
+  const all = (s, lv, b) => [...new Set(beltKeys.map(k => pick(s, b, lv, null, k)))];
+  const beltFam = id => id && BELTS.find(x => x.id === id).fam, isMulti = id => !!id && BELTS.find(x => x.id === id).multi;
+  const plainFam = (s, lv) => all(s, lv).filter(id => !isMulti(id)).map(beltFam);
+  out.belt = {
+    profiles: BELTS.map(b => [b.id, b.fam, !!b.multi, !!b.casualBelt]),
+    brown: plainFam(beltShoe('Dark Brown Suede Penny Loafers', 'Dark Brown'), 3),
+    tan: plainFam(beltShoe('Tan Suede Penny Loafers', 'Tan'), 3),
+    black: plainFam(beltShoe('Black Leather Loafers', 'Black'), 3),
+    navy: plainFam(beltShoe('Navy Suede Loafers', 'Navy'), 3),
+    grey: plainFam(beltShoe('Grey Suede Loafers', 'Grey'), 3),
+    greige: plainFam(beltShoe('Greige Suede Penny Loafers', 'Greige'), 3),
+    suedeFirst: pick(beltShoe('Tobacco Suede Loafers', 'Tobacco'), null, 5),
+    dressy: all(beltShoe('Navy Suede Loafers', 'Navy'), 5).concat(all(beltShoe('Rust Suede Tassel Loafers', 'Rust'), 5)),
+    whiteSneaker: all(beltShoe('White Leather Sneakers', 'White'), 2),
+    drawstring: pick(beltShoe('Black Leather Loafers', 'Black'), P({ id: 'b2', name: 'Navy Drawstring Trousers', category: 'Trousers', colourName: 'Navy' }, 53), 3),
+    sideAdjusters: pick(beltShoe('Black Leather Loafers', 'Black'), P({ id: 'b3', name: 'Ivory Seersucker Pants', category: 'Trousers', colourName: 'Ivory', notes: 'Ivory seersucker with side adjusters.' }, 54), 3),
+    noBeltNote: pick(beltShoe('Black Leather Loafers', 'Black'), P({ id: 'b4', name: 'Cream Linen Trousers', category: 'Trousers', colourName: 'Cream', notes: 'No belt.' }, 55), 3),
+    swim: pick(beltShoe('Black Leather Loafers', 'Black'), P({ id: 'b5', name: 'Navy Swim Trunks', category: 'Bathing suits', colourName: 'Navy' }, 56), 2),
+    blackTie: pick(beltShoe('Black Leather Loafers', 'Black'), null, 7),
+    multiOnBlack: all(beltShoe('Black Leather Loafers', 'Black'), 2).filter(isMulti),
+    multiAloneBlack: pick(beltShoe('Black Leather Loafers', 'Black'), null, 2, BELTS.filter(b => b.multi)),
+    multiAloneRust: pick(beltShoe('Rust Suede Tassel Loafers', 'Rust'), null, 2, BELTS.filter(b => b.id === 'bb-multi')),
+    multiAloneTan: pick(beltShoe('Tan Suede Penny Loafers', 'Tan'), null, 2, BELTS.filter(b => b.id === 'bb-polo')),
+    creamLoafer: pick(beltShoe('Cream Leather Loafers', 'Cream'), null, 5, BELTS.filter(b => !b.multi)) };
+  const d6 = C.build(items.concat(extras, BELTS.map(b => ({ id: b.id, name: b.name, category: 'Belts', colourName: b.fam === 'grey' ? 'Charcoal' : b.name.split(' ')[0], colourHex: '#555555' }))));
+  let dealtBelt = 0, dealtN = 0; const r6 = [];
+  for (let pg = 0; pg < 12; pg++) d6.deal(6, { level: 3, temp: 68, recent: r6 }).forEach(o => { r6.push(o.key); dealtN++; if (o.belt) dealtBelt++; });
+  out.belt.dealt = [dealtBelt, dealtN];
   out.newPiecePlaceable = !!d2.coverage(null)['new-1'];
   // levels
   out.levels = {};
@@ -166,8 +212,29 @@ def main() -> int:
             check("all 83 pieces shown within 600 deals", eng["shown"] == len(FIXTURE), eng["shown"])
             check("a new piece is placeable", eng["newPiecePlaceable"])
             check("a new piece is dealt within the first pages", 0 <= eng["newPieceAt"] < 60, eng["newPieceAt"])
-            check("belts are in the deck for packing but never dealt at random", eng["beltsInDeck"] == 2 and eng["beltDealt"] == 0, (eng["beltsInDeck"], eng["beltDealt"]))
+            check("a belt is never the random accessory", eng["beltsInDeck"] == 2 and eng["beltDealt"] == 0, (eng["beltsInDeck"], eng["beltDealt"]))
             check("sunglasses go with Daytime looks, never a night level", eng["sunDay"][1] > 20 and eng["sunDay"][0] > 0 and eng["sunNight"][0] == 0 and eng["sunNight"][2] == 0 and eng["sunNight"][4] == 0, (eng["sunDay"], eng["sunNight"]))
+            bl = eng["belt"]
+            prof = {b[0]: b for b in bl["profiles"]}
+            check("a belt's colour ignores its buckle", prof["bb-buckle"][1] == "brown" and not prof["bb-buckle"][2], prof["bb-buckle"])
+            check("beaded and polo belts are multicolour; one-colour belts are plain", prof["bb-multi"][2] and prof["bb-polo"][2] and not prof["bb-woven"][2] and not prof["bb-brown"][2], bl["profiles"])
+            check("plain belt matches brown shoes", bl["brown"] and set(bl["brown"]) == {"brown"}, bl["brown"])
+            check("plain belt matches tan shoes (brown leathers)", bl["tan"] and set(bl["tan"]) == {"brown"}, bl["tan"])
+            check("plain belt matches black shoes", set(bl["black"]) == {"black"}, bl["black"])
+            check("plain belt matches navy shoes", set(bl["navy"]) == {"navy"}, bl["navy"])
+            check("plain belt matches grey shoes", set(bl["grey"]) == {"grey"}, bl["grey"])
+            check("greige shoes take a brown belt, not what the photo's hex says", bl["greige"] and set(bl["greige"]) == {"brown"}, bl["greige"])
+            check("suede shoes prefer the suede belt", bl["suedeFirst"] == "bb-suede", bl["suedeFirst"])
+            check("blazer-level looks take a plain leather belt", all(b in ("bb-navy", "bb-brown", "bb-buckle", "bb-suede") for b in bl["dressy"]), bl["dressy"])
+            check("white sneakers lift the match rule but still get a belt", bl["whiteSneaker"] and all(bl["whiteSneaker"]), bl["whiteSneaker"])
+            check("no belt with drawstring trousers", bl["drawstring"] is None, bl["drawstring"])
+            check("no belt with side-adjuster trousers", bl["sideAdjusters"] is None, bl["sideAdjusters"])
+            check("no belt when the notes say no belt", bl["noBeltNote"] is None, bl["noBeltNote"])
+            check("no belt with swim trunks or at black tie", bl["swim"] is None and bl["blackTie"] is None, (bl["swim"], bl["blackTie"]))
+            check("a multicolour belt is never paired with shoes it does not harmonise with", bl["multiOnBlack"] == [] and bl["multiAloneBlack"] is None, (bl["multiOnBlack"], bl["multiAloneBlack"]))
+            check("a multicolour belt joins shoes that share its colour or leather", bl["multiAloneRust"] == "bb-multi" and bl["multiAloneTan"] == "bb-polo", (bl["multiAloneRust"], bl["multiAloneTan"]))
+            check("with no belt in the shoes' colour, the nearest plain leather is used", bl["creamLoafer"] in ("bb-brown", "bb-buckle", "bb-suede"), bl["creamLoafer"])
+            check("dealt outfits carry a belt", bl["dealt"][0] > bl["dealt"][1] * 0.6, bl["dealt"])
             for L, v in eng["levels"].items():
                 check(f"outfit type {L} deals", v["dealt"] >= 1 and v["inLevel"], v)
             check("a disliked combo never returns", not eng["bannedReturned"])
