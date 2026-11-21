@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.36" />
+    <meta name="wardrobe-build" content="2026-11-21.86.37" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6258,6 +6258,22 @@ window.notMenswear853 = function (e) {
       .fb830-open { width: 100%; min-height: 48px; margin: 0 0 14px; }
       /* .86.34: dress level 4 is retired (old Smart Casual → Nighttime Casual) */
       [data-studio-type="4"][hidden] { display: none !important; }
+      /* .86.37: Looks dress-level + temperature dropdowns */
+      .lk-ctl837 { display: flex; gap: 8px; padding: 6px 16px 4px; }
+      .lk-dd837 { position: relative; flex: 1 1 0; min-width: 0; }
+      .lk-ddb837 { width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 14px;
+        border: 1px solid var(--line, rgba(0,0,0,.18)); border-radius: 999px; background: transparent; color: inherit; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+      .lk-ddl837 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .lk-ddc837 { font-size: 11px; opacity: .7; }
+      .lk-menu837 { position: absolute; z-index: 60; top: calc(100% + 6px); left: 0; right: 0; min-width: 200px; padding: 6px;
+        background: var(--bg, #F6F2EA); border: 1px solid var(--line, rgba(0,0,0,.12)); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.12); }
+      .lk-dd837[data-kind="temp"] .lk-menu837 { left: auto; right: 0; }
+      .lk-menu837[hidden] { display: none; }
+      .lk-opt837 { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px;
+        background: transparent; color: inherit; font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+      .lk-opt837[aria-checked="true"] { font-weight: 600; }
+      .lk-tick837 { width: 16px; text-align: center; }
+      .lk-hint837 { margin-left: auto; color: var(--dim, #777); font-size: 12.5px; }
       /* .86.29: Saved ideas row under the Mine feed (all widths) */
       #saved-grid.saved-collapsed829 { display: none !important; }
       .saved-toggle829 {
@@ -8476,7 +8492,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.36</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.37</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9724,11 +9740,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       if (layer) return false;
       if (!(top.kind === "tee" || top.kind === "polo")) return false;
       var bk = bottom.kind;
-      if (!(bk === "shorts" || bk === "jeans" || bk === "chinos" || bk === "linen")) return false;
-      var tmp = (typeof root.__levelTemp834 === "number") ? root.__levelTemp834 : (root.currentWeather && typeof root.currentWeather.temp === "number" ? root.currentWeather.temp : null);
-      if (tmp !== null && bk === "shorts" && tmp < 68) return false;
-      if (tmp !== null && tmp >= 88 && !(bk === "shorts" || bk === "linen")) return false;
-      return true;
+      return bk === "shorts" || bk === "jeans" || bk === "chinos" || bk === "linen";
     }
     if (L === 3) {
       /* Nighttime Casual: trousers or jeans with a tee, polo, sweater or button-down;
@@ -9953,6 +9965,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         if (tEff >= 72 && lv && lv <= 3 && c.l && (c.l.kind === "knit" || c.l.kind === "coat" || c.l.kind === "jacket" || c.l.kind === "blazer" || c.l.kind === "suit")) return false;
         if (tEff >= 72 && lv === 4 && c.l && (c.l.kind === "knit" || c.l.kind === "coat" || c.l.kind === "jacket")) return false;
         if (tEff < 72 && lv === 4 && c.b.kind === "shorts") return false;
+        /* .86.37 Daytime (David): no shorts below 68°F; from 88°F shorts or linen only */
+        if (lv === 2 && tEff < 68 && c.b.kind === "shorts") return false;
+        if (lv === 2 && tEff >= 88 && !(c.b.kind === "shorts" || c.b.kind === "linen")) return false;
         if (tEff < 55 && (c.b.kind === "shorts" || c.b.kind === "swim" || c.s.kind === "espadrille" || c.s.kind === "sandal")) return false;
         if (tEff < 45 && !c.l) return false;
         return true;
@@ -11613,7 +11628,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.36";
+var WARDROBE_BUILD = "2026-11-21.86.37";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -41871,7 +41886,7 @@ function analyzeFilePiece(card, job, ix) {
     var src = (typeof studioSource !== "undefined") ? studioSource : "combo";
     return src === "wardrobe" || src === "combo";
   }
-  function stateSig() { return [studioSource, feedLevel(), composerDeckCache.sig ? composerDeckCache.sig.length : 0, (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0)].join("/"); }
+  function stateSig() { return [studioSource, feedLevel(), (window.tempBands834 ? window.tempBands834.get().join("+") : "now"), composerDeckCache.sig ? composerDeckCache.sig.length : 0, (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0)].join("/"); }
   function cardHTML(look, idx) {
     return '<article class="card option-card cf-card" role="listitem" data-cf-idx="' + idx + '">' +
       '<button type="button" class="cf-media" data-cf-open="' + idx + '" aria-label="' + esc(look.title) + '">' + flatlayHTML(look, true, currentTab === "looks" || !!mineHost) + "</button>" +
@@ -41886,7 +41901,7 @@ function analyzeFilePiece(card, job, ix) {
   function feedInputs() {
     var feedPool = (typeof homeOwnedPhotoPieces742 === "function") ? homeOwnedPhotoPieces742() : null;
     var feedOnly = feedPool ? (feedPool.own.length >= 3 ? feedPool.own : feedPool.withPhoto) : null;
-    return { only: feedOnly && feedOnly.length >= 3 ? feedOnly : null, level: feedLevel(), temp: (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78 };
+    return { only: feedOnly && feedOnly.length >= 3 ? feedOnly : null, level: feedLevel(), temp: (typeof window.tempForDeal834 === "function" && window.tempForDeal834() !== null) ? window.tempForDeal834(true) : (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : 78 };
   }
   window.__cfInputs81 = feedInputs;
   /* .86.14: the Mine deck is dealt by the endless worker. Before it is
@@ -44790,6 +44805,117 @@ window.inspoView = "withmine";
 })();
     </script>
     <script type="wardrobe/app">
+/* .86.37: Looks gets its own dress-level and temperature dropdowns.
+   Temperature allows several bands at once (David, 21 Nov); the feeds
+   rotate through the chosen bands. Home keeps today's real temperature.
+   The choice lasts for this app session, then resets to Now. */
+(function () {
+  var BANDS = [
+    { id: "now", label: "Now" },
+    { id: "hot", label: "Hot", hint: "85°+", mid: 90 },
+    { id: "warm", label: "Warm", hint: "75–84°", mid: 80 },
+    { id: "mild", label: "Mild", hint: "65–74°", mid: 70 },
+    { id: "cool", label: "Cool", hint: "55–64°", mid: 60 },
+    { id: "cold", label: "Cold", hint: "under 55°", mid: 48 }
+  ];
+  var LEVELS = [[1, "Pool / Beach"], [2, "Daytime"], [3, "Nighttime Casual"], [5, "Nighttime Dressy"], [6, "Formal"], [7, "Black Tie"]];
+  var KEY = "wardrobe.tempBands837", sel = ["now"], rr = 0;
+  try { var saved = JSON.parse(sessionStorage.getItem(KEY) || "null"); if (Array.isArray(saved) && saved.length) sel = saved.filter(function (id) { return BANDS.some(function (b) { return b.id === id; }); }); } catch (e) {}
+  if (!sel.length) sel = ["now"];
+  function band(id) { for (var i = 0; i < BANDS.length; i++) if (BANDS[i].id === id) return BANDS[i]; return null; }
+  function nowTemp() { return (typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? Math.round(currentWeather.temp) : null; }
+  function tempOf(id) { return id === "now" ? nowTemp() : (band(id) ? band(id).mid : null); }
+  /* the next deal's temperature; advance=true moves to the next chosen band */
+  window.tempForDeal834 = function (advance) {
+    var t = tempOf(sel[rr % sel.length]);
+    if (advance) rr++;
+    return t;
+  };
+  function tempLabel() {
+    if (sel.length === 1 && sel[0] === "now") { var t = nowTemp(); return "Now" + (t !== null ? " · " + t + "°" : ""); }
+    return sel.map(function (id) { return band(id).label; }).join(" + ");
+  }
+  function levelLabel() {
+    var lv = (typeof formalityLevel !== "undefined") ? parseInt(formalityLevel, 10) : 2; if (lv === 4) lv = 3;
+    for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i][0] === lv) return LEVELS[i][1];
+    return "Daytime";
+  }
+  function refreshFeeds() {
+    rr = 0;
+    try { if (typeof window.endlessOnWeights81 === "function") window.endlessOnWeights81(); } catch (e) {}
+    try { if (typeof window.__cfReset81 === "function") window.__cfReset81(); } catch (e) {}
+  }
+  window.tempBands834 = {
+    get: function () { return sel.slice(); },
+    set: function (ids) {
+      sel = (ids || []).filter(function (id) { return !!band(id); }); if (!sel.length) sel = ["now"];
+      try { sessionStorage.setItem(KEY, JSON.stringify(sel)); } catch (e) {}
+      paint(); refreshFeeds();
+    }
+  };
+  var row = null;
+  function dd(kind, label) {
+    return '<div class="lk-dd837" data-kind="' + kind + '"><button type="button" class="lk-ddb837" aria-haspopup="true" aria-expanded="false">' +
+      '<span class="lk-ddl837">' + label + '</span><span class="lk-ddc837" aria-hidden="true">▾</span></button>' +
+      '<div class="lk-menu837" role="menu" hidden></div></div>';
+  }
+  function menuHTML(kind) {
+    if (kind === "level") {
+      var cur = levelLabel();
+      return LEVELS.map(function (l) { var on = l[1] === cur; return '<button type="button" role="menuitemradio" aria-checked="' + on + '" class="lk-opt837" data-level="' + l[0] + '"><span class="lk-tick837">' + (on ? "✓" : "") + "</span>" + l[1] + "</button>"; }).join("");
+    }
+    return BANDS.map(function (b) {
+      var on = sel.indexOf(b.id) !== -1, t = b.id === "now" ? nowTemp() : null;
+      return '<button type="button" role="menuitemcheckbox" aria-checked="' + on + '" class="lk-opt837" data-band="' + b.id + '"><span class="lk-tick837">' + (on ? "✓" : "") + "</span>" + b.label +
+        '<span class="lk-hint837">' + (b.id === "now" ? (t !== null ? t + "°" : "") : b.hint) + "</span></button>";
+    }).join("");
+  }
+  function paint() {
+    if (!row) return;
+    var l = row.querySelector('[data-kind="level"] .lk-ddl837'), t = row.querySelector('[data-kind="temp"] .lk-ddl837');
+    if (l) l.textContent = levelLabel();
+    if (t) t.textContent = tempLabel();
+    [].forEach.call(row.querySelectorAll(".lk-dd837"), function (d) { var m = d.querySelector(".lk-menu837"); if (!m.hidden) m.innerHTML = menuHTML(d.getAttribute("data-kind")); });
+  }
+  function closeAll(except) {
+    if (!row) return;
+    [].forEach.call(row.querySelectorAll(".lk-dd837"), function (d) {
+      if (d === except) return;
+      d.querySelector(".lk-menu837").hidden = true; d.querySelector(".lk-ddb837").setAttribute("aria-expanded", "false");
+    });
+  }
+  function mount() {
+    var top = document.getElementById("pv-top"), bar = top && top.querySelector(".pv-bar");
+    if (!bar || document.getElementById("lk-ctl837")) return;
+    row = document.createElement("div"); row.id = "lk-ctl837"; row.className = "lk-ctl837";
+    row.innerHTML = dd("level", levelLabel()) + dd("temp", tempLabel());
+    bar.parentNode.insertBefore(row, bar.nextSibling);
+    row.addEventListener("click", function (e) {
+      var b = e.target.closest(".lk-ddb837");
+      if (b) {
+        var d = b.parentNode, m = d.querySelector(".lk-menu837"), open = m.hidden;
+        closeAll(d); m.innerHTML = menuHTML(d.getAttribute("data-kind")); m.hidden = !open; b.setAttribute("aria-expanded", open ? "true" : "false");
+        return;
+      }
+      var o = e.target.closest(".lk-opt837"); if (!o) return;
+      if (o.hasAttribute("data-level")) {
+        var lv = parseInt(o.getAttribute("data-level"), 10);
+        if (typeof setFormality === "function") setFormality(lv, { silent: true });
+        closeAll(); paint(); refreshFeeds(); return;
+      }
+      var id = o.getAttribute("data-band"), next = sel.slice(), at = next.indexOf(id);
+      if (at === -1) next.push(id); else next.splice(at, 1);
+      window.tempBands834.set(next);
+    });
+    /* a tap inside the menu redraws it, so its target may already be detached:
+       only a tap that is really outside closes the menus */
+    document.addEventListener("click", function (e) { if (!row || !e.target.isConnected || row.contains(e.target)) return; closeAll(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAll(); });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
+  window.addEventListener("pageshow", paint);
+  setInterval(function () { if (row && document.getElementById("panel-looks") && !document.getElementById("panel-looks").hidden) paint(); }, 4000);
+})();
 /* .86.30: Send feedback to Claude. A note (dictation works), an optional
    screenshot, and the screen he was on are saved to the synced
    "feedback" list, which Claude reads at the start of each session.
@@ -48532,7 +48658,7 @@ function dealInspo(q) {
   }
   // In warm Casual feeds, try shorts once per eight outfits if the closet,
   // catalogue, selected style and budget can make a valid combination.
-  var warmCasual = q.level === 3 && (typeof q.temp !== "number" || q.temp >= 72);
+  var warmCasual = q.level === 2 && (typeof q.temp !== "number" || q.temp >= 72);   /* .86.37: Daytime */
   var shortsSlot = Math.floor(rng() * 8);
   function draw(src) {
     var cands = [];
