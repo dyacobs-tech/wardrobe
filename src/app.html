@@ -7212,7 +7212,7 @@ window.notMenswear853 = function (e) {
   <body data-page="today">
     <script>
 (function () {
-  var t = "today", titles = { today: "Donna", looks: "Looks", wardrobe: "Closet", find: "The Edit", calendar: "Calendar", studio: "Looks", pinfo: "Profile", plocation: "Profile", prules: "Profile", pcloud: "Profile", shopwish: "Wishlist", sale: "Sale", search: "Search" };
+  var t = "today", titles = { today: "Donna", looks: "Looks", wardrobe: "Closet", find: "Shop", inspo: "The Edit", gotos: "Looks", liked: "Looks", calendar: "Calendar", studio: "Looks", pinfo: "Profile", plocation: "Profile", prules: "Profile", pcloud: "Profile", shopwish: "Wishlist", sale: "Sale", search: "Search" };
   try { t = document.documentElement.getAttribute("data-boot-tab") || "today"; } catch (e) {}
   document.body.setAttribute("data-page", t);
   document.body.classList.toggle("home-view", t === "today");
@@ -7226,7 +7226,7 @@ window.notMenswear853 = function (e) {
     <script>
 (function () {
   var t = document.documentElement.getAttribute("data-boot-tab") || "today";
-  var titles = { today: "Donna", looks: "Looks", wardrobe: "Closet", find: "The Edit", calendar: "Calendar", studio: "Looks", pinfo: "Profile", plocation: "Profile", prules: "Profile", pcloud: "Profile", shopwish: "Wishlist", sale: "Sale", search: "Search" };
+  var titles = { today: "Donna", looks: "Looks", wardrobe: "Closet", find: "Shop", inspo: "The Edit", gotos: "Looks", liked: "Looks", calendar: "Calendar", studio: "Looks", pinfo: "Profile", plocation: "Profile", prules: "Profile", pcloud: "Profile", shopwish: "Wishlist", sale: "Sale", search: "Search" };
   var brand = document.getElementById("brand-home");
   if (brand) brand.textContent = titles[t] || "Donna";
 })();
@@ -7850,7 +7850,7 @@ window.notMenswear853 = function (e) {
       <!-- ================= LOOKS ================= -->
       <section id="panel-gotos" role="tabpanel" aria-label="Go-to's" hidden></section>
       <section id="panel-liked" role="tabpanel" aria-label="Liked" hidden></section>
-      <section id="panel-inspo" role="tabpanel" aria-label="Inspo" hidden></section>
+      <section id="panel-inspo" role="tabpanel" aria-label="The Edit" hidden></section>
       <section id="panel-looks" role="tabpanel" aria-labelledby="tab-looks" hidden>
         <div id="pv-top">
           <div class="pv-bar"><span class="pv-bar-l" aria-hidden="true"></span>
@@ -8315,7 +8315,7 @@ window.notMenswear853 = function (e) {
 
       <!-- ================= FIND ME ================= -->
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
-        <div class="outfits-toggle theme-toggle edit-tabs edit-section-tabs" role="group" aria-label="The Edit">
+        <div class="outfits-toggle theme-toggle edit-tabs edit-section-tabs" role="group" aria-label="Shop">
           <button type="button" class="chip" id="edit-tab-shop" data-edit-section="shop" aria-pressed="true">Shop</button>
           <button type="button" class="chip" id="edit-tab-curate" data-edit-section="curate" aria-pressed="false">Curate</button>
         </div>
@@ -8696,7 +8696,7 @@ window.notMenswear853 = function (e) {
       <div class="nav-pill" role="presentation">
       <button type="button" class="navbtn" id="tab-today" data-tab="today" data-section="today" aria-controls="panel-today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><span>Home</span></button>
             <button type="button" class="navbtn" id="section-ideas" data-section="ideas"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7.2a2 2 0 1 0-2-2"/><path d="M12 7.2v1.6L3.6 14.6a1.4 1.4 0 0 0 .8 2.6h15.2a1.4 1.4 0 0 0 .8-2.6L12 8.8"/></svg><span>Looks</span></button>
-      <button type="button" class="navbtn" id="section-inspo" data-section="inspo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Inspo</span></button>
+      <button type="button" class="navbtn" id="section-inspo" data-section="inspo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>The Edit</span></button>
       <button type="button" class="navbtn" id="tab-find" data-tab="find" data-section="find" aria-controls="panel-find"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Shop</span></button>
       <button type="button" class="navbtn" id="section-calendar" data-section="calendar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Calendar</span></button>
       </div>
@@ -11846,7 +11846,7 @@ applyTheme(currentTheme(), false);
 })();
 var PAGE_TITLES = {
   today: "", wardrobe: "Closet", looks: "Looks", watches: "Closet",
-  gotos: "Looks", liked: "Looks", inspo: "Inspo",
+  gotos: "Looks", liked: "Looks", inspo: "The Edit",
   wearing: "Today", gaps: "Shop", studio: "Looks",
   outfitideas: "Looks", icons: "Icons", palettes: "Palettes",
   myinspo: "My Inspo", find: "Shop", brands: "Brands", sale: "Sale",
@@ -37687,7 +37687,7 @@ document.getElementById("panel-calendar").addEventListener("click", function (e)
     h += '<div class="tp-sec tp-row2"><div><label class="field">Pool days</label>' + stepper("poolDays", num(f.poolDays, 0, N, 0), 0, N) + '</div><div><label class="field">Dressy dinners</label>' + stepper("dressy", num(f.dressy, 0, N, 0), 0, N) + "</div></div>";
     if (num(f.dressy, 0, N, 0) > 0) h += '<div class="tp-sec">' + chips("dressyLevel", [[5, "Nighttime Dressy"], [6, "Formal"], [7, "Black Tie"]], f.dressyLevel) + "</div>";
     h += '<div class="tp-sec"><div class="tp-share-head"><label class="field" for="tp-share">From my closet</label><span class="tp-share-v" data-tp-sharev>' + f.share + '%</span></div><input type="range" id="tp-share" min="0" max="100" step="10" value="' + f.share + '" data-tp-share /><div class="tp-share-ends"><span>Shop more</span><span>Only my closet</span></div></div>';
-    h += '<div class="tp-sec"><label class="tf-pool"><input type="checkbox" data-tp-check="buy"' + (f.buy ? " checked" : "") + " /> Suggest pieces to buy from The Edit</label>" +
+    h += '<div class="tp-sec"><label class="tf-pool"><input type="checkbox" data-tp-check="buy"' + (f.buy ? " checked" : "") + " /> Suggest pieces to buy from Shop</label>" +
       (f.buy ? '<div class="tp-budget"><label class="field" for="tp-budget">Budget <span class="tp-opt-l">(optional)</span></label><span class="tp-dollar">$<input type="number" id="tp-budget" inputmode="numeric" min="0" step="50" data-tp-field="budget" value="' + esc(f.budget) + '" placeholder="No limit" /></span></div>' : "") +
       (f.share < 100 && f.buy ? '<p class="tp-hint">About ' + Math.round((100 - f.share) / 100 * (f.counts.tops + f.counts.bottoms + f.counts.shoes + f.counts.layers)) + " of the pieces come from The Edit — menswear only, nothing you own.</p>" : "") + "</div>";
     h += '<div class="tp-sec"><label class="field">How much re-wear</label>' + chips("wearPreset", [["fewer", "Fewer re-wears"], ["balanced", "Balanced"], ["light", "Pack light"]], f.wearPreset) +
@@ -42861,6 +42861,9 @@ function tryonJob(itemsPromise, onState, isLive, meta) {
     items = items.slice(0, 6);
     var ck = tryonCacheKey(items);
     if (tryonCache[ck] && tryonCache[ck].u) { try { if (window.renderedCapture867) window.renderedCapture867(ck, tryonCache[ck].u, items, meta, false); } catch (e) {} onState("done", "", tryonCache[ck].u, true); return; }
+    /* .86.42: the preview copy never posts to the try-on service (no credits,
+       no account), so say that plainly instead of "turn on sync" */
+    if (window.__PV81) { onState("error", "Try-on is off in the preview, so testing never touches your account or credits. It works in your DONNA app once this goes live."); return; }
     var key = tryonKey();
     if (!key) { onState("error", tryonErrorText(401)); return; }
     var headers = { "authorization": "Bearer " + key, "content-type": "application/json" };
@@ -43353,6 +43356,8 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
       if (p.hex) e.hex = p.hex;
       if (Array.isArray(p.keys)) e.keys = p.keys.concat(e.subcat ? [e.subcat] : []);
       ["tier", "st", "sq", "occasion"].forEach(function (k) { if (p[k]) e[k] = p[k]; });
+      /* .86.42: keep the "photo shows a model" flag so Shop pieces stay plain product shots */
+      if (p.mdl) e.mdl = 1;
       var cur = p.currency || p.cur;
       if (cur && cur !== "USD") { e.cur = cur; if (p.priceDisplay) e.pd = p.priceDisplay; }
       var tg = p.tags || {};
@@ -43963,7 +43968,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
         fwPieces: its.map(function (it) { return { id: it.id, itemId: it.id, name: it.name || "", category: it.category || "", hex: it.colourHex || "" }; }),
         composerKey: its.map(function (it) { return it.id; }).filter(function (x, i) { return WEAR_SLOTS.indexOf(pcs[i].slot) !== -1; }).sort().join("|"),
         swatches: its.map(function (it) { return { name: String(it.colourName || "").split("\u00b7")[0].trim(), hex: it.colourHex || "#888888", role: it.category || "Piece" }; }) });
-    } else if (typeof toast === "function") toast("Saved — in Looks → Inspo.");
+    } else if (typeof toast === "function") toast("Saved.");
     if (typeof renderInspoOnYou === "function") try { renderInspoOnYou(); } catch (e) {}
   }
   window.editBuiltLooks = function () { return builtLooks(); };
@@ -45458,7 +45463,7 @@ window.inspoView = "withmine";
     lCloset.sort(function (a, b) { return String(b.likedAt || "") < String(a.likedAt || "") ? -1 : 1; });
     lInspo = (window.__enLiked841 && window.__enLiked841.list) ? window.__enLiked841.list() : [];
     if (!lCloset.length && !lInspo.length) {
-      host.innerHTML = '<p class="meta lk-empty841">Nothing liked yet. Tap the thumbs-up on any outfit in Outfits or Inspo and it lands here.</p>';
+      host.innerHTML = '<p class="meta lk-empty841">Nothing liked yet. Tap the thumbs-up on any outfit in Outfits or The Edit and it lands here.</p>';
       return;
     }
     var h = "";
@@ -45718,7 +45723,7 @@ window.inspoView = "withmine";
   function ensureHost() {
     var top = $("ins-top841"); if (!top) return null;
     if (!$("ins-seg841")) {
-      var sg = document.createElement("div"); sg.id = "ins-seg841"; sg.className = "lk-seg841 ins-seg841"; sg.setAttribute("role", "tablist"); sg.setAttribute("aria-label", "Inspo");
+      var sg = document.createElement("div"); sg.id = "ins-seg841"; sg.className = "lk-seg841 ins-seg841"; sg.setAttribute("role", "tablist"); sg.setAttribute("aria-label", "The Edit");
       sg.innerHTML = '<button type="button" role="tab" data-ins-seg="icons" aria-selected="true">Icons</button><button type="button" role="tab" data-ins-seg="dress" aria-selected="false">Dress me</button>';
       top.insertBefore(sg, top.firstChild);
     }
@@ -48467,7 +48472,9 @@ window.inspoView = "withmine";
     var fi = window.__cfInputs81 ? window.__cfInputs81() : {};
     var mine = (fi.only || ownItems()).map(lite);
     var own = ownItems().map(lite);
-    var shop = CATALOG.map(catItem).filter(Boolean);
+    /* .86.42 (David): products photographed on a model (e.mdl, tagged in the
+       catalogue) stay in the Shop but never in an outfit's item boxes */
+    var shop = CATALOG.filter(function (e) { return e && !e.mdl; }).map(catItem).filter(Boolean);
     var sig = mine.length + "/" + own.length + "/" + shop.length + "/" + mine.map(function (i) { return i.id; }).join(",");
     if (sig === dataSig) return;
     dataSig = sig; ready = false;
@@ -48717,14 +48724,14 @@ window.inspoView = "withmine";
       '<span class="cf-actions"><button type="button" class="chip" data-cf-like="' + i + '" data-en-like="' + i + '" aria-pressed="' + (liked ? "true" : "false") + '">Like</button>' +
       (PV ? '<button type="button" class="pv-edit" data-pv-edit="' + i + '" aria-label="Edit">Edit</button>' : "") +
       '<button type="button" class="chip" data-cf-dislike="' + i + '" data-en-dislike="' + i + '" aria-pressed="false">Dislike</button>' +
-      (l.render ? "" : '<button type="button" class="chip en-rme" data-en-rme="' + i + '" aria-pressed="' + (rq ? "true" : "false") + '">' + (rq ? "Queued" : (PV ? "Render me" : "Render on me")) + "</button>") +
+      /* .86.42 (David): no "Render me" on the cards; the pencil opens Dress me */
       "</span></article>";
   }
   function isLiked(key) { return S.liked.some(function (x) { return x.key === key; }); }
   /* .86.42: Dress me reads the Shop catalogue and his closet photos */
   window.__enCatalog841 = function () {
     var out = [];
-    CATALOG.forEach(function (e) { var it = e && catItem(e); if (it && e.img) out.push({ id: it.id, sku: it.sku, name: (e.brand ? e.brand + " " : "") + e.name, category: it.category, img: e.img, price: e.price, url: e.url || "" }); });
+    CATALOG.forEach(function (e) { if (e && e.mdl) return; var it = e && catItem(e); if (it && e.img) out.push({ id: it.id, sku: it.sku, name: (e.brand ? e.brand + " " : "") + e.name, category: it.category, img: e.img, price: e.price, url: e.url || "" }); });
     return out;
   };
   window.__enOwnPhoto841 = function (it) { return ownPhoto(it); };
@@ -48788,7 +48795,7 @@ window.inspoView = "withmine";
       var NOUN = { top: "tops", bottom: "trousers", shoes: "shoes", layer: "jackets" };
       f.empty.hidden = false;
       var ps = priceState();
-      f.empty.textContent = !priceActive() ? "No looks fit right now." : ps.mode === "total" ? "No complete look fits that budget yet \u2014 widen it with Price." : "The Edit has no " + (NOUN[WHY[feed]] || "pieces") + " in that price range yet \u2014 widen it with Price.";
+      f.empty.textContent = !priceActive() ? "No looks fit right now." : ps.mode === "total" ? "No complete look fits that budget yet \u2014 widen it with Price." : "Shop has no " + (NOUN[WHY[feed]] || "pieces") + " in that price range yet \u2014 widen it with Price.";
       return;
     }
     f.empty.hidden = true;

@@ -32,6 +32,7 @@ function tryonJob(itemsPromise,onState,isLive,meta){var started=Date.now();funct
 function stepText(j){if(!j||j.steps<=1)return"Putting it on you… about 20 seconds.";return"Dressing you — piece "+Math.max(1,j.step)+" of "+j.steps+"…";}
 Promise.resolve(itemsPromise).then(function(items){if(!live())return;if(!items||!items.length){onState("error","There's no photo of this piece to try on yet.");return;}
 items=items.slice(0,6);var ck=tryonCacheKey(items);if(tryonCache[ck]&&tryonCache[ck].u){try{if(window.renderedCapture867)window.renderedCapture867(ck,tryonCache[ck].u,items,meta,false);}catch(e){}onState("done","",tryonCache[ck].u,true);return;}
+if(window.__PV81){onState("error","Try-on is off in the preview, so testing never touches your account or credits. It works in your DONNA app once this goes live.");return;}
 var key=tryonKey();if(!key){onState("error",tryonErrorText(401));return;}
 var headers={"authorization":"Bearer "+key,"content-type":"application/json"};function finish(j){tryonCachePut(ck,j.resultUrl);try{if(window.renderedCapture867)window.renderedCapture867(ck,j.resultUrl,items,meta,true);}catch(e){}onState("done","",j.resultUrl);}
 function poll(id){if(!live())return;if(Date.now()-started>8*60*1000){onState("error","This one is taking too long. Try again later.");return;}
