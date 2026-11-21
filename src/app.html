@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.32" />
+    <meta name="wardrobe-build" content="2026-11-21.86.33" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8474,7 +8474,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.32</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.33</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10833,7 +10833,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   var ADDED_831 = [
     { id: "dj-sweater-over-shirt-70", text: "Never wear a sweater over a button-down shirt at 70\u00B0F or warmer." },
     { id: "dj-eleventy-no-sweater", text: "Never wear the Eleventy suede western shirt with a sweater." },
-    { id: "dj-eleventy-untucked", text: "The Eleventy suede western shirt is never tucked." }
+    { id: "dj-eleventy-untucked", text: "The Eleventy suede western shirt is never tucked." },
+    { id: "dj-malibu-tees-only", text: "Never wear the Pool House New York Malibu linen pants with a polo or a button-down shirt." }
   ];
 
   function seedRules() {
@@ -11586,7 +11587,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.32";
+var WARDROBE_BUILD = "2026-11-21.86.33";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -11668,12 +11669,20 @@ function loadWardrobeRules() {
       return window.WardrobeRules && WardrobeRules.normalize ? WardrobeRules.normalize(r) : r;
     }).filter(Boolean);
   }
-  /* .86.31: add David's 21 Nov rules once; a rule he later deletes stays deleted */
+  /* .86.31: add David's rules once each; a rule he later deletes stays
+     deleted (each id is remembered once it has been offered) */
   try {
-    if (window.WardrobeRules && WardrobeRules.ADDED_831 && typeof store !== "undefined" && !store.get("rulesAdded831", false)) {
+    if (window.WardrobeRules && WardrobeRules.ADDED_831 && typeof store !== "undefined") {
+      var offered831 = store.get("rulesAddedIds", []) || [];
       var have831 = {}; wardrobeRules.forEach(function (r) { have831[r.id] = 1; });
-      WardrobeRules.ADDED_831.forEach(function (a) { if (!have831[a.id]) wardrobeRules.push(WardrobeRules.makeRule(a.text, { id: a.id, addedISO: "2026-11-21T14:30:00.000Z" })); });
-      store.set("wardrobeRules", wardrobeRules); store.set("rulesAdded831", true);
+      var changed831 = false;
+      WardrobeRules.ADDED_831.forEach(function (a) {
+        if (offered831.indexOf(a.id) !== -1) return;
+        if (!have831[a.id]) { wardrobeRules.push(WardrobeRules.makeRule(a.text, { id: a.id, addedISO: "2026-11-21T15:30:00.000Z" })); changed831 = true; }
+        offered831.push(a.id);
+      });
+      if (changed831) store.set("wardrobeRules", wardrobeRules);
+      store.set("rulesAddedIds", offered831);
     }
   } catch (e831) {}
   if (window.WardrobeRules && WardrobeRules.setActive) WardrobeRules.setActive(wardrobeRules);
@@ -41839,7 +41848,7 @@ function analyzeFilePiece(card, job, ix) {
   function stateSig() { return [studioSource, feedLevel(), composerDeckCache.sig ? composerDeckCache.sig.length : 0, (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0)].join("/"); }
   function cardHTML(look, idx) {
     return '<article class="card option-card cf-card" role="listitem" data-cf-idx="' + idx + '">' +
-      '<button type="button" class="cf-media" data-cf-open="' + idx + '" aria-label="' + esc(look.title) + '">' + flatlayHTML(look, true, currentTab === "looks") + "</button>" +
+      '<button type="button" class="cf-media" data-cf-open="' + idx + '" aria-label="' + esc(look.title) + '">' + flatlayHTML(look, true, currentTab === "looks" || !!mineHost) + "</button>" +
       '<span class="oc-body"><span class="oc-title">' + esc(look.title) + "</span></span>" +
       '<span class="cf-actions"><button type="button" class="chip" data-cf-like="' + idx + '" aria-pressed="' + (look.verdict === "like" ? "true" : "false") + '">Like</button>' +
       (window.__cfEdit81 ? window.__cfEdit81(idx) : "") +
@@ -41887,7 +41896,13 @@ function analyzeFilePiece(card, job, ix) {
   /* .86.29: two outfits with the same title read as duplicates, so the
      feed shows each title once (rendered looks come first, so the one
      with his avatar wins). Skipped keys are not dealt again. */
-  var dupSkip829 = [];
+  var dupSkip829 = [], emptyTries829 = 0;
+  function mineEmpty829() {
+    if (!mineHost) return;
+    try { dropSkeleton38(); } catch (eS) {}
+    if (grid.querySelector("article, .mine-empty829")) return;
+    grid.innerHTML = '<p class="meta mine-empty829 span-all">No outfits rendered on you for this dress level yet.</p>';
+  }
   function titleKey829(l) { return String((l && l.title) || "").trim().toLowerCase().replace(/\s+/g, " "); }
   function appendLooks(n) {
     var exclude = feedLooks.map(function (l) { return l.composerKey; }).concat(dupSkip829);
@@ -41901,10 +41916,13 @@ function analyzeFilePiece(card, job, ix) {
       var have0 = st0 && st0.buf ? st0.buf.mine : 0;
       looks = take(feedLooks.length ? n : Math.min(n, Math.max(4, have0 || 0)), exclude, fi);
     }
-    if (!looks && workerFeed38() && !feedLooks.length) { feedSkeleton38(); waitForWorker38(); return 0; }
+    if (!looks && workerFeed38() && !feedLooks.length) {
+      if (emptyTries829 >= 4) { mineEmpty829(); return 0; }
+      feedSkeleton38(); waitForWorker38(); return 0;
+    }
     if (!looks && workerFeed38()) return 0;
     if (!looks) looks = composerLooks({ count: n, level: fi.level, exclude: exclude, only: fi.only, slot: "feed", renderedFirst: true, strictKeys: true, temp: fi.temp });
-    if (!looks.length) return 0;
+    if (!looks.length) { if (!feedLooks.length) mineEmpty829(); return 0; }
     dropSkeleton38();
     var seenT829 = {};
     feedLooks.forEach(function (l) { seenT829[titleKey829(l)] = 1; });
@@ -41912,9 +41930,22 @@ function analyzeFilePiece(card, job, ix) {
     looks = looks.filter(function (l) {
       var k = titleKey829(l);
       if (k && seenT829[k]) { if (l.composerKey) dupSkip829.push(l.composerKey); return false; }
+      /* .86.32: Mine shows only outfits rendered on him (David, 21 Nov:
+         "always on avatar"); unrendered combinations stay out of Mine */
+      if (mineHost && typeof onbodyForLook === "function" && !onbodyForLook(l)) { if (l.composerKey) dupSkip829.push(l.composerKey); return false; }
       seenT829[k] = 1; return true;
     });
-    if (!looks.length) { if (dealt829) scheduleMinePage(); return 0; }
+    if (!looks.length) {
+      /* every dealt look was filtered out: keep dealing a few rounds, then
+         say there is nothing rendered for this level instead of spinning */
+      if (dealt829 && !feedLooks.length) {
+        /* scheduleMinePage only pages a feed that already has cards */
+        if (++emptyTries829 < 6) setTimeout(function () { appendLooks(n); }, 0); else mineEmpty829();
+      } else if (dealt829) scheduleMinePage();
+      else if (!feedLooks.length) mineEmpty829();
+      return 0;
+    }
+    emptyTries829 = 0;
     var html = "";
     looks.forEach(function (l) { html += cardHTML(l, feedLooks.length); feedLooks.push(l); });
     grid.insertAdjacentHTML("beforeend", html);
@@ -41923,9 +41954,11 @@ function analyzeFilePiece(card, job, ix) {
     return looks.length;
   }
   function resetFeed() {
+    var sig829 = stateSig();
+    if (sig829 !== feedSig) emptyTries829 = 0;   /* same filters: keep counting empty rounds */
     feedLooks = []; dupSkip829 = [];
     grid.innerHTML = "";
-    feedSig = stateSig();
+    feedSig = sig829;
     appendLooks(12);
   }
   function syncFeed(force) {
@@ -41940,6 +41973,7 @@ function analyzeFilePiece(card, job, ix) {
     var looksPanel = document.getElementById("panel-looks");
     var panel = document.getElementById("panel-studio");
     if (!(looksPanel && !looksPanel.hidden) && panel && panel.hidden && !force) return;
+    if (!force && !feedLooks.length && feedSig === stateSig() && grid.querySelector(".mine-empty829")) return;
     if (force || !feedLooks.length || feedSig !== stateSig()) resetFeed();
   }
   window.__cfLooks81 = function () { return feedLooks; };
@@ -45139,7 +45173,7 @@ window.inspoView = "withmine";
       var noCloset829 = false;
       try {
         var own829 = (typeof wardrobeItems !== "undefined" && wardrobeItems || []).filter(function (i) { return i && i.id && String(i.id).indexOf("seed-") !== 0; });
-        noCloset829 = !(typeof SY !== "undefined" && SY && SY.key) || !own829.length;
+        noCloset829 = !own829.length;   /* only built-in starter pieces on this device */
       } catch (eN) { noCloset829 = false; }
       if (collage && noCloset829) {
         collage.classList.remove("flatlay-host");

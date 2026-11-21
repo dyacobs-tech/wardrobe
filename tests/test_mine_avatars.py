@@ -1,4 +1,4 @@
-"""Mine opens on exact on-body portraits and offers rendering for unmatched outfits."""
+"""Mine shows only exact on-body portraits of him; a level with none says so (.86.32)."""
 import json
 import os
 import sys
@@ -22,7 +22,12 @@ def check(browser, level):
     page = ctx.new_page()
     page.goto(URL, wait_until="domcontentloaded")
     page.locator("#section-ideas").tap()
-    page.wait_for_function("() => window.__cfLooks81 && __cfLooks81().length >= 4")
+    if level == 5:
+        page.wait_for_function("() => window.__cfLooks81 && __cfLooks81().length >= 4")
+    else:
+        # a level with few renders: wait until the feed has settled
+        page.wait_for_function("() => window.__cfLooks81 && (document.querySelector('#cf-grid .mine-empty829') || (__cfLooks81().length >= 1 && !document.querySelector('#cf-grid .en-skel')))")
+        page.wait_for_timeout(1500)
     cards = page.locator(CARDS)
     if level == 5:
         first = cards.first.locator("img.mine-avatar")
@@ -50,11 +55,13 @@ def check(browser, level):
         assert page.evaluate("() => new Set(__cfLooks81().map(l => l.composerKey)).size === __cfLooks81().length")
         print(f"Confirmed {len(verified)} exact outfit portraits, detail and additional unique cards")
     else:
-        card = cards.filter(has=page.locator("[data-cf-rme]")).first
-        expect(card.get_by_role("button", name="Render me")).to_be_visible()
-        expect(card.locator(".flatlay .fl-cell").first).to_be_visible()
-        expect(card.locator(".mine-avatar")).to_have_count(0)
-        print("Confirmed unmatched outfit shows its pieces and Render me")
+        # .86.32 (David, 21 Nov: "always on avatar"): Mine shows only outfits
+        # rendered on him; a level with none says so instead of flat-lays.
+        assert page.locator("#cf-grid [data-cf-rme]").count() == 0
+        assert cards.evaluate_all("cards => cards.every(c => !!c.querySelector('.mine-avatar'))")
+        if not cards.count():
+            expect(page.locator("#cf-grid .mine-empty829")).to_be_visible()
+        print("Confirmed Mine shows only outfits rendered on him (%d cards)" % cards.count())
     ctx.close()
 
 
