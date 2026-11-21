@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.30" />
+    <meta name="wardrobe-build" content="2026-11-21.86.31" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6192,11 +6192,15 @@ window.notMenswear853 = function (e) {
           pointer-events: none;
           transition: none !important;
         }
+        /* .86.31: lower and smaller. The pill sits just above the home
+           indicator (inset - 14px, never under 6px) instead of a full
+           inset + 3px up; --sab lets tests simulate an iPhone inset. */
+        html body #bottombar.bottombar { padding-bottom: 0 !important; }
         html body #bottombar .nav-pill {
           flex: none;
-          width: min(calc(100% - 24px), 328px);
-          height: 48px;
-          margin: 0 0 3px;
+          width: min(calc(100% - 32px), 300px);
+          height: 44px;
+          margin: 0 0 max(6px, calc(var(--sab, env(safe-area-inset-bottom, 0px)) - 14px));
           pointer-events: auto;
           transition: width 180ms ease-out, height 180ms ease-out;
         }
@@ -6219,7 +6223,7 @@ window.notMenswear853 = function (e) {
           will-change: transform;
         }
         html.nav-compact body #bottombar .nav-pill {
-          width: 232px; height: 42px;
+          width: 216px; height: 40px;
         }
         /* the .78.2b rule moved the whole bar; only the pill may move now */
         #saved-grid.saved-collapsed829 { display: none !important; }
@@ -8470,7 +8474,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.30</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.31</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11462,7 +11466,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.30";
+var WARDROBE_BUILD = "2026-11-21.86.31";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
