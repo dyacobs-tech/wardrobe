@@ -60,7 +60,42 @@ How it could look in the app: a "Vintage" option on Dress me's New picker
 and on Shop. Resale listings are one of a kind and sell out fast, so we
 would fetch them live and never bake them into the renders.
 
-## 3. Other parked items
+## 3. Receipts by email
+
+David, 21 Nov 2026 (after seeing Indyx ask "Do your online shopping receipts
+go to a Gmail address?"): ask for the email his receipts go to, so purchases
+are tracked from order emails.
+
+**What already exists (build .41):**
+
+- Shop › Receipts: a review page. Each purchase found in an order email
+  shows as a card; one tap files it into the Closet and into Purchased.
+  Nothing is filed without a tap.
+- The sync worker's `/receipt-inbox`: takes parsed order lines and delivers
+  them to the app. It only adds; a dismissed or confirmed line never comes
+  back.
+
+**What is missing:** the part that reads the order emails. It was a script
+run on a computer, outside the app. Nothing reads them today as far as we
+can tell from the repo.
+
+**Ways to feed it, simplest first:**
+
+1. A scheduled Claude task reads the Gmail inbox for new order emails and
+   sends the purchases to the inbox above. No new app code. Needs David's OK
+   to read his mail, and the inbox's secret entered once in a secure form.
+2. A forwarding address: he forwards receipts (or sets a Gmail filter) to a
+   DONNA address, and the worker reads only what is forwarded. Needs a domain
+   that can receive email. This is the privacy-friendly choice for clients.
+3. "Connect Gmail" inside the app, as Indyx appears to do. Google treats
+   reading Gmail as a restricted permission; a public app has to pass
+   Google's verification first. Check Google's current rules before
+   planning this.
+
+**In the app:** Profile gets "Where do your receipts go?" with the email, so
+the reader knows which inbox to watch.
+
+## 4. Other parked items
 
 - Colour palette, folded into AI creation and Inspo.
 - Share a link to DONNA → a store inbox.

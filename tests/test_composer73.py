@@ -76,8 +76,13 @@ ENGINE_JS = """([items, extras]) => {
   const d2 = C.build(withNew);
   let firstNew = -1, r2 = [], e2 = {};
   for (const id of Object.keys(exposure)) e2[id] = exposure[id];
+  // Same mild 68F as the deals above, and a fixed-seed rng. With no temp the
+  // deck assumes a warm 78F day, which marks down a long-sleeve linen shirt,
+  // and the new piece then missed the first 60 deals in about 1 run in 8
+  // (5 of 40 measured; 0 of 40 at 68F). That failed CI at random.
+  let sd = 73; const rng2 = () => { sd = (sd + 0x6D2B79F5) | 0; let t = Math.imul(sd ^ (sd >>> 15), 1 | sd); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   for (let page = 0; page < 10 && firstNew < 0; page++) {
-    const pg = d2.deal(6, { level: null, recent: r2, exposure: e2 });
+    const pg = d2.deal(6, { level: null, temp: 68, recent: r2, exposure: e2, rng: rng2 });
     pg.forEach((o, i) => { if (firstNew < 0 && o.ids.includes('new-1')) firstNew = page * 6 + i; r2.push(o.key); o.ids.forEach(id => { e2[id] = (e2[id] || 0) + 1; }); });
   }
   out.newPieceAt = firstNew;
