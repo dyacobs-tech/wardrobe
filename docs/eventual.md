@@ -108,4 +108,9 @@ the reader knows which inbox to watch.
   - a photo cache in the service worker
   - the IndexedDB gap in preview
   - silent account creation
-  - sync efficiency
+  - sync efficiency: the read side was fixed on 22 Nov 2026
+    (worker/sync-speed). Still open: the record counter can hand the same
+    number to two devices that save within about a minute of each other
+    (see that folder's README), and a full download is built in memory,
+    which will stop working somewhere above the current 31 MB closet (the
+    Worker limit is 128 MB; the exact ceiling is not measured).

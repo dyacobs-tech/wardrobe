@@ -261,7 +261,7 @@ const SNAP_SWEEP_MAX = 120;
 // write that is still in flight is never touched.
 const SNAP_ORPHAN_AGE_MS = 2 * 60 * 60 * 1000;
 
-async function writeSnapshot(kv: KVNamespace, acct: string) {
+async function writeSnapshot(kv: KVNamespace, acct: string, flagKey?: string) {
   const snapPrefix = K("snap", acct) + "/";
   // Index the ring first; the trim and the sweep reuse this listing.
   const idx: string[] = []; // complete snapshots: their meta key exists
@@ -304,6 +304,7 @@ async function writeSnapshot(kv: KVNamespace, acct: string) {
   // so a snapshot whose meta key exists is always complete.
   const ts = Date.now();
   const prefix = K("snap", acct, ts);
+  if (flagKey) await kv.put(flagKey, String(ts));
   const recPrefix = K("rec", acct) + "/";
   const heads: { name: string; coll: string; id: string }[] = [];
   for (const name of await listAll(kv, recPrefix)) {
@@ -349,6 +350,7 @@ async function writeSnapshot(kv: KVNamespace, acct: string) {
     (m && m.payload != null ? m.payload : "null") + "}";
   await flush();
   await kv.put(prefix, JSON.stringify({ at: ts, chunks: nParts, v: 2 }));
+  if (flagKey) await kv.delete(flagKey);
   // Trim the ring to the newest SNAP_KEEP snapshots. The parts of an old
   // snapshot are known from the listing above, so nothing is read back
   // (reading a 25 MiB inline snapshot only to delete it is wasteful).
@@ -446,7 +448,43 @@ async function liveIdsForColl(
   return ids;
 }
 
-async function handleSync(kv: KVNamespace, req: Request): Promise<Response> {
+const SCAN_BATCH = 16;
+const SNAP_DEFER_MAX_CHARS = 16e6;
+const SNAP_FLAG_FRESH_MS = 90 * 1e3;
+
+// The hourly safety snapshot, started at the end of a sync that changed
+// something. It is handed to ctx.waitUntil, so the answer is not held back
+// for it and a phone that drops the connection cannot cut it off; waitUntil
+// allows 30 seconds after the answer. writeSnapshot keeps a flag key while
+// it is writing and removes it once the snapshot is complete, so:
+// - no flag: start the snapshot and answer at once;
+// - a flag younger than 90 seconds: one is being written right now, do nothing;
+// - an older flag: the last attempt did not finish, so this time the answer
+//   waits for the snapshot, as every sync did before this change.
+// The answer also waits when there is no ctx, or when the answer itself is
+// very large (mustWait), so the two are not in memory together.
+async function snapshotAfterSync(
+  kv: KVNamespace,
+  acct: string,
+  ctx: { waitUntil?: (p: Promise<unknown>) => void } | undefined,
+  mustWait: boolean,
+) {
+  const canDefer = !!(ctx && typeof ctx.waitUntil === "function");
+  const flagKey = K("snapflag", acct);
+  const flagRaw = await kv.get(flagKey);
+  const flagAt = flagRaw ? Number(flagRaw) || 0 : 0;
+  const age = Date.now() - flagAt;
+  if (flagAt && age >= 0 && age < SNAP_FLAG_FRESH_MS) return;
+  const snap = writeSnapshot(kv, acct, flagKey).catch(() => {});
+  if (canDefer) ctx!.waitUntil!(snap);
+  if (!canDefer || mustWait || flagAt) await snap;
+}
+
+async function handleSync(
+  kv: KVNamespace,
+  req: Request,
+  ctx?: { waitUntil?: (p: Promise<unknown>) => void },
+): Promise<Response> {
   const auth = req.headers.get("authorization") || "";
   const key = auth.startsWith("Bearer ") ? auth.slice(7) : null;
   const acct = await acctForKey(kv, key);
@@ -628,26 +666,52 @@ async function handleSync(kv: KVNamespace, req: Request): Promise<Response> {
 
   // Collect everything this client has not seen (seq > since), minus the
   // records it just wrote itself in this request.
+  // The counter is stored as soon as the writes are done (it used to be
+  // stored after the scan below), so a request that is cut off while
+  // scanning never leaves records numbered above the stored counter.
+  if (seqAllocated) await kv.put(seqKey, String(seqCounter));
+
+  // Record heads are read SCAN_BATCH at a time. They used to be read one
+  // by one, which made every sync of a 300-record closet wait for 300
+  // round trips to KV (about 25 s). What is returned, and in what order,
+  // is the same.
   const recs: Record<string, unknown>[] = [];
+  let outChars = 0;
   const recPrefix = K("rec", acct) + "/";
+  const recNames: string[] = [];
   for (const name of await listAll(kv, recPrefix)) {
-    const segs = name.split("/");
-    if (segs.length !== 4) continue;
-    const coll = decodeURIComponent(segs[2]);
-    const id = decodeURIComponent(segs[3]);
-    const v = await getMeta(kv, name);
-    if (!v || typeof v.seq !== "number" || !(v.seq > since)) continue;
-    if (written.has(coll + "\0" + id + "\0" + v.updatedAt)) continue;
-    if (v.deleted) {
-      recs.push({ coll, id, updatedAt: v.updatedAt, deleted: true });
-    } else {
-      const full = await getChunked(kv, name);
-      recs.push({
-        coll,
-        id,
-        updatedAt: v.updatedAt,
-        data: full && full.payload != null ? JSON.parse(full.payload) : null,
-      });
+    if (name.split("/").length === 4) recNames.push(name);
+  }
+  for (let i = 0; i < recNames.length; i += SCAN_BATCH) {
+    const group = recNames.slice(i, i + SCAN_BATCH);
+    const heads = await Promise.all(group.map((name) => getMeta(kv, name)));
+    const picked: { name: string; coll: string; id: string; v: any }[] = [];
+    for (let j = 0; j < group.length; j++) {
+      const segs = group[j].split("/");
+      const coll = decodeURIComponent(segs[2]);
+      const id = decodeURIComponent(segs[3]);
+      const v = heads[j];
+      if (!v || typeof v.seq !== "number" || !(v.seq > since)) continue;
+      if (written.has(coll + "\0" + id + "\0" + v.updatedAt)) continue;
+      picked.push({ name: group[j], coll, id, v });
+    }
+    const fulls = await Promise.all(
+      picked.map((p) => (p.v.deleted ? null : getChunked(kv, p.name))),
+    );
+    for (let j = 0; j < picked.length; j++) {
+      const p = picked[j];
+      if (p.v.deleted) {
+        recs.push({ coll: p.coll, id: p.id, updatedAt: p.v.updatedAt, deleted: true });
+      } else {
+        const full = fulls[j];
+        if (full && full.payload != null) outChars += full.payload.length;
+        recs.push({
+          coll: p.coll,
+          id: p.id,
+          updatedAt: p.v.updatedAt,
+          data: full && full.payload != null ? JSON.parse(full.payload) : null,
+        });
+      }
     }
   }
   recs.sort((a, b) => (a.updatedAt as number) - (b.updatedAt as number));
@@ -688,17 +752,11 @@ async function handleSync(kv: KVNamespace, req: Request): Promise<Response> {
     }
   }
 
-  if (seqAllocated) await kv.put(seqKey, String(seqCounter));
   const now = seqCounter;
 
-  if (dirty) {
-    // Last-known-good snapshot of the post-sync live state.
-    try {
-      await writeSnapshot(kv, acct);
-    } catch (_) {
-      // A snapshot failure must never fail the sync itself.
-    }
-  }
+  // Last-known-good snapshot of the post-sync live state. A snapshot
+  // failure never fails the sync itself; see snapshotAfterSync.
+  if (dirty) await snapshotAfterSync(kv, acct, ctx, outChars >= SNAP_DEFER_MAX_CHARS);
 
   return json({ recs, meta, now, cancelled });
 }
@@ -2088,7 +2146,11 @@ async function handlePriceDrops(
   return json({ written, skipped });
 }
 
-export async function handler(req: Request, env: Env): Promise<Response> {
+export async function handler(
+  req: Request,
+  env: Env,
+  ctx?: { waitUntil?: (p: Promise<unknown>) => void },
+): Promise<Response> {
   const kv = env.SYNC_KV;
   const url = new URL(req.url);
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -2099,7 +2161,7 @@ export async function handler(req: Request, env: Env): Promise<Response> {
     return handleRegister(kv, req, env);
   }
   if (req.method === "POST" && url.pathname === "/sync") {
-    return handleSync(kv, req);
+    return handleSync(kv, req, ctx);
   }
   if (req.method === "POST" && url.pathname === "/render-queue") {
     return handleRenderEnqueue(kv, req, env);
@@ -2172,7 +2234,11 @@ export async function handler(req: Request, env: Env): Promise<Response> {
 }
 
 export default {
-  fetch(req: Request, env: Env): Promise<Response> {
-    return handler(req, env);
+  fetch(
+    req: Request,
+    env: Env,
+    ctx?: { waitUntil?: (p: Promise<unknown>) => void },
+  ): Promise<Response> {
+    return handler(req, env, ctx);
   },
 };

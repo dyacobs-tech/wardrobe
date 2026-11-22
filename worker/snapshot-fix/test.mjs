@@ -15,7 +15,8 @@ class KV { constructor() { this.m = new Map(); this.ops = { get: 0, put: 0, dele
 const KEY = 'ab'.repeat(24), ACCT = '1111222233334444', OTHER = 'ffffeeeeddddcccc';
 const sha = s => createHash('sha256').update(s).digest('hex');
 const seed = kv => { kv.m.set('key/' + sha(KEY), ACCT); };
-const call = async (mod, kv, body) => { const r = await mod.default.fetch(new Request('https://x.test/sync', { method: 'POST', headers: { authorization: 'Bearer ' + KEY, 'content-type': 'application/json' }, body: JSON.stringify(body) }), { SYNC_KV: kv }, { waitUntil() {} }); return { status: r.status, text: await r.text() }; };
+// Work handed to ctx.waitUntil (the snapshot, since the sync speed change) is awaited before the call returns.
+const call = async (mod, kv, body) => { const ps = []; const r = await mod.default.fetch(new Request('https://x.test/sync', { method: 'POST', headers: { authorization: 'Bearer ' + KEY, 'content-type': 'application/json' }, body: JSON.stringify(body) }), { SYNC_KV: kv }, { waitUntil(p) { ps.push(p); } }); const out = { status: r.status, text: await r.text() }; await Promise.all(ps); return out; };
 const big = n => 'data:image/jpeg;base64,' + 'A'.repeat(n);
 const rec = (coll, id, at, data) => ({ coll, id, updatedAt: at, data });
 const realNow = Date.now; let clock = 1795300000000; Date.now = () => clock;
@@ -62,7 +63,7 @@ const readSnap = kv => { const mk = metas(kv).pop(); const meta = JSON.parse(kv.
   ok('ring trimmed to 10 complete snapshots, oldest first', mk.length === 10 && !mk.includes(String(T0 + 900)) && mk.includes(String(T0 + 1001)), mk.join(','));
   ok('the trimmed legacy snapshot\'s parts are gone', !snapKeys(B).some(k => k.startsWith('snap/' + ACCT + '/' + (T0 + 900) + '/')));
   const orphanLeft = snapKeys(B).filter(k => B.m.get(k) === 'orphan').length, flight = snapKeys(B).filter(k => B.m.get(k) === 'in flight').length;
-  ok('old orphan parts swept, bounded per run', orphanLeft > 0 && orphanLeft < 500 && B.ops.delete <= 120, 'left ' + orphanLeft + ', deletes ' + B.ops.delete);
+  ok('old orphan parts swept, bounded per run', orphanLeft > 0 && orphanLeft < 500 && B.ops.delete <= 121, 'left ' + orphanLeft + ', deletes ' + B.ops.delete);
   ok('parts of a write that may still be in flight are kept', flight === 7);
   ok('another account\'s snapshot keys are untouched', B.m.get('snap/' + OTHER + '/5') !== undefined && [...B.m.keys()].some(k => k.startsWith('snap/' + OTHER + '/') && k.endsWith('/c/0')));
   clock += 2 * 3600e3; await call(next, B, { since: 0, changes: [rec('items', 'c', clock, { v: 3 })] });
