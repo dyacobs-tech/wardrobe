@@ -5,23 +5,18 @@ be completed things are getting lost". This is the one list. Every chat keeps
 it current and every reply to David ends with the short version of it.
 `docs/handover.md` has the detail and his exact words for each item.
 
-Last updated: 22 Nov 2026, about 19:40 UTC.
+Last updated: 22 Nov 2026, about 20:15 UTC.
 
 ## Live now
 
-Build `.86.58`. `.86.60` to `.86.65` go live together once the full suite
-and preview's test run are green (standing OK, "Always").
+Build `.86.65` (live since about 20:10 UTC, 22 Nov): everything from `.86.60`
+to `.86.65`.
 
 ## In progress
 
 | # | What | State |
 |---|---|---|
-| 1 | `.86.60`: ties only with white or light blue shirts; wide-leg linen with tees; belts on every pair of trousers with belt loops; Formal 8 pictures; swim redrawn across 14 tees; Inspo cleaned | Built, tested |
-| 2 | `.86.61`: Home never scrolls or grows taller than the screen | Built, tested |
-| 3 | `.86.62`: formatting audit (Profile tabs, Closet search, Shop row, + Look, Profile sizes) | Built, tested |
-| 4 | `.86.63`: tapping Home's outfit opens that outfit, never an earlier one | Built, tested |
-| 5 | `.86.64`: the distorted grey knit tee picture taken out | Built, tested |
-| 6 | `.86.65`: Evening Casual / Evening Sharp / Evening Dressy; 11 Evening Sharp pictures; all-blue in black or blue shoes; rust tee is milk chocolate (closet and 6 pictures); 8 broken shoes re-cut; removed pictures no longer linger | Full suite running |
+| 1 | `.86.66`: 12 more Evening Sharp outfits (tonal looks, dark and black jeans, knit tees, the all-navy Giorgio knit blazer look); the grey knit tee outfit redrawn slim | Built; full suite, then preview, then live |
 
 ## Waiting on David
 
@@ -31,8 +26,8 @@ question, so they stay held and I decide.)
 
 ## Next, in his order
 
-1. More Evening Sharp outfits (11 drawn; tucked shirts need visible belts).
-2. Redraw the grey knit tee outfit slimmer and the three rejected Home pictures.
+1. More Evening Sharp outfits (23 drawn).
+2. Redraw the three rejected Home pictures.
 3. Inspo concepts: a belt wherever the trousers have loops.
 4. Page-by-page audit, behaviour items (handover section 3, items 6 to 17).
 5. More Formal outfits; swim with linen shirts and short-sleeve polos.
