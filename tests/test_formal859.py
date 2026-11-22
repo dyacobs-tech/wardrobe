@@ -60,10 +60,10 @@ def run(browser):
     # the three pictures he rejected
     assert out["banned"] == [True, True, True], out["banned"]
     # every Formal picture shipped is keyed with a tie that is in its outfit
-    shipped = page.evaluate("""() => fetch('assets/onbody/manifest.json').then(r => r.json()).then(m => m.r.filter(e => /^(b6f935ac7ac6f480|a3df17689d036028|d91f68ef408a9e03|1b441c9b92641b24|087c53c9afdfc646|650043a805412c85|4ef4510277e0905e|091f1e1266906656|582e08a5a13b832c|c88c951126da147c|1cd02ba725268704|8fcb4a3a6a84d85b)\\.webp$/.test(e.f)).map(e => e.k.split('|').length))""")
-    assert len(shipped) == 12 and all(n == 5 for n in shipped), shipped
+    shipped = page.evaluate("""() => fetch('assets/onbody/manifest.json').then(r => r.json()).then(m => m.r.filter(e => /^(991b06032bdc1445|52fa75dc5d42b2f8|f86f8825194e787a|47432458250f4cd3|e3d81b11dce01a39|b45b3642962ed2ae|091f1e1266906656|1cd02ba725268704)\\.webp$/.test(e.f)).map(e => e.k.split('|').length))""")
+    assert len(shipped) == 8 and all(n == 5 for n in shipped), shipped
     assert not errors, errors
-    print("Confirmed: Formal deals only dress loafers %s; a Formal look shows only a picture with its tie; 12 tie pictures shipped; 3 rejected pictures out" % out["formal"])
+    print("Confirmed: Formal deals only dress loafers %s; a Formal look shows only a picture with its tie; 8 tie pictures shipped; 3 rejected pictures out" % out["formal"])
     ctx.close()
 
 

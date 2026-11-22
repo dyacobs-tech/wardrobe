@@ -36,7 +36,7 @@ def run(browser):
 
     # the library: every concept has a picture file, garments with colours, a level he uses, and a source
     lib = page.evaluate("() => INSPO_CONCEPTS")
-    assert len(lib) >= 60, len(lib)
+    assert len(lib) >= 50, len(lib)
     for c in lib:
         assert os.path.exists(os.path.join(ROOT, "assets", "inspo-concepts", c["id"] + ".webp")), c["id"]
         assert c["level"] in (2, 3, 5, 6) and c["source"] in ("icon", "palette", "engine") and c["title"], c

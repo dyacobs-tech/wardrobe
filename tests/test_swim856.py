@@ -13,8 +13,9 @@ URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000/"
 CLOSET = [
     {"id": "sw1", "name": "Yellow & Navy Chevron Swim Trunks", "category": "Bathing suits", "colourName": "Yellow", "colourHex": "#c4ab63"},
     {"id": "tee", "name": "White Tee", "category": "Tees", "colourName": "White", "colourHex": "#f7f5ef"},
-    {"id": "linen", "name": "Blue Linen Shirt", "category": "Shirts", "colourName": "Blue", "colourHex": "#6f86a8"},
-    {"id": "noted", "name": "Slate Blue Shirt", "category": "Shirts", "colourName": "Slate Blue", "colourHex": "#716c61", "notes": "Chambray linen."},
+    {"id": "linen", "name": "Light Blue Linen Shirt", "category": "Shirts", "colourName": "Light Blue", "colourHex": "#a9c2de"},
+    {"id": "noted", "name": "Sky Shirt", "category": "Shirts", "colourName": "Light Blue", "colourHex": "#b4cbe0", "notes": "Chambray linen."},
+    {"id": "rust", "name": "Rust Tee", "category": "Tees", "colourName": "Rust", "colourHex": "#b4552d"},   # .86.60: loud tees stay off the pool
     {"id": "oxford", "name": "White Oxford Shirt", "category": "Shirts", "colourName": "White", "colourHex": "#f7f5ef"},
     {"id": "polo", "name": "Navy Knit Polo", "category": "Polos", "colourName": "Navy", "colourHex": "#1f2a44"},
     {"id": "lspolo", "name": "White Long-Sleeve Polo", "category": "Polos", "colourName": "White", "colourHex": "#f7f5ef"},
@@ -47,7 +48,7 @@ def run(browser):
     tops = {o["top"] for o in swim}
     shoes = {o["shoes"] for o in swim}
     assert not any(o["layer"] for o in swim), swim
-    assert tops == {"tee", "linen", "noted", "polo"}, tops          # never the oxford, the long-sleeve polo or a sweater
+    assert tops == {"tee", "linen", "noted", "polo"}, tops          # never the oxford, the long-sleeve polo, a sweater or the rust tee
     assert shoes == {"slides", "toms", "bl"}, shoes                  # never loafers, sneakers or the Vans
     # the rule is about bathing suits only: chinos still take the other tops and shoes
     assert any(c.startswith("oxford+") for c in out["chino"]) and any(c.endswith("+loafer") for c in out["chino"]), out["chino"][:8]
