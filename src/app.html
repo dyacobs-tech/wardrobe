@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.70" />
+    <meta name="wardrobe-build" content="2026-11-22.86.71" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8806,7 +8806,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.70</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.71</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10096,7 +10096,12 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       }
       else if (cat === "Coats") { p.lo = 3; p.hi = 7; p.kind = "coat"; p.warm = 3; }
       else if (cat === "Vests") { p.lo = 3; p.hi = 5; p.kind = "vest"; }
-      else { p.lo = 2; p.hi = 4; p.kind = "jacket"; p.warm = 2; }
+      else {
+        p.lo = 2; p.hi = 4; p.kind = "jacket"; p.warm = 2;
+        /* .86.71 (David, 22 Nov 2026, on the Human Assembly linen chore jacket: "It's light layer correct."):
+           a linen jacket is a light layer, like a linen blazer, and is worn on warm days */
+        if (/\blinen\b/.test(n) || /\blinen\b/.test(String(notes844 || "").toLowerCase())) { p.warm = -1; p.light871 = true; }
+      }
     } else if (ACC_CATS[cat]) {
       p.role = "acc"; p.lo = 1; p.hi = 7; p.kind = cat.toLowerCase();
       if (cat === "Belts") beltProfile(p, item, name, colourName, notes844);
@@ -10311,7 +10316,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
          are Evening Sharp's, so the two levels never deal the same outfit. */
       if (lk === "blazer" || lk === "suit" || lk === "dinner") return false;
       if (bottom.kind === "swim") return false;
-      if (layer && !(lk === "knit" || lk === "overshirt" || lk === "coat")) return false;
+      /* .86.71: a casual jacket (his linen chore jacket: "It's light layer correct.") is Evening Casual's too */
+      if (layer && !(lk === "knit" || lk === "overshirt" || lk === "coat" || lk === "jacket")) return false;
       if (knitTee865(top)) return false;
       if (!layer && tonalDark865(top, bottom)) return false;   /* one colour head to toe is Evening Sharp */
       if (top.kind === "shirt") return casualShirt868(top);
@@ -10538,8 +10544,10 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         if (tEff >= 70 && c.l && (c.l.kind === "coat" || c.l.warm >= 3)) return false;
         if (tEff >= 74 && c.l && c.l.warm >= 2) return false;
         if (tEff >= 84 && (c.t.warm >= 2 || (c.l && c.l.warm >= 2))) return false;
-        if (tEff >= 72 && lv && lv <= 3 && c.l && (c.l.kind === "knit" || c.l.kind === "coat" || c.l.kind === "jacket" || c.l.kind === "blazer" || c.l.kind === "suit")) return false;
-        if (tEff >= 72 && lv === 4 && c.l && (c.l.kind === "knit" || c.l.kind === "coat" || c.l.kind === "jacket")) return false;
+        /* .86.71: a linen jacket is a light layer (David: "It's light layer correct.") and stays in the heat up to 84°F */
+        var light871 = c.l && c.l.light871 && tEff < 84;
+        if (tEff >= 72 && lv && lv <= 3 && c.l && !light871 && (c.l.kind === "knit" || c.l.kind === "coat" || c.l.kind === "jacket" || c.l.kind === "blazer" || c.l.kind === "suit")) return false;
+        if (tEff >= 72 && lv === 4 && c.l && !light871 && (c.l.kind === "knit" || c.l.kind === "coat" || c.l.kind === "jacket")) return false;
         if (tEff < 72 && lv === 4 && c.b.kind === "shorts") return false;
         /* .86.37 Daytime (David): no shorts below 68°F; from 88°F shorts or linen only */
         if (lv === 2 && tEff < 68 && c.b.kind === "shorts") return false;
@@ -12264,7 +12272,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.70";
+var WARDROBE_BUILD = "2026-11-22.86.71";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -37806,7 +37814,7 @@ document.getElementById("panel-calendar").addEventListener("click", function (e)
         var fits = false; for (var L = p.lo; L <= p.hi; L++) if (levels[L]) fits = true;
         if (!fits) return;
         if (p.swim && !pool) return;
-        if (minT >= 74 && (p.warm >= 2 || /Coats|Jackets/.test(it.category))) return;
+        if (minT >= 74 && (p.warm >= 2 || (/Coats|Jackets/.test(it.category) && !p.light871))) return;
         if (maxT < 58 && (p.kind === "shorts" || p.swim)) return;
       }
       it._rank = it.gap * 2 + Math.min(it.pairs, 6) * 0.35 + (p.neutral ? 0.6 : 0) - (it.price || 0) / 1500 + (p.swim && pool ? 3 : 0);
