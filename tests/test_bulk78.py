@@ -182,7 +182,7 @@ def main():
         check("remote unstar clears liked", "sku-local-like" not in pg.evaluate("askState().liked"))
         # ask -> star + hide through the UI
         pg.evaluate("switchTab('find')"); pg.wait_for_timeout(400)
-        pg.click("#edit-tab-ask"); pg.wait_for_timeout(300)
+        pg.click("#edit-tab-askdonna"); pg.wait_for_timeout(300)   # .86.68: Ask DONNA is its own page
         pg.fill("#ask-q", "trousers for the olive polo"); pg.click("#ask-send")
         pg.wait_for_selector("#ask-thread .ask-card", timeout=10000)
         c0 = pg.locator("#ask-thread .ask-card").first
