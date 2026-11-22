@@ -4,6 +4,44 @@ Written 22 Nov 2026, about 11:45 UTC (06:45 in Palm Beach), when David moved
 to a new chat. Read `CLAUDE.md` first; this file only adds what that one does
 not say. Where I am not sure of something, it says so.
 
+## 0. Update from the next chat (22 Nov 2026, afternoon UTC)
+
+Work is on branch `claude/keen-albattani-2m0tbq` (not on `preview`, not live).
+Sections below are as the earlier chat left them, except where this says so.
+
+- **Done, build `.86.49`:** Liked no longer shows colour bands (section 3,
+  item 1), thumbs are centred (item 2), Go-to's opens at once (item 3).
+  Tests: `tests/test_liked849.py`.
+- **Done, build `.86.50`:** the flicker on open (item 4, section 2b points 1
+  and 2). Test: `tests/test_open850.py`. Point 3 (hidden screens filled at
+  start) is not done.
+- **Renders from Drive (item 5, section 2a): 76 of 89 are in.** Belts 20,
+  ties 7, sunglasses 14, tees 19, trousers and jeans 16, written to the sync
+  server on 22 Nov with every record read back exactly. Each item's notes end
+  "Picture: the studio render you sent from your Drive folder, set 22 Nov
+  2026."
+  - **Held for David, 10 renders:** chinos `trousers-01, -09, -10, -11`
+    against five closet chinos (Stone Grey Cotton Chinos and four Proper
+    Cloth beige/stone pairs), and blue jeans `trousers-25` to `-30` against
+    the FRAME Faded Grey-Blue and the five Levi's 517s. The colours do not
+    identify them and the original photos are not in the Drive zips.
+  - **No closet piece:** `tees-14` (grey Theory tee). Ask before adding.
+  - Unused by design: the sneaker's top view.
+- **WebKit is not installed in this cloud environment.** Tests were run with
+  Chromium standing in for WebKit (`tools/chat-2026-11-22/tests/chromerun.py`
+  does the same). `test_photos787.py` passes that way but stays quarantined
+  until it passes on real WebKit in CI.
+- **Seen, not fixed:** his level is saved as Formal, and the closet has no
+  suit, so Home shows "No Formal looks in your closet yet" and Outfits shows
+  only grey placeholder cards (item 18).
+- **Item 15, checked:** the closet outfit dealer (`evaluate` in the composer)
+  scores by colour family, contrast and shoe pairings. It does not read the
+  Wada palettes. I found no stored list of "approved" palettes; ask David
+  which palettes he means.
+- 17 of his 24 liked looks have no picture (old looks whose only picture is
+  a mirror picture of him, with pieces he does not own). They are listed by
+  name under the Liked cards.
+
 ## 1. Where things stand
 
 - **Live app:** build `2026-11-21.86.48`. `main` and `preview` were both at
