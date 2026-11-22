@@ -18,6 +18,7 @@ CLOSET = [
     {"id": "jeans", "name": "Light Wash Jeans", "category": "Jeans", "colourName": "Light Blue", "colourHex": "#8aa8c4"},
     {"id": "check", "name": "Vibi Venezia Mustard Check Furlane Slippers", "category": "Shoes", "colourName": "Mustard", "colourHex": "#c9a227"},
     {"id": "loafer", "name": "Dark Brown Suede Penny Loafers", "category": "Shoes", "colourName": "Dark brown", "colourHex": "#4a2e1f"},
+    {"id": "black", "name": "Black Leather Penny Loafers", "category": "Shoes", "colourName": "Black", "colourHex": "#111111"},   # navy tee + blue jeans is all blue: black shoes
 ]
 
 
@@ -33,7 +34,9 @@ def run(browser):
     assert not any(c.endswith("/blue/check") for c in combos), combos
     assert any(c.endswith("/stone/check") for c in combos), combos          # quiet outfit: fine
     assert any(c.endswith("/blue/loafer") for c in combos), combos          # the blue trousers still get dealt with quiet shoes
-    assert any("/jeans/" in c for c in combos), combos                      # light blue denim stays a neutral
+    neutral = page.evaluate("closet => closet.map((x, i) => [x.id, WardrobeComposer.profile(x, i).neutral])", CLOSET)
+    neutral = dict(neutral)
+    assert neutral["jeans"] is True and neutral["blue"] is False and neutral["t"] is True, neutral   # denim and navy stay neutrals; bright blue is a statement
     assert not errors, errors
     ctx.close()
     return len(combos)
