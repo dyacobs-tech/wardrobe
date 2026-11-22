@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.55" />
+    <meta name="wardrobe-build" content="2026-11-22.86.56" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8736,7 +8736,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.55</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.56</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9877,6 +9877,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       id: item.id, idx: idx, cat: cat, name: item.name || "", n: n,
       role: "none", lo: 3, hi: 4, kind: "",
       L: (function () { var nl = nameLightness(item.colourName); return nl === null ? hsl.l : nl; })(), fam: fc.fam, neutral: fc.neutral,
+      linen856: /linen/.test(n + " " + notes844),   /* .86.56: linen by name or by his notes on the piece */
       pattern: PATTERN_RE.test(n), denim: /denim|chambray/.test(n) || cat === "Jeans",
       warm: 0, collared: false, overshirt: false, casualShirt: false, shortSleeve: false,
       fresh: !!(item.addedISO && (Date.now() - Date.parse(item.addedISO)) < 21 * 864e5)
@@ -9913,6 +9914,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         }
         if (p.pattern && !/stripe/.test(n)) p.hi = Math.min(p.hi, 4);
         if (p.hi >= 7 && !(p.fam === "white" || p.fam === "black" || (p.fam === "blue" && p.L > 60))) p.hi = 6;
+        /* .86.56 (David, 22 Nov 2026): a linen button-down goes with a bathing suit, so it reaches Pool / Beach */
+        if (p.linen856) p.lo = 1;
       }
     } else if (BOTTOM_CATS[cat]) {
       p.role = "bottom";
@@ -10034,6 +10037,17 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if ((bottom.kind === "shorts" || bottom.kind === "swim") && (/velvet/.test(shoes.n) || shoes.kind === "dress")) return null;
     /* .78.8c: Pool-only pieces (pool slides) only ever meet swim */
     if ((shoes.poolOnly || top.poolOnly || (layer && layer.poolOnly)) && !(bottom.kind === "swim" || bottom.swim)) return null;
+    /* .86.56 (David, 22 Nov 2026: "Bathing suits looks should be with linen button down shirts or t shirts, or
+       casual polos. Should Be with pool slides, my toms slip ons, or my baudoin lange with raffia trim."):
+       a bathing suit takes no layer; the top is a tee, a linen shirt or a casual (not long-sleeve) polo; the
+       shoes are pool slides, canvas slip-ons such as his TOMS, or raffia-trimmed espadrilles such as his
+       Baudoin & Lange. Nothing else is dealt with swim trunks. */
+    if (bottom.kind === "swim" || bottom.swim) {
+      if (layer) return null;
+      var swimTop856 = top.kind === "tee" || (top.kind === "shirt" && top.linen856) || (top.kind === "polo" && !/long-sleeve|long sleeve/.test(top.n));
+      var swimShoe856 = shoes.poolOnly || /\bslides?\b/.test(shoes.n) || shoes.kind === "espadrille" || /espadrille|raffia/.test(shoes.n) || (/\btoms\b/.test(shoes.n)) || (/canvas/.test(shoes.n) && /slip-on/.test(shoes.n) && !/checkerboard|vans/.test(shoes.n));
+      if (!swimTop856 || !swimShoe856) return null;
+    }
     var score = 0;
     var upper = layer || top;
     var dl = Math.abs(upper.L - bottom.L);
@@ -10108,7 +10122,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
        1 Pool / Beach · 2 Daytime · 3 Nighttime Casual · (4 retired → 3)
        5 Nighttime Dressy · 6 Formal · 7 Black Tie */
     if (L === 4) L = 3;
-    if (L === 1) return !layer && (bottom.kind === "swim" || bottom.kind === "shorts" || bottom.kind === "linen") && (top.kind === "tee" || top.shortSleeve || /linen/.test(top.n));
+    if (L === 1) return !layer && (bottom.kind === "swim" || bottom.kind === "shorts" || bottom.kind === "linen") && (top.kind === "tee" || top.shortSleeve || /linen/.test(top.n) || top.linen856 || (top.kind === "polo" && !/long-sleeve|long sleeve/.test(top.n)));
     if (L === 2) {
       /* Daytime: shorts, jeans, chinos or linen trousers with a tee or polo; no layer.
          Temperature: no shorts below 68°F; at 88°F and up only shorts or linen. */
@@ -12043,7 +12057,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.55";
+var WARDROBE_BUILD = "2026-11-22.86.56";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
