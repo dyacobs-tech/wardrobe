@@ -6,6 +6,12 @@ sync, so the app client cannot tell which host serves it.
 
 **This copy is ready to review and to test locally. It is not deployed.**
 
+> 22 Nov 2026: the live worker got one change, the snapshot writer (see
+> `snapshot-fix/README.md`). It was applied to the live module itself, so
+> the live code is still this `worker.ts` without the three hardening
+> layers below, plus the relink endpoints added on 20 Nov, which are not in
+> this file.
+
 > Verified read-only on Nov 19 2026: the deployed `wardrobe-sync` (etag
 > `cff9ac46…`, last modified Nov 17 2026 5:34 PM ET) is this `worker.ts`
 > **without** the three hardening layers below (no baseline-manifest gate,

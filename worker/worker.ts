@@ -256,7 +256,7 @@ async function acctForKey(
 // value limit even if every character were three bytes.
 const SNAP_PART = 6 * 1024 * 1024;
 // At most this many deletes (ring trim + orphan sweep) per snapshot run.
-const SNAP_SWEEP_MAX = 400;
+const SNAP_SWEEP_MAX = 120;
 // Parts with no meta key are swept only once they are this old, so a
 // write that is still in flight is never touched.
 const SNAP_ORPHAN_AGE_MS = 2 * 60 * 60 * 1000;

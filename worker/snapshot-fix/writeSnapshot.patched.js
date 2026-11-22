@@ -1,5 +1,5 @@
 const SNAP_PART = 6 * 1024 * 1024;
-const SNAP_SWEEP_MAX = 400;
+const SNAP_SWEEP_MAX = 120;
 const SNAP_ORPHAN_AGE_MS = 2 * 60 * 60 * 1e3;
 async function writeSnapshot(kv, acct) {
   const snapPrefix = K("snap", acct) + "/";
