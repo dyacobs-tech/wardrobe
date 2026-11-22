@@ -307,6 +307,16 @@ Quotes are David's.
   "I don't need 6 burgundy looks for formal." Brown with gold or blue is
   "awful". Use all his different clothes, "not multiple duplicates": one
   swim picture per pair of trunks, each with a different tee.
+- 22 Nov, evening (.86.65, `tests/test_sharp865.py`): levels renamed
+  Evening Casual (3), Evening Sharp (4, new), Evening Dressy (5). Evening
+  Sharp: a button-down tucked or untucked with no blazer, a knit tee with
+  trousers or dark jeans, a tonal one-colour look; a blazer only over a plain
+  white or cream tee, or a navy tee under a navy blazer ("my tech Giorgio
+  blazer good example"). "All blue I'd prefer black shoes black belts. Or
+  tonal matching blue shoes blue belt." The Fedeli tee is "light milk
+  chocolate brown", not rust.
+- The sync server refuses Python's default user agent (HTTP 403); send a
+  generic one such as `curl/8.5.0`.
 
 **Going live: the rule is not settled.** On 21 Nov he said "Push live when
 it's ready!!!" and "Yes go live when it's ready". `CLAUDE.md`, written later

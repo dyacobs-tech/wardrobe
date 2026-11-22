@@ -5,47 +5,43 @@ be completed things are getting lost". This is the one list. Every chat keeps
 it current and every reply to David ends with the short version of it.
 `docs/handover.md` has the detail and his exact words for each item.
 
-Last updated: 22 Nov 2026, about 18:40 UTC.
+Last updated: 22 Nov 2026, about 19:40 UTC.
 
 ## Live now
 
-Build `.86.58` (live since 17:43 UTC). `.86.59` was never promoted on its own;
-`.86.60` includes it and goes live once preview's test run is green (standing
-OK, "Always").
+Build `.86.58`. `.86.60` to `.86.65` go live together once the full suite
+and preview's test run are green (standing OK, "Always").
 
 ## In progress
 
 | # | What | State |
 |---|---|---|
-| 1 | `.86.60`: ties only with white or light blue shirts (or all black / all navy); wide-leg linen trousers only with tees; a belt on every trouser with belt loops; Formal pictures cut from 12 to 8 (one burgundy look darker, four new); swim redrawn with 14 different quiet tees and all five pool shoes, the rust tee gone; Inspo: 10 clashing or rule-breaking concepts out, all-black and all-navy tie concepts in | Built and tested here; preview, then live |
+| 1 | `.86.60`: ties only with white or light blue shirts; wide-leg linen with tees; belts on every pair of trousers with belt loops; Formal 8 pictures; swim redrawn across 14 tees; Inspo cleaned | Built, tested |
+| 2 | `.86.61`: Home never scrolls or grows taller than the screen | Built, tested |
+| 3 | `.86.62`: formatting audit (Profile tabs, Closet search, Shop row, + Look, Profile sizes) | Built, tested |
+| 4 | `.86.63`: tapping Home's outfit opens that outfit, never an earlier one | Built, tested |
+| 5 | `.86.64`: the distorted grey knit tee picture taken out | Built, tested |
+| 6 | `.86.65`: Evening Casual / Evening Sharp / Evening Dressy; 11 Evening Sharp pictures; all-blue in black or blue shoes; rust tee is milk chocolate (closet and 6 pictures); 8 broken shoes re-cut; removed pictures no longer linger | Full suite running |
 
 ## Waiting on David
 
-| # | Question |
-|---|---|
-| 1 | Tapping "the first image" opened a different outfit: which screen (Home, Looks > Outfits, The Edit)? Not reproduced on Home or Looks. |
-| 2 | 11 studio renders held (4 chinos, 6 blue jeans, a grey Theory tee): which closet piece is each? Sheet sent 22 Nov. |
-| 3 | Approved palettes: is Liked > Palettes the list he meant? |
-| 4 | "that color 'brown' is a bit darker": is that the Fedeli Rust Tee's closet photo (to be darkened), or a different piece? It is no longer in any swim outfit. |
+Nothing open. (22 Nov answers: the tap was on Home; Liked > Palettes is the
+approved palettes list; the 11 held studio renders: he did not follow the
+question, so they stay held and I decide.)
 
 ## Next, in his order
 
-1. Inspo concepts: add a belt to every concept whose trousers have belt loops
-   (his belt rule; the outfit engine already does it, the concept pictures do
-   not yet).
-2. Page-by-page audit (handover section 3, items 6 to 17): shirts always
-   tucked under a blazer; Dress me piece picker filters; Dress me change
-   piece returns to the previous page; "Put it on me" stuck; Ask tab;
-   icon weights add to 100; "lookbook" to "looks"; lookboard buttons; old
-   Ideas page links; three shoe pictures to check; "Where are the belts?".
-3. More Formal outfits (8 pictures; only light blue shirts take a tie).
-   Swim with linen shirts and short-sleeve polos (no base pictures yet).
-4. Redraw the three rejected Home pictures correctly.
-5. Light blue 517s: pressed crease.
-6. Linen jacket as a light layer.
-7. Hidden screens filled at start (speed).
+1. More Evening Sharp outfits (11 drawn; tucked shirts need visible belts).
+2. Redraw the grey knit tee outfit slimmer and the three rejected Home pictures.
+3. Inspo concepts: a belt wherever the trousers have loops.
+4. Page-by-page audit, behaviour items (handover section 3, items 6 to 17).
+5. More Formal outfits; swim with linen shirts and short-sleeve polos.
+6. Light blue 517s: pressed crease. Linen jacket as a light layer.
 
 ## Done 22 Nov (most recent first)
+
+- Rust tee recoloured and renamed in the closet: Fedeli Milk Chocolate Tee
+  (#8a5a3c), backup taken first, only that record changed.
 
 - Today's two looks logged; Uniqlo white linen shirt, Uniqlo dark blue
   chambray linen shirt, Kiton seashell trunks and 16 trunks from Drive added;
