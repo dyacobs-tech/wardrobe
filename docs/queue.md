@@ -5,18 +5,19 @@ be completed things are getting lost". This is the one list. Every chat keeps
 it current and every reply to David ends with the short version of it.
 `docs/handover.md` has the detail and his exact words for each item.
 
-Last updated: 22 Nov 2026, about 20:15 UTC.
+Last updated: 22 Nov 2026, about 21:30 UTC.
 
 ## Live now
 
-Build `.86.65` (live since about 20:10 UTC, 22 Nov): everything from `.86.60`
-to `.86.65`.
+Build `.86.66` (live since about 21:25 UTC, 22 Nov): tees shortened to two
+inches below the waistband (84 pictures), 12 more Evening Sharp outfits, the
+all-navy Giorgio look, the slim grey knit tee.
 
 ## In progress
 
 | # | What | State |
 |---|---|---|
-| 1 | `.86.66`: 12 more Evening Sharp outfits (tonal looks, dark and black jeans, knit tees, the all-navy Giorgio knit blazer look); the grey knit tee outfit redrawn slim | Built; full suite, then preview, then live |
+| 1 | `.86.67`: the three rejected Home pictures redrawn slim (Armani black tee + faded 517s, Zegna grey knit tee + white jeans, Whitesville navy tee + Bottega slip-ons) | Full suite, then preview, then live |
 
 ## Waiting on David
 
@@ -27,7 +28,6 @@ question, so they stay held and I decide.)
 ## Next, in his order
 
 1. More Evening Sharp outfits (23 drawn).
-2. Redraw the three rejected Home pictures.
 3. Inspo concepts: a belt wherever the trousers have loops.
 4. Page-by-page audit, behaviour items (handover section 3, items 6 to 17).
 5. More Formal outfits; swim with linen shirts and short-sleeve polos.
