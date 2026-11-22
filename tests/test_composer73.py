@@ -191,7 +191,7 @@ def main() -> int:
             ctx.add_init_script(STANDALONE_INIT)
             # These two blue receipt rows describe the same garment, which the app merges.
             ui_items = [i for i in photographed_closet() if i["id"] != "rcptbuy-1dnqhzg17"]
-            seed = {"items": ui_items, "todaySource": "wardrobe", "formality": 4}
+            seed = {"items": ui_items, "todaySource": "wardrobe", "formality": 3}   # .86.65: level 4 is Evening Sharp now; this test means Evening Casual
             ctx.add_init_script("(() => { if (localStorage.getItem('wardrobe.items')) return; const S = %s;"
                                 " for (const k in S) localStorage.setItem('wardrobe.' + k, JSON.stringify(S[k])); })();" % json.dumps(seed))
             ctx.route(BLOCK, lambda r: r.abort())
