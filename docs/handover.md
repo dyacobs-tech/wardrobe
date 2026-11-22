@@ -317,6 +317,14 @@ Quotes are David's.
   chocolate brown", not rust.
 - The sync server refuses Python's default user agent (HTTP 403); send a
   generic one such as `curl/8.5.0`.
+- 22 Nov, evening: "T shirts are too long they should be a hanging a couple
+  inches below my belt line." Every new render prompt for an untucked tee says
+  the hem sits about two inches below the top of the trousers, covering the
+  waistband. 21 pictures shortened with FASHN `edit` (19 kept). Measure: hem
+  at about 0.52 of figure height is right; 0.545 and lower is too long.
+- A picture is banned by FILE NAME (`ONBODY_REJECTED859`). Never re-save a
+  banned picture under a new name: it comes back. Skip banned files in any
+  batch redraw.
 
 **Going live: the rule is not settled.** On 21 Nov he said "Push live when
 it's ready!!!" and "Yes go live when it's ready". `CLAUDE.md`, written later
