@@ -1,7 +1,9 @@
-"""The Edit's "with mine" feed shows outfits drawn on him; undrawn ideas are one tap away (.86.57).
+"""The Edit's "with mine" feed shows outfits drawn on him; undrawn ideas are one tap away (.86.57, Icon filter .86.67).
 
 David, 22 Nov 2026, with a screenshot of The Edit showing boxes of pieces
 under "With mine": "With mine should be on my avatar!!!"
+David, 22 Nov 2026 (later), on Icons > Ideas for you with an Icon filter on,
+showing product photos: "I should be on my avatar for these!!!!"
 """
 import json
 import sys
@@ -14,6 +16,24 @@ URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000/"
 STATE = """() => { const cards = [...document.querySelectorAll('#en-grid-withmine .cf-card:not(.en-skel)')]; const n = document.querySelector('.en-undrawn857');
   return { cards: cards.length, drawn: cards.filter(c => c.querySelector('.en-render img')).length, skel: document.querySelectorAll('#en-grid-withmine .en-skel').length,
            note: n && !n.hidden ? n.textContent : null, button: !!(n && !n.hidden && n.querySelector('[data-en-undrawn857]')) }; }"""
+
+
+def run_lens(browser):
+    ctx = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, service_workers="block")
+    ctx.route("**/*", lambda route: route.continue_() if route.request.url.startswith(URL) and route.request.method == "GET" else route.abort())
+    ctx.add_init_script("localStorage.setItem('wardrobe.items'," + json.dumps(json.dumps(photographed_closet())) + ");localStorage.setItem('wardrobe.formality','3')")
+    page = ctx.new_page()
+    page.goto(URL, wait_until="domcontentloaded")
+    page.wait_for_function("() => window.__appRan850 === true && typeof switchTab === 'function'", timeout=60000)
+    page.evaluate("() => switchTab('inspo')")
+    page.wait_for_function("() => !!window.endlessLens81", timeout=60000)
+    page.evaluate("() => window.endlessLens81.set('beckham')")
+    page.wait_for_function("() => { const n = document.querySelector('.en-undrawn857'); return (n && !n.hidden) || document.querySelectorAll('#en-grid-withmine .cf-card:not(.en-skel)').length >= 4; }", timeout=60000)
+    page.wait_for_timeout(800)
+    a = page.evaluate(STATE)
+    assert a["cards"] == a["drawn"], ("with an Icon filter on, an outfit not drawn on him is in New + mine", a)
+    ctx.close()
+    return a
 
 
 def run(browser):
@@ -55,5 +75,6 @@ with sync_playwright() as pw:
     for engine in (pw.chromium, pw.webkit):
         browser = engine.launch()
         drawn, more = run(browser)
-        print("Confirmed: With mine showed %d outfits, all drawn on him, then the button; it revealed %d undrawn ideas; All new unchanged" % (drawn, more))
+        lens = run_lens(browser)
+        print("Confirmed: With mine showed %d outfits, all drawn on him, then the button; it revealed %d undrawn ideas; All new unchanged; with an Icon filter %d of %d drawn" % (drawn, more, lens["drawn"], lens["cards"]))
         browser.close()

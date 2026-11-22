@@ -49668,14 +49668,16 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     /* HAN-38: first fill is 4 cards (fast first paint); the rest follows next frame */
     var CAP = f.looks.length ? 8 : 4;
     /* With mine: the On you renders lead */
-    if (feed === "withmine" && !S.lens && f.rendered && f.rendered.length) {
+    /* .86.67 (David, 22 Nov 2026, on Icons > Ideas for you showing product photos: "I should be on my avatar for
+       these!!!!"): with an Icon filter on too, New + mine shows the outfits drawn on him first, and only those */
+    if (feed === "withmine" && f.rendered && f.rendered.length) {
       while (out.length < CAP && f.rendered.length) { var r = f.rendered.shift(); if (!f.keys[r.key] && !S.hidden[r.key] && !(window.isDislikedLook && window.isDislikedLook(r.key)) && lookPriceOk(r) && renderedFits838(r)) out.push(r); }
     }
     /* .86.57 (David, 22 Nov 2026, on The Edit showing boxes of pieces under "With mine": "With mine should be on my
        avatar!!!"). With mine shows the outfits that are drawn on him and nothing else. The ideas that are not
        drawn on him yet stay one tap away (the button under the grid); under an Icon the feed is that Icon's
        ideas, as before. */
-    var drawnOnly857 = feed === "withmine" && !S.lens && !undrawn857;
+    var drawnOnly857 = feed === "withmine" && !undrawn857;
     while (!drawnOnly857 && out.length < CAP && BUF[feed].length) {
       var o = BUF[feed].shift();
       if (f.keys[o.key] || S.hidden[o.key] || (window.isDislikedLook && window.isDislikedLook(o.key))) continue;
