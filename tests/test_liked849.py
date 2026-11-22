@@ -11,7 +11,8 @@ David, 22 Nov 2026:
 An old liked look has a list of colours and no pieces. Its card shows the
 pieces from his closet that the look names (the same piece by name, or the
 same kind of garment in the same colour). A look where that fails is listed
-by name under the cards. No card is ever a stack of colour bands.
+on Liked > Palettes (.86.53), where colour bands belong. No card on Looks is
+ever a stack of colour bands.
 """
 import json
 import sys
@@ -64,25 +65,19 @@ def run(browser):
         return { title: c.querySelector('.oc-title').textContent, imgs: m.querySelectorAll('img').length,
                  bands: m.querySelectorAll('[class*="lk-sw"], .fl-swatch').length,
                  painted: [...m.querySelectorAll('span')].filter(s => s.style && s.style.background && !s.querySelector('img')).length }; });
-      const list = [...host.querySelectorAll('.lk-nopic849 .lk-np849')].map(r => ({ title: r.querySelector('.lk-npt849').textContent, open: r.querySelector('[data-l841-open]') != null, unlike: r.querySelector('[data-l841-unlike]') != null }));
-      return { cards, list, summary: (host.querySelector('.lk-nopic849 > summary') || {}).textContent || '', anyBand: host.querySelectorAll('.lk-sw843, .lk-swb843').length }; }""")
+      return { cards, anyBand: host.querySelectorAll('.lk-sw843, .lk-swb843, .lk-sw853').length, sub: [...host.querySelectorAll('[data-lk-sub853]')].map(x => x.textContent) }; }""")
     by = {c["title"]: c for c in liked["cards"]}
     assert liked["anyBand"] == 0, liked
     assert all(c["bands"] == 0 and c["painted"] == 0 and c["imgs"] >= 1 for c in liked["cards"]), liked
     assert "Named pieces" in by and by["Named pieces"]["imgs"] >= 2, liked
     assert "Same kind same colour" in by and by["Same kind same colour"]["imgs"] >= 2, liked
+    # .86.53: a look that is colours only is not on Looks at all; it is a palette, on Liked > Palettes
     assert "Racing Green & Stone" not in by, liked
-    assert [r["title"] for r in liked["list"]] == ["Racing Green & Stone"] and liked["list"][0]["open"] and liked["list"][0]["unlike"], liked
-    assert liked["summary"].startswith("1 older liked look without a picture"), liked
+    assert liked["sub"][0] == "Looks" and liked["sub"][1].startswith("Palettes"), liked
     # the matcher itself: exact names give those pieces; an unowned colour gives nothing
     m = page.evaluate("""() => ({ named: (likedClosetPieces849(savedLooks.find(l => l.id === 'old-named')) || []).map(i => i.id),
       none: likedClosetPieces849(savedLooks.find(l => l.id === 'old-none')) })""")
     assert m["named"][0] == made["top0"] and len(m["named"]) == 3 and m["none"] is None, m
-    # unliking from the list keeps the look (a dislike or unlike never deletes) and empties the list
-    page.evaluate("() => document.querySelector('.lk-nopic849').setAttribute('open', '')")
-    page.locator(".lk-nopic849 [data-l841-unlike]").tap()
-    page.wait_for_function("() => !document.querySelector('.lk-nopic849')")
-    assert page.evaluate("() => savedLooks.some(l => l.id === 'old-none')"), "unliking removed the look"
 
     # thumbs: the icon is its own size and laid out in the middle of its circle (it was a 44px strip pinned left)
     def thumbs(sel):
@@ -108,7 +103,7 @@ def run(browser):
     assert took["cards"] >= 1 and not took["deck"], took
     assert took["ms"] < 1500, took
     assert not errors, errors
-    print("Confirmed: Liked shows pieces, never colour bands (%d cards, 1 listed by name); %d thumbs centred; Go-to's opened in %d ms without building the deck" % (len(liked["cards"]), seen, took["ms"]))
+    print("Confirmed: Liked > Looks shows pieces, never colour bands (%d cards; the colours-only look is on Palettes); %d thumbs centred; Go-to's opened in %d ms without building the deck" % (len(liked["cards"]), seen, took["ms"]))
     ctx.close()
 
 

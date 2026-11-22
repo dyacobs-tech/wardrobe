@@ -79,7 +79,7 @@ def run(browser):
     assert wornc["back"]["src"].startswith("data:image/png") and wornc["back"]["pieces"] >= 2, wornc
     assert wornc["selfie"]["card"] and wornc["selfie"]["src"] is None and wornc["selfie"]["pieces"] >= 2, wornc
 
-    # Liked: a photo look (no pieces, no render, no closet match) is listed by name under the cards (.86.49:
+    # Liked: a photo look (no pieces, no render, no closet match) is not on Looks (.86.49:
     # David, 22 Nov 2026, "Liked section has color swatches makes NO sense"), never colour bands or a lone watch;
     # a liked rendered outfit shows the whole avatar inside its box
     page.evaluate("""() => {
@@ -89,18 +89,19 @@ def run(browser):
     }""")
     page.evaluate("() => window.scrollTo(0, 0)")
     page.locator('#panel-looks [data-lk-go="liked"]').tap()
-    page.wait_for_function("() => document.querySelectorAll('#lk-liked841 .lk-card841').length >= 1 && document.querySelector('#lk-liked841 .lk-nopic849')")
+    page.wait_for_function("() => document.querySelectorAll('#lk-liked841 .lk-card841').length >= 1 && document.querySelector('#lk-liked841 [data-lk-sub853]')")
     liked = page.evaluate("""() => [...document.querySelectorAll('#lk-liked841 .lk-card841')].map(c => { const m = c.querySelector('.cf-media'), a = m.querySelector('.mine-avatar');
       const mr = m.getBoundingClientRect(), ar = a ? a.getBoundingClientRect() : null;
       return { title: c.querySelector('.oc-title').textContent, bands: m.querySelectorAll('.lk-sw843, .lk-swb843, .fl-swatch').length, cells: m.querySelectorAll('.fl-cell').length,
         watchOnly: m.querySelectorAll('.fl-cell').length === 1 && !!m.querySelector('.fl-watch'), avatarFits: ar ? (ar.height <= mr.height + 1 && ar.width <= mr.width + 1) : null }; })""")
     assert not [c for c in liked if c["title"] == "Racing Green & Stone"], liked
     assert not any(c["bands"] for c in liked), liked
-    assert page.evaluate("() => [...document.querySelectorAll('#lk-liked841 .lk-nopic849 .lk-npt849')].map(b => b.textContent)") == ["Racing Green & Stone"]
+    # .86.53: the colours-only look is a palette, on Liked > Palettes
+    assert page.evaluate("() => window.approvedPalettes853().map(p => p.name)") == ["Racing Green & Stone"]
     assert not any(c["watchOnly"] for c in liked), liked
     assert any(c["avatarFits"] is True for c in liked) and not any(c["avatarFits"] is False for c in liked), liked
     assert not errors, errors
-    print("Confirmed go-to's: avatar with %d pieces beside it; a logged outfit shows its own picture of him (cut-out, or the saved picture), never a selfie; Liked lists a photo look by name (no colour bands) and shows a fitted avatar" % first["pieces"])
+    print("Confirmed go-to's: avatar with %d pieces beside it; a logged outfit shows its own picture of him (cut-out, or the saved picture), never a selfie; Liked keeps a colours-only look off Looks (it is a palette) and shows a fitted avatar" % first["pieces"])
     ctx.close()
 
 
