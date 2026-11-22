@@ -65,6 +65,8 @@ def run(browser):
     blz = [s for s in sharp if "+" in s]
     assert blz and all(s.split("+")[1].split("/")[0] in ("wtee", "ntee") for s in blz), blz
     assert not any(s.startswith("bzT+ntee") for s in blz), blz
+    # .86.66: the all-navy look, navy blazer over a navy tee with navy trousers
+    assert "bzN+ntee/navyt" in sharp, blz
     assert not any("ztee" in s and "+" in s for s in sharp), sharp
     # never shorts, never light-wash jeans
     assert not any(s.endswith("/sh") or s.endswith("/ltj") for s in sharp), sharp
