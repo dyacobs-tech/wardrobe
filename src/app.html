@@ -7321,6 +7321,7 @@ window.notMenswear853 = function (e) {
       .vp-look { min-height: 32px !important; padding: 6px 12px !important; }
       /* Profile sizes: a label that runs to two lines ("Sweater / knit size") pushed its box below its neighbour's */
       .profile-grid > div { display: flex; flex-direction: column; justify-content: flex-end; }
+      .lk-icon867 { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
     </style>
   </head>
   <body data-page="today">
@@ -21359,7 +21360,7 @@ function boardCardHTML(ic, en) {
     '<figcaption><strong>' + esc(cap) + "</strong>" +
     '<button type="button" class="btn-accent" data-emulate="' + ic.id + '" data-look-idx="' + en.idx + '">Emulate</button>' +
     '<button type="button" class="btn-ghost" data-find-icon-look="' + ic.id + '" data-look-idx="' + en.idx + '">Shop the look</button>' +
-    '<button type="button" class="btn-ghost" data-icon-lookbook="' + ic.id + '" data-look-idx="' + en.idx + '">Add to lookbook</button>' +
+    '<button type="button" class="btn-ghost" data-icon-lookbook="' + ic.id + '" data-look-idx="' + en.idx + '">Add to Looks</button>' +
     '<button type="button" class="btn-ghost" data-icon-look="' + ic.id + '" data-look-idx="' + en.idx + '">Inspo</button></figcaption></figure>';
 }
 function lookboardHTML(ic) {
@@ -21368,7 +21369,7 @@ function lookboardHTML(ic) {
   return '<h5>Lookboard — ' + esc(ic.name) + ' <span class="lb-count">' + board.length + " look" + (board.length === 1 ? "" : "s") + "</span></h5>" +
     '<div class="iconic-row board-grid">' + board.map(function (en) { return boardCardHTML(ic, en); }).join("") + "</div>";
 }
-/* Add to lookbook: the icon look saved as a find-look under a
+/* Add to Looks (was "lookbook"): the icon look saved as a find-look under a
    stable id, so a second tap dedupes on saveLook's own
    already-saved check. */
 function addIconLookToLookbook(ic, lk) {
@@ -21378,7 +21379,13 @@ function addIconLookToLookbook(ic, lk) {
   fl.id = "iconlook-" + lk.spec;
   fl.title = ic.name + " — " + cap;
   fl.img = lk.img;
-  saveLook(fl);
+  /* .86.67 (David, 22 Nov 2026: "Add to "looks" not lookbook ... then I go to liked section and nothing
+     appeared. This needs to WORK."): the look is saved as liked, so it lands in Looks > Liked. */
+  var now867 = new Date().toISOString();
+  var had867 = (typeof savedLooks !== "undefined" ? savedLooks : []).filter(function (l) { return l.id === fl.id; })[0];
+  if (had867) { had867.verdict = "like"; had867.likedAt = now867; if (typeof persistAll === "function") persistAll(); }
+  else { fl.verdict = "like"; fl.likedAt = now867; saveLook(fl); }
+  try { if (typeof toast === "function") toast("Added to Looks \u203a Liked"); } catch (e867) {}
 }
 
 /* The Ideas engine's board seed (build .43): choose uniformly
@@ -21957,7 +21964,7 @@ function renderEmulate() {
     "<h3>" + esc(title) + "</h3>" +
     '<p class="lane">' + esc(ic.name) + " · Emulate</p>" +
     '<div class="emulate-actions">' +
-    '<button type="button" class="btn-accent" data-icon-lookbook="' + ic.id + '" data-look-idx="' + ic.looks.indexOf(lk) + '">Add to lookbook</button>' +
+    '<button type="button" class="btn-accent" data-icon-lookbook="' + ic.id + '" data-look-idx="' + ic.looks.indexOf(lk) + '">Add to Looks</button>' +
     '<button type="button" class="btn-ghost" data-emulate-shop="' + ic.id + '" data-look-idx="' + ic.looks.indexOf(lk) + '">Shop this look</button>' +
     "</div>" +
     "<h5>The breakdown</h5>" +
@@ -46076,6 +46083,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       /* .86.58: a liked concept from The Edit > Inspo shows its picture of him */
       if (look && look.concept && typeof window.conceptFigure858 === "function") { var cf = window.conceptFigure858(look); if (cf) return cf; }
       if (typeof window.flatlayHTML841 !== "function") return "";
+      /* .86.67: an icon look added with "Add to Looks" shows the icon's own photo when none of his pieces match */
+      if (look && look.iconSpec && look.img && !(look.fwPieces && look.fwPieces.length) && !closetPieces849(look)) return '<img class="lk-icon867" src="' + E(look.img) + '" alt="" loading="lazy" decoding="async" />';
       if (look && look.fwPieces && look.fwPieces.length) return window.flatlayHTML841(look, true, true);
       var mine = closetPieces849(look);
       if (mine) return window.flatlayHTML841(Object.assign({}, look, { fwPieces: mine }), true, true);
@@ -46256,7 +46265,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   }
   function renderLiked() {
     var host = ensureHost("lk-liked841"); if (!host) return;
-    lCloset = (typeof savedLooks !== "undefined" ? savedLooks : []).filter(function (l) { return l && l.verdict === "like"; });
+    /* .86.67: icon looks he added with the old "Add to lookbook" button were saved without a verdict; they count as liked */
+    lCloset = (typeof savedLooks !== "undefined" ? savedLooks : []).filter(function (l) { return l && (l.verdict === "like" || (!l.verdict && /^iconlook-/.test(String(l.id || "")))); });
     lCloset.sort(function (a, b) { return String(b.likedAt || "") < String(a.likedAt || "") ? -1 : 1; });
     lInspo = (window.__enLiked841 && window.__enLiked841.list) ? window.__enLiked841.list() : [];
     var pics = [];
