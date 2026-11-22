@@ -49,7 +49,7 @@ def run(browser):
       const after = { formal: onbodyForLook(formalLook), dressy: onbodyForLook(dressyLook) };
       delete ONBODY.map[core]; delete ONBODY.map[withTie];
       return { formal: [...new Set(formal)].sort(), dressy: [...new Set(dressy)].sort(), before, after,
-        banned: ['c1c3225a0867efce.webp', 'ed7969a72e937a88.webp', '4529bac87ec41ac7.webp'].map(f => onbodyFileBanned('assets/onbody/' + f)) }; }""", CLOSET)
+        banned: ['c1c3225a0867efce.webp', 'ed7969a72e937a88.webp', '4529bac87ec41ac7.webp', '9f5bc4066c18d16a.webp'].map(f => onbodyFileBanned('assets/onbody/' + f)) }; }""", CLOSET)
     # dress loafers only at Formal
     assert out["formal"] == ["bal", "eg"], out["formal"]
     # the rule is Formal's: Nighttime Dressy still takes the other shoes it took before
@@ -58,7 +58,7 @@ def run(browser):
     assert out["before"] == {"formal": None, "dressy": "assets/onbody/notie.webp"}, out["before"]
     assert out["after"] == {"formal": "assets/onbody/tie.webp", "dressy": "assets/onbody/notie.webp"}, out["after"]
     # the three pictures he rejected
-    assert out["banned"] == [True, True, True], out["banned"]
+    assert out["banned"] == [True, True, True, True], out["banned"]   # .86.64: "Awful!!!!!! I'm fat and picture distorted"
     # every Formal picture shipped is keyed with a tie that is in its outfit
     shipped = page.evaluate("""() => fetch('assets/onbody/manifest.json').then(r => r.json()).then(m => m.r.filter(e => /^(991b06032bdc1445|52fa75dc5d42b2f8|f86f8825194e787a|47432458250f4cd3|e3d81b11dce01a39|b45b3642962ed2ae|091f1e1266906656|1cd02ba725268704)\\.webp$/.test(e.f)).map(e => e.k.split('|').length))""")
     assert len(shipped) == 8 and all(n == 5 for n in shipped), shipped
