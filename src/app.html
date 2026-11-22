@@ -10119,8 +10119,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if (statements > 1 || patterns > 1) return null;
     if (shoes.pattern && patterns > 0) return null;
     /* .86.68 (David, 22 Nov 2026, on bright blue trousers with mustard check slippers under a cream blazer: "This
-       could be the ugliest outfit I have ever seen"): loud patterned shoes only with a quiet outfit */
-    if (shoes.pattern && statements > 0) return null;
+       could be the ugliest outfit I have ever seen"): loud patterned shoes never with loud trousers */
+    if (shoes.pattern && !bottom.neutral) return null;   /* bright trousers never meet patterned shoes; a bright tee with checkerboard Vans is his own look */
     if (!shoes.neutral && statements > 0) return null;
     /* Double denim — a denim or chambray shirt over blue jeans. */
     if (bottom.cat === "Jeans" && bottom.fam === "blue" && (top.denim || (layer && layer.denim))) return null;

@@ -281,7 +281,9 @@ def main():
         check("casual unlayered is the majority (>=75%)", cfree["unlayered"] >= 75, cfree)
         check("casual has plenty of T-shirt + jeans/trousers (>=25%)", cfree["teeBottom"] >= 25, cfree)
         check("daytime includes shorts on a warm day (>=5%)", cfree["shorts"] >= 5, cfree)
-        check("nighttime casual deals no shorts", sfree["shorts"] == 0, sfree)
+        # .86.68 (David, 22 Nov 2026, his "casual hibachi dinner" look in shorts, then "Yes, that split"): Evening
+        # Casual may deal shorts; it never deals a blazer
+        check("evening casual deals no blazer", not any(k in ("blazer", "suit") for k in (sfree.get("layers") or {})), sfree)
         check("smart-casual short-sleeve is the majority (>=60%)", sfree["ss"] >= 60, sfree)
         check("smart-casual unlayered is the majority (>=70%)", sfree["unlayered"] >= 70, sfree)
         check("smart-casual has T-shirt + jeans/trousers (>=20%)", sfree["teeBottom"] >= 20, sfree)
@@ -353,7 +355,7 @@ def main():
                 if sf.get("n"):
                     check("%s smart-casual unlayered majority (>=55%%)" % label, sf.get("unlayered", 0) >= 55, sf)
                     check("%s smart-casual 0 pool slides outside pool" % label, sf.get("poolSlide", 0) == 0, sf)
-                    check("%s nighttime casual deals no shorts" % label, sf.get("shorts", 0) == 0, sf)
+                    check("%s evening casual deals no blazer" % label, not any(k in ("blazer", "suit") for k in (sf.get("layers") or {})), sf)   # .86.68: shorts are allowed now
 
         # Polo classification: a knit short-sleeve polo is not treated as long-sleeve
         polo = pg.evaluate("""() => {
