@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.48" />
+    <meta name="wardrobe-build" content="2026-11-22.86.49" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -5502,6 +5502,14 @@ window.notMenswear853 = function (e) {
         -webkit-mask: var(--thumb-up) center / contain no-repeat; mask: var(--thumb-up) center / contain no-repeat;
       }
       .cf-actions [data-cf-dislike]::before { -webkit-mask-image: var(--thumb-down); mask-image: var(--thumb-down); }
+      /* .86.49 (David, 22 Nov 2026: "Thumbs up and down still off centered", then "you haven't fixed the placement
+         of the thumbs in the icons!!!!!!"). These buttons are also chips, and every chip's ::before is stretched
+         into a 44px-wide tap strip pinned to its left edge. The thumb is drawn in that same ::before, so it sat
+         7px right of the middle of its 32px circle. The thumb's box is its own size again, laid out in the middle. */
+      .cf-actions [data-cf-like]::before, .cf-actions [data-cf-dislike]::before, .thumb-btn::before {
+        position: static !important; left: auto !important; right: auto !important; top: auto !important;
+        min-width: 0 !important; transform: none !important; margin: 0 !important; flex: 0 0 auto;
+      }
       /* ================= Build .78.4b — Home hero: two layers =================
          Background layer (#hero-bg): today the same render, full-bleed,
          blurred once and scaled past its blurred edges; replaceable by a
@@ -6902,12 +6910,15 @@ window.notMenswear853 = function (e) {
       html[data-lkm="inspo"] #pv-pills [data-pv-clear="lens"] { display: none !important; }
       /* the avatar on a Liked or Go-to card fits its box, as on Outfits (it was drawn at full size and cropped to head and chest) */
       .lk-card841 .cf-media > .mine-avatar { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
-      .lk-card841 .cf-media > .lk-nophoto843 { display: block; width: 100%; height: 100%; background: #F6F2EA; }
-      .lk-card841 .cf-media > .lk-sw843 { display: flex; flex-direction: column; width: 100%; height: 100%; border-radius: inherit; overflow: hidden; }
-      .lk-sw843 .lk-swb843 { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 1px; padding: 0 12px; text-align: left; color: #1f1a15; }
-      .lk-sw843 .lk-swb843.dk { color: #fbf7ee; }
-      .lk-sw843 .lk-swb843 b { font: 600 11.5px/1.2 var(--sans, inherit); letter-spacing: .02em; }
-      .lk-sw843 .lk-swb843 i { font: 400 10.5px/1.2 var(--sans, inherit); font-style: normal; opacity: .78; }
+      .lk-nopic849 { margin: 14px 16px 0; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); padding: 0 14px; }
+      .lk-nopic849 > summary { min-height: 48px; display: flex; align-items: center; font-size: 13.5px; font-weight: 600; color: var(--dim); cursor: pointer; }
+      .lk-nopic849 > summary::-webkit-details-marker { display: none; }
+      .lk-nopic849 > summary { list-style: none; justify-content: space-between; }
+      .lk-nopic849 > summary::after { content: ""; width: 8px; height: 8px; margin: 0 4px 3px 12px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); }
+      .lk-nopic849[open] > summary::after { transform: rotate(225deg); margin-bottom: -3px; }
+      .lk-np849 { display: flex; align-items: center; gap: 10px; min-height: 48px; border-top: 1px solid var(--border); }
+      .lk-np849 .lk-npt849 { flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
+      .lk-np849 .lk-npx849 { flex: 0 0 auto; min-height: 36px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: 999px; background: transparent; color: var(--dim); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
       .lk-card841 [data-l841-unlike] { background: var(--ink-btn) !important; color: var(--accent-ink) !important; border-color: var(--ink-btn) !important; }
       .ins-mini841 { display: inline-flex; padding: 2px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border-strong); }
       .ins-mini841 button { height: 30px; padding: 0 11px; border: 0; border-radius: 999px; background: transparent; color: var(--dim); font: inherit; font-size: 12.5px; font-weight: 600; white-space: nowrap; cursor: pointer; }
@@ -8683,7 +8694,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.48</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.49</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11921,7 +11932,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.48";
+var WARDROBE_BUILD = "2026-11-22.86.49";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -45527,25 +45538,79 @@ window.inspoView = "withmine";
     try { if (typeof window.flatlayHTML841 === "function") return window.flatlayHTML841(look, true, true); } catch (e) {}
     return "";
   }
-  /* .86.43 (David: "Fix - on liked"): 20 of his 24 liked looks are old photo looks: a mirror photo of him (never
-     shown; no selfies in the app), a colour palette and no piece list. Their card showed only the watch. A liked
-     card now shows, in order: him in the on-body render, the look's pieces, or the look's own colours with what
-     each one is. Never a watch on its own. */
-  function swatchCard(look) {
-    var sw = (look && Array.isArray(look.swatches) ? look.swatches : []).filter(function (x) { return x && /^#[0-9a-f]{6}$/i.test(String(x.hex || "")); }).slice(0, 5);
-    if (!sw.length) return '<span class="lk-nophoto843" aria-hidden="true"></span>';
-    return '<span class="lk-sw843" role="img" aria-label="' + E(sw.map(function (x) { return (x.name || "") + " " + String(x.role || "").toLowerCase(); }).join(", ")) + '">' + sw.map(function (x) {
-      var h = String(x.hex), r = parseInt(h.slice(1, 3), 16), g = parseInt(h.slice(3, 5), 16), bl = parseInt(h.slice(5, 7), 16);
-      var dark = (0.299 * r + 0.587 * g + 0.114 * bl) < 150;
-      return '<span class="lk-swb843' + (dark ? " dk" : "") + '" style="background:' + E(h) + '"><b>' + E(x.role || "") + "</b><i>" + E(x.name || "") + "</i></span>";
-    }).join("") + "</span>";
+  /* .86.49 (David, 22 Nov 2026: "Liked section has color swatches makes NO sense pls fix this now", then
+     "Liked looks still showing palettes"). 20 of his 24 liked looks are old photo looks: a mirror picture of
+     him (never shown; no selfies in the app), a list of colours and no pieces. .86.43 drew those colours as
+     bands. Never again: a liked card shows him in the on-body render, or the look's pieces, or the pieces from
+     his closet that the look names (each one must be a real match: the same piece by name, or the same kind of
+     garment in the same colour). A look where that fails has no picture; it is listed by name under the cards. */
+  function rgb849(h) { h = String(h || ""); return /^#[0-9a-f]{6}$/i.test(h) ? [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)] : null; }
+  function colourGap849(a, b) {
+    a = rgb849(a); b = rgb849(b); if (!a || !b) return 999;
+    var rm = (a[0] + b[0]) / 2, dr = a[0] - b[0], dg = a[1] - b[1], db = a[2] - b[2];
+    return Math.sqrt((2 + rm / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rm) / 256) * db * db);
   }
+  /* which closet shelf a garment name belongs to; "" = an accessory the card can do without; null = unknown */
+  function shelfFor849(role) {
+    var r = String(role || "").toLowerCase();
+    if (/pocket square|watch|sunglass|scarf|\bhat\b|\bcap\b|\bbag\b|sock/.test(r)) return "";
+    if (/belt/.test(r)) return "Belts";
+    if (/\btie\b/.test(r)) return "Ties";
+    if (/vest|gilet/.test(r)) return "Vests";
+    if (/blazer|sport coat|suit jacket/.test(r)) return "Blazers";
+    if (/jacket|bomber|coat/.test(r)) return "Jackets";
+    if (/polo/.test(r)) return "Polos";
+    if (/\btee\b|t-shirt/.test(r)) return "Tees";
+    if (/shirt/.test(r)) return "Shirts";
+    if (/jeans|denim/.test(r)) return "Jeans";
+    if (/shorts/.test(r)) return "Shorts";
+    if (/chino|trouser|pants|slacks/.test(r)) return "Trousers";
+    if (/loafer|boot|sneaker|shoe|trainer|derby|espadrille|slipper|moccasin/.test(r)) return "Shoes";
+    if (/knit|sweater|zip|crew|roll-neck|turtleneck|cardigan|jumper/.test(r)) return "Sweaters";
+    return null;
+  }
+  var CLOSE849 = 40;
+  function closetPieces849(look) {
+    var sw = (look && Array.isArray(look.swatches)) ? look.swatches : [];
+    var all = (typeof wardrobeItems !== "undefined" && Array.isArray(wardrobeItems)) ? wardrobeItems.filter(function (i) { return i && i.photo && !(typeof isCameraSelfieImg === "function" && isCameraSelfieImg(i.photo)); }) : [];
+    if (!sw.length || !all.length) return null;
+    var out = [], used = {}, top = false, bottom = false, failed = false;
+    sw.forEach(function (x) {
+      if (failed || !x) return;
+      var role = String(x.role || "").toLowerCase().trim();
+      var hit = all.filter(function (i) { return !used[i.id] && String(i.name || "").toLowerCase().trim() === role; })[0] || null;
+      var shelf = hit ? hit.category : shelfFor849(role);
+      if (shelf === "") return;
+      var extra = shelf === "Belts" || shelf === "Ties";
+      if (!hit && shelf) {
+        var kind = (role.match(/loafer|boot|sneaker|slipper|espadrille/) || [""])[0];
+        var best = null, bd = 1e9;
+        all.forEach(function (i) {
+          if (used[i.id] || i.category !== shelf) return;
+          if (kind && String(i.name || "").toLowerCase().indexOf(kind) === -1) return;
+          var d = colourGap849(x.hex, i.colourHex);
+          if (d < bd) { bd = d; best = i; }
+        });
+        if (best && bd <= CLOSE849) hit = best;
+      }
+      if (!hit) { if (!extra) failed = true; return; }
+      used[hit.id] = 1; out.push(hit);
+      if (/Polos|Tees|Shirts|Sweaters|Blazers|Jackets|Vests/.test(hit.category)) top = true;
+      if (/Trousers|Jeans|Shorts/.test(hit.category)) bottom = true;
+    });
+    return (!failed && top && bottom) ? out : null;
+  }
+  window.likedClosetPieces849 = closetPieces849;
+  /* "" = this liked look has nothing true to show (it goes in the list under the cards) */
   function likedMedia(look) {
     try {
       if (typeof onbodyForLook === "function" && onbodyForLook(look)) return media(look);
-      if (look && look.fwPieces && look.fwPieces.length && typeof window.flatlayHTML841 === "function") return window.flatlayHTML841(look, true, true);
+      if (typeof window.flatlayHTML841 !== "function") return "";
+      if (look && look.fwPieces && look.fwPieces.length) return window.flatlayHTML841(look, true, true);
+      var mine = closetPieces849(look);
+      if (mine) return window.flatlayHTML841(Object.assign({}, look, { fwPieces: mine }), true, true);
     } catch (e) {}
-    return swatchCard(look);
+    return "";
   }
   function mediaSplit(look) {
     try { if (typeof window.flatlayHTML841 === "function") return window.flatlayHTML841(look, false, false); } catch (e) {}
@@ -45559,16 +45624,13 @@ window.inspoView = "withmine";
     var nm = function (i) { return typeof composerPieceTitle === "function" ? composerPieceTitle(i) : i.name; };
     return up && lo ? nm(up) + " & " + nm(lo) : (items[0] ? items[0].name : "Outfit");
   }
+  /* .86.49 (David, 22 Nov 2026: "Click on go-tos is super slow!!!!", then "GO-TOs still loading still SO slow").
+     This used to build the deck of every possible outfit in his closet (874,436 of them with his data, about
+     11 seconds, and kept in memory afterwards) to look up each worn outfit in it. The lookup never produced
+     anything: a worn outfit was either not in the deck or in a shape that could not be read, so every go-to
+     already showed exactly the pieces he logged. It now does that directly and builds nothing. */
   function lookFor(key, items, title) {
-    var look = null;
-    try {
-      var d = typeof composerDeck === "function" ? composerDeck(null, "lk841") : null;
-      var c = d && d.combos ? d.combos.filter(function (x) { return x.key === key; })[0] : null;
-      if (c && typeof composerOutfitToLook === "function") look = composerOutfitToLook(c, 0);
-    } catch (e) { look = null; }
-    if (!look) look = { id: "goto-" + key, title: title, fwPieces: items, composerKey: key };
-    if (title && look) look.title = title;
-    return look;
+    return { id: "goto-" + key, title: title, fwPieces: items, composerKey: key };
   }
   function dateLabel(iso) {
     try { var d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); } catch (e) { return iso; }
@@ -45653,11 +45715,19 @@ window.inspoView = "withmine";
     }
     var h = "";
     if (lCloset.length) {
-      h += '<h3 class="lk-h841">From your closet</h3><div class="options-grid cf-grid lk-grid841">' + lCloset.map(function (l, i) {
-        return '<article class="card option-card cf-card lk-card841"><button type="button" class="cf-media" data-l841-open="' + i + '" aria-label="' + E(l.title || "Outfit") + '">' + likedMedia(l) + "</button>" +
+      /* .86.49: cards for looks with a picture; the rest by name underneath, never as colour bands or an empty card */
+      var pics = [], bare = [];
+      lCloset.forEach(function (l, i) { var m = likedMedia(l); if (m) pics.push([l, i, m]); else bare.push([l, i]); });
+      h += '<h3 class="lk-h841">From your closet</h3>';
+      if (pics.length) h += '<div class="options-grid cf-grid lk-grid841">' + pics.map(function (x) {
+        var l = x[0], i = x[1];
+        return '<article class="card option-card cf-card lk-card841"><button type="button" class="cf-media" data-l841-open="' + i + '" aria-label="' + E(l.title || "Outfit") + '">' + x[2] + "</button>" +
           '<span class="oc-body"><span class="oc-title">' + E(l.title || "Outfit") + "</span></span>" +
           '<span class="cf-actions"><button type="button" class="chip" data-cf-like="0" data-l841-unlike="' + i + '" aria-pressed="true" aria-label="Unlike">Like</button></span></article>';
       }).join("") + "</div>";
+      if (bare.length) h += '<details class="lk-nopic849"' + (pics.length ? "" : " open") + "><summary>" + bare.length + (bare.length === 1 ? " older liked look" : " older liked looks") + " without a picture</summary>" + bare.map(function (x) {
+        return '<div class="lk-np849"><button type="button" class="lk-npt849" data-l841-open="' + x[1] + '">' + E(x[0].title || "Outfit") + '</button><button type="button" class="lk-npx849" data-l841-unlike="' + x[1] + '" aria-label="Unlike ' + E(x[0].title || "Outfit") + '">Unlike</button></div>';
+      }).join("") + "</details>";
     }
     if (lInspo.length) {
       h += '<h3 class="lk-h841">With new pieces</h3><div class="options-grid cf-grid en-grid lk-grid841">' + lInspo.map(function (l, i) {
