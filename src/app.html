@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.50" />
+    <meta name="wardrobe-build" content="2026-11-22.86.51" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8734,7 +8734,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.50</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.51</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9690,7 +9690,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   var TOP_CATS = { "Tees": 1, "Polos": 1, "Shirts": 1, "Button downs": 1, "Sweaters": 1 };
   var BOTTOM_CATS = { "Trousers": 1, "Jeans": 1, "Shorts": 1, "Bathing suits": 1 };
   var LAYER_CATS = { "Blazers": 1, "Suits": 1, "Jackets": 1, "Coats": 1, "Leather jackets": 1, "Vests": 1 };
-  var ACC_CATS = { "Sunglasses": 1, "Hats": 1, "Scarves": 1, "Belts": 1 };
+  var ACC_CATS = { "Sunglasses": 1, "Hats": 1, "Scarves": 1, "Belts": 1, "Ties": 1 };   /* .86.51: ties are dealt only by tieFor851 (Formal, on a shirt under a blazer) */
   var FAMILIES = [
     [/\bnavy\b|midnight|indigo/, "navy", true],
     [/\bblack\b|onyx|jet/, "black", true],
@@ -9797,6 +9797,15 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   function whiteSneaker(s) { return !!s && s.kind === "sneaker" && (s.fam === "white" || s.L >= 85); }
   function keyHash(k) { var h = 2166136261; k = String(k || ""); for (var i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
   /* The belt for one outfit, or null. c = { t, b, s, l, key }; lv = dress level (0 = any). */
+  /* .86.51: the tie for a Formal outfit. One pattern at a time (a patterned tie only on a plain shirt under a
+     plain blazer), never the shirt's own colour, and a steady pick so the same outfit keeps the same tie. */
+  function tieFor851(ties, c) {
+    var busy = !!(c.t.pattern || (c.l && c.l.pattern));
+    var ok = ties.filter(function (t) { return !(busy && t.pattern) && !sameTone(t, c.t, 10); });
+    if (!ok.length) ok = ties.filter(function (t) { return !(busy && t.pattern); });
+    if (!ok.length) ok = ties;
+    return ok[keyHash(c.key) % ok.length];
+  }
   function beltFor(belts, c, lv) {
     if (!belts || !belts.length || !c || !c.s || !c.b) return null;
     if (lv === 1 || lv === 7) return null;                         /* swim; black tie */
@@ -9897,7 +9906,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         if (/linen/.test(n)) { p.lo = 1; p.hi = 5; p.warm = -2; p.kind = "linen"; }
         else if (/seersucker/.test(n)) { p.lo = 3; p.hi = /dress/.test(n) ? 6 : 5; p.warm = -2; }
         else if (/5-pocket|five-pocket|jogger|drawstring/.test(n)) { p.lo = 2; p.hi = 4; }
-        else if (/chino|twill|cotton/.test(n)) { p.lo = 2; p.hi = 5; p.kind = "chinos"; }
+        /* .86.51 (David, 22 Nov 2026: Formal "Doesn't need to be suits tie dressier chinoos and blazer. Do that.
+           Seersucker is more casual."): chinos reach Formal; fitsLevel() says with what. */
+        else if (/chino|twill|cotton/.test(n)) { p.lo = 2; p.hi = 6; p.kind = "chinos"; }
         else if (/dress|wool|flannel|tailored|pleat|tuxedo/.test(n) && !/seersucker/.test(n)) { p.lo = 4; p.hi = /tuxedo/.test(n) ? 7 : 6; p.warm = /flannel|wool/.test(n) ? 1 : 0; }
         else { p.lo = 3; p.hi = 6; }
         if (p.hi === 6 && (p.fam === "navy" || p.fam === "black" || p.fam === "grey") && /dress|tailored|wool|tuxedo/.test(n)) p.hi = 7;
@@ -10109,8 +10120,11 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if (L === 6) {
       if (isDinnerLayer867(layer)) return false;
       if (lk !== "blazer" && lk !== "suit") return false;
-      if (!isFormalTrousers867(bottom)) return false;
       if (typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes)) return false;
+      /* .86.51 (David, 22 Nov 2026): Formal does not need a suit: a blazer, a shirt that takes a tie, and
+         dressier chinos. Seersucker, jeans, linen, drawstring and five-pocket trousers stay below Formal. */
+      if (bottom.kind === "chinos" && !/seersucker|drawstring|jogger|5-pocket|five-pocket|linen/.test(pieceName867(bottom))) return top.kind === "shirt" && !top.casualShirt && !top.shortSleeve;
+      if (!isFormalTrousers867(bottom)) return false;
       return (top.kind === "shirt" && !top.casualShirt) || (top.kind === "polo" && !top.shortSleeve) || (top.kind === "knit" && /turtle|roll/.test(top.n));
     }
     if (L === 7) {
@@ -10436,7 +10450,13 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
          The belt is never random: beltFor() applies David's belt rules. */
       var accPool = this.accsLoose || (this.accsLoose = this.accs.filter(function (a) { return a.kind !== "belts"; }));
       if (lv >= 3) accPool = this.accsNight || (this.accsNight = accPool.filter(function (a) { return a.kind !== "sunglasses" && a.kind !== "hats"; }));
+      /* .86.51 (David, 22 Nov 2026: Formal is "tie dressier chinoos and blazer"): a tie is never a random
+         accessory. It goes on a long-sleeve shirt under a blazer or suit: always at Formal, never below
+         Nighttime Dressy, and never with a tee, polo or knit. The same outfit always gets the same tie. */
+      var ties851 = this.ties851 || (this.ties851 = this.accs.filter(function (a) { return a.kind === "ties"; }));
+      if (ties851.length) accPool = accPool.filter(function (a) { return a.kind !== "ties"; });
       if (accPool.length && rng() < 0.35) acc = accPool[Math.floor(rng() * accPool.length)];
+      if (lv === 6 && ties851.length && pc.t.kind === "shirt" && !pc.t.shortSleeve && pc.l && (pc.l.kind === "blazer" || pc.l.kind === "suit")) acc = tieFor851(ties851, pc);
       var belt = beltFor(this.belts, pc, lv);
       picked.push({ _i: chosen, key: pc.key, ids: pc.ids.slice(), top: pc.t, bottom: pc.b, shoes: pc.s, layer: pc.l, acc: acc, belt: belt, score: pc.score, mask: pc.mask, tuck: pc.tuck, tucked: pc.tuck, tuckPrompt: pc.tuckPrompt });
     }
@@ -11995,7 +12015,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.50";
+var WARDROBE_BUILD = "2026-11-22.86.51";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
