@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.69" />
+    <meta name="wardrobe-build" content="2026-11-22.86.70" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -7333,6 +7333,8 @@ window.notMenswear853 = function (e) {
       }
       /* Profile sizes: a label that runs to two lines ("Sweater / knit size") pushed its box below its neighbour's */
       .profile-grid > div { display: flex; flex-direction: column; justify-content: flex-end; }
+      .dm-filters869 { display: flex; gap: 8px; margin: 8px 0 10px; }
+      .dm-filters869 select { flex: 1 1 0; min-width: 0; height: 38px; border-radius: 999px; border: 1px solid var(--border-strong, #cfc6b8); background: var(--surface, #fffdf8); color: inherit; padding: 0 12px; font: inherit; font-size: 13px; }
       .ins-look868 { padding: 0; border: 0; background: none; border-radius: 12px; overflow: hidden; display: block; cursor: pointer; }
       .ins-look868 img { display: block; width: 100%; height: 100%; object-fit: cover; }
       .look-sheet868-img { display: block; width: 100%; max-height: 62vh; object-fit: cover; border-radius: 14px; margin: 8px 0; }
@@ -8804,7 +8806,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.69</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.70</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12262,7 +12264,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.69";
+var WARDROBE_BUILD = "2026-11-22.86.70";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -46569,7 +46571,15 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var sh = $("dm-sheet841"); if (!sh || !pick) return;
     var label = (SLOTS.filter(function (s) { return s[0] === pick.slot; })[0] || ["", "piece"])[1].toLowerCase();
     var q = pick.q.toLowerCase();
-    var list = pick.list.filter(function (c) { return !q || pieceName(c).toLowerCase().indexOf(q) !== -1; }).slice(0, 120);
+    /* .86.69 (David: "Should be a drop down toggle in dress me for clothing type and brand!") */
+    function typeOf869(c) { return String((c.own ? c.it.category : (c.e.category || c.e.cat)) || "Other"); }
+    function brandOf869(c) { return String((c.own ? (c.it.brand || "") : (c.e.brand || "")) || "").trim() || "Other"; }
+    var types869 = [], brands869 = [];
+    pick.list.forEach(function (c) { var t = typeOf869(c), b = brandOf869(c); if (types869.indexOf(t) === -1) types869.push(t); if (brands869.indexOf(b) === -1) brands869.push(b); });
+    types869.sort(); brands869.sort(function (a, b) { return a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b); });
+    var list = pick.list.filter(function (c) { return (!q || pieceName(c).toLowerCase().indexOf(q) !== -1) && (!pick.type || typeOf869(c) === pick.type) && (!pick.brand || brandOf869(c) === pick.brand); }).slice(0, 120);
+    function sel869(cls, label, opts, cur) { return '<select class="' + cls + '" aria-label="' + label + '"><option value="">' + label + ": all</option>" + opts.map(function (o) { return '<option value="' + E(o) + '"' + (o === cur ? " selected" : "") + ">" + E(o) + "</option>"; }).join("") + "</select>"; }
+    var filters869 = '<div class="dm-filters869">' + sel869("dm-type869", "Type", types869, pick.type || "") + sel869("dm-brand869", "Brand", brands869, pick.brand || "") + "</div>";
     var body = list.length ? '<div class="dm-grid841">' + list.map(function (c, i) {
       return '<button type="button" class="dm-tile841" data-dm-choose="' + pick.list.indexOf(c) + '"><span class="dm-ph841">' + (pieceImg(c) ? '<img src="' + E(pieceImg(c)) + '" alt="" loading="lazy" decoding="async">' : "") + "</span>" +
         '<span class="dm-tn841">' + E(pieceName(c)) + "</span>" + (!c.own && c.e.price ? '<span class="dm-tp841">' + kmoney(c.e.price) + "</span>" : "") + "</button>";
@@ -46577,7 +46587,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var keep = sh.querySelector(".dm-q841"), hadFocus = keep && document.activeElement === keep;
     sh.innerHTML = '<div class="dm-card841"><div class="dm-top841"><h3>' + (pick.from === "mine" ? "Your " : "New ") + E(label) + (label.slice(-1) === "s" ? "" : "s") + "</h3>" +
       '<button type="button" class="dm-x841" data-dm-close aria-label="Close">×</button></div>' +
-      '<input type="search" class="dm-q841" placeholder="Search" value="' + E(pick.q) + '">' + body + "</div>";
+      '<input type="search" class="dm-q841" placeholder="Search" value="' + E(pick.q) + '">' + filters869 + body + "</div>";
     if (hadFocus) { var nq = sh.querySelector(".dm-q841"); if (nq) { nq.focus(); nq.setSelectionRange(nq.value.length, nq.value.length); } }
   }
   function closePicker() { var sh = $("dm-sheet841"); if (sh) sh.hidden = true; R.classList.remove("sheet-lock"); pick = null; }
@@ -46625,6 +46635,11 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (t.closest && t.closest("[data-dm-go]")) { goTryon(); return; }
   });
   document.addEventListener("input", function (e) { if (e.target.classList && e.target.classList.contains("dm-q841") && pick) { pick.q = e.target.value; paintPicker(); } });
+  document.addEventListener("change", function (e) {
+    if (!pick || !e.target.classList) return;
+    if (e.target.classList.contains("dm-type869")) { pick.type = e.target.value || ""; paintPicker(); }
+    else if (e.target.classList.contains("dm-brand869")) { pick.brand = e.target.value || ""; paintPicker(); }
+  });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && pick) closePicker(); });
 
   /* ---------- Inspo: Icons | Dress me ---------- */
