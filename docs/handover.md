@@ -52,6 +52,8 @@ Sections below are as the earlier chat left them, except where this says so.
 
 | 24 | Looking at Home saying "No Formal looks in your closet yet": "Showing NO looks", then "Doesn't need to be suits tie dressier chinoos and blazer. Do that. Seersucker is more casual." | **Built, `.86.51`** (`tests/test_formal851.py`). Formal is now a blazer, a long-sleeve shirt with a tie, dressier chinos and dress shoes; seersucker, drawstring, five-pocket, linen and jeans stay below Formal. A tie is dealt only there. With his data: 2,856 Formal combinations; 9 already have a picture of him, all with the burgundy blazer, and **none of those pictures shows a tie**. Formal pictures with ties still need drawing (item 18). |
 
+| 25 | Screenshot of Home (installed app, Nighttime Dressy) with a dead band of about 90 points between the buttons and the nav: "Too much spacing again between the icons" | **Built, `.86.52`** (`tests/test_homevh852.py`), **not confirmed on his iPhone.** Same fault as 19 Nov (.80.31): Home is sized from `innerHeight`, which in the installed iPhone app can come back a status bar short. I could not reproduce it in a simulated iPhone (buttons sit 10 points above the nav there), so the cause is inferred from his screenshot and the Nov 19 notes. Now, in the installed app in portrait, `screen.height` is used when `innerHeight` is short of it by 70px or less, and the height is measured again at 0.3, 1 and 2.5 s and when the app returns to the front. If the band is still there after publishing, ask him for Profile, Cloud & backup, which shows the layout numbers ("Home at launch" and "now"). |
+
 ## 1. Where things stand
 
 - **Live app:** build `2026-11-21.86.48`. `main` and `preview` were both at
