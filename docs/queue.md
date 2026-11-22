@@ -5,20 +5,37 @@ be completed things are getting lost". This is the one list. Every chat keeps
 it current and every reply to David ends with the short version of it.
 `docs/handover.md` has the detail and his exact words for each item.
 
-Last updated: 22 Nov 2026, about 23:40 UTC.
+Last updated: 22 Nov 2026, about 23:50 UTC.
 
 ## Live now
 
-Build `.86.66` (live since about 21:25 UTC, 22 Nov): tees shortened to two
-inches below the waistband (84 pictures), 12 more Evening Sharp outfits, the
-all-navy Giorgio look, the slim grey knit tee.
+Build `.86.66` (live since about 21:25 UTC, 22 Nov).
 
 ## In progress
 
 | # | What | State |
 |---|---|---|
-| 1 | `.86.67`–`.86.69` on `preview` (commit 10741b35): Inspo belts, Add to Looks lands in Liked, icon weights sum to 100, Dress me tuck/hem notes, Home pinned between header and nav, level change re-deals, Evening Casual / Evening Sharp split, loud-colour rules, Ask DONNA page, old Ideas studio redirected | GitHub CI running since 22:58 UTC, then live |
-| 2 | `.86.69` Shop the look fix; `.86.70` Dress me Type/Brand filters, Dress me keeps its place, stalled try-on shows a clock and says when it lost touch | Committed on the session branch; full suite, then preview, then live |
+| 1 | `.86.67`–`.86.71` (everything below under "Done, not live yet") | Full local suite running on the session branch; then `preview`, its CI, then live |
+
+CI on `preview` 10741b35 (`.86.67`–`.86.69`): 58 pass, 1 fail, 5 quarantined.
+The failure was `test_photos787` (outside sites' photos did not load on CI),
+which that same push had taken out of quarantine; it is back in quarantine.
+
+## Done, not live yet
+
+- `.86.67`: Inspo belts; Add to Looks lands in Liked; icon weights share 100;
+  Dress me tuck and hem notes.
+- `.86.68`: Home pinned between header and nav; changing the level re-deals;
+  Evening Casual / Evening Sharp split; loud-colour rules; Ask DONNA page.
+- `.86.69`: old Ideas studio opens The Edit > Inspo; Shop the look fixed.
+- `.86.70`: Dress me Type and Brand dropdowns; Dress me keeps its place when a
+  piece is changed; a stalled Put it on me shows a clock and says when it lost
+  touch.
+- `.86.71`: a linen jacket is a light layer and Evening Casual can wear a
+  casual jacket; 15 swim looks with the Uniqlo white linen shirt; light blue
+  517s show a pressed crease (5 outfit pictures, and the closet picture on the
+  sync server); the Theory Cream Knit Polo is long-sleeved and stays away from
+  swim.
 
 ## Waiting on David
 
@@ -26,13 +43,14 @@ Nothing open.
 
 ## Next, in his order
 
-1. Put it on me: the app now reports a stall, but the cause on the try-on
-   side is not confirmed. It needs one live attempt on his phone after
-   `.86.70` is live; the message he sees says which case it is.
-2. Ask DONNA: answers are untested against the live try-on worker.
-3. More Formal outfits; swim with linen shirts and short-sleeve polos.
-4. Light blue 517s: pressed crease. Linen jacket as a light layer.
-5. Fix bad Home renders and the wrong picture opening on tap (older item).
+1. Put it on me: the cause of the stall is not confirmed. One live attempt
+   after `.86.70` is live; the message shown says which case it is.
+2. Swim with polos: no short-sleeve polo in a quiet colour in his closet
+   (the Theory cream one is long-sleeved). Needs one, or a rule change.
+3. Ask DONNA: answers untested against the live try-on worker.
+4. More Formal outfits.
+5. Linen chore jacket outfits drawn on him (rule is in; pictures are not).
+6. Fix bad Home renders and the wrong picture opening on tap (older item).
 
 ## Done 22 Nov (most recent first)
 
