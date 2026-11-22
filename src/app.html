@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.54" />
+    <meta name="wardrobe-build" content="2026-11-22.86.55" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8736,7 +8736,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.54</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.55</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11397,14 +11397,24 @@ function onbodySrc(key) {
   var src = (key && ONBODY.map[key]) || null;
   return (src && onbodyFileBanned(src)) ? null : src;
 }
+/* .86.55: the same answer is asked for with every batch of outfits; it only changes when the picture list, the
+   closet or the rules change, so it is worked out once per such change (it cost about half a second a time). */
+var onbodyKeysCache855 = { sig: null, v: null };
 function onbodyKeys() {
+  var n = 0, k0;
+  for (k0 in ONBODY.map) n++;
+  var nm = 0;
+  if (typeof wardrobeItems !== "undefined" && wardrobeItems) for (var wi = 0; wi < wardrobeItems.length; wi++) nm += (wardrobeItems[wi].name || "").length + (wardrobeItems[wi].category || "").length;
+  var sig = n + "/" + ((typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems.length : 0) + "/" + nm + "/" + ((window.WardrobeRules && typeof window.WardrobeRules.signature === "function") ? window.WardrobeRules.signature() : "");
+  if (onbodyKeysCache855.sig === sig) return onbodyKeysCache855.v ? Object.assign({}, onbodyKeysCache855.v) : null;
   var out = null;
   for (var k in ONBODY.map) {
     if (onbodyFileBanned(ONBODY.map[k]) || (typeof onbodyKeyBanned866 === "function" && onbodyKeyBanned866(k))) continue;
     if (!out) out = {};
     out[k] = ONBODY.map[k];
   }
-  return out;
+  onbodyKeysCache855 = { sig: sig, v: out };
+  return out ? Object.assign({}, out) : null;
 }
 function onbodyForLook(look) {
   if (!look) return null;
@@ -12033,7 +12043,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.54";
+var WARDROBE_BUILD = "2026-11-22.86.55";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -19298,6 +19308,8 @@ var CAMERA_SELFIE_SET = {};
 })();
 function selfieIdOf(img) {
   if (!img || typeof img !== "string") return "";
+  /* .86.55: a picture stored as data has no file name; do not search a megabyte of it for one */
+  if (img.charCodeAt(0) === 100 && img.slice(0, 5) === "data:") return "";
   var m = String(img).match(/([0-9a-f]{12})\.(?:webp|jpe?g|png)(?:$|\?)/i);
   return m ? m[1].toLowerCase() : "";
 }
@@ -42414,8 +42426,8 @@ function analyzeFilePiece(card, job, ix) {
         resetFeed();
         return;
       }
-      if (tries > 90) { clearInterval(cfWait); cfWait = null; window.__cfNoWorker38 = true; resetFeed(); }
-    }, 250);
+      if (tries > 360) { clearInterval(cfWait); cfWait = null; window.__cfNoWorker38 = true; resetFeed(); }
+    }, 60);   /* .86.55: was every 250 ms; the outfits show as soon as they arrive */
   }
   /* .86.29: two outfits with the same title read as duplicates, so the
      feed shows each title once (rendered looks come first, so the one
@@ -44535,6 +44547,11 @@ window.inspoCutOnError = function (el) {
 function renderInspoOnYou() {
   var host = document.getElementById("panel-onyou");
   if (!host) return;
+  /* .86.55 (David, 22 Nov 2026: "Looks is loading SLOW pls make fast and seamless"). This screen was filled, with
+     full-size pictures written into the page, every time prices refreshed, also while it was hidden; that held
+     the app for about a second just as Looks opened. A hidden screen waits until it is shown (the view switch
+     calls this again after un-hiding it). */
+  if (host.hidden) return;
   var mine = (typeof editBuiltLooks === "function" ? editBuiltLooks() : []).filter(function (l) {
     if (l.home === "mine") return false;
     return l.board && Object.keys(l.board).some(function (k) { return l.board[k] && l.board[k].t === "p"; });
@@ -47881,6 +47898,16 @@ window.inspoView = "withmine";
     s.onerror = function () { loading = false; };
     document.head.appendChild(s);
   };
+  /* .86.55 (David, 22 Nov 2026: "Looks is loading SLOW pls make fast and seamless"). The outfit dealer runs in the
+     background, but it was only started by the first tap on Looks and then needed a few seconds to get ready,
+     so Looks sat on grey placeholders. It is now started quietly once Home has shown and the app is idle, so
+     the outfits are already waiting when he taps Looks. */
+  (function () {
+    var done = false;
+    function warm() { if (done) return; done = true; try { window.endlessLoad81(); } catch (e) {} }
+    function soon() { setTimeout(function () { (window.requestIdleCallback || function (f) { return setTimeout(f, 200); })(warm, { timeout: 2500 }); }, 900); }
+    if (window.__appRan850) soon(); else document.addEventListener("wardrobe-app-ran", soon, { once: true });
+  })();
   if (typeof window.switchTab === "function") {
     var _st81 = window.switchTab;
     window.switchTab = function (name) { var r = _st81.apply(this, arguments); if (name === "looks" || name === "ideas" || name === "inspo" || name === "liked") window.endlessLoad81(); return r; };
@@ -48933,13 +48960,16 @@ window.inspoView = "withmine";
     /* .86.42 (David): products photographed on a model (e.mdl, tagged in the
        catalogue) stay in the Shop but never in an outfit's item boxes */
     var shop = CATALOG.filter(function (e) { return e && !e.mdl; }).map(catItem).filter(Boolean);
-    var sig = mine.length + "/" + own.length + "/" + shop.length + "/" + mine.map(function (i) { return i.id + (i.nb ? "~nb" : "") + (i.notes ? "~" + i.notes.length : ""); }).join(",");
+    /* .86.55: Outfits (Mine) only shows outfits pictured on him, so the worker is told which those are and
+       builds just them; a new picture changes the list and the data is sent again */
+    var rkeys = (document.getElementById("outfits-mine-view") && typeof onbodyKeys === "function") ? onbodyKeys() : null;
+    var sig = mine.length + "/" + own.length + "/" + shop.length + "/" + mine.map(function (i) { return i.id + (i.nb ? "~nb" : "") + (i.notes ? "~" + i.notes.length : ""); }).join(",") + "/r" + (rkeys ? Object.keys(rkeys).length : "all");
     if (sig === dataSig) return;
     dataSig = sig; ready = false;
     BUF.mine = []; BUF.withmine = []; BUF.allnew = [];
     gen.mine++; gen.withmine++; gen.allnew++;
     var rules = (typeof window.WardrobeRules !== "undefined" && window.WardrobeRules.getActive) ? window.WardrobeRules.getActive() : [];
-    W.postMessage({ type: "data", mine: mine, own: own, shop: shop, icons: iconsLite(), plates: platesLite(), gaps: gapsLite(), rules: rules });
+    W.postMessage({ type: "data", mine: mine, own: own, shop: shop, icons: iconsLite(), plates: platesLite(), gaps: gapsLite(), rules: rules, renderKeys: rkeys });
   }
   function level() { return (typeof studioTypeAny !== "undefined" && studioTypeAny) ? null : ((typeof formalityLevel !== "undefined") ? formalityLevel : 4); }
   var WANT = { mine: 24, withmine: 24, allnew: 24 };
@@ -49892,7 +49922,13 @@ function setData(d) {
   OWN.forEach(function (p) { STYLE_FAM[p.fam] = (STYLE_FAM[p.fam] || 0) + 1; });
   if (self.WardrobeRules && self.WardrobeRules.setActive) self.WardrobeRules.setActive(d.rules || []);
   var sig = (d.mine || []).map(function (i) { return i.id + "~" + i.category + "~" + i.name + "~" + i.colourHex + (i.nb ? "~nb" : "") + (i.notes ? "~" + i.notes.length : ""); }).join("\n");
-  if (sig !== mineSig) { mineSig = sig; mineDeck = (d.mine && d.mine.length >= 3) ? C.build(d.mine) : null; }
+  /* .86.55 (David, 22 Nov 2026: "Looks is loading SLOW pls make fast and seamless"). Outfits shows only outfits that
+     have a picture of him, but this built every combination in the closet first (874,436 with his data) and
+     only then answered; that was most of the wait on Looks. When the page sends the list of pictured outfits,
+     only those are built: the same outfits reach the screen. */
+  var rk = (d.renderKeys && typeof d.renderKeys === "object") ? d.renderKeys : null;
+  if (rk) sig += "\n#rendered:" + Object.keys(rk).length + ":" + Object.keys(rk).sort().join(",").length;
+  if (sig !== mineSig) { mineSig = sig; mineDeck = (d.mine && d.mine.length >= 3) ? C.build(d.mine, rk) : null; }
 }
 
 /* ---------- mine: the composer Deck, as composerLooks deals ---------- */
