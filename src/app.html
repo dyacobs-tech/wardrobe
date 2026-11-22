@@ -48945,7 +48945,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       });
       levels.setAttribute("aria-disabled", w.mode === "all" ? "true" : "false");
     }
-    var map = w.mode === "all" ? w.all : (w.byLevel[cwLevel] || w.all);
+    var map = normalized867(Object.assign({}, w.mode === "all" ? w.all : (w.byLevel[cwLevel] || w.all)));
     var h = "";
     icons().forEach(function (ic) {
       var val = clampW(map[ic.id] != null ? map[ic.id] : MID);
@@ -48959,14 +48959,44 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     });
     host.innerHTML = h || '<p class="cw-note">Icons are still loading\u2026</p>';
   }
+  /* .86.67 (David, 22 Nov 2026: "Slider weightings don't work they should add to 100 no?"): the icons share
+     100%. Moving one slider moves the others in proportion so the total stays exactly 100. */
+  function share867(map, id, val) {
+    var ids = icons().map(function (ic) { return ic.id; });
+    if (ids.indexOf(id) === -1) ids.push(id);
+    var others = ids.filter(function (x) { return x !== id; });
+    var out = {}; out[id] = val;
+    var rest = 0; others.forEach(function (x) { rest += Math.max(0, +(map[x] != null ? map[x] : MID) || 0); });
+    var left = 100 - val;
+    others.forEach(function (x) {
+      var o = Math.max(0, +(map[x] != null ? map[x] : MID) || 0);
+      out[x] = rest > 0 ? Math.round(o * left / rest) : (others.length ? Math.round(left / others.length) : 0);
+    });
+    /* rounding: put the remainder on the largest other share */
+    var tot = 0; ids.forEach(function (x) { tot += out[x]; });
+    if (tot !== 100 && others.length) {
+      var big = others.slice().sort(function (a, b) { return out[b] - out[a]; })[0];
+      out[big] = Math.max(0, out[big] + (100 - tot));
+    }
+    Object.keys(out).forEach(function (x) { map[x] = out[x]; });
+    return map;
+  }
+  function normalized867(map) {
+    var ids = icons().map(function (ic) { return ic.id; }), tot = 0;
+    ids.forEach(function (x) { tot += Math.max(0, +(map[x] != null ? map[x] : MID) || 0); });
+    if (!ids.length || tot === 100) return map;
+    var first = ids[0];
+    return share867(map, first, tot > 0 ? Math.round(Math.max(0, +(map[first] != null ? map[first] : MID) || 0) * 100 / tot) : Math.round(100 / ids.length));
+  }
+  window.iconShare867 = share867;
   function setSlider(id, val) {
     var w = loadWeights();
     val = clampW(val);
     if (w.mode === "all") {
-      w.all[id] = val;
-      GROUP_ORDER.forEach(function (g) { w.byLevel[g][id] = val; });
+      share867(w.all, id, val);
+      GROUP_ORDER.forEach(function (g) { w.byLevel[g] = Object.assign({}, w.byLevel[g] || {}, w.all); });
     } else {
-      w.byLevel[cwLevel][id] = val;
+      w.byLevel[cwLevel] = share867(Object.assign({}, w.byLevel[cwLevel] || w.all), id, val);
     }
     saveWeights(w);
     paintWeights();
