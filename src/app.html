@@ -20197,6 +20197,17 @@ function setFormality(level, opts) {
      (Dress-for macros, a parsed brief, restore). */
   if (changed) {
     try { if (typeof window.clearHeroLookahead === "function") window.clearHeroLookahead(); } catch (e) {}
+    /* .86.68 (David, 22 Nov 2026, Looks > Outfits at Evening Casual showing blazers: "Evening casual shouldn't
+       have blazer!!!!!!!"): a level chosen on Home also re-deals Looks and The Edit, which otherwise kept the
+       outfits dealt for the previous level under the new name */
+    try {
+      if (window.dressLevels838 && window.dressLevels838.get().indexOf(level) === -1) { try { localStorage.setItem("wardrobe.dressLevels838", JSON.stringify([level])); } catch (e1) {} }
+      clearTimeout(window.__lvReset868);
+      window.__lvReset868 = setTimeout(function () {
+        try { if (typeof window.endlessOnWeights81 === "function") window.endlessOnWeights81(); } catch (e2) {}
+        try { if (typeof window.__cfReset81 === "function") window.__cfReset81(); } catch (e3) {}
+      }, 300);
+    } catch (e4) {}
     if (!(opts && opts.silent) && typeof dealAnotherToday === "function" && typeof todayLook !== "undefined" && todayLook) {
       dealAnotherToday();
     }
