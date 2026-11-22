@@ -322,6 +322,10 @@ Quotes are David's.
   the hem sits about two inches below the top of the trousers, covering the
   waistband. 21 pictures shortened with FASHN `edit` (19 kept). Measure: hem
   at about 0.52 of figure height is right; 0.545 and lower is too long.
+- 22 Nov: David likes the French tuck (tee tucked at the front only, the
+  rest hanging; he called it "bleached"). Never untuck or shorten a
+  French-tucked tee; only tees hanging fully loose are shortened. None of
+  the 84 shortened on 22 Nov were French-tucked (checked by eye).
 - A picture is banned by FILE NAME (`ONBODY_REJECTED859`). Never re-save a
   banned picture under a new name: it comes back. Skip banned files in any
   batch redraw.
