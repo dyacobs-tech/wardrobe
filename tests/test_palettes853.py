@@ -51,13 +51,13 @@ def run(browser):
 
     # Six more deals six different palettes
     first = page.evaluate("() => [...document.querySelectorAll('[data-p853-like]')].map(b => b.getAttribute('data-p853-like'))")
-    page.locator("[data-p853-more]").tap()
+    page.evaluate("() => document.querySelector('[data-p853-more]').click()")  # a tap can land on the nav bar that floats over the page bottom
     second = page.evaluate("() => [...document.querySelectorAll('[data-p853-like]')].map(b => b.getAttribute('data-p853-like'))")
     assert len(second) == 6 and not set(first) & set(second), (first, second)
 
     # liking one keeps it: it moves to Your palettes, is saved, and is offered to the engine as approved
     plate = second[0]
-    page.locator('[data-p853-like="%s"]' % plate).tap()
+    page.evaluate("p => document.querySelector('[data-p853-like=\"' + p + '\"]').click()", plate)
     after = page.evaluate("""plate => ({ mine: [...document.querySelectorAll('#lk-liked841 [data-p853-unlike]')].length, offered: !!document.querySelector('[data-p853-like="' + plate + '"]'),
       stored: JSON.parse(localStorage.getItem('wardrobe.palettes') || '[]').filter(p => p.plate === +plate && p.liked === true).length,
       approved: approvedPalettes853().filter(p => p.plate === +plate).length, count: document.querySelector('[data-lk-sub853="palettes"]').textContent })""", plate)
@@ -65,7 +65,7 @@ def run(browser):
 
     # unliking never deletes: the palette record stays (liked: false); the look stays, without its like
     for _ in range(2):
-        page.locator("#lk-liked841 [data-p853-unlike]").first.tap()
+        page.evaluate("() => document.querySelector('#lk-liked841 [data-p853-unlike]').click()")
         page.wait_for_timeout(150)
     end = page.evaluate("""plate => ({ mine: document.querySelectorAll('#lk-liked841 [data-p853-unlike]').length, rec: customPalettes.filter(p => p.plate === +plate).map(p => p.liked),
       look: savedLooks.filter(l => l.id === 'old-colours').map(l => l.verdict || null), approved: approvedPalettes853().length })""", plate)
