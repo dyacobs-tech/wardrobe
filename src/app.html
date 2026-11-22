@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.68" />
+    <meta name="wardrobe-build" content="2026-11-22.86.69" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8799,7 +8799,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.68</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.69</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12257,7 +12257,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.68";
+var WARDROBE_BUILD = "2026-11-22.86.69";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -35936,6 +35936,14 @@ function deferHeavy38(key, fn, hasContent) {
   });
 }
 function switchTab(name, opts) {
+  /* .86.68 (David: "some page called looks - took forever - but isn't shown or linked anywhere!!!! We need to clean
+     this up" and "This is basically linking to an old page concept let's clean this up!!!"): the old Ideas studio
+     ("Give me ideas") is retired. Every way into it now opens The Edit > Inspo. */
+  if (name === "studio" || name === "outfitideas") {
+    switchTab("inspo");
+    setTimeout(function () { try { var b = document.querySelector('[data-ins-seg="ideas"]'); if (b) b.click(); } catch (e868) {} }, 0);
+    return;
+  }
   /* Consolidated destinations: the old Queue and Yours pages are
      states and filters inside My Looks now — old links and stored
      tabs land there. */
