@@ -43380,6 +43380,7 @@ function tryonErrorText(status, body) {
   var err = body && body.error;
   if (status === 401) return "Turn on sync in Profile first — try-on uses the same account.";
   if (err === "not_configured") return "Try-on isn't switched on yet. It will work as soon as the render service is connected.";
+  if (err === "timeout") return "The try-on service didn't answer. Try again in a minute.";
   if (err === "daily_cap") return "That's today's try-on limit. It resets overnight.";
   if (err === "garment_image") return "Couldn't read that product's photo. Try another listing.";
   if (body && body.message) return body.message;
@@ -43390,9 +43391,14 @@ function tryonErrorText(status, body) {
 function tryonJob(itemsPromise, onState, isLive, meta) {
   var started = Date.now();
   function live() { return !isLive || isLive(); }
+  /* .86.70 (David: "When I press Put it on me button in dress me it is not loading", stuck on "Dressing you —
+     piece 1 of 4..."): the wait shows the time running, the first request gives up after 90 seconds, and
+     repeated failed checks say so instead of retrying silently for 8 minutes */
+  var fails870 = 0, last870 = null;
+  function took870() { var s = Math.round((Date.now() - started) / 1000); return s < 10 ? "" : " · " + Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
   function stepText(j) {
-    if (!j || j.steps <= 1) return "Putting it on you… about 20 seconds.";
-    return "Dressing you — piece " + Math.max(1, j.step) + " of " + j.steps + "…";
+    if (!j || j.steps <= 1) return "Putting it on you… about 20 seconds." + took870();
+    return "Dressing you — piece " + Math.max(1, j.step) + " of " + j.steps + "…" + took870();
   }
   Promise.resolve(itemsPromise).then(function (items) {
     if (!live()) return;
@@ -43418,20 +43424,31 @@ function tryonJob(itemsPromise, onState, isLive, meta) {
           var j = x.body;
           if (j.status === "done" && j.resultUrl) { finish(j); return; }
           if (j.status === "failed") { onState("error", j.note || "Couldn't render that one."); return; }
+          fails870 = 0; last870 = j;
           onState("loading", stepText(j));
           setTimeout(function () { poll(id); }, 3000);
         })
-        .catch(function () { if (live()) setTimeout(function () { poll(id); }, 5000); });
+        .catch(function () {
+          if (!live()) return;
+          if (++fails870 >= 8) { onState("error", "Lost touch with the try-on service. Check your connection and try again."); return; }
+          onState("loading", stepText(last870));
+          setTimeout(function () { poll(id); }, 5000);
+        });
     }
     onState("loading", stepText({ steps: items.length, step: 1 }));
-    return fetch(TRYON_URL + "/tryon", { method: "POST", headers: headers, body: JSON.stringify({ items: items }) })
-      .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+    var ac870 = typeof AbortController === "function" ? new AbortController() : null;
+    var tm870 = ac870 ? setTimeout(function () { ac870.abort(); }, 90000) : null;
+    var tick870 = setInterval(function () { if (!live()) { clearInterval(tick870); return; } onState("loading", stepText({ steps: items.length, step: 1 })); }, 5000);
+    return fetch(TRYON_URL + "/tryon", { method: "POST", headers: headers, body: JSON.stringify({ items: items }), signal: ac870 ? ac870.signal : undefined })
+      .then(function (r) { clearTimeout(tm870); clearInterval(tick870); return r.json().then(function (b) { return { status: r.status, body: b }; }); },
+            function (err) { clearTimeout(tm870); clearInterval(tick870); if (err && err.name === "AbortError") return { status: 504, body: { error: "timeout" } }; throw err; })
       .then(function (x) {
         if (!live()) return;
         if (x.status !== 200 && x.status !== 202) { onState("error", tryonErrorText(x.status, x.body)); return; }
         var j = x.body;
         if (j.status === "done" && j.resultUrl) { finish(j); return; }
         if (j.status === "failed") { onState("error", j.note || "Couldn't render that one."); return; }
+        last870 = j;
         onState("loading", stepText(j));
         setTimeout(function () { poll(j.id); }, 2500);
       });
@@ -46564,6 +46581,9 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       sh = document.createElement("div"); sh.id = "dm-sheet841"; sh.className = "dm-sheet841"; sh.setAttribute("role", "dialog"); sh.setAttribute("aria-modal", "true");
       document.body.appendChild(sh);
     }
+    /* .86.70 (David: "When I tried to change an item In dress me it didn't work and navigated me back to Prev
+       page"): lock the page where he is, not at the top, and put him back there when the picker closes */
+    if (pickY870 === null) { pickY870 = window.scrollY || 0; R.style.setProperty("--lock-top", (-pickY870) + "px"); }
     sh.hidden = false; R.classList.add("sheet-lock");
     paintPicker();
   }
@@ -46590,7 +46610,14 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       '<input type="search" class="dm-q841" placeholder="Search" value="' + E(pick.q) + '">' + filters869 + body + "</div>";
     if (hadFocus) { var nq = sh.querySelector(".dm-q841"); if (nq) { nq.focus(); nq.setSelectionRange(nq.value.length, nq.value.length); } }
   }
-  function closePicker() { var sh = $("dm-sheet841"); if (sh) sh.hidden = true; R.classList.remove("sheet-lock"); pick = null; }
+  var pickY870 = null;
+  function closePicker() {
+    var sh = $("dm-sheet841"); if (sh) sh.hidden = true;
+    var y = pickY870; pickY870 = null;
+    if (!(window.sheetLockedY782 && window.sheetLockedY782() !== null)) { R.classList.remove("sheet-lock"); R.style.removeProperty("--lock-top"); }
+    if (y !== null) { window.scrollTo(0, y); requestAnimationFrame(function () { if (Math.abs((window.scrollY || 0) - y) > 2) window.scrollTo(0, y); }); }
+    pick = null;
+  }
 
   /* ---------- Put it on me ---------- */
   function goTryon() {
