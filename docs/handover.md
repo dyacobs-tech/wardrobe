@@ -42,6 +42,14 @@ Sections below are as the earlier chat left them, except where this says so.
   a mirror picture of him, with pieces he does not own). They are listed by
   name under the Liked cards.
 
+### New from David, 22 Nov 2026 (after the update above). None of this is built.
+
+| # | His words | Notes |
+|---|---|---|
+| 21 | "We should create a section for "liked" palettes - in its own place, in liked, let's have palettes as its own sub page" | Liked gets two sub pages: Looks and Palettes. The app has no way to like a palette today and no saved list of liked palettes. Every liked look carries its own colours (`swatches`); the 17 liked looks with no picture are colours only, so they belong on Palettes. Palettes is the one place colour bands are right; the Looks sub page still never shows them. |
+| 22 | "I feel like this is creating outfits from my wardrobe ONLY not creating any new ideas for me. We need to be able to create new outfit concepts (DOESNT HAVE TO BE SHOPPABLE) and if I like the designs of the concepts we can try and find the items for sale. Correct? The old app used to do this very well!" then "let's create a sub page in the edit called ideas, whereby it creates new outfit concepts (six at a time) and lets me create six more, I can save down, and so forth." | The old engine is still in the app (`Give me ideas`, `Six more ideas`, the Wada plates, `buildLook`). Item 14 said to remove the old Ideas page: **do not delete that engine**; move it behind a new Ideas sub page in The Edit and remove only the stray links to the old page. A saved concept goes to Liked; "find these for sale" hands its pieces to Shop search. Menswear only. |
+| 23 | "when I open home, there's still a flicker and resizing of the image that pops up. This needs to be totally smooth and elegant with no flickering or framiness." | He wrote this while his phone still ran `.86.48`; the fix is `.86.50` on this branch, unpublished. Checked again with his data at Daytime: the picture's four resizes happen under the cover, and screenshots from 0.3 s to 6 s after Home shows are pixel-identical (Chromium). Needs his OK to publish, then a look on his iPhone. |
+
 ## 1. Where things stand
 
 - **Live app:** build `2026-11-21.86.48`. `main` and `preview` were both at
