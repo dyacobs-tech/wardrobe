@@ -101,6 +101,15 @@ def run(browser):
         else:
             assert re.search(r"white|light blue|pale blue", col), (c["id"], col)
     assert tonal >= 2, tonal
+    # .86.67 (David: "EVERY pant w belt loops should always have a belt - in outfit"): every concept whose
+    # trousers have belt loops lists a belt, and every redrawn concept picture is shipped
+    for c in lib:
+        ps = {p["role"]: p for p in c["pieces"]}
+        b = ps["bottom"]["name"].lower()
+        if not any(w in b for w in ("short", "drawstring", "gurkha", "swim")):
+            assert "belt" in ps, c["id"]
+        if c.get("img"):
+            assert os.path.exists(os.path.join(ROOT, "assets", "inspo-concepts", c["img"] + ".webp")), c["img"]
     assert not errors, errors
     ctx.close()
     print("Confirmed: ties only on white/light blue (or tonal) shirts; wide-leg with tees only; a belt on %d outfits with belt loops" % out["loops"])
