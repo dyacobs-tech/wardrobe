@@ -5,7 +5,7 @@ be completed things are getting lost". This is the one list. Every chat keeps
 it current and every reply to David ends with the short version of it.
 `docs/handover.md` has the detail and his exact words for each item.
 
-Last updated: 22 Nov 2026, about 21:30 UTC.
+Last updated: 22 Nov 2026, about 23:40 UTC.
 
 ## Live now
 
@@ -17,23 +17,28 @@ all-navy Giorgio look, the slim grey knit tee.
 
 | # | What | State |
 |---|---|---|
-| 1 | `.86.67`: the three rejected Home pictures redrawn slim (Armani black tee + faded 517s, Zegna grey knit tee + white jeans, Whitesville navy tee + Bottega slip-ons) | Full suite, then preview, then live |
+| 1 | `.86.67`–`.86.69` on `preview` (commit 10741b35): Inspo belts, Add to Looks lands in Liked, icon weights sum to 100, Dress me tuck/hem notes, Home pinned between header and nav, level change re-deals, Evening Casual / Evening Sharp split, loud-colour rules, Ask DONNA page, old Ideas studio redirected | GitHub CI running since 22:58 UTC, then live |
+| 2 | `.86.69` Shop the look fix; `.86.70` Dress me Type/Brand filters, Dress me keeps its place, stalled try-on shows a clock and says when it lost touch | Committed on the session branch; full suite, then preview, then live |
 
 ## Waiting on David
 
-Nothing open. (22 Nov answers: the tap was on Home; Liked > Palettes is the
-approved palettes list; the 11 held studio renders: he did not follow the
-question, so they stay held and I decide.)
+Nothing open.
 
 ## Next, in his order
 
-1. More Evening Sharp outfits (23 drawn).
-3. Inspo concepts: a belt wherever the trousers have loops.
-4. Page-by-page audit, behaviour items (handover section 3, items 6 to 17).
-5. More Formal outfits; swim with linen shirts and short-sleeve polos.
-6. Light blue 517s: pressed crease. Linen jacket as a light layer.
+1. Put it on me: the app now reports a stall, but the cause on the try-on
+   side is not confirmed. It needs one live attempt on his phone after
+   `.86.70` is live; the message he sees says which case it is.
+2. Ask DONNA: answers are untested against the live try-on worker.
+3. More Formal outfits; swim with linen shirts and short-sleeve polos.
+4. Light blue 517s: pressed crease. Linen jacket as a light layer.
+5. Fix bad Home renders and the wrong picture opening on tap (older item).
 
 ## Done 22 Nov (most recent first)
+
+- Tonight's hibachi look logged (Fliks yellow graphic tee, new Redvanly cream
+  shorts, Vans checkerboard); Armani tee renamed Giorgio Armani Dark Navy Tee
+  and its pictures recoloured; 3 Home pictures redrawn.
 
 - Rust tee recoloured and renamed in the closet: Fedeli Milk Chocolate Tee
   (#8a5a3c), backup taken first, only that record changed.
