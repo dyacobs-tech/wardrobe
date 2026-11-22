@@ -299,6 +299,14 @@ Quotes are David's.
   without my OK, and never recommend women's items."
 - Order of work from here: fixes, then the page-by-page audit, then new
   outfits (section 3).
+- 22 Nov, evening (.86.60, in `tests/test_rules860.py`): "Create a rule I
+  only wear white or light blue shirts with ties. EVER." A faint stripe on a
+  white or light blue base is fine; "All black with black tie could work. Or
+  all navy navy tie". "The WIDE linen pants should ONLY be worn with t
+  shirts." "EVERY pant w belt loops should always have a belt - in outfit".
+  "I don't need 6 burgundy looks for formal." Brown with gold or blue is
+  "awful". Use all his different clothes, "not multiple duplicates": one
+  swim picture per pair of trunks, each with a different tee.
 
 **Going live: the rule is not settled.** On 21 Nov he said "Push live when
 it's ready!!!" and "Yes go live when it's ready". `CLAUDE.md`, written later
