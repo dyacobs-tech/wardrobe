@@ -8455,7 +8455,7 @@ window.notMenswear853 = function (e) {
           <button type="button" class="chip" id="edit-tab-saved" data-edit-view="saved" aria-pressed="true">Saved<span class="n" id="edit-n-saved"></span></button>
           <button type="button" class="chip" id="edit-tab-searches" data-edit-view="searches" aria-pressed="false">Searches<span class="n" id="edit-n-search"></span></button>
           <button type="button" class="chip" id="edit-tab-build" data-edit-view="build" aria-pressed="false">Build</button>
-          <button type="button" class="chip" id="edit-tab-ask" data-edit-view="ask" aria-pressed="false">Ask</button>
+          <button type="button" class="chip" id="edit-tab-ask" data-edit-view="ask" aria-pressed="false">Ask DONNA</button>
           <button type="button" class="chip price-pill" id="price-pill" aria-haspopup="dialog" aria-pressed="false">Price</button>
         </div>
         <div id="edit-v-saved">
@@ -8484,7 +8484,7 @@ window.notMenswear853 = function (e) {
         <div id="edit-v-ask" hidden>
           <div id="ask-thread" aria-live="polite"></div>
           <div class="ask-sugs" id="ask-sugs"></div>
-          <form id="ask-form" autocomplete="off"><input type="text" id="ask-q" aria-label="Ask Vesper" placeholder="Ask Vesper…" maxlength="1000" enterkeyhint="send" autocomplete="off" /><button type="submit" id="ask-send" aria-label="Send" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>
+          <form id="ask-form" autocomplete="off"><input type="text" id="ask-q" aria-label="Ask DONNA" placeholder="Ask DONNA…" maxlength="1000" enterkeyhint="send" autocomplete="off" /><button type="submit" id="ask-send" aria-label="Send" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>
         </div>
 
         <div id="edit-v-curate" hidden>
@@ -45076,7 +45076,7 @@ window.inspoView = "withmine";
   }
   function turnHTML(t) {
     var h = '<div class="ask-turn" data-ask-turn-id="' + esc(t.id) + '"><div class="ask-q">' + esc(t.q) + "</div>";
-    if (t.state === "pending") return h + '<div class="ask-a" aria-live="polite"><span class="ask-dots" aria-label="Vesper is typing"><i></i><i></i><i></i></span></div></div>';
+    if (t.state === "pending") return h + '<div class="ask-a" aria-live="polite"><span class="ask-dots" aria-label="DONNA is typing"><i></i><i></i><i></i></span></div></div>';
     if (t.state === "error") return h + '<p class="ask-a ask-msg">' + esc(t.msg || "That one didn't come through.") + "</p>" +
       (t.code === 429 || t.code === 401 ? "" : '<button type="button" class="chip ask-retry" data-ask-retry="' + esc(t.id) + '">Try again</button>') + "</div>";
     var cards = (t.picks || []).filter(function (p) { return !isDisliked(p.sku); }).map(function (p) { return cardHTML(t, p); }).join("");
@@ -45104,7 +45104,7 @@ window.inspoView = "withmine";
     placeForm();
     var signed = !!(typeof tryonKey === "function" && tryonKey());
     var qEl = document.getElementById("ask-q");
-    if (qEl) qEl.placeholder = signed ? "Ask Vesper…" : "Sign in to ask…";
+    if (qEl) qEl.placeholder = signed ? "Ask DONNA…" : "Sign in to ask…";
     if (!signed) {
       host.innerHTML = '<div class="ask-signedout"><p class="ask-a ask-msg">Ask is ready once this device is signed in. Open Profile to connect, then come back here.</p><button type="button" class="btn-ink" id="ask-goto-profile">Open Profile</button></div>';
     } else {

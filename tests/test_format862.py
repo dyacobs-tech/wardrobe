@@ -52,6 +52,9 @@ def run(browser):
     cells = page.evaluate("""() => [...document.querySelectorAll('#panel-find .outfits-toggle:has(> #edit-tab-saved) > .chip')].filter(e => e.getBoundingClientRect().width > 0)
       .map(e => ({ t: e.textContent.trim(), cut: e.scrollWidth > e.clientWidth + 1, r: Math.round(e.getBoundingClientRect().right) }))""")
     assert len(cells) == 5 and not any(c["cut"] for c in cells) and all(c["r"] <= W for c in cells), cells
+    # .86.68 (David, 22 Nov 2026: "CALL ASK DONNA"): never "Vesper"
+    assert any(c["t"] == "Ask DONNA" for c in cells), cells
+    assert page.evaluate("() => document.getElementById('ask-q').placeholder.indexOf('Vesper') === -1"), "Vesper in the Ask box"
     assert not errors, errors
     ctx.close()
     return tabs, sw
