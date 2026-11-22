@@ -1332,9 +1332,9 @@ function openFindLookMode(look){if(!look)return;if(!shopPiecesForLook(look).leng
 if(lookAllOwned862(look)){routeOwnedLook862(look);return;}
 findLookMode=look;store.set("findLook",look);renderFindLookMode();switchTab("find");try{var pf=document.getElementById("panel-find");if(pf)pf.setAttribute("data-stl","1");var box2=document.getElementById("find-look-mode");if(box2)box2.hidden=false;var lh=document.getElementById("edit-today-look");if(lh)lh.hidden=false;}catch(eOpenStl){}}
 function clearFindLookMode(){findLookMode=null;store.set("findLook",null);renderFindLookMode();}
-window.clearFindLookMode=clearFindLookMode;function syncShopLookToToday(){if(typeof todayLook==="undefined"||!todayLook)return;if(!shopPiecesForLook(todayLook).length)return;if(lookAllOwned862(todayLook)){if(findLookMode){findLookMode=null;store.set("findLook",null);renderFindLookMode();if(typeof window.editShow==="function"){try{window.editShow("saved");}catch(eSh){}}}
+window.clearFindLookMode=clearFindLookMode;function syncShopLookToToday(){if(typeof todayLook==="undefined"||!todayLook)return;if(findLookMode&&!findLookMode.fromToday869)return;if(!shopPiecesForLook(todayLook).length)return;if(lookAllOwned862(todayLook)){if(findLookMode){findLookMode=null;store.set("findLook",null);renderFindLookMode();if(typeof window.editShow==="function"){try{window.editShow("saved");}catch(eSh){}}}
 return;}
-if(findLookMode&&findLookMode.id===todayLook.id&&findLookMode.title===todayLook.title&&lookImg(findLookMode)===lookImg(todayLook))return;findLookMode=JSON.parse(JSON.stringify(todayLook));store.set("findLook",findLookMode);renderFindLookMode();}
+if(findLookMode&&findLookMode.id===todayLook.id&&findLookMode.title===todayLook.title&&lookImg(findLookMode)===lookImg(todayLook))return;findLookMode=JSON.parse(JSON.stringify(todayLook));findLookMode.fromToday869=true;store.set("findLook",findLookMode);renderFindLookMode();}
 var shopPurchases=store.get("shopPurchases",[]);var receiptInbox=[];try{receiptInbox=store.get("receiptInbox",[]);}catch(e){receiptInbox=[];}
 if(!Array.isArray(receiptInbox))receiptInbox=[];function shopEntryKey(e){return(e.brand||"")+"|"+(e.name||"")+"|"+(e.url||"");}
 function shopHash(str){var h=5381;for(var i=0;i<str.length;i++)h=((h*33)^str.charCodeAt(i))>>>0;return h.toString(36)+str.length;}

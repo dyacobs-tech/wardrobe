@@ -7333,6 +7333,11 @@ window.notMenswear853 = function (e) {
       }
       /* Profile sizes: a label that runs to two lines ("Sweater / knit size") pushed its box below its neighbour's */
       .profile-grid > div { display: flex; flex-direction: column; justify-content: flex-end; }
+      .ins-look868 { padding: 0; border: 0; background: none; border-radius: 12px; overflow: hidden; display: block; cursor: pointer; }
+      .ins-look868 img { display: block; width: 100%; height: 100%; object-fit: cover; }
+      .look-sheet868-img { display: block; width: 100%; max-height: 62vh; object-fit: cover; border-radius: 14px; margin: 8px 0; }
+      .look-sheet868-acts { display: flex; gap: 10px; margin-top: 10px; }
+      .look-sheet868-acts > button { flex: 1 1 0; min-height: 44px; }
       .lk-icon867 { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
     </style>
   </head>
@@ -34664,6 +34669,10 @@ window.clearFindLookMode = clearFindLookMode;
    card) stands until the hero next changes. */
 function syncShopLookToToday() {
   if (typeof todayLook === "undefined" || !todayLook) return;
+  /* .86.69 (David: "Shop the look button doesn't work"): a look he chose to shop (an icon's photo, a card) stays
+     until he closes it; only a look carried in from Home follows Home. Opening the Shop tab used to swap it for
+     Home's outfit (or clear it when that outfit was all his own), so Shop opened empty. */
+  if (findLookMode && !findLookMode.fromToday869) return;
   if (!shopPiecesForLook(todayLook).length) return;
   /* .86.2: an all-owned look on Home is never carried into Shop, and
      an earlier carried look is let go rather than left standing stale,
@@ -34677,6 +34686,7 @@ function syncShopLookToToday() {
   }
   if (findLookMode && findLookMode.id === todayLook.id && findLookMode.title === todayLook.title && lookImg(findLookMode) === lookImg(todayLook)) return;
   findLookMode = JSON.parse(JSON.stringify(todayLook));
+  findLookMode.fromToday869 = true;
   store.set("findLook", findLookMode);
   renderFindLookMode();
 }
@@ -46004,11 +46014,31 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var L = (ic.looks || []).slice(0, 3), pal = (ic.palette || []).slice(0, 6), w = weightOf(ic.id);
     box.innerHTML = '<div class="ins-ich841"><div><b>' + E(ic.name || ic.id) + "</b>" + (ic.lane ? "<span>" + E(ic.lane) + "</span>" : "") + "</div>" +
       '<button type="button" class="ins-x841" data-ins-clear aria-label="Back to all your icons">×</button></div>' +
-      (L.length ? '<div class="ins-strip841">' + L.map(function (l) { return '<img src="' + E(l.img || l.src || "") + '" alt="' + E(l.caption || "") + '" loading="lazy" decoding="async">'; }).join("") + "</div>" : "") +
+      (L.length ? '<div class="ins-strip841">' + L.map(function (l, li) { return '<button type="button" class="ins-look868" data-ins-look868="' + E(ic.id) + '" data-look-idx="' + li + '" aria-label="' + E(l.caption || "Look") + '"><img src="' + E(l.img || l.src || "") + '" alt="' + E(l.caption || "") + '" loading="lazy" decoding="async"></button>'; }).join("") + "</div>" : "") +
       (pal.length ? '<div class="ins-pal841">' + pal.map(function (c) { return '<i style="background:' + E(typeof c === "string" ? c : (c.hex || "")) + '"></i>'; }).join("") + "</div>" : "") +
       '<label class="ins-wt841"><span>His weight in your looks</span><input type="range" min="0" max="100" step="1" value="' + w + '" data-ins-weight="' + E(ic.id) + '"><output>' + w + "</output></label>";
     box.hidden = false;
   }
+  /* .86.69 (David: "Shop the look button doesn't work / Add to lookbook doesn't work on main page / Nor does inspo /
+     So this entire feature set is broken"): an icon's photo opens a sheet with Shop the look and Add to Looks */
+  function openLook868(icId, idx) {
+    var ic = icons().filter(function (x) { return x.id === icId; })[0]; if (!ic) return;
+    var lk = (ic.looks || [])[idx]; if (!lk) return;
+    var sh = $("ins-look-sheet868");
+    if (!sh) { sh = document.createElement("div"); sh.id = "ins-look-sheet868"; sh.className = "info-pop-backdrop"; sh.setAttribute("role", "dialog"); sh.setAttribute("aria-modal", "true"); document.body.appendChild(sh); }
+    sh.innerHTML = '<div class="card info-pop-card look-sheet868"><div class="principles-head"><h3 class="type-title">' + E(ic.name || "") + '</h3><button type="button" class="info-pop-close" data-look868-close aria-label="Close">&times;</button></div>' +
+      '<img class="look-sheet868-img" src="' + E(lk.img || lk.src || "") + '" alt="' + E(lk.caption || "") + '">' +
+      (lk.caption ? '<p class="meta">' + E(lk.caption) + "</p>" : "") +
+      '<div class="look-sheet868-acts"><button type="button" class="btn-ink" data-find-icon-look="' + E(ic.id) + '" data-look-idx="' + idx + '">Shop the look</button>' +
+      '<button type="button" class="btn-ghost" data-icon-lookbook="' + E(ic.id) + '" data-look-idx="' + idx + '">Add to Looks</button></div></div>';
+    sh.hidden = false;
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target; if (!t || !t.closest) return;
+    var b = t.closest("[data-ins-look868]"); if (b) { e.preventDefault(); openLook868(b.getAttribute("data-ins-look868"), +b.getAttribute("data-look-idx")); return; }
+    var sh = $("ins-look-sheet868");
+    if (sh && !sh.hidden && (t === sh || t.closest("[data-look868-close]") || t.closest("[data-find-icon-look]") || t.closest("[data-icon-lookbook]"))) { setTimeout(function () { sh.hidden = true; }, 0); }
+  });
   function syncMini() {
     /* Mine is offered on an icon's page only; without an icon the closet-only outfits are Looks > Outfits */
     if (!insLens && insFeed === "mine") insFeed = "withmine";
