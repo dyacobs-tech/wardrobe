@@ -109,8 +109,9 @@ the reader knows which inbox to watch.
   - the IndexedDB gap in preview
   - silent account creation
   - sync efficiency: the read side was fixed on 22 Nov 2026
-    (worker/sync-speed). Still open: the record counter can hand the same
-    number to two devices that save within about a minute of each other
-    (see that folder's README), and a full download is built in memory,
+    (worker/sync-speed), and record numbering the same day
+    (worker/seq-clock). Still open: two devices rewriting the same record
+    within about a minute (the later arrival can win), and a full download
+    is built in memory,
     which will stop working somewhere above the current 31 MB closet (the
     Worker limit is 128 MB; the exact ceiling is not measured).

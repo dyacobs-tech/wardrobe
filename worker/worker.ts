@@ -448,6 +448,26 @@ async function liveIdsForColl(
   return ids;
 }
 
+// Record numbers ("seq") are the server's clock in milliseconds, not a
+// counter. A counter kept in KV can be read stale (KV may serve a value up
+// to about a minute old), so two devices saving close together were given
+// the same number, and a device whose bookmark had passed that number never
+// received the other device's record. With clock numbers a stale read
+// cannot lower a number, and the bookmark handed back to a device
+// deliberately trails the clock by SEQ_MARGIN_MS: anything written, or
+// still spreading through KV, in that window is sent again on the next
+// sync. The app ignores a record it already holds (same updatedAt), so a
+// repeat costs a little download and nothing else.
+// The bookmark moves in whole steps of SEQ_STEP_MS so that the app's paged
+// download loop sees an unchanged bookmark and stops.
+// The stored counter (seq/<acct>) is kept at or above every number and
+// every bookmark handed out, so the previous version of this worker, if it
+// is ever rolled back to, continues above them.
+const SEQ_MARGIN_MS = 180 * 1e3;
+const SEQ_STEP_MS = 60 * 1e3;
+const nextSeq = (last: number) => Math.max(Date.now(), last + 1);
+const bookmarkFor = (t: number) =>
+  Math.floor((t - SEQ_MARGIN_MS) / SEQ_STEP_MS) * SEQ_STEP_MS;
 const SCAN_BATCH = 16;
 const SNAP_DEFER_MAX_CHARS = 16e6;
 const SNAP_FLAG_FRESH_MS = 90 * 1e3;
@@ -584,7 +604,8 @@ async function handleSync(
   let seqAllocated = false;
   const allocSeq = () => {
     seqAllocated = true;
-    return ++seqCounter;
+    seqCounter = nextSeq(seqCounter);
+    return seqCounter;
   };
 
   const written = new Set<string>(); // "coll\0id\0updatedAt" written this request
@@ -669,7 +690,14 @@ async function handleSync(
   // The counter is stored as soon as the writes are done (it used to be
   // stored after the scan below), so a request that is cut off while
   // scanning never leaves records numbered above the stored counter.
-  if (seqAllocated) await kv.put(seqKey, String(seqCounter));
+  if (seqAllocated) {
+    try {
+      await kv.put(seqKey, String(seqCounter));
+    } catch (_) {
+      // the counter is only a floor for an older worker version; never fail a sync for it
+    }
+  }
+  const scanStart = Date.now();
 
   // Record heads are read SCAN_BATCH at a time. They used to be read one
   // by one, which made every sync of a 300-record closet wait for 300
@@ -752,7 +780,15 @@ async function handleSync(
     }
   }
 
-  const now = seqCounter;
+  const mark = bookmarkFor(scanStart);
+  const now = Math.max(since, mark);
+  if (mark > seqCounter) {
+    try {
+      await kv.put(seqKey, String(mark));
+    } catch (_) {
+      // as above
+    }
+  }
 
   // Last-known-good snapshot of the post-sync live state. A snapshot
   // failure never fails the sync itself; see snapshotAfterSync.
@@ -1417,7 +1453,7 @@ async function handleReceiptPush(
       continue;
     }
     seqAllocated = true;
-    const seq = ++seqCounter;
+    const seq = (seqCounter = nextSeq(seqCounter));
     const data = {
       id: it.id,
       name: it.name,
@@ -2123,7 +2159,7 @@ async function handlePriceDrops(
       } catch { /* an unreadable record is replaced, never kept */ }
     }
     seqAllocated = true;
-    const seq = ++seqCounter;
+    const seq = (seqCounter = nextSeq(seqCounter));
     const data = {
       id: it.id,
       key: it.key,

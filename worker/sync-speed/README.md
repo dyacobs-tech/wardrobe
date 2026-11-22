@@ -79,7 +79,7 @@ the snapshot's content, the hourly throttle, the ring of 10 snapshots.
   now waits for work handed to `waitUntil`; one count allows for the flag
   key's delete).
 
-## Known weakness this does not fix
+## Known weakness this does not fix (fixed since: see ../seq-clock)
 
 The record counter (`seq/<account>`) lives in KV, which may serve a value up
 to about a minute old in a location that read it recently. Two devices that

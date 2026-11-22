@@ -20,9 +20,12 @@ are the authority, and where they disagree with this one, say so to David.
   script; take a backup of the live script before any approved deploy.
 - **Menswear only.** Never recommend women's items.
 - **No owner personal data in the shipped page.** `tests/smoke.py` checks it.
-- **Spend needs a cost first.** FASHN renders cost credits (about 2 each, per
-  `docs/eventual.md`; verify before quoting). Give David a count and a cost
-  before any batch.
+- **FASHN credits can be spent without asking first** (David, 22 Nov 2026:
+  "Use credits I don't care", after "Yes spend whatever you need for FASHN").
+  Renders cost about 2 credits each and photo edits 1 (verify before
+  quoting). Tell him afterwards how many were used and what is left. Any
+  other spend, such as a new paid service, still needs a cost and his yes
+  first.
 - **Affiliate sources stay off** until a human enables them and supplies
   credentials. Do not apply to programmes or create accounts.
 - **The Edit catalog is append-only.** Existing SKUs are locked; ingest never
