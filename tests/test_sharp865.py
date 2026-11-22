@@ -12,6 +12,9 @@ David, 22 Nov 2026:
   "All blue I'd prefer black shoes black belts. Or tonal matching blue shoes
    blue belt."
   "Rust tee is more like a light milk chocolate brown - pls fix"
+  Later: "All these evening Casual looks are evening sharp!!!", then his photo
+  of a "casual hibachi dinner" look (graphic tee, cream shorts, Vans) and "Yes,
+  that split" (.86.68): Evening Casual and Evening Sharp never share an outfit.
 """
 import json
 import sys
@@ -33,6 +36,9 @@ CLOSET = [
     {"id": "dkj", "name": "Dark Indigo Jeans", "category": "Jeans", "colourName": "Indigo", "colourHex": "#22304f"},
     {"id": "ltj", "name": "Light Wash Jeans", "category": "Jeans", "colourName": "Light Blue", "colourHex": "#8aa8c4"},
     {"id": "sh", "name": "Stone Chino Shorts", "category": "Shorts", "colourName": "Stone", "colourHex": "#c9b896"},
+    {"id": "lin", "name": "Yellow Linen Shirt", "category": "Shirts", "colourName": "Yellow", "colourHex": "#efe0a0"},
+    {"id": "gtee2", "name": "Fliks Yellow Graphic Tee", "category": "Tees", "colourName": "Yellow", "colourHex": "#f0cf4a"},
+    {"id": "vans", "name": "Vans Black and White Checkerboard Slip-On Sneakers", "category": "Shoes", "colourName": "Black/White", "colourHex": "#222222"},
     {"id": "brl", "name": "Dark Brown Suede Penny Loafers", "category": "Shoes", "colourName": "Dark brown", "colourHex": "#4a2e1f"},
     {"id": "bkl", "name": "Black Leather Penny Loafers", "category": "Shoes", "colourName": "Black", "colourHex": "#111111"},
     {"id": "nvl", "name": "Navy Suede Loafers", "category": "Shoes", "colourName": "Navy", "colourHex": "#22304f"},
@@ -56,7 +62,9 @@ def run(browser):
       const dealt = []; [2, 3, 4, 5].forEach(lv => deck.deal(30, { level: lv, temp: 72, recent: [], prefs: {}, exposure: {}, banned: {} }).forEach(o => {
         const ids = [o.top.id, o.bottom.id].concat(o.layer ? [o.layer.id] : []);
         if (ids.every(id => ['oxf', 'ntee', 'navyt', 'dkj', 'ltj', 'bzN'].includes(id))) dealt.push(o.shoes.id + '/' + (o.belt ? o.belt.id : '-')); }));
-      return { sharp: [...new Set(sharp)].sort(), blue: [...new Set(blue)], dealt: [...new Set(dealt)],
+      const casual = deck.combos.filter(c => c.mask & (1 << 3)).map(c => (c.l ? c.l.id + '+' : '') + c.t.id + '/' + c.b.id + '/' + c.s.id);
+      const both = deck.combos.filter(c => (c.mask & (1 << 3)) && (c.mask & (1 << 4))).length;
+      return { casual: [...new Set(casual)], both, sharp: [...new Set(sharp)].sort(), blue: [...new Set(blue)], dealt: [...new Set(dealt)],
         names: FORMALITY_LEVELS.map(l => l.level + ':' + l.name) }; }""", CLOSET)
 
     sharp = out["sharp"]
@@ -76,7 +84,14 @@ def run(browser):
     assert out["blue"] and "brl" not in out["blue"], out["blue"]
     for d in out["dealt"]:
         shoe, belt = d.split("/")
-        assert shoe in ("bkl", "nvl") and belt in ("-", {"bkl": "bbk", "nvl": "bnv"}[shoe]), out["dealt"]
+        assert shoe in ("bkl", "nvl", "vans") and belt in ("-", {"bkl": "bbk", "nvl": "bnv", "vans": "bbk"}[shoe]), out["dealt"]   # the Vans read black
+    # .86.68: the two evening levels never share an outfit; shorts and sneakers are Evening Casual's
+    casual = out["casual"]
+    assert out["both"] == 0, out["both"]
+    assert any(c.startswith("gtee2/sh/vans") for c in casual), casual[:20]          # his hibachi look
+    assert any(c.startswith("lin/") for c in casual) and not any(s.startswith("lin/") for s in sharp), (casual[:20], sharp)
+    assert not any(c.startswith("oxf/") for c in casual), [c for c in casual if c.startswith("oxf/")][:5]   # a dress button-down is Sharp's
+    assert not any(c.startswith(("bzN+", "bzT+")) for c in casual), casual[:20]
     # the names
     names = out["names"]
     assert "3:Evening Casual" in names and "4:Evening Sharp" in names and "5:Evening Dressy" in names, names
