@@ -1,4 +1,4 @@
-"""Home never grows taller than the screen, never scrolls, and the nav never shrinks there (.86.61).
+"""Home never grows taller than the screen, never scrolls, and the nav never shrinks there (.86.61, pinned .86.68).
 
 David, 22 Nov 2026, with a screenshot of Home in the installed app: the page
 had scrolled, the figure sat behind DONNA and the nav had shrunk to bare
@@ -9,6 +9,11 @@ Earlier fixes (.80.31, .86.41, .86.52) each sized Home from a reading of the
 window. Now Home also checks itself after layout: if anything on the phone
 makes the page taller than the screen, the picture gives up the difference,
 and Home stays at the top.
+
+Again on 22 Nov, evening, on the live app: "NOT FITTING AGAIN PUCTURE TOO BIG
+AND ICONS HIDDEN UNDER NAVI HOW HARD IS THIS TO GET RIGHT AND STAY
+CONSISTANT!!!!!" (.86.68): Home is now pinned between the masthead's real
+bottom edge and the nav, with no height worked out from the window size.
 """
 import json
 import sys
@@ -42,7 +47,13 @@ def run(browser):
     page.wait_for_timeout(300)
     after = page.evaluate(MEASURE)
     assert after["body"] <= H and after["sy"] == 0, after
-    assert after["trim"] == "40px" and after["img"] < before["img"] and after["actions"] <= after["nav"], (before, after)
+    # .86.68: Home is pinned between the masthead and the nav, so extra height elsewhere cannot push it
+    assert after["actions"] <= after["nav"] and after["img"] == before["img"], (before, after)
+    # and with an iPhone status bar the masthead grows: the picture starts below it, the buttons stay above the nav
+    page.evaluate("() => { document.querySelector('header.masthead').style.paddingTop = '59px'; window.__wardrobeFitToday(); }")
+    page.wait_for_timeout(300)
+    sb = page.evaluate("() => { const r = s => document.querySelector(s).getBoundingClientRect(); return { mast: Math.round(r('header.masthead').bottom), img: Math.round(r('#today-img').top), actions: Math.round(r('#today-simple-actions').bottom), nav: Math.round(r('#bottombar .nav-pill').top), sy: Math.round(scrollY) }; }")
+    assert sb["img"] >= sb["mast"] - 1 and sb["actions"] <= sb["nav"] and sb["sy"] == 0, sb
     # and Home cannot be scrolled by hand
     page.evaluate("() => window.scrollBy(0, 200)")
     page.wait_for_timeout(200)
@@ -56,5 +67,5 @@ with sync_playwright() as pw:
     for engine in (pw.chromium, pw.webkit):
         browser = engine.launch()
         a = run(browser)
-        print("Confirmed: Home stays one screen (%dpx) and at the top; extra height is taken from the picture (%s)" % (a["body"], a["trim"]))
+        print("Confirmed: Home stays one screen and at the top; the picture starts under the masthead (status bar or not) and the buttons stay above the nav")
         browser.close()

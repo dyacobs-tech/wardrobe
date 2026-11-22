@@ -44,12 +44,13 @@ def run(browser):
     assert tab["vh"] == "%dpx" % H, tab
     # a browser tab whose window is short (toolbar showing) keeps the short height: nothing changes there
     tab_short = open_home(browser, short + screen)
-    assert tab_short["vh"] == "%dpx" % (H - SHORT), tab_short
+    assert tab_short["vh"] == "%dpx" % (H - SHORT), tab_short   # the reading is kept; Home no longer sizes from it
     # the installed app with a short reading is sized to the screen, and the buttons sit just above the nav
     inst = open_home(browser, short + screen + app)
     assert inst["vh"] == "%dpx" % H, inst
     assert inst["panel"] == tab["panel"] and inst["gap"] == tab["gap"] and 0 <= inst["gap"] <= 40, (inst, tab)
-    assert tab_short["panel"] == tab["panel"] - SHORT, (tab_short, tab)
+    # .86.68: Home is pinned between the masthead and the nav, so a short report changes nothing on screen
+    assert tab_short["panel"] == tab["panel"] and 0 <= tab_short["gap"] <= 40, (tab_short, tab)
     # a reading that is short by much more than a status bar is not trusted to be the screen
     far = open_home(browser, "Object.defineProperty(window, 'innerHeight', { configurable: true, get: () => %d });" % (H - 200) + screen + app)
     assert far["vh"] == "%dpx" % (H - 200), far

@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.67" />
+    <meta name="wardrobe-build" content="2026-11-22.86.68" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -7319,6 +7319,18 @@ window.notMenswear853 = function (e) {
       #panel-find .outfits-toggle:has(> #edit-tab-saved) > .chip { flex: 1 1 auto !important; padding: 0 9px !important; white-space: nowrap !important; }
       /* Shop > Searches: "+ Look" was 24px tall, too small to tap */
       .vp-look { min-height: 32px !important; padding: 6px 12px !important; }
+      /* .86.68 (David, 22 Nov 2026, a screenshot of Home with the figure behind DONNA and the buttons under the
+         nav: "NOT FITTING AGAIN ... HOW HARD IS THIS TO GET RIGHT AND STAY CONSISTANT!!!!!"). Home no longer
+         works out a height from the window size, which his phone reports differently from one launch to the
+         next. It is pinned between the masthead's real bottom edge and the nav's space, the way the nav
+         itself is pinned, so the two can never overlap. */
+      @media (max-width: 899px) {
+        html body[data-page="today"] #panel-today:not([hidden]) {
+          position: fixed !important; left: 0 !important; right: 0 !important;
+          top: var(--home-top, 44px) !important; bottom: var(--bb-h, 68px) !important;
+          height: auto !important; max-height: none !important; margin: 0 !important; z-index: 1;
+        }
+      }
       /* Profile sizes: a label that runs to two lines ("Sweater / knit size") pushed its box below its neighbour's */
       .profile-grid > div { display: flex; flex-direction: column; justify-content: flex-end; }
       .lk-icon867 { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
@@ -8786,7 +8798,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.67</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.68</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8963,6 +8975,8 @@ window.notMenswear853 = function (e) {
              permanently !!!!!"). Whatever else on the phone adds height (the home-indicator area, an element
              after Home), Home is checked after layout: if the page is still taller than the screen, the
              picture gives up the difference, and Home is put back at the top so the nav never collapses. */
+          /* .86.68: Home is pinned under the masthead; its real bottom edge, measured, includes the status bar */
+          try { var mh868 = document.querySelector("header.masthead"); if (mh868) { var mb868 = mh868.getBoundingClientRect().bottom; if (mb868 > 0 && mb868 < 200) de.setProperty("--home-top", Math.round(mb868) + "px"); } } catch (e868) {}
           de.setProperty("--home-trim", "0px");
           var room = vh > 0 ? vh : (window.innerHeight || 0);
           var bottom = 0, sy = window.scrollY || 0;
@@ -12230,7 +12244,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.67";
+var WARDROBE_BUILD = "2026-11-22.86.68";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
