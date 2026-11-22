@@ -266,7 +266,7 @@ def main():
         }""")
 
         after = {}
-        for level, key in ((2, "casual"), (3, "smart")):  # .86.34: Daytime, Nighttime Casual
+        for level, key in ((2, "casual"), (3, "smart")):  # .86.34: Daytime, Evening Casual
             after[key] = pg.evaluate(CLASSIFY_JS, {"level": level, "temp": 78, "n": 80})
             print("MINE", key, json.dumps(after[key]))
 
@@ -334,7 +334,7 @@ def main():
             weights = pg.evaluate("() => window.iconWeights81 && window.iconWeights81.state ? window.iconWeights81.state() : null")
             for feed in ("withmine", "allnew"):
                 feeds[feed] = {}
-                for level, key in ((2, "casual"), (3, "smart")):  # .86.34: Daytime, Nighttime Casual
+                for level, key in ((2, "casual"), (3, "smart")):  # .86.34: Daytime, Evening Casual
                     try:
                         feeds[feed][key] = pg.evaluate(FEED_JS, {"feed": feed, "level": level, "temp": 78, "n": 80, "weights": weights})
                     except Exception as e:

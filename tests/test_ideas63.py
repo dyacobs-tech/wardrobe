@@ -210,9 +210,9 @@ def main() -> int:
                 page.wait_for_timeout(200)
                 after5 = page.evaluate(TYPE_JS)
                 check(
-                    f"{name}: type pill sets Nighttime Dressy",
+                    f"{name}: type pill sets Evening Dressy",
                     after5
-                    and after5.get("label") == "Nighttime Dressy"
+                    and after5.get("label") == "Evening Dressy"
                     and after5.get("formality") == 5
                     and after5.get("stored") == 5,
                     str(after5),

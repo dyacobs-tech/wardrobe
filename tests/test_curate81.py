@@ -319,7 +319,7 @@ def main():
               const mid = {};
               allIcons().forEach(ic => mid[ic.id] = 2);
               const by = { casual: Object.assign({}, mid), smart: Object.assign({}, mid), business: Object.assign({}, mid), formal: Object.assign({}, mid) };
-              by.casual.squarzi = 8; by.smart.squarzi = 8;  // .86.42: Nighttime Casual has its own group, seeded like Daytime
+              by.casual.squarzi = 8; by.smart.squarzi = 8;  // .86.42: Evening Casual has its own group, seeded like Daytime
               by.business.kraft = 8; by.business.beckham = 8;
               by.formal.kraft = 8; by.formal.beckham = 8;
               return { mode: 'per', all: mid, byLevel: by };

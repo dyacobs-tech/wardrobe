@@ -2,7 +2,7 @@
 
 Engine (fixture_closet83.json, 74°F):
   * Casual and Smart Casual deals never include a blazer or suit
-  * Nighttime Dressy (level 5) always wears a blazer (.86.34)
+  * Evening Dressy (level 5) always wears a blazer (.86.34)
   * Formal / Black Tie deals are tailored
   * Flannel shirts are never tucked, with or without a layer
   * Dress T-shirts are always tucked; casual T-shirts may be untucked under a blazer
@@ -183,9 +183,9 @@ def main() -> int:
                     r,
                 )
             r5 = rates.get("5") or rates.get(5) or {}
-            # .86.34 (David): level 5 is Nighttime Dressy, always a blazer
+            # .86.34 (David): level 5 is Evening Dressy, always a blazer
             check(
-                "50 Nighttime Dressy deals all wear a blazer",
+                "50 Evening Dressy deals all wear a blazer",
                 r5.get("n") == 50 and r5.get("blazers") == 50,
                 r5,
             )
@@ -249,8 +249,8 @@ def main() -> int:
                 }"""
             )
             check(
-                "Nighttime Casual pick sets and stores formality 3",
-                after.get("formality") == 3 and after.get("stored") == 3 and after.get("label") == "Nighttime Casual",
+                "Evening Casual pick sets and stores formality 3",
+                after.get("formality") == 3 and after.get("stored") == 3 and after.get("label") == "Evening Casual",
                 after,
             )
             check("type menu closes after the pick", after.get("menuHidden") is True, after)

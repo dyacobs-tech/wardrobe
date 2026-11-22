@@ -52,7 +52,7 @@ def run(browser):
         banned: ['c1c3225a0867efce.webp', 'ed7969a72e937a88.webp', '4529bac87ec41ac7.webp', '9f5bc4066c18d16a.webp'].map(f => onbodyFileBanned('assets/onbody/' + f)) }; }""", CLOSET)
     # dress loafers only at Formal
     assert out["formal"] == ["bal", "eg"], out["formal"]
-    # the rule is Formal's: Nighttime Dressy still takes the other shoes it took before
+    # the rule is Formal's: Evening Dressy still takes the other shoes it took before
     assert "dior" in out["dressy"], out["dressy"]
     # a Formal look (it carries a tie) never shows a picture without the tie; it shows the one with it
     assert out["before"] == {"formal": None, "dressy": "assets/onbody/notie.webp"}, out["before"]

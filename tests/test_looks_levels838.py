@@ -3,7 +3,7 @@
 David (21 Nov): "Dress level should allow for multiple looks as well."
 Ticking levels adds them, the last one cannot be removed, Home keeps a
 level that is in the list, the Mine feed mixes the chosen levels (blazer
-looks from Nighttime Dressy beside unlayered Daytime looks) and stays
+looks from Evening Dressy beside unlayered Daytime looks) and stays
 avatar-only, and a few quick ticks refill the feed promptly.
 """
 import json
@@ -88,7 +88,7 @@ def run(browser):
     page.wait_for_timeout(500)
     made = page.evaluate("""() => [...document.querySelectorAll('#panel-withmine .en-card')].filter(c => c.querySelector('.en-render'))
       .map(c => ({ title: !!c.querySelector('.oc-title'), src: !!c.querySelector('.en-src'), alt: c.querySelector('.en-render img').alt }))""")
-    assert made, "no ready-made outfits at Nighttime Dressy"
+    assert made, "no ready-made outfits at Evening Dressy"
     assert not any(m["title"] or m["src"] for m in made), made
     assert all(any(w in m["alt"].lower() for w in ("blazer", "jacket", "sport coat", "sportcoat", "suit")) for m in made), made
 
