@@ -127,7 +127,7 @@ def main() -> int:
                 page.wait_for_timeout(700)
                 vis = page.evaluate(
                     f"(() => {{ const p = document.getElementById('{panel}');"
-                    " return !!p && !p.hidden && p.offsetParent !== null; })()")
+                    " return !!p && !p.hidden && (p.offsetParent !== null || getComputedStyle(p).position === 'fixed') && p.getClientRects().length > 0; })()")   # .86.68: Home is position:fixed (offsetParent is null)
                 check(f"tab {sel} shows #{panel}", vis)
                 # .80.6: no page may be wider than the screen (a nowrap chip
                 # row once made a page 1,500px wide and pushed the nav off)
