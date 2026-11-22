@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.58" />
+    <meta name="wardrobe-build" content="2026-11-22.86.59" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8759,7 +8759,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.58</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.59</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9901,6 +9901,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       role: "none", lo: 3, hi: 4, kind: "",
       L: (function () { var nl = nameLightness(item.colourName); return nl === null ? hsl.l : nl; })(), fam: fc.fam, neutral: fc.neutral,
       linen856: /linen/.test(n + " " + notes844),   /* .86.56: linen by name or by his notes on the piece */
+      longSleeve859: /long-sleeve|long sleeve|long sleeves/.test(n + " " + notes844),   /* .86.59: by name or by his notes */
       pattern: PATTERN_RE.test(n), denim: /denim|chambray/.test(n) || cat === "Jeans",
       warm: 0, collared: false, overshirt: false, casualShirt: false, shortSleeve: false,
       fresh: !!(item.addedISO && (Date.now() - Date.parse(item.addedISO)) < 21 * 864e5)
@@ -10067,7 +10068,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
        Baudoin & Lange. Nothing else is dealt with swim trunks. */
     if (bottom.kind === "swim" || bottom.swim) {
       if (layer) return null;
-      var swimTop856 = top.kind === "tee" || (top.kind === "shirt" && top.linen856) || (top.kind === "polo" && !/long-sleeve|long sleeve/.test(top.n));
+      var swimTop856 = top.kind === "tee" || (top.kind === "shirt" && top.linen856) || (top.kind === "polo" && !/long-sleeve|long sleeve/.test(top.n) && !top.longSleeve859 && !/cashmere/.test(top.n));
       var swimShoe856 = shoes.poolOnly || /\bslides?\b/.test(shoes.n) || shoes.kind === "espadrille" || /espadrille|raffia/.test(shoes.n) || (/\btoms\b/.test(shoes.n)) || (/canvas/.test(shoes.n) && /slip-on/.test(shoes.n) && !/checkerboard|vans/.test(shoes.n));
       if (!swimTop856 || !swimShoe856) return null;
     }
@@ -10138,6 +10139,11 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     return /patent|opera|pump/.test(n) || (/velvet/.test(n) && /loafer|pump|oxford|dress/.test(n) && !/furlane|concho/.test(n));
   }
 
+  function isDressLoafer859(s) {
+    if (!s || s.kind !== "loafer") return false;
+    var n = pieceName867(s);
+    return !/slipper|furlane|espadrille|driver|boat|whipstitch|slip-on|sneaker|rubber|cupsole|white sole|pony-hair|camo|dior tan suede penny|armani cream woven/.test(n);
+  }
   /* Structural rules per outfit type. */
   function fitsLevel(L, top, bottom, shoes, layer) {
     var lk = layer ? layer.kind : "";
@@ -10145,7 +10151,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
        1 Pool / Beach · 2 Daytime · 3 Nighttime Casual · (4 retired → 3)
        5 Nighttime Dressy · 6 Formal · 7 Black Tie */
     if (L === 4) L = 3;
-    if (L === 1) return !layer && (bottom.kind === "swim" || bottom.kind === "shorts" || bottom.kind === "linen") && (top.kind === "tee" || top.shortSleeve || /linen/.test(top.n) || top.linen856 || (top.kind === "polo" && !/long-sleeve|long sleeve/.test(top.n)));
+    if (L === 1) return !layer && (bottom.kind === "swim" || bottom.kind === "shorts" || bottom.kind === "linen") && (top.kind === "tee" || top.shortSleeve || /linen/.test(top.n) || top.linen856 || (top.kind === "polo" && !/long-sleeve|long sleeve/.test(top.n) && !top.longSleeve859 && !/cashmere/.test(top.n)));
     if (L === 2) {
       /* Daytime: shorts, jeans, chinos or linen trousers with a tee or polo; no layer.
          Temperature: no shorts below 68°F; at 88°F and up only shorts or linen. */
@@ -10176,6 +10182,10 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       if (isDinnerLayer867(layer)) return false;
       if (lk !== "blazer" && lk !== "suit") return false;
       if (typeof shoeIsCasual866 === "function" && shoeIsCasual866(shoes)) return false;
+      /* .86.59 (David, 22 Nov 2026: "Formal looks should be DRESS loafers only not sneakers w white soles"): a
+         leather or suede loafer on a dark sole. Not slippers or furlane, not espadrilles, not the white-soled
+         Dior pennies, not the Armani cream drivers, not pony-hair camo. */
+      if (!isDressLoafer859(shoes)) return false;
       /* .86.51 (David, 22 Nov 2026): Formal does not need a suit: a blazer, a shirt that takes a tie, and
          dressier chinos. Seersucker, jeans, linen, drawstring and five-pocket trousers stay below Formal. */
       if (bottom.kind === "chinos" && !/seersucker|drawstring|jogger|5-pocket|five-pocket|linen/.test(pieceName867(bottom))) return top.kind === "shirt" && !top.casualShirt && !top.shortSleeve;
@@ -11413,9 +11423,13 @@ var ONBODY = { map: {} };
    Files stay on disk; they are just never used on Home or in a feed. */
 var ONBODY_TUCK_EXCLUDE = { "f9109db74c0834f4.webp": 1, "e1c60a64d5c2379a.webp": 1, "60a0c37d108a9e30.webp": 1, "e262dd0c0a1b7811.webp": 1, "d49d69def12794ac.webp": 1, "50a4598d25e9eea2.webp": 1, "54ca22ba2033d0e2.webp": 1, "5264f245ffa9d15e.webp": 1, "3ff5c876803bd555.webp": 1, "05e5c9e5e478e6a4.webp": 1, "33eb788bd50b3fe4.webp": 1, "34ddb4694f5d8a0b.webp": 1, "7de8d0c864db49b0.webp": 1, "19b13ebc88f435a3.webp": 1, "8843c1428aefb606.webp": 1, "829f3fdc2dbf89f1.webp": 1, "b42eda05623c7298.webp": 1, "aef565f15d06c66b.webp": 1, "c21b9508bbdc5f8c.webp": 1, "2d58c979d24d009f.webp": 1, "b6c6487249962aa5.webp": 1, "ecf118bef93f18bb.webp": 1, "909b69e3c34c2f4b.webp": 1, "bdd6f6234aac79c2.webp": 1, "7ed280ef99bfcbd1.webp": 1, "9af9e73b045cf5c7.webp": 1 };
 var ONBODY_TUCK_EXCLUDE_COUNT = 26;
+/* .86.59 (David, 22 Nov 2026, screenshots of Home: "Sneaker fucked up"; "I look fat head is messed up images
+   messed up"). Pictures he rejected, never shown again: a broken right shoe (black tee, faded 517s), a wrong head
+   (grey knit tee, white jeans), and wide linen trousers drawn for the beige chinos (navy tee). */
+var ONBODY_REJECTED859 = { "c1c3225a0867efce.webp": 1, "ed7969a72e937a88.webp": 1, "4529bac87ec41ac7.webp": 1 };
 function onbodyFileBanned(f) {
   var base = String(f || "").split("/").pop();
-  return !!(base && ONBODY_TUCK_EXCLUDE[base]);
+  return !!(base && (ONBODY_TUCK_EXCLUDE[base] || ONBODY_REJECTED859[base]));
 }
 function onbodyIngest(j) {
   if (!j || !j.r || !j.r.length) return 0;
@@ -11449,6 +11463,12 @@ function onbodyKeys() {
     if (onbodyFileBanned(ONBODY.map[k]) || (typeof onbodyKeyBanned866 === "function" && onbodyKeyBanned866(k))) continue;
     if (!out) out = {};
     out[k] = ONBODY.map[k];
+    /* .86.59: a picture with a tie also marks its outfit (without the tie) as pictured, so the dealer builds it;
+       the picture itself is only shown for the look that carries that tie (onbodyForLook) */
+    if (k.indexOf("|") !== -1 && typeof closetItemById === "function") {
+      var parts859 = k.split("|"), core859 = parts859.filter(function (id) { var it = closetItemById(id); return !(it && /^ties?$/i.test(String(it.category || ""))); });
+      if (core859.length < parts859.length && !out[core859.join("|")]) out[core859.join("|")] = ONBODY.map[k];
+    }
   }
   onbodyKeysCache855 = { sig: sig, v: out };
   return out ? Object.assign({}, out) : null;
@@ -11461,7 +11481,10 @@ function onbodyForLook(look) {
     if (window.WardrobeRules && typeof window.WardrobeRules.lookAllowed === "function" && !window.WardrobeRules.lookAllowed(look)) return false;
     return true;
   }
-  if (look.composerKey && ONBODY.map[look.composerKey] && rulesOk(ONBODY.map[look.composerKey])) return ONBODY.map[look.composerKey];
+  /* .86.59 (David, 22 Nov 2026: Formal "all outfit should have TIES"): a look that carries a tie (Formal) shows only a
+     picture of him wearing that tie; its key is the outfit's key plus the tie. A picture without the tie is not used. */
+  var hasTie859 = (look.fwPieces || []).some(function (p) { return p && /^ties?$/i.test(String(p.category || "")); });
+  if (!hasTie859 && look.composerKey && ONBODY.map[look.composerKey] && rulesOk(ONBODY.map[look.composerKey])) return ONBODY.map[look.composerKey];
   var ids = (look.fwPieces || []).map(function (p) { return p && p.id; }).filter(Boolean);
   if (ids.length < 3) return null;
   var cats = (look.fwPieces || []).map(function (p) { return String(p.category || "").toLowerCase(); });
@@ -11719,6 +11742,10 @@ function composerOutfitToLook(o, i, renderPairs) {
   var upper = o.layer ? byId[o.layer.id] : byId[o.top.id];
   var bottom = byId[o.bottom.id];
   var title = composerPieceTitle(upper) + " & " + composerPieceTitle(bottom);
+  /* .86.59: a Formal look is named by its shirt and tie (the blazer and chinos repeat across many, and Outfits
+     shows each title once) */
+  var tie859 = o.acc ? byId[o.acc.id] : null;
+  if (tie859 && /^ties?$/i.test(String(tie859.category || "")) && o.layer && byId[o.top.id]) title = composerPieceTitle(byId[o.layer.id]) + ", " + composerPieceTitle(byId[o.top.id]) + " & " + (String(tie859.colourName || "").split("\u00b7")[0].trim() + (/knit/i.test(tie859.name || "") ? " Knit Tie" : " Silk Tie")).trim();
   var swatches = [], seenHex = {};
   pieces.forEach(function (p) {
     if (p.colourHex && !seenHex[p.colourHex]) {
@@ -12080,7 +12107,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.58";
+var WARDROBE_BUILD = "2026-11-22.86.59";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
