@@ -11,9 +11,12 @@ in this file yet.
 
 ## Standing rules
 
-- **Nothing goes live without David's explicit OK.** `main` is the live site.
-  Never push to `main`, never force-push, and never run the "Promote preview
-  to live" workflow unless David asks for it in that conversation.
+- **Publishing: David has given a standing OK** (22 Nov 2026, asked "say
+  'always' and I'll publish every fix as soon as its tests pass": "Always").
+  Publish each finished fix once the full test suite passes: push to
+  `preview`, wait for its CI run to go green, then run "Promote preview to
+  live", and tell him afterwards what went live. Still never push to `main`
+  directly and never force-push.
 - **Preview data is real data.** The preview build shares browser storage and
   the sync account with the live app on the same device.
 - **Never delete synced data.** A dislike never deletes a piece. Sync deletes

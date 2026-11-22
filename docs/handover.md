@@ -69,6 +69,9 @@ Sections below are as the earlier chat left them, except where this says so.
 | 29 | "Outfits when I open is lagging should be instant!!!" | He was on `.86.52`; the fix is `.86.55` (item 27), unpublished when he wrote this. Asked him for "live", and offered "always" (publish every fix once its tests pass). No answer yet. |
 | 30 | Screenshot of The Edit with boxes of pieces under "With mine": "With mine should be on my avatar!!!" | **Built, `.86.57`** (`tests/test_withmine857.py`), on the branch. With mine (labelled "New + mine" since `.86.54`) shows only the outfits drawn on him (`INSPO_ONBODY`, 120 in all, fewer after the level, weather and price filters). When they run out a line says so, with a button "Show ideas not drawn on you yet" that brings back the undrawn mixes. Under an Icon the feed is unchanged. On his phone none were showing: his price filter was on, which the drawn outfits did not pass. More can be drawn on him with FASHN credits. |
 
+| 31 | Inspo yes; .86.54 live yes; icon page closet-only view: "Both" | **Built, `.86.58`** (`tests/test_inspo858.py`). The Edit has Icons, Inspo, Dress me. Inspo shows 60 concepts drawn on his avatar with FASHN `edit` (35 from icon looks in `ICON_SPECS`, 14 from palettes he liked, 11 Daytime from his rules), six at a time, by dress level; Like keeps one in Liked; Shop the look opens the find sheet with its garments. Pictures in `assets/inspo-concepts/`, list in `INSPO_CONCEPTS` in `src/app.html`. On an icon's page a "Mine" choice shows his closet outfits on him, ranked by the icon. 66 credits (377 to 311). |
+| 32 | "LIVE", "Always" | Standing OK to publish every fix once tests pass; recorded in `CLAUDE.md`. |
+
 ## 1. Where things stand
 
 - **Live app:** build `2026-11-21.86.48`. `main` and `preview` were both at
