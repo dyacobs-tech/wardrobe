@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.61" />
+    <meta name="wardrobe-build" content="2026-11-22.86.62" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -7300,6 +7300,28 @@ window.notMenswear853 = function (e) {
     </style>
 
 
+    <style>
+      /* ================= .86.62 — formatting audit (David, 22 Nov 2026: "Want formatting to be DIALED!!!!
+         Make sure all pages for viewing are correct in formatting and buttons are smushed or hidden!!!!").
+         Every page was checked at 402px; these are the controls that were squashed. ================= */
+      /* Profile: Info / Location / Rules / Advanced were 33–69px pills with 4px padding */
+      #subnav-me .subnav-scroll { gap: 8px !important; }
+      #subnav-me .subnav-scroll .subtab, #subnav-me .subnav-scroll > .subtab:last-child {
+        flex: 0 0 auto !important; min-height: 36px !important; padding: 0 16px !important; font-size: 13px !important; white-space: nowrap !important;
+      }
+      /* Looks > Closet: the search box was crushed to "Sear" beside the filters; it gets its own row */
+      #panel-wardrobe .closet-top3.closet-row789 { flex-wrap: wrap !important; row-gap: 8px !important; }
+      #panel-wardrobe .closet-row789 .closet-search789 { flex: 1 1 100% !important; }
+      #panel-wardrobe .closet-row789 .cdd { flex: 1 1 0 !important; }
+      #panel-wardrobe .closet-row789 .cdd > button { width: 100%; justify-content: center; }
+      /* Shop: Saved / Searches / Build / Ask / Price were five equal 73px cells with the counts against the edge */
+      #panel-find .outfits-toggle:has(> #edit-tab-saved) { gap: 2px !important; }
+      #panel-find .outfits-toggle:has(> #edit-tab-saved) > .chip { flex: 1 1 auto !important; padding: 0 9px !important; white-space: nowrap !important; }
+      /* Shop > Searches: "+ Look" was 24px tall, too small to tap */
+      .vp-look { min-height: 32px !important; padding: 6px 12px !important; }
+      /* Profile sizes: a label that runs to two lines ("Sweater / knit size") pushed its box below its neighbour's */
+      .profile-grid > div { display: flex; flex-direction: column; justify-content: flex-end; }
+    </style>
   </head>
   <body data-page="today">
     <script>
@@ -8763,7 +8785,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.61</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.62</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12169,7 +12191,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.61";
+var WARDROBE_BUILD = "2026-11-22.86.62";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
