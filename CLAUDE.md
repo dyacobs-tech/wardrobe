@@ -5,6 +5,10 @@ with Cloudflare Workers for sync and try-on. David is the owner and the only
 person who approves changes. This file is the short version; the linked files
 are the authority, and where they disagree with this one, say so to David.
 
+**Start here after 22 Nov 2026:** `docs/handover.md` lists the unfinished
+work, in David's order, and the rules he gave in the last chat that are not
+in this file yet.
+
 ## Standing rules
 
 - **Nothing goes live without David's explicit OK.** `main` is the live site.
@@ -81,7 +85,8 @@ are the authority, and where they disagree with this one, say so to David.
 | `tests/` | Playwright tests, fixtures, `quarantine.json`, `smoke_baseline.json`. See `tests/README.md`. |
 | `worker/` | Sync worker source and notes. The live worker differs from this copy; the README says how. |
 | `workers/tryon/` | Read-only copy of the deployed try-on worker. |
-| `docs/` | `catalog-pipeline.md`, `eventual.md`. |
+| `docs/` | `catalog-pipeline.md`, `eventual.md`, `handover.md`. |
+| `tools/chat-2026-11-22/` | Helper scripts from the 21–22 Nov chat. Not part of the app. |
 | `.github/workflows/` | `smoke.yml` (CI), `pages.yml` (deploy), `promote.yml` (preview to live, manual). |
 
 ## David's style rules
