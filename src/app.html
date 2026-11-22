@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.56" />
+    <meta name="wardrobe-build" content="2026-11-22.86.57" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6947,6 +6947,8 @@ window.notMenswear853 = function (e) {
       #ins-head841 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px 10px; }
       #ins-head841 h3 { flex: 1 0 100%; margin: 0; font-size: 19px; line-height: 1.2; }
       #ins-head841 .ins-mini841 { margin-right: auto; }
+      .en-undrawn857 { margin: 18px 16px 0; text-align: center; font-size: 13px; line-height: 1.5; }
+      .en-undrawn857 .btn-ghost { display: block; margin: 10px auto 0; }
       #ins-head841 .ins-note854 { flex: 1 0 100%; order: 9; margin: 2px 0 0; font-size: 12.5px; line-height: 1.35; color: var(--dim); }
       html[data-lkm="inspo"] #pv-pills [data-pv-clear="lens"] { display: none !important; }
       /* the avatar on a Liked or Go-to card fits its box, as on Outfits (it was drawn at full size and cropped to head and chest) */
@@ -8736,7 +8738,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.56</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.57</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12057,7 +12059,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.56";
+var WARDROBE_BUILD = "2026-11-22.86.57";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -45596,7 +45598,7 @@ window.inspoView = "withmine";
          labelled "With mine" and reads as "mine", but it is new pieces for sale worn with his own (the old Mix).
          The label says so now, and a line under it says where his own outfits are. */
       '<button type="button" data-ins-feed="withmine">New + mine</button><button type="button" data-ins-feed="allnew">All new</button></div>' +
-      '<p class="ins-note854">Pieces for sale, styled with yours. A price marks what is new. Outfits made only from your closet are in Looks.</p>';
+      '<p class="ins-note854">Pieces for sale, worn with yours and drawn on you. A price marks what is new. Outfits made only from your closet are in Looks.</p>';
     top.parentNode.insertBefore(h, top.nextSibling);
     /* the filter (price) on the Ideas header: a stand-in that taps the
        original (its sheet and state live with the feed's top bar) */
@@ -49285,13 +49287,31 @@ window.inspoView = "withmine";
     if (feed === "withmine" && !S.lens && f.rendered && f.rendered.length) {
       while (out.length < CAP && f.rendered.length) { var r = f.rendered.shift(); if (!f.keys[r.key] && !S.hidden[r.key] && !(window.isDislikedLook && window.isDislikedLook(r.key)) && lookPriceOk(r) && renderedFits838(r)) out.push(r); }
     }
-    while (out.length < CAP && BUF[feed].length) {
+    /* .86.57 (David, 22 Nov 2026, on The Edit showing boxes of pieces under "With mine": "With mine should be on my
+       avatar!!!"). With mine shows the outfits that are drawn on him and nothing else. The ideas that are not
+       drawn on him yet stay one tap away (the button under the grid); under an Icon the feed is that Icon's
+       ideas, as before. */
+    var drawnOnly857 = feed === "withmine" && !S.lens && !undrawn857;
+    while (!drawnOnly857 && out.length < CAP && BUF[feed].length) {
       var o = BUF[feed].shift();
       if (f.keys[o.key] || S.hidden[o.key] || (window.isDislikedLook && window.isDislikedLook(o.key))) continue;
       var l = toLook(o, feed);
       if (l && lookPriceOk(l)) { out.push(l); S.recent.push(o.key); }
     }
     appendCards(feed, out);
+    if (feed === "withmine") {
+      var note857 = f.host.querySelector(".en-undrawn857");
+      if (!note857) { note857 = document.createElement("p"); note857.className = "meta en-undrawn857"; f.grid.parentNode.insertBefore(note857, f.grid.nextSibling); }
+      var done857 = drawnOnly857 && !(f.rendered && f.rendered.length);
+      note857.hidden = !done857;
+      if (done857) {
+        var sk857 = f.grid.querySelectorAll(".en-skel"); for (var si857 = 0; si857 < sk857.length; si857++) sk857[si857].remove();
+        note857.innerHTML = (f.looks.length ? "That is every outfit drawn on you for this level" : "No outfit drawn on you fits this level") + (priceActive() ? " and price" : "") + '. <button type="button" class="btn-ghost" data-en-undrawn857>Show ideas not drawn on you yet</button>';
+        f.empty.hidden = true;
+        if (out.length) save();
+        return;
+      }
+    }
     if (out.length) save();
     if (CAP === 4 && out.length === 4) requestAnimationFrame(function () { requestAnimationFrame(function () { onBuffer(feed); }); });
     if (!f.looks.length && WHY[feed]) {
@@ -49304,6 +49324,13 @@ window.inspoView = "withmine";
     f.empty.hidden = true;
     if (!WHY[feed]) fill(feed);
   }
+  var undrawn857 = false;
+  document.addEventListener("click", function (e) {
+    var b857 = e.target.closest && e.target.closest("[data-en-undrawn857]"); if (!b857) return;
+    undrawn857 = true;
+    var n857 = document.querySelector(".en-undrawn857"); if (n857) n857.hidden = true;
+    more("withmine");
+  });
   function onBuffer(feed, force) {
     var f = F[feed];
     if (!f || f.host.hidden) return;
