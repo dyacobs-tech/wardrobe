@@ -9971,6 +9971,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     var n = name + " " + colourName;
     var hsl = hexToHsl(item.colourHex);
     var fc = familyOf(colourName + " " + name, hsl);
+    /* .86.68: a bright, saturated blue (cobalt, cerulean) is a statement, not a neutral like denim or navy */
+    if (fc.fam === "blue" && fc.neutral && hsl.s > 0.55 && hsl.l > 30 && hsl.l < 70 && !/denim|jean|chambray|navy|indigo/.test(name + " " + colourName)) fc = { fam: fc.fam, neutral: false };
     var p = {
       poolOnly: typeof itemPoolOnly === "function" ? itemPoolOnly(item) : false,
       swim: typeof pieceIsSwim === "function" ? pieceIsSwim(item) : false,
@@ -10115,6 +10117,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if (layer) { if (!layer.neutral) statements++; if (layer.pattern) patterns++; }
     if (statements > 1 || patterns > 1) return null;
     if (shoes.pattern && patterns > 0) return null;
+    /* .86.68 (David, 22 Nov 2026, on bright blue trousers with mustard check slippers under a cream blazer: "This
+       could be the ugliest outfit I have ever seen"): loud patterned shoes only with a quiet outfit */
+    if (shoes.pattern && statements > 0) return null;
     if (!shoes.neutral && statements > 0) return null;
     /* Double denim — a denim or chambray shirt over blue jeans. */
     if (bottom.cat === "Jeans" && bottom.fam === "blue" && (top.denim || (layer && layer.denim))) return null;
