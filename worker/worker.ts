@@ -252,13 +252,28 @@ async function acctForKey(
 
 // ---------- snapshots (last-known-good ring) ----------
 
+// Snapshot parts: characters of JSON per KV value. Well under the 25 MiB
+// value limit even if every character were three bytes.
+const SNAP_PART = 6 * 1024 * 1024;
+// At most this many deletes (ring trim + orphan sweep) per snapshot run.
+const SNAP_SWEEP_MAX = 400;
+// Parts with no meta key are swept only once they are this old, so a
+// write that is still in flight is never touched.
+const SNAP_ORPHAN_AGE_MS = 2 * 60 * 60 * 1000;
+
 async function writeSnapshot(kv: KVNamespace, acct: string) {
   const snapPrefix = K("snap", acct) + "/";
-  // Index the ring first; the trim at the end reuses this listing.
-  const idx: string[] = [];
+  // Index the ring first; the trim and the sweep reuse this listing.
+  const idx: string[] = []; // complete snapshots: their meta key exists
+  const partsOf = new Map<string, string[]>(); // ts -> part key names
   for (const name of await listAll(kv, snapPrefix)) {
     const segs = name.split("/");
     if (segs.length === 3) idx.push(segs[2]);
+    else if (segs.length === 5 && segs[3] === "c") {
+      const a = partsOf.get(segs[2]);
+      if (a) a.push(name);
+      else partsOf.set(segs[2], [name]);
+    }
   }
   idx.sort();
   // Throttle: a snapshot is insurance, not a journal — at most one an
@@ -270,47 +285,100 @@ async function writeSnapshot(kv: KVNamespace, acct: string) {
   if (Number.isFinite(newest) && Date.now() - newest < SNAP_MIN_INTERVAL_MS) {
     return;
   }
-  // Assemble the full live state: every non-deleted record + meta.
-  const state: Record<string, Record<string, unknown>> = {};
+  // The snapshot is one JSON document with the same shape as before,
+  //   {"at":..,"recs":{"<coll>":{"<id>":<data>,..},..},"meta":<meta|null>}
+  // but it is never held in memory whole. Each live record's stored JSON
+  // text is appended as it is (no parse, no re-stringify) and the text is
+  // flushed to KV in a few large parts.
+  //
+  // Why (Nov 21 2026): once the closet passed the 25 MiB value limit the
+  // old code fell back to putChunked on the fully assembled text: about
+  // 500 puts of 60,000 characters, on top of three in-memory copies of
+  // the closet. The worker was killed part-way through every time (error
+  // 1102: about 170 parts written, never the meta key), so every
+  // state-changing sync returned 503 after the records were stored, no
+  // snapshot was kept, and each attempt left its parts behind.
+  //
+  // Layout is the chunked layout getChunked / deleteChunked already read:
+  // parts at <prefix>/c/<i>, then the meta key { at, chunks, v: 2 } last,
+  // so a snapshot whose meta key exists is always complete.
+  const ts = Date.now();
+  const prefix = K("snap", acct, ts);
   const recPrefix = K("rec", acct) + "/";
+  const heads: { name: string; coll: string; id: string }[] = [];
   for (const name of await listAll(kv, recPrefix)) {
     const segs = name.split("/");
     if (segs.length !== 4) continue; // skip chunk keys (6 segments)
-    const [, , collEnc, idEnc] = segs;
-    const coll = decodeURIComponent(collEnc);
-    const id = decodeURIComponent(idEnc);
-    const head = await getMeta(kv, name);
-    if (!head || head.deleted) continue;
-    const full = await getChunked(kv, name);
-    if (!full || full.payload == null) continue;
-    (state[coll] ||= {})[id] = JSON.parse(full.payload);
+    heads.push({
+      name,
+      coll: decodeURIComponent(segs[2]),
+      id: decodeURIComponent(segs[3]),
+    });
+  }
+  heads.sort((a, b) =>
+    a.coll < b.coll ? -1 : a.coll > b.coll ? 1 : a.id < b.id ? -1 : a.id > b.id ? 1 : 0
+  );
+  let buf = '{"at":' + ts + ',"recs":{';
+  let nParts = 0;
+  let curColl: string | null = null;
+  let firstInColl = true;
+  const flush = async () => {
+    await kv.put(CK(prefix, nParts), buf);
+    nParts++;
+    buf = "";
+  };
+  const BATCH = 8;
+  for (let i = 0; i < heads.length; i += BATCH) {
+    const group = heads.slice(i, i + BATCH);
+    const fulls = await Promise.all(group.map((h) => getChunked(kv, h.name)));
+    for (let j = 0; j < group.length; j++) {
+      const h = group[j], full = fulls[j];
+      if (!full || full.meta.deleted || full.payload == null) continue;
+      if (h.coll !== curColl) {
+        buf += (curColl === null ? "" : "},") + JSON.stringify(h.coll) + ":{";
+        curColl = h.coll;
+        firstInColl = true;
+      }
+      buf += (firstInColl ? "" : ",") + JSON.stringify(h.id) + ":" + full.payload;
+      firstInColl = false;
+      if (buf.length >= SNAP_PART) await flush();
+    }
   }
   const m = await getChunked(kv, K("meta", acct));
-  const snap = {
-    at: Date.now(),
-    recs: state,
-    meta: m && m.payload != null ? JSON.parse(m.payload) : null,
-  };
-  const ts = snap.at;
-  // One KV write for the whole snapshot: Workers KV values hold up to
-  // 25 MiB, so the payload rides inline in the meta JSON instead of
-  // being split into 60,000-char chunks at one put each. getChunked
-  // reads inline and chunked forms alike (and prefers inline), so
-  // snapshots written by earlier versions stay readable; the chunked
-  // layout is only the fallback for a snapshot that outgrows the
-  // value limit.
-  const snapJson = JSON.stringify(snap);
-  const inlineValue = JSON.stringify({ at: ts, inline: snapJson });
-  if (enc.encode(inlineValue).length <= KV_VALUE_MAX) {
-    await kv.put(K("snap", acct, ts), inlineValue);
-  } else {
-    await putChunked(kv, K("snap", acct, ts), { at: ts }, snapJson);
-  }
-  // Trim the ring to the newest SNAP_KEEP snapshots.
+  buf += (curColl === null ? "" : "}") + '},"meta":' +
+    (m && m.payload != null ? m.payload : "null") + "}";
+  await flush();
+  await kv.put(prefix, JSON.stringify({ at: ts, chunks: nParts, v: 2 }));
+  // Trim the ring to the newest SNAP_KEEP snapshots. The parts of an old
+  // snapshot are known from the listing above, so nothing is read back
+  // (reading a 25 MiB inline snapshot only to delete it is wasteful).
+  // Meta key first: a reader never sees a meta that points at missing parts.
+  let deletes = 0;
   idx.push(String(ts));
   idx.sort();
   for (const old of idx.slice(0, Math.max(0, idx.length - SNAP_KEEP))) {
-    await deleteChunked(kv, K("snap", acct, decodeURIComponent(old)));
+    await kv.delete(K("snap", acct) + "/" + old);
+    deletes++;
+    for (const part of partsOf.get(old) || []) {
+      await kv.delete(part);
+      deletes++;
+    }
+    partsOf.delete(old);
+  }
+  // Sweep parts left behind by snapshot writes that died before their
+  // meta key was written. Only parts with no meta key, and only once they
+  // are well past any write that could still be in flight. Bounded per run.
+  const complete = new Set(idx);
+  for (const [tsEnc, parts] of partsOf) {
+    if (deletes >= SNAP_SWEEP_MAX) break;
+    if (complete.has(tsEnc)) continue;
+    const t = Number(decodeURIComponent(tsEnc));
+    if (!Number.isFinite(t) || ts - t < SNAP_ORPHAN_AGE_MS) continue;
+    for (const part of parts) {
+      if (deletes >= SNAP_SWEEP_MAX) break;
+      await kv.delete(part);
+      deletes++;
+    }
   }
 }
 

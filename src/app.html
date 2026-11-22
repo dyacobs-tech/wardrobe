@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-21.86.44" />
+    <meta name="wardrobe-build" content="2026-11-21.86.45" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -5015,6 +5015,7 @@ window.notMenswear853 = function (e) {
       .onbody-split .ob-figure { display: block; height: 100%; min-height: 0; background: #F6F2EA; overflow: hidden; border-radius: 12px; }
       #cf-grid .cf-media > .mine-avatar { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
       .onbody-split .ob-figure img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+      .flatlay.onbody-split:has(> .ob-figure[hidden]) { grid-template-columns: 1fr !important; }
       .onbody-split .ob-pieces { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 4px; min-height: 0; }
       .onbody-split.ob-n1 .ob-pieces, .onbody-split.ob-n2 .ob-pieces { grid-template-columns: 1fr; }
       .onbody-split.ob-n3 .ob-pieces { grid-template-columns: 1fr; }
@@ -6578,6 +6579,8 @@ window.notMenswear853 = function (e) {
       html[data-theme="dark"] .en-skel-media { background: linear-gradient(90deg, #2A2622 0%, #35302B 45%, #2A2622 90%); background-size: 200% 100%; }
       html[data-theme="dark"] .en-skel-line { background: #3A3530; }
       .en-card .en-media { display: block; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 12px 12px 0 0; background: #F6F2EA; }
+      .en-card .en-media { position: relative; }
+      .en-auto845 { position: absolute; left: 8px; right: 8px; bottom: 8px; z-index: 2; padding: 7px 10px; border-radius: 999px; background: rgba(34, 28, 22, .84); color: #fff; font: 600 12px/1.2 var(--font-ui, system-ui, sans-serif); text-align: center; pointer-events: none; }
       .en-card .flatlay { background: #F6F2EA !important; }
       .en-card .flatlay .fl-cell { background: #F6F2EA !important; }
       .en-card .flatlay .en-shop img, .en-card .flatlay .en-own img { mix-blend-mode: multiply; }
@@ -8680,7 +8683,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-21.86.44</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-21.86.45</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11918,7 +11921,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-21.86.44";
+var WARDROBE_BUILD = "2026-11-21.86.45";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -42107,6 +42110,10 @@ function analyzeFilePiece(card, job, ix) {
     var ob = (typeof onbodyForLook === "function") ? onbodyForLook(look) : null;
     var shown = ob;
     try { if (ob && typeof window.cutoutFor === "function") shown = window.cutoutFor(ob) || ob; } catch (e) {}
+    /* .86.45 (David: "Go-tos should be on my avatar too remember!!!"): an outfit he logged carries its own
+       picture of him wearing it (the avatar, never a camera selfie). A go-to with no library render shows that. */
+    var worn845 = "";
+    if (!ob && look && typeof look.wornFig845 === "string" && look.wornFig845 && !(typeof isCameraSelfieImg === "function" && isCameraSelfieImg(look.wornFig845))) { ob = shown = look.wornFig845; worn845 = ' data-worn845="' + esc(look.wornKey845 || "") + '"'; }
     if (shown && avatarCard) {
       return '<img class="mine-avatar" src="' + esc(shown) + '" alt="' + esc((look.title || "Outfit") + " on David") + '" data-onbody="1" loading="lazy" decoding="async" />';
     }
@@ -42139,7 +42146,7 @@ function analyzeFilePiece(card, job, ix) {
          .80.11: prefer the transparent cut-out so the card sits on
          cream, not a grey studio box. */
       var side = cells.filter(function (c) { return c.indexOf("fl-swatch") === -1; }).slice(0, 4);
-      return '<span class="flatlay onbody-split ob-n' + side.length + '"><span class="ob-figure"><img src="' + esc(shown) + '" alt="' + esc((look.title || "Outfit") + " on David") + '" data-onbody="1" decoding="async" /></span>' +
+      return '<span class="flatlay onbody-split ob-n' + side.length + '"><span class="ob-figure"><img src="' + esc(shown) + '" alt="' + esc((look.title || "Outfit") + " on David") + '" data-onbody="1"' + worn845 + ' decoding="async" /></span>' +
         '<span class="ob-pieces">' + side.join("") + "</span></span>";
     }
     return '<span class="flatlay fl-n' + cells.length + '">' + cells.join("") + "</span>";
@@ -45589,6 +45596,12 @@ window.inspoView = "withmine";
       var g = by[key];
       if (!g) { g = by[key] = { key: key, items: items, dates: [], title: titleFor(c, en.title) }; out.push(g); }
       if (en.date) g.dates.push(en.date);
+      /* .86.45: the picture saved with the log entry: his avatar wearing it. `cut` is the same picture with the
+         studio backdrop removed (assets/worn/<id>.webp), so the card sits on cream. Never a camera selfie. */
+      var cam = function (x) { return typeof isCameraSelfieImg === "function" && isCameraSelfieImg(x); };
+      var pic = (!en.selfie && typeof en.img === "string" && en.img && !cam(en.img)) ? en.img : "";
+      var cut = (pic && typeof en.cut === "string" && /^assets\/worn\/[a-z0-9-]+\.webp$/.test(en.cut)) ? en.cut : "";
+      if (pic && (!g.fig || (en.date || "") >= (g.figDate || ""))) { g.fig = cut || pic; g.figBack = cut ? pic : ""; g.figDate = en.date || ""; }
     });
     out.forEach(function (g) { g.dates.sort().reverse(); });
     out.sort(function (a, b) { return (b.dates[0] || "") < (a.dates[0] || "") ? -1 : 1; });
@@ -45605,6 +45618,7 @@ window.inspoView = "withmine";
     }
     host.innerHTML = '<div class="options-grid cf-grid lk-grid841">' + gList.map(function (g, i) {
       var look = lookFor(g.key, g.items, g.title);
+      if (g.fig) { look = Object.assign({}, look, { wornFig845: g.fig, wornKey845: g.key }); }
       var n = g.dates.length;
       /* .86.43 (David): a go-to shows him wearing it AND its pieces beside him; pieces alone until it has a render */
       return '<article class="card option-card cf-card lk-card841 lk-goto843"><button type="button" class="cf-media" data-g841-open="' + i + '" aria-label="' + E(look.title) + '">' + mediaSplit(look) + "</button>" +
@@ -45614,8 +45628,20 @@ window.inspoView = "withmine";
     }).join("") + "</div>";
   }
 
+  /* .86.45: a go-to's backdrop-free picture is a file (assets/worn/...). If it cannot load, the picture
+     saved with the log entry takes its place; if that fails too, the card keeps its pieces. */
+  document.addEventListener("error", function (e) {
+    var t = e.target; if (!t || t.tagName !== "IMG" || !t.hasAttribute("data-worn845")) return;
+    var key = t.getAttribute("data-worn845"), g = null;
+    for (var i = 0; i < gList.length; i++) if (gList[i].key === key) { g = gList[i]; break; }
+    if (g && g.figBack && !t.hasAttribute("data-worn845-back")) { t.setAttribute("data-worn845-back", "1"); t.src = g.figBack; return; }
+    var fig = t.closest && t.closest(".ob-figure"); if (fig) fig.hidden = true;
+  }, true);
+
   /* ---------- Liked: closet outfits and Inspo outfits he liked ---------- */
   var lCloset = [], lInspo = [];
+  /* the Liked host is made on first use (ensureHost), so it is looked up by selector, and only repainted while it shows */
+  window.__lkRenderLiked845 = function () { var h = document.querySelector('#panel-looks [id="lk-liked841"]'); if (h && h.offsetParent) renderLiked(); };
   function renderLiked() {
     var host = ensureHost("lk-liked841"); if (!host) return;
     lCloset = (typeof savedLooks !== "undefined" ? savedLooks : []).filter(function (l) { return l && l.verdict === "like"; });
@@ -45659,7 +45685,9 @@ window.inspoView = "withmine";
     }
     if ((b = t.closest && t.closest("[data-g841-open]"))) {
       var gg = gList[+b.getAttribute("data-g841-open")]; if (!gg) return;
-      if (typeof openLookLayer === "function") openLookLayer(lookFor(gg.key, gg.items, gg.title));
+      var gl = lookFor(gg.key, gg.items, gg.title);
+      if (gg.fig) gl = Object.assign({}, gl, { wornFig845: gg.fig, wornKey845: gg.key });
+      if (typeof openLookLayer === "function") openLookLayer(gl);
       return;
     }
     if ((b = t.closest && t.closest("[data-l841-open]"))) {
@@ -48870,8 +48898,9 @@ window.inspoView = "withmine";
   function cardHTML(l, i, feed) {
     var eager = i < 6;
     var cells = l.pieces.map(function (p) { return cellHTML(p, eager); });
-    var media = l.render
-      ? '<span class="flatlay onbody-split ob-n' + Math.min(4, cells.length) + '"><span class="ob-figure en-render"><img src="' + E(l.render) + '" alt="' + E(l.title + " on David") + '" loading="lazy" decoding="async" /></span><span class="ob-pieces">' + cells.slice(0, 4).join("") + "</span></span>"
+    var fig845 = l.render || l.on845 || "";
+    var media = fig845
+      ? '<span class="flatlay onbody-split ob-n' + Math.min(4, cells.length) + '"><span class="ob-figure en-render"><img src="' + E(fig845) + '" alt="' + E(l.title + " on David") + '" loading="lazy" decoding="async" /></span><span class="ob-pieces">' + cells.slice(0, 4).join("") + "</span></span>"
       : '<span class="flatlay fl-n' + cells.length + ' en-flat">' + cells.join("") + "</span>";
     var liked = isLiked(l.key);
     var sl = srcLine(l);
@@ -48989,8 +49018,84 @@ window.inspoView = "withmine";
     if (x.render) { var r = renderedLooks().filter(function (l) { return l.key === x.key; })[0]; return r || null; }
     var ids = x.ids || [];
     var o = { key: x.key, ids: ids, t: x.t, b: x.b, s: x.s, l: x.l, acc: x.acc, src: x.src };
-    return toLook(o, x.feed);
+    var lk = toLook(o, x.feed);
+    if (lk && typeof x.on === "string" && x.on) lk.on845 = x.on;
+    return lk;
   }
+
+  /* .86.45 (David, 21 Nov: "Are we able to pull these new items on me????" then "Yes auto on like is good"):
+     liking an outfit in The Edit puts it on him. It is the same try-on Dress me uses (his sync account, FASHN
+     credits, the service's daily cap). The service answers the same pieces with the same job, so liking twice,
+     or reopening the app mid-render, never pays twice. The picture is kept on the liked record (`on`) and
+     shows on the card here and in Looks > Liked. Accessories are not dressed (the try-on dresses garments). */
+  var AUTO845 = {}, autoSaid845 = {};
+  function autoItems845(l) {
+    var products = [], closet = [];
+    (l.pieces || []).forEach(function (p) {
+      if (p.shop) { if (p.e && p.e.img && typeof tryonSlotForEntry === "function" && tryonSlotForEntry(p.e) !== "accessory") products.push(p.e); }
+      else if (p.it && typeof closetSlot76 === "function") { var sl = TRYON_SLOT[closetSlot76(p.it.category)]; if (sl && sl !== "accessory") closet.push(p.it); }
+    });
+    return { products: products, closet: closet };
+  }
+  function autoCards845(key) {
+    var out = [];
+    Object.keys(F).forEach(function (feed) {
+      var f = F[feed], el = f && (f.grid || f.host); if (!f || !el || !f.looks) return;
+      f.looks.forEach(function (x, i) { if (x && x.key === key) { var c = el.querySelector('[data-en-i="' + i + '"]'); if (c) out.push({ card: c, look: x, i: i, feed: feed }); } });
+    });
+    return out;
+  }
+  function autoNote845(key, text) {
+    autoCards845(key).forEach(function (o) {
+      var m = o.card.querySelector(".en-media"); if (!m) return;
+      var n = m.querySelector(".en-auto845");
+      if (!text) { if (n) n.remove(); return; }
+      if (!n) { n = document.createElement("span"); n.className = "en-auto845"; n.setAttribute("role", "status"); m.appendChild(n); }
+      n.textContent = text;
+    });
+  }
+  function autoRec845(key) { for (var i = 0; i < S.liked.length; i++) if (S.liked[i] && S.liked[i].key === key) return S.liked[i]; return null; }
+  function autoOnLike845(l, resumed) {
+    if (!l || !l.key || l.render || l.on845 || AUTO845[l.key]) return false;
+    if (window.__PV81) return false;                      /* the preview never spends credits */
+    if (typeof tryonJob !== "function" || typeof tryonPiecesItems !== "function") return false;
+    var it = autoItems845(l); if (!it.products.length) return false;
+    if (typeof tryonKey === "function" && !tryonKey()) {
+      if (!resumed && !autoSaid845.key && typeof toast === "function") { autoSaid845.key = 1; toast("Liked. To see liked outfits on you, turn on sync in Profile."); }
+      return false;
+    }
+    var key = l.key, rec = autoRec845(key);
+    AUTO845[key] = 1;
+    if (rec && !rec.onq) { rec.onq = Date.now(); save(true); }
+    autoNote845(key, "Putting it on you\u2026");
+    tryonJob(tryonPiecesItems(it.products, it.closet), function (state, text, url) {
+      if (state === "done" && url) {
+        delete AUTO845[key];
+        var r = autoRec845(key); if (r) { r.on = url; delete r.onq; save(true); }
+        autoCards845(key).forEach(function (o) { o.look.on845 = url; o.card.outerHTML = cardHTML(o.look, o.i, o.feed); });
+        try { if (typeof window.__lkRenderLiked845 === "function") window.__lkRenderLiked845(); } catch (e) {}
+        if (!resumed && typeof toast === "function") toast("It\u2019s on you. See it in Looks \u203a Liked.");
+      } else if (state === "error") {
+        delete AUTO845[key];
+        var r2 = autoRec845(key); if (r2 && r2.onq) { delete r2.onq; save(true); }
+        autoNote845(key, "");
+        if (!resumed && typeof toast === "function") toast("Liked, but it could not be put on you: " + String(text || "try again later."));
+      } else autoNote845(key, text || "Putting it on you\u2026");
+    }, null, function () { return { title: l.title, ids: it.closet.map(function (i) { return i.id; }), src: "like" }; });
+    return true;
+  }
+  /* a like whose picture was still being made when the app closed: pick it up again (same job, no new charge) */
+  var autoResumed845 = false;
+  function autoResume845() {
+    if (autoResumed845) return; autoResumed845 = true;
+    try {
+      S.liked.forEach(function (x) {
+        if (!x || x.on || x.render || !x.onq || Date.now() - x.onq > 20 * 60 * 1000) return;
+        var lk = rehydrate(x); if (lk) autoOnLike845(lk, true);
+      });
+    } catch (e) {}
+  }
+  window.__enAuto845 = { start: autoOnLike845, state: function () { return AUTO845; }, items: autoItems845 };
   window.endlessShow81 = function (v) {
     if (v !== "withmine" && v !== "allnew") { active = null; syncRow(); return; }
     active = v;
@@ -48999,6 +49104,7 @@ window.inspoView = "withmine";
     if (typeof window.paintEndlessSkeleton81 === "function") window.paintEndlessSkeleton81(v);
     var kick = function (changed) {
       if (changed && W) sendData();
+      autoResume845();
       var sig = lfMode() + "|" + JSON.stringify(priceState());
       if (!f.looks.length || f.sig !== sig) requestAnimationFrame(function () { rebuild(v); });
       fill(v);
@@ -49018,7 +49124,8 @@ window.inspoView = "withmine";
         S.liked.unshift(likeRec(l));
         if (window.WardrobeComposer) window.WardrobeComposer.applyVerdict(S.prefs, l.pieces.map(function (p) { return p.id; }), "like");
         save(true); b.setAttribute("aria-pressed", "true");
-        if (typeof toast === "function") toast("Liked \u2014 it's in Looks \u203a Liked.");
+        var going845 = false; try { going845 = autoOnLike845(l, false); } catch (er845) {}
+        if (typeof toast === "function" && !autoSaid845.key) toast(going845 ? "Liked. Putting it on you now; it takes about a minute." : "Liked \u2014 it's in Looks \u203a Liked.");
       }
       return;
     }

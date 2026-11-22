@@ -51,6 +51,34 @@ def run(browser):
     assert first["avatar"] and first["pieces"] >= 3 and first["fig"] > 150, cards
     if worn["loose"]:
         assert any((not c["avatar"]) and c["flat"] >= 2 for c in cards), cards
+    # .86.45 (David: "Go-tos should be on my avatar too remember!!!"): an outfit he logged carries its own picture
+    # of him wearing it. With no library render the go-to shows that picture beside its pieces: the backdrop-free
+    # file when the entry names one, the saved picture when that file cannot load, and never a camera selfie.
+    px = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+    made = page.evaluate("""px => {
+      const tops = wardrobeItems.filter(i => /Shirts|Polos|Tees/.test(i.category)), bots = wardrobeItems.filter(i => /Trousers|Jeans/.test(i.category));
+      const have = {}; window.gotoEntries841().forEach(g => { have[g.key] = 1; });
+      const pairs = [];
+      for (const t of tops) { for (const b of bots) { const k = [t.id, b.id].sort().join('|'); if (have[k] || onbodyForLook({ fwPieces: [t, b], composerKey: k })) continue; pairs.push([t.id, b.id]); have[k] = 1; break; } if (pairs.length >= 3) break; }
+      if (pairs.length < 3) return { n: pairs.length };
+      wornLog.push({ id: 'worn-cut', date: '2026-10-03', title: 'Has a cut-out', img: px, selfie: false, cut: 'assets/worn/selfie-1794868007730.webp', pieces: [], pieceIds: pairs[0] });
+      wornLog.push({ id: 'worn-nocut', date: '2026-10-02', title: 'Cut-out missing', img: px, selfie: false, cut: 'assets/worn/not-there.webp', pieces: [], pieceIds: pairs[1] });
+      wornLog.push({ id: 'worn-selfie', date: '2026-10-01', title: 'A camera selfie', img: px, selfie: true, pieces: [], pieceIds: pairs[2] });
+      return { n: 3 };
+    }""", px)
+    assert made["n"] == 3, made
+    page.evaluate("() => { document.querySelector('#panel-looks [data-lk-go=\"liked\"]').click(); document.querySelector('#panel-looks [data-lk-go=\"gotos\"]').click(); }")
+    page.wait_for_function("""() => { const by = {}; document.querySelectorAll('.lk-goto843').forEach(c => { by[c.querySelector('.oc-title').textContent] = c; });
+      const a = by['Has a cut-out'], b = by['Cut-out missing']; if (!a || !b) return false;
+      const ia = a.querySelector('.ob-figure img[data-worn845]'), ib = b.querySelector('.ob-figure img[data-worn845]');
+      return ia && ia.complete && ia.naturalWidth > 0 && ib && ib.complete && ib.naturalWidth > 0 && ib.getAttribute('src').indexOf('data:') === 0; }""", timeout=15000)
+    wornc = page.evaluate("""() => { const by = {}; document.querySelectorAll('.lk-goto843').forEach(c => { by[c.querySelector('.oc-title').textContent] = c; });
+      const f = t => { const c = by[t]; const i = c && c.querySelector('.ob-figure img[data-worn845]'); return { card: !!c, src: i ? i.getAttribute('src').slice(0, 44) : null, pieces: c ? c.querySelectorAll('.fl-cell').length : 0, fig: i ? Math.round(i.getBoundingClientRect().height) : 0 }; };
+      return { cut: f('Has a cut-out'), back: f('Cut-out missing'), selfie: f('A camera selfie') }; }""")
+    assert wornc["cut"]["src"] == "assets/worn/selfie-1794868007730.webp" and wornc["cut"]["pieces"] >= 2 and wornc["cut"]["fig"] > 150, wornc
+    assert wornc["back"]["src"].startswith("data:image/png") and wornc["back"]["pieces"] >= 2, wornc
+    assert wornc["selfie"]["card"] and wornc["selfie"]["src"] is None and wornc["selfie"]["pieces"] >= 2, wornc
+
     # Liked: a photo look (no pieces, no render) shows its colours and what each is, never a lone watch;
     # a liked rendered outfit shows the whole avatar inside its box
     page.evaluate("""() => {
@@ -70,7 +98,7 @@ def run(browser):
     assert not any(c["watchOnly"] for c in liked), liked
     assert any(c["avatarFits"] is True for c in liked) and not any(c["avatarFits"] is False for c in liked), liked
     assert not errors, errors
-    print("Confirmed go-to's: avatar with %d pieces beside it; an unrendered go-to shows its pieces; Liked shows colours for photo looks and a fitted avatar" % first["pieces"])
+    print("Confirmed go-to's: avatar with %d pieces beside it; a logged outfit shows its own picture of him (cut-out, or the saved picture), never a selfie; Liked shows colours for photo looks and a fitted avatar" % first["pieces"])
     ctx.close()
 
 
