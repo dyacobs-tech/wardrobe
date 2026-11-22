@@ -56,6 +56,8 @@ def run(browser, engine):
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
     page.goto(URL, wait_until="domcontentloaded")
+    # a tap during start-up is lost (WebKit timed out here on preview, 22 Nov): wait until the app has run
+    page.wait_for_function("() => window.__appRan850 === true && typeof switchTab === 'function'", timeout=60000)
     page.locator("#section-inspo").tap()
     page.wait_for_selector('[data-ins-feed="allnew"]', timeout=30000)
     page.evaluate("() => document.querySelector('[data-ins-feed=\"allnew\"]').click()")
