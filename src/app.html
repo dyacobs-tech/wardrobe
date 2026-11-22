@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.60" />
+    <meta name="wardrobe-build" content="2026-11-22.86.61" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -4051,14 +4051,18 @@ window.notMenswear853 = function (e) {
       html:has(body[data-page="today"]):not(#_):not(div) {
         min-height: 100lvh !important;
       }
+      /* .86.61: Home fits one screen and never scrolls, so the nav never shrinks there */
+      @media (max-width: 899px) {
+        html:has(body[data-page="today"]), body[data-page="today"] { overflow: hidden; overscroll-behavior: none; }
+      }
       .navstack:has(> #subnav[hidden]) { display: none; }
       @media (max-width: 899px) {
         #panel-today:not([hidden]) {
           display: flex;
           flex-direction: column;
           box-sizing: border-box;
-          height: calc(var(--home-vh, 100svh) - var(--bb-h) - var(--home-chrome, 52px));
-          max-height: calc(var(--home-vh, 100svh) - var(--bb-h) - var(--home-chrome, 52px));
+          height: calc(var(--home-vh, 100svh) - var(--bb-h) - var(--home-chrome, 52px) - var(--home-trim, 0px));
+          max-height: calc(var(--home-vh, 100svh) - var(--bb-h) - var(--home-chrome, 52px) - var(--home-trim, 0px));
           min-height: 0;
           overflow: hidden;
         }
@@ -8759,7 +8763,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.60</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.61</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -8931,6 +8935,23 @@ window.notMenswear853 = function (e) {
           var de = document.documentElement.style;
           if (vh > 0) de.setProperty("--home-vh", vh + "px");
           de.setProperty("--home-chrome", (Math.round(h * 10) / 10) + "px");
+          /* .86.61 (David, 22 Nov 2026, a screenshot of Home scrolled so the figure sat under DONNA and the
+             nav had shrunk: "Front page here icons are hidden again - pls make sure you fix this sizing
+             permanently !!!!!"). Whatever else on the phone adds height (the home-indicator area, an element
+             after Home), Home is checked after layout: if the page is still taller than the screen, the
+             picture gives up the difference, and Home is put back at the top so the nav never collapses. */
+          de.setProperty("--home-trim", "0px");
+          var room = vh > 0 ? vh : (window.innerHeight || 0);
+          var bottom = 0, sy = window.scrollY || 0;
+          Array.prototype.forEach.call(document.body.children, function (el) {
+            var cs = getComputedStyle(el);
+            if (cs.display === "none" || cs.position === "fixed" || cs.position === "absolute") return;
+            var rr = el.getBoundingClientRect();
+            if (rr.height > 0) bottom = Math.max(bottom, rr.bottom + sy + (parseFloat(cs.marginBottom) || 0));
+          });
+          var over = Math.ceil(bottom + (parseFloat(getComputedStyle(document.body).paddingBottom) || 0) - room);
+          if (over > 0 && over < 240) de.setProperty("--home-trim", over + "px");
+          if ((window.scrollY || 0) > 0) window.scrollTo(0, 0);
         }
         window.__wardrobeFitToday = fit;
         function run() { try { fit(); } catch (e) {} }
@@ -9857,9 +9878,11 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   function beltFor(belts, c, lv) {
     if (!belts || !belts.length || !c || !c.s || !c.b) return null;
     if (c.b.beltless || c.b.kind === "swim" || c.b.swim) return null;
+    if (lv === 7) return null;                                   /* black-tie trousers have side adjusters, no belt loops */
     var got860 = beltFor860(belts, c, lv);
     if (got860) return got860;
-    var any = belts.filter(function (b) { return !b.multi && !b.casualBelt; }); if (!any.length) any = belts;
+    /* never a multicolour belt the shoes do not suit: with no plain belt to fall back on, no belt */
+    var any = belts.filter(function (b) { return !b.multi && !b.casualBelt; }); if (!any.length) any = belts.filter(function (b) { return !b.multi; });
     var best = null, bd = 1e9;
     any.forEach(function (b) { var dd = Math.abs((b.L || 50) - (c.s.L || 50)); if (dd < bd) { bd = dd; best = b; } });
     return best;
@@ -12146,7 +12169,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.60";
+var WARDROBE_BUILD = "2026-11-22.86.61";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
