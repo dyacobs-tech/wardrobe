@@ -8450,12 +8450,13 @@ window.notMenswear853 = function (e) {
         <div class="outfits-toggle theme-toggle edit-tabs edit-section-tabs" role="group" aria-label="Shop">
           <button type="button" class="chip" id="edit-tab-shop" data-edit-section="shop" aria-pressed="true">Shop</button>
           <button type="button" class="chip" id="edit-tab-curate" data-edit-section="curate" aria-pressed="false">Curate</button>
+          <button type="button" class="chip" id="edit-tab-askdonna" data-edit-section="ask" aria-pressed="false">Ask DONNA</button>
         </div>
         <div class="outfits-toggle theme-toggle edit-tabs edit-shop-tabs" role="group" aria-label="Shop the stores">
           <button type="button" class="chip" id="edit-tab-saved" data-edit-view="saved" aria-pressed="true">Saved<span class="n" id="edit-n-saved"></span></button>
           <button type="button" class="chip" id="edit-tab-searches" data-edit-view="searches" aria-pressed="false">Searches<span class="n" id="edit-n-search"></span></button>
           <button type="button" class="chip" id="edit-tab-build" data-edit-view="build" aria-pressed="false">Build</button>
-          <button type="button" class="chip" id="edit-tab-ask" data-edit-view="ask" aria-pressed="false">Ask DONNA</button>
+          <button type="button" class="chip" id="edit-tab-ask" data-edit-view="ask" aria-pressed="false" hidden>Ask DONNA</button>
           <button type="button" class="chip price-pill" id="price-pill" aria-haspopup="dialog" aria-pressed="false">Price</button>
         </div>
         <div id="edit-v-saved">
@@ -44518,11 +44519,12 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
   function show(v) {
     editState.view = v;
     store.set("editView", v);
-    if (v !== "curate") editState.lastShopView = v;
-    var section = v === "curate" ? "curate" : "shop";
+    /* .86.68 (David, 22 Nov 2026: "Ask Donna should be it own page next to shop / curate"): Shop · Curate · Ask DONNA */
+    if (v !== "curate" && v !== "ask") editState.lastShopView = v;
+    var section = v === "curate" ? "curate" : v === "ask" ? "ask" : "shop";
     document.querySelectorAll("[data-edit-section]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-section") === section)); });
     var shopTabs = document.querySelector("#panel-find .edit-shop-tabs");
-    if (shopTabs) shopTabs.hidden = section === "curate";
+    if (shopTabs) shopTabs.hidden = section !== "shop";
     document.querySelectorAll("[data-edit-view]").forEach(function (b) { if (b.closest(".edit-shop-tabs")) b.setAttribute("aria-pressed", String(b.getAttribute("data-edit-view") === v)); });
     ["saved", "searches", "build", "ask", "curate"].forEach(function (n) { var el = document.getElementById("edit-v-" + n); if (el) el.hidden = n !== v; });
     updateCounts();
@@ -44612,7 +44614,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     if ((b = t.closest("[data-edit-section]"))) {
       var sec = b.getAttribute("data-edit-section");
       if (typeof window.clearFindLookMode === "function") window.clearFindLookMode();
-      show(sec === "curate" ? "curate" : (editState.lastShopView || "saved"));
+      show(sec === "curate" ? "curate" : sec === "ask" ? "ask" : (editState.lastShopView === "ask" ? "saved" : (editState.lastShopView || "saved")));
       return;
     }
     if ((b = t.closest("[data-edit-view]"))) {
