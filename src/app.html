@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.62" />
+    <meta name="wardrobe-build" content="2026-11-22.86.63" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8785,7 +8785,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.62</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.63</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12191,7 +12191,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.62";
+var WARDROBE_BUILD = "2026-11-22.86.63";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -38837,10 +38837,24 @@ function closePopout() {
   }
 }
 window.openPopout = openPopout;
+/* .86.62: the full-size version of the picture Home is showing right now (same file, uncut) */
+window.homeShownPop862 = function () {
+  try {
+    var im = document.getElementById("today-img"), cur = im && !im.hidden ? (im.currentSrc || im.getAttribute("src") || "") : "";
+    var m = /assets\/onbody-cut(?:-hq)?\/([0-9a-z_-]+\.webp)/i.exec(cur);
+    if (m) return "assets/onbody/" + m[1];
+    if (cur && !/^data:/.test(cur)) return cur;
+  } catch (e) {}
+  return "";
+};
 document.addEventListener("click", function (e) {
   var t = e.target && e.target.closest ? e.target.closest("[data-popout]") : null;
   if (!t) return;
   var srcAttr = t.getAttribute("data-popout");
+  /* .86.62: Home's picture is swapped by the avatar code without touching data-popout, which then still
+     named an earlier outfit ("When I click on outfit in home page this OTHER wrong outfit shows up every
+     time"). For Home, the pop-out is always the picture on screen. */
+  if (t.id === "today-img" && typeof window.homeShownPop862 === "function") srcAttr = window.homeShownPop862() || srcAttr;
   if (!srcAttr) return;
   e.preventDefault();
   e.stopPropagation();
@@ -38875,6 +38889,10 @@ if (heroEl) {
          resolves fwRender first). Never a piece photograph:
          piece photos live on Closet / item pages only. */
       var popSrc = lookImg(todayLook);
+      /* .86.62 (David, 22 Nov 2026: "When I click on outfit in home page this OTHER wrong outfit shows up
+         every time"). The look's stored image could be an older picture than the one Home shows. The
+         pop-out now opens the very picture on Home, full size: the same file, uncut. */
+      popSrc = window.homeShownPop862() || popSrc;
       openPopout(popSrc, todayLook.imgAlt || "");
     }
   });
