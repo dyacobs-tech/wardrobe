@@ -156,7 +156,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.49" />
+    <meta name="wardrobe-build" content="2026-11-22.86.50" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -244,6 +244,42 @@ window.notMenswear853 = function (e) {
   var tab = norm(refresh ? (sess || hash || (route && route.tab) || "") : hash) || "today";
   var looks = (route && route.looks) || {};
   document.documentElement.setAttribute("data-boot-tab", tab);
+  /* .86.50 (David, 22 Nov 2026: "When I open the app it's flickers isn't smooth"). Home is put together by
+     about two dozen code files run one after another, and the screen repainted between them: the picture
+     changed height several times, the level label flipped, the weather line and the buttons arrived late.
+     Home's panel now stays clear (header and nav are untouched) until the loader has run its last file and
+     the picture, the caption and the button row have not moved for a quarter of a second; then it shows once.
+     It always shows after 3 seconds, and at once on any touch, key or scroll. */
+  if (tab === "today") (function () {
+    var R = document.documentElement, lifted = false, timer = 0, last = "", since = 0;
+    function lift() {
+      if (lifted) return; lifted = true;
+      if (timer) clearInterval(timer);
+      R.classList.remove("home-cover850");
+      window.__homeShownAt850 = Date.now();
+    }
+    function sig() {
+      var P = document.getElementById("panel-today"); if (!P) return "";
+      var im = document.getElementById("today-img"), row = document.getElementById("today-simple-actions"), cap = P.querySelector(".today-caption");
+      var a = im ? im.getBoundingClientRect() : null, b = row ? row.getBoundingClientRect() : null;
+      /* a picture that is still arriving is not settled; the 1px placeholder and "no picture" both are */
+      if (im && im.getAttribute("src") && !im.complete) return "";
+      return [a ? Math.round(a.top) + "," + Math.round(a.height) : "", im ? (im.currentSrc || im.getAttribute("src") || "").slice(-40) : "", b ? Math.round(b.top) + "," + Math.round(b.height) : "", cap ? cap.textContent : ""].join("|");
+    }
+    function watch() {
+      if (lifted || timer) return;
+      timer = setInterval(function () {
+        var s = sig(), now = Date.now();
+        if (!s || s !== last) { last = s; since = now; return; }
+        if (now - since >= 250) lift();
+      }, 50);
+    }
+    R.classList.add("home-cover850");
+    window.__homeCoverLift850 = lift;
+    setTimeout(lift, 3000);
+    if (window.__appRan850) watch(); else document.addEventListener("wardrobe-app-ran", watch, { once: true });
+    ["touchstart", "pointerdown", "keydown", "wheel"].forEach(function (ev) { window.addEventListener(ev, lift, { capture: true, passive: true, once: true }); });
+  })();
   /* .86.41: Outfits, Go-to's, Liked and Inspo are modes of the Looks page */
   var LKM = { looks: "outfits", gotos: "gotos", liked: "liked", inspo: "inspo" };
   if (LKM[tab]) document.documentElement.setAttribute("data-lkm", LKM[tab]);
@@ -253,6 +289,10 @@ window.notMenswear853 = function (e) {
 })();
     </script>
     <style id="boot-route-865">
+      /* .86.50: Home stays clear until it has settled, then shows once (see the script above) */
+      #panel-today { transition: opacity .18s ease-out; }
+      html.home-cover850 #panel-today { opacity: 0 !important; transition: none !important; }
+      @media (prefers-reduced-motion: reduce) { #panel-today { transition: none; } }
       /* Hide the Home hero until JS switchTab finishes, when this load is not Home. */
       html[data-boot-tab]:not([data-boot-tab="today"]) #panel-today,
       html[data-boot-tab]:not([data-boot-tab="today"]) #today-hero,
@@ -291,7 +331,7 @@ window.notMenswear853 = function (e) {
 
     <link rel="preload" as="script" fetchpriority="low" href="app/00-brand-list.27a288fac9.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/01.57f13e592a.js" />
-    <link rel="preload" as="script" fetchpriority="low" href="app/02.5cf83d84d6.js" />
+    <link rel="preload" as="script" fetchpriority="low" href="app/02.2e720bb990.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/25.318a5abe99.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/26.44c6f329b2.js" />
     <link rel="preload" as="script" fetchpriority="low" href="app/27.7dbf1175b2.js" />
@@ -1512,7 +1552,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.49</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.50</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -2089,12 +2129,28 @@ window.notMenswear853 = function (e) {
     } catch (e) { cb(null); }
   }
   var thIdle = window.requestIdleCallback ? function (f) { window.requestIdleCallback(f, { timeout: 5000 }); } : function (f) { setTimeout(f, 300); };
+  /* .86.50: small tiles are drawn one at a time with a pause between them. New closet pictures used to start
+     every tile job together (where the browser has no requestIdleCallback: all of them 300 ms after the page
+     opened), which cost about 1.8 s of work in one go on the next open. */
+  var thQ850 = [], thRun850 = false;
+  function thNext850() {
+    var f = thQ850.shift();
+    if (!f) { thRun850 = false; return; }
+    thIdle(function () { try { f(); } catch (e) {} setTimeout(thNext850, 120); });
+  }
+  function thQueue850(f) {
+    thQ850.push(f);
+    if (thRun850) return;
+    thRun850 = true;
+    /* not before Home has shown */
+    setTimeout(thNext850, window.__homeShownAt850 ? 300 : 1500);
+  }
   /* draw the tile's own (already decoded) full photo small, once */
   function thMake(im, key) {
     if (!TH.db || TH.has[key] || TH.busy[key]) return;
     TH.busy[key] = 1;
     function go() {
-      thIdle(function () {
+      thQueue850(function () {
         try {
           var nw = im.naturalWidth, nh = im.naturalHeight;
           if (!nw || !nh || nw <= TH_W * 1.25) return;
@@ -2179,7 +2235,7 @@ window.notMenswear853 = function (e) {
     var mc = typeof MessageChannel === "function" ? new MessageChannel() : null, yq = [];
     if (mc) mc.port1.onmessage = function () { var f = yq.shift(); if (f) f(); };
     function yieldThen(f) { if (mc) { yq.push(f); mc.port2.postMessage(0); } else setTimeout(f, 0); }
-    var i = 0, first = true;
+    var i = 0, first = true, held850 = false, ranSaid850 = false;
     function step() {
       for (; i < list.length; i++) {
         var el = list[i], s = document.createElement("script");
@@ -2199,6 +2255,7 @@ window.notMenswear853 = function (e) {
             document.body.appendChild(bsc);
           }
           i++;
+          held850 = true;
           (function (el, s, bs, bi) {
             whenRun(function () {
               var arr = (window.__bundle803 || {})[bs];
@@ -2212,6 +2269,12 @@ window.notMenswear853 = function (e) {
         s.text = el.text;
         el.parentNode.replaceChild(s, el);
       }
+      /* .86.50: every app file has been handed over; once the last of them has run, say so (Home's cover waits for it) */
+      if (i >= list.length && !held850 && !ranSaid850) {
+        ranSaid850 = true;
+        whenRun(function () { yieldThen(function () { window.__appRan850 = true; try { document.dispatchEvent(new Event("wardrobe-app-ran")); } catch (e) {} }); });
+      }
+      held850 = false;
       if (first) {
         first = false;
         try { startHydration(); } catch (e) {}
@@ -2273,7 +2336,7 @@ window.notMenswear853 = function (e) {
 })();
     </script>
     <script type="wardrobe/app" data-src="app/01.57f13e592a.js"></script>
-    <script type="wardrobe/app" data-src="app/02.5cf83d84d6.js"></script>
+    <script type="wardrobe/app" data-src="app/02.2e720bb990.js"></script>
     <script type="wardrobe/app" data-bsrc="app/bundle.3e6ca3846b.js" data-bi="0"></script>
     <script type="wardrobe/app" data-bsrc="app/bundle.3e6ca3846b.js" data-bi="1"></script>
     <script type="wardrobe/app" data-bsrc="app/bundle.3e6ca3846b.js" data-bi="2"></script>
