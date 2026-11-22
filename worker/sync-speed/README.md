@@ -49,8 +49,17 @@ the snapshot's content, the hourly throttle, the ring of 10 snapshots.
 - A save: 2.6 s (was 32 to 43 s).
 - Settings: KV binding `SYNC_KV` and both secrets still bound; `/register`
   without the secret answers 403.
-- Not yet seen live at the time of writing: a background snapshot. The last
-  complete one was 01:51:50 UTC, so none was due until 02:51:50 UTC.
+- First background snapshot, 02:53 UTC (the previous complete one was
+  01:51:50, so none was due before 02:51:50): a save sent at 02:53:05
+  answered in 4.5 s; at 02:53:10 the flag key was present and no new
+  snapshot yet; at 02:53:31 a new complete snapshot (stamp 02:53:10, 5
+  parts, `v: 2`) and no flag key. Read back through the KV API: 31.3 MB,
+  291 records, each identical to the live data, profile data identical.
+  The ring still holds 10; orphan parts went from 1,157 to 1,038.
+  So the snapshot took about 21 s of the 30 s allowed after the answer.
+  When a closet grows enough to pass 30 s, the flag key makes the next
+  sync wait for its snapshot (see 3 above); a scheduled (cron) snapshot
+  would be the cleaner answer then.
 
 ## Files
 
