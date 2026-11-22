@@ -46518,9 +46518,19 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (typeof tryonStart !== "function" || typeof tryonImageRef !== "function") { if (typeof toast === "function") toast("Try-on isn't available in this build."); return; }
     var TS = (typeof TRYON_SLOT !== "undefined") ? TRYON_SLOT : { top: "top", layer: "outer", bottom: "bottom", shoes: "shoes" };
     var TO = (typeof TRYON_ORDER !== "undefined") ? TRYON_ORDER : { top: 1, outer: 2, bottom: 3, shoes: 5 };
-    var pcs = filled.map(function (s) { var p = dm[s[0]]; return { slot: TS[s[0]] || s[0], img: p.own ? (p.it.photo || "") : (p.e.img || ""), name: pieceName(p) }; }).filter(function (x) { return x.img; });
+    /* .86.67 (David: "Shirts ALWAYS tucked under a blazer"; "T shirts ... hanging a couple inches below my belt
+       line"): the top's note to the try-on says how it is worn */
+    var hasLayer867 = !!dm.layer;
+    function topNote867(p) {
+      var n = String(pieceName(p) || "").toLowerCase(), cat = String((p.own ? p.it.category : (p.e.category || p.e.cat || "")) || "").toLowerCase();
+      var tee = /\btee\b|t-shirt|tshirt/.test(n) || /^tees?$/.test(cat);
+      if (tee) return "T-shirt worn untucked, the hem about two inches below the waistband of the trousers";
+      if (hasLayer867 && (/shirt|oxford|polo|knit|sweater|popover/.test(n) || /shirts|polos|sweaters/.test(cat))) return "Tucked into the trousers under the open blazer";
+      return "";
+    }
+    var pcs = filled.map(function (s) { var p = dm[s[0]]; return { slot: TS[s[0]] || s[0], img: p.own ? (p.it.photo || "") : (p.e.img || ""), name: pieceName(p), prompt: s[0] === "top" ? topNote867(p) : "" }; }).filter(function (x) { return x.img; });
     var items = Promise.all(pcs.map(function (pc) { return tryonImageRef(pc.img); })).then(function (refs) {
-      var out = []; refs.forEach(function (ref, i) { if (ref) out.push({ slot: pcs[i].slot, image: ref, name: pcs[i].name }); });
+      var out = []; refs.forEach(function (ref, i) { if (ref) { var o = { slot: pcs[i].slot, image: ref, name: pcs[i].name }; if (pcs[i].prompt) o.prompt = pcs[i].prompt; out.push(o); } });
       out.sort(function (a, b) { return (TO[a.slot] || 0) - (TO[b.slot] || 0); });
       return out;
     });
