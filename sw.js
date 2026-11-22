@@ -38,7 +38,7 @@
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
 const PREVIEW = /\/preview\/$/.test(SCOPE_PATH);
 const NS = PREVIEW ? 'preview-' : '';
-const WARDROBE_BUILD = '2026-11-21.86.46';
+const WARDROBE_BUILD = '2026-11-21.86.47';
 const SHELL_CACHE = NS + 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = NS + 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = NS + 'wardrobe-assets-' + WARDROBE_BUILD;
@@ -46,7 +46,9 @@ const ASSET_CACHE = NS + 'wardrobe-assets-' + WARDROBE_BUILD;
 // ONBODY_CACHE to drop the v2 copies whose left shoe faded out.
 // v4 (.86.46): 38 outfits were redrawn in place with his real faded
 // Levi's 517 (they showed dark indigo); the v3 copies are the old ones.
-const ONBODY_CACHE = NS + 'wardrobe-onbody-v4';
+// v5 (.86.47): 26 more outfits were redrawn in place, with his five-pocket
+// trousers in the light khaki his own photo shows.
+const ONBODY_CACHE = NS + 'wardrobe-onbody-v5';
 // Build .79.3: the JSON manifests (renders, cut-outs, inspo, the Edit
 // catalogue, the cut-out placeholders) are stale-while-revalidate in a
 // cache that survives builds, so a reopen never waits on them; a change
@@ -62,7 +64,7 @@ const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
 // builds (activate drops files no longer listed), precached on install.
 const CODE_CACHE = NS + 'wardrobe-code-v1';
 const CODE_RE = /\/app\/[^\/]+\.[0-9a-f]{10}\.(js|css|json)$/;
-const CODE_FILES = ['./app/app.954a9c15e4.css', './app/00-brand-list.27a288fac9.js', './app/01.57f13e592a.js', './app/02.1ba39aaa12.js', './app/25.318a5abe99.js', './app/26.44c6f329b2.js', './app/27.7dbf1175b2.js', './app/bundle.4da13cc23a.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json', './app/endless.8516cd0bf7.js', './app/endless-worker.a04abbcc7a.js'];
+const CODE_FILES = ['./app/app.954a9c15e4.css', './app/00-brand-list.27a288fac9.js', './app/01.57f13e592a.js', './app/02.3643db418f.js', './app/25.318a5abe99.js', './app/26.44c6f329b2.js', './app/27.7dbf1175b2.js', './app/bundle.4da13cc23a.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json', './app/endless.8516cd0bf7.js', './app/endless-worker.a04abbcc7a.js'];
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
