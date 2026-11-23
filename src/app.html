@@ -7333,6 +7333,8 @@ window.notMenswear853 = function (e) {
       }
       /* Profile sizes: a label that runs to two lines ("Sweater / knit size") pushed its box below its neighbour's */
       .profile-grid > div { display: flex; flex-direction: column; justify-content: flex-end; }
+      .closet-filters875 { display: flex; gap: 8px; margin: 6px 0 8px; }
+      .closet-filters875 select { flex: 1 1 0; min-width: 0; height: 38px; border-radius: 999px; border: 1px solid var(--border-strong, #cfc6b8); background: var(--surface, #fffdf8); color: inherit; padding: 0 12px; font: inherit; font-size: 13px; }
       .dm-filters869 { display: flex; gap: 8px; margin: 8px 0 10px; }
       .dm-filters869 select { flex: 1 1 0; min-width: 0; height: 38px; border-radius: 999px; border: 1px solid var(--border-strong, #cfc6b8); background: var(--surface, #fffdf8); color: inherit; padding: 0 12px; font: inherit; font-size: 13px; }
       .ins-look868 { padding: 0; border: 0; background: none; border-radius: 12px; overflow: hidden; display: block; cursor: pointer; }
@@ -7754,6 +7756,7 @@ window.notMenswear853 = function (e) {
               </div>
               <button type="button" class="cdd-btn closet-add-btn closet-add789" id="closet-add-entry" aria-label="Add a piece" title="Add a piece"><span class="cdd-label" aria-hidden="true">+</span></button>
             </div>
+            <div class="closet-filters875"><select id="ward-brand875" aria-label="Filter by brand"><option value="">Brand: all</option></select><select id="ward-colour875" aria-label="Filter by colour"><option value="">Colour: all</option></select></div>
             <div class="closet-stale-row"><button type="button" class="chip" id="ward-stale-chip" aria-pressed="false">Not worn in 90 days</button><span class="meta" id="ward-stale-note"></span></div>
             <div class="item-grid" id="item-grid"></div>
         <section id="panel-watches" hidden aria-label="Watches">
@@ -28283,6 +28286,11 @@ WARD_CAT_GROUPS.forEach(function (g) {
 syncWardCatLabels();
 var wardQuery = "";
 var _wardSearchTimer = null;
+document.addEventListener("change", function (e) {
+  if (!e.target) return;
+  if (e.target.id === "ward-brand875") { wardBrand875 = e.target.value || ""; renderWardrobe(); }
+  else if (e.target.id === "ward-colour875") { wardColour875 = e.target.value || ""; renderWardrobe(); }
+});
 document.getElementById("ward-search").addEventListener("input", function () {
   wardQuery = this.value;
   clearTimeout(_wardSearchTimer);
@@ -28420,15 +28428,48 @@ function renderStaleChip() {
       : counts.excluded + " pieces have no wear date yet and aren't counted.";
   } else note.textContent = "";
 }
+/* .86.75 (David, 23 Nov 2026: "Should be able to search by brand in my closet or color"): Brand and Colour
+   dropdowns, and the search box matches every word on its own (brand, colour, second colours, colour family) */
+var wardBrand875 = "", wardColour875 = "";
+var COLOUR_FAM875 = { white: "White & cream", beige: "Beige & stone", brown: "Brown & tan", grey: "Grey", black: "Black", navy: "Navy", blue: "Blue", green: "Green", olive: "Olive", burgundy: "Burgundy & red", red: "Burgundy & red", pink: "Pink", orange: "Orange & rust", yellow: "Yellow", purple: "Purple" };
+var COLOUR_WORDS875 = [[/navy|midnight/, "Navy"], [/black|charcoal black/, "Black"], [/white|cream|ivory|ecru|off-white|milk|chalk/, "White & cream"],
+  [/beige|stone|sand|khaki|oatmeal|taupe|greige|camel|natural|ochre/, "Beige & stone"], [/rust|orange|terracotta|coral/, "Orange & rust"],
+  [/brown|tan|chocolate|cognac|tobacco|espresso|mocha/, "Brown & tan"], [/burgundy|wine|red|maroon|plum/, "Burgundy & red"], [/pink|rose/, "Pink"],
+  [/olive|khaki green|sage/, "Olive"], [/green|teal|turquoise|mint/, "Green"], [/grey|gray|charcoal|slate|silver/, "Grey"],
+  [/yellow|mustard|gold/, "Yellow"], [/purple|lilac|lavender/, "Purple"], [/blue|indigo|denim|chambray|sky/, "Blue"]];
+function colourFam875(i) {
+  /* the piece's own main colour name first ("Red" trunks with a navy print are red), then the colour read from its photo */
+  var cn = String(i.colourName || "").toLowerCase().split(/[\/·,&]| and /)[0];
+  for (var w = 0; w < COLOUR_WORDS875.length; w++) if (COLOUR_WORDS875[w][0].test(cn)) return COLOUR_WORDS875[w][1];
+  var fam = ""; try { if (window.WardrobeComposer) fam = WardrobeComposer.profile(i, 0).fam || ""; } catch (e) {}
+  return COLOUR_FAM875[fam] || (fam ? fam.charAt(0).toUpperCase() + fam.slice(1) : "Other");
+}
+function brandOf875(i) { var b = (typeof wardBrandKey === "function" ? wardBrandKey(i) : (i.brand || "")) || ""; return String(b).trim() || "Other"; }
+function paintWardFilters875() {
+  var bs = document.getElementById("ward-brand875"), cs = document.getElementById("ward-colour875"); if (!bs || !cs) return;
+  var brands = {}, cols = {};
+  wardrobeItems.forEach(function (i) { if (wardFilter !== "All" && i.category !== wardFilter) return; brands[brandOf875(i)] = 1; cols[colourFam875(i)] = 1; });
+  function opts(sel, all, label, cur) {
+    var keys = Object.keys(all).sort(function (a, b) { return a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b); });
+    var h = '<option value="">' + label + ': all</option>' + keys.map(function (k) { return '<option value="' + esc(k) + '"' + (k === cur ? " selected" : "") + ">" + esc(k) + "</option>"; }).join("");
+    if (sel.innerHTML !== h) sel.innerHTML = h;
+  }
+  opts(bs, brands, "Brand", wardBrand875); opts(cs, cols, "Colour", wardColour875);
+}
 function renderWardrobe() {
   var q = wardQuery.trim().toLowerCase();
+  var words875 = q ? q.split(/\s+/).filter(Boolean) : [];
   var staleSet = wardStaleOnly ? stalePieceIds(90) : null;
+  paintWardFilters875();
   var items = wardrobeItems.filter(function (i) {
     if (staleSet && !staleSet[i.id]) return false;
     if (wardFilter !== "All" && i.category !== wardFilter) return false;
-    if (!q) return true;
-    var hay = (i.name + " " + (i.brand || "") + " " + i.category + " " + (i.colourName || "") + " " + (i.notes || "")).toLowerCase();
-    return hay.indexOf(q) !== -1;
+    if (wardBrand875 && brandOf875(i) !== wardBrand875) return false;
+    if (wardColour875 && colourFam875(i) !== wardColour875) return false;
+    if (!words875.length) return true;
+    var hay = (i.name + " " + (i.brand || "") + " " + brandOf875(i) + " " + i.category + " " + (i.colourName || "") + " " +
+      (i.extraColours || []).map(function (c) { return c && c.name || ""; }).join(" ") + " " + colourFam875(i) + " " + (i.notes || "")).toLowerCase();
+    return words875.every(function (w) { return hay.indexOf(w) !== -1; });
   });
   /* Alphabetical on both keys (build .28): All sorts type →
      brand → name; a single category sorts brand → name. Stable
