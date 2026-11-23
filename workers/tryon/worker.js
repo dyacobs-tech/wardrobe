@@ -449,7 +449,10 @@ function openaiKey(env) {
   return null;
 }
 function keyShapes(env) {
-  return KEY_NAMES.filter((n) => env[n] !== void 0).map((n) => ({ name: n, kind: keyKind(env[n]), length: String(env[n] || "").trim().length }));
+  return KEY_NAMES.filter((n) => env[n] !== void 0).map((n) => {
+    const raw = String(env[n] || ""), t = raw.trim();
+    return { name: n, kind: keyKind(raw), length: t.length, innerSpace: /\s/.test(t), outerSpace: raw !== t, quoted: /^["']|["']$/.test(t), prefix: t.slice(0, t.startsWith("sk-proj-") ? 8 : 3) };
+  });
 }
 function openaiModels(env) {
   const list = [];
@@ -498,7 +501,7 @@ async function handleAskPing(env, json2) {
       tried.push(m + ": " + clip(e.message, 80));
     }
   }
-  return json2({ ok: false, reason: "all_models_failed", tried });
+  return json2({ ok: false, reason: "all_models_failed", tried, keys: keyShapes(env) });
 }
 function parseModelJson(res) {
   let r = res?.response ?? res?.result?.response ?? res;
