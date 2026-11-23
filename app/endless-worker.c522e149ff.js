@@ -242,7 +242,7 @@ if(q.lens&&outs.length){var have2=outs.map(function(x){return x.key;});var extra
 x._ls=t+rng()*0.12;});outs.sort(rank);outs=outs.slice(0,q.n);}
 return outs.map(slim);}
 function priceOk(p,pr){if(!pr||pr.mode!=="piece")return true;var v=p.price;if(!(v>0))return pr.lo<=0&&pr.hi==null;return v>=(pr.lo||0)&&(pr.hi==null||v<=pr.hi);}
-function groupForLevel(level){var n=+level||0;if(n<=2)return"casual";if(n===3||n===4)return"smart";if(n===5)return"business";return"formal";}
+function groupForLevel(level){var n=+level||0;return({1:"pool",2:"casual",3:"smart",4:"sharp",5:"business",6:"formal",7:"blacktie"})[n]||"smart";}
 function weightsFor(q){var W=(q&&q.weights)||{};if(W.mode==="all")return W.all||{};var g=groupForLevel(q&&q.level);return(W.byLevel&&W.byLevel[g])||W.all||{};}
 function weightLenses(q){var wt=weightsFor(q),out=[];ICONS.forEach(function(ic){var w=+wt[ic.id]||0;if(w<=0)return;var lens=ic.lens;if(!lens)return;out.push({ic:ic,w:w,lens:lens});});return out;}
 function iconShare(feed,wt,W){var tot=0,on=0,maxW=0;var hiAt=(W&&(W.scale===100||W.v===2))?80:8;ICONS.forEach(function(ic){var w=+wt[ic.id]||0;if(w>0){tot+=w;on++;if(w>maxW)maxW=w;}});if(!on||tot<=0)return 0;var high=maxW>=hiAt;if(feed==="allnew")return high?0.70:0.32;return high?0.50:0.16;}

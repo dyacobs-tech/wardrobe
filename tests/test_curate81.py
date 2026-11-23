@@ -131,7 +131,8 @@ def main():
         check("Kraft and Beckham are icons", "Alexander Kraft" in names and "David Beckham" in names, names)
         check("Skarsgård is not an icon", not any("skarsg" in (n or "").lower() for n in names), names)
         check("Squarzi is present (casual stand-in)", any("Squarzi" in (n or "") for n in names), names)
-        check("dress-level selector", pg.locator("#cw-levels [data-cw-level]").count() == 4)
+        # .86.93 (David, 24 Nov 2026, asked which dress-level list should appear everywhere: "All of them"): all seven
+        check("dress-level selector has all seven levels", pg.locator("#cw-levels [data-cw-level]").count() == 7)
         check("same-for-all control", pg.locator("#cw-same").count() == 1)
         check("Icons sub-tab active", pg.evaluate("document.querySelector('[data-curate-view=icons]').getAttribute('aria-pressed')") == "true")
         # overflow at 390

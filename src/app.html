@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.92" />
+    <meta name="wardrobe-build" content="2026-11-22.86.93" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -5812,7 +5812,7 @@ window.notMenswear853 = function (e) {
         border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg);
       }
       html body #panel-today #today-type-row .cdd-opt[aria-pressed="true"] { font-weight: 650 !important; }
-      html body #panel-today #today-type-row .cdd-opt[data-studio-type="7"] { display: none !important; }
+      /* .86.93 (David, 24 Nov 2026: all seven dress levels everywhere, "All of them"): Black Tie is shown on Home too */
       @keyframes ddrop792 { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
       /* Home: no masthead paint at all (only the person icon), and the hero
          starts below it — nothing can ever clip his head */
@@ -7010,6 +7010,9 @@ window.notMenswear853 = function (e) {
       .en-undrawn857 { margin: 18px 16px 0; text-align: center; font-size: 13px; line-height: 1.5; }
       .en-undrawn857 .btn-ghost { display: block; margin: 10px auto 0; }
       #ins-head841 .ins-note854 { flex: 1 0 100%; order: 9; margin: 2px 0 0; font-size: 12.5px; line-height: 1.35; color: var(--dim); }
+      /* .86.93 (David, 24 Nov 2026, asked "Remove the 12 helper captions? Some are the instructions shown on empty pages."
+         — "Yes"): explanatory captions are gone; empty pages keep a few words without instructions */
+      .ins-note854, .cx-note858, .cw-help893, #panel-prules .rules-lead, #sync-relink-note { display: none !important; }
       html[data-lkm="inspo"] #pv-pills [data-pv-clear="lens"] { display: none !important; }
       /* the avatar on a Liked or Go-to card fits its box, as on Outfits (it was drawn at full size and cropped to head and chest) */
       .lk-card841 .cf-media > .mine-avatar { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
@@ -7350,6 +7353,28 @@ window.notMenswear853 = function (e) {
         #subnav-me .subnav-scroll { gap: 6px !important; }
         #subnav-me .subnav-scroll .subtab, #subnav-me .subnav-scroll > .subtab:last-child { padding: 0 12px !important; min-width: 48px !important; }
       }
+      /* .86.93 (David, 24 Nov 2026, asked "Make every tab row look the same?" — "Yes"): one tab row everywhere, the
+         Looks one: a single outlined capsule, 36px tabs of equal width, 13px semibold, grey text, the chosen tab
+         filled dark. Shop, Curate, Profile, Calendar and the small Liked / Icons rows used tan or separate pills. */
+      html body .lk-seg841:not(#n893), html body #panel-find .edit-section-tabs:not(#n893), html body #panel-find .edit-shop-tabs:not(#n893), html body #panel-find .curate-subs:not(#n893), html body .ins-mini841:not(#n893), html body #subnav-me .subnav-scroll:not(#n893), html body .cal-subtabs:not(#n893) {
+        display: flex !important; align-items: center !important; gap: 0 !important; padding: 3px !important;
+        border: 1px solid var(--border-strong) !important; border-radius: 999px !important; background: var(--surface) !important;
+      }
+      html body .lk-seg841 > button:not(#n893), html body #panel-find .edit-section-tabs > button:not(#n893), html body #panel-find .edit-shop-tabs > button:not(#n893), html body #panel-find .curate-subs > button:not(#n893), html body .ins-mini841 > button:not(#n893), html body #subnav-me .subnav-scroll > button:not(#n893), html body .cal-subtabs > button:not(#n893) {
+        flex: 1 1 0 !important; min-width: 0; height: 36px !important; min-height: 36px !important; margin: 0 !important;
+        border: 0 !important; border-radius: 999px !important; background: transparent !important; box-shadow: none !important;
+        color: var(--dim) !important; font-size: 13px !important; font-weight: 600 !important; letter-spacing: 0 !important;
+        padding: 0 10px !important; white-space: nowrap !important;
+      }
+      html body .lk-seg841 > button:not(#n893)[aria-pressed="true"], html body .lk-seg841 > button:not(#n893)[aria-selected="true"], html body #panel-find .edit-section-tabs > button:not(#n893)[aria-pressed="true"], html body #panel-find .edit-section-tabs > button:not(#n893)[aria-selected="true"], html body #panel-find .edit-shop-tabs > button:not(#n893)[aria-pressed="true"], html body #panel-find .edit-shop-tabs > button:not(#n893)[aria-selected="true"], html body #panel-find .curate-subs > button:not(#n893)[aria-pressed="true"], html body #panel-find .curate-subs > button:not(#n893)[aria-selected="true"], html body .ins-mini841 > button:not(#n893)[aria-pressed="true"], html body .ins-mini841 > button:not(#n893)[aria-selected="true"], html body #subnav-me .subnav-scroll > button:not(#n893)[aria-pressed="true"], html body #subnav-me .subnav-scroll > button:not(#n893)[aria-selected="true"], html body .cal-subtabs > button:not(#n893)[aria-pressed="true"], html body .cal-subtabs > button:not(#n893)[aria-selected="true"] { background: var(--ink-btn) !important; color: var(--accent-ink) !important; }
+      /* the small two-tab rows size each tab to its words ("New + mine" was cut); the main rows span the page */
+      html body .ins-mini841:not(#n893) > button:not(#n893) { flex: 1 0 auto !important; padding: 0 16px !important; }
+      html body .lk-seg841:not(#n893) { margin-left: 0 !important; margin-right: 0 !important; }
+      html body .lk-segw841:not(#n893) { padding-left: 0 !important; padding-right: 0 !important; }
+      html body #subnav-me:not(#n893):not([hidden]) { padding-left: 0 !important; padding-right: 0 !important; width: 100% !important; box-sizing: border-box !important; }
+      html body .subnav .wrap:has(> #subnav-me:not([hidden])) { padding-left: 16px !important; padding-right: 16px !important; }
+      html body #subnav-me .subnav-scroll:not(#n893) { flex: 1 1 100% !important; width: 100% !important; margin: 0 !important; }
+      html body #cw-levels [data-cw-level][aria-pressed="true"]:not(#n893) { background: var(--ink-btn) !important; color: var(--accent-ink) !important; border-color: var(--ink-btn) !important; }
       @media (max-width: 380px) {
         #subnav-me .subnav-scroll { gap: 4px !important; }
         #subnav-me .subnav-scroll .subtab, #subnav-me .subnav-scroll > .subtab:last-child { padding: 0 9px !important; min-width: 48px !important; }
@@ -8554,10 +8579,13 @@ window.notMenswear853 = function (e) {
               <label class="cw-all"><input type="checkbox" id="cw-same" /> Same for all levels</label>
             </div>
             <div id="cw-levels" role="group" aria-label="Dress level">
+              <button type="button" data-cw-level="pool" aria-pressed="false">Pool / Beach</button>
               <button type="button" data-cw-level="casual" aria-pressed="true">Daytime</button>
               <button type="button" data-cw-level="smart" aria-pressed="false">Evening Casual</button>
+              <button type="button" data-cw-level="sharp" aria-pressed="false">Evening Sharp</button>
               <button type="button" data-cw-level="business" aria-pressed="false">Evening Dressy</button>
               <button type="button" data-cw-level="formal" aria-pressed="false">Formal</button>
+              <button type="button" data-cw-level="blacktie" aria-pressed="false">Black Tie</button>
             </div>
             <div class="cw-search" id="cw-search">
               <label class="field" for="cw-search-q">Search or add an icon</label>
@@ -8568,7 +8596,7 @@ window.notMenswear853 = function (e) {
               <button type="button" class="btn-ghost" id="cw-apply-all">Apply these to every level</button>
             </div>
             <div id="cw-sliders"></div>
-            <p class="cw-note">These steer looks from your closet, Mix and New, and Shop the look. A single Icon in Looks still overrides. Wardrobe Rules always win, and a blazer or Business Casual / Formal / Black Tie look never uses sneakers or cupsole slip-ons.</p>
+            <p class="cw-note cw-help893">These steer looks from your closet, Mix and New, and Shop the look. A single Icon in Looks still overrides. Wardrobe Rules always win, and a blazer or Business Casual / Formal / Black Tie look never uses sneakers or cupsole slip-ons.</p>
           </div>
           <div id="curate-pages"></div>
         </div>
@@ -8854,7 +8882,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.92</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.93</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12429,7 +12457,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.92";
+var WARDROBE_BUILD = "2026-11-22.86.93";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -12540,8 +12568,8 @@ function persistWardrobeRules() {
 }
 function rulesCountLabel() {
   var n = wardrobeRules.length, on = wardrobeRules.filter(function (r) { return r && r.enabled !== false; }).length;
-  if (!n) return "No rules yet — add one in plain English";
-  if (on === n) return n === 1 ? "1 rule the engine always follows" : (n + " rules the engine always follows");
+  if (!n) return "No rules yet";
+  if (on === n) return n === 1 ? "1 rule" : (n + " rules");
   return on + " of " + n + " on";
 }
 function renderRulesEntry() {
@@ -31868,7 +31896,7 @@ function fetchWeather(attempt) {
 function weatherFailed(attempt) {
   if (!attempt) { setTimeout(function () { fetchWeather(1); }, 2500); return; }
   var el = document.getElementById("loc-weather");
-  if (el && !currentWeather) el.textContent = "Weather unavailable right now — the day's look stands, and location still applies when it returns.";
+  if (el && !currentWeather) el.textContent = "Weather unavailable.";
 }
 function setCurrentLoc(loc, silent) {
   currentLoc = { name: loc.name, lat: loc.lat, lon: loc.lon, admin: loc.admin || "", country: loc.country || "" };
@@ -37887,7 +37915,7 @@ function renderTripList() {
   if (!el) return;
   var keys86 = allTripKeys();
   if (!keys86.length) {
-    el.innerHTML = '<div class="tp-empty"><p class="tp-empty-note">No trips yet. Plan one and DONNA packs it from your closet.</p><button type="button" class="btn-ink" data-tp-create>Create trip</button></div>';
+    el.innerHTML = '<div class="tp-empty"><p class="tp-empty-note">No trips yet.</p><button type="button" class="btn-ink" data-tp-create>Create trip</button></div>';
     return;
   }
   el.innerHTML = keys86.map(function (k) {
@@ -45504,7 +45532,7 @@ window.inspoView = "withmine";
     var qEl = document.getElementById("ask-q");
     if (qEl) qEl.placeholder = signed ? "Ask DONNA…" : "Sign in to ask…";
     if (!signed) {
-      host.innerHTML = '<div class="ask-signedout"><p class="ask-a ask-msg">Ask is ready once this device is signed in. Open Profile to connect, then come back here.</p><button type="button" class="btn-ink" id="ask-goto-profile">Open Profile</button></div>';
+      host.innerHTML = '<div class="ask-signedout"><p class="ask-a ask-msg">Sign in on Profile to use Ask.</p><button type="button" class="btn-ink" id="ask-goto-profile">Open Profile</button></div>';
     } else {
       host.innerHTML = askThread.map(turnHTML).join("");
     }
@@ -46613,7 +46641,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var host = ensureHost("lk-gotos841"); if (!host) return;
     gList = gotoEntries();
     if (!gList.length) {
-      host.innerHTML = '<p class="meta lk-empty841">No go-to’s yet. Open any outfit and tap <b>Wore it</b>; outfits you wear land here.</p>';
+      host.innerHTML = '<p class="meta lk-empty841">No go-to’s yet.</p>';
       return;
     }
     host.innerHTML = '<div class="options-grid cf-grid lk-grid841">' + gList.map(function (g, i) {
@@ -46736,7 +46764,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       '<button type="button" data-lk-sub853="palettes" aria-pressed="' + (likedSub853 === "palettes" ? "true" : "false") + '">Palettes' + (nPal ? " · " + nPal : "") + "</button></div></div>";
     if (likedSub853 === "palettes") { host.innerHTML = h + palettesHTML853(); return; }
     if (!pics.length && !lInspo.length) {
-      host.innerHTML = h + '<p class="meta lk-empty841">No liked looks with a picture yet. Tap the thumbs-up on any outfit in Outfits or The Edit and it lands here.</p>';
+      host.innerHTML = h + '<p class="meta lk-empty841">No liked looks yet.</p>';
       return;
     }
     if (pics.length) {
@@ -49134,7 +49162,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     });
     h += "</div>";
     if (!list.length) {
-      h += '<div class="card empty rnd-empty"><p>No renders yet.</p><p class="meta">Tap See it on me on a look, an icon, or a piece — in Looks, The Edit, Shop or Build — and the render lands here, on every device.</p></div>';
+      h += '<div class="card empty rnd-empty"><p>No renders yet.</p></div>';
     } else {
       h += '<p class="rnd-count">' + list.length + " render" + (list.length === 1 ? "" : "s") + " of you \u00b7 newest first</p>";
       h += '<div class="rnd-grid" id="rnd-grid">';
@@ -49277,12 +49305,18 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     /* .86.42: grouped by David's dress levels (ids kept, so saved weights
        stay valid): Daytime with Pool / Beach; Evening Casual on its own;
        Evening Dressy; Formal with Black Tie */
-    casual: { id: "casual", label: "Daytime", levels: [1, 2] },
-    smart: { id: "smart", label: "Evening Casual", levels: [3, 4] },
+    /* .86.93 (David, 24 Nov 2026, asked which dress-level list should appear everywhere: "All of them"): each of
+       the seven levels has its own weights; the three new ones start from the group they were part of */
+    pool: { id: "pool", label: "Pool / Beach", levels: [1] },
+    casual: { id: "casual", label: "Daytime", levels: [2] },
+    smart: { id: "smart", label: "Evening Casual", levels: [3] },
+    sharp: { id: "sharp", label: "Evening Sharp", levels: [4] },
     business: { id: "business", label: "Evening Dressy", levels: [5] },
-    formal: { id: "formal", label: "Formal", levels: [6, 7] }
+    formal: { id: "formal", label: "Formal", levels: [6] },
+    blacktie: { id: "blacktie", label: "Black Tie", levels: [7] }
   };
-  var GROUP_ORDER = ["casual", "smart", "business", "formal"];
+  var GROUP_ORDER = ["pool", "casual", "smart", "sharp", "business", "formal", "blacktie"];
+  var PARENT893 = { pool: "casual", sharp: "smart", blacktie: "formal" };
   var HIGH = 80, MID = 20, MAX = 100;
   var LENS_WORDS = ["double-breasted", "blazer", "suit", "polo", "loafer", "linen", "knit", "sweater", "cardigan", "chino", "jean", "denim", "tee", "t-shirt", "shirt", "oxford", "trouser", "shorts", "suede", "boot", "sneaker", "overshirt", "jacket", "coat", "turtleneck", "roll-neck", "rollneck", "cashmere", "gurkha", "pleat", "leather", "tweed", "flannel", "corduroy", "camp collar", "henley", "espadrille", "driver", "derby", "chelsea", "field jacket", "safari", "bomber", "peacoat", "trench", "waistcoat", "cable"];
   var lensMemo = {};
@@ -49310,8 +49344,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     GROUP_ORDER.forEach(function (g) { by[g] = Object.assign({}, mid); });
     /* Casual leans Squarzi — Alexander Skarsgård is not in the icon set (see the HAN-14 report). Business and Formal lean Kraft + Beckham. */
     /* .86.42: Evening Casual (its own group now) leans Squarzi too */
-    ["casual", "smart"].forEach(function (g) { if (by[g].squarzi !== undefined) by[g].squarzi = HIGH; });
-    ["business", "formal"].forEach(function (g) {
+    ["pool", "casual", "smart", "sharp"].forEach(function (g) { if (by[g].squarzi !== undefined) by[g].squarzi = HIGH; });
+    ["business", "formal", "blacktie"].forEach(function (g) {
       if (by[g].kraft !== undefined) by[g].kraft = HIGH;
       if (by[g].beckham !== undefined) by[g].beckham = HIGH;
     });
@@ -49336,7 +49370,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (!raw || typeof raw !== "object") return d;
     var out = { mode: raw.mode === "all" ? "all" : "per", all: Object.assign({}, d.all, raw.all || {}), byLevel: {}, scale: 100, v: 2 };
     GROUP_ORDER.forEach(function (g) {
-      out.byLevel[g] = Object.assign({}, d.byLevel[g], (raw.byLevel && raw.byLevel[g]) || {});
+      var own = raw.byLevel && raw.byLevel[g], par = PARENT893[g] && raw.byLevel && raw.byLevel[PARENT893[g]];
+      out.byLevel[g] = Object.assign({}, d.byLevel[g], own || par || {});
     });
     return out;
   }
@@ -51070,10 +51105,8 @@ function dealMine(q) {
 function priceOk(p, pr) { if (!pr || pr.mode !== "piece") return true; var v = p.price; if (!(v > 0)) return pr.lo <= 0 && pr.hi == null; return v >= (pr.lo || 0) && (pr.hi == null || v <= pr.hi); }
 function groupForLevel(level) {
   var n = +level || 0;
-  if (n <= 2) return "casual";          /* .86.42: Daytime (and Pool / Beach) */
-  if (n === 3 || n === 4) return "smart"; /* Evening Casual */
-  if (n === 5) return "business";
-  return "formal";
+  /* .86.93: one weight group per dress level (David: "All of them") */
+  return ({ 1: "pool", 2: "casual", 3: "smart", 4: "sharp", 5: "business", 6: "formal", 7: "blacktie" })[n] || "smart";
 }
 function weightsFor(q) {
   var W = (q && q.weights) || {};
