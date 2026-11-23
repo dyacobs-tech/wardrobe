@@ -48239,7 +48239,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   "use strict";
   var hero = document.getElementById("today-hero"), img = document.getElementById("today-img");
   if (!hero || !img) return;
-  var FEET = null, BASE_BOT = 50;
+  var FEET = null, BASE_BOT = 50, HEIGHT874 = 1106;
   function idOf(u) { var m = String(u || "").match(/onbody-cut\/([^\/?#]+?)\.(webp|png)/i); return m ? m[1] : ""; }
   function place(el) {
     if (!FEET || !el) return;
@@ -48251,6 +48251,16 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var dy = Math.round((f[0] - BASE_BOT) * s * 10) / 10, dx = Math.round(-f[1] * s * 10) / 10;
     var v = "calc(50% + " + dx + "px) calc(100% + " + dy + "px)";
     if (el.style.objectPosition !== v) el.style.setProperty("object-position", v, "important");
+    /* .86.74 (David, 23 Nov 2026: "My height isn't consistent throughout these!!!!!!!"): each drawing has him a
+       little taller or shorter in the frame (1088-1165px head to sole); scale each to the same height, anchored on
+       his feet so the floor line does not move */
+    if (f.length >= 3) {
+      var fig = 1200 - f[0] - f[2], k = fig > 600 ? Math.max(0.9, Math.min(1.1, HEIGHT874 / fig)) : 1;
+      var org = "50% calc(100% - " + (Math.round((BASE_BOT * s + parseFloat(cs.paddingBottom)) * 10) / 10) + "px)";
+      var sc = Math.abs(k - 1) < 0.004 ? "" : String(Math.round(k * 1000) / 1000);
+      if (el.style.scale !== sc) el.style.scale = sc;
+      if (sc && el.style.transformOrigin !== org) el.style.transformOrigin = org;
+    }
   }
   function all() { place(img); hero.querySelectorAll(".hero-xfade").forEach(place); }
   window.heroFeet801 = function () { return FEET; };
