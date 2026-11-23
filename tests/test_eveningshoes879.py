@@ -7,7 +7,8 @@ and of the Baudoin & Lange maple suede espadrilles: "Maple I wear these a lot!!!
 Baudoin are evening sharp evening dressy formal / Espadrilles stop at evening sharp", and of the
 other Baudoins: "Others can go through formal". Then: "Evening sharp can also have sneakers!!!!! / But casual
 should NOT have any loafers or velvets or anything / NO - baudoin espadrilles can be casual daytime or evening
-sharp as top category. / Other baudoins are evening sharp to formal."
+sharp as top category. / Other baudoins are evening sharp to formal." And finally: "Maple baudoins evening
+sharp to formal!!!!!! Espradrilles casual to sharp!!!!!"
 Also: "appears my velasca slippers in every picture '!!!!! Where are my other shoes??????"
 """
 import sys
@@ -61,7 +62,8 @@ with sync_playwright() as pw:
         lpEsp: P('Loro Piana Light Blue Knit Espadrilles'),
         casualYes: ['Vans Tan Suede Authentic Sneakers', 'TOMS Cream Canvas Slip-Ons', 'Bottega Veneta Black and White Intrecciato Slip-On Sneakers', 'D.A.T.E. Cream and Navy Retro Runner Sneakers'].filter(n => !casual(n)),
         casualNo: ['Giorgio Armani Navy Suede Whipstitch Slip-On Loafers', 'Baudoin & Lange Tan Suede Penny Espadrilles', 'Prada Dark Brown Suede Boat Shoes', 'Loro Piana Dark Brown Suede Summer Walk Loafers', 'Loro Piana Light Blue Knit Espadrilles'].filter(n => casual(n)) }; }""")
-    assert r["maple"]["lo"] == 2 and r["maple"]["hi"] == 4, r["maple"]
+    assert r["maple"]["lo"] == 4 and r["maple"]["hi"] == 6, r["maple"]
+    assert r["lpEsp"]["lo"] <= 2, r["lpEsp"]
     assert r["tassel"]["lo"] == 4 and r["tassel"]["hi"] == 6, r["tassel"]
     # no loafers, slippers or velvets below Evening Sharp
     low = page.evaluate("""() => ['Giorgio Armani Navy Suede Whipstitch Slip-On Loafers', 'Velasca Brown Suede Venetian Slippers',

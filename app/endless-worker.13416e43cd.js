@@ -122,7 +122,7 @@ else if(/5-pocket|five-pocket|jogger|drawstring/.test(n)){p.lo=2;p.hi=4;}
 else if(/chino|twill|cotton/.test(n)){p.lo=2;p.hi=6;p.kind="chinos";}
 else if(/dress|wool|flannel|tailored|pleat|tuxedo/.test(n)&&!/seersucker/.test(n)){p.lo=4;p.hi=/tuxedo/.test(n)?7:6;p.warm=/flannel|wool/.test(n)?1:0;}
 else{p.lo=3;p.hi=6;}
-if(p.hi===6&&(p.fam==="navy"||p.fam==="black"||p.fam==="grey")&&/dress|tailored|wool|tuxedo/.test(n))p.hi=7;}}else if(cat==="Shoes"){p.role="shoes";if(/baudoin/.test(n)&&/espadrille|maple/.test(n)){p.lo=2;p.hi=4;p.kind="espadrille";p.maple879=true;}
+if(p.hi===6&&(p.fam==="navy"||p.fam==="black"||p.fam==="grey")&&/dress|tailored|wool|tuxedo/.test(n))p.hi=7;}}else if(cat==="Shoes"){p.role="shoes";if(/baudoin/.test(n)&&/espadrille|maple/.test(n)){p.lo=4;p.hi=6;p.kind="loafer";p.maple879=true;}
 else if(/baudoin/.test(n)){p.lo=4;p.hi=6;p.kind="loafer";}
 else if(/espadrille/.test(n)){p.lo=1;p.hi=4;p.kind="espadrille";p.warm=-2;}
 else if(/whipstitch|summer walk/.test(n)){p.kind="loafer";p.lo=4;p.hi=4;p.warm=-1;}
