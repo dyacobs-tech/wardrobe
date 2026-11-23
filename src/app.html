@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.90" />
+    <meta name="wardrobe-build" content="2026-11-22.86.91" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -7348,11 +7348,11 @@ window.notMenswear853 = function (e) {
          edge), more on a 375px one; on phones they keep 13px text with a little less padding, so all four fit. */
       @media (max-width: 440px) {
         #subnav-me .subnav-scroll { gap: 6px !important; }
-        #subnav-me .subnav-scroll .subtab, #subnav-me .subnav-scroll > .subtab:last-child { padding: 0 12px !important; }
+        #subnav-me .subnav-scroll .subtab, #subnav-me .subnav-scroll > .subtab:last-child { padding: 0 12px !important; min-width: 48px !important; }
       }
       @media (max-width: 380px) {
         #subnav-me .subnav-scroll { gap: 4px !important; }
-        #subnav-me .subnav-scroll .subtab, #subnav-me .subnav-scroll > .subtab:last-child { padding: 0 9px !important; }
+        #subnav-me .subnav-scroll .subtab, #subnav-me .subnav-scroll > .subtab:last-child { padding: 0 9px !important; min-width: 48px !important; }
       }
       /* Looks > Closet: the search box was crushed to "Sear" beside the filters; it gets its own row */
       #panel-wardrobe .closet-top3.closet-row789 { flex-wrap: wrap !important; row-gap: 8px !important; }
@@ -8854,7 +8854,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.90</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.91</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12429,7 +12429,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.90";
+var WARDROBE_BUILD = "2026-11-22.86.91";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
