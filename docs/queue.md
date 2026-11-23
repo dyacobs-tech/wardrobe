@@ -5,18 +5,16 @@ be completed things are getting lost". This is the one list. Every chat keeps
 it current and every reply to David ends with the short version of it.
 `docs/handover.md` has the detail and his exact words for each item.
 
-Last updated: 23 Nov 2026, about 04:45 UTC.
+Last updated: 23 Nov 2026, about 05:42 UTC.
 
 ## Live now
 
-Build `.86.75` (live since about 03:50 UTC, 23 Nov).
+Build `.86.77` (live since 05:41 UTC, 23 Nov; .86.76 went live at 05:09).
 
 ## In progress
 
 | # | What | State |
 |---|---|---|
-| 1 | `.86.76` belts and seersucker | On `preview`; CI failed once on a test that has been flaky before (Outfits "more looks after scrolling", WebKit), rerun running. Promote when green. |
-| 2 | `.86.77` striped trousers and linen under blazers | Committed on the session branch; full suite running, then preview, CI, live. |
 | 3 | Tees that hang too long (about 60 pictures) | Needs about 120 FASHN credits; 18 left. Waiting for a top-up. |
 | 4 | More SKUs in Shop | Blocked: this cloud environment's network does not reach the brand stores. Needs David to approve adding the store hosts. |
 | 5 | Claude / ChatGPT / Meta Muse assistant | Waiting for David's API keys in Cloudflare and "yes, deploy the assistant". |
@@ -28,7 +26,7 @@ Build `.86.75` (live since about 03:50 UTC, 23 Nov).
 - Ask DONNA button removed (it did not work).
 - Closet: filter by brand or colour; search matches brand and colour words.
 
-## Waiting in .86.76-.86.77
+## Went live in .86.76-.86.77
 
 - Tucked shirts on trousers with belt loops wear their matched belt (73 pictures); tees hang untucked.
 - Zanieri seersucker: no belt loops, extended waist tab with a hidden clasp.
