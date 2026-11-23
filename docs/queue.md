@@ -5,35 +5,27 @@ be completed things are getting lost". This is the one list. Every chat keeps
 it current and every reply to David ends with the short version of it.
 `docs/handover.md` has the detail and his exact words for each item.
 
-Last updated: 23 Nov 2026, about 00:35 UTC.
+Last updated: 23 Nov 2026, about 02:10 UTC.
 
 ## Live now
 
-Build `.86.71` (live since 00:27 UTC, 23 Nov): everything through the linen
-jacket, the first swim linen looks, the 517 crease (since redrawn straight) and
-23 Formal looks in the Edward Greens (since replaced by his rule).
+Build `.86.71` (live since 00:27 UTC, 23 Nov).
 
 ## In progress
 
 | # | What | State |
 |---|---|---|
-| 1 | `.86.72`–`.86.73` | Full local suite running; then `preview`, its CI, then live |
+| 1 | `.86.72`-`.86.74` on `preview` (b1bba0ad) | David said GO (about 02:10 UTC). Preview CI running since 02:05; promote when green |
 
-## Done, not live yet
+## Going live with it
 
-- `.86.72`: crease straight down the centre of each leg (5 outfit pictures and
-  the closet picture); never a darker colour under a lighter layer (white or
-  cream under cream is the one-colour look); Formal loafers are only the dark
-  brown Baudoin & Lange, the Belgians and the Balenciagas; 27 Formal pictures in
-  those; 20 swim pictures.
-- `.86.73`: swim takes a tee, a linen button-down or the white Alex Mill pocket
-  polo only; 55 looks drawn in his Belgians, Baudoin & Langes, Vibi Venezias,
-  Guccis and Balenciagas (these had 0 to 2 pictures before).
-
-## Waiting on David
-
-- Light blue shirts under the cream Eleventy blazer: an exception to "lighter
-  goes under darker", or strict? Strict for now (Formal is burgundy only).
+- He stands the same height on the same floor line in every picture, on every screen.
+- Every shoe in a picture is one of his real pairs, drawn from that shoe's photo (65 loafer looks, 27 Formal, 52 Inspo ideas); understated shoes first.
+- Swim: tees, linen button-downs or the white Alex Mill pocket polo only.
+- Lighter under darker; white or cream only under the cream blazer ("No / White or monochrome under cream").
+- Formal loafers: dark brown Baudoin & Lange, Belgians, Balenciaga.
+- 517s: straight centre crease. Burgundy striped trousers: wide-leg.
+- Four Inspo ideas no longer show a belt over a closed jacket or a cropped blazer.
 
 ## Next
 
@@ -41,9 +33,9 @@ jacket, the first swim linen looks, the 517 crease (since redrawn straight) and
 2. Ask DONNA: answers untested against the live try-on worker.
 3. Fix bad Home renders and the wrong picture opening on tap (older item).
 
-Lesson (23 Nov): plan outfits from the app's `wardrobeItems`, not from
-`localStorage` or the sync copy; the built-in `seed-` pieces (his Belgians,
-Baudoin & Langes, most polos) live only in the app.
+Lessons (23 Nov): plan outfits from the app's `wardrobeItems` (built-in `seed-` pieces live only there);
+never draw a shoe from a text description, use the shoe's own photo with `tryon-max`; a belt is never
+drawn over a closed jacket.
 
 ## Done 22 Nov (most recent first)
 
