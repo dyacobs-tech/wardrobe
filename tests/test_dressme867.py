@@ -72,6 +72,8 @@ def run(browser):
 
     shirt = dress("White Oxford Shirt")
     assert "Tucked" in shirt.get("top", ""), shirt
+    # .86.76 (David, 23 Nov 2026: "I NEVER wear beltless tucked remember! Unless no belt loops"): the chino has loops
+    assert "belt" in shirt.get("top", ""), shirt
     page.evaluate("() => { const c = document.getElementById('tryon-close'); if (c) c.click(); }")
     page.wait_for_timeout(300)
     tee = dress("White Cotton Tee")
