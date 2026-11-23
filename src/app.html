@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.77" />
+    <meta name="wardrobe-build" content="2026-11-22.86.78" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8809,7 +8809,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.77</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.78</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11635,7 +11635,12 @@ function onbodyIngest(j) {
   return n;
 }
 onbodyIngest(ONBODY_SEED);
-try { var _obc = localStorage.getItem("wardrobe.onbody"); if (_obc) onbodyIngest(JSON.parse(_obc)); } catch (e) {}
+/* .86.78 (David, 23 Nov 2026, Home screenshot of the navy tee and stone chinos: "Head messed up and no belt
+   again!!!!!!!"). The list saved on the phone was read after the built-in list and put back pictures that a newer
+   build had replaced, so Home showed the old drawing until the next update. The saved list is only used when it
+   was saved by this same build. */
+function onbodyBuild878() { try { var m = document.querySelector('meta[name="wardrobe-build"]'); return (m && m.getAttribute("content")) || ""; } catch (e) { return ""; } }
+try { var _obc = localStorage.getItem("wardrobe.onbody"); if (_obc) { _obc = JSON.parse(_obc); if (_obc && _obc.b878 && _obc.b878 === onbodyBuild878()) onbodyIngest(_obc); } } catch (e) {}
 function onbodySrc(key) {
   var src = (key && ONBODY.map[key]) || null;
   return (src && onbodyFileBanned(src)) ? null : src;
@@ -11697,8 +11702,13 @@ function onbodyRefresh() {
         Object.keys(ONBODY.map).forEach(function (k) { if (!keep865[k]) delete ONBODY.map[k]; });
         try { if (typeof onbodyKeysCache855 !== "undefined") onbodyKeysCache855.sig = null; } catch (e865) {}
       }
+      var before878 = {}; Object.keys(ONBODY.map).forEach(function (k) { before878[k] = ONBODY.map[k]; });
       var added = onbodyIngest(j);
-      if (j.r.length >= 100) { try { localStorage.setItem("wardrobe.onbody", JSON.stringify(j)); } catch (e) {} }
+      /* .86.78: a redrawn picture (same outfit, new file) also redraws Home, not only a newly pictured outfit */
+      Object.keys(ONBODY.map).forEach(function (k) { if (before878[k] !== ONBODY.map[k]) added = added || 1; });
+      Object.keys(before878).forEach(function (k) { if (!ONBODY.map[k]) added = added || 1; });
+      if (added) { try { if (typeof onbodyKeysCache855 !== "undefined") onbodyKeysCache855.sig = null; } catch (e878) {} }
+      if (j.r.length >= 100) { try { j.b878 = onbodyBuild878(); localStorage.setItem("wardrobe.onbody", JSON.stringify(j)); } catch (e) {} }
       if (added && typeof todayLook !== "undefined" && todayLook && typeof renderToday === "function" && typeof currentTab !== "undefined" && currentTab === "today") renderToday();
     }).catch(function () {});
   } catch (e) {}
@@ -12306,7 +12316,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.77";
+var WARDROBE_BUILD = "2026-11-22.86.78";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
