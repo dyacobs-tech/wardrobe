@@ -3,6 +3,9 @@
 David, 23 Nov 2026: "Where did you get this long sleeves on the t shirts??????? Pls fix they are all normal
 length short sleeves", then "Sleeves should be halfway up the upper arm, not to elbow!!!!! For short sleeve tees
 and polos. The two missoni zig zag polos are to elbow l[ength]".
+Reference he approved the same day, of the Giorgio Armani white tee with the olive linen trousers
+(assets/onbody/ceb95c9eb9dca42f.webp): "THIS IS THE CORRECT LENGTH" - fitted sleeves ending mid upper arm,
+hem just below the waistband.
 The pictures drawn with elbow-length or long sleeves were redrawn; none of them may come back.
 """
 import json
