@@ -93,7 +93,7 @@ def hidden_files() -> set:
     import re
     src = (ROOT / "src/app.html").read_text()
     out = set()
-    for var in ("ONBODY_TUCK_EXCLUDE", "ONBODY_REJECTED859", "ONBODY_TEELONG879"):
+    for var in ("ONBODY_TUCK_EXCLUDE", "ONBODY_REJECTED859", "ONBODY_TEELONG879", "ONBODY_AUDIT883"):
         m = re.search(r"var " + var + r" = \{(.*?)\};", src, re.S)
         if m:
             out |= set(re.findall(r'"([0-9a-f]{16})\.webp"', m.group(1)))

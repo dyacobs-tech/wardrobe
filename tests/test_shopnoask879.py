@@ -35,6 +35,12 @@ with sync_playwright() as pw:
         page.locator("#edit-tab-askdonna").click()
         page.wait_for_timeout(300)
         assert page.evaluate("() => document.getElementById('panel-find').getAttribute('data-edit-mode')") == "ask"
+        # .86.83 (audit): after using Ask, leaving Shop and coming back opens Shop, not Ask DONNA
+        page.locator("#tab-today").first.dispatch_event("click")
+        page.wait_for_timeout(300)
+        page.locator("#tab-find").first.dispatch_event("click")
+        page.wait_for_timeout(500)
+        assert page.evaluate("() => document.getElementById('panel-find').getAttribute('data-edit-mode')") != "ask", (engine.name, "Shop reopened on Ask")
         ctx.close()
         browser.close()
 print("Confirmed Shop opens on Shop, never on Ask DONNA, even when Ask was the last view")

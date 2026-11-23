@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.82" />
+    <meta name="wardrobe-build" content="2026-11-22.86.83" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -4877,6 +4877,10 @@ window.notMenswear853 = function (e) {
       #shop-plus-sheet .info-pop-card { max-width: 520px; width: calc(100vw - 32px); max-height: 80vh; overflow: auto; }
 
       #shop-plus-sheet .link-card { margin: 0 0 16px; }
+      /* .86.83 (audit): "Check it" ran off the card (the URL box had a fixed width inside the sheet) */
+      #shop-plus-sheet .link-row, .link-row { display: flex; gap: 8px; min-width: 0; }
+      #shop-plus-sheet .link-row #link-url, .link-row #link-url { flex: 1 1 auto; width: auto !important; min-width: 0; max-width: none; }
+      #shop-plus-sheet .link-row #link-go { flex: 0 0 auto; white-space: nowrap; }
       main.wrap { padding-left: 16px; padding-right: 16px; }
       .inspo-missing { margin: 8px 0 0; }
 
@@ -7358,7 +7362,7 @@ window.notMenswear853 = function (e) {
       /* Profile sizes: a label that runs to two lines ("Sweater / knit size") pushed its box below its neighbour's */
       .profile-grid > div { display: flex; flex-direction: column; justify-content: flex-end; }
       .closet-filters875 { display: flex; gap: 8px; margin: 6px 0 8px; }
-      .closet-filters875 select { flex: 1 1 0; min-width: 0; height: 38px; border-radius: 999px; border: 1px solid var(--border-strong, #cfc6b8); background: var(--surface, #fffdf8); color: inherit; padding: 0 12px; font: inherit; font-size: 13px; }
+      .closet-filters875 select { flex: 1 1 0; min-width: 0; height: 38px; border-radius: 999px; border: 1px solid var(--border-strong, #cfc6b8); background-color: var(--surface, #fffdf8); /* .86.83 (audit): not the shorthand, which tiled the dark-mode chevron */ color: inherit; padding: 0 12px; font: inherit; font-size: 13px; }
       .dm-filters869 { display: flex; gap: 8px; margin: 8px 0 10px; }
       .dm-filters869 select { flex: 1 1 0; min-width: 0; height: 38px; border-radius: 999px; border: 1px solid var(--border-strong, #cfc6b8); background: var(--surface, #fffdf8); color: inherit; padding: 0 12px; font: inherit; font-size: 13px; }
       .ins-look868 { padding: 0; border: 0; background: none; border-radius: 12px; overflow: hidden; display: block; cursor: pointer; }
@@ -8833,7 +8837,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.82</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.83</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9979,7 +9983,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   }
   function beltFor860(belts, c, lv) {
     var s = c.s, free = whiteSneaker(s), want = beltShoeFam(s), suedeShoe = /suede/.test(s.n || "");
-    var dressy = lv >= 5 || (!lv && isTailoredLayer(c.l));
+    /* .86.83 (audit): any blazer look takes a plain leather belt, at every level (a beaded belt had gone with a blazer at Evening Sharp) */
+    var dressy = lv >= 5 || isTailoredLayer(c.l);
     var h = keyHash(c.key);
     var plain = null, plainScore = -1e9, multi = null, multiScore = -1e9;
     function vary(b) { return ((h + b.idx * 7919) % 97) / 97 * 0.8; }                /* steady variety between near-equal belts */
@@ -10014,7 +10019,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   }
 
   /* .86.60: pieces whose closet photo is long-sleeved though the name does not say so (kept out of swim) */
-  var LONG_SLEEVE_IDS860 = { "item-1794970837072-242832": 1, "item-1794965887177-185377": 1 };   /* .86.71: the Theory Cream Knit Polo is long-sleeved in its photo */
+  var LONG_SLEEVE_IDS860 = { "item-1794970837072-242832": 1, "item-1794965887177-185377": 1,
+    /* .86.83 (audit): long-sleeved in their product photos — Kiton dark olive, Theory black, Brunello ivory cashmere and light grey */
+    "item-1794965887183-921466": 1, "item-1794970837074-498365": 1, "item-1794965887179-895680": 1, "item-1794970837069-614876": 1 };   /* .86.71: the Theory Cream Knit Polo is long-sleeved in its photo */
 
   function profile(item, idx) {
     var cat = item.category || "";
@@ -10050,7 +10057,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         p.collared = true; p.kind = "polo";
         /* Knit / merino / cashmere describe the cloth, not the sleeve.
            Only an explicit long-sleeve word marks a polo as long-sleeve. */
-        var poloLS = /long-sleeve|long sleeve|longsleeve/.test(n);
+        /* .86.83 (audit): his notes and the long-sleeve list count too, not only the name */
+        var poloLS = /long-sleeve|long sleeve|longsleeve/.test(n) || !!p.longSleeve859;
         if (poloLS) { p.lo = 2; p.hi = 6; p.shortSleeve = false; p.warm = /cashmere|wool/.test(n) ? 1 : 0; }
         else { p.lo = 1; p.hi = 5; p.shortSleeve = true; p.warm = -1; }
       } else if (cat === "Sweaters") {
@@ -10103,7 +10111,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       /* then: "Baudoin espadrilles are casual to evening sharp!" — the espadrilles and the maple pair are two shoes */
       /* Pool too: the swim rule of 22 Nov names "my baudoin lange with raffia trim" */
       if (/baudoin/.test(n) && /espadrille/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "espadrille"; p.maple879 = true; }
-      else if (/baudoin/.test(n)) { p.lo = 4; p.hi = 6; p.kind = "loafer"; }
+      /* .86.83 (audit; "Maple baudoins evening sharp to formal"): his Baudoin dress loafers read as neutral browns, so the
+         rust/maple pair is not shut out of Formal by its colour */
+      else if (/baudoin/.test(n)) { p.lo = 4; p.hi = 6; p.kind = "loafer"; if (!p.pattern) p.neutral = true; }
       else if (/espadrille/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "espadrille"; p.warm = -2; }
       else if (/whipstitch|summer walk/.test(n)) { p.kind = "loafer"; p.lo = 4; p.hi = 4; p.warm = -1; }
       else if (/cupsole|sneaker-?sole|rubber[-\s]?(cup)?sole/.test(n) || /slip-on loafer/.test(n)) {
@@ -10247,7 +10257,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       /* .86.73 (David, 23 Nov 2026: "Swim looks should be T Shirts Or linen button down ONLY!!!!! Or white Alex mill
          polo pocket shirt!!!!! Otherwise NO polos") */
       var swimTop856 = top.kind === "tee" || (top.kind === "shirt" && top.linen856) || (top.kind === "polo" && swimPolo873(top));
-      var swimShoe856 = shoes.poolOnly || /\bslides?\b/.test(shoes.n) || shoes.kind === "espadrille" || /espadrille|raffia/.test(shoes.n) || (/\btoms\b/.test(shoes.n)) || (/canvas/.test(shoes.n) && /slip-on/.test(shoes.n) && !/checkerboard|vans/.test(shoes.n));
+      /* .86.83 (audit): of the espadrilles only his Baudoin & Lange raffia pair goes with trunks ("my baudoin lange with raffia trim") */
+      var swimShoe856 = shoes.poolOnly || /\bslides?\b/.test(shoes.n) || ((shoes.kind === "espadrille" || /espadrille|raffia/.test(shoes.n)) && /baudoin|raffia/.test(shoes.n)) || (/\btoms\b/.test(shoes.n)) || (/canvas/.test(shoes.n) && /slip-on/.test(shoes.n) && !/checkerboard|vans/.test(shoes.n));
       if (!swimTop856 || !swimShoe856) return null;
     }
     var score = 0;
@@ -10464,7 +10475,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   function tuckOf(top, layer) {
     if (!top) return false;
     if (isFlannelPiece(top)) return false;
-    if (top.kind === "tee") return isDressTee(top);
+    /* .86.83 (audit; David, 23 Nov 2026: "Untucked under blazer", and tees hang untucked): a tee is never tucked,
+       dress tee or not, and never into swim trunks. */
+    if (top.kind === "tee") return false;
     if (isTailoredLayer(layer) && (top.kind === "shirt" || top.kind === "polo" || top.kind === "knit" || top.kind === "overshirt")) return true;
     if (top.kind === "shirt" && !top.casualShirt && !top.overshirt) return true;
     return false;
@@ -10474,7 +10487,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if (isFlannelPiece(top)) return "The flannel shirt is worn untucked, hem over the trousers.";
     if (tucked && isTailoredLayer(layer)) return "The " + who + " is tucked into the trousers under the blazer.";
     if (tucked) return "The " + who + " is tucked into the trousers.";
-    if (isTailoredLayer(layer) && top && top.kind === "tee") return "The T-shirt may be worn untucked under the blazer.";
+    if (isTailoredLayer(layer) && top && top.kind === "tee") return "The T-shirt is worn untucked under the open blazer, its hem at or above the blazer's hem.";
     return "The " + who + " is worn untucked.";
   }
 
@@ -11692,9 +11705,13 @@ var ONBODY_REJECTED859 = { "34f362e9b6f813d0.webp": 1, "c1c3225a0867efce.webp": 
    all looks are updated!!!!!!!"). Pictures whose tee hangs past the hip (measured 23 Nov, 61 of them) are not shown
    until they are redrawn with the tee at the belt line. */
 var ONBODY_TEELONG879 = {"013a82322533c6cd.webp": 1, "044e05b7fb22060e.webp": 1, "04deabc025be435b.webp": 1, "05ce042267914120.webp": 1, "09fa120749c8a60f.webp": 1, "0a291a715d521c5e.webp": 1, "0ff68d362ff3f8fb.webp": 1, "118989983152ac3b.webp": 1, "1282fa9e275bb113.webp": 1, "1809f4ad35c2949b.webp": 1, "21f1fdc61ccad322.webp": 1, "24148f4bbf11770f.webp": 1, "2afeed781fffbfb0.webp": 1, "2d53399ac0c761e5.webp": 1, "2f7016e8946b9d6d.webp": 1, "31f5fd639534df1e.webp": 1, "33e8b7419a2eb537.webp": 1, "34efcf04aa872a02.webp": 1, "3a3260555d0024cd.webp": 1, "3fd7b356de38d479.webp": 1, "48b62cac817b282e.webp": 1, "48cad1dc7b252244.webp": 1, "4fcc413ad48e8eba.webp": 1, "56ae8665b1f3d328.webp": 1, "5c635f01357c37a9.webp": 1, "5cd6b214a0eb8bb4.webp": 1, "5e39964e05ad28b7.webp": 1, "5fc051313cfdffd5.webp": 1, "647b9e0850f67983.webp": 1, "6ef6a5f352c400b7.webp": 1, "724e881f2316094d.webp": 1, "72c1bb2815b8e596.webp": 1, "73a97ed828267d16.webp": 1, "7774ea7d43f6a5aa.webp": 1, "8202e2ac515b2308.webp": 1, "8553f9acf56b8ec6.webp": 1, "8a6b7ed76a422a56.webp": 1, "8aaf89a36a80d814.webp": 1, "8cae267431c31599.webp": 1, "8e26bb15c322b442.webp": 1, "901848b962397c0a.webp": 1, "9070062c64d3dde8.webp": 1, "92c00eb7c24ea3c5.webp": 1, "9498a9ade05c3a72.webp": 1, "977ec8da4daf594e.webp": 1, "9911c7f433e8bf73.webp": 1, "99970f1de1932de0.webp": 1, "9ee22f7e8df26a0c.webp": 1, "ae89a23cb955a0b3.webp": 1, "b17cdff33dfadefe.webp": 1, "ba3f26d74576df84.webp": 1, "c4f3339b7c910a20.webp": 1, "c8c112030aa33fee.webp": 1, "d115eb13f6504d91.webp": 1, "d1684ea5c8a0ee7d.webp": 1, "dcd324049ca0adb5.webp": 1, "e51c1a1d3bb4be2d.webp": 1, "e8926d7e5a1b4a04.webp": 1, "efa1da46a597f285.webp": 1, "fa95f6172b8510ee.webp": 1, "fb20e368f044e284.webp": 1};
+/* .86.83 (David, 23 Nov 2026, after the full audit: "Just start going through ALL of these"): pictures the audit
+   found breaking his rules or with shoes cut off are not shown until redrawn: shoes cropped or hidden (7), the
+   burgundy striped trousers tucked (3), the yellow linen shirt under a blazer (18), flannel tucked (2), tee tucked (6). */
+var ONBODY_AUDIT883 = {"05cfdbd4d8834ff3.webp": 1, "0dbbdf2f1b7e2361.webp": 1, "29aabd684f3f94c0.webp": 1, "2de892a8019b5d66.webp": 1, "3b2d6af73872369e.webp": 1, "40c5842d12d5649a.webp": 1, "49aa13e9741adb47.webp": 1, "50118f6e84ad027e.webp": 1, "517ef23b150f640b.webp": 1, "51a31d506d3413ec.webp": 1, "539d69739fb7246d.webp": 1, "585df3de35cad13e.webp": 1, "5e6d10762c6fd328.webp": 1, "5f2ddba2ba475c7d.webp": 1, "6106fba55d17a649.webp": 1, "6290bbecff94bac6.webp": 1, "6654f6bf74e11a2d.webp": 1, "6babadfdd8d16359.webp": 1, "725fbbbc8c573711.webp": 1, "75adf0b70e1e97dd.webp": 1, "7a1d4c4f9ebb7899.webp": 1, "856836707d0d2d16.webp": 1, "8e3922c2494d338f.webp": 1, "95cde66088f8784f.webp": 1, "a74deae3507436fa.webp": 1, "b5b1c573bdb13b0b.webp": 1, "b9f6fe75469a1a66.webp": 1, "c3433e3bf26f9ab5.webp": 1, "ca9500aad854c5ca.webp": 1, "ccb241fd5af60cc5.webp": 1, "da8574af5236fcc2.webp": 1, "e481b551dd7368dd.webp": 1, "f3de4f807b176659.webp": 1};
 function onbodyFileBanned(f) {
   var base = String(f || "").split("/").pop();
-  return !!(base && (ONBODY_TUCK_EXCLUDE[base] || ONBODY_REJECTED859[base] || ONBODY_TEELONG879[base]));
+  return !!(base && (ONBODY_TUCK_EXCLUDE[base] || ONBODY_REJECTED859[base] || ONBODY_TEELONG879[base] || ONBODY_AUDIT883[base]));
 }
 function onbodyIngest(j) {
   if (!j || !j.r || !j.r.length) return 0;
@@ -12389,7 +12406,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.82";
+var WARDROBE_BUILD = "2026-11-22.86.83";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -31161,8 +31178,10 @@ function openingLook() {
 function isSwimLook(look) {
   if (!look) return false;
   if ((look.fwPieces || []).some(function (p) { return p.category === "Bathing suits"; })) return true;
+  /* .86.83 (audit): a composed look is swim only if it has trunks; "Pool House" linen trousers lost their watch */
+  if ((look.fwPieces || []).length) return false;
   var t = ((look.title || "") + " " + (look.meta || "") + " " + (look.desc || "") + " " + (look.img || "")).toLowerCase();
-  if (/swim|pool|bathing/.test(t)) return true;
+  if (/swim|pool|bathing/.test(t.replace(/pool house/g, ""))) return true;
   if ((look.flatlay || []).some(function (f) { return /swim|bathing/.test(f.label || ""); })) return true;
   return false;
 }
@@ -36219,9 +36238,9 @@ function switchTab(name, opts) {
     if (typeof window.flushCurate81 === "function") window.flushCurate81();
     else if (typeof window.editShow === "function") window.editShow("curate");
   } else if (name === "find" && typeof renderTheEdit === "function") {
-    if (!(opts && opts.restore) && typeof editState !== "undefined" && editState && editState.view === "curate" && sectionOf(prevTab) !== "find") {
-      editState.view = editState.lastShopView || "saved";
-    }
+    /* .86.83 (audit): coming back to Shop from another page opens Shop, not Ask DONNA or Curate (editState lives
+       inside the Shop module, so it is asked through editReturnToShop883) */
+    if (!(opts && opts.restore) && sectionOf(prevTab) !== "find" && typeof window.editReturnToShop883 === "function") window.editReturnToShop883();
     if (typeof window.editOnOpen804 === "function") window.editOnOpen804(); else renderTheEdit();
   }
   if (name === "prules" && typeof renderRulesPage === "function") renderRulesPage();
@@ -44053,6 +44072,11 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     return EDIT_CATALOG.concat(base, sale).filter(prodHasPhoto);
   }
   /* ---------- the verified Edit catalogue (assets/edit-catalog.json) ---------- */
+  /* .86.83 (audit): the catalogue file is append-only, so corrections live here. Women's pieces (and two caps, not a
+     Shop category) are left out; products the store feed mis-filed (Oxford shirts as shoes, chino shorts as trousers,
+     trousers as shorts, jackets as trousers or bags) show in their right aisle. */
+  var CATALOG_HIDE883 = {"db-22863d513f77": 1, "db-b4238c7f785d": 1, "db-6c0080ff1659": 1, "db-4882b8224c2f": 1, "db-aad37cdc4392": 1, "db-79975c9825d1": 1, "db-3c2c2b1a4ab9": 1, "db-5f18bcac0c68": 1, "db-bb2747cc2c02": 1, "db-23ed6701bdd9": 1, "db-63d049ae3fe7": 1};
+  var CATALOG_CAT883 = {"db-4cb26fba6318": "shorts", "db-9807516f9bd2": "shorts", "db-8d183b7a7b03": "shorts", "db-1016ce9c9f34": "shorts", "db-733fa87bca19": "shorts", "db-2e0684670743": "shorts", "db-29c4b43791bf": "trousers", "db-42f5bd8e2342": "trousers", "db-58aa4a155b48": "trousers", "db-b25451f3edb5": "trousers", "db-c6ebe4502e21": "trousers", "db-cf2718067fb4": "trousers", "db-05ee35c44ab5": "trousers", "db-c8b1b8a29907": "trousers", "db-6e6cad0faca8": "trousers", "db-c3dc59e43c96": "trousers", "db-27964a823bd0": "outerwear", "db-1c1b9ea562c0": "outerwear", "db-cf0670073dde": "outerwear", "db-dea60a868905": "outerwear", "db-3135836c344a": "shirt", "db-098e9821a4c5": "shirt", "db-2a3d5e074e54": "shirt", "db-3fc022cc4210": "shirt", "db-5a0748303d2c": "shirt", "db-5af2995ddf4f": "shirt", "db-6363eb246d8f": "shirt", "db-76351613370d": "shirt", "db-7a5efdb655ad": "shirt", "db-a59bc917cdc7": "shirt", "db-aa12ab2815e8": "shirt", "db-b218948571b5": "shirt", "db-c7ed56e9f7db": "shirt", "db-d71a25a49647": "shirt", "db-e1531dd8bb61": "shirt", "db-e54b7e0df992": "shirt", "db-e57d0f6e2f6b": "shirt", "db-eb4b03fbccd4": "shirt", "db-f05f0146ab65": "shirt", "db-491a0cb63b44": "shirt", "db-618b0030b87e": "shirt", "db-3a90a99b0284": "knitwear"};
   window.editNormalizeCatalog = function (j) {
     var arr = Array.isArray(j) ? j : (j && (j.products || j.items || j.skus)) || [];
     var out = [], seen = {};
@@ -44063,15 +44087,17 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
       var price = typeof p.price === "number" ? p.price : parseFloat(String(p.price || p.price_usd || "").replace(/[^0-9.]/g, ""));
       var img = p.img || p.image || p.image_url || p.imageUrl || (Array.isArray(p.images) ? (typeof p.images[0] === "string" ? p.images[0] : p.images[0] && (p.images[0].src || p.images[0].url)) : null);
       if (!url || !name || !isFinite(price) || !img || seen[url]) return;
+      if ((p.sku && CATALOG_HIDE883[p.sku]) || p.status === "inactive") return;
       /* .85.3: menswear only — no women's styles, house slippers or
          mis-filed non-shoes in the shoe aisle */
       if (window.notMenswear853 && window.notMenswear853({ url: url, name: name, cat: p.cat || p.category || "" })) return;
       seen[url] = 1;
       var e = { brand: p.brand || p.vendor || "", name: String(name), price: price, url: url, img: img, retailer: p.retailer || p.store || p.seller || "", colour: p.colour || p.colourName || p.color || "", verified: true };
-      var rc = String(p.cat || p.category || p.type || "").toLowerCase();
+      var rc = String((p.sku && CATALOG_CAT883[p.sku]) || p.cat || p.category || p.type || "").toLowerCase();
       rc = { chinos: "trousers", chino: "trousers", polo: "knitwear", pants: "trousers" }[rc] || rc;
       e.cat = catOf({ cat: rc, name: name });
       if (p.subcat) e.subcat = String(p.subcat).toLowerCase();
+      if (p.sku && CATALOG_CAT883[p.sku]) e.subcat = CATALOG_CAT883[p.sku];
       if (p.sku) e.sku = String(p.sku);
       if (p.hex) e.hex = p.hex;
       if (Array.isArray(p.keys)) e.keys = p.keys.concat(e.subcat ? [e.subcat] : []);
@@ -44744,6 +44770,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     if (p) p.setAttribute("data-edit-mode", v);
   }
   window.editShow = show;
+  window.editReturnToShop883 = function () { if (editState.view === "ask" || editState.view === "curate") show(editState.lastShopView || "saved"); };
   /* Build .77: shared with Ask and Inspo */
   window.editProductBySku = function (sku) {
     for (var i = 0; i < EDIT_CATALOG.length; i++) if (EDIT_CATALOG[i].sku === sku) return EDIT_CATALOG[i];
@@ -45979,7 +46006,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   /* this level's concepts, in an order that changes each day; liked ones go to the back so new ideas lead */
   function pool() {
     var lv = level(), day = Math.floor(Date.now() / 86400000);
-    var list = INSPO_CONCEPTS.filter(function (c) { return c.level === lv; });
+    /* .86.83: two ideas whose drawings lost their shoes (cx-058 none, cx-010 the left one) stay out until redrawn */
+    var list = INSPO_CONCEPTS.filter(function (c) { return c.level === lv && c.id !== "cx-058" && c.id !== "cx-010"; });
     function h(id) { var x = 2166136261, k = id + ":" + day; for (var i = 0; i < k.length; i++) { x ^= k.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
     list.sort(function (a, b) { return (isLiked(a) ? 1 : 0) - (isLiked(b) ? 1 : 0) || h(a.id) - h(b.id); });
     return list;
