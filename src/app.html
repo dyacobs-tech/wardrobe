@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.73" />
+    <meta name="wardrobe-build" content="2026-11-22.86.74" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8806,7 +8806,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.73</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.74</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10196,6 +10196,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if (statements === 1) score += 0.5; else score += 0.2;
     if (patterns === 1 && layer && !layer.pattern) score += 0.3;
     if ((shoes.fam === "brown" || shoes.fam === "beige") && /navy|grey|blue|white|olive|beige/.test(bottom.fam)) score += 0.7;
+    /* .86.74 (David, 23 Nov 2026: "Generally I prefer UNDERSTATED style shoes!!!!!"): plain shoes in quiet colours
+       come first; patterned, two-tone or bright ones (camo, checks, stripes, needlepoint) still appear, less often */
+    score += understated874(shoes) ? 0.6 : -0.8;
     if (shoes.fam === "navy" && /beige|white|grey|olive/.test(bottom.fam)) score += 0.7;
     if (shoes.kind === "sneaker" && bottom.cat === "Jeans") score += 0.4;
     if (shoes.fam === "brown" && bottom.fam === "black") score -= 0.8;
@@ -10269,6 +10272,11 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   }
   function tonalTie860(top, layer) { return !!(top && layer && top.kind === "shirt" && (top.fam === "black" || top.fam === "navy") && layer.fam === top.fam && !top.pattern); }
   root.shirtTakesTie860 = shirtTakesTie860;
+  function understated874(s) {
+    var n = pieceName867(s);
+    if (s.pattern || /camo|check|stripe|needlepoint|zigzag|leopard|print|two-tone|black white|black and white|multicolou?r|metallic|glitter/.test(n)) return false;
+    return /^(brown|beige|black|navy|grey|white|olive|burgundy)$/.test(s.fam || "") || /brown|tan|taupe|greige|navy|black|grey|cream|white|chocolate/.test(n);
+  }
   function swimPolo873(t) { var n = pieceName867(t); return /alex mill/.test(n) && /white/.test(n) && !t.longSleeve859; }
   function formalLoafer872(s) {
     var n = pieceName867(s);
@@ -12289,7 +12297,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.73";
+var WARDROBE_BUILD = "2026-11-22.86.74";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
