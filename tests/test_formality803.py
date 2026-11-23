@@ -5,7 +5,8 @@ Engine (fixture_closet83.json, 74°F):
   * Evening Dressy (level 5) always wears a blazer (.86.34)
   * Formal / Black Tie deals are tailored
   * Flannel shirts are never tucked, with or without a layer
-  * Dress T-shirts are always tucked; casual T-shirts may be untucked under a blazer
+  * T-shirts, dress tees included, are untucked, even under a blazer (.86.83; David, 22 Nov 2026:
+    "Untucked under blazer.")
   * Other shirts, polos and knits under a blazer are tucked
   * 26 existing on-body renders that break those tuck rules are excluded
 
@@ -208,7 +209,8 @@ def main() -> int:
             check("dress shirt under a blazer is tucked", tk.get("dressShirtBlazer") is True, tk)
             check("knit under a blazer is tucked", tk.get("knitBlazer") is True, tk)
             check("polo under a blazer is tucked", tk.get("poloBlazer") is True, tk)
-            check("dress T-shirt is flagged and always tucked", tk.get("dressTeeFlag") and tk.get("dressTeeAlone") and tk.get("dressTeeBlazer"), tk)
+            # .86.83: David, 22 Nov 2026, of T-shirts under a blazer: "Untucked under blazer." Every tee is untucked now.
+            check("dress T-shirt is flagged and untucked (David: \"Untucked under blazer.\")", tk.get("dressTeeFlag") and tk.get("dressTeeAlone") is False and tk.get("dressTeeBlazer") is False, tk)
             check("casual T-shirt may be untucked under a blazer", (not tk.get("casualTeeFlag")) and tk.get("casualTeeAlone") is False and tk.get("casualTeeBlazer") is False, tk)
             ci = eng.get("comboIntegrity") or {}
             check("no fixture combo breaks the tuck rules", ci.get("badFlan") == 0 and ci.get("badBlazer") == 0, ci)

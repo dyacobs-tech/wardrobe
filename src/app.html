@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.83" />
+    <meta name="wardrobe-build" content="2026-11-22.86.84" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -4877,6 +4877,8 @@ window.notMenswear853 = function (e) {
       #shop-plus-sheet .info-pop-card { max-width: 520px; width: calc(100vw - 32px); max-height: 80vh; overflow: auto; }
 
       #shop-plus-sheet .link-card { margin: 0 0 16px; }
+      /* .86.84 (audit): the outfit sheet has its own Back; the app chevron would sit on top of it */
+      body:has(#look-layer:not([hidden])) #view-back { display: none !important; }
       /* .86.83 (audit): "Check it" ran off the card (the URL box had a fixed width inside the sheet) */
       #shop-plus-sheet .link-row, .link-row { display: flex; gap: 8px; min-width: 0; }
       #shop-plus-sheet .link-row #link-url, .link-row #link-url { flex: 1 1 auto; width: auto !important; min-width: 0; max-width: none; }
@@ -8837,7 +8839,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.83</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.84</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9389,6 +9391,8 @@ window.WADA={"colors":[["Hermosa Pink","#f9c1ce"],["Corinthian Pink","#f8b6ba"],
      were already on disk at boot are candidates, so a photo added
      this session is never swept before its record is saved. */
   V.sweep = function (live) {
+    /* .86.84 (audit): the preview build shares this phone's photo vault with the live app; it must never delete from it */
+    if (window.__PV81 || /\/preview\//.test(location.pathname)) return;
     if (!db) return 0;
     var dead = Object.keys(bootKeys).filter(function (k) { return !live[k]; });
     if (!dead.length) return 0;
@@ -10257,8 +10261,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       /* .86.73 (David, 23 Nov 2026: "Swim looks should be T Shirts Or linen button down ONLY!!!!! Or white Alex mill
          polo pocket shirt!!!!! Otherwise NO polos") */
       var swimTop856 = top.kind === "tee" || (top.kind === "shirt" && top.linen856) || (top.kind === "polo" && swimPolo873(top));
-      /* .86.83 (audit): of the espadrilles only his Baudoin & Lange raffia pair goes with trunks ("my baudoin lange with raffia trim") */
-      var swimShoe856 = shoes.poolOnly || /\bslides?\b/.test(shoes.n) || ((shoes.kind === "espadrille" || /espadrille|raffia/.test(shoes.n)) && /baudoin|raffia/.test(shoes.n)) || (/\btoms\b/.test(shoes.n)) || (/canvas/.test(shoes.n) && /slip-on/.test(shoes.n) && !/checkerboard|vans/.test(shoes.n));
+      /* .86.84 (David, 23 Nov 2026: "with trunk, can be sandals, toms, espadrilles"): any espadrille, sandal, slide or TOMS */
+      var swimShoe856 = shoes.poolOnly || /\bslides?\b|\bsandals?\b/.test(shoes.n) || shoes.kind === "sandal" || shoes.kind === "espadrille" || /espadrille|raffia/.test(shoes.n) || (/\btoms\b/.test(shoes.n)) || (/canvas/.test(shoes.n) && /slip-on/.test(shoes.n) && !/checkerboard|vans/.test(shoes.n));
       if (!swimTop856 || !swimShoe856) return null;
     }
     var score = 0;
@@ -12406,7 +12410,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.83";
+var WARDROBE_BUILD = "2026-11-22.86.84";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -12652,7 +12656,15 @@ function bindWardrobeRulesUi() {
       var rule = id ? ruleById(id) : null;
       var act = btn.getAttribute("data-rule-act");
       if (act === "toggle" && rule) toggleWardrobeRule(id, rule.enabled === false);
-      else if (act === "delete" && rule) deleteWardrobeRule(id);
+      else if (act === "delete" && rule) {
+        /* .86.84 (audit): one tap deleted a rule (and synced it) with no confirm; now tap twice, with Undo */
+        if (btn.getAttribute("aria-pressed") !== "true") { btn.setAttribute("aria-pressed", "true"); btn.setAttribute("data-label884", btn.textContent); btn.textContent = "Tap again to delete"; setTimeout(function () { if (btn.isConnected && btn.getAttribute("aria-pressed") === "true") { btn.setAttribute("aria-pressed", "false"); btn.textContent = btn.getAttribute("data-label884") || "Delete"; } }, 4000); return; }
+        var idx884 = wardrobeRules.indexOf(rule), copy884 = JSON.parse(JSON.stringify(rule));
+        deleteWardrobeRule(id);
+        if (typeof showUndoToast === "function") showUndoToast("Rule deleted.", function () {
+          if (!wardrobeRules.some(function (r) { return r.id === copy884.id; })) { wardrobeRules.splice(Math.max(0, idx884), 0, copy884); persistWardrobeRules(); }
+        });
+      }
       else if (act === "edit" && rule) startRuleEdit(card, rule);
       else if (act === "cancel-edit") cancelRuleEdit(card, rule);
       else if (act === "save-edit" && rule) {
@@ -28784,10 +28796,21 @@ document.getElementById("item-detail").addEventListener("click", function (e) {
   if (act === "delete") {
     if (b.getAttribute("aria-pressed") !== "true") { b.setAttribute("aria-pressed", "true"); b.textContent = "Tap again to delete"; return; }
     var nm = it.name;
+    /* .86.84 (audit, fix 5): deleting a piece offers Undo. The copy comes back
+       under the same id; sync sees it reappear and re-stamps it over the tombstone. */
+    var snap884 = JSON.parse(JSON.stringify(it));
     deleteEntry("items", it.id);
     detailItemId = null;
     renderItemDetail(); renderWardrobe();
-    toast("Deleted — " + nm + ".");
+    showUndoToast("Deleted — " + nm + ".", function () {
+      if (wardrobeItems.some(function (i) { return i.id === snap884.id; })) return;
+      try { if (_sySessionDeletes.items) delete _sySessionDeletes.items[snap884.id]; } catch (e) {}
+      deletedIds = deletedIds.filter(function (d) { return d !== snap884.id; });
+      wardrobeItems.unshift(snap884);
+      persistAll();
+      renderWardrobe();
+      toast("Restored — " + nm + ".");
+    });
   }
 });
 
@@ -32280,10 +32303,25 @@ function profileSizeFor(cat) {
    file it writes is the same payload a sync endpoint would
    carry.) */
 var DATA_KEYS = ["items", "palettes", "watches", "looks", "icons", "finds", "profile", "wardrobeRules", "homeLocation", "currentLocation", "formality", "dealtImgs", "dealtCards", "dislikedImgs", "dislikedLooks", "gotoHidden", "likedInspo", "queue", "deletedIds", "overrides", "tab", "openIcon", "inspoImages", "recentlyRemoved", "studioSettings", "wornLog", "iconSeen", "dealtCombos", "dealtTitles", "lastOpeningImg", "todaySource", "capsulePacked", "findBudget", "shopTier", "priceRange", "findLook", "shopPurchases", "shopWishlist", "todayOpeningCloset", "weekPlan", "lazyRenders", "buildAnchors", "trips", "packedItems", "receiptInbox", "priceDrops", "editMeta", "editSearches", "editBoard", "editView"];
+/* .86.84 (audit): photos in the phone's photo vault are only "idb:" references in memory; a backup carried those
+   references instead of the pictures. Every reference is now swapped for the photo before the file is written. */
+function resolveBackupPhotos884(text, done) {
+  var keys = {}, m, re = /"idb:([^"\\]+)"/g;
+  while ((m = re.exec(text))) keys[m[1]] = 1;
+  var list = Object.keys(keys), got = {}, left = list.length, missing = 0;
+  if (!left || !window.photoVault || typeof window.photoVault.fetch !== "function") { done(text, list.length && !window.photoVault ? list.length : 0); return; }
+  list.forEach(function (k) {
+    window.photoVault.fetch(k, function (v) {
+      if (typeof v === "string" && v) got[k] = v; else missing++;
+      if (--left === 0) done(text.replace(re, function (all, key) { return got[key] ? JSON.stringify(got[key]) : all; }), missing);
+    });
+  });
+}
 document.getElementById("data-export").addEventListener("click", function () {
   var payload = currentBackupPayload();
   var data = payload.data;
-  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  resolveBackupPhotos884(JSON.stringify(payload, null, 2), function (text, missing) {
+  var blob = new Blob([text], { type: "application/json" });
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "wardrobe-backup-" + localTodayISO() + ".json";
@@ -32292,8 +32330,9 @@ document.getElementById("data-export").addEventListener("click", function () {
   a.remove();
   setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
   var st = document.getElementById("data-status");
-  if (st) st.textContent = "Backup exported — " + Object.keys(data).length + " sections in the file.";
-  toast("Backup exported.");
+  if (st) st.textContent = "Backup exported — " + Object.keys(data).length + " sections in the file." + (missing ? " " + missing + " photo" + (missing === 1 ? " was" : "s were") + " not on this phone and could not be included." : "");
+  toast(missing ? "Backup exported — " + missing + " photo" + (missing === 1 ? "" : "s") + " missing." : "Backup exported.");
+  });
 });
 /* Import: the file is checked BEFORE anything on the device is
    touched, what is here now is copied aside first, and a write
@@ -32388,6 +32427,16 @@ function applyBackupData(data, opts) {
             return st !== null && st > exportedAt;
           });
           if (kept.length) val = val.concat(kept);
+          /* .86.84 (audit): a piece in both the backup and the phone keeps the phone's copy when that copy changed
+             after the backup was made (an old backup used to roll newer edits back on every device) */
+          var localById884 = {};
+          localVal.forEach(function (r) { var rid4 = (r && typeof r === "object") ? recIdFor(k, r) : null; if (rid4) localById884[rid4] = r; });
+          val = val.map(function (r) {
+            var rid5 = (r && typeof r === "object") ? recIdFor(k, r) : null, loc = rid5 && localById884[rid5];
+            if (!loc) return r;
+            var st5 = recStampFor(k, loc, rid5);
+            return (st5 !== null && st5 > exportedAt) ? loc : r;
+          });
         }
       }
       if (!store.set(k, val)) failed.push(k);
@@ -36315,19 +36364,62 @@ function viewPopLayer(kind) {
   viewCur = viewHist.pop() || "today";
   syncViewBack();
 }
+(function () {
+  window.__sub884 = [];
+  document.addEventListener("click", function (e) {
+    if (window.__sub884restoring || !e.target.closest) return;
+    var b = e.target.closest("[data-edit-section], #panel-find .edit-shop-tabs [data-edit-view], [data-ins-seg]");
+    if (!b || typeof viewPushLayer !== "function") return;
+    var tab = typeof currentTab !== "undefined" ? currentTab : "";
+    var restore = null;
+    if (b.hasAttribute("data-ins-seg")) {
+      var prev = document.documentElement.getAttribute("data-insv") || "icons";
+      if ((b.getAttribute("data-ins-seg") || "") === prev) return;
+      restore = function () { var t = document.querySelector('[data-ins-seg="' + prev + '"]'); if (t) t.click(); };
+    } else {
+      var panel = document.getElementById("panel-find"), mode = panel && panel.getAttribute("data-edit-mode");
+      var next = b.getAttribute("data-edit-view") || b.getAttribute("data-edit-section");
+      if (!mode || next === mode || (next === "shop" && mode !== "ask" && mode !== "curate")) return;
+      restore = function () { if (typeof window.editShow === "function") window.editShow(mode); };
+    }
+    window.__sub884.push({ tab: tab, restore: restore });
+    viewPushLayer("sub884");
+  }, true);
+})();
 function viewBack() {
   /* A modal sheet or the photo pop-out owns the screen while it
      is open — it dismisses through its own close, never through
      a page change behind it. */
-  var sheetOpen = false;
-  document.querySelectorAll('[id$="-sheet"]').forEach(function (s) { if (!s.hidden) sheetOpen = true; });
-  if (sheetOpen) return;
+  /* .86.84 (audit): Back closes the top-most open sheet (Calendar month, Shop +, Filters, Price…) instead of doing
+     nothing: its own close button if it has one, else a tap on its backdrop, else it is hidden. */
+  var open884 = [].filter.call(document.querySelectorAll('[id$="-sheet"], .info-pop-backdrop'), function (s) {
+    return !s.hidden && s.getClientRects().length > 0 && getComputedStyle(s).display !== "none";   /* fixed sheets have no offsetParent */
+  });
+  if (open884.length) {
+    var top884 = open884[open884.length - 1];
+    var btn884 = top884.querySelector('[data-close], .info-pop-close, .sheet-close, button[aria-label^="Close"], button[aria-label^="close"]');
+    if (btn884) { btn884.click(); }
+    else {
+      try { top884.dispatchEvent(new MouseEvent("click", { bubbles: true })); } catch (e) {}
+      if (!top884.hidden && top884.getClientRects().length > 0) top884.hidden = true;
+    }
+    return;
+  }
   if (currentTab === "calendar" && calNavStack.length && typeof calNavRestore === "function") { calNavRestore(); return; }
   if (viewCur === "look") { closeLookLayer(); return; }
   if (viewCur === "fw") { closeFwLayer(); return; }
   if (viewCur === "dress879" && typeof window.dressBack879 === "function") { window.dressBack879(); return; }
+  /* .86.84 (audit): Back steps back through Shop and The Edit sub-tabs before leaving the page */
+  if (viewCur === "sub884") {
+    var st884 = (window.__sub884 || []).pop();
+    viewPopLayer("sub884");
+    if (st884 && st884.tab === currentTab) { window.__sub884restoring = true; try { st884.restore(); } catch (e) {} window.__sub884restoring = false; return; }
+    return viewBack();
+  }
   if (!viewHist.length) return;
   var target = viewHist.pop();
+  while (target === "sub884" && viewHist.length) target = viewHist.pop();   /* .86.84: sub-tab steps of a page he has left */
+  if (target === "sub884") return;
   viewNavGuard = true;
   viewCur = target;
   switchTab(target);
@@ -46950,6 +47042,13 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   }
   if (typeof currentTab !== "undefined" && currentTab === "inspo") setTimeout(ensureHost, 0);
 
+  /* .86.84 (audit): tapping the outfit picture on a card in The Edit opens it, as the pencil does */
+  window.addEventListener("click", function (e) {
+    var m = e.target.closest && e.target.closest(".en-card .en-media");
+    if (!m || e.target.closest("button, a, [data-pv-edit]")) return;
+    var pen = m.closest(".en-card").querySelector("[data-pv-edit]");
+    if (pen) { e.preventDefault(); e.stopPropagation(); pen.click(); }
+  }, true);
   /* ---------- the pencil on any outfit card opens it in Dress me ---------- */
   window.addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest("[data-pv-edit]"); if (!b) return;

@@ -3,7 +3,7 @@
 David, 23 Nov 2026, after the full audit: "Just start going through ALL of these in order in most effecient
 logical way". Rules checked here, in his words where he gave them:
 - tees are never tucked ("Untucked under blazer"), never into swim trunks;
-- swim shoes: "pool slides, my toms slip ons, or my baudoin lange with raffia trim" — no other espadrilles;
+- swim shoes, then (same day): "with trunk, can be sandals, toms, espadrilles" — any espadrille is fine with trunks;
 - any blazer look takes a plain leather belt (no beaded belt with a blazer);
 - "Pool House" linen trousers are not a swim look, so the watch shows;
 - polos that are long-sleeved in their photos are long-sleeved (never dealt at Pool);
@@ -49,7 +49,7 @@ with sync_playwright() as pw:
     }""", sorted(hidden))
     assert out["hiddenBanned"], out
     assert out["teeTucked"] is False, ("a tee is tucked", out)
-    assert out["swimEsp"] is False, ("Loro Piana espadrilles with trunks", out)
+    assert out["swimEsp"] is True, ("espadrilles refused with trunks", out)
     assert out["kitonShort"] is False and out["kitonLo"] >= 2, ("long-sleeve polo treated as short-sleeve", out)
     assert out["mapleNeutral"] is True and out["mapleHi"] >= 6, ("maple Baudoins shut out of Formal", out)
     assert out["poolHouseSwim"] is False, ("Pool House trousers read as swim", out)
