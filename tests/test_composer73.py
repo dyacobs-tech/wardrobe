@@ -209,7 +209,9 @@ def main() -> int:
             check("every outfit is top + bottom + shoes (+ layer)", eng["structureOk"])
             check("every piece can appear", eng["coverage"] == len(FIXTURE), f'{eng["coverage"]}/{len(FIXTURE)}')
             check("600 dealt with no repeats", eng["dealt"] == 600 and eng["dups"] == 0, f'{eng["dealt"]} unique, {eng["dups"]} repeats')
-            check("all 83 pieces shown within 600 deals", eng["shown"] == len(FIXTURE), eng["shown"])
+            # .86.72 (David, 22 Nov 2026: "I don't like wearing darker colors under lighter colors generally"): a dark
+            # shirt no longer goes under a lighter blazer, so a piece or two is now rare rather than everywhere
+            check("all 83 pieces shown within 600 deals (two may be rare)", eng["shown"] >= len(FIXTURE) - 2, eng["shown"])
             check("a new piece is placeable", eng["newPiecePlaceable"])
             check("a new piece is dealt within the first pages", 0 <= eng["newPieceAt"] < 60, eng["newPieceAt"])
             check("a belt is never the random accessory", eng["beltsInDeck"] == 2 and eng["beltDealt"] == 0, (eng["beltsInDeck"], eng["beltDealt"]))
@@ -259,9 +261,9 @@ def main() -> int:
             check("hero Dislike bans the combo (and only his on-body render), not a piece photo", home["key"] in after["banned"] and all("/onbody/" in x for x in added), (added, home["key"], after))
 
             page.locator("#section-ideas").click(); page.wait_for_timeout(250)
-            page.wait_for_function("() => __cfLooks81().length >= 12")
+            page.wait_for_function("() => __cfLooks81().length >= 8")   # .86.72: fewer layered looks after the lighter-under-darker rule
             n0 = page.evaluate("document.querySelectorAll('#cf-grid .cf-card').length")
-            check("Outfits Mine closet feed shows", n0 >= 12 and not page.evaluate("document.getElementById('closet-feed').hidden"), n0)
+            check("Outfits Mine closet feed shows", n0 >= 8 and not page.evaluate("document.getElementById('closet-feed').hidden"), n0)
             page.locator("#cf-sentinel").scroll_into_view_if_needed()
             page.wait_for_function("n => __cfLooks81().length > n", arg=n0)
             n1 = page.evaluate("document.querySelectorAll('#cf-grid .cf-card').length")

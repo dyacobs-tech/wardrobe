@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.71" />
+    <meta name="wardrobe-build" content="2026-11-22.86.72" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8806,7 +8806,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.71</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.72</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10152,8 +10152,15 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       }
       if ((layer.kind === "knit" || layer.kind === "vest") && !(top.kind === "shirt" || (layer.kind === "vest" && top.kind === "polo"))) return null;
       if (layer.kind === "overshirt" && !(top.kind === "tee" || (top.kind === "polo" && top.shortSleeve))) return null;
-      if (sameTone(layer, top, 10) && !(layer.kind === "blazer" && top.kind === "tee" && top.fam === bottom.fam && (top.fam === "navy" || top.fam === "black"))) return null;   /* .86.66: the one-colour look is meant */
+      /* .86.72 (David: "Prefer the colors to either be monochromatic or lighter goes under darker"): white or cream
+         under a white or cream layer is the one-colour look he asked for */
+      var lightMono872 = /^(white|beige)$/.test(top.fam || "") && /^(white|beige)$/.test(layer.fam || "") && top.L >= layer.L - 8;
+      if (sameTone(layer, top, 10) && !lightMono872 && !(layer.kind === "blazer" && top.kind === "tee" && top.fam === bottom.fam && (top.fam === "navy" || top.fam === "black"))) return null;   /* .86.66: the one-colour look is meant */
       if (layer.pattern && top.pattern) return null;
+      /* .86.72 (David, 22 Nov 2026: "I don't like wearing darker colors under lighter colors generally. Prefer the
+         colors to either be monochromatic or lighter goes under darker."): what is underneath is lighter than the
+         layer over it, or the same colour family */
+      if (top.L < layer.L - 8 && top.fam !== layer.fam && !sameTone(top, layer, 14)) return null;
     }
     /* Shorts and swim stay casual; a smart shirt never meets swim. */
     if ((bottom.kind === "shorts" || bottom.kind === "swim") && top.kind === "knit") return null;
@@ -10260,10 +10267,14 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   }
   function tonalTie860(top, layer) { return !!(top && layer && top.kind === "shirt" && (top.fam === "black" || top.fam === "navy") && layer.fam === top.fam && !top.pattern); }
   root.shirtTakesTie860 = shirtTakesTie860;
+  function formalLoafer872(s) {
+    var n = pieceName867(s);
+    return /belgian/.test(n) || /balenciaga/.test(n) || (/baudoin/.test(n) && /dark brown|chocolate|espresso/.test(n + " " + String(s.colourName || s.cn || "").toLowerCase()));
+  }
   function isDressLoafer859(s) {
     if (!s || s.kind !== "loafer") return false;
     var n = pieceName867(s);
-    return !/slipper|furlane|espadrille|driver|boat|whipstitch|slip-on|sneaker|rubber|cupsole|white sole|pony-hair|camo|dior tan suede penny|armani cream woven/.test(n);
+    return !/slipper|furlane|espadrille|driver|boat|whipstitch|slip-on|sneaker|rubber|cupsole|white sole|dior tan suede penny|armani cream woven/.test(n) && (!/pony-hair|camo/.test(n) || /belgian/.test(n));   /* .86.72: "all Belgians", the camo pony-hair pair too */
   }
   /* Structural rules per outfit type. */
   /* .86.65 helpers for Evening Sharp and the all-blue rule */
@@ -10341,6 +10352,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
          leather or suede loafer on a dark sole. Not slippers or furlane, not espadrilles, not the white-soled
          Dior pennies, not the Armani cream drivers, not pony-hair camo. */
       if (!isDressLoafer859(shoes)) return false;
+      /* .86.72 (David, 22 Nov 2026: "Formal loafers should be dark brown boudain lange all Belgians. Balenciaga."):
+         only his dark brown Baudoin & Lange, any Belgian Shoes, or the Balenciaga loafers */
+      if (!formalLoafer872(shoes)) return false;
       /* .86.51 (David, 22 Nov 2026): Formal does not need a suit: a blazer, a shirt that takes a tie, and
          dressier chinos. Seersucker, jeans, linen, drawstring and five-pocket trousers stay below Formal. */
       /* .86.60: Formal always wears a tie, so its shirt is one that takes a tie */
@@ -12272,7 +12286,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.71";
+var WARDROBE_BUILD = "2026-11-22.86.72";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }

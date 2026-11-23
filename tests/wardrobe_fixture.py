@@ -18,6 +18,8 @@ def garments_for_all_levels():
     for name, category, colour in [
         ("Black patent Oxford shoes", "Shoes", "Black"),
         ("Black leather oxford dress shoes", "Shoes", "Black"),
+        # .86.72 (David, 22 Nov 2026): "Formal loafers should be dark brown boudain lange all Belgians. Balenciaga."
+        ("Belgian Shoes dark brown suede loafers", "Shoes", "Dark brown"),
         ("Tuxedo trousers", "Trousers", "Black"),
         ("White tuxedo dress shirt", "Shirts", "White"),
         ("Black shawl collar dinner jacket", "Suits", "Black"),

@@ -33,7 +33,9 @@ def run(browser):
     combos = page.evaluate("closet => WardrobeComposer.build(closet).combos.map(c => c.t.id + '/' + c.b.id + '/' + c.s.id)", CLOSET)
     assert not any(c.endswith("/blue/check") for c in combos), combos
     assert any(c.endswith("/stone/check") for c in combos), combos          # quiet outfit: fine
-    assert any(c.endswith("/blue/loafer") for c in combos), combos          # the blue trousers still get dealt with quiet shoes
+    assert any(c.endswith("/blue/loafer") or c.endswith("/blue/black") for c in combos), combos   # the blue trousers still get dealt with quiet shoes
+    # .86.72 (David: "lighter goes under darker"): the navy tee never goes under the cream blazer again
+    assert not page.evaluate("closet => WardrobeComposer.build(closet).combos.some(c => c.l && c.l.id === 'bz' && c.t.id === 't')", CLOSET)
     neutral = page.evaluate("closet => closet.map((x, i) => [x.id, WardrobeComposer.profile(x, i).neutral])", CLOSET)
     neutral = dict(neutral)
     assert neutral["jeans"] is True and neutral["blue"] is False and neutral["t"] is True, neutral   # denim and navy stay neutrals; bright blue is a statement

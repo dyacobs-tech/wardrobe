@@ -51,7 +51,9 @@ def run(browser):
       return { formal: [...new Set(formal)].sort(), dressy: [...new Set(dressy)].sort(), before, after,
         banned: ['c1c3225a0867efce.webp', 'ed7969a72e937a88.webp', '4529bac87ec41ac7.webp', '9f5bc4066c18d16a.webp'].map(f => onbodyFileBanned('assets/onbody/' + f)) }; }""", CLOSET)
     # dress loafers only at Formal
-    assert out["formal"] == ["bal", "eg"], out["formal"]
+    # .86.72 (David, 22 Nov 2026: "Formal loafers should be dark brown boudain lange all Belgians. Balenciaga."):
+    # the Edward Greens leave Formal; the camo Belgians are allowed but this closet deals them nothing
+    assert "eg" not in out["formal"] and "bal" in out["formal"] and set(out["formal"]) <= {"bal", "camo"}, out["formal"]
     # the rule is Formal's: Evening Dressy still takes the other shoes it took before
     assert "dior" in out["dressy"], out["dressy"]
     # a Formal look (it carries a tie) never shows a picture without the tie; it shows the one with it

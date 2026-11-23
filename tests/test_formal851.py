@@ -27,7 +27,7 @@ CLOSET = [
     {"id": "dr1", "name": "Navy Drawstring Trousers", "category": "Trousers", "colourName": "Navy", "colourHex": "#1f2a44"},
     {"id": "fp1", "name": "Cream Stretch Slub Twill 5-Pocket", "category": "Trousers", "colourName": "Cream", "colourHex": "#e9dfc8"},
     {"id": "je1", "name": "Dark Indigo Jeans", "category": "Jeans", "colourName": "Indigo", "colourHex": "#2c3e63"},
-    {"id": "lo1", "name": "Dark Brown Suede Penny Loafers", "category": "Shoes", "colourName": "Dark brown", "colourHex": "#4a2e1f"},
+    {"id": "lo1", "name": "Belgian Shoes Dark Brown Suede Loafers", "category": "Shoes", "colourName": "Dark brown", "colourHex": "#4a2e1f"},
     {"id": "sn1", "name": "White Leather Sneakers", "category": "Shoes", "colourName": "White", "colourHex": "#f5f5f0"},
     {"id": "be1", "name": "Dark Brown Leather Belt", "category": "Belts", "colourName": "Dark Brown", "colourHex": "#4a2e1f"},
     {"id": "ti1", "name": "Navy Knit Tie", "category": "Ties", "colourName": "Navy", "colourHex": "#1f2a44"},
