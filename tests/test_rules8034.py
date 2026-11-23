@@ -267,9 +267,20 @@ def main() -> int:
             check("a rule can be edited", page.evaluate("wardrobeRules.some(r => r.text === 'No shorts in winter' && /winter/.test(r.understood || ''))"))
             # Delete the note
             before = page.locator(".rule-card").count()
+            # .86.84 (audit fix 5, David: "Just start going through ALL of these in order"): the first tap asks,
+            # the second deletes, and Undo brings the rule back
+            page.locator(".rule-card").last.locator('[data-rule-act="delete"]').click()
+            page.wait_for_timeout(100)
+            check("one tap does not delete a rule", page.locator(".rule-card").count() == before)
             page.locator(".rule-card").last.locator('[data-rule-act="delete"]').click()
             page.wait_for_timeout(200)
             check("a rule can be deleted", page.locator(".rule-card").count() == before - 1)
+            page.evaluate("() => document.getElementById('undo-btn').click()")
+            page.wait_for_timeout(200)
+            check("Undo brings a deleted rule back", page.locator(".rule-card").count() == before)
+            page.locator(".rule-card").last.locator('[data-rule-act="delete"]').click()
+            page.locator(".rule-card").last.locator('[data-rule-act="delete"]').click()
+            page.wait_for_timeout(200)
 
             # Overflow at other widths (desktop 1440 and the other phone sizes)
             for w, h in ((375, 812), (430, 932), (1440, 900)):
