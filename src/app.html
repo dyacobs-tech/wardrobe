@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.74" />
+    <meta name="wardrobe-build" content="2026-11-22.86.75" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8806,7 +8806,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.74</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.75</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12297,7 +12297,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.74";
+var WARDROBE_BUILD = "2026-11-22.86.75";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -45794,7 +45794,10 @@ window.inspoView = "withmine";
     var panel = document.getElementById("panel-today"), hero = document.getElementById("today-hero"), img = document.getElementById("today-img");
     if (!panel || panel.hidden || !hero || !img) return;
     var cap = hero.querySelector(".today-caption"); if (!cap) return;
+    /* .86.75: measure the layout box, not the drawing scaled to his height (that scale moved the caption) */
+    var sc875 = img.style.scale, tr875 = img.style.translate; img.style.scale = ""; img.style.translate = "";
     var top = img.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+    img.style.scale = sc875; img.style.translate = tr875;
     /* the caption's bottom padding (room for the nav bar) may run past the
        page edge; its buttons may not */
     var padB = parseFloat(getComputedStyle(cap).paddingBottom) || 0;
@@ -48240,7 +48243,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   var hero = document.getElementById("today-hero"), img = document.getElementById("today-img");
   if (!hero || !img) return;
   var FEET = null, BASE_BOT = 50, HEIGHT874 = 1106;
-  function idOf(u) { var m = String(u || "").match(/onbody-cut\/([^\/?#]+?)\.(webp|png)/i); return m ? m[1] : ""; }
+  /* .86.75: the sharper copy (onbody-cut-hq) that replaces each picture once loaded is the same drawing */
+  function idOf(u) { var m = String(u || "").match(/onbody-cut(?:-hq)?\/([^\/?#]+?)\.(webp|png)/i); return m ? m[1] : ""; }
   function place(el) {
     if (!FEET || !el) return;
     var f = FEET[idOf(el.getAttribute("src"))];
@@ -48279,6 +48283,10 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   function fit() {
     if (!nm) return;
     nm.style.fontSize = "";
+    /* .86.75 (David, 23 Nov 2026: "text placement on Home Screen. None of it stays fixed"): the line keeps the
+       height of the full-size name, so a shrunk name never moves the text above or below it */
+    nm.style.height = ""; nm.style.lineHeight = "";
+    var h0 = nm.offsetHeight; if (h0 > 0) { nm.style.height = h0 + "px"; nm.style.lineHeight = h0 + "px"; }
     var cw = nm.clientWidth, sw = nm.scrollWidth;
     if (cw > 0 && sw > cw + 1) {
       var fs = parseFloat(getComputedStyle(nm).fontSize) || 28;

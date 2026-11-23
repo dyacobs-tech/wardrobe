@@ -14,10 +14,11 @@ from wardrobe_fixture import photographed_closet
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000/"
 
 PROBE = """() => { const im = document.getElementById('today-img'), F = window.heroFeet801 && window.heroFeet801();
-  const m = String(im.getAttribute('src') || '').match(/onbody-cut\\/([^\\/?#]+?)\\.(webp|png)/); const f = m && F && F[m[1]];
+  const m = String(im.getAttribute('src') || '').match(/onbody-cut(?:-hq)?\\/([^\\/?#]+?)\\.(webp|png)/); const f = m && F && F[m[1]];
   if (!f) return null; const k = parseFloat(im.style.scale || '1') || 1;
   const cs = getComputedStyle(im), w = im.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), h = im.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-  const s = Math.min(w / 362, h / 1200); return { id: m[1], fig: 1200 - f[0] - f[2], k, px: (1200 - f[0] - f[2]) * s * k }; }"""
+  const s = Math.min(w / 362, h / 1200); const T = e => Math.round(document.querySelector(e).getBoundingClientRect().top);
+  return { id: m[1], fig: 1200 - f[0] - f[2], k, px: (1200 - f[0] - f[2]) * s * k, name: T('#today-name'), row: T('#today-simple-actions') }; }"""
 
 
 def run(browser):
@@ -30,12 +31,20 @@ def run(browser):
     page.goto(URL, wait_until="load")
     page.wait_for_function("() => window.__appRan850 === true && window.heroFeet801 && window.heroFeet801()", timeout=60000)
     seen = {}
-    for _ in range(14):
+    texts = set()
+    for n in range(14):
         page.wait_for_timeout(700)
+        if n == 5:   # .86.75: the sharper copy that replaces each picture keeps the same height and placement
+            page.evaluate("() => { const im = document.getElementById('today-img'); im.src = im.getAttribute('src').replace('onbody-cut/', 'onbody-cut-hq/'); }")
+            page.wait_for_timeout(900)
         r = page.evaluate(PROBE)
         if r:
-            seen[r["id"]] = r
+            seen[r["id"] + str(n == 5)] = r
+            texts.add((r["name"], r["row"]))
         page.evaluate("() => document.getElementById('today-next').click()")
+    # .86.75 (David, 23 Nov 2026: "My height still fluctuating as it text placement on Home Screen. None of it
+    # stays fixed entirely as I scroll through items."): the name and the buttons never move
+    assert len(texts) == 1, texts
     figs = [r["fig"] for r in seen.values()]
     px = [r["px"] for r in seen.values()]
     assert len(seen) >= 4, seen
