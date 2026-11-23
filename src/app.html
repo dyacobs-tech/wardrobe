@@ -11655,9 +11655,13 @@ var ONBODY_TUCK_EXCLUDE_COUNT = 26;
    messed up"). Pictures he rejected, never shown again: a broken right shoe (black tee, faded 517s), a wrong head
    (grey knit tee, white jeans), and wide linen trousers drawn for the beige chinos (navy tee). */
 var ONBODY_REJECTED859 = { "c1c3225a0867efce.webp": 1, "ed7969a72e937a88.webp": 1, "4529bac87ec41ac7.webp": 1, "9f5bc4066c18d16a.webp": 1 };   /* .86.64: David, 22 Nov 2026, "Awful!!!!!! I'm fat and picture distorted" (grey knit tee, light khaki 5-pocket) */
+/* .86.79 (David, 23 Nov 2026, Home screenshot of the cream tee under the burgundy blazer: "T shirt too long make sure
+   all looks are updated!!!!!!!"). Pictures whose tee hangs past the hip (measured 23 Nov, 61 of them) are not shown
+   until they are redrawn with the tee at the belt line. */
+var ONBODY_TEELONG879 = {"013a82322533c6cd.webp": 1, "044e05b7fb22060e.webp": 1, "04deabc025be435b.webp": 1, "05ce042267914120.webp": 1, "09fa120749c8a60f.webp": 1, "0a291a715d521c5e.webp": 1, "0ff68d362ff3f8fb.webp": 1, "118989983152ac3b.webp": 1, "1282fa9e275bb113.webp": 1, "1809f4ad35c2949b.webp": 1, "21f1fdc61ccad322.webp": 1, "24148f4bbf11770f.webp": 1, "2afeed781fffbfb0.webp": 1, "2d53399ac0c761e5.webp": 1, "2f7016e8946b9d6d.webp": 1, "31f5fd639534df1e.webp": 1, "33e8b7419a2eb537.webp": 1, "34efcf04aa872a02.webp": 1, "3a3260555d0024cd.webp": 1, "3fd7b356de38d479.webp": 1, "48b62cac817b282e.webp": 1, "48cad1dc7b252244.webp": 1, "4fcc413ad48e8eba.webp": 1, "56ae8665b1f3d328.webp": 1, "5c635f01357c37a9.webp": 1, "5cd6b214a0eb8bb4.webp": 1, "5e39964e05ad28b7.webp": 1, "5fc051313cfdffd5.webp": 1, "647b9e0850f67983.webp": 1, "6ef6a5f352c400b7.webp": 1, "724e881f2316094d.webp": 1, "72c1bb2815b8e596.webp": 1, "73a97ed828267d16.webp": 1, "7774ea7d43f6a5aa.webp": 1, "8202e2ac515b2308.webp": 1, "8553f9acf56b8ec6.webp": 1, "8a6b7ed76a422a56.webp": 1, "8aaf89a36a80d814.webp": 1, "8cae267431c31599.webp": 1, "8e26bb15c322b442.webp": 1, "901848b962397c0a.webp": 1, "9070062c64d3dde8.webp": 1, "92c00eb7c24ea3c5.webp": 1, "9498a9ade05c3a72.webp": 1, "977ec8da4daf594e.webp": 1, "9911c7f433e8bf73.webp": 1, "99970f1de1932de0.webp": 1, "9ee22f7e8df26a0c.webp": 1, "ae89a23cb955a0b3.webp": 1, "b17cdff33dfadefe.webp": 1, "ba3f26d74576df84.webp": 1, "c4f3339b7c910a20.webp": 1, "c8c112030aa33fee.webp": 1, "d115eb13f6504d91.webp": 1, "d1684ea5c8a0ee7d.webp": 1, "dcd324049ca0adb5.webp": 1, "e51c1a1d3bb4be2d.webp": 1, "e8926d7e5a1b4a04.webp": 1, "efa1da46a597f285.webp": 1, "fa95f6172b8510ee.webp": 1, "fb20e368f044e284.webp": 1};
 function onbodyFileBanned(f) {
   var base = String(f || "").split("/").pop();
-  return !!(base && (ONBODY_TUCK_EXCLUDE[base] || ONBODY_REJECTED859[base]));
+  return !!(base && (ONBODY_TUCK_EXCLUDE[base] || ONBODY_REJECTED859[base] || ONBODY_TEELONG879[base]));
 }
 function onbodyIngest(j) {
   if (!j || !j.r || !j.r.length) return 0;
