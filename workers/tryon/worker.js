@@ -444,12 +444,17 @@ function keyKind(v) {
   if (/^sk-/.test(t)) return "openai";
   return "other";
 }
+function keyNames(env) {
+  const names = KEY_NAMES.filter((n) => env[n] !== void 0);
+  for (const n of Object.keys(env)) if (!names.includes(n) && typeof env[n] === "string" && /key|openai/i.test(n)) names.push(n);
+  return names;
+}
 function openaiKey(env) {
-  for (const n of KEY_NAMES) if (keyKind(env[n]) === "openai") return env[n].trim();
+  for (const n of keyNames(env)) if (keyKind(env[n]) === "openai") return env[n].trim();
   return null;
 }
 function keyShapes(env) {
-  return KEY_NAMES.filter((n) => env[n] !== void 0).map((n) => {
+  return keyNames(env).map((n) => {
     const raw = String(env[n] || ""), t = raw.trim();
     return { name: n, kind: keyKind(raw), length: t.length, innerSpace: /\s/.test(t), outerSpace: raw !== t, quoted: /^["']|["']$/.test(t), prefix: t.slice(0, t.startsWith("sk-proj-") ? 8 : 3) };
   });
