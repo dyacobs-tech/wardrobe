@@ -51,3 +51,47 @@ with sync_playwright() as pw:
         n, f0, f1, p0, p1 = run(browser)
         print("Confirmed: %d looks drawn %d-%dpx tall all show him %.1f-%.1fpx tall on Home" % (n, f0, f1, p0, p1))
         browser.close()
+
+
+# .86.74, the same day: "MY HEIGHT IS INCONSISTENT THROURGOUT ALMOST ALL IMAGES PINGING BACK AND FORTH"
+# every picture of him on every screen, here the Outfits grid, has the same height and the same floor line
+GRID = """() => [...document.querySelectorAll('#cf-grid img')].filter(i => i.getBoundingClientRect().width > 40 && i.dataset.h874).map(i => {
+  const cs = getComputedStyle(i), k = parseFloat(i.style.scale || '1') || 1, t = (i.style.translate || '0px 0px').split(' ').map(parseFloat);
+  const o = cs.transformOrigin.split(' ').map(parseFloat); const f = i.__f874 || null;
+  return { k, ty: t[1] || 0, oy: o[1], h: i.clientHeight, src: i.getAttribute('src') }; })"""
+
+
+def run_grid(browser):
+    ctx = browser.new_context(viewport={"width": 402, "height": 874}, is_mobile=True, has_touch=True, service_workers="block")
+    ctx.route("**/*", lambda route: route.continue_() if route.request.url.startswith(URL) and route.request.method == "GET" else route.abort())
+    ctx.add_init_script("localStorage.setItem('wardrobe.items'," + json.dumps(json.dumps(photographed_closet())) + ")")
+    page = ctx.new_page()
+    page.goto(URL, wait_until="load")
+    page.wait_for_function("() => window.__appRan850 === true && typeof switchTab === 'function'", timeout=60000)
+    page.evaluate("() => switchTab('wardrobe')")
+    page.wait_for_timeout(600)
+    page.evaluate("() => { const b = document.getElementById('section-ideas'); if (b) b.click(); }")
+    page.wait_for_function("() => document.querySelectorAll('#cf-grid img[data-h874]').length >= 4", timeout=30000)
+    page.wait_for_timeout(800)
+    # where his feet and the top of his head land, measured from each card picture's own top
+    out = page.evaluate("""async () => { const F = await (await fetch('assets/onbody-cut/feet.json')).json(), M = await (await fetch('assets/feet-more874.json')).json();
+      const RE = /assets\\/(onbody(?:-cut|-cut-hq)?|inspo-cut|inspo-concepts)\\/([^\\/?#]+?)\\.webp/;
+      return [...document.querySelectorAll('#cf-grid img[data-h874]')].filter(i => i.clientWidth > 40).map(i => {
+        const m = RE.exec(i.getAttribute('src')); const f = /^onbody/.test(m[1]) ? F.feet[m[2]] : M.feet[m[1] + '/' + m[2]];
+        const cs = getComputedStyle(i), k = parseFloat(i.style.scale || '1') || 1, ty = parseFloat((i.style.translate || '0 0').split(' ')[1]) || 0;
+        const oy = parseFloat(cs.transformOrigin.split(' ')[1]);
+        const s = Math.max(i.clientWidth / i.naturalWidth, i.clientHeight / i.naturalHeight), px = i.naturalHeight / 1200 * s;
+        const feet = oy + ty, head = oy + ty - (1200 - f[0] - f[2]) * px * k;
+        return [Math.round(feet * 10) / 10, Math.round(head * 10) / 10]; }); }""")
+    ctx.close()
+    return out
+
+
+with sync_playwright() as pw:
+    for engine in (pw.chromium, pw.webkit):
+        browser = engine.launch()
+        pts = run_grid(browser)
+        feet = [p[0] for p in pts]; head = [p[1] for p in pts]
+        assert len(pts) >= 4 and max(feet) - min(feet) <= 2 and max(head) - min(head) <= 2, pts
+        print("Confirmed: %d Outfits cards, his feet within %.1fpx and his head within %.1fpx of each other" % (len(pts), max(feet) - min(feet), max(head) - min(head)))
+        browser.close()

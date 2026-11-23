@@ -48297,6 +48297,58 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
 })();
     </script>
     <script type="wardrobe/app">
+/* .86.74 (David, 23 Nov 2026: "MY HEIGHT IS INCONSISTENT THROURGOUT ALMOST ALL IMAGES PINGING BACK AND FORTH"):
+   every picture of him, on every screen (Looks, Outfits, Liked, the full-screen view), is scaled when shown so he
+   stands the same height (1106 of 1200px, head to sole), anchored on his feet. Home's hero does this itself. */
+(function () {
+  "use strict";
+  var FEET = null, MORE = {}, H = 1106, RE = /assets\/(onbody(?:-cut|-cut-hq)?|inspo-cut|inspo-concepts)\/([^\/?#]+?)\.(?:webp|png|jpe?g)/i;
+  function feetOf(m) { return !m ? null : /^onbody/.test(m[1]) ? FEET[m[2]] : MORE[m[1] + "/" + m[2]]; }
+  function place(el) {
+    if (!FEET || !el) return;
+    var m = RE.exec(el.currentSrc || el.getAttribute("src") || "");
+    /* Home's hero lines up his own outfit pictures itself */
+    if ((el.id === "today-img" || (el.classList && el.classList.contains("hero-xfade"))) && m && /^onbody/.test(m[1]) && FEET[m[2]]) return;
+    var f = feetOf(m);
+    if (!f || f.length < 3 || !el.naturalWidth) { if (el.dataset.h874) { el.style.scale = ""; el.style.translate = ""; delete el.dataset.h874; } return; }
+    var fig = 1200 - f[0] - f[2]; if (!(fig > 600)) return;
+    var k = Math.max(0.9, Math.min(1.1, H / fig));
+    var cs = getComputedStyle(el), w = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), h = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    if (!(w > 0 && h > 0)) return;
+    var nw = el.naturalWidth, nh = el.naturalHeight, fit = cs.objectFit;
+    var s = fit === "cover" ? Math.max(w / nw, h / nh) : fit === "fill" ? h / nh : Math.min(w / nw, h / nh);
+    var ih = nh * s, pos = String(cs.objectPosition || "50% 50%").split(" "), py = pos[1] || "50%", oy;
+    oy = /%$/.test(py) ? (h - ih) * parseFloat(py) / 100 : parseFloat(py) || 0;
+    var feetY = parseFloat(cs.paddingTop) + oy + (1200 - f[0]) * (nh / 1200) * s;
+    var sc = Math.abs(k - 1) < 0.004 ? "" : String(Math.round(k * 1000) / 1000);
+    /* and the same floor line and centre line as Home: feet 50px (of 1200) above the frame's bottom, body centred */
+    var px = (nh / 1200) * s, ty = Math.round((f[0] - 50) * px * 10) / 10, tx = Math.round(-(f[1] || 0) * (nw / 362) * s * 10) / 10;
+    var fx = parseFloat(cs.paddingLeft) + w / 2;
+    el.style.transformOrigin = Math.round(fx * 10) / 10 + "px " + Math.round(feetY * 10) / 10 + "px";
+    el.style.scale = sc; el.style.translate = (tx || ty) ? tx + "px " + ty + "px" : ""; el.dataset.h874 = "1";
+  }
+  function scan(root) { (root.querySelectorAll ? root.querySelectorAll("img") : []).forEach(function (im) { RE.lastIndex = 0; if (RE.test(im.getAttribute("src") || "")) { if (im.complete) place(im); } }); }
+  document.addEventListener("load", function (e) { var t = e.target; if (t && t.tagName === "IMG" && RE.test(t.getAttribute("src") || "")) place(t); }, true);
+  new MutationObserver(function (ms) {
+    if (!FEET) return;
+    ms.forEach(function (m) {
+      if (m.type === "attributes") { if (m.target.tagName === "IMG" && m.target.complete) place(m.target); }
+      else m.addedNodes.forEach(function (n) { if (n.nodeType === 1) { if (n.tagName === "IMG") { if (n.complete) place(n); } else scan(n); } });
+    });
+  }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["src"] });
+  var rt = 0;
+  window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { scan(document); }, 120); }, { passive: true });
+  window.heightAll874 = function () { scan(document); };
+  function boot() {
+    fetch("assets/feet-more874.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j && j.feet) { MORE = j.feet; if (FEET) scan(document); } }).catch(function () {});
+    var F = window.heroFeet801 && window.heroFeet801();
+    if (F) { FEET = F; scan(document); return; }
+    fetch("assets/onbody-cut/feet.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j && j.feet) { FEET = j.feet; scan(document); } }).catch(function () {});
+  }
+  setTimeout(boot, 600);
+})();
+    </script>
+    <script type="wardrobe/app">
 /* ================= Build .80.4 — The Edit opens without rebuilding =================
    Opening The Edit used to rebuild its current view (~40ms at 4x CPU) on
    every tab tap. It is now built once (on idle after boot) and rebuilt only
