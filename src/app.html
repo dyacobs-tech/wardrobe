@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.88" />
+    <meta name="wardrobe-build" content="2026-11-22.86.89" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8854,7 +8854,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.88</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.89</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12425,7 +12425,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.88";
+var WARDROBE_BUILD = "2026-11-22.86.89";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -40579,8 +40579,20 @@ function syMetaOf() {
 var SY_KEY_COLL = { looks: "looks", queue: "queue", items: "items", watches: "watches", wornLog: "worn", inspoImages: "inspo", finds: "finds", palettes: "palettes", icons: "icons", weekPlan: "plan", buildAnchors: "anchors", trips: "trips", packedItems: "packed", receiptInbox: "receipts", shopWishlist: "shopwish", priceDrops: "pricedrops", editMeta: "edits", editSearches: "searches", askSync: "ask", renderedLooks: "rendered", feedbackNotes: "feedback" };
 var SY_COLL_KEY = { looks: "looks", queue: "queue", items: "items", watches: "watches", worn: "wornLog", inspo: "inspoImages", finds: "finds", palettes: "palettes", icons: "icons", plan: "weekPlan", anchors: "buildAnchors", trips: "trips", packed: "packedItems", receipts: "receiptInbox", shopwish: "shopWishlist", pricedrops: "priceDrops", edits: "editMeta", searches: "editSearches", ask: "askSync", rendered: "renderedLooks" };
 var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, dislikedLooks: 1, gotoHidden: 1, likedInspo: 1, recentlyRemoved: 1, findBudget: 1, shopTier: 1, priceRange: 1, homeLocation: 1, currentLocation: 1, formality: 1, studioSettings: 1, lastOpeningImg: 1, wardrobeRules: 1 };
+/* .86.89 (audit, fix 10): a phone whose clock is wrong stamped every edit with its own wrong time, so its edits
+   always won (clock ahead) or always lost (clock behind) against his other devices. The server's reply carries its
+   own clock (now, in ms); when this phone is more than 2 minutes off, edits are stamped in server time instead.
+   A reply whose time is not a real date (test mocks) is ignored; a correct clock changes nothing. */
+function syNoteServerTime889(serverNow) {
+  if (typeof serverNow !== "number" || !(serverNow > 1.6e12) || !(serverNow < 4.1e12)) return;
+  SY.off889 = Math.round(serverNow - Date.now());
+}
+function syNow889() {
+  var off = (typeof SY !== "undefined" && SY && typeof SY.off889 === "number") ? SY.off889 : 0;
+  return Date.now() + (Math.abs(off) > 120000 ? off : 0);
+}
 function syTrackChanges(onlyColl) {
-  var now = Date.now(), ch = false, mig = false;
+  var now = syNow889(), ch = false, mig = false;
   var colls = onlyColl ? [onlyColl] : SY_COLLS;
   colls.forEach(function (c) {
     /* Poisoned store key: the in-memory list is a fallback, not
@@ -41414,6 +41426,7 @@ function syncNow(isRetry, force) {
           var _pj56 = null;
           try { _pj56 = await _pr56.json(); } catch (e) { restoreFailed59 = true; break; }
           if (!_pj56 || typeof _pj56.now !== "number") { restoreFailed59 = true; break; }
+          syNoteServerTime889(_pj56.now);
           var _prev56 = _dlSince;
           var _pa56 = syApplyDownload56(_pj56);
           if (_rep862) (Array.isArray(_pj56.recs) ? _pj56.recs : []).forEach(function (r) {
@@ -41694,7 +41707,7 @@ function syncNow(isRetry, force) {
         if (window.photoVault && window.photoVault.enabled) metaData = syWire(metaData);
         metaOut = { updatedAt: SY.st.m || Date.now(), data: metaData };
       }
-      var since = SY.last, lastNow = null, sent = 0, down = down56;
+      var since = SY.last, lastNow = null, sent = 0, down = down56, kept889 = 0;
       var changedAny = changedAny56, changedLooks = changedLooks56;
       for (var bi = 0; bi < batches.length; bi++) {
         var batch = batches[bi];
@@ -41734,6 +41747,18 @@ function syncNow(isRetry, force) {
         if (!r.ok) throw new Error("sync " + r.status);
         var j = await r.json();
         if (!j || typeof j.now !== "number") throw new Error("bad response");
+        syNoteServerTime889(j.now);
+        /* .86.89 (audit, fix 10): a server that refuses a delete (the hardened sync worker answers 200 with
+           j.cancelled and sends the live record back in j.recs) must not leave the piece deleted on this phone
+           while it is still on every other device. The local delete mark is dropped, so the live copy below is
+           applied over it; old servers never send j.cancelled, so nothing changes with them. */
+        if (Array.isArray(j.cancelled)) j.cancelled.forEach(function (c) {
+          if (!c || SY_COLLS.indexOf(c.coll) === -1 || !c.id) return;
+          if (SY.tomb[c.coll]) delete SY.tomb[c.coll][c.id];
+          if (SY.dirty[c.coll]) delete SY.dirty[c.coll][c.id];
+          try { if (_sySessionDeletes[c.coll]) delete _sySessionDeletes[c.coll][c.id]; } catch (e) {}
+          kept889++;
+        });
         /* Confirmed 200: the sent dirty flags clear — but only for
            records that have not changed again since they were
            sent. An edit made during the request keeps its flag. */
@@ -41773,7 +41798,7 @@ function syncNow(isRetry, force) {
       _syFailed = false; _syNoteOff = false;
       clearTimeout(_syRetryT);
       saveSY();
-      setSyncStatus("Synced ✓ " + sent + " up · " + down + " down" + (held ? " · " + held + " held (photo not on this device)" : ""));
+      setSyncStatus("Synced ✓ " + sent + " up · " + down + " down" + (held ? " · " + held + " held (photo not on this device)" : "") + (kept889 ? " · " + kept889 + " delete" + (kept889 === 1 ? "" : "s") + " not applied: still on your other devices, kept here too" : ""));
       if (changedAny) syRefresh();
     } catch (e) {
       _syApplying = false;
