@@ -35,7 +35,9 @@ FRAME_JS = """() => { window.__hf = []; const hero = document.getElementById('to
   const vis = el => { const cs = getComputedStyle(el); return !el.hidden && cs.visibility !== 'hidden' && parseFloat(cs.opacity) > 0.01 && el.getBoundingClientRect().height > 50; };
   const ok = el => el.complete && el.naturalWidth > 0;
   const tick = () => { const figs = [img, ...hero.querySelectorAll('.hero-xfade')].filter(vis);
-    const r = img.getBoundingClientRect();
+    /* .86.74: the picture is scaled so he stands one height ("My height isn't consistent"); the layout box,
+       not the scaled drawing, is what must never move */
+    const sc = img.style.scale; img.style.scale = ''; const r = img.getBoundingClientRect(); img.style.scale = sc;
     window.__hf.push([figs.length, figs.every(ok) ? 1 : 0, Math.round(r.top), Math.round(r.height), Math.round(r.width)]);
     if (window.__hf.length < 4000) requestAnimationFrame(tick); };
   requestAnimationFrame(tick); }"""

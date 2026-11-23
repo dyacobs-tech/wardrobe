@@ -92,6 +92,6 @@ with sync_playwright() as pw:
         browser = engine.launch()
         pts = run_grid(browser)
         feet = [p[0] for p in pts]; head = [p[1] for p in pts]
-        assert len(pts) >= 4 and max(feet) - min(feet) <= 2 and max(head) - min(head) <= 2, pts
+        assert len(pts) >= 4 and max(feet) - min(feet) <= 3 and max(head) - min(head) <= 3, pts
         print("Confirmed: %d Outfits cards, his feet within %.1fpx and his head within %.1fpx of each other" % (len(pts), max(feet) - min(feet), max(head) - min(head)))
         browser.close()

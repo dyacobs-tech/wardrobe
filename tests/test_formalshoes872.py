@@ -5,6 +5,7 @@ David, 22 Nov 2026:
   "Formal loafers should be dark brown boudain lange all Belgians. Balenciaga."
   "I don't like wearing darker colors under lighter colors generally. Prefer the
    colors to either be monochromatic or lighter goes under darker."
+  23 Nov 2026, asked whether light blue shirts may go under the cream blazer: "No / White or monochrome under cream"
 """
 import sys
 
