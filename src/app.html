@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.87" />
+    <meta name="wardrobe-build" content="2026-11-22.86.88" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -2772,6 +2772,11 @@ window.notMenswear853 = function (e) {
       .rules-entry-meta { display: block; font-size: 13px; line-height: 1.4; color: var(--dim); }
       .rules-entry-chev { flex: none; color: var(--honey-nav, #C29E74); font-size: 22px; line-height: 1; }
       #panel-prules { padding-bottom: calc(var(--bb-h, 80px) + 28px); }
+      /* .86.88 (audit, fix 9): the last button or line of a page ended exactly at the top of the bottom bar, or under
+         it on a smaller phone (Closet · Add, Profile · Info and Advanced, Shop · Build "See it on me"). Every page
+         but Home (which is fitted to the screen) now ends at least 24px above the bar; the space is added after
+         whatever bottom space a page already has. */
+      main section[role="tabpanel"]:not(#panel-today)::after { content: ""; display: block; height: 24px; clear: both; }
       #panel-prules .rules-heading {
         text-align: center; font-family: var(--font-display); font-size: 22px; font-weight: 600;
         margin: 0 0 6px; color: var(--text);
@@ -7339,6 +7344,16 @@ window.notMenswear853 = function (e) {
       #subnav-me .subnav-scroll .subtab, #subnav-me .subnav-scroll > .subtab:last-child {
         flex: 0 0 auto !important; min-height: 36px !important; padding: 0 16px !important; font-size: 13px !important; white-space: nowrap !important;
       }
+      /* .86.88 (audit, fix 9): the four tabs ran 10px past the row even on his 402px phone ("Advanced" cut at the
+         edge), more on a 375px one; on phones they keep 13px text with a little less padding, so all four fit. */
+      @media (max-width: 440px) {
+        #subnav-me .subnav-scroll { gap: 6px !important; }
+        #subnav-me .subnav-scroll .subtab, #subnav-me .subnav-scroll > .subtab:last-child { padding: 0 12px !important; }
+      }
+      @media (max-width: 380px) {
+        #subnav-me .subnav-scroll { gap: 4px !important; }
+        #subnav-me .subnav-scroll .subtab, #subnav-me .subnav-scroll > .subtab:last-child { padding: 0 9px !important; }
+      }
       /* Looks > Closet: the search box was crushed to "Sear" beside the filters; it gets its own row */
       #panel-wardrobe .closet-top3.closet-row789 { flex-wrap: wrap !important; row-gap: 8px !important; }
       #panel-wardrobe .closet-row789 .closet-search789 { flex: 1 1 100% !important; }
@@ -8839,7 +8854,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.87</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.88</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12410,7 +12425,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.87";
+var WARDROBE_BUILD = "2026-11-22.86.88";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -50760,7 +50775,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
        when that spot is clear, else it lifts to the nearest clear gap
        (between card rows, above the buttons), checked whenever he stops
        scrolling, the feed grows, or the window resizes */
-    var CTRL = ".cf-actions button, .pv-edit, .en-shop, .cf-actions a";
+    /* .86.88 (audit, fix 9): card titles too; the + sat on "Oatmeal Polo & Olive Linen Trousers" */
+    var CTRL = ".cf-actions button, .pv-edit, .en-shop, .cf-actions a, .oc-title";
     function placeFab() {
       if (panel.hidden || !fab.isConnected) return;
       /* layout box (offset* ignores the transform and its transition) */
