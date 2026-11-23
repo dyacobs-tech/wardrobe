@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.91" />
+    <meta name="wardrobe-build" content="2026-11-22.86.92" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8854,7 +8854,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.91</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.92</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12429,7 +12429,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.91";
+var WARDROBE_BUILD = "2026-11-22.86.92";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -40642,6 +40642,9 @@ function syTrackChanges(onlyColl) {
           ch = true;
           return;
         }
+        /* .86.92 (fix 10): remember the version this phone last had of the piece, so the delete can prove to the
+           server which version it removes (baseUpdatedAt); the hardened sync worker refuses an unproven bulk delete */
+        if (SY.st[c][id]) { if (!SY.tb889 || typeof SY.tb889 !== "object") SY.tb889 = {}; if (!SY.tb889[c]) SY.tb889[c] = {}; SY.tb889[c][id] = SY.st[c][id]; }
         delete SY.snap[c][id]; delete SY.st[c][id]; SY.tomb[c][id] = now; SY.dirty[c][id] = 1; ch = true;
       }
     });
@@ -41594,7 +41597,9 @@ function syncNow(isRetry, force) {
           }
           else if (SY.tomb[c][id]) {
             if (_syRestoredIds[c] && _syRestoredIds[c][id]) return;
-            changes.push({ coll: c, id: id, updatedAt: SY.tomb[c][id], deleted: true });
+            var _del889 = { coll: c, id: id, updatedAt: SY.tomb[c][id], deleted: true };
+            if (SY.tb889 && SY.tb889[c] && typeof SY.tb889[c][id] === "number") _del889.baseUpdatedAt = SY.tb889[c][id];
+            changes.push(_del889);
           }
         });
       });
@@ -41760,6 +41765,7 @@ function syncNow(isRetry, force) {
           if (!c || SY_COLLS.indexOf(c.coll) === -1 || !c.id) return;
           if (SY.tomb[c.coll]) delete SY.tomb[c.coll][c.id];
           if (SY.dirty[c.coll]) delete SY.dirty[c.coll][c.id];
+          if (SY.tb889 && SY.tb889[c.coll]) delete SY.tb889[c.coll][c.id];
           try { if (_sySessionDeletes[c.coll]) delete _sySessionDeletes[c.coll][c.id]; } catch (e) {}
           kept889++;
         });
@@ -41768,7 +41774,10 @@ function syncNow(isRetry, force) {
            sent. An edit made during the request keeps its flag. */
         batch.forEach(function (ch) {
           var cur = ch.deleted ? SY.tomb[ch.coll][ch.id] : SY.st[ch.coll][ch.id];
-          if (cur === undefined || cur === ch.updatedAt) delete SY.dirty[ch.coll][ch.id];
+          if (cur === undefined || cur === ch.updatedAt) {
+            delete SY.dirty[ch.coll][ch.id];
+            if (ch.deleted && SY.tb889 && SY.tb889[ch.coll]) delete SY.tb889[ch.coll][ch.id];
+          }
         });
         /* Build .57 (B5): blobs carried in a batch the server
            accepted are marked as pushed by this device, so later

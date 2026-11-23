@@ -9,6 +9,8 @@ fixed in the app before that worker can go live.
 
   1. A refused delete: the piece comes back on this phone (memory and storage), with no delete mark left.
   2. Today's server (no `cancelled`): the same delete still goes through.
+  4. (.86.92) Every delete carries the version this phone last had of the piece (baseUpdatedAt), which the
+     hardened worker needs to accept a bulk delete David confirms.
   3. A phone whose clock is an hour behind the server stamps a new edit in the server's time (it used to lose
      every edit to his other devices); with a correct clock the stamp is the phone's own time.
 All workers.dev traffic is answered locally; nothing reaches a server.
@@ -56,8 +58,12 @@ def run(base, refuse, skew=None):
     def route(r):
         if r.request.method == "POST" and "/sync" in r.request.url:
             body = json.loads(r.request.post_data or "{}")
+            state.setdefault("bodies", []).append(body)
             state["now"] += 1
             out = {"now": state["now"] if skew is None else int(time.time() * 1000) + skew, "recs": [], "meta": None}
+            if body.get("since") == 0 and not state.get("served"):
+                state["served"] = 1   # the first full download: the server has this piece at version 777
+                out["recs"] = [{"coll": "items", "id": piece["id"], "updatedAt": 777, "data": piece}]
             dels = [c for c in (body.get("changes") or []) if c.get("coll") == "items" and c.get("deleted")]
             if refuse and dels:
                 out["cancelled"] = [{"coll": "items", "id": c["id"], "reason": "server_truth"} for c in dels]
@@ -103,6 +109,11 @@ def run(base, refuse, skew=None):
         pg.wait_for_timeout(500)
         st = pg.evaluate("""id => ({ mem: wardrobeItems.some(i => i.id === id), stored: JSON.parse(localStorage.getItem('wardrobe.items') || '[]').some(i => i.id === id),
             tomb: !!(SY.tomb.items && SY.tomb.items[id]), status: (SY.status || '') })""", pid)
+        sentdels = [c for body in state.get("bodies", []) for c in (body.get("changes") or []) if c.get("deleted")]
+        # the server's version of the piece: the last copy this phone uploaded, else the one it downloaded (777)
+        ups = [c["updatedAt"] for body in state.get("bodies", []) for c in (body.get("changes") or []) if c.get("id") == pid and not c.get("deleted")]
+        server_ver = ups[-1] if ups else 777
+        check("the delete carries the version the server has", sentdels and all(c.get("baseUpdatedAt") == server_ver for c in sentdels), (sentdels, server_ver))
         if refuse:
             check("refused delete: the piece is back on this phone", st["mem"] and st["stored"], st)
             check("refused delete: no delete mark is left", not st["tomb"], st)
