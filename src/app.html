@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.86" />
+    <meta name="wardrobe-build" content="2026-11-22.86.87" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8839,7 +8839,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.86</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.87</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12410,7 +12410,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.86";
+var WARDROBE_BUILD = "2026-11-22.86.87";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -12687,6 +12687,21 @@ function applyEntryState(list) {
     return ov ? Object.assign({}, e, ov) : e;
   });
 }
+/* .86.86 (audit, fix 8): closet photos are 900x1200 (~180 KB) but are shown as small tiles and 58px avatars;
+   assets/photos-sm holds a ~360px copy of every one (~12 KB). Small views use it; if a copy is missing the
+   full photo loads instead (data-full, swapped by the error listener below). */
+function smallPhoto886(src) {
+  var m = /^(?:\.\/)?assets\/photos\/([^\/?#]+)\.(?:jpe?g|png|webp)(?:[?#].*)?$/i.exec(String(src || ""));
+  return m ? "assets/photos-sm/" + m[1] + ".webp" : src;
+}
+function smallImgAttrs886(src) {
+  var sm = smallPhoto886(src);
+  return sm !== src ? ' src="' + sm + '" data-full="' + String(src).replace(/"/g, "&quot;") + '"' : ' src="' + String(src).replace(/"/g, "&quot;") + '"';
+}
+document.addEventListener("error", function (e) {
+  var t = e.target;
+  if (t && t.tagName === "IMG" && t.getAttribute("data-full") && /assets\/photos-sm\//.test(t.getAttribute("src") || "")) { var f = t.getAttribute("data-full"); t.removeAttribute("data-full"); t.src = f; }
+}, true);
 function deleteEntry(listName, id) {
   if (id.indexOf("seed-") === 0) { if (deletedIds.indexOf(id) === -1) deletedIds.push(id); }
   if (listName === "items") wardrobeItems = wardrobeItems.filter(function (i) { return i.id !== id; });
@@ -24349,7 +24364,7 @@ function renderBuildWardrobeGrid() {
     return hay.indexOf(q) !== -1;
   });
   grid.innerHTML = items.length ? items.map(function (i) {
-    var media = i.photo ? '<img src="' + esc(i.photo) + '" alt="" loading="lazy" />' : '<span class="bc-dot" style="background:' + esc(i.colourHex || "#ccc") + '"></span>';
+    var media = i.photo ? '<img' + smallImgAttrs886(i.photo) + ' alt="" loading="lazy" />' : '<span class="bc-dot" style="background:' + esc(i.colourHex || "#ccc") + '"></span>';
     return '<button type="button" class="build-cell" data-build-ward="' + esc(i.id) + '">' + media + '<span class="bc-name">' + esc(i.name) + (q ? '<span class="bc-cat">' + esc(i.category || "") + "</span>" : "") + "</span></button>";
   }).join("") : '<p class="meta">' + (q ? "Nothing matches that search." : "Nothing in your closet yet.") + "</p>";
 }
@@ -28640,7 +28655,7 @@ function renderWardrobe() {
     var bk0 = (brandById[i.id] || i.name || "").charAt(0).toUpperCase();
     var bInit = /^[A-Z]$/.test(bk0) ? bk0 : "#";
     return '<article class="card item-card' + (i.laundry ? " laundry" : "") + '" data-brand-initial="' + bInit + '">' +
-      (i.photo ? '<img class="photo" src="' + i.photo + '" alt="Photograph of ' + esc(i.name) + '" loading="lazy" decoding="async" />' : '<div class="photo card-photo-ph" role="img" aria-label="No photograph yet for ' + esc(i.name) + '" style="background:' + esc(i.colourHex || "#c9bda6") + ";color:" + contrastInk(i.colourHex || "#c9bda6") + '"><span>' + esc(i.category || "Piece") + "</span></div>") +
+      (i.photo ? '<img class="photo"' + smallImgAttrs886(i.photo) + ' alt="Photograph of ' + esc(i.name) + '" loading="lazy" decoding="async" />' : '<div class="photo card-photo-ph" role="img" aria-label="No photograph yet for ' + esc(i.name) + '" style="background:' + esc(i.colourHex || "#c9bda6") + ";color:" + contrastInk(i.colourHex || "#c9bda6") + '"><span>' + esc(i.category || "Piece") + "</span></div>") +
       '<span class="cat">' + esc(i.category) + "</span>" + (i.shopBought ? ' <span class="shop-bought-badge">Bought via Shop the look</span>' : "") +
       '<div class="item-idrow">' +
       '<h4 class="item-name">' + esc(itemDisplayName844(i)) + "</h4>" +
@@ -46316,7 +46331,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     row.innerHTML = list.map(function (x) {
       var nm = String(x.ic.name || x.ic.id).split(" ").slice(-1)[0];
       return '<button type="button" role="listitem" class="ins-ic841" data-ins-icon="' + E(x.ic.id) + '" aria-pressed="' + (insLens === x.ic.id) + '">' +
-        '<span class="ins-ph841">' + (photoOf(x.ic) ? '<img src="' + E(photoOf(x.ic)) + '" alt="" loading="lazy" decoding="async">' : "") + "</span>" +
+        '<span class="ins-ph841">' + (photoOf(x.ic) ? '<img' + smallImgAttrs886(photoOf(x.ic)) + ' alt="" loading="lazy" decoding="async">' : "") + "</span>" +
         '<span class="ins-nm841">' + E(nm) + '</span><span class="ins-w841"><b style="width:' + x.w + '%"></b></span></button>';
     }).join("");
   }
@@ -48213,9 +48228,15 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       }, { timeout: 600 });
     }
     /* never compete with the hero itself */
-    if (him && !(him.complete && him.naturalWidth)) { var once = false, go = function () { if (once) return; once = true; run(); }; him.addEventListener("load", go, { once: true }); setTimeout(go, 6000); }
-    else run();
+    /* .86.86 (audit, fix 8): at start-up the look-ahead (8 looks composed, ~0.4-0.7s on a phone) ran as the Home
+       photo appeared and froze the page right then; it now waits 2s after the photo is on screen. A Next tapped
+       before that deals on the spot, as it always did when no look-ahead was ready. */
+    var bootDelay = boot886 ? 2000 : 0; boot886 = false;
+    var runSoon = function () { if (bootDelay) setTimeout(run, bootDelay); else run(); };
+    if (him && !(him.complete && him.naturalWidth)) { var once = false, go = function () { if (once) return; once = true; runSoon(); }; him.addEventListener("load", go, { once: true }); setTimeout(go, 6000); }
+    else runSoon();
   }
+  var boot886 = true;
   window.heroPrefetch784 = prefetch;
   /* Undo sits just above the action row it belongs to, never over it */
   window.placeUndo782 = function (box) {
