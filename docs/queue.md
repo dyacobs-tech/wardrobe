@@ -5,52 +5,45 @@ be completed things are getting lost". This is the one list. Every chat keeps
 it current and every reply to David ends with the short version of it.
 `docs/handover.md` has the detail and his exact words for each item.
 
-Last updated: 22 Nov 2026, about 23:50 UTC.
+Last updated: 23 Nov 2026, about 00:35 UTC.
 
 ## Live now
 
-Build `.86.66` (live since about 21:25 UTC, 22 Nov).
+Build `.86.71` (live since 00:27 UTC, 23 Nov): everything through the linen
+jacket, the first swim linen looks, the 517 crease (since redrawn straight) and
+23 Formal looks in the Edward Greens (since replaced by his rule).
 
 ## In progress
 
 | # | What | State |
 |---|---|---|
-| 1 | `.86.67`–`.86.71` (everything below under "Done, not live yet") | Full local suite running on the session branch; then `preview`, its CI, then live |
-
-CI on `preview` 10741b35 (`.86.67`–`.86.69`): 58 pass, 1 fail, 5 quarantined.
-The failure was `test_photos787` (outside sites' photos did not load on CI),
-which that same push had taken out of quarantine; it is back in quarantine.
+| 1 | `.86.72`–`.86.73` | Full local suite running; then `preview`, its CI, then live |
 
 ## Done, not live yet
 
-- `.86.67`: Inspo belts; Add to Looks lands in Liked; icon weights share 100;
-  Dress me tuck and hem notes.
-- `.86.68`: Home pinned between header and nav; changing the level re-deals;
-  Evening Casual / Evening Sharp split; loud-colour rules; Ask DONNA page.
-- `.86.69`: old Ideas studio opens The Edit > Inspo; Shop the look fixed.
-- `.86.70`: Dress me Type and Brand dropdowns; Dress me keeps its place when a
-  piece is changed; a stalled Put it on me shows a clock and says when it lost
-  touch.
-- `.86.71`: a linen jacket is a light layer and Evening Casual can wear a
-  casual jacket; 15 swim looks with the Uniqlo white linen shirt; light blue
-  517s show a pressed crease (5 outfit pictures, and the closet picture on the
-  sync server); the Theory Cream Knit Polo is long-sleeved and stays away from
-  swim.
+- `.86.72`: crease straight down the centre of each leg (5 outfit pictures and
+  the closet picture); never a darker colour under a lighter layer (white or
+  cream under cream is the one-colour look); Formal loafers are only the dark
+  brown Baudoin & Lange, the Belgians and the Balenciagas; 27 Formal pictures in
+  those; 20 swim pictures.
+- `.86.73`: swim takes a tee, a linen button-down or the white Alex Mill pocket
+  polo only; 55 looks drawn in his Belgians, Baudoin & Langes, Vibi Venezias,
+  Guccis and Balenciagas (these had 0 to 2 pictures before).
 
 ## Waiting on David
 
-Nothing open.
+- Light blue shirts under the cream Eleventy blazer: an exception to "lighter
+  goes under darker", or strict? Strict for now (Formal is burgundy only).
 
-## Next, in his order
+## Next
 
-1. Put it on me: the cause of the stall is not confirmed. One live attempt
-   after `.86.70` is live; the message shown says which case it is.
-2. Swim with polos: no short-sleeve polo in a quiet colour in his closet
-   (the Theory cream one is long-sleeved). Needs one, or a rule change.
-3. Ask DONNA: answers untested against the live try-on worker.
-4. More Formal outfits.
-5. Linen chore jacket outfits drawn on him (rule is in; pictures are not).
-6. Fix bad Home renders and the wrong picture opening on tap (older item).
+1. Put it on me: one live attempt; the message shown says which case it is.
+2. Ask DONNA: answers untested against the live try-on worker.
+3. Fix bad Home renders and the wrong picture opening on tap (older item).
+
+Lesson (23 Nov): plan outfits from the app's `wardrobeItems`, not from
+`localStorage` or the sync copy; the built-in `seed-` pieces (his Belgians,
+Baudoin & Langes, most polos) live only in the app.
 
 ## Done 22 Nov (most recent first)
 
