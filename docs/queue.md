@@ -5,17 +5,35 @@ be completed things are getting lost". This is the one list. Every chat keeps
 it current and every reply to David ends with the short version of it.
 `docs/handover.md` has the detail and his exact words for each item.
 
-Last updated: 23 Nov 2026, about 02:10 UTC.
+Last updated: 23 Nov 2026, about 04:45 UTC.
 
 ## Live now
 
-Build `.86.74` (live since 02:35 UTC, 23 Nov; checked on the live site: Home and the Outfits grid scale every picture to one height).
+Build `.86.75` (live since about 03:50 UTC, 23 Nov).
 
 ## In progress
 
 | # | What | State |
 |---|---|---|
-| - | Nothing waiting to publish | |
+| 1 | `.86.76` belts and seersucker | On `preview`; CI failed once on a test that has been flaky before (Outfits "more looks after scrolling", WebKit), rerun running. Promote when green. |
+| 2 | `.86.77` striped trousers and linen under blazers | Committed on the session branch; full suite running, then preview, CI, live. |
+| 3 | Tees that hang too long (about 60 pictures) | Needs about 120 FASHN credits; 18 left. Waiting for a top-up. |
+| 4 | More SKUs in Shop | Blocked: this cloud environment's network does not reach the brand stores. Needs David to approve adding the store hosts. |
+| 5 | Claude / ChatGPT / Meta Muse assistant | Waiting for David's API keys in Cloudflare and "yes, deploy the assistant". |
+| 6 | Nightly 12am audit | Scheduled (fresh session each night). It has no GitHub tools, so it reports rather than publishes. |
+
+## Went live in .86.75
+
+- Home: his height and the name text no longer move as he swipes.
+- Ask DONNA button removed (it did not work).
+- Closet: filter by brand or colour; search matches brand and colour words.
+
+## Waiting in .86.76-.86.77
+
+- Tucked shirts on trousers with belt loops wear their matched belt (73 pictures); tees hang untucked.
+- Zanieri seersucker: no belt loops, extended waist tab with a hidden clasp.
+- Purple/burgundy-and-white striped trousers: never tucked, never belted.
+- Only the Brunello blue-and-white stripe linen shirt goes under a blazer or suit (no yellow linen).
 
 ## Went live in .86.72-.86.74
 
@@ -30,8 +48,8 @@ Build `.86.74` (live since 02:35 UTC, 23 Nov; checked on the live site: Home and
 ## Next
 
 1. Put it on me: one live attempt; the message shown says which case it is.
-2. Ask DONNA: answers untested against the live try-on worker.
-3. Fix bad Home renders and the wrong picture opening on tap (older item).
+2. Fix bad Home renders and the wrong picture opening on tap (older item).
+3. Redraw the seersucker overshirt look that was removed in .86.76.
 
 Lessons (23 Nov): plan outfits from the app's `wardrobeItems` (built-in `seed-` pieces live only there);
 never draw a shoe from a text description, use the shoe's own photo with `tryon-max`; a belt is never
