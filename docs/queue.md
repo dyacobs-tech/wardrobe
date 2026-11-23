@@ -9,15 +9,15 @@ Last updated: 23 Nov 2026, about 02:10 UTC.
 
 ## Live now
 
-Build `.86.71` (live since 00:27 UTC, 23 Nov).
+Build `.86.74` (live since 02:35 UTC, 23 Nov; checked on the live site: Home and the Outfits grid scale every picture to one height).
 
 ## In progress
 
 | # | What | State |
 |---|---|---|
-| 1 | `.86.72`-`.86.74` on `preview` (b1bba0ad) | David said GO (about 02:10 UTC). Preview CI running since 02:05; promote when green |
+| - | Nothing waiting to publish | |
 
-## Going live with it
+## Went live in .86.72-.86.74
 
 - He stands the same height on the same floor line in every picture, on every screen.
 - Every shoe in a picture is one of his real pairs, drawn from that shoe's photo (65 loafer looks, 27 Formal, 52 Inspo ideas); understated shoes first.
