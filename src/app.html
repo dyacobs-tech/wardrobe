@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.89" />
+    <meta name="wardrobe-build" content="2026-11-22.86.90" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8854,7 +8854,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.89</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.90</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10239,6 +10239,10 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         if (layer.kind === "blazer" && sameTone(layer, bottom, 14) && !(top.kind === "tee" && top.fam === layer.fam && top.fam === bottom.fam && (top.fam === "navy" || top.fam === "black"))) return null;
       }
       if ((layer.kind === "knit" || layer.kind === "vest") && !(top.kind === "shirt" || (layer.kind === "vest" && top.kind === "polo"))) return null;
+      /* .86.90 (David, 23 Nov 2026: "There are too many outfits with a sweater over a button-down shirt. I rarely wear
+         this. I prefer button-down shirt untucked for evening, casual or evening, sharp or button down shirt tucked
+         in"): a sweater is no longer dealt over a button-down shirt; the shirt is worn on its own instead. */
+      if (layer.kind === "knit" && top.kind === "shirt") return null;
       if (layer.kind === "overshirt" && !(top.kind === "tee" || (top.kind === "polo" && top.shortSleeve))) return null;
       /* .86.72 (David: "Prefer the colors to either be monochromatic or lighter goes under darker"): white or cream
          under a white or cream layer is the one-colour look he asked for */
@@ -12425,7 +12429,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.89";
+var WARDROBE_BUILD = "2026-11-22.86.90";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
