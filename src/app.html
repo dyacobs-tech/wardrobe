@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.85" />
+    <meta name="wardrobe-build" content="2026-11-22.86.86" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8839,7 +8839,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.85</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.86</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12410,7 +12410,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.85";
+var WARDROBE_BUILD = "2026-11-22.86.86";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -42981,6 +42981,9 @@ function analyzeFilePiece(card, job, ix) {
      feed shows each title once (rendered looks come first, so the one
      with his avatar wins). Skipped keys are not dealt again. */
   var dupSkip829 = [], emptyTries829 = 0;
+  /* .86.86 (audit, fix 8): the worker is told which outfits Mine skipped (same title as a card already shown, or
+     no picture of him), so it deals new ones instead of the same skipped ones every 15ms forever */
+  window.__cfSkipped886 = function () { return dupSkip829; };
   function mineEmpty829() {
     if (!mineHost) return;
     try { dropSkeleton38(); } catch (eS) {}
@@ -49854,6 +49857,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       if (m.type === "ready") { ready = true; stats.ready = m; fillAll(); return; }
       if (m.type === "error" && window.console) console.warn("[endless81] worker: " + m.msg);
       if (m.type === "dealt" || m.type === "error") {
+        if (inflight884 && inflight884.feed === m.feed) inflight884 = null;
         asking[m.feed] = false;
         if (m.type === "dealt" && m.gen === gen[m.feed]) {
           stats.dealt += m.looks.length; stats.ms.push(m.ms);
@@ -49864,6 +49868,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
           else if (m.looks.length && window.__cfBufferReady) window.__cfBufferReady();
         }
         if (!WHY[m.feed]) fill(m.feed); else onBuffer(m.feed, true);
+        pump884();
+        watch884();
       }
     };
     sendData();
@@ -49901,7 +49907,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       q.level = fi.level; q.temp = fi.temp; q.prefs = typeof composerEffectivePrefs === "function" ? composerEffectivePrefs() : { items: {}, pairs: {} };
       q.exposure = p.exposure; q.recent = p.recent;
       q.banned = Object.assign({}, p.banned);
-      shown.concat(buf).forEach(function (key) { q.banned[key] = 1; });
+      var skipped = window.__cfSkipped886 ? window.__cfSkipped886() : [];
+      shown.concat(buf, skipped).forEach(function (key) { q.banned[key] = 1; });
       q.onlyKeys = typeof onbodyKeys === "function" ? onbodyKeys() : null;
       /* the Mine feed keeps only rendered looks (feed module, .86.32) */
       q.renderedOnly = !!document.getElementById("outfits-mine-view");
@@ -49915,10 +49922,50 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     /* .86.38: Looks may ask for several dress levels and temperatures at once */
     if (q.level != null && window.dressLevels838) q.levels = window.dressLevels838.get();
     if (window.tempBands834 && window.tempBands834.temps) q.temps = window.tempBands834.temps();
-    try { W.postMessage(q); } catch (e) { asking[feed] = false; }
+    enqueue884(q);
   }
+  /* .86.85 (audit, fix 8: Looks sometimes took 12-18s to refill after a few quick level ticks): every tick queued
+     a fresh deal for all three feeds while the older ones were still waiting, and the worker ran every one of them
+     in order, out of date or not (a stale Formal Shop deal took ~7s). Now one deal is in the worker at a time;
+     each feed keeps only its newest request, out-of-date ones are dropped before they are sent, Mine goes first,
+     and a worker stuck on an out-of-date deal while Mine waits is restarted. */
+  var inflight884 = null, queue884 = {};
+  function enqueue884(q) {
+    queue884[q.feed] = q;
+    watch884();
+    pump884();
+  }
+  /* Mine is waiting behind an out-of-date deal: give that deal 400ms to finish, then restart the worker */
+  var watchT884 = 0;
+  function watch884() {
+    clearTimeout(watchT884);
+    if (!inflight884 || !queue884.mine) return;
+    if (inflight884.gen === gen[inflight884.feed]) return;
+    var left = 400 - (Date.now() - inflight884.t0);
+    if (left <= 0) { restart884(); return; }
+    watchT884 = setTimeout(watch884, left + 10);
+  }
+  function pump884() {
+    if (!W || !ready || inflight884) return;
+    var order = ["mine", active, "withmine", "allnew"];
+    for (var i = 0; i < order.length; i++) {
+      var f = order[i], q = f && queue884[f];
+      if (!q) continue;
+      delete queue884[f];
+      if (q.gen !== gen[f]) { asking[f] = false; continue; }
+      inflight884 = { feed: f, gen: q.gen, t0: Date.now() };
+      try { W.postMessage(q); } catch (e) { inflight884 = null; asking[f] = false; continue; }
+      return;
+    }
+  }
+  function restart884() {
+    try { W.terminate(); } catch (e) {}
+    W = null; ready = false; dataSig = ""; inflight884 = null; queue884 = {}; asking = {};
+    startWorker();
+  }
+  window.__endlessQueue884 = function () { return { inflight: inflight884, queued: Object.keys(queue884) }; };
   function fillAll() { ["mine", "withmine", "allnew"].forEach(function (f) { if (f === "mine" || active === f || BUF[f].length < 8) fill(f); }); }
-  function reset(feed) { gen[feed]++; BUF[feed] = []; asking[feed] = false; WHY[feed] = null; fill(feed); }
+  function reset(feed) { gen[feed]++; BUF[feed] = []; asking[feed] = false; WHY[feed] = null; fill(feed); watch884(); }
 
   /* Mine: the composer feed takes its next looks from here */
   window.__endless81 = {
@@ -49936,7 +49983,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       ric(function () { fill("mine"); });
       return out.length ? out : null;
     },
-    stats: function () { return { dealt: stats.dealt, ms: stats.ms.slice(-20), ready: stats.ready, buf: { mine: BUF.mine.length, withmine: BUF.withmine.length, allnew: BUF.allnew.length } }; },
+    stats: function () { return { dealt: stats.dealt, ms: stats.ms.slice(-20), ready: stats.ready, buf: { mine: BUF.mine.length, withmine: BUF.withmine.length, allnew: BUF.allnew.length }, out: { mine: !!WHY.mine } }; },
     state: S
   };
 
