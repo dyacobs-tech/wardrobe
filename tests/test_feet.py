@@ -88,12 +88,27 @@ def fault(m: dict) -> str | None:
     return None
 
 
+def hidden_files() -> set:
+    """Pictures the app never shows (rejected, tuck-excluded, long-tee): .86.82, read from src/app.html."""
+    import re
+    src = (ROOT / "src/app.html").read_text()
+    out = set()
+    for var in ("ONBODY_TUCK_EXCLUDE", "ONBODY_REJECTED859", "ONBODY_TEELONG879"):
+        m = re.search(r"var " + var + r" = \{(.*?)\};", src, re.S)
+        if m:
+            out |= set(re.findall(r'"([0-9a-f]{16})\.webp"', m.group(1)))
+    return out
+
+
 def main() -> int:
     fails = []
+    hidden = hidden_files()
     dirs = ["assets/onbody-cut", "assets/onbody-cut-hq"]
     n = 0
     for folder in dirs:
         for path in sorted((ROOT / folder).glob("*.webp")):
+            if path.stem in hidden and path.stem != REPORTED:
+                continue
             n += 1
             why = fault(shoe_metrics(decode_alpha(path)))
             if why:

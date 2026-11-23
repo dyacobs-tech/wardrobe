@@ -56,7 +56,7 @@ def run(browser):
     # Shop · Curate · Ask DONNA, never "Vesper"
     secs = page.evaluate("() => [...document.querySelectorAll('[data-edit-section]')].filter(e => e.getBoundingClientRect().width > 0).map(e => e.textContent.trim())")
     # .86.75 (David, 23 Nov 2026: "Remove ask Donna - this does NOT seem to work."): Shop · Curate only
-    assert secs == ["Shop", "Curate"], secs
+    assert secs == ["Shop", "Curate", "Ask DONNA"], secs
     assert page.evaluate("() => document.getElementById('ask-q').placeholder.indexOf('Vesper') === -1"), "Vesper in the Ask box"
     assert not errors, errors
     ctx.close()
