@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.76" />
+    <meta name="wardrobe-build" content="2026-11-22.86.77" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8809,7 +8809,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.76</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.77</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10110,6 +10110,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       if (cat === "Belts") beltProfile(p, item, name, colourName, notes844);
     }
     if (p.role === "bottom") p.beltless = p.kind === "swim" || !!item.nb || BELTLESS_RE.test(name + " " + notes844);
+    /* .86.77 (David, 23 Nov 2026: "The purple white striped pants should not be worn tucked!!!!! Or with belt!!!!") */
+    if (p.role === "bottom" && (item.id === "item-1795296663305-695652" || /never tucked|not tucked|untucked only/.test(notes844))) { p.beltless = true; p.noTuck877 = true; }
     if (/cashmere|wool|flannel|corduroy/.test(n) && p.warm < 1 && p.role !== "shoes") p.warm = 1;
     /* A jacket or coat named as a blazer or sport coat is tailoring,
        not a casual layer — Casual / Smart Casual will not deal it. */
@@ -10160,6 +10162,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       var lightMono872 = /^(white|beige)$/.test(top.fam || "") && /^(white|beige)$/.test(layer.fam || "") && top.L >= layer.L - 8;
       if (sameTone(layer, top, 10) && !lightMono872 && !(layer.kind === "blazer" && top.kind === "tee" && top.fam === bottom.fam && (top.fam === "navy" || top.fam === "black"))) return null;   /* .86.66: the one-colour look is meant */
       if (layer.pattern && top.pattern) return null;
+      /* .86.77 (David, 23 Nov 2026: "Yellow linen shirt is NOT to be worn under a blazer. Only linen I would consider
+         under blazer is the blue and white striped Brunello one."): a linen shirt goes under a blazer only if it is that one */
+      if ((layer.kind === "blazer" || layer.kind === "suit") && top.kind === "shirt" && top.linen856 && !(/brunello/.test(top.n) && /stripe/.test(top.n) && /blue/.test(top.n))) return null;
       /* .86.72 (David, 22 Nov 2026: "I don't like wearing darker colors under lighter colors generally. Prefer the
          colors to either be monochromatic or lighter goes under darker."): what is underneath is lighter than the
          layer over it, or the same colour family */
@@ -10452,6 +10457,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         var over = root.WardrobeRules.applyTuck(tucked, t, ly, undefined, bt);
         if (over === true || over === false) tucked = over;
       }
+      if (bt && bt.noTuck877) tucked = false;   /* .86.77: never tucked into the striped trousers, whatever else says */
       combos.push({ t: t, b: bt, s: s, l: ly, mask: mask, score: ev.score, ids: cids, key: comboKey(cids), tuck: tucked, tucked: tucked, tuckPrompt: tuckPromptOf(t, ly, tucked) });
     }
     /* Home can only display combinations in the render manifest. Resolve
@@ -12300,7 +12306,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.76";
+var WARDROBE_BUILD = "2026-11-22.86.77";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
