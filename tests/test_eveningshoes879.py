@@ -64,7 +64,7 @@ with sync_playwright() as pw:
         casualNo: ['Giorgio Armani Navy Suede Whipstitch Slip-On Loafers', 'Baudoin & Lange Tan Suede Penny Espadrilles', 'Prada Dark Brown Suede Boat Shoes', 'Loro Piana Dark Brown Suede Summer Walk Loafers', 'Loro Piana Light Blue Knit Espadrilles'].filter(n => casual(n)) }; }""")
     assert r["maple"]["lo"] == 4 and r["maple"]["hi"] == 6, r["maple"]
     assert r["lpEsp"]["lo"] <= 2, r["lpEsp"]
-    assert r["bdlEsp"]["lo"] == 2 and r["bdlEsp"]["hi"] == 4, r["bdlEsp"]
+    assert r["bdlEsp"]["lo"] <= 2 and r["bdlEsp"]["hi"] == 4, r["bdlEsp"]   # Pool too (swim rule, 22 Nov)
     assert r["tassel"]["lo"] == 4 and r["tassel"]["hi"] == 6, r["tassel"]
     # no loafers, slippers or velvets below Evening Sharp
     low = page.evaluate("""() => ['Giorgio Armani Navy Suede Whipstitch Slip-On Loafers', 'Velasca Brown Suede Venetian Slippers',

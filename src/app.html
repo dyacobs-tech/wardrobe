@@ -10077,7 +10077,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
          loafers and slippers start at Evening Sharp; casual levels keep sneakers, slip-ons and espadrilles. */
       /* and finally (same day): "Maple baudoins evening sharp to formal!!!!!! Espradrilles casual to sharp!!!!!" */
       /* then: "Baudoin espadrilles are casual to evening sharp!" — the espadrilles and the maple pair are two shoes */
-      if (/baudoin/.test(n) && /espadrille/.test(n)) { p.lo = 2; p.hi = 4; p.kind = "espadrille"; p.maple879 = true; }
+      /* Pool too: the swim rule of 22 Nov names "my baudoin lange with raffia trim" */
+      if (/baudoin/.test(n) && /espadrille/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "espadrille"; p.maple879 = true; }
       else if (/baudoin/.test(n)) { p.lo = 4; p.hi = 6; p.kind = "loafer"; }
       else if (/espadrille/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "espadrille"; p.warm = -2; }
       else if (/whipstitch|summer walk/.test(n)) { p.kind = "loafer"; p.lo = 4; p.hi = 4; p.warm = -1; }
@@ -10222,7 +10223,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       /* .86.73 (David, 23 Nov 2026: "Swim looks should be T Shirts Or linen button down ONLY!!!!! Or white Alex mill
          polo pocket shirt!!!!! Otherwise NO polos") */
       var swimTop856 = top.kind === "tee" || (top.kind === "shirt" && top.linen856) || (top.kind === "polo" && swimPolo873(top));
-      var swimShoe856 = shoes.poolOnly || /\bslides?\b/.test(shoes.n) || shoes.kind === "espadrille" || (/espadrille|raffia/.test(shoes.n) && !shoes.maple879) || (/\btoms\b/.test(shoes.n)) || (/canvas/.test(shoes.n) && /slip-on/.test(shoes.n) && !/checkerboard|vans/.test(shoes.n));
+      var swimShoe856 = shoes.poolOnly || /\bslides?\b/.test(shoes.n) || shoes.kind === "espadrille" || /espadrille|raffia/.test(shoes.n) || (/\btoms\b/.test(shoes.n)) || (/canvas/.test(shoes.n) && /slip-on/.test(shoes.n) && !/checkerboard|vans/.test(shoes.n));
       if (!swimTop856 || !swimShoe856) return null;
     }
     var score = 0;

@@ -9,9 +9,11 @@ from playwright.sync_api import sync_playwright
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000/"
 
+# .86.79: loafers and slippers start at Evening Sharp ("casual should NOT have any loafers or velvets"),
+# so the tees are knit tees, which Evening Sharp takes.
 CLOSET = [
-    {"id": "t", "name": "White Cotton Tee", "category": "Tees", "colourName": "White", "colourHex": "#f7f5ef"},
-    {"id": "t2", "name": "Navy Cotton Tee", "category": "Tees", "colourName": "Navy", "colourHex": "#1f2a44"},
+    {"id": "t", "name": "White Knit Tee", "category": "Tees", "colourName": "White", "colourHex": "#f7f5ef"},
+    {"id": "t2", "name": "Navy Merino Knit Tee", "category": "Tees", "colourName": "Navy", "colourHex": "#1f2a44"},
     {"id": "b", "name": "Stone Cotton Chino", "category": "Trousers", "colourName": "Stone", "colourHex": "#c9b896"},
     {"id": "b2", "name": "White Cotton Trousers", "category": "Trousers", "colourName": "White", "colourHex": "#f4f1ea"},
     {"id": "plain", "name": "Dark Brown Suede Penny Loafers", "category": "Shoes", "colourName": "Dark brown", "colourHex": "#4a2e1f"},

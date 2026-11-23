@@ -21,6 +21,8 @@ CLOSET = [
     {"id": "bl", "name": "Brunello Cucinelli Blue Stripe Linen Shirt", "category": "Shirts", "colourName": "Blue Stripe", "colourHex": "#b9cde3"},
     {"id": "wl", "name": "Uniqlo White Linen Shirt", "category": "Shirts", "colourName": "White", "colourHex": "#f7f5ef"},
     {"id": "lf", "name": "Dark Brown Suede Penny Loafers", "category": "Shoes", "colourName": "Dark brown", "colourHex": "#4a2e1f"},
+    # .86.79: loafers start at Evening Sharp, so casual outfits need a casual shoe
+    {"id": "sn", "name": "White Leather Sneakers", "category": "Shoes", "colourName": "White", "colourHex": "#f5f5f0"},
     {"id": "belt", "name": "Dark Brown Suede Belt", "category": "Belts", "colourName": "Dark brown", "colourHex": "#4a2e1f"},
 ]
 
