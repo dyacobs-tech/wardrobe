@@ -74,4 +74,10 @@ for old, new in SHOES.items():
 hidden = re.search(r"var ONBODY_AUDIT883 = (\{.*?\});", src).group(1)
 for f in SHOES_HIDDEN:
     assert f + ".webp" in hidden, ("picture with a broken shoe is not hidden", f)
+# .86.85: 249 more pictures re-cut at the feet to take out the grey floor shadow beside the shoes
+SHADOWS = json.load(open(ROOT / "tests/shadows885.json"))
+stale = [o for o in SHADOWS if o + ".webp" in files]
+missing = [n for n in SHADOWS.values() if n + ".webp" not in files]
+assert not stale and not missing, ("floor-shadow repairs not listed", stale[:5], missing[:5])
+print("Confirmed %d pictures re-cut without the floor shadow" % len(SHADOWS))
 print("Confirmed the 4 striped outfit pictures are whole and %d shoe pictures are re-cut" % len(SHOES))
