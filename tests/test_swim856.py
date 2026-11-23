@@ -48,7 +48,9 @@ def run(browser):
     tops = {o["top"] for o in swim}
     shoes = {o["shoes"] for o in swim}
     assert not any(o["layer"] for o in swim), swim
-    assert tops == {"tee", "linen", "noted", "polo"}, tops          # never the oxford, the long-sleeve polo, a sweater or the rust tee
+    # .86.73 (David, 23 Nov 2026: "Swim looks should be T Shirts Or linen button down ONLY!!!!! Or white Alex mill
+    # polo pocket shirt!!!!! Otherwise NO polos"): the navy polo is out too
+    assert tops == {"tee", "linen", "noted"}, tops          # never a polo (bar his white Alex Mill), the oxford, a sweater or the rust tee
     assert shoes == {"slides", "toms", "bl"}, shoes                  # never loafers, sneakers or the Vans
     # the rule is about bathing suits only: chinos still take the other tops and shoes
     assert any(c.startswith("oxford+") for c in out["chino"]) and any(c.endswith("+loafer") for c in out["chino"]), out["chino"][:8]

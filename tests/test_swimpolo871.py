@@ -14,6 +14,9 @@ URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000/"
 CLOSET = [
     {"id": "item-1794965887177-185377", "name": "Theory Cream Knit Polo", "category": "Polos", "colourName": "Cream", "colourHex": "#e8e0cc"},
     {"id": "lin", "name": "Uniqlo White Linen Shirt", "category": "Shirts", "colourName": "White", "colourHex": "#f7f5ef", "notes": "Linen, one chest pocket."},
+    {"id": "am", "name": "Alex Mill White Knit Polo", "category": "Polos", "colourName": "White", "colourHex": "#f4f1ea", "notes": "Short sleeves, chest pocket."},
+    {"id": "sp", "name": "Sunspel Grey Piqué Polo", "category": "Polos", "colourName": "Grey", "colourHex": "#9a9a98", "notes": "Short sleeves."},
+    {"id": "wt", "name": "White Cotton Tee", "category": "Tees", "colourName": "White", "colourHex": "#f7f5ef"},
     {"id": "sw", "name": "Schoastal Navy Swim Trunks", "category": "Bathing suits", "colourName": "Navy", "colourHex": "#1f2a44"},
     {"id": "toms", "name": "TOMS Cream Canvas Slip-Ons", "category": "Shoes", "colourName": "Cream", "colourHex": "#ece3cf"},
 ]
@@ -29,6 +32,9 @@ def run(browser):
     page.wait_for_function("() => window.WardrobeComposer && typeof WardrobeComposer.build === 'function'")
     tops = page.evaluate("closet => [...new Set(WardrobeComposer.build(closet).combos.filter(c => c.b.id === 'sw').map(c => c.t.id))]", CLOSET)
     assert "lin" in tops and "item-1794965887177-185377" not in tops, tops
+    # .86.73 (David, 23 Nov 2026: "Swim looks should be T Shirts Or linen button down ONLY!!!!! Or white Alex mill
+    # polo pocket shirt!!!!! Otherwise NO polos")
+    assert "wt" in tops and "am" in tops and "sp" not in tops, tops
     assert not errors, errors
     ctx.close()
 
