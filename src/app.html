@@ -10076,7 +10076,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
          are evening sharp to formal." and "casual should NOT have any loafers or velvets or anything":
          loafers and slippers start at Evening Sharp; casual levels keep sneakers, slip-ons and espadrilles. */
       /* and finally (same day): "Maple baudoins evening sharp to formal!!!!!! Espradrilles casual to sharp!!!!!" */
-      if (/baudoin/.test(n) && /espadrille|maple/.test(n)) { p.lo = 4; p.hi = 6; p.kind = "loafer"; p.maple879 = true; }
+      /* then: "Baudoin espadrilles are casual to evening sharp!" — the espadrilles and the maple pair are two shoes */
+      if (/baudoin/.test(n) && /espadrille/.test(n)) { p.lo = 2; p.hi = 4; p.kind = "espadrille"; p.maple879 = true; }
       else if (/baudoin/.test(n)) { p.lo = 4; p.hi = 6; p.kind = "loafer"; }
       else if (/espadrille/.test(n)) { p.lo = 1; p.hi = 4; p.kind = "espadrille"; p.warm = -2; }
       else if (/whipstitch|summer walk/.test(n)) { p.kind = "loafer"; p.lo = 4; p.hi = 4; p.warm = -1; }
