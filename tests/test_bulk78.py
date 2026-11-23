@@ -182,7 +182,9 @@ def main():
         check("remote unstar clears liked", "sku-local-like" not in pg.evaluate("askState().liked"))
         # ask -> star + hide through the UI
         pg.evaluate("switchTab('find')"); pg.wait_for_timeout(400)
-        pg.evaluate("() => document.getElementById('edit-tab-askdonna').click()"); pg.wait_for_timeout(300)   # .86.75: the page is hidden from him; its stored thread still syncs
+        # .86.75: the page is hidden from him; its stored thread still syncs. .86.79: Shop never opens it ("Shop opening
+        # to this page even though we removed ask Donna fix this!!!!!"), so the test reveals the hidden form itself.
+        pg.evaluate("() => { const v = document.getElementById('edit-v-ask'); v.hidden = false; ['saved','searches','build','curate'].forEach(n => { const e = document.getElementById('edit-v-' + n); if (e) e.hidden = true; }); document.getElementById('panel-find').setAttribute('data-edit-mode', 'ask'); if (typeof renderAsk === 'function') renderAsk(false); }"); pg.wait_for_timeout(300)
         pg.fill("#ask-q", "trousers for the olive polo"); pg.click("#ask-send")
         pg.wait_for_selector("#ask-thread .ask-card", timeout=10000)
         c0 = pg.locator("#ask-thread .ask-card").first
