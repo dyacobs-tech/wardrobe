@@ -60,14 +60,19 @@ SHOES = {
 SHOES_HIDDEN = ["8004b7f7e6517a4f"]
 
 src = (ROOT / "src/app.html").read_text()
+# .87.03: some of these pictures now carry a belt under a new name (tests/belts8703.json)
+BELTED = json.load(open(ROOT / "tests/belts8703.json"))["belted"]
+cur = lambda stem: BELTED.get(stem, stem)
 seed = json.loads(re.search(r"var ONBODY_SEED = (\{.*?\});\n", src).group(1))
 files = {e["f"] for e in seed["r"]}
 for old, new in FIXED.items():
     assert old + ".webp" not in files, ("the old cut-out is still listed", old)
+    new = cur(new)
     assert new + ".webp" in files, ("the repaired picture is not listed", new)
     n = light_holes(new)
     assert n < 60, ("light stripes cut out of the picture", new, n)
 for old, new in SHOES.items():
+    new = cur(new)
     assert old + ".webp" not in files and new + ".webp" in files, ("shoe repair not listed", old, new)
     a = np.asarray(Image.open(ROOT / f"assets/onbody-cut-hq/{new}.webp").convert("RGBA"))[..., 3]
     assert (a[1050:, :6] > 127).sum() == 0 and (a[1050:, -6:] > 127).sum() == 0, ("stray strip at the frame edge", new)
@@ -77,7 +82,7 @@ for f in SHOES_HIDDEN:
 # .86.85: 249 more pictures re-cut at the feet to take out the grey floor shadow beside the shoes
 SHADOWS = json.load(open(ROOT / "tests/shadows885.json"))
 stale = [o for o in SHADOWS if o + ".webp" in files]
-missing = [n for n in SHADOWS.values() if n + ".webp" not in files]
+missing = [cur(n) for n in SHADOWS.values() if cur(n) + ".webp" not in files]
 assert not stale and not missing, ("floor-shadow repairs not listed", stale[:5], missing[:5])
 print("Confirmed %d pictures re-cut without the floor shadow" % len(SHADOWS))
 print("Confirmed the 4 striped outfit pictures are whole and %d shoe pictures are re-cut" % len(SHOES))
