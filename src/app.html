@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.97" />
+    <meta name="wardrobe-build" content="2026-11-22.86.98" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8854,7 +8854,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.97</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.98</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12429,7 +12429,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.97";
+var WARDROBE_BUILD = "2026-11-22.86.98";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -35398,10 +35398,17 @@ var feedbackNotes = store.get("feedbackNotes", []);
   }
   /* .86.96: the previous session's errors and after-tap snapshots go out too, whether or not the page stalled */
   if ((prev.errors && prev.errors.length) || (prev.snaps && prev.snaps.length)) {
-    setTimeout(function () { report("previous session details", { build: prev.build, ended: prev.clean ? "closed normally" : "did not close normally", errors: prev.errors || [], snaps: prev.snaps || [], gaps: prev.gaps || [], lastTap: prev.tap }); }, 9000);
+    setTimeout(function () { report("previous session details", { build: prev.build, ended: prev.clean ? "closed normally" : "did not close normally", snaps: prev.snaps || [], lastTap: prev.tap, gaps: prev.gaps || [], errors: prev.errors || [] }); }, 9000);
   }
   var d = read(); d.clean = 0; d.gaps = []; d.errors = []; d.snaps = []; d.build = window.WARDROBE_BUILD || ""; write(d);
-  function keepErr(rec) { try { var x = read(); x.errors = (x.errors || []).concat([rec]).slice(-12); write(x); } catch (e) {} }
+  var errN898 = 0, errT898 = 0;
+  function keepErr(rec) {
+    /* .86.98: an error repeated many times a second is written at most twice a second, with a count */
+    var now = Date.now(); errN898++;
+    if (now - errT898 < 500) return;
+    errT898 = now; rec.count = errN898; errN898 = 0;
+    try { var x = read(); x.errors = (x.errors || []).concat([rec]).slice(-6); write(x); } catch (e) {}
+  }
   window.addEventListener("error", function (e) {
     if (e && e.target && e.target !== window && e.target.tagName) return;   /* image/script load errors are not code errors */
     keepErr({ t: Date.now(), where: where(), msg: String(e && e.message || "").slice(0, 200), at: String(e && e.filename || "").slice(-60) + ":" + (e && e.lineno) + ":" + (e && e.colno), stack: String(e && e.error && e.error.stack || "").slice(0, 400) });
@@ -35415,11 +35422,17 @@ var feedbackNotes = store.get("feedbackNotes", []);
       var r = document.documentElement, b = document.body, cs = getComputedStyle(b);
       function desc(el) { if (!el) return "none"; return (el.tagName || "") + (el.id ? "#" + el.id : "") + (typeof el.className === "string" && el.className ? "." + el.className.split(" ").slice(0, 2).join(".") : ""); }
       var under = document.elementFromPoint(x0, y0), mid = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
-      var fixed = [].slice.call(document.querySelectorAll("body *")).filter(function (el) {
-        if (!el.getClientRects().length) return false;
-        var c = getComputedStyle(el); if (c.position !== "fixed" || c.visibility === "hidden" || c.display === "none") return false;
-        var q = el.getBoundingClientRect(); return q.width >= innerWidth * 0.8 && q.height >= innerHeight * 0.5;
-      }).slice(0, 6).map(function (el) { var c = getComputedStyle(el); return desc(el) + " z" + c.zIndex + " op" + c.opacity + " pe:" + c.pointerEvents; });
+      /* .86.98: cheap — only the elements under the finger and a few screen points, and their fixed ancestors
+         (scanning every element cost 0.1-0.2s on a phone after each touch) */
+      var fixed = [], seen = {};
+      [[x0, y0], [innerWidth / 2, innerHeight / 2], [innerWidth / 2, innerHeight * 0.25], [innerWidth / 2, innerHeight * 0.75]].forEach(function (pt) {
+        var el = document.elementFromPoint(pt[0], pt[1]), hops = 0;
+        while (el && el !== document.body && hops++ < 25) {
+          var c = getComputedStyle(el);
+          if (c.position === "fixed") { var q = el.getBoundingClientRect(), k = desc(el); if (!seen[k] && q.width >= innerWidth * 0.8 && q.height >= innerHeight * 0.5) { seen[k] = 1; fixed.push(k + " z" + c.zIndex + " op" + c.opacity + " pe:" + c.pointerEvents); } break; }
+          el = el.parentElement;
+        }
+      });
       var x = read();
       x.snaps = (x.snaps || []).concat([{ afterTap: Math.round((Date.now() - tapAt) / 100) / 10, tap: tapDesc, xy: [Math.round(x0), Math.round(y0)], where: where(), tab: typeof currentTab !== "undefined" ? currentTab : "", view: typeof viewCur !== "undefined" ? viewCur : "", html: String(r.className || "").slice(0, 120), body: cs.position + " top:" + b.style.top + " ovf:" + cs.overflow + " pe:" + cs.pointerEvents, scrollY: Math.round(scrollY), under: desc(under), mid: desc(mid), fixedCovers: fixed, inert: !!document.querySelector("[inert]"), dialog: !!document.querySelector("dialog[open]"), active: desc(document.activeElement) }]).slice(-8);
       write(x);
@@ -35428,6 +35441,9 @@ var feedbackNotes = store.get("feedbackNotes", []);
   function onTap(e) {
     var x = read(); x.tap = describe(e.target); x.tapAt = Date.now(); x.tapWhere = where(); write(x);
     var px = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX) || 0, py = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY) || 0, td = x.tap, ta = x.tapAt;
+    /* .86.98: at most one pair of snapshots every 8s (each scroll swipe is a touch too) */
+    if (ta - (onTap.last898 || 0) < 8000) return;
+    onTap.last898 = ta;
     setTimeout(function () { snapshot(px, py, td, ta); }, 1500);
     setTimeout(function () { snapshot(px, py, td, ta); }, 5000);
   }
@@ -50370,7 +50386,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
        appears as a hover and never sends the click, so every tap on every page was swallowed. The marker is now
        re-armed only after cards were actually added (appendCards), and the note is rewritten only when it changes. */
     var io = new IntersectionObserver(function (en) {
-      if (!en[0].isIntersecting || f.host.hidden) return;
+      if (!en[en.length - 1].isIntersecting || f.host.hidden) return;   /* the newest entry decides */
       more(feed);
     }, { rootMargin: "1400px 0px" });
     f.rearm897 = function () { if (f.rearmQ897) return; f.rearmQ897 = 1; requestAnimationFrame(function () { f.rearmQ897 = 0; io.unobserve(f.sent); io.observe(f.sent); }); };
