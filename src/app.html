@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.87.07" />
+    <meta name="wardrobe-build" content="2026-11-22.87.08" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -1699,6 +1699,7 @@ window.notMenswear853 = function (e) {
 
       /* ---------- Full-size photo pop-out (shared) ---------- */
       .popout { position: fixed; inset: 0; z-index: 120; background: #0c0a07; display: flex; align-items: center; justify-content: center; }
+      .popout.popout-cut8708 { background: #F6F2EA; }
       .popout[hidden] { display: none; }
       .popout img { width: 100%; height: 100%; object-fit: contain; display: block; }
       .popout-close { position: absolute; top: 10px; right: 12px; width: 44px; height: 44px; min-height: 44px; border-radius: 50%; background: rgba(20,17,13,.55); color: #f7f1e5; border: 1px solid rgba(247,241,229,.5); font-size: 22px; line-height: 1; padding: 0; cursor: pointer; }
@@ -8862,7 +8863,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.87.07</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.87.08</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12454,7 +12455,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.87.07";
+var WARDROBE_BUILD = "2026-11-22.87.08";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -24612,6 +24613,7 @@ function lookCardHTML(look, opts) {
   opts = opts || {};
   var refTag = look.refLook ? '<span class="pane-tag">Reference — ' + esc(look.imgInspo ? "your image" : ((look.iconId ? (iconById(look.iconId) || {}).name : "") || "icon")) + "</span>" : "";
   var cardImg = look.swapPhoto || lookImg(look);
+  if (window.cleanPic8708) cardImg = window.cleanPic8708(cardImg);   /* .87.08: the clean cut-out, not the studio drawing */
   var lcState = swapCardState(look);
   var lcWaiting = lcState === "rendering" || lcState === "pending" || lcState === "failed" || lcState === "nosync";
   var mediaPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + esc(cardImg) + '"';
@@ -38883,6 +38885,7 @@ function renderWeekPlan() {
     var fcTxt = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" + (fc.label ? " " + fc.label.replace("Thunderstorms", "T-storms").replace("Thunderstorm", "T-storm") : "") : "";
     var cls = "wp-day" + (iso === todayIso ? " wp-today" : "") + (iso < todayIso ? " wp-past" : "") + (look ? " wp-planned" : "") + (worn.length ? " wp-hasworn" : "");
     var img = cover && cover.image, imgTitle = cover && cover.title;
+    if (img && window.cleanPic8708) img = window.cleanPic8708(img, true);   /* .87.08: the cut-out, not the studio drawing */
     var aria = esc(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) +
       (worn.length ? " — wore: " + esc(worn.map(function (w) { return w.title; }).join(", ")) : "") +
       (look ? " — planned: " + esc(look.title) : "");
@@ -39344,6 +39347,8 @@ if (popoutImg) popoutImg.addEventListener("load", placePopoutClose);
 window.addEventListener("resize", placePopoutClose);
 function openPopout(src, alt) {
   if (!src || !popoutEl) return;
+  if (window.cleanPic8708) src = window.cleanPic8708(src);   /* .87.08: the clean cut-out on a light ground, not the studio drawing */
+  popoutEl.classList.toggle("popout-cut8708", /\/onbody-cut(-hq)?\//.test(src));
   popoutImg.src = src;
   popoutImg.alt = alt || "";
   popoutEl.hidden = false;
@@ -48199,6 +48204,14 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var id = idOf(src); if (!id || BADCUT[id]) return "";
     if (CUT.map) return CUT.map[id] || "";
     return "assets/onbody-cut/" + id + ".webp";
+  };
+  /* .87.08 (David, 24 Nov 2026, on a look page showing his picture in its grey studio box: "wtf is this quality
+     looks like shit!!!!"): the look page, the full-screen view and the Calendar showed the raw drawing with its
+     studio backdrop, while every other screen shows the clean cut-out. They now show the cut-out too: the sharp
+     copy where the picture is big, the small one for Calendar thumbnails. */
+  window.cleanPic8708 = function (src, small) {
+    var c = window.cutoutFor(src); if (!c) return src;
+    return small ? c : c.replace("onbody-cut/", "onbody-cut-hq/");
   };
   /* a cut-out that fails to load is dropped and Home re-deals */
   document.addEventListener("error", function (e) {
