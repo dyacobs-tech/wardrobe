@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.87.00" />
+    <meta name="wardrobe-build" content="2026-11-22.87.01" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -5146,6 +5146,9 @@ window.notMenswear853 = function (e) {
       #panel-find .ask-sugs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 12px 0 0; }
       #panel-find .ask-sugs .chip { min-width: 0 !important; }
       #panel-find .ask-sugs:empty { display: none; }
+      #panel-find .ask-earlier903 { display: block; margin: 4px auto 14px; }
+      #panel-find .ask-old903 { opacity: .78; }
+      #panel-find .ask-new903 { margin: 18px 0 10px; text-align: center; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
       #ask-form { position: sticky; bottom: 0; display: flex; gap: 8px; align-items: center; margin: 14px 0 0; padding: 8px 0; background: var(--bg); z-index: 3; }
       #ask-q { flex: 1; min-width: 0; height: 44px; border-radius: 999px; border: var(--ctl-border, 1px solid var(--border)); background: var(--surface); color: var(--text); padding: 0 16px; font: 16px var(--font-ui); -webkit-appearance: none; appearance: none; }
       #ask-send { width: 44px !important; height: 44px !important; min-width: 44px !important; max-width: 44px !important; min-height: 44px !important; max-height: 44px !important; border-radius: 999px !important; border: 0; padding: 0 !important; background: var(--ink-btn); color: var(--ink-btn-text); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: none; }
@@ -8854,7 +8857,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.87.00</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.87.01</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12432,7 +12435,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.87.00";
+var WARDROBE_BUILD = "2026-11-22.87.01";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -45012,6 +45015,7 @@ if (window.stlPending) { window.stlPending = false; lazyRender803("SHOP_CATALOGU
     if (b) b.textContent = String(allSearches().length);
   }
   function show(v) {
+    if (v === "ask" && editState.view !== "ask" && typeof window.askFresh903 === "function") window.askFresh903();   /* .87.01 */
     /* .86.79 (David, 23 Nov 2026, screenshot of Shop opening on the Ask DONNA chat: "Shop opening to this page
        even though we removed ask Donna fix this!!!!!"). Ask DONNA was removed in .86.75, but a phone that had it
        open last time reopened on it. Shop never shows Ask DONNA; it opens on the last Shop view instead. */
@@ -45370,6 +45374,19 @@ window.inspoView = "withmine";
   var askDisliked = store.get("ask.disliked", []) || [];
   var askBusy = false, askAdded = {};
   if (!Array.isArray(askThread)) askThread = [];
+  /* .87.01 (David, 24 Nov 2026, screenshot of Ask DONNA reopening on an old chat: "this needs to be refreshed and
+     clean for every query right?"; he chose "Clean on open + an Earlier button"). Each time Ask DONNA is opened it
+     starts an empty chat; questions asked during that visit stay together (follow-ups keep their context). Earlier
+     chats are only hidden, never deleted (they are synced records): "Earlier chats" shows them again. */
+  var askFrom = +store.get("ask.from903", 0) || 0, askEarlier = false;
+  function visibleTurns() { return askThread.filter(function (t) { return t && tsOf(t) >= askFrom; }); }
+  function earlierTurns() { return askThread.filter(function (t) { return t && tsOf(t) < askFrom; }); }
+  window.askFresh903 = function () {
+    var pend = askThread.filter(function (t) { return t && t.state === "pending"; })[0];
+    askFrom = pend ? tsOf(pend) : Date.now();   /* a reply still on its way stays on screen */
+    askEarlier = false;
+    store.set("ask.from903", askFrom);
+  };
   /* a reply that never landed (closed mid-wait) is not left spinning */
   askThread.forEach(function (t) { if (t && t.state === "pending") { t.state = "error"; t.msg = "That one didn't come through."; } });
   /* esc: the one shared helper (global) — Nov 19 consolidation */
@@ -45494,7 +45511,7 @@ window.inspoView = "withmine";
   }
   function historyPayload(beforeIdx) {
     var h = [];
-    askThread.slice(0, beforeIdx).filter(function (t) { return t && t.state === "done"; }).slice(-3).forEach(function (t) {
+    askThread.slice(0, beforeIdx).filter(function (t) { return t && t.state === "done" && tsOf(t) >= askFrom; }).slice(-3).forEach(function (t) {
       h.push({ role: "user", content: String(t.q || "").slice(0, 1000) });
       var picks = (t.picks || []).map(function (p) { var pr = p.product || {}; return (pr.brand ? pr.brand + " " : "") + (pr.name || "") + (pr.priceDisplay ? " (" + pr.priceDisplay + ")" : ""); });
       h.push({ role: "assistant", content: String(t.answer || "") + (picks.length ? " Picks: " + picks.join("; ") + "." : "") });
@@ -45611,10 +45628,14 @@ window.inspoView = "withmine";
     if (!signed) {
       host.innerHTML = '<div class="ask-signedout"><p class="ask-a ask-msg">Ask is ready once this device is signed in. Open Profile to connect, then come back here.</p><button type="button" class="btn-ink" id="ask-goto-profile">Open Profile</button></div>';
     } else {
-      host.innerHTML = askThread.map(turnHTML).join("");
+      var vis903 = visibleTurns(), old903 = earlierTurns();
+      host.innerHTML = (old903.length ? '<button type="button" class="chip ask-earlier903" data-ask-earlier903 aria-expanded="' + askEarlier + '">' +
+          (askEarlier ? "Hide earlier chats" : "Earlier chats (" + old903.length + ")") + "</button>" : "") +
+        (askEarlier && old903.length ? '<div class="ask-old903">' + old903.map(turnHTML).join("") + '</div><p class="ask-new903">New chat</p>' : "") +
+        vis903.map(turnHTML).join("");
     }
     var sg = document.getElementById("ask-sugs");
-    if (sg) sg.innerHTML = (!signed || askThread.length) ? "" : ASK_SUGS.map(function (s) { return '<button type="button" class="chip" data-ask-sug>' + esc(s) + "</button>"; }).join("");
+    if (sg) sg.innerHTML = (!signed || visibleTurns().length) ? "" : ASK_SUGS.map(function (s) { return '<button type="button" class="chip" data-ask-sug>' + esc(s) + "</button>"; }).join("");
     syncSend();
     if (toEnd) {
       var last = host.lastElementChild;
@@ -45654,6 +45675,7 @@ window.inspoView = "withmine";
     var b, card, x;
     if ((b = t.closest("#ask-goto-profile"))) { if (typeof switchTab === "function") switchTab("pcloud"); return; }
     if ((b = t.closest("[data-ask-sug]"))) { if (!tryonKey()) { renderAsk(false); return; } ask(b.textContent); return; }
+    if ((b = t.closest("[data-ask-earlier903]"))) { askEarlier = !askEarlier; renderAsk(false); return; }
     if ((b = t.closest("[data-ask-retry]"))) {
       var old = turnById(b.getAttribute("data-ask-retry"));
       if (old && !askBusy && online()) { askThread = askThread.filter(function (z) { return z !== old; }); saveThread(); ask(old.q); }
