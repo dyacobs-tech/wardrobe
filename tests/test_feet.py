@@ -25,6 +25,9 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 # The reported outfit: Black Overshirt & Blue Jeans, taupe loafers.
 REPORTED = "c6c0fca9cf6398ed"
+sys.path.insert(0, str(ROOT / "tests"))
+from picture_names import current   # .87.04: repaired pictures are renamed
+REPORTED = current(REPORTED)
 
 
 def decode_alpha(path: Path) -> np.ndarray:

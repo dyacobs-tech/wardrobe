@@ -26,8 +26,11 @@ def light_holes(stem):
     than the grey backdrop there (a keyed-out light stripe)."""
     raw = np.asarray(Image.open(ROOT / f"assets/onbody/{stem}.webp").convert("RGB")).astype(np.float32)
     a = np.asarray(Image.open(ROOT / f"assets/onbody-cut-hq/{stem}.webp").convert("RGBA"))[..., 3]
-    edge = np.concatenate([raw[:, :12], raw[:, -12:]], axis=1)
-    lighter = raw.mean(2) - np.median(edge, axis=1).mean(1)[:, None] > 22
+    # the backdrop of each row is what the cut-out leaves out on that row (.87.04: the outermost columns of a picture
+    # whose arms were redrawn hold the redraw's slightly different grey, so they no longer stand for the backdrop)
+    lum = raw.mean(2)
+    bg = np.array([np.median(lum[y][a[y] < 10]) if (a[y] < 10).sum() > 8 else np.median(lum[y]) for y in range(a.shape[0])])
+    lighter = lum - bg[:, None] > 22
     n = 0
     for y in range(300, a.shape[0]):
         xs = np.where(a[y] >= 128)[0]
@@ -60,9 +63,8 @@ SHOES = {
 SHOES_HIDDEN = ["8004b7f7e6517a4f"]
 
 src = (ROOT / "src/app.html").read_text()
-# .87.03: some of these pictures now carry a belt under a new name (tests/belts8703.json)
-BELTED = json.load(open(ROOT / "tests/belts8703.json"))["belted"]
-cur = lambda stem: BELTED.get(stem, stem)
+# .87.03 / .87.04: these pictures may since have been repaired under a new name (tests/picture_names.py)
+from picture_names import current as cur
 seed = json.loads(re.search(r"var ONBODY_SEED = (\{.*?\});\n", src).group(1))
 files = {e["f"] for e in seed["r"]}
 for old, new in FIXED.items():
