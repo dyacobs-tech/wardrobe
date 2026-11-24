@@ -30,6 +30,6 @@ with sync_playwright() as pw:
       return { shown: keys.map(k => { const c = find(k); return c ? { untucked: !c.tucked, prompt: c.tuckPrompt } : null; }), control: !!find(control) }; }""", [ITEMS, UNTUCKED, CONTROL])
     assert all(x and x["untucked"] for x in got["shown"]), ("an untucked picture is not dealt at Evening Casual, untucked", got)
     assert all("untucked" in x["prompt"] for x in got["shown"]), got
-    assert not got["control"], ("a picture drawn with the shirt tucked reached Evening Casual", got)
+    assert not got["control"], ("an outfit with a tucked shirt that is not on the untucked list reached Evening Casual", got)
     browser.close()
-print("Confirmed the 6 untucked yellow linen and denim shirt pictures are dealt at Evening Casual, and a tucked one is not")
+print("Confirmed the 6 untucked yellow linen and denim shirt pictures are dealt at Evening Casual, and an outfit with a tucked shirt not on the list is not")
