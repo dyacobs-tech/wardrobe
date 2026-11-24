@@ -100,10 +100,12 @@ def run(browser):
     page.wait_for_function("() => !document.querySelector('[data-ins-feed=\"mine\"]').hidden")
     assert page.evaluate("() => [...document.querySelectorAll('[data-ins-feed]')].filter(b => !b.hidden).map(b => b.textContent)") == ["Mine", "New + mine", "All new"]
     page.evaluate("() => document.querySelector('[data-ins-feed=\"mine\"]').click()")
-    page.wait_for_function("() => [...document.querySelectorAll('#cf-grid .cf-card:not(.en-skel)')].filter(c => c.offsetParent).length >= 2", timeout=30000)
-    mine = page.evaluate("""() => { const cards = [...document.querySelectorAll('#cf-grid .cf-card:not(.en-skel)')].filter(c => c.offsetParent);
+    # waited for and measured in one step: the level change above re-deals the grid ~300ms later, and on a busy
+    # machine a separate measure could land in that re-deal and count 0 cards (24 Nov 2026, full local runs)
+    mine = page.wait_for_function("""() => { const cards = [...document.querySelectorAll('#cf-grid .cf-card:not(.en-skel)')].filter(c => c.offsetParent);
+      if (cards.length < 2) return false;
       return { n: cards.length, priced: cards.filter(c => /\\$\\d/.test(c.textContent)).length, onHim: cards.filter(c => c.querySelector('img[data-onbody], .mine-avatar')).length,
-               products: [...document.querySelectorAll('#en-grid-withmine .cf-card, #en-grid-allnew .cf-card')].filter(c => c.offsetParent).length, tab: currentTab }; }""")
+               products: [...document.querySelectorAll('#en-grid-withmine .cf-card, #en-grid-allnew .cf-card')].filter(c => c.offsetParent).length, tab: currentTab }; }""", timeout=30000).json_value()
     assert mine["tab"] == "inspo" and mine["n"] >= 2 and mine["priced"] == 0 and mine["onHim"] == mine["n"] and mine["products"] == 0, mine
     page.evaluate("() => document.querySelector('[data-ins-clear]').click()")
     page.wait_for_function("() => document.querySelector('[data-ins-feed=\"mine\"]').hidden && document.querySelector('[data-ins-feed=\"withmine\"]').getAttribute('aria-pressed') === 'true'")
