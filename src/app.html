@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.87.01" />
+    <meta name="wardrobe-build" content="2026-11-22.87.02" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8857,7 +8857,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.87.01</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.87.02</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10559,9 +10559,16 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         if (over === true || over === false) tucked = over;
       }
       if (bt && bt.noTuck877) tucked = false;   /* .86.77: never tucked into the striped trousers, whatever else says */
-      /* .87.00 (David, 23 Nov 2026: "Evening casual should be untucked. Evening sharp either tucked or untucked"):
-         an outfit whose top is tucked in is not dealt at Evening Casual; Evening Sharp keeps both */
-      if (tucked) { mask &= ~(1 << 3); if (!mask || onlyLevel === 3) return; }
+      /* .87.00 / .87.02 (David, 23 Nov 2026: "Evening casual should be untucked. Evening sharp either tucked or
+         untucked"). An outfit that fits Evening Casual is worn untucked there; Evening Sharp takes either, so the
+         same outfit stays at both. Two cases cannot be untucked and leave Evening Casual instead: a picture already
+         drawn with the shirt tucked in (renderKeys: the outfits shown with his pictures) and a shirt under a blazer.
+         (.87.00 dropped every tucked outfit from Evening Casual, which emptied it of his linen, chambray and denim
+         button-downs, whose only outfits were there.) */
+      if (tucked && (mask & (1 << 3))) {
+        if (renderKeys || isTailoredLayer(ly)) { mask &= ~(1 << 3); if (!mask || onlyLevel === 3) return; }
+        else tucked = false;
+      }
       combos.push({ t: t, b: bt, s: s, l: ly, mask: mask, score: ev.score, ids: cids, key: comboKey(cids), tuck: tucked, tucked: tucked, tuckPrompt: tuckPromptOf(t, ly, tucked) });
     }
     /* Home can only display combinations in the render manifest. Resolve
@@ -12435,7 +12442,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.87.01";
+var WARDROBE_BUILD = "2026-11-22.87.02";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
