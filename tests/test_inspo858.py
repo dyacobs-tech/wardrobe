@@ -98,7 +98,8 @@ def run(browser):
     assert page.evaluate("() => document.querySelector('[data-ins-feed=\"mine\"]').hidden") is True
     page.evaluate("() => document.querySelector('[data-ins-icon]').click()")
     page.wait_for_function("() => !document.querySelector('[data-ins-feed=\"mine\"]').hidden")
-    assert page.evaluate("() => [...document.querySelectorAll('[data-ins-feed]')].filter(b => !b.hidden).map(b => b.textContent)") == ["Mine", "New + mine", "All new"]
+    # .87.10: Mix (new pieces mixed with his closet, not drawn on him) is back next to New + mine (David, 24 Nov 2026)
+    assert page.evaluate("() => [...document.querySelectorAll('[data-ins-feed]')].filter(b => !b.hidden).map(b => b.textContent)") == ["Mine", "New + mine", "Mix", "All new"]
     page.evaluate("() => document.querySelector('[data-ins-feed=\"mine\"]').click()")
     # waited for and measured in one step: the level change above re-deals the grid ~300ms later, and on a busy
     # machine a separate measure could land in that re-deal and count 0 cards (24 Nov 2026, full local runs)
