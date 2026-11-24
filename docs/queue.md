@@ -49,11 +49,6 @@ Build `.86.77` (live since 05:41 UTC, 23 Nov; .86.76 went live at 05:09).
 2. Fix bad Home renders and the wrong picture opening on tap (older item).
 3. Redraw the seersucker overshirt look that was removed in .86.76.
 
-Sleeve and tee length reference (David, 23 Nov: "THIS IS THE CORRECT LENGTH"): assets/onbody/ceb95c9eb9dca42f.webp,
-Giorgio Armani white tee: fitted sleeves at mid upper arm, hem just below the waistband. Short-sleeve tees and polos
-match it; the two Missoni zig-zag polos are elbow length by design. The drawing model makes tees boxy; do not
-shorten a tee by trimming its product photo (that made them boxier).
-
 Lessons (23 Nov): plan outfits from the app's `wardrobeItems` (built-in `seed-` pieces live only there);
 never draw a shoe from a text description, use the shoe's own photo with `tryon-max`; a belt is never
 drawn over a closed jacket.

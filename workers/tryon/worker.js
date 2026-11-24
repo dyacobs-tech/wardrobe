@@ -432,82 +432,6 @@ ${candLines.join("\n")}`;
   msgs.push({ role: "user", content: user });
   return { messages: msgs, cCode, sCode };
 }
-// .86.82 (David, 23 Nov 2026: "Let's integrate muse / Claude / chatgpt though", then "yes deploy the assistant"):
-// Ask answers with OpenAI first, using the key saved as a Cloudflare secret; Workers AI stays as the fallback.
-var OPENAI_DEFAULT_MODELS = ["gpt-5-mini", "gpt-4.1-mini", "gpt-4o-mini"];
-var OPENAI_OK_MODEL = null;
-var KEY_NAMES = ["OPENAI_API_KEY", "key_BE3gX1OPxUqH6jDL", "apikey_01D4TB6uBd1x13y3rvuqqSez", "ANTHROPIC_API_KEY"];
-function keyKind(v) {
-  const t = typeof v === "string" ? v.trim() : "";
-  if (!t) return "empty";
-  if (/^sk-ant-/.test(t)) return "anthropic";
-  if (/^sk-/.test(t)) return "openai";
-  return "other";
-}
-function keyNames(env) {
-  const names = KEY_NAMES.filter((n) => env[n] !== void 0);
-  for (const n of Object.keys(env)) if (!names.includes(n) && typeof env[n] === "string" && /key|openai/i.test(n)) names.push(n);
-  return names;
-}
-function openaiKey(env) {
-  for (const n of keyNames(env)) if (keyKind(env[n]) === "openai") return env[n].trim();
-  return null;
-}
-function keyShapes(env) {
-  return keyNames(env).map((n) => {
-    const raw = String(env[n] || ""), t = raw.trim();
-    return { name: n, kind: keyKind(raw), length: t.length, innerSpace: /\s/.test(t), outerSpace: raw !== t, quoted: /^["']|["']$/.test(t), prefix: t.slice(0, t.startsWith("sk-proj-") ? 8 : 3) };
-  });
-}
-function openaiModels(env) {
-  const list = [];
-  if (env.OPENAI_MODEL) list.push(String(env.OPENAI_MODEL));
-  if (OPENAI_OK_MODEL) list.push(OPENAI_OK_MODEL);
-  for (const m of OPENAI_DEFAULT_MODELS) list.push(m);
-  return [...new Set(list)];
-}
-async function openaiChat(env, model, messages, schema, maxTokens) {
-  const body = { model, messages, max_completion_tokens: maxTokens || 1200 };
-  if (!/^gpt-5|^o\d/.test(model)) body.temperature = 0.35;
-  if (schema) body.response_format = { type: "json_schema", json_schema: { name: "donna_answer", schema, strict: false } };
-  const r = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { "content-type": "application/json", authorization: "Bearer " + openaiKey(env) },
-    body: JSON.stringify(body)
-  });
-  const txt = await r.text();
-  if (!r.ok) {
-    let code = "";
-    try { code = JSON.parse(txt)?.error?.code || JSON.parse(txt)?.error?.type || ""; } catch {}
-    const e = new Error("openai " + r.status + " " + code);
-    e.status = r.status; e.code = code;
-    throw e;
-  }
-  const j = JSON.parse(txt);
-  const content = j?.choices?.[0]?.message?.content;
-  if (typeof content !== "string" || !content.trim()) throw new Error("openai empty reply");
-  return content;
-}
-async function handleAskPing(env, json2) {
-  if (!openaiKey(env)) return json2({ ok: false, reason: "no_key", keys: keyShapes(env) });
-  const day = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
-  const ck = "askping/" + day;
-  const used = Number(await env.TRYON_KV.get(ck)) || 0;
-  if (used >= 30) return json2({ ok: false, reason: "daily_cap" }, 429);
-  await env.TRYON_KV.put(ck, String(used + 1), { expirationTtl: 2 * DAY });
-  const tried = [];
-  for (const m of openaiModels(env)) {
-    const t0 = Date.now();
-    try {
-      const out = await openaiChat(env, m, [{ role: "user", content: "Reply with the single word: ready" }], null, 400);
-      OPENAI_OK_MODEL = m;
-      return json2({ ok: true, provider: "openai", model: m, ms: Date.now() - t0, reply: clip(out, 40), tried });
-    } catch (e) {
-      tried.push(m + ": " + clip(e.message, 80));
-    }
-  }
-  return json2({ ok: false, reason: "all_models_failed", tried, keys: keyShapes(env) });
-}
 function parseModelJson(res) {
   let r = res?.response ?? res?.result?.response ?? res;
   if (r && typeof r === "object" && !Array.isArray(r)) return r;
@@ -615,7 +539,7 @@ function scrubCodes(text, cCode, sCode, bySku, closetById) {
   }).replace(/\s+([,.])/g, "$1").replace(/\s{2,}/g, " ").trim();
 }
 async function handleAsk(req, env, acct, json2) {
-  if (!env.AI && !openaiKey(env)) return json2({ error: "not_configured", message: "Ask isn't switched on (no AI binding)." }, 503);
+  if (!env.AI) return json2({ error: "not_configured", message: "Ask isn't switched on (no AI binding)." }, 503);
   const raw = await req.text();
   if (raw.length > MAX_ASK_BODY) return json2({ error: "too large" }, 413);
   let body;
@@ -672,27 +596,7 @@ async function handleAsk(req, env, acct, json2) {
   let modelUsed = "";
   const errors = [];
   const t0 = Date.now();
-  if (openaiKey(env)) {
-    for (const model of openaiModels(env)) {
-      try {
-        const content = await openaiChat(env, model, messages, SCHEMA, 1500);
-        const v = validate(parseModelJson(content), cCode, sCode, bySku, closetById);
-        OPENAI_OK_MODEL = model;
-        if (v.picks.length && v.answer) {
-          result = v;
-          modelUsed = "openai:" + model;
-          break;
-        }
-        errors.push("openai:" + model + ": no valid picks");
-        break;
-      } catch (e) {
-        errors.push("openai:" + model + ": " + clip(e.message, 120));
-        if (e.status && e.status !== 404 && e.status !== 400) break;
-      }
-    }
-  }
-  for (const model of result ? [] : models) {
-    if (!env.AI) break;
+  for (const model of models) {
     try {
       const res = await env.AI.run(model, {
         messages,
@@ -1553,7 +1457,7 @@ async function handler(req, env) {
         service: "wardrobe-tryon",
         engine: "fashn/tryon-max",
         configured: !!await fashnKey(env),
-        ask: { configured: !!env.AI || !!openaiKey(env), provider: openaiKey(env) ? "openai" : "workers-ai", model: openaiKey(env) ? (OPENAI_OK_MODEL || openaiModels(env)[0]) : (env.ASK_MODEL || DEFAULT_MODEL) },
+        ask: { configured: !!env.AI, model: env.ASK_MODEL || DEFAULT_MODEL },
         identify: { configured: !!env.AI, model: env.IDENTIFY_MODEL || IDENTIFY_MODEL }
       });
     }
@@ -1572,7 +1476,6 @@ async function handler(req, env) {
       if (!acct) return json({ error: "unauthorized" }, 401);
       return await handleIdentify(req, env, acct, json);
     }
-    if (p === "/ask/ping" && req.method === "GET") return await handleAskPing(env, json);
     if (p === "/ask/catalog" && req.method === "GET") {
       const acct = await acctFor(env, req);
       if (!acct) return json({ error: "unauthorized" }, 401);

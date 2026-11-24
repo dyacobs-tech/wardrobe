@@ -82,14 +82,7 @@ def check(browser, level):
         page.locator("#look-layer-close").tap()
         count = cards.count()
         cards.last.scroll_into_view_if_needed()
-        # .86.86 (audit, fix 8): scrolling deals more, or the feed has shown every outfit pictured on him at
-        # this level; either way the worker then goes quiet (it used to re-deal skipped outfits every 15ms forever)
-        wait(page, "n => __cfLooks81().length > n || window.__endless81.stats().out.mine", "more looks after scrolling to the last card, or the end of the feed (had %d)" % count, where, errors, arg=count)
-        page.wait_for_timeout(1500)
-        d0 = page.evaluate("() => window.__endless81.stats().dealt")
-        page.wait_for_timeout(2000)
-        d1 = page.evaluate("() => window.__endless81.stats().dealt")
-        assert d1 - d0 < 30, ("the outfit worker keeps dealing with nothing new to show", where, d1 - d0)
+        wait(page, "n => __cfLooks81().length > n", "more looks after scrolling to the last card (had %d)" % count, where, errors, arg=count)
         assert page.evaluate("() => new Set(__cfLooks81().map(l => l.composerKey)).size === __cfLooks81().length")
         print(f"Confirmed {len(verified)} exact outfit portraits, detail and additional unique cards")
     else:

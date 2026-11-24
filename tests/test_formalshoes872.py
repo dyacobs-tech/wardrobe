@@ -42,9 +42,7 @@ def run(browser):
     out = page.evaluate("""closet => { const d = WardrobeComposer.build(closet);
       return { formal: [...new Set(d.combos.filter(c => c.mask & (1 << 6)).map(c => c.s.id))],
                layered: [...new Set(d.combos.filter(c => c.l).map(c => c.l.id + '+' + c.t.id))] }; }""", CLOSET)
-    # .86.83: later rules widen Baudoin at Formal (David, 23 Nov 2026: "Other baudoins are evening sharp to formal",
-    # "Maple baudoins evening sharp to formal"), so the rust/maple pair is now in.
-    assert set(out["formal"]) == {"bl", "blr", "be", "ba"}, out["formal"]
+    assert set(out["formal"]) == {"bl", "be", "ba"}, out["formal"]
     lay = out["layered"]
     assert "bzC+sh" not in lay and "bzC+nt" not in lay, lay          # darker under lighter
     assert "bzB+sh" in lay and "bzN+wt" in lay, lay                    # lighter under darker
