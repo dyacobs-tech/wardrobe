@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.87.05" />
+    <meta name="wardrobe-build" content="2026-11-22.87.06" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -6936,6 +6936,11 @@ window.notMenswear853 = function (e) {
       .dm-wrap841 { display: flex; gap: 10px; align-items: stretch; }
       .dm-av841 { position: relative; flex: 0 0 40%; min-height: 360px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
       .dm-av841 img { width: 100%; height: 100%; max-height: 440px; object-fit: contain; object-position: bottom center; display: block; }
+      /* .87.06 (David, 24 Nov 2026: "Issue with all arm cut off sleeves wrong pls fix"): every picture is scaled up to
+         15% so he stands the same height everywhere, and this frame clips at its edge, so a scaled-up picture had his
+         arms cut off by a straight line here. The picture now takes 88% of the frame's width, which leaves room for
+         the largest scale on both sides. */
+      .dm-av841 img { width: 88%; }
       .dm-off841 img { opacity: .45; filter: grayscale(.3); }
       .dm-note841 { position: absolute; left: 8px; right: 8px; top: 10px; text-align: center; font-size: 12px; font-weight: 600; color: var(--dim); }
       .dm-slots841 { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -8857,7 +8862,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.87.05</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.87.06</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12449,7 +12454,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.87.05";
+var WARDROBE_BUILD = "2026-11-22.87.06";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
