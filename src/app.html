@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.87.08" />
+    <meta name="wardrobe-build" content="2026-11-22.87.09" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8863,7 +8863,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.87.08</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.87.09</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -9955,6 +9955,25 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   var BELTLESS_RE = /drawstring|draw-string|elasticated|elastic waist|pull-on|jogger|side[- ]adjust|side tabs?\b|beltless|no belt/;
   var BELT_HARDWARE_RE = /(silver|gold|brass|gunmetal|nickel|metal)[a-z -]{0,14}(buckle|keeper|tip|hardware)[^.;]*/g;
   var LEATHER_TONES = { brown: 1, beige: 1, orange: 1, burgundy: 1, yellow: 1 };
+  /* .87.09 (David, 24 Nov 2026: "Seeing tons of belts that DONT match shoes. Remember dark brown with dark brown.
+     Caramel with caramel. Etc... I have a match belt for ALL my shoes. Do better!!!!"): a belt matches the shoes by
+     shade, not by colour family. The browns split into dark brown and caramel (tan, cognac, tobacco, rust, camel,
+     greige, taupe), so a dark brown loafer never gets the tobacco suede belt again. A patterned belt counts by the
+     colour of its leather (and of its strap). White and cream sneakers still take any belt (21 Nov rule). */
+  var SHADES8709 = [
+    [/dark brown|chocolate|espresso|coffee|pony[- ]hair/, "darkbrown"],
+    [/\bblack\b|onyx|\bjet\b/, "black"],
+    [/\bnavy\b|midnight|indigo|\bblue\b/, "navy"],
+    [/charcoal|\bgr[ae]y\b|slate/, "grey"],
+    [/\bgreen\b|olive|forest/, "green"],
+    [/\bred\b|burgundy|oxblood|\bwine\b/, "black"],    /* no red belt: red velvet slippers are worn at night with black */
+    [/\btan\b|caramel|cognac|tobacco|\brust\b|camel|honey|whiske?y|greige|taupe|\bsand\b|mustard|brown|cream|ivory|ecru|beige|natural/, "caramel"]
+  ];
+  function shadeOf8709(text) {
+    var t = String(text || "").toLowerCase().replace(BELT_HARDWARE_RE, " ").replace(/edward green/g, " ");   /* a maker's name is not a colour */
+    for (var i = 0; i < SHADES8709.length; i++) if (SHADES8709[i][0].test(t)) return SHADES8709[i][1];
+    return "";
+  }
   function famsIn(text) {
     var out = [], t = String(text || "").toLowerCase();
     for (var i = 0; i < FAMILIES.length; i++) if (FAMILIES[i][0].test(t) && out.indexOf(FAMILIES[i][1]) === -1) out.push(FAMILIES[i][1]);
@@ -9972,6 +9991,15 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     p.suede = /suede/.test(name + " " + notes);
     p.beltFams = p.multi ? famsIn(words) : [p.fam];
     if (!p.beltFams.length) p.beltFams = [p.fam];
+    /* .87.09: the belt's shade; a patterned or woven belt also by the leather it is made on ("on dark leather",
+       "tan leather ends") */
+    var lm = /(?:on|with)\s+([a-z ]{2,24}?)\s+leather/.exec(notes.replace(BELT_HARDWARE_RE, " "));
+    var lsh = lm ? (/^dark\b/.test(lm[1]) && !/dark (green|grey|gray|navy|blue)/.test(lm[1]) ? "darkbrown" : shadeOf8709(lm[1])) : "";
+    p.shade8709 = shadeOf8709(colourName + " " + plainName) || shadeOf8709(plainName);
+    p.shades8709 = [];
+    if (p.multi || p.casualBelt) { if (lsh) p.shades8709.push(lsh); var bs = shadeOf8709(colourName); if (bs && p.shades8709.indexOf(bs) === -1) p.shades8709.push(bs); }
+    if (!p.shades8709.length && p.shade8709) p.shades8709.push(p.shade8709);
+    if (!p.multi && p.casualBelt && lsh && !shadeOf8709(colourName)) p.shade8709 = lsh;
   }
   function beltShoeFam(s) {
     /* shoe colours with no family word of their own ("greige", "taupe", "camo") are brown-leather tones, not whatever the photo's hex says */
@@ -10003,6 +10031,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if (lv === 7) return null;                                   /* black-tie trousers have side adjusters, no belt loops */
     var got860 = beltFor860(belts, c, lv);
     if (got860) return got860;
+    if (shadeOf8709(c.s.n || "") && !whiteSneaker(c.s)) return null;   /* .87.09: never a belt of another shade */
     /* never a multicolour belt the shoes do not suit: with no plain belt to fall back on, no belt */
     var any = belts.filter(function (b) { return !b.multi && !b.casualBelt; }); if (!any.length) any = belts.filter(function (b) { return !b.multi; });
     var best = null, bd = 1e9;
@@ -10011,6 +10040,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   }
   function beltFor860(belts, c, lv) {
     var s = c.s, free = whiteSneaker(s), want = beltShoeFam(s), suedeShoe = /suede/.test(s.n || "");
+    var shade = shadeOf8709(s.n || "");   /* .87.09: the shoes' shade: dark brown, caramel, black, navy, grey or green */
     /* .86.83 (audit): any blazer look takes a plain leather belt, at every level (a beaded belt had gone with a blazer at Evening Sharp) */
     var dressy = lv >= 5 || isTailoredLayer(c.l);
     var h = keyHash(c.key);
@@ -10021,15 +10051,16 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       var sc;
       if (b.multi) {
         var f = b.beltFams;
-        var withShoes = f.indexOf(s.fam) !== -1 || f.indexOf(want) !== -1 || (want === "brown" && f.some(function (x) { return LEATHER_TONES[x]; }));
-        if (!withShoes) return;                                     /* multicolour: in harmony with the shoes, or not at all */
+        var withShoes = shade ? (b.shades8709 || []).indexOf(shade) !== -1
+          : (f.indexOf(s.fam) !== -1 || f.indexOf(want) !== -1 || (want === "brown" && f.some(function (x) { return LEATHER_TONES[x]; })));
+        if (!withShoes) return;                                     /* multicolour: its leather in the shoes' shade, or not at all */
         sc = 1 + ((f.indexOf(c.t.fam) !== -1 || f.indexOf(c.b.fam) !== -1) ? 1.5 : 0) + vary(b);
         if (sc > multiScore) { multiScore = sc; multi = b; }
         return;
       }
       if (free) sc = 2 + (b.casualBelt ? 1 : 0) + (b.fam === "brown" || b.fam === "navy" ? 0.5 : 0);
-      else if (b.fam === want) sc = 4 - Math.abs(b.L - s.L) / 14 + (b.suede === suedeShoe ? 0.9 : -0.5) - (b.casualBelt && lv >= 4 ? 0.6 : 0);
-      else return;                                                  /* a plain belt always matches the shoes */
+      else if (shade ? b.shade8709 === shade : b.fam === want) sc = 4 - Math.abs(b.L - s.L) / 14 + (b.suede === suedeShoe ? 0.9 : -0.5) - (b.casualBelt && lv >= 4 ? 0.6 : 0);
+      else return;                                                  /* a plain belt always matches the shoes, shade for shade */
       sc += vary(b);
       if (sc > plainScore) { plainScore = sc; plain = b; }
     });
@@ -10038,6 +10069,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if (multi && (!plain || (h % 100) < (lv && lv <= 2 ? 35 : 15))) return multi;
     if (plain || free) return plain;
     /* no belt in the shoes' colour (cream loafers, a red shoe): the nearest plain leather by lightness */
+    if (shade) return plain;   /* .87.09: he has a matching belt for every pair; a shade with none gets no belt rather than a wrong one */
     belts.forEach(function (b) {
       if (b.multi || b.casualBelt || !LEATHER_TONES[b.fam]) return;
       var sc2 = 1 - Math.abs(b.L - s.L) / 14 + vary(b);
@@ -10868,6 +10900,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
 
   root.WardrobeComposer = {
     beltFor: beltFor,
+    shadeOf8709: shadeOf8709,
     version: 1,
     profile: profile,
     evaluate: evaluate,
@@ -12455,7 +12488,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.87.08";
+var WARDROBE_BUILD = "2026-11-22.87.09";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }

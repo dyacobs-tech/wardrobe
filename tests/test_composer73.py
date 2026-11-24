@@ -136,6 +136,7 @@ ENGINE_JS = """([items, extras]) => {
     multiOnBlack: all(beltShoe('Black Leather Loafers', 'Black'), 2).filter(isMulti),
     multiAloneBlack: pick(beltShoe('Black Leather Loafers', 'Black'), null, 2, BELTS.filter(b => b.multi)),
     multiAloneRust: pick(beltShoe('Rust Suede Tassel Loafers', 'Rust'), null, 2, BELTS.filter(b => b.id === 'bb-multi')),
+    multiAloneDark: pick(beltShoe('Dark Brown Suede Penny Loafers', 'Dark brown'), null, 2, BELTS.filter(b => b.id === 'bb-multi')),
     multiAloneTan: pick(beltShoe('Tan Suede Penny Loafers', 'Tan'), null, 2, BELTS.filter(b => b.id === 'bb-polo')),
     creamLoafer: pick(beltShoe('Cream Leather Loafers', 'Cream'), null, 5, BELTS.filter(b => !b.multi)) };
   const d6 = C.build(items.concat(extras, BELTS.map(b => ({ id: b.id, name: b.name, category: 'Belts', colourName: b.fam === 'grey' ? 'Charcoal' : b.name.split(' ')[0], colourHex: '#555555' }))));
@@ -234,7 +235,9 @@ def main() -> int:
             check("no belt when the notes say no belt", bl["noBeltNote"] is None, bl["noBeltNote"])
             check("no belt with swim trunks or at black tie", bl["swim"] is None and bl["blackTie"] is None, (bl["swim"], bl["blackTie"]))
             check("a multicolour belt is never paired with shoes it does not harmonise with", bl["multiOnBlack"] == [] and bl["multiAloneBlack"] is None, (bl["multiOnBlack"], bl["multiAloneBlack"]))
-            check("a multicolour belt joins shoes that share its colour or leather", bl["multiAloneRust"] == "bb-multi" and bl["multiAloneTan"] == "bb-polo", (bl["multiAloneRust"], bl["multiAloneTan"]))
+            # .87.09 (David, 24 Nov 2026: "dark brown with dark brown. Caramel with caramel"): a beaded or woven belt
+            # counts by its leather, so the beaded belt on dark leather goes with dark brown shoes and no longer with rust
+            check("a multicolour belt joins shoes that share its leather's shade", bl["multiAloneDark"] == "bb-multi" and bl["multiAloneRust"] is None and bl["multiAloneTan"] == "bb-polo", (bl["multiAloneDark"], bl["multiAloneRust"], bl["multiAloneTan"]))
             check("with no belt in the shoes' colour, the nearest plain leather is used", bl["creamLoafer"] in ("bb-brown", "bb-buckle", "bb-suede"), bl["creamLoafer"])
             check("dealt outfits carry a belt", bl["dealt"][0] > bl["dealt"][1] * 0.6, bl["dealt"])
             for L, v in eng["levels"].items():
