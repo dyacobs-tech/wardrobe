@@ -69,7 +69,7 @@ jobs:
         with:
           fetch-depth: 1
       - name: Install the Playwright Python package (browsers are in the image)
-        run: python3 -m pip install --break-system-packages playwright==1.60.0 numpy
+        run: python3 -m pip install --break-system-packages playwright==1.60.0 numpy pillow
       - name: ffmpeg for test_feet (decodes the cut-out webps)
         run: apt-get update -qq && apt-get install -y -qq ffmpeg > /dev/null
       - name: Run every test file (quarantined ones are reported, not failing)

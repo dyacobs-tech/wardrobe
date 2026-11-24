@@ -2,7 +2,8 @@
 
 David, 23 Nov 2026, screenshot of Shop opening on the Ask DONNA chat:
 "Shop opening to this page even though we removed ask Donna fix this!!!!!"
-Ask DONNA was removed in .86.75 ("Remove ask Donna - this does NOT seem to work.").
+Ask DONNA was removed in .86.75 ("Remove ask Donna - this does NOT seem to work.") and came back as its own
+tab in .86.82 ("yes deploy the assistant"); Shop still opens on Shop, and Ask opens only from its tab.
 """
 import json
 import sys
@@ -29,11 +30,17 @@ with sync_playwright() as pw:
           shopPressed: document.getElementById('edit-tab-shop').getAttribute('aria-pressed') })""")
         assert state["mode"] != "ask" and state["askHidden"] and not state["askBox"], (engine.name, state)
         assert state["shopPressed"] == "true", (engine.name, state)
-        # asking for the Ask view directly still lands on Shop
-        page.evaluate("() => window.editShow('ask')")
-        assert page.evaluate("() => document.getElementById('panel-find').getAttribute('data-edit-mode')") != "ask"
-        saved = page.evaluate("() => JSON.parse(localStorage.getItem('wardrobe.editView'))")
-        assert saved != "ask", saved
+        # .86.82: the Ask DONNA tab is back and opens Ask; leaving and reopening Shop lands on Shop again
+        assert page.locator("#edit-tab-askdonna").is_visible()
+        page.locator("#edit-tab-askdonna").click()
+        page.wait_for_timeout(300)
+        assert page.evaluate("() => document.getElementById('panel-find').getAttribute('data-edit-mode')") == "ask"
+        # .86.83 (audit): after using Ask, leaving Shop and coming back opens Shop, not Ask DONNA
+        page.locator("#tab-today").first.dispatch_event("click")
+        page.wait_for_timeout(300)
+        page.locator("#tab-find").first.dispatch_event("click")
+        page.wait_for_timeout(500)
+        assert page.evaluate("() => document.getElementById('panel-find').getAttribute('data-edit-mode')") != "ask", (engine.name, "Shop reopened on Ask")
         ctx.close()
         browser.close()
 print("Confirmed Shop opens on Shop, never on Ask DONNA, even when Ask was the last view")
