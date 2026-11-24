@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.92" />
+    <meta name="wardrobe-build" content="2026-11-22.86.94" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8854,7 +8854,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.92</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.94</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12429,7 +12429,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.92";
+var WARDROBE_BUILD = "2026-11-22.86.94";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -35360,6 +35360,59 @@ var editSearches = store.get("editSearches", []);
 var askSync = store.get("askSync", []);
 /* .86.30: notes David sends to Claude from inside the app (synced) */
 var feedbackNotes = store.get("feedbackNotes", []);
+/* .86.94 (David, 24 Nov 2026: "And app is freezing when I click the edit !!!!!!!", "Figure this out pls"). The
+   freeze does not happen on any test device, so the app now reports it itself: the last tap and screen, any stretch
+   of more than 1.5s where the page could not respond, and a session that ended stuck (killed while frozen) are saved
+   to the synced feedback list as "[auto]" notes for Claude to read. At most 8 reports a day; nothing is removed. */
+(function freezeRecorder894() {
+  var K = "wardrobe.diag894";
+  function read() { try { return JSON.parse(localStorage.getItem(K) || "null") || {}; } catch (e) { return {}; } }
+  function write(o) { try { localStorage.setItem(K, JSON.stringify(o)); } catch (e) {} }
+  function where() {
+    try { var r = document.documentElement; return [typeof currentTab !== "undefined" ? currentTab : "", r.getAttribute("data-lkm") || "", r.getAttribute("data-insv") || "", r.getAttribute("data-insf") || ""].join("/"); } catch (e) { return ""; }
+  }
+  function describe(t) {
+    try {
+      var b = t.closest ? (t.closest("button, a, [role=tab], [data-pv-edit], .en-card, .ins-ic841, label, input") || t) : t;
+      var ds = b.dataset ? Object.keys(b.dataset).slice(0, 3).join(",") : "";
+      return (b.tagName || "") + (b.id ? "#" + b.id : "") + (b.className && typeof b.className === "string" ? "." + b.className.split(" ").slice(0, 2).join(".") : "") + (ds ? "[" + ds + "]" : "") + " \"" + String(b.textContent || b.getAttribute("aria-label") || "").trim().slice(0, 30) + "\"";
+    } catch (e) { return "?"; }
+  }
+  function report(kind, info) {
+    try {
+      var d = read(), day = new Date().toISOString().slice(0, 10);
+      if (d.day !== day) { d.day = day; d.sent = 0; }
+      if ((d.sent || 0) >= 8) return;
+      d.sent = (d.sent || 0) + 1; write(d);
+      var rec = { id: "fb-auto894-" + Date.now(), at: new Date().toISOString(), note: "[auto] " + kind + " " + JSON.stringify(info).slice(0, 1800), screen: where(), build: window.WARDROBE_BUILD || "", viewport: innerWidth + "x" + innerHeight, standalone: !!navigator.standalone, auto894: 1 };
+      if (typeof feedbackNotes === "undefined") return;
+      feedbackNotes = (feedbackNotes || []).concat([rec]);
+      try { store.set("feedbackNotes", feedbackNotes); } catch (e) {}
+      try { if (typeof schedSync === "function") schedSync(); } catch (e) {}
+    } catch (e) {}
+  }
+  /* a session that ended while stuck: no clean hide was recorded after the last heartbeat */
+  var prev = read();
+  if (prev.alive && !prev.clean && prev.tapAt && prev.alive - prev.tapAt < 20000) {
+    setTimeout(function () { report("previous session ended without closing (likely frozen, then killed)", { lastTap: prev.tap, tapScreen: prev.tapWhere, secondsFromTapToLastSign: Math.round((prev.alive - prev.tapAt) / 100) / 10, gaps: prev.gaps || [], build: prev.build }); }, 8000);
+  }
+  var d = read(); d.clean = 0; d.gaps = []; d.build = window.WARDROBE_BUILD || ""; write(d);
+  function onTap(e) { var x = read(); x.tap = describe(e.target); x.tapAt = Date.now(); x.tapWhere = where(); write(x); }
+  document.addEventListener("pointerdown", onTap, true);
+  document.addEventListener("visibilitychange", function () { var x = read(); x.clean = document.visibilityState === "hidden" ? 1 : 0; x.alive = Date.now(); write(x); });
+  window.addEventListener("pagehide", function () { var x = read(); x.clean = 1; write(x); });
+  var last = Date.now(), lastWrite = 0;
+  setInterval(function () {
+    var now = Date.now(), gap = now - last; last = now;
+    if (document.visibilityState !== "visible") return;
+    var x = null;
+    if (gap > 1500) {
+      x = read(); x.gaps = (x.gaps || []).concat([{ s: Math.round(gap / 100) / 10, where: where(), tap: x.tap, tapAgo: x.tapAt ? Math.round((now - gap - x.tapAt) / 100) / 10 : null }]).slice(-10);
+      if (gap > 3000) report("page stuck " + Math.round(gap / 100) / 10 + "s", { lastTap: x.tap, tapScreen: x.tapWhere, secondsAfterTap: x.tapAt ? Math.round((now - gap - x.tapAt) / 100) / 10 : null });
+    }
+    if (x || now - lastWrite > 1000) { x = x || read(); x.alive = now; write(x); lastWrite = now; }
+  }, 250);
+})();
 if (!Array.isArray(askSync)) askSync = [];
 if (!Array.isArray(editSearches)) editSearches = [];
 /* Build .86.8: every render of him — the synced "rendered" collection (records: on-demand renders {id,u,t,title,pieces,ids,lv}, and {id,hide} gallery-hide markers) */
