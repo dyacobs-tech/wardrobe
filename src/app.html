@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.98" />
+    <meta name="wardrobe-build" content="2026-11-22.86.99" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8854,7 +8854,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.98</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.99</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12429,7 +12429,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.98";
+var WARDROBE_BUILD = "2026-11-22.86.99";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -20393,6 +20393,7 @@ function renderFormality() {
       ds.setAttribute("data-info-text", info.name + " — " + info.desc);
     }
   });
+  try { if (typeof window.__insLevel899 === "function") window.__insLevel899(); } catch (e) {}   /* .86.99 */
 }
 function setFormality(level, opts) {
   level = Math.min(7, Math.max(1, parseInt(level, 10) || 4));
@@ -46122,7 +46123,13 @@ window.inspoView = "withmine";
       try { localStorage.setItem(LKEY, JSON.stringify(keep)); } catch (e) {}
       if (keep.indexOf(curFormal()) === -1 && typeof setFormality === "function") setFormality(keep[0], { silent: true });
       paint(); refreshFeeds();
+      try { if (typeof window.__insLevel899 === "function") window.__insLevel899(); } catch (e) {}   /* .86.99 */
     }
+  };
+  /* .86.99: Pool / Beach is the only dress level chosen (The Edit then shows his own closet, no pieces for sale) */
+  window.poolOnly899 = function () {
+    if (typeof studioTypeAny !== "undefined" && studioTypeAny) return false;
+    var ls = levelsSel(); return ls.length === 1 && ls[0] === 1;
   };
   /* the next deal's level for the one-at-a-time fallbacks */
   window.levelForDeal838 = function (advance) { var ls = levelsSel(), lv = ls[lrr % ls.length]; if (advance) lrr++; return lv; };
@@ -46423,6 +46430,12 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   /* ---------- Inspo ---------- */
   var IKEY = "wardrobe.insFeed841", insFeed = "withmine", insLens = null;
   try { if (sessionStorage.getItem(IKEY) === "allnew") insFeed = "allnew"; } catch (e) {}
+  /* .86.99 (David, 24 Nov 2026: "I don't care about Inspo pool looks. Maybe we remove this section for the edit.
+     I only really care about pool looks with my existing wardrobe with what I own. Just to have as a fun
+     feature."). With Pool / Beach the only dress level, The Edit shows outfits from his own closet (drawn on
+     him) and no pieces for sale; the New + mine and All new choices are hidden there. */
+  function pool899() { return !!(window.poolOnly899 && window.poolOnly899()); }
+  function picked899() { var f = "withmine"; try { if (sessionStorage.getItem(IKEY) === "allnew") f = "allnew"; } catch (e) {} return f; }
   function lvl() { var v = (typeof formalityLevel !== "undefined") ? parseInt(formalityLevel, 10) : 2; return v; }
   function icons() { try { return (typeof allIcons === "function" ? allIcons() : []).filter(function (ic) { return ic && ic.id; }); } catch (e) { return []; } }
   function weightOf(id) {
@@ -46492,7 +46505,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   function paintIconPage() {
     var box = $("ins-icon841"), title = $("ins-title841"); if (!box) return;
     var ic = insLens ? icons().filter(function (x) { return x.id === insLens; })[0] : null;
-    if (title) title.textContent = ic ? "On you, in his style" : "Ideas for you";
+    if (title) title.textContent = ic ? "On you, in his style" : (pool899() ? "Pool looks from your closet" : "Ideas for you");
     if (!ic) { box.hidden = true; box.innerHTML = ""; return; }
     var L = (ic.looks || []).slice(0, 3), pal = (ic.palette || []).slice(0, 6), w = weightOf(ic.id);
     box.innerHTML = '<div class="ins-ich841"><div><b>' + E(ic.name || ic.id) + "</b>" + (ic.lane ? "<span>" + E(ic.lane) + "</span>" : "") + "</div>" +
@@ -46524,11 +46537,18 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   });
   function syncMini() {
     /* Mine is offered on an icon's page only; without an icon the closet-only outfits are Looks > Outfits */
-    if (!insLens && insFeed === "mine") insFeed = "withmine";
+    var pool = pool899();
+    if (pool) insFeed = "mine";
+    else if (!insLens && insFeed === "mine") insFeed = picked899();
     [].forEach.call(document.querySelectorAll("[data-ins-feed]"), function (b) {
-      if (b.getAttribute("data-ins-feed") === "mine") b.hidden = !insLens;
-      b.setAttribute("aria-pressed", b.getAttribute("data-ins-feed") === insFeed ? "true" : "false");
+      var fd = b.getAttribute("data-ins-feed");
+      b.hidden = fd === "mine" ? (pool || !insLens) : pool;
+      b.setAttribute("aria-pressed", fd === insFeed ? "true" : "false");
     });
+    var g899 = document.querySelector(".ins-mini841");   /* no empty pill at Pool / Beach */
+    if (g899) g899.style.display = g899.querySelector("[data-ins-feed]:not([hidden])") ? "" : "none";
+    var fx899 = document.querySelector(".ins-filter841");   /* the price filter is for pieces for sale */
+    if (fx899) fx899.style.display = pool ? "none" : "";
     var had858 = R.getAttribute("data-insf") === "mine", now858 = insFeed === "mine" && cur() === "inspo";
     if (now858) R.setAttribute("data-insf", "mine"); else R.removeAttribute("data-insf");
     if (had858 !== now858 && typeof window.__cfSync858 === "function") setTimeout(window.__cfSync858, 0);
@@ -46545,16 +46565,23 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (window.endlessLoad81) window.endlessLoad81();
     pvClick(insFeed);
   }
+  window.__insLevel899 = function () {
+    try {
+      if (cur() !== "inspo") return;
+      var was = insFeed; syncMini(); paintIconPage();
+      if (was !== insFeed) pvClick(insFeed);
+    } catch (e) {}
+  };
   function leaveInspo() {
     if (insLens && window.endlessLens81) window.endlessLens81.set(null);
     insLens = null;
-    if (insFeed === "mine") insFeed = "withmine";
+    if (insFeed === "mine") insFeed = picked899();
     R.removeAttribute("data-insf");
   }
   document.addEventListener("click", function (e) {
     var t = e.target;
     var f = t.closest && t.closest("[data-ins-feed]");
-    if (f) { insFeed = f.getAttribute("data-ins-feed"); try { sessionStorage.setItem(IKEY, insFeed); } catch (er) {} syncMini(); pvClick(insFeed); return; }
+    if (f) { if (pool899()) { syncMini(); return; } insFeed = f.getAttribute("data-ins-feed"); try { if (insFeed !== "mine") sessionStorage.setItem(IKEY, insFeed); } catch (er) {} syncMini(); pvClick(insFeed); return; }
     var ic = t.closest && t.closest("[data-ins-icon]");
     if (ic) { var id = ic.getAttribute("data-ins-icon"); setLens(insLens === id ? null : id); var p = $("ins-icon841"); if (p && !p.hidden && p.scrollIntoView) p.scrollIntoView({ block: "nearest", behavior: "smooth" }); return; }
     if (t.closest && t.closest("[data-ins-clear]")) { setLens(null); return; }
@@ -50096,6 +50123,13 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (window.iconWeights81 && window.iconWeights81.state) q.weights = window.iconWeights81.state();
     /* .86.38: Looks may ask for several dress levels and temperatures at once */
     if (q.level != null && window.dressLevels838) q.levels = window.dressLevels838.get();
+    /* .86.99 (David, 24 Nov 2026: "I don't care about Inspo pool looks"): the shop feeds skip Pool / Beach; with
+       only Pool chosen they deal nothing (The Edit shows his closet there) */
+    if (feed !== "mine" && q.level != null) {
+      var lv899 = (q.levels || [q.level]).filter(function (l) { return +l !== 1; });
+      if (!lv899.length) { asking[feed] = false; WHY[feed] = "pool899"; return; }
+      q.levels = lv899; if (lv899.indexOf(+q.level) === -1) q.level = lv899[0];
+    }
     if (window.tempBands834 && window.tempBands834.temps) q.temps = window.tempBands834.temps();
     enqueue884(q);
   }
@@ -50286,6 +50320,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (fw.length < (r.pieces || []).length) return true;   /* a piece we cannot read: do not hide it */
     var lv = level();
     var ls = lv == null ? [null] : (window.dressLevels838 ? window.dressLevels838.get() : [lv]);
+    ls = ls.filter(function (L) { return L == null || +L !== 1; });   /* .86.99: no Pool / Beach shop looks */
     var temps = (window.tempBands834 && window.tempBands834.temps) ? window.tempBands834.temps() : [];
     var temp = temps.length ? temps[0] : ((typeof currentWeather !== "undefined" && currentWeather && typeof currentWeather.temp === "number") ? currentWeather.temp : undefined);
     return ls.some(function (L) {
@@ -50452,7 +50487,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       var NOUN = { top: "tops", bottom: "trousers", shoes: "shoes", layer: "jackets" };
       f.empty.hidden = false;
       var ps = priceState();
-      f.empty.textContent = !priceActive() ? "No looks fit right now." : ps.mode === "total" ? "No complete look fits that budget yet \u2014 widen it with Price." : "Shop has no " + (NOUN[WHY[feed]] || "pieces") + " in that price range yet \u2014 widen it with Price.";
+      f.empty.textContent = WHY[feed] === "pool899" ? "At Pool / Beach you see outfits from your own closet only." : !priceActive() ? "No looks fit right now." : ps.mode === "total" ? "No complete look fits that budget yet \u2014 widen it with Price." : "Shop has no " + (NOUN[WHY[feed]] || "pieces") + " in that price range yet \u2014 widen it with Price.";
       return;
     }
     f.empty.hidden = true;
