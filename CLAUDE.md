@@ -5,9 +5,10 @@ with Cloudflare Workers for sync and try-on. David is the owner and the only
 person who approves changes. This file is the short version; the linked files
 are the authority, and where they disagree with this one, say so to David.
 
-**Start here after 22 Nov 2026:** `docs/handover.md` lists the unfinished
-work, in David's order, and the rules he gave in the last chat that are not
-in this file yet.
+**Start here after 24 Nov 2026:** `docs/grok-handover.md` is the current
+state, the design handover to Grok (who owns design work from now on), and the
+list of docs that are out of date (including lines of this file). Then
+`docs/queue.md` for what is queued. `docs/handover.md` (22 Nov) is older.
 
 ## Standing rules
 
