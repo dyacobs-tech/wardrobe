@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.86.96" />
+    <meta name="wardrobe-build" content="2026-11-22.86.97" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8854,7 +8854,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.86.96</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.86.97</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12429,7 +12429,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.86.96";
+var WARDROBE_BUILD = "2026-11-22.86.97";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -40673,14 +40673,13 @@ var SY_META_KEYS = { profile: 1, deletedIds: 1, overrides: 1, dislikedImgs: 1, d
    always won (clock ahead) or always lost (clock behind) against his other devices. The server's reply carries its
    own clock (now, in ms); when this phone is more than 2 minutes off, edits are stamped in server time instead.
    A reply whose time is not a real date (test mocks) is ignored; a correct clock changes nothing. */
+/* .86.97: withdrawn. The server's "now" is a paging bookmark that runs 3-4 minutes behind its clock, not the clock,
+   so .86.89-.86.96 stamped every edit a few minutes in the past. Edits are stamped with this phone's own time again,
+   as before .86.89, and the stored offset is cleared. */
 function syNoteServerTime889(serverNow) {
-  if (typeof serverNow !== "number" || !(serverNow > 1.6e12) || !(serverNow < 4.1e12)) return;
-  SY.off889 = Math.round(serverNow - Date.now());
+  try { if (typeof SY !== "undefined" && SY && "off889" in SY) delete SY.off889; } catch (e) {}
 }
-function syNow889() {
-  var off = (typeof SY !== "undefined" && SY && typeof SY.off889 === "number") ? SY.off889 : 0;
-  return Date.now() + (Math.abs(off) > 120000 ? off : 0);
-}
+function syNow889() { return Date.now(); }
 function syTrackChanges(onlyColl) {
   var now = syNow889(), ch = false, mig = false;
   var colls = onlyColl ? [onlyColl] : SY_COLLS;
@@ -50363,11 +50362,18 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (!host) return null;
     var f = F[feed] = { host: host, grid: host.querySelector(".en-grid"), sent: host.querySelector(".en-sentinel"), empty: host.querySelector(".en-empty"), looks: [], keys: {}, renderedAt: 0, mode: null };
     f.grid.addEventListener("click", function (e) { onClick(feed, e); });
+    /* .86.97 (David, 24 Nov 2026: "Once I click the edit, it shows the screen, but none of the buttons navigate
+       anywhere. And then the rest of the app freezes and I can't scroll to different pages. I have to close the
+       app."). At Pool / Beach the New + mine feed holds only a few outfits, so the end-of-feed marker never left this
+       observer's range; re-observing it every frame called more() 60 times a second, and each call rebuilt the
+       "Show ideas not drawn on you yet" button. iPhone Safari treats a tap during which a new clickable element
+       appears as a hover and never sends the click, so every tap on every page was swallowed. The marker is now
+       re-armed only after cards were actually added (appendCards), and the note is rewritten only when it changes. */
     var io = new IntersectionObserver(function (en) {
       if (!en[0].isIntersecting || f.host.hidden) return;
       more(feed);
-      requestAnimationFrame(function () { io.unobserve(f.sent); io.observe(f.sent); });
     }, { rootMargin: "1400px 0px" });
+    f.rearm897 = function () { if (f.rearmQ897) return; f.rearmQ897 = 1; requestAnimationFrame(function () { f.rearmQ897 = 0; io.unobserve(f.sent); io.observe(f.sent); }); };
     io.observe(f.sent);
     f.io = io;
     return f;
@@ -50382,6 +50388,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var html = "";
     looks.forEach(function (l) { f.keys[l.key] = 1; html += cardHTML(l, f.looks.length, feed); f.looks.push(l); });
     f.grid.insertAdjacentHTML("beforeend", html);
+    /* .86.97: the feed grew, so check again whether the end marker is still in range */
+    if (f.rearm897) f.rearm897();
   }
   function more(feed) {
     var f = feedEl(feed); if (!f) return;
@@ -50412,10 +50420,11 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       var note857 = f.host.querySelector(".en-undrawn857");
       if (!note857) { note857 = document.createElement("p"); note857.className = "meta en-undrawn857"; f.grid.parentNode.insertBefore(note857, f.grid.nextSibling); }
       var done857 = drawnOnly857 && !(f.rendered && f.rendered.length);
-      note857.hidden = !done857;
+      if (note857.hidden !== !done857) note857.hidden = !done857;   /* .86.97: written only when it changes */
       if (done857) {
         var sk857 = f.grid.querySelectorAll(".en-skel"); for (var si857 = 0; si857 < sk857.length; si857++) sk857[si857].remove();
-        note857.innerHTML = (f.looks.length ? "That is every outfit drawn on you for this level" : "No outfit drawn on you fits this level") + (priceActive() ? " and price" : "") + '. <button type="button" class="btn-ghost" data-en-undrawn857>Show ideas not drawn on you yet</button>';
+        var nh857 = (f.looks.length ? "That is every outfit drawn on you for this level" : "No outfit drawn on you fits this level") + (priceActive() ? " and price" : "") + '. <button type="button" class="btn-ghost" data-en-undrawn857>Show ideas not drawn on you yet</button>';
+        if (note857.__h897 !== nh857) { note857.innerHTML = nh857; note857.__h897 = nh857; }
         f.empty.hidden = true;
         if (out.length) save();
         return;

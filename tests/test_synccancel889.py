@@ -11,8 +11,9 @@ fixed in the app before that worker can go live.
   2. Today's server (no `cancelled`): the same delete still goes through.
   4. (.86.92) Every delete carries the version this phone last had of the piece (baseUpdatedAt), which the
      hardened worker needs to accept a bulk delete David confirms.
-  3. A phone whose clock is an hour behind the server stamps a new edit in the server's time (it used to lose
-     every edit to his other devices); with a correct clock the stamp is the phone's own time.
+  3. (.86.97) Edits are stamped with the phone's own time, whatever the server's "now" says: that value is a paging
+     bookmark 3-4 minutes behind the server's clock, and .86.89-.86.96 wrongly used it as the clock, stamping every
+     edit minutes in the past.
 All workers.dev traffic is answered locally; nothing reaches a server.
 """
 from __future__ import annotations
@@ -94,10 +95,8 @@ def run(base, refuse, skew=None):
             stamp = pg.evaluate("""id => { const it = wardrobeItems.find(i => i.id === id); it.notes = 'edited ' + Date.now(); persistAll(); syTrackChanges();
               return [SY.st.items[id], Date.now()]; }""", pid)
             off = stamp[0] - stamp[1]
-            if abs(skew) > 120000:
-                check("clock an hour behind: the edit is stamped in server time", abs(off - skew) < 60000, (off, skew))
-            else:
-                check("correct clock: the edit is stamped with the phone's own time", abs(off) < 5000, off)
+            if True:
+                check("the edit is stamped with the phone's own time (server bookmark %+ds)" % (skew // 1000), abs(off) < 5000, off)
             check("no page errors", not errors, errors)
             b.close()
             return
@@ -129,6 +128,7 @@ def main():
     run(base, refuse=False)
     run(base, refuse=False, skew=3600000)
     run(base, refuse=False, skew=30000)
+    run(base, refuse=False, skew=-237000)   # the live server's bookmark: about 4 minutes behind its clock
     httpd.shutdown()
     print("FAILED %d" % len(fails) if fails else "ALL PASS")
     sys.exit(1 if fails else 0)
