@@ -37,7 +37,8 @@ def run(browser):
     page.evaluate("() => switchTab('inspo')")
     page.wait_for_function("() => document.querySelector('.ins-mini841 [data-ins-feed=\"mix\"]')", timeout=60000)
     page.evaluate("() => document.querySelector('[data-ins-feed=\"mix\"]').click()")
-    page.wait_for_function("() => document.querySelectorAll('#en-grid-withmine .cf-card:not(.en-skel)').length >= 8", timeout=60000)
+    # the New + mine cards stay on screen until the feed is rebuilt for Mix (next frame); wait for the Mix cards
+    page.wait_for_function("() => { const c = [...document.querySelectorAll('#en-grid-withmine .cf-card:not(.en-skel)')]; return c.length >= 8 && !c.some(x => x.querySelector('.en-render img')); }", timeout=60000)
     for _ in range(4):
         page.evaluate("() => window.scrollTo(0, document.scrollingElement.scrollHeight)")
         page.wait_for_timeout(400)
@@ -51,7 +52,7 @@ def run(browser):
     assert "Fills gap" in (m["note"] or ""), m
     # New + mine is unchanged: drawn on him only, then the button
     page.evaluate("() => { window.scrollTo(0, 0); document.querySelector('[data-ins-feed=\"withmine\"]').click(); }")
-    page.wait_for_function("() => { const n = document.querySelector('.en-undrawn857'); return (n && !n.hidden) || document.querySelectorAll('#en-grid-withmine .cf-card:not(.en-skel)').length >= 4; }", timeout=60000)
+    page.wait_for_function("() => { const c = [...document.querySelectorAll('#en-grid-withmine .cf-card:not(.en-skel)')]; const n = document.querySelector('.en-undrawn857'); return ((n && !n.hidden) || c.length >= 4) && c.every(x => x.querySelector('.en-render img')); }", timeout=60000)
     for _ in range(12):
         page.evaluate("() => window.scrollTo(0, document.scrollingElement.scrollHeight)")
         page.wait_for_timeout(350)
