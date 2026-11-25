@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.87.12" />
+    <meta name="wardrobe-build" content="2026-11-22.87.13" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8863,7 +8863,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.87.12</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.87.13</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10351,7 +10351,9 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       var evLook = { t: top, b: bottom, s: shoes, l: layer, shoes: shoes, layer: layer };
       if ((layer && (layer.kind === "blazer" || layer.kind === "suit")) && !formalShoesOk866(evLook)) return null;
       if (lo >= 5 && !formalShoesOk866(evLook, { level: lo })) return null;
-      if ((layer && (layer.kind === "blazer" || layer.kind === "suit") || lo >= 5) && typeof shoeIsPreferredDress866 === "function" && shoeIsPreferredDress866(shoes)) score += 1.25;
+      /* .87.13 (David, 24 Nov 2026, after the audit found his Edward Green Polperro in about one Evening Dressy look in
+         four): the favourite-brand lift is halved (was 1.25) so the brand no longer decides the shoe on its own */
+      if ((layer && (layer.kind === "blazer" || layer.kind === "suit") || lo >= 5) && typeof shoeIsPreferredDress866 === "function" && shoeIsPreferredDress866(shoes)) score += 0.625;
     }
     return { lo: lo, hi: hi, score: score };
   }
@@ -10761,9 +10763,22 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     var exposure = opts.exposure || {};
     var banned = opts.banned || {};
     var recentArr = opts.recent || [];
-    var recentShoes879 = {};
-    for (var rs879 = Math.max(0, recentArr.length - 3); rs879 < recentArr.length; rs879++) String(recentArr[rs879] || "").split("|").forEach(function (id) { recentShoes879[id] = 1; });
     var prof = this.prof, NI = prof.length;
+    /* .87.13 shoe rotation (David, 24 Nov 2026, approving the audit's fix: no shoe in more than 15% of the looks at a
+       level, a repeat window of 8 looks, the brand lift halved, and his shoes that were never dealt brought in):
+       - the shoes of the last 8 looks dealt are rarely dealt again straight away (was the last 3, .86.79);
+       - over any 20 looks in a row a shoe is worn at most 3 times (15%), unless every shoe that fits is at its cap;
+       - a shoe he owns that was never dealt is weighted up wherever the outfit fits the level. */
+    var shoeIds8713 = this.shoeIds8713;
+    if (!shoeIds8713) { shoeIds8713 = this.shoeIds8713 = {}; for (var si8713 = 0; si8713 < NI; si8713++) if (prof[si8713].role === "shoes") shoeIds8713[prof[si8713].id] = 1; }
+    var SHOE_WIN8713 = 8, CAP_WIN8713 = 20, CAP_N8713 = 3;
+    var shoeCnt8713 = {}, shoeSeq8713 = [];
+    for (var rs879 = Math.max(0, recentArr.length - CAP_WIN8713); rs879 < recentArr.length; rs879++) {
+      var sid8713 = null;
+      String(recentArr[rs879] || "").split("|").forEach(function (id) { if (shoeIds8713[id]) sid8713 = id; });
+      shoeSeq8713.push(sid8713);
+    }
+    shoeSeq8713.forEach(function (id) { if (id) shoeCnt8713[id] = (shoeCnt8713[id] || 0) + 1; });
     /* Per-combo base weight: styling score + piece/pair preferences
        + weather fit, computed once per deal. */
     var base = new Float64Array(pool.length);
@@ -10802,11 +10817,11 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       base[i] = Math.exp(0.9 * (c.score + Math.max(-4, Math.min(4, pref)) + wxs + fr * 0.3 + climate));
       /* .86.79 (David, 23 Nov 2026: "appears my velasca slippers in every picture '!!!!! Where are my other
          shoes??????"): the shoes from the last three outfits dealt are rarely dealt again straight away. */
-      if (recentShoes879[c.s.id]) base[i] *= 0.12;
+      if (!(exposure[c.s.id] > 0)) base[i] *= 2.5;   /* .87.13: a shoe never dealt yet */
     }
     var limit = Math.min(600, Math.floor(pool.length * 0.75));
     var picked = [], localExp = {};
-    var excluded = new Uint8Array(pool.length);
+    var excluded = new Uint8Array(pool.length), dealt8713 = new Uint8Array(pool.length);
     function markRecent(lim) {
       var recent = {};
       for (var r = Math.max(0, recentArr.length - lim); r < recentArr.length; r++) recent[recentArr[r]] = 1;
@@ -10824,10 +10839,14 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         fac[b] = Math.exp(0.9 * ((maxE - e) / (maxE + 1) * 0.9 + (e === 0 ? 0.9 : 0)));
       }
       var weights = new Float64Array(pool.length), total = 0;
+      /* .86.79 / .87.13: the shoes of the last 8 looks (this deal's picks included) are rarely dealt again straight away */
+      var recentShoes879 = {};
+      for (var rw8713 = Math.max(0, shoeSeq8713.length - SHOE_WIN8713); rw8713 < shoeSeq8713.length; rw8713++) if (shoeSeq8713[rw8713]) recentShoes879[shoeSeq8713[rw8713]] = 1;
       for (var q = 0; q < pool.length; q++) {
         if (excluded[q]) continue;
         var cc = pool[q];
         var wq = base[q] * fac[cc.t.idx] * fac[cc.b.idx] * fac[cc.s.idx] * (cc.l ? fac[cc.l.idx] : 1);
+        if (recentShoes879[cc.s.id]) wq *= 0.12;
         weights[q] = wq; total += wq;
       }
       /* .80.34: Business Casual mixes tailoring — scale the two
@@ -10849,6 +10868,34 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
           if (tot2 > 0) total = tot2;
         }
       }
+      /* .87.13: at most 3 looks in any 20 with the same shoes; if every candidate is at the cap, the least worn lead */
+      if (total > 0) {
+        /* and never the shoes of the look just dealt, when other shoes fit */
+        var last8713 = shoeSeq8713.length ? shoeSeq8713[shoeSeq8713.length - 1] : null;
+        var capped8713 = function (sid) { return (shoeCnt8713[sid] || 0) >= CAP_N8713 || sid === last8713; };
+        var free8713 = 0;
+        for (var q4 = 0; q4 < pool.length; q4++) if (weights[q4] && !capped8713(pool[q4].s.id)) free8713 += weights[q4];
+        /* every fresh look left wears a capped shoe: an older look in shoes under the cap comes back first
+           (a different shoe matters more than a look not seen for a while); never one dealt in this batch or banned */
+        if (free8713 <= 0) {
+          for (var q6 = 0; q6 < pool.length; q6++) {
+            if (!excluded[q6] || dealt8713[q6] || banned[pool[q6].key]) continue;
+            var c6 = pool[q6];
+            if (capped8713(c6.s.id)) continue;
+            var w6 = base[q6] * fac[c6.t.idx] * fac[c6.b.idx] * fac[c6.s.idx] * (c6.l ? fac[c6.l.idx] : 1) * 0.5 * (recentShoes879[c6.s.id] ? 0.12 : 1);
+            if (w6 > 0) { weights[q6] = w6; free8713 += w6; }
+          }
+        }
+        var tot4 = 0;
+        for (var q5 = 0; q5 < pool.length; q5++) {
+          if (!weights[q5]) continue;
+          var sc8713 = shoeCnt8713[pool[q5].s.id] || 0;
+          if (free8713 > 0) { if (capped8713(pool[q5].s.id)) weights[q5] = 0; }
+          else weights[q5] *= Math.pow(0.15, sc8713);
+          tot4 += weights[q5];
+        }
+        total = tot4;
+      }
       if (total <= 0) {
         /* Everything recently seen: shrink the window to its newest
            third and deal the oldest again. */
@@ -10859,7 +10906,10 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       for (var z = 0; z < pool.length; z++) { if (weights[z] <= 0) continue; chosen = z; x2 -= weights[z]; if (x2 <= 0) break; }
       if (chosen < 0) break;
       var pc = pool[chosen];
-      excluded[chosen] = 1;
+      excluded[chosen] = 1; dealt8713[chosen] = 1;
+      /* .87.13: the rolling 20-look shoe count moves on with each pick */
+      shoeSeq8713.push(pc.s.id); shoeCnt8713[pc.s.id] = (shoeCnt8713[pc.s.id] || 0) + 1;
+      if (shoeSeq8713.length > CAP_WIN8713) { var old8713 = shoeSeq8713.shift(); if (old8713) shoeCnt8713[old8713]--; }
       pc.ids.forEach(function (id) { localExp[id] = (localExp[id] || 0) + 1; });
       var acc = null;
       /* .86.43/.86.44: accessories. Sunglasses and hats are for the day
@@ -12489,7 +12539,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.87.12";
+var WARDROBE_BUILD = "2026-11-22.87.13";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
