@@ -7,6 +7,8 @@ its "Fills gap" marks had dried up, so no mix was ever marked. Asked what to bri
 Checks (Evening Casual, fixture closet): Mix sits between New + mine and All new; it opens straight into mixes with a
 piece for sale, none of them drawn on him, with no button to tap; some say "Fills gap"; the note under the title says
 what Mix is; New + mine still shows only outfits drawn on him and its button; Mix is hidden at Pool / Beach.
+.87.12: Mix tapped before the feed's code has loaded (a slow phone, or a busy CI machine: this test failed on .87.10
+and .87.11 that way) still opens as Mix, not as New + mine under a pressed Mix; checked by holding back app/endless.
 """
 import json
 import sys
@@ -25,9 +27,16 @@ STATE = """() => { const cards = [...document.querySelectorAll('#en-grid-withmin
            note: (document.querySelector('#ins-head841 .ins-note854') || {}).textContent }; }"""
 
 
-def run(browser):
+def run(browser, slow=False):
     ctx = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, service_workers="block")
-    ctx.route("**/*", lambda route: route.continue_() if route.request.url.startswith(URL) and route.request.method == "GET" else route.abort())
+    held = []
+    def route(r):
+        if not (r.request.url.startswith(URL) and r.request.method == "GET"):
+            return r.abort()
+        if slow and "/app/endless." in r.request.url:
+            return held.append(r)   # the feed's code is let through only after the Mix tap
+        r.continue_()
+    ctx.route("**/*", route)
     ctx.add_init_script("localStorage.setItem('wardrobe.items'," + json.dumps(json.dumps(photographed_closet())) + ");localStorage.setItem('wardrobe.formality','3')")
     page = ctx.new_page()
     errors = []
@@ -36,7 +45,12 @@ def run(browser):
     page.wait_for_function("() => window.__appRan850 === true && typeof switchTab === 'function'", timeout=60000)
     page.evaluate("() => switchTab('inspo')")
     page.wait_for_function("() => document.querySelector('.ins-mini841 [data-ins-feed=\"mix\"]')", timeout=60000)
-    page.evaluate("() => document.querySelector('[data-ins-feed=\"mix\"]').click()")
+    early = page.evaluate("() => { const early = typeof window.setMix8710 !== 'function'; document.querySelector('[data-ins-feed=\"mix\"]').click(); return early; }")
+    if slow:
+        assert early, "the slow run should tap Mix before the feed's code has loaded"
+        page.wait_for_timeout(300)
+        while held:
+            held.pop().continue_()
     # the New + mine cards stay on screen until the feed is rebuilt for Mix (next frame); wait for the Mix cards
     page.wait_for_function("() => { const c = [...document.querySelectorAll('#en-grid-withmine .cf-card:not(.en-skel)')]; return c.length >= 8 && !c.some(x => x.querySelector('.en-render img')); }", timeout=60000)
     for _ in range(4):
@@ -74,5 +88,6 @@ with sync_playwright() as pw:
     for engine in (pw.chromium, pw.webkit):
         browser = engine.launch()
         m = run(browser)
+        run(browser, slow=True)
         print("Confirmed: Mix shows %d mixes with pieces for sale, none drawn on him, %d marked Fills gap; New + mine unchanged" % (m["cards"], m["gap"]))
         browser.close()

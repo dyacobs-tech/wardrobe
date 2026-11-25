@@ -76,7 +76,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.87.11" />
+    <meta name="wardrobe-build" content="2026-11-22.87.12" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8863,7 +8863,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.87.11</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-22.87.12</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12489,7 +12489,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.87.11";
+var WARDROBE_BUILD = "2026-11-22.87.12";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -46493,7 +46493,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
 
   /* ---------- the Looks page modes ---------- */
   /* .87.10: Mix is the New + mine feed showing the mixes not drawn on him (see setMix8710) */
-  function pvClick(f) { if (window.setMix8710) window.setMix8710(f === "mix"); if (f === "mix") f = "withmine"; var b = document.querySelector('#pv-top [data-pv-f="' + f + '"]'); if (b) b.click(); }
+  /* .87.12: the feed module can load after the first tap (slow phone), so the wanted Mix state is kept here too */
+  function pvClick(f) { window.__mixWant8712 = f === "mix"; if (window.setMix8710) window.setMix8710(f === "mix"); if (f === "mix") f = "withmine"; var b = document.querySelector('#pv-top [data-pv-f="' + f + '"]'); if (b) b.click(); }
   function applyMode(name) {
     var m = MODES[name];
     if (!m) { R.removeAttribute("data-lkm"); return; }
@@ -50616,7 +50617,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   }
   var undrawn857 = false;
   /* .87.10: Mix = this feed without the outfits drawn on him, straight into the mixes (no "Show ideas" button) */
-  var mix8710 = false;
+  /* .87.12: a Mix tap made before this module loaded is kept (window.__mixWant8712), so Mix never opens as New + mine */
+  var mix8710 = !!window.__mixWant8712;
   window.setMix8710 = function (on) { mix8710 = !!on; };
   window.mixOn8710 = function () { return mix8710; };
   document.addEventListener("click", function (e) {
