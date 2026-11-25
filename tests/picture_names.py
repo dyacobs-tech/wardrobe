@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-MAPS = [("tests/belts8703.json", "belted"), ("tests/pictures8704.json", "renamed"), ("tests/pictures8705.json", "renamed"), ("tests/pictures8707.json", "renamed")]
+MAPS = [("tests/belts8703.json", "belted"), ("tests/pictures8704.json", "renamed"), ("tests/pictures8705.json", "renamed"), ("tests/pictures8707.json", "renamed"), ("tests/pictures8711.json", "renamed")]
 
 
 def current(stem):
