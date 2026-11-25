@@ -38,7 +38,7 @@
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
 const PREVIEW = /\/preview\/$/.test(SCOPE_PATH);
 const NS = PREVIEW ? 'preview-' : '';
-const WARDROBE_BUILD = '2026-11-22.87.13';
+const WARDROBE_BUILD = '2026-11-25.87.14';
 const SHELL_CACHE = NS + 'wardrobe-shell-' + WARDROBE_BUILD;
 const PHOTO_CACHE = NS + 'wardrobe-photos-' + WARDROBE_BUILD;
 const ASSET_CACHE = NS + 'wardrobe-assets-' + WARDROBE_BUILD;
@@ -54,7 +54,7 @@ const ONBODY_CACHE = NS + 'wardrobe-onbody-v5';
 // cache that survives builds, so a reopen never waits on them; a change
 // lands on the next open.
 const DATA_CACHE = NS + 'wardrobe-data-v2';
-const DATA_RE = /\/assets\/(onbody\/manifest\.json|onbody-cut\/(manifest|lq|feet)\.json|inspo\/manifest\.json|edit-catalog(-lite)?\.json)$/;
+const DATA_RE = /\/assets\/(onbody\/manifest\.json|onbody-hires\/manifest\.json|onbody-cut\/(manifest|lq|feet)\.json|inspo\/manifest\.json|edit-catalog(-lite)?\.json)$/;
 // Cut-outs (assets/onbody-cut/, and the full-resolution zoom copies in
 // assets/onbody-cut-hq/) are immutable: cache-first in ONBODY_CACHE.
 const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
@@ -64,7 +64,7 @@ const CUT_RE = /\/assets\/onbody-cut(-hq)?\/[^\/]+\.(webp|png)$/;
 // builds (activate drops files no longer listed), precached on install.
 const CODE_CACHE = NS + 'wardrobe-code-v1';
 const CODE_RE = /\/app\/[^\/]+\.[0-9a-f]{10}\.(js|css|json)$/;
-const CODE_FILES = ['./app/app.7e03039af9.css', './app/00-brand-list.27a288fac9.js', './app/01.9819fa4a13.js', './app/02.37806b0b18.js', './app/26.318a5abe99.js', './app/27.44c6f329b2.js', './app/28.5af50274e0.js', './app/bundle.35ff91a206.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json', './app/endless.7b47333d21.js', './app/endless-worker.3e5ac8d4c4.js'];
+const CODE_FILES = ['./app/app.7e03039af9.css', './app/00-brand-list.27a288fac9.js', './app/01.a9e04a3225.js', './app/02.dc0c221e50.js', './app/26.318a5abe99.js', './app/27.44c6f329b2.js', './app/28.5af50274e0.js', './app/bundle.9a2474fbd5.js', './app/style-icons.e167dc7786.json', './app/extra-renders.ab99cb82a0.json', './app/sale-items.0fae754db8.json', './app/icon-directory.fe780b77f4.json', './app/shop-catalogue.6133045db3.json', './app/icon-specs.766c27918a.json', './app/endless.7b47333d21.js', './app/endless-worker.3e5ac8d4c4.js'];
 const SHELL_KEY = './index.html';
 const SHELL_FILES = ['./index.html', './manifest.webmanifest',
   './assets/icon-180.png', './assets/icon-192.png', './assets/icon-512.png',
@@ -256,7 +256,7 @@ self.addEventListener('fetch', (event) => {
   const ROOT_PATH = PREVIEW ? SCOPE_PATH.replace(/preview\/$/, '') : SCOPE_PATH;
   if (url.pathname.indexOf(ROOT_PATH + 'preview/assets/') === 0 && !req.headers.has('range')) {
     const target = url.origin + ROOT_PATH + url.pathname.slice((ROOT_PATH + 'preview/').length);
-    const cacheName = CUT_RE.test(url.pathname) || url.pathname.includes('/assets/onbody/') ? ONBODY_CACHE : (url.pathname.includes('/assets/photos/') ? PHOTO_CACHE : ASSET_CACHE);
+    const cacheName = CUT_RE.test(url.pathname) || url.pathname.includes('/assets/onbody/') || url.pathname.includes('/assets/onbody-hires/') ? ONBODY_CACHE : (url.pathname.includes('/assets/photos/') ? PHOTO_CACHE : ASSET_CACHE);
     event.respondWith(caches.open(cacheName).then((cache) => cache.match(target).then((hit) => {
       const net = fetch(target + url.search).then((res) => { if (res && res.status === 200) { if (cacheName === ASSET_CACHE) cache.put(target, res.clone()); else event.waitUntil(putLRU(cache, target, res)); } return res; });
       if (hit && cacheName !== ASSET_CACHE) { event.waitUntil(touchLRU(cache, target, hit)); return hit; }
@@ -332,7 +332,7 @@ self.addEventListener('fetch', (event) => {
 
   // On-body renders: content-hashed, cache-first in their own cache.
   // The manifest beside them stays network-first (below).
-  if ((url.pathname.includes('/assets/onbody/') || url.pathname.includes('/assets/inspo/')) && url.pathname.endsWith('.webp')) {
+  if ((url.pathname.includes('/assets/onbody-hires/') && /\.(jpe?g|webp|png)$/.test(url.pathname)) || ((url.pathname.includes('/assets/onbody/') || url.pathname.includes('/assets/inspo/')) && url.pathname.endsWith('.webp'))) {
     event.respondWith(
       caches.open(ONBODY_CACHE).then((cache) =>
         cache.match(req, { ignoreSearch: true }).then((hit) => {

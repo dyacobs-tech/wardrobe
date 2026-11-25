@@ -19,6 +19,7 @@
             E.onbody = fetch("assets/onbody/manifest.json", { cache: "no-cache" });
             E.cut = fetch("assets/onbody-cut/manifest.json", { cache: "no-cache" });
             E.feet = fetch("assets/onbody-cut/feet.json");
+            E.hires = fetch("assets/onbody-hires/manifest.json", { cache: "no-cache" });
             Object.keys(E).forEach(function (k) { E[k].catch(function () {}); });
           }
         } catch (e) {}
@@ -76,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-22.87.13" />
+    <meta name="wardrobe-build" content="2026-11-25.87.14" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8863,7 +8864,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-22.87.13</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-25.87.14</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -11858,6 +11859,84 @@ function onbodyIngest(j) {
   return n;
 }
 onbodyIngest(ONBODY_SEED);
+/* .87.14 (David, 24 Nov 2026, on the 4k test: "Great make them all like that!!!!"): high-res studio
+   redraws from his new avatar photo. Home hero and the full-screen view use the ~2,600 px copy;
+   look cards and grids use the smaller card copy. Looks not yet redrawn keep their previous picture.
+   Phone copies were made from the 4k original, never from another copy. */
+var HIRES = { map: {}, byFile: {}, ready: false };
+function hiresIngest(j) {
+  if (!j || !j.r) return 0;
+  var n = 0;
+  j.r.forEach(function (e) {
+    if (!e || !e.k) return;
+    HIRES.map[e.k] = e;
+    if (e.onbody) HIRES.byFile[String(e.onbody).replace(/^.*\//, "")] = e;
+    n++;
+  });
+  HIRES.ready = true;
+  return n;
+}
+function hiresEntryForKey(key) { return (key && HIRES.map[key]) || null; }
+function hiresForKey(key, kind) {
+  var e = hiresEntryForKey(key);
+  if (!e) return null;
+  return (kind === "card" ? e.card : e.full) || e.full || e.card || null;
+}
+function hiresKeyOfLook(look) {
+  if (!look) return null;
+  if (look.composerKey && HIRES.map[look.composerKey]) return look.composerKey;
+  try {
+    if (typeof onbodyForLook === "function") {
+      var ob = onbodyForLook(look);
+      if (ob) {
+        var file = String(ob).replace(/^.*\//, "");
+        var hit = HIRES.byFile[file];
+        if (hit) return hit.k;
+        for (var k in HIRES.map) {
+          if (ONBODY && ONBODY.map && ONBODY.map[k] === ob) return k;
+        }
+      }
+    }
+  } catch (e) {}
+  var parts = [];
+  var pcs = (look.fwPieces || look.pieces || look.swapPieces || []);
+  for (var i = 0; i < pcs.length; i++) if (pcs[i] && pcs[i].id) parts.push(pcs[i].id);
+  if (parts.length) {
+    var key = parts.slice().sort().join("|");
+    if (HIRES.map[key]) return key;
+  }
+  return null;
+}
+function hiresForLook(look, kind) {
+  return hiresForKey(hiresKeyOfLook(look), kind);
+}
+function hiresForOnbody(src, kind) {
+  if (!src) return null;
+  var file = String(src).replace(/^.*\//, "");
+  var e = HIRES.byFile[file];
+  if (!e) {
+    for (var k in HIRES.map) {
+      if (ONBODY && ONBODY.map && ONBODY.map[k] === src) { e = HIRES.map[k]; break; }
+    }
+  }
+  if (!e) return null;
+  return (kind === "card" ? e.card : e.full) || e.full || e.card || null;
+}
+window.hiresForKey = hiresForKey;
+window.hiresForLook = hiresForLook;
+window.hiresForOnbody = hiresForOnbody;
+window.HIRES = HIRES;
+function hiresRefresh() {
+  try {
+    if (typeof fetch !== "function") return;
+    ((window.__takeEarly803 && window.__takeEarly803("hires")) || fetch("assets/onbody-hires/manifest.json", { cache: "no-cache" })).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.r) return;
+      hiresIngest(j);
+      try { if (typeof renderToday === "function") renderToday(); } catch (e) {}
+    }).catch(function () {});
+  } catch (e2) {}
+}
+hiresRefresh();
 /* .86.78 (David, 23 Nov 2026, Home screenshot of the navy tee and stone chinos: "Head messed up and no belt
    again!!!!!!!"). The list saved on the phone was read after the built-in list and put back pictures that a newer
    build had replaced, so Home showed the old drawing until the next update. The saved list is only used when it
@@ -11961,6 +12040,7 @@ function lookHeroVisible84(look) {
      A look is showable only when we have an on-body render (and its
      cut-out, once cutoutFor is in). */
   if (!look) return false;
+  try { if (typeof hiresForLook === "function" && hiresForLook(look, "full")) return true; } catch (eHi) {}
   var ob = typeof onbodyForLook === "function" ? onbodyForLook(look) : null;
   if (!ob) return false;
   try { if (typeof window.cutoutFor === "function") return !!window.cutoutFor(ob); } catch (e) {}
@@ -12539,7 +12619,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-22.87.13";
+var WARDROBE_BUILD = "2026-11-25.87.14";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -19842,6 +19922,12 @@ function isCameraSelfieImg(img) {
 function studioImgForLook(look) {
   if (!look) return "";
   try {
+    if (typeof hiresForLook === "function") {
+      var hi = hiresForLook(look, "card");
+      if (hi) return hi;
+    }
+  } catch (eHi) {}
+  try {
     if (typeof onbodyForLook === "function") {
       var ob = onbodyForLook(look);
       if (ob && !isCameraSelfieImg(ob)) {
@@ -24697,7 +24783,9 @@ function lookCardHTML(look, opts) {
   opts = opts || {};
   var refTag = look.refLook ? '<span class="pane-tag">Reference — ' + esc(look.imgInspo ? "your image" : ((look.iconId ? (iconById(look.iconId) || {}).name : "") || "icon")) + "</span>" : "";
   var cardImg = look.swapPhoto || lookImg(look);
-  if (window.cleanPic8708) cardImg = window.cleanPic8708(cardImg);   /* .87.08: the clean cut-out, not the studio drawing */
+  var hiresCard = (typeof hiresForLook === "function") ? hiresForLook(look, "card") : null;
+  if (hiresCard) cardImg = hiresCard;                                 /* .87.14: redrawn looks use the studio card copy */
+  else if (window.cleanPic8708) cardImg = window.cleanPic8708(cardImg);   /* .87.08: the clean cut-out, not the old studio drawing */
   var lcState = swapCardState(look);
   var lcWaiting = lcState === "rendering" || lcState === "pending" || lcState === "failed" || lcState === "nosync";
   var mediaPop = (look.refLook && !look.imgInspo) ? "" : ' data-popout="' + esc(cardImg) + '"';
@@ -47753,7 +47841,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       var sig = keys.length + "/" + (typeof wardrobeItems !== "undefined" ? wardrobeItems.length : 0) + "/" + (typeof dislikedImgs !== "undefined" ? dislikedImgs.length : 0);
       if (rcache.sig === sig) return rcache.v;
       var own = {}; (wardrobeItems || []).forEach(function (i) { own[i.id] = 1; });
-      var v = keys.some(function (k) { var src = ONBODY.map[k]; return k.split("|").every(function (id) { return own[id]; }) && !(typeof isDislikedImg === "function" && isDislikedImg(src)) && !(typeof window.cutoutFor === "function" && !window.cutoutFor(src)); });
+      var v = keys.some(function (k) { var src = ONBODY.map[k]; var hi = (typeof hiresForKey === "function") && hiresForKey(k, "full"); return k.split("|").every(function (id) { return own[id]; }) && !(typeof isDislikedImg === "function" && isDislikedImg(src)) && !(!hi && typeof window.cutoutFor === "function" && !window.cutoutFor(src)); });
       rcache = { sig: sig, v: v }; return v;
     } catch (e) { return true; }
   }
@@ -47867,8 +47955,9 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (guestMode782() && guestHero782()) return;
     if (typeof todayLook === "undefined" || !todayLook) return;
     var src = renderFor(todayLook);
-    /* .78.9a: Home only deals a render that has its cut-out */
-    if (src && typeof window.cutoutFor === "function" && !window.cutoutFor(src)) src = null;
+    var hiresFull = (typeof hiresForLook === "function") ? hiresForLook(todayLook, "full") : null;
+    /* .78.9a: Home only deals a render that has its cut-out, unless .87.14 has a high-res studio redraw */
+    if (src && typeof window.cutoutFor === "function" && !window.cutoutFor(src) && !hiresFull) src = null;
     /* .78.2c: a render he gave a thumbs-down never comes back */
     if (src && typeof isDislikedImg === "function" && isDislikedImg(src)) src = null;
     if (!src) {
@@ -47897,9 +47986,10 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     booted782 = true; userDeal782 = false;
     skip = 0;
     if (collage) { collage.hidden = true; collage.innerHTML = ""; collage.classList.remove("flatlay-host"); }
-    /* .78.5b: his cut-out on the closet backdrop when one exists */
-    var shown = (typeof window.cutoutFor === "function" && window.cutoutFor(src)) || src;
-    hero.classList.toggle("has-cut", shown !== src);
+    /* .78.5b: his cut-out on the closet backdrop when one exists.
+       .87.14: a redrawn look shows the high-res studio shot, not the cut-out. */
+    var shown = hiresFull || (typeof window.cutoutFor === "function" && window.cutoutFor(src)) || src;
+    hero.classList.toggle("has-cut", !hiresFull && shown !== src);
     hero.classList.remove("hero-flatlay");
     img.setAttribute("data-render", src);
     swapHero(shown);
@@ -47927,9 +48017,15 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     try { var C = window.cutoutManifest && window.cutoutManifest(); if (C && C.map) for (var k in C.map) if (u.indexOf(C.map[k]) !== -1) return true; } catch (e) {}
     return false;
   }
+  function isHiresSrc(u) {
+    u = String(u || "");
+    return /\/onbody-hires\/(full|card)\/[^\/?#]+\.(jpe?g|webp|png)/i.test(u) || /^assets\/onbody-hires\//.test(u);
+  }
   function guard(el) {
     if (!el) return;
-    var ok = isCutSrc(el.getAttribute("src")) || !hero.classList.contains("hero-solo");
+    var src = el.getAttribute("src");
+    /* .87.14: a high-res studio redraw is a valid Home figure, not a missing cut-out */
+    var ok = isCutSrc(src) || isHiresSrc(src) || !hero.classList.contains("hero-solo");
     if (ok) el.removeAttribute("data-nocut"); else el.setAttribute("data-nocut", "");
   }
   window.heroIsCut792 = isCutSrc;
@@ -48306,6 +48402,16 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
      studio backdrop, while every other screen shows the clean cut-out. They now show the cut-out too: the sharp
      copy where the picture is big, the small one for Calendar thumbnails. */
   window.cleanPic8708 = function (src, small) {
+    /* .87.14: a redrawn look keeps the high-res studio copy, never the old 25 KB drawing or its cut-out. */
+    if (typeof hiresForOnbody === "function") {
+      var hi = hiresForOnbody(src, small ? "card" : "full");
+      if (hi) return hi;
+    }
+    if (src && /onbody-hires\//.test(src)) {
+      if (!small && /\/card\//.test(src)) return src.replace("/card/", "/full/");
+      if (small && /\/full\//.test(src)) return src.replace("/full/", "/card/");
+      return src;
+    }
     var c = window.cutoutFor(src); if (!c) return src;
     return small ? c : c.replace("onbody-cut/", "onbody-cut-hq/");
   };

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""HAN-31 / .86.4 — Home only ever shows an avatar cut-out of him, never a flat-lay grid.
+"""HAN-31 / .86.4 / .87.14 — Home only ever shows him in a studio shot or
+an avatar cut-out, never a flat-lay grid.
 
 Loads the live closet fixture, Palm Beach 76°F Overcast, then cycles Next
 and every dress level in light and dark at 390px. Fails if #today-hero
-picks up hero-flatlay or a piece-photo collage.
+picks up hero-flatlay or a piece-photo collage. A high-res studio redraw
+(assets/onbody-hires) counts as the Home picture, same as an avatar cut-out.
 """
 from __future__ import annotations
 
@@ -72,13 +74,14 @@ HERO_JS = """() => {
   const empty = !!(h && h.classList.contains('hero-empty861'));
   const flat = !!(h && h.classList.contains('hero-flatlay'));
   const cut = /onbody-cut/.test(src);
+  const hires = /onbody-hires/.test(src);
   const loaded = !!(im && !im.hidden && im.complete && im.naturalWidth > 40);
   return {
     build: window.WARDROBE_BUILD || '',
     title: (document.getElementById('today-name') || {}).textContent || '',
     level: (typeof dressLevel841 === 'function') ? dressLevel841() : null,
     levelLabel: (document.getElementById('today-type-label') || {}).textContent || '',
-    empty, flat, cut, loaded, src: src.slice(0, 80),
+    empty, flat, cut, hires, loaded, src: src.slice(0, 80),
     flCells,
     collageOpen: !!(c && !c.hidden && (c.innerHTML || '').trim() && !c.querySelector('.hero-empty861-box')),
     hasCut: !!(h && h.classList.contains('has-cut')),
@@ -96,7 +99,7 @@ WAIT_JS = """() => {
   if (h.classList.contains('hero-empty861')) return true;
   const im = document.getElementById('today-img');
   const src = (im && im.getAttribute('src')) || '';
-  return !!(im && !im.hidden && im.complete && im.naturalWidth > 40 && /onbody-cut/.test(src) && !h.classList.contains('lq-show'));
+  return !!(im && !im.hidden && im.complete && im.naturalWidth > 40 && (/onbody-cut/.test(src) || /onbody-hires/.test(src)) && !h.classList.contains('lq-show'));
 }"""
 
 WEATHER_JS = """() => {
@@ -113,9 +116,9 @@ def hero_ok(st, allow_empty=True):
         return False, "flat-lay on Home: " + json.dumps(st)[:400]
     if st.get("empty"):
         return (True, "empty") if allow_empty else (False, "empty: " + json.dumps(st)[:400])
-    if st.get("cut") and st.get("loaded"):
+    if (st.get("cut") or st.get("hires")) and st.get("loaded"):
         return True, st.get("src")
-    return False, "no cut-out: " + json.dumps(st)[:400]
+    return False, "no studio shot or cut-out: " + json.dumps(st)[:400]
 
 
 def wait_hero(pg, timeout=12000):
@@ -125,8 +128,8 @@ def wait_hero(pg, timeout=12000):
         pass
     pg.wait_for_timeout(250)
     st = pg.evaluate(HERO_JS)
-    # A just-dealt cut-out can still be decoding; never fail a shoot on that race.
-    if st.get("cut") and not st.get("loaded"):
+    # A just-dealt studio shot or cut-out can still be decoding; never fail a shoot on that race.
+    if (st.get("cut") or st.get("hires")) and not st.get("loaded"):
         try:
             pg.wait_for_function("""() => {
               const im = document.getElementById('today-img');
@@ -182,7 +185,7 @@ def main():
         st = wait_hero(pg, 15000)
         check("build is .86.4", CURRENT_BUILD in (st.get("build") or ""), st.get("build"))
         ok, detail = hero_ok(st, allow_empty=False)
-        check("opening Home is an avatar cut-out, not a grid", ok, detail)
+        check("opening Home is a studio shot or cut-out, not a grid", ok, detail)
         print("OPENING", json.dumps({k: st[k] for k in st}, indent=2))
 
         # Render inventory per dress level (owned on-body keys that fit)
@@ -229,7 +232,7 @@ def main():
         for i in range(8):
             st = wait_hero(pg)
             ok, detail = hero_ok(st, allow_empty=False)
-            check("Next %d at Evening Casual is a cut-out" % (i + 1), ok, detail)
+            check("Next %d at Evening Casual is a studio shot or cut-out" % (i + 1), ok, detail)
             titles.append(st.get("title"))
             srcs.append(st.get("src"))
             report["next"].append(st)
