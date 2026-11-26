@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -49,8 +50,10 @@ def main() -> None:
         fail("hires manifest has no looks")
     app = APP.read_text()
     sw = SW.read_text()
-    if "2026-11-26.87.18" not in app or "2026-11-26.87.18" not in sw:
-        fail("build stamp is not 2026-11-26.87.18")
+    # the build is read from sw.js, never written here, so a later build does not fail this check
+    m = re.search(r"WARDROBE_BUILD = '([^']+)'", sw)
+    if not m or m.group(1) not in app:
+        fail("the build in sw.js and the build in src/app.html do not agree")
     for needle in (
         "function hiresForLook",
         "function hiresForKey",
