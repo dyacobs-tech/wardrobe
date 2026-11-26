@@ -57,6 +57,8 @@ def main() -> None:
         "assets/onbody-hires/manifest.json",
         'hiresForLook(todayLook, "full")',
         'hiresForLook(look, "card")',
+        "function cardPicForLook",
+        "card grids prefer the cream hires JPEG",
     ):
         if needle not in app:
             fail(f"app is missing {needle!r}")

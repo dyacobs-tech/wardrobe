@@ -4643,7 +4643,7 @@ window.notMenswear853 = function (e) {
       .flatlay .fl-swatch { border-radius: 6px; }
       .flatlay .fl-watch img { width: auto !important; height: 74% !important; aspect-ratio: 1 / 1 !important; object-fit: cover !important; border-radius: 50%; }
       .flatlay.fl-n3 > .fl-cell:first-child, .flatlay.fl-n5 > .fl-cell:first-child, .flatlay.fl-n7 > .fl-cell:first-child { grid-row: span 2; }
-      .cf-media { display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; margin: 0; border: 0; background: #f5f1e8; cursor: pointer; flex: none; border-radius: 0; min-height: 0; }
+      .cf-media { display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; margin: 0; border: 0; background: #F6F2EA; cursor: pointer; flex: none; border-radius: 0; min-height: 0; }
       .cf-card { cursor: default; }
       .cf-card .oc-body { flex: 0 0 auto !important; padding-bottom: 6px !important; }
       .cf-actions { display: flex; gap: 6px; padding: 0 10px 10px; margin-top: auto; }
@@ -5758,6 +5758,28 @@ window.notMenswear853 = function (e) {
         mask-image: none !important;
         -webkit-mask: none !important;
         mask: none !important;
+      }
+      /* .87.14: cream hires card JPEGs on look-card grids — no off-cream box,
+         and object-fit contain so the 9:16 figure keeps head and shoes in a
+         4:5 or 3:4 card (cover + top would crop the feet). */
+      .cf-media,
+      .lk-card841 .cf-media,
+      .look-media .layer-flatlay {
+        background: #F6F2EA !important;
+      }
+      #cf-grid .cf-media > .mine-avatar[src*="onbody-hires"],
+      .lk-card841 .cf-media > .mine-avatar[src*="onbody-hires"],
+      .cf-media img[src*="onbody-hires"],
+      .look-media img[src*="onbody-hires"],
+      .wp-thumb[src*="onbody-hires"],
+      .wp-pick img[src*="onbody-hires"],
+      .wp-open-photo img[src*="onbody-hires"],
+      .shop-look-head img[src*="onbody-hires"],
+      .worn-row img[src*="onbody-hires"] {
+        object-fit: contain !important;
+        object-position: center center !important;
+        background: #F6F2EA !important;
+        background-color: #F6F2EA !important;
       }
       /* ================= Build .79.1 — Closet: search + filters + Add on one row =================
          A compact search pill (magnifier + "Search"), the three category
@@ -11984,16 +12006,45 @@ function hiresForOnbody(src, kind) {
   var file = String(src).replace(/^.*\//, "");
   var e = HIRES.byFile[file];
   if (!e) {
+    var stem = file.replace(/\.(webp|jpe?g|png)$/i, "");
+    if (stem) e = HIRES.byFile[stem + ".webp"] || HIRES.byFile[stem + ".jpg"] || HIRES.byFile[stem + ".jpeg"] || HIRES.byFile[stem + ".png"] || null;
+  }
+  if (!e) {
     for (var k in HIRES.map) {
-      if (ONBODY && ONBODY.map && ONBODY.map[k] === src) { e = HIRES.map[k]; break; }
+      if (ONBODY && ONBODY.map && (ONBODY.map[k] === src || String(ONBODY.map[k]).replace(/^.*\//, "") === file)) { e = HIRES.map[k]; break; }
     }
   }
   if (!e) return null;
   return (kind === "card" ? e.card : e.full) || e.full || e.card || null;
 }
+function cardPicForLook(look, src) {
+  /* .87.14: look-card grids (Looks / Mine, library, Saved, Calendar thumbs)
+     use the cream hires card JPEG when one exists, else the previous picture
+     (cut-out, on-body, or saved) — including looks with no hires entry. */
+  try {
+    if (look && typeof hiresForLook === "function") {
+      var hi = hiresForLook(look, "card");
+      if (hi) return hi;
+    }
+  } catch (eHi) {}
+  try {
+    if (src && typeof hiresForOnbody === "function") {
+      var ho = hiresForOnbody(src, "card");
+      if (ho) return ho;
+    }
+  } catch (eHo) {}
+  if (src && window.cleanPic8708) {
+    try {
+      var c = window.cleanPic8708(src, true);
+      if (c) return c;
+    } catch (eC) {}
+  }
+  return src || "";
+}
 window.hiresForKey = hiresForKey;
 window.hiresForLook = hiresForLook;
 window.hiresForOnbody = hiresForOnbody;
+window.cardPicForLook = cardPicForLook;
 window.HIRES = HIRES;
 function hiresRefresh() {
   try {
@@ -12002,6 +12053,12 @@ function hiresRefresh() {
       if (!j || !j.r) return;
       hiresIngest(j);
       try { if (typeof renderToday === "function") renderToday(); } catch (e) {}
+      try { if (typeof window.composerSyncFeed === "function") window.composerSyncFeed(false); } catch (eCf) {}
+      try { if (typeof window.__lkRenderLiked845 === "function") window.__lkRenderLiked845(); } catch (eLk) {}
+      try { if (typeof window.renderGotos === "function") window.renderGotos(); } catch (eGo) {}
+      try { if (typeof renderWeekPlan === "function") renderWeekPlan(); } catch (eWk) {}
+      try { if (typeof renderWornLog === "function") renderWornLog(); } catch (eWn) {}
+      try { if (typeof renderFindLookMode === "function") renderFindLookMode(); } catch (eSh) {}
     }).catch(function () {});
   } catch (e2) {}
 }
@@ -36286,7 +36343,9 @@ function renderFindLookMode() {
   var isRaw862 = function (u) { return !!u && (/^(data:image\/(jpe?g|png|heic|heif)|blob:|idb:)/i.test(u) || (typeof isCameraSelfieImg === "function" && isCameraSelfieImg(u)) || u === img && rawImg861); };
   if (isRaw862(cut)) cut = "";
   if (isRaw862(ob853)) ob853 = "";
-  var shown = cut || ob853 || (rawImg861 ? "" : img);
+  var hiShop = "";
+  try { if (typeof hiresForLook === "function") hiShop = hiresForLook(look, "card") || ""; } catch (eHiS) {}
+  var shown = hiShop || cut || ob853 || (rawImg861 ? "" : img);
   var fl861 = "";
   if (!shown) { try { if (typeof window.composerFlatlayHTML === "function") fl861 = window.composerFlatlayHTML(look, true) || ""; } catch (eFl) { fl861 = ""; } if (fl861.indexOf("<img ") === -1) fl861 = ""; }
   var title = look.title || "Untitled";
@@ -37695,7 +37754,8 @@ function renderWornLog() {
     var attrs = "";
     if (en.id) attrs = ' data-worn-edit="' + esc(en.id) + '" role="button" tabindex="0"';
     else if (en.synthetic && en.lookId) attrs = ' data-worn-look="' + esc(en.lookId) + '" data-worn-date="' + esc(en.date || "") + '" role="button" tabindex="0"';
-    html += '<div class="worn-row compact' + (en.selfie ? " selfie" : "") + '"' + attrs + '>' + (en.img ? '<img src="' + en.img + '" alt="" loading="lazy" data-popout="' + en.img + '" />' : '<span class="worn-thumb-ph" aria-hidden="true"></span>') +
+    var wornImg = en.img ? ((en.selfie || typeof cardPicForLook !== "function") ? en.img : (cardPicForLook(null, en.img) || en.img)) : "";
+    html += '<div class="worn-row compact' + (en.selfie ? " selfie" : "") + '"' + attrs + '>' + (wornImg ? '<img src="' + wornImg + '" alt="" loading="lazy" data-popout="' + wornImg + '" />' : '<span class="worn-thumb-ph" aria-hidden="true"></span>') +
       '<span class="w-main"><span class="w-name">' + esc(label) + '</span>' +
       (subParts.length ? '<span class="w-sub">' + esc(subParts.join(" \u00b7 ")) + "</span>" : "") + "</span></div>";
   });
@@ -38685,8 +38745,10 @@ document.getElementById("panel-calendar").addEventListener("click", function (e)
     var ids = [s.parts.layer, s.parts.top, s.parts.bottom, s.parts.shoe].filter(Boolean);
     if (ids.some(function (id) { return id.indexOf("buy:") === 0; })) return null;
     var src = null;
-    try { src = onbodyForLook(lookFromParts(s.parts, s.level)); } catch (e) { src = null; }
+    var tripLook = null;
+    try { tripLook = lookFromParts(s.parts, s.level); src = onbodyForLook(tripLook); } catch (e) { src = null; }
     if (!src) return null;
+    try { if (typeof cardPicForLook === "function") { var hiSlot = cardPicForLook(tripLook, src); if (hiSlot) return hiSlot; } } catch (eHi) {}
     try { if (typeof window.cutoutFor === "function") { var cut = window.cutoutFor(src); if (cut) return cut; } } catch (e) {}
     return src;
   }
@@ -39126,7 +39188,7 @@ function renderWeekPlan() {
     var fcTxt = fc && typeof fc.hi === "number" ? Math.round(fc.hi) + "°" + (fc.label ? " " + fc.label.replace("Thunderstorms", "T-storms").replace("Thunderstorm", "T-storm") : "") : "";
     var cls = "wp-day" + (iso === todayIso ? " wp-today" : "") + (iso < todayIso ? " wp-past" : "") + (look ? " wp-planned" : "") + (worn.length ? " wp-hasworn" : "");
     var img = cover && cover.image, imgTitle = cover && cover.title;
-    if (img && window.cleanPic8708) img = window.cleanPic8708(img, true);   /* .87.08: the cut-out, not the studio drawing */
+    if (img) img = (typeof cardPicForLook === "function") ? cardPicForLook((cover && cover.plan) || look, img) : (window.cleanPic8708 ? window.cleanPic8708(img, true) : img);
     var aria = esc(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) +
       (worn.length ? " — wore: " + esc(worn.map(function (w) { return w.title; }).join(", ")) : "") +
       (look ? " — planned: " + esc(look.title) : "");
@@ -39243,7 +39305,7 @@ function openPlanSheet(iso, selected, focusSelector) {
     if (entries.length > 1) html += '<div class="wp-outfit-nav"><button type="button" class="btn-ghost" data-outfit-step="-1" aria-label="Previous outfit">‹</button>' +
       '<span aria-live="polite">Outfit ' + (index + 1) + ' of ' + entries.length + '</span><button type="button" class="btn-ghost" data-outfit-step="1" aria-label="Next outfit">›</button></div>';
     var pieces = calendarPieces(item);
-    html += '<div class="wp-outfit">' + (item.image ? '<button type="button" class="wp-open-photo" data-calendar-zoom aria-label="Enlarge ' + esc(item.title) + '"><img src="' + esc(item.image) + '" alt="" decoding="async" /></button>' : '') +
+    html += '<div class="wp-outfit">' + (item.image ? '<button type="button" class="wp-open-photo" data-calendar-zoom aria-label="Enlarge ' + esc(item.title) + '"><img src="' + esc((typeof cardPicForLook === "function") ? cardPicForLook(item.plan, item.image) : item.image) + '" alt="" decoding="async" /></button>' : '') +
       '<div><strong>' + esc(item.title) + '</strong>' + (pieces.length ? '<ul>' + pieces.map(function (piece) { return '<li>' + esc(piece) + '</li>'; }).join("") + '</ul>' : '<p class="meta">No pieces recorded.</p>') +
       (item.worn && item.worn.watch ? '<p>Watch · ' + esc(item.worn.watch) + '</p>' : '') +
       (item.plan && !past ? '<button type="button" class="btn-ghost" data-plan-clear>Remove plan</button>' : '') + '</div></div>';
@@ -39255,7 +39317,7 @@ function openPlanSheet(iso, selected, focusSelector) {
     html += '<button type="button" class="btn-accent wp-deal" data-plan-deal>Deal a fresh one</button>';
     if (cands.length) {
       html += '<p class="wp-pick-label">Liked &amp; queued</p><div class="wp-pick-grid">' + cands.map(function (l) {
-        return '<button type="button" class="wp-pick" data-plan-pick="' + esc(l.id) + '" aria-label="Plan ' + esc(l.title) + '"><img src="' + esc(lookImg(l)) + '" alt="" loading="lazy" decoding="async" /></button>';
+        return '<button type="button" class="wp-pick" data-plan-pick="' + esc(l.id) + '" aria-label="Plan ' + esc(l.title) + '"><img src="' + esc((typeof cardPicForLook === "function") ? cardPicForLook(l, lookImg(l)) : lookImg(l)) + '" alt="" loading="lazy" decoding="async" /></button>';
       }).join("") + "</div>";
     } else {
       html += '<p class="wp-pick-label">No liked or queued looks yet</p>';
@@ -39308,7 +39370,7 @@ function closePlanSheet() {
       if (button.hasAttribute("data-calendar-zoom")) {
         var currentIndex = Number(sheet.querySelector('.wp-choice[aria-pressed="true"]').dataset.outfitIndex);
         planPhotoEntries = calendarOutfits(wornForDate(iso), planLookForDate(iso)).map(function (entry, index) {
-          return { image: entry.image, title: entry.title, index: index };
+          return { image: (typeof cardPicForLook === "function") ? cardPicForLook(entry.plan, entry.image) : entry.image, title: entry.title, index: index };
         }).filter(function (entry) { return entry.image; });
         planPhotoIndex = planPhotoEntries.findIndex(function (entry) { return entry.index === currentIndex; });
         showPlanPhoto();
@@ -43220,7 +43282,14 @@ function analyzeFilePiece(card, job, ix) {
   function flatlayHTML(look, withWatch, avatarCard) {
     var ob = (typeof onbodyForLook === "function") ? onbodyForLook(look) : null;
     var shown = ob;
-    try { if (ob && typeof window.cutoutFor === "function") shown = window.cutoutFor(ob) || ob; } catch (e) {}
+    try {
+      /* .87.14: card grids prefer the cream hires JPEG; else the old picture */
+      if (typeof hiresForLook === "function") {
+        var hiCard = hiresForLook(look, "card");
+        if (hiCard) shown = hiCard;
+        else if (ob && typeof window.cutoutFor === "function") shown = window.cutoutFor(ob) || ob;
+      } else if (ob && typeof window.cutoutFor === "function") shown = window.cutoutFor(ob) || ob;
+    } catch (e) {}
     /* .86.45 (David: "Go-tos should be on my avatar too remember!!!"): an outfit he logged carries its own
        picture of him wearing it (the avatar, never a camera selfie). A go-to with no library render shows that. */
     var worn845 = "";
@@ -47057,6 +47126,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
         '<span class="cf-actions"><button type="button" class="lk-x841" data-g841-hide="' + i + '" aria-label="Not a go-to">Not a go-to</button></span></article>';
     }).join("") + "</div>";
   }
+  window.renderGotos = renderGotos;
 
   /* .86.45: a go-to's backdrop-free picture is a file (assets/worn/...). If it cannot load, the picture
      saved with the log entry takes its place; if that fails too, the card keeps its pieces. */
@@ -47336,18 +47406,24 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (typeof todayLook !== "undefined" && todayLook && todayLook.fwPieces) fromLook(todayLook);
     started = true;
   }
+  function cardOrCut(u) {
+    if (!u) return u;
+    try { if (typeof cardPicForLook === "function") { var p = cardPicForLook(null, u); if (p) return p; } } catch (e) {}
+    try { if (typeof cutoutFor === "function") { var c = cutoutFor(u); if (c) return c; } } catch (e2) {}
+    return u;
+  }
   function avatar() {
     if (fromPic879 && fromPic879.sig === dmSig879()) {
       var fp = fromPic879.src;
-      return { src: (/assets\/onbody\//.test(fp) && typeof cutoutFor === "function") ? (cutoutFor(fp) || fp) : fp, on: true };
+      return { src: cardOrCut(fp), on: true };
     }
     var mine = SLOTS.map(function (s) { return dm[s[0]]; }).filter(Boolean);
     if (mine.length && mine.every(function (p) { return p.own; }) && typeof onbodyForLook === "function") {
       var src = onbodyForLook({ fwPieces: mine.map(function (p) { return p.it; }) });
-      if (src) return { src: typeof cutoutFor === "function" ? (cutoutFor(src) || src) : src, on: true };
+      if (src) return { src: cardOrCut(src), on: true };
     }
     var base = (typeof todayLook !== "undefined" && todayLook && typeof onbodyForLook === "function") ? onbodyForLook(todayLook) : null;
-    return { src: base ? (typeof cutoutFor === "function" ? (cutoutFor(base) || base) : base) : "", on: false };
+    return { src: base ? cardOrCut(base) : "", on: false };
   }
   function paint() {
     var box = $("ins-dress841"); if (!box) return;

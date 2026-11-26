@@ -63,13 +63,15 @@ def check(browser, level):
     if level == 5:
         first = cards.first.locator("img.mine-avatar")
         expect(first).to_be_visible()
-        wait(page, "() => document.querySelector('#cf-grid .mine-avatar')?.naturalWidth > 20", "the first avatar image to load", where, errors)
+        wait(page, "() => window.HIRES && HIRES.ready && document.querySelector('#cf-grid .mine-avatar')?.naturalWidth > 20", "hires manifest and the first avatar image to load", where, errors)
         verified = cards.evaluate_all("""cards => cards.slice(0, 8).map(card => {
           const button = card.querySelector('[data-cf-open]');
           const look = __cfLooks81()[Number(button.dataset.cfOpen)];
           const photo = ONBODY.map[look.composerKey];
           const image = button.querySelector('.mine-avatar');
-          return !!photo && !!image && image.getAttribute('src') === (cutoutFor(photo) || photo)
+          const hires = (typeof hiresForLook === 'function' && hiresForLook(look, 'card')) || '';
+          const expected = hires || cutoutFor(photo) || photo;
+          return !!photo && !!image && image.getAttribute('src') === expected
             && button.querySelectorAll('img').length === 1 && !card.querySelector('[data-cf-rme]');
         })""")
         assert len(verified) >= 4 and all(verified), verified
