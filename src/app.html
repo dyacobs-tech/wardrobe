@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-26.87.22" />
+    <meta name="wardrobe-build" content="2026-11-26.87.23" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8981,7 +8981,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-26.87.22</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-26.87.23</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10129,6 +10129,56 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   /* The belt for one outfit, or null. c = { t, b, s, l, key }; lv = dress level (0 = any). */
   /* .86.51: the tie for a Formal outfit. One pattern at a time (a patterned tie only on a plain shirt under a
      plain blazer), never the shirt's own colour, and a steady pick so the same outfit keeps the same tie. */
+  function formalHiresCore8722(pc) {
+    if (!pc || !pc.ids || !pc.ids.length) return false;
+    if (typeof HIRES === "undefined" || !HIRES.map) return false;
+    var core = pc.ids, n = 0, hk;
+    for (hk in HIRES.map) {
+      var parts = String(hk).split("|");
+      if (parts.length !== core.length + 1) continue;
+      var have = {}, i;
+      for (i = 0; i < core.length; i++) have[core[i]] = 1;
+      var extra = null, ok = true;
+      for (i = 0; i < parts.length; i++) {
+        if (have[parts[i]]) have[parts[i]] = 2;
+        else if (!extra) extra = parts[i];
+        else { ok = false; break; }
+      }
+      if (!ok) continue;
+      for (i = 0; i < core.length; i++) if (have[core[i]] !== 2) { ok = false; break; }
+      if (!ok || !extra) continue;
+      var it = (typeof closetItemById === "function") ? closetItemById(extra) : null;
+      if (it && /^ties?$/i.test(String(it.category || ""))) { n++; break; }
+    }
+    return n > 0;
+  }
+  function picturedTieForCore8722(pc, ties, keyMap) {
+    if (!pc || !pc.ids || !ties || !ties.length) return null;
+    var maps = [];
+    if (typeof HIRES !== "undefined" && HIRES.map) maps.push(HIRES.map);
+    if (keyMap) maps.push(keyMap);
+    if (!maps.length) return null;
+    var core = pc.ids, cands = [], seen = {};
+    function consider(hk) {
+      var parts = String(hk).split("|");
+      if (parts.length !== core.length + 1) return;
+      var have = {}, i;
+      for (i = 0; i < core.length; i++) have[core[i]] = 1;
+      var extra = null, ok = true;
+      for (i = 0; i < parts.length; i++) {
+        if (have[parts[i]]) have[parts[i]] = 2;
+        else if (!extra) extra = parts[i];
+        else { ok = false; break; }
+      }
+      if (!ok) return;
+      for (i = 0; i < core.length; i++) if (have[core[i]] !== 2) { ok = false; break; }
+      if (!ok || !extra || seen[extra]) return;
+      for (i = 0; i < ties.length; i++) if (ties[i].id === extra) { seen[extra] = 1; cands.push(ties[i]); return; }
+    }
+    for (var mi = 0; mi < maps.length; mi++) for (var hk in maps[mi]) consider(hk);
+    if (!cands.length) return null;
+    return cands[(typeof keyHash === "function" ? keyHash(pc.key) : 0) % cands.length];
+  }
   function tieFor851(ties, c) {
     if (!shirtTakesTie860(c.t)) {
       if (!tonalTie860(c.t, c.l)) return null;
@@ -10331,13 +10381,14 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       }
       else if (cat === "Blazers") {
         p.kind = "blazer"; p.warm = 1;
-        if (/knit|jersey|unstructured/.test(n)) { p.lo = 4; p.hi = 5; }
-        else if (/linen|seersucker/.test(n)) { p.lo = 4; p.hi = 5; p.warm = -1; }
-        else if (p.pattern) { p.lo = 4; p.hi = 5; }
-        else if (/tuxedo|dinner jacket|dinner-jacket|\bdinner\b|shawl collar|evening jacket/.test(n) || (/velvet/.test(n) && /tuxedo|dinner|evening|shawl/.test(n))) {
+        /* .87.22 (David, 26 Nov 2026: "Formal looks can use all of the blazers"): knit, linen,
+           jersey and plaid sport blazers reach Formal too. A dinner jacket stays Black Tie. */
+        if (/tuxedo|dinner jacket|dinner-jacket|\bdinner\b|shawl collar|evening jacket/.test(n) || (/velvet/.test(n) && /tuxedo|dinner|evening|shawl/.test(n))) {
           p.lo = 6; p.hi = 7; p.kind = "dinner";
+        } else {
+          p.lo = 4; p.hi = 6;
+          if (/linen|seersucker/.test(n)) p.warm = -1;
         }
-        else { p.lo = 4; p.hi = 6; }
       }
       else if (cat === "Coats") { p.lo = 3; p.hi = 7; p.kind = "coat"; p.warm = 3; }
       else if (cat === "Vests") { p.lo = 3; p.hi = 5; p.kind = "vest"; }
@@ -10406,7 +10457,12 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       /* .86.72 (David: "Prefer the colors to either be monochromatic or lighter goes under darker"): white or cream
          under a white or cream layer is the one-colour look he asked for */
       var lightMono872 = /^(white|beige)$/.test(top.fam || "") && /^(white|beige)$/.test(layer.fam || "") && top.L >= layer.L - 8;
-      if (sameTone(layer, top, 10) && !lightMono872 && !(layer.kind === "blazer" && top.kind === "tee" && top.fam === bottom.fam && (top.fam === "navy" || top.fam === "black"))) return null;   /* .86.66: the one-colour look is meant */
+      /* .87.22: a navy or black shirt under a matching blazer is the tonal Formal look the tie
+         rule already allows ("all navy navy tie"). A light-blue dress shirt under a light-blue
+         blazer is the same idea in a paler register, and is the only Formal shirt that blazer has. */
+      var tonalShirt8722 = !!(typeof tonalTie860 === "function" && tonalTie860(top, layer));
+      var lightBlueMono8722 = !!(top && layer && top.kind === "shirt" && typeof shirtTakesTie860 === "function" && shirtTakesTie860(top) && top.fam === "blue" && layer.fam === "blue" && top.L >= layer.L - 8);
+      if (sameTone(layer, top, 10) && !lightMono872 && !tonalShirt8722 && !lightBlueMono8722 && !(layer.kind === "blazer" && top.kind === "tee" && top.fam === bottom.fam && (top.fam === "navy" || top.fam === "black"))) return null;   /* .86.66: the one-colour look is meant */
       if (layer.pattern && top.pattern) return null;
       /* .86.77 (David, 23 Nov 2026: "Yellow linen shirt is NOT to be worn under a blazer. Only linen I would consider
          under blazer is the blue and white striped Brunello one."): a linen shirt goes under a blazer only if it is that one */
@@ -10635,6 +10691,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
          dressier chinos. Seersucker, jeans, linen, drawstring and five-pocket trousers stay below Formal. */
       /* .86.60: Formal always wears a tie, so its shirt is one that takes a tie */
       if (!(shirtTakesTie860(top) || tonalTie860(top, layer))) return false;
+      /* .87.22: a suit jacket takes proper trousers, never chinos */
+      if (lk === "suit" && bottom.kind === "chinos") return false;
       if (bottom.kind === "chinos" && !/seersucker|drawstring|jogger|5-pocket|five-pocket|linen/.test(pieceName867(bottom))) return true;
       return isFormalTrousers867(bottom);
     }
@@ -10891,12 +10949,27 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     if (!shoeIds8713) { shoeIds8713 = this.shoeIds8713 = {}; for (var si8713 = 0; si8713 < NI; si8713++) if (prof[si8713].role === "shoes") shoeIds8713[prof[si8713].id] = 1; }
     var SHOE_WIN8713 = 8, CAP_WIN8713 = 20, CAP_N8713 = 3;
     var shoeCnt8713 = {}, shoeSeq8713 = [];
+    /* .87.22 (David, 26 Nov 2026: "why are all the blazers my red one? Formal looks can use all of the blazers"):
+       at Formal, no single blazer may take more than about 1/N of a rolling window. */
+    var BLZ_WIN8722 = 18, blzCnt8722 = {}, blzSeq8722 = [];
     for (var rs879 = Math.max(0, recentArr.length - CAP_WIN8713); rs879 < recentArr.length; rs879++) {
       var sid8713 = null;
       String(recentArr[rs879] || "").split("|").forEach(function (id) { if (shoeIds8713[id]) sid8713 = id; });
       shoeSeq8713.push(sid8713);
     }
     shoeSeq8713.forEach(function (id) { if (id) shoeCnt8713[id] = (shoeCnt8713[id] || 0) + 1; });
+    if (lv === 6) {
+      var blzIds8722 = {};
+      this.layerOpts.forEach(function (ly) { if (ly && (ly.kind === "blazer" || ly.kind === "suit")) blzIds8722[ly.id] = 1; });
+      var nBlz8722 = Object.keys(blzIds8722).length || 1;
+      var capBlz8722 = Math.max(1, Math.ceil(BLZ_WIN8722 / nBlz8722));
+      for (var rb8722 = Math.max(0, recentArr.length - BLZ_WIN8722); rb8722 < recentArr.length; rb8722++) {
+        var bid8722 = null;
+        String(recentArr[rb8722] || "").split("|").forEach(function (id) { if (blzIds8722[id]) bid8722 = id; });
+        blzSeq8722.push(bid8722);
+        if (bid8722) blzCnt8722[bid8722] = (blzCnt8722[bid8722] || 0) + 1;
+      }
+    }
     /* Per-combo base weight: styling score + piece/pair preferences
        + weather fit, computed once per deal. */
     var base = new Float64Array(pool.length);
@@ -11014,6 +11087,37 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
         }
         total = tot4;
       }
+      /* .87.22: Formal blazer share cap — about 1/N each, never the blazer just dealt when another fits */
+      if (lv === 6 && total > 0) {
+        var nBlzW = 0, blzSeenW = {};
+        for (var qb0 = 0; qb0 < pool.length; qb0++) {
+          if (pool[qb0].l && (pool[qb0].l.kind === "blazer" || pool[qb0].l.kind === "suit")) blzSeenW[pool[qb0].l.id] = 1;
+        }
+        nBlzW = Object.keys(blzSeenW).length || 1;
+        var capBlzW = Math.max(1, Math.ceil(BLZ_WIN8722 / nBlzW));
+        var lastBlzW = blzSeq8722.length ? blzSeq8722[blzSeq8722.length - 1] : null;
+        var cappedBlz = function (lid) { return !lid || (blzCnt8722[lid] || 0) >= capBlzW || lid === lastBlzW; };
+        var freeBlz = 0;
+        for (var qb1 = 0; qb1 < pool.length; qb1++) if (weights[qb1] && pool[qb1].l && !cappedBlz(pool[qb1].l.id)) freeBlz += weights[qb1];
+        if (freeBlz > 0) {
+          var totB = 0;
+          for (var qb2 = 0; qb2 < pool.length; qb2++) {
+            if (!weights[qb2]) continue;
+            if (cappedBlz(pool[qb2].l ? pool[qb2].l.id : null)) weights[qb2] = 0;
+            totB += weights[qb2];
+          }
+          total = totB;
+        } else {
+          var totB2 = 0;
+          for (var qb3 = 0; qb3 < pool.length; qb3++) {
+            if (!weights[qb3]) continue;
+            var scB = pool[qb3].l ? (blzCnt8722[pool[qb3].l.id] || 0) : 0;
+            weights[qb3] *= Math.pow(0.15, scB);
+            totB2 += weights[qb3];
+          }
+          total = totB2;
+        }
+      }
       if (total <= 0) {
         /* Everything recently seen: shrink the window to its newest
            third and deal the oldest again. */
@@ -11041,9 +11145,24 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       var ties851 = this.ties851 || (this.ties851 = this.accs.filter(function (a) { return a.kind === "ties"; }));
       if (ties851.length) accPool = accPool.filter(function (a) { return a.kind !== "ties"; });
       if (accPool.length && rng() < 0.35) acc = accPool[Math.floor(rng() * accPool.length)];
-      if (lv === 6 && ties851.length && pc.t.kind === "shirt" && !pc.t.shortSleeve && pc.l && (pc.l.kind === "blazer" || pc.l.kind === "suit")) acc = tieFor851(ties851, pc);
+      /* .87.22 (David, 26 Nov 2026: "all formal should have ties"): Formal is not dealt without a tie */
+      if (lv === 6) {
+        if (!(ties851.length && pc.t.kind === "shirt" && !pc.t.shortSleeve && pc.l && (pc.l.kind === "blazer" || pc.l.kind === "suit"))) { n--; continue; }
+        /* When a cream Formal picture already exists for this core, wear the
+           tie in that picture so Home/Looks show the redraw, not an older cut-out. */
+        acc = picturedTieForCore8722(pc, ties851, opts && opts.onlyKeys);
+        if (!acc) {
+          if (opts.strictKeys) { n--; continue; }
+          acc = tieFor851(ties851, pc);
+        }
+        if (!acc) { n--; continue; }
+      }
       var belt = beltFor(this.belts, pc, lv);
       picked.push({ _i: chosen, key: pc.key, ids: pc.ids.slice(), top: pc.t, bottom: pc.b, shoes: pc.s, layer: pc.l, acc: acc, belt: belt, score: pc.score, mask: pc.mask, tuck: pc.tuck, tucked: pc.tuck, tuckPrompt: pc.tuckPrompt });
+      if (lv === 6 && pc.l) {
+        blzSeq8722.push(pc.l.id); blzCnt8722[pc.l.id] = (blzCnt8722[pc.l.id] || 0) + 1;
+        if (blzSeq8722.length > BLZ_WIN8722) { var old8722 = blzSeq8722.shift(); if (old8722) blzCnt8722[old8722]--; }
+      }
     }
     return picked;
   };
@@ -11991,6 +12110,7 @@ function hiresIngest(j) {
     n++;
   });
   HIRES.ready = true;
+  try { if (typeof onbodyKeysCache855 !== "undefined") onbodyKeysCache855.sig = null; } catch (eHk) {}
   return n;
 }
 function hiresEntryForKey(key) { return (key && HIRES.map[key]) || null; }
@@ -12001,6 +12121,16 @@ function hiresForKey(key, kind) {
 }
 function hiresKeyOfLook(look) {
   if (!look) return null;
+  /* .87.22: Formal keys include the tie but never the belt. Match that key first so a
+     Formal look with a belt still finds its cream picture. */
+  var pcs = (look.fwPieces || look.pieces || look.swapPieces || []);
+  var ids = [], cats = [];
+  for (var i0 = 0; i0 < pcs.length; i0++) if (pcs[i0] && pcs[i0].id) { ids.push(pcs[i0].id); cats.push(String(pcs[i0].category || "").toLowerCase()); }
+  var core8722 = ids.filter(function (id, i) { return !/watch|belt|sunglass|bag|hat|scarf|accessor/.test(cats[i]); });
+  if (core8722.length) {
+    var k8722 = core8722.slice().sort().join("|");
+    if (HIRES.map[k8722]) return k8722;
+  }
   if (look.composerKey && HIRES.map[look.composerKey]) return look.composerKey;
   try {
     if (typeof onbodyForLook === "function") {
@@ -12015,11 +12145,8 @@ function hiresKeyOfLook(look) {
       }
     }
   } catch (e) {}
-  var parts = [];
-  var pcs = (look.fwPieces || look.pieces || look.swapPieces || []);
-  for (var i = 0; i < pcs.length; i++) if (pcs[i] && pcs[i].id) parts.push(pcs[i].id);
-  if (parts.length) {
-    var key = parts.slice().sort().join("|");
+  if (ids.length) {
+    var key = ids.slice().sort().join("|");
     if (HIRES.map[key]) return key;
   }
   return null;
@@ -12105,20 +12232,34 @@ var onbodyKeysCache855 = { sig: null, v: null };
 function onbodyKeys() {
   var n = 0, k0;
   for (k0 in ONBODY.map) n++;
+  var nh = 0, hk0;
+  if (typeof HIRES !== "undefined" && HIRES.map) for (hk0 in HIRES.map) nh++;
   var nm = 0;
   if (typeof wardrobeItems !== "undefined" && wardrobeItems) for (var wi = 0; wi < wardrobeItems.length; wi++) nm += (wardrobeItems[wi].name || "").length + (wardrobeItems[wi].category || "").length;
-  var sig = n + "/" + ((typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems.length : 0) + "/" + nm + "/" + ((window.WardrobeRules && typeof window.WardrobeRules.signature === "function") ? window.WardrobeRules.signature() : "");
+  var sig = n + "/" + nh + "/" + ((typeof wardrobeItems !== "undefined" && wardrobeItems) ? wardrobeItems.length : 0) + "/" + nm + "/" + ((window.WardrobeRules && typeof window.WardrobeRules.signature === "function") ? window.WardrobeRules.signature() : "");
   if (onbodyKeysCache855.sig === sig) return onbodyKeysCache855.v ? Object.assign({}, onbodyKeysCache855.v) : null;
   var out = null;
-  for (var k in ONBODY.map) {
-    if (onbodyFileBanned(ONBODY.map[k]) || (typeof onbodyKeyBanned866 === "function" && onbodyKeyBanned866(k))) continue;
+  function addKey8722(k, src) {
+    if (typeof onbodyKeyBanned866 === "function" && onbodyKeyBanned866(k)) return;
     if (!out) out = {};
-    out[k] = ONBODY.map[k];
+    if (!out[k]) out[k] = src;
     /* .86.59: a picture with a tie also marks its outfit (without the tie) as pictured, so the dealer builds it;
-       the picture itself is only shown for the look that carries that tie (onbodyForLook) */
+       the picture itself is only shown for the look that carries that tie (onbodyForLook / hiresForLook) */
     if (k.indexOf("|") !== -1 && typeof closetItemById === "function") {
       var parts859 = k.split("|"), core859 = parts859.filter(function (id) { var it = closetItemById(id); return !(it && /^ties?$/i.test(String(it.category || ""))); });
-      if (core859.length < parts859.length && !out[core859.join("|")]) out[core859.join("|")] = ONBODY.map[k];
+      if (core859.length < parts859.length && !out[core859.join("|")]) out[core859.join("|")] = src;
+    }
+  }
+  for (var k in ONBODY.map) {
+    if (onbodyFileBanned(ONBODY.map[k])) continue;
+    addKey8722(k, ONBODY.map[k]);
+  }
+  /* .87.22: cream Formal redraws (and every other hires look) must be dealable even when
+     they are not in the older onbody list */
+  if (typeof HIRES !== "undefined" && HIRES.map) {
+    for (var hk in HIRES.map) {
+      var ent = HIRES.map[hk];
+      addKey8722(hk, (ent && (ent.full || ent.card)) || ("hires:" + hk));
     }
   }
   onbodyKeysCache855 = { sig: sig, v: out };
@@ -12193,6 +12334,14 @@ function lookHeroVisible84(look) {
      cut-out, once cutoutFor is in). */
   if (!look) return false;
   try { if (typeof hiresForLook === "function" && hiresForLook(look, "full")) return true; } catch (eHi) {}
+  /* .87.22: Formal always carries a tie; never fall back to an older picture
+     drawn without one. */
+  var formal8722 = false;
+  try {
+    formal8722 = (look.composerLevel === 6 || look.dressLevel === 6 || (typeof dressLevel841 === "function" && dressLevel841() === 6));
+    if (!formal8722 && look.fwPieces) formal8722 = look.fwPieces.some(function (p) { return p && /^ties?$/i.test(String(p.category || "")); });
+  } catch (eF) {}
+  if (formal8722) return false;
   var ob = typeof onbodyForLook === "function" ? onbodyForLook(look) : null;
   if (!ob) return false;
   try { if (typeof window.cutoutFor === "function") return !!window.cutoutFor(ob); } catch (e) {}
@@ -12242,6 +12391,11 @@ function lookFitsDress841(look, level) {
   if (!top || !shoes) return false;
   if (typeof formalShoesOk866 === "function" && !formalShoesOk866(look, { level: level })) return false;
   if (!C.fitsLevel(level, top, bottom, shoes, layer)) return false;
+  /* .87.22 (David, 26 Nov 2026: "Formal looks should have TIES"): Formal is only a look that already has a tie */
+  if (level === 6) {
+    var hasTie8722 = (look.fwPieces || []).some(function (p) { return p && /^ties?$/i.test(String(p.category || "")); });
+    if (!hasTie8722) return false;
+  }
   if (level <= 2 && top.kind === "knit" && !top.shortSleeve) return false;
   return true;
 }
@@ -12445,6 +12599,7 @@ function composerOutfitToLook(o, i, renderPairs) {
     tuckPrompt: o.tuckPrompt || ""
   };
   if (typeof onbodyForLook === "function") look864.fwRender = onbodyForLook(look864) || null;
+  try { if (typeof hiresForLook === "function") { var hi864 = hiresForLook(look864, "full"); if (hi864) look864.fwRender = hi864; } } catch (eHi864) {}
   return look864;
 }
 /* Deal composed looks. opts: count, level (null = any outfit type;
@@ -12771,7 +12926,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-26.87.22";
+var WARDROBE_BUILD = "2026-11-26.87.23";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -43563,8 +43718,13 @@ function analyzeFilePiece(card, job, ix) {
       var k = titleKey829(l);
       if (k && seenT829[k]) { if (l.composerKey) dupSkip829.push(l.composerKey); return false; }
       /* .86.32: Mine shows only outfits rendered on him (David, 21 Nov:
-         "always on avatar"); unrendered combinations stay out of Mine */
-      if (mineHost && typeof onbodyForLook === "function" && !onbodyForLook(l)) { if (l.composerKey) dupSkip829.push(l.composerKey); return false; }
+         "always on avatar"); unrendered combinations stay out of Mine.
+         .87.22: a cream Formal redraw counts, even when it is not in the older onbody list. */
+      var formalOrTie8722 = (typeof dressLevel841 === "function" && dressLevel841() === 6) ||
+        (l.fwPieces || []).some(function (p) { return p && /^ties?$/i.test(String(p.category || "")); });
+      var pictured8722 = (typeof hiresForLook === "function" && hiresForLook(l, "card")) ||
+        (!formalOrTie8722 && typeof onbodyForLook === "function" && onbodyForLook(l));
+      if (mineHost && !pictured8722) { if (l.composerKey) dupSkip829.push(l.composerKey); return false; }
       seenT829[k] = 1; return true;
     });
     if (!looks.length) {
@@ -48155,6 +48315,13 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (typeof todayLook === "undefined" || !todayLook) return;
     var src = renderFor(todayLook);
     var hiresFull = (typeof hiresForLook === "function") ? hiresForLook(todayLook, "full") : null;
+    /* .87.22: Formal (and any look wearing a tie) must show the cream redraw with the tie visible,
+       never an older cut-out drawn without one. */
+    try {
+      var formalHero8722 = (typeof dressLevel841 === "function" && dressLevel841() === 6);
+      if (!formalHero8722 && todayLook && todayLook.fwPieces) formalHero8722 = todayLook.fwPieces.some(function (p) { return p && /^ties?$/i.test(String(p.category || "")); });
+      if (formalHero8722 && !hiresFull) src = null;
+    } catch (eFh) {}
     /* .78.9a: Home only deals a render that has its cut-out, unless .87.14 has a high-res studio redraw */
     if (src && typeof window.cutoutFor === "function" && !window.cutoutFor(src) && !hiresFull) src = null;
     /* .78.2c: a render he gave a thumbs-down never comes back */
@@ -48277,7 +48444,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   var shownOnce80 = false;
   function lqSync() {
     if (!lqEl) return;
-    var src = img.getAttribute("src") || "", ready = img.complete && img.naturalWidth > 0 && isCutSrc(src);
+    var src = img.getAttribute("src") || "", ready = img.complete && img.naturalWidth > 0 && (isCutSrc(src) || (typeof isHiresSrc === "function" && isHiresSrc(src)) || /onbody-hires\//.test(src));
     /* .80.1: the placeholder is for a cold first paint only — once a
        cut-out has shown, a Next crossfades cut-out to cut-out (the old one
        stays on screen until the new one is decoded), never via the blur */
