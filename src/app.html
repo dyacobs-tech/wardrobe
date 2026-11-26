@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-26.87.24" />
+    <meta name="wardrobe-build" content="2026-11-26.87.25" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -7042,6 +7042,37 @@ window.notMenswear853 = function (e) {
       .cx-more858 { display: flex; justify-content: center; margin: 14px 16px 0; }
       .cx-end858 { margin: 14px 16px 0; text-align: center; font-size: 13px; color: var(--dim); }
       .cx-sheet858 .cx-big858 { display: block; width: 100%; margin: 0 auto; aspect-ratio: 9 / 16; object-fit: contain; object-position: center top; background: #F6F2EA; }
+      /* .87.25 (David, 26 Nov 2026: the concept look sheet's card was #FFFBF4,
+         a shade lighter than the #F6F2EA photo, so a cream box showed around
+         the figure). Every sheet, overlay and modal that shows an on-body
+         picture uses exact #F6F2EA for the card, the picture well and the
+         photo — never --surface. */
+      #cx-sheet858 .cx-sheet858,
+      #cx-sheet858 .cx-sheet858 .cx-big858,
+      #cx-sheet858 .principles-head,
+      .cx-sheet858 .cx-big858 {
+        background: #F6F2EA !important;
+        background-color: #F6F2EA !important;
+      }
+      #rnd-sheet .rnd-sheet-card,
+      #rnd-sheet .rnd-stage,
+      #rnd-sheet .rnd-stage img,
+      #rnd-sheet .rnd-acts,
+      #rnd-sheet .rnd-confirm,
+      #rnd-sheet .principles-head {
+        background: #F6F2EA !important;
+        background-color: #F6F2EA !important;
+      }
+      #fw-layer .fw-outfit,
+      #fw-layer .fw-hero {
+        background: #F6F2EA !important;
+        background-color: #F6F2EA !important;
+      }
+      #look-layer .look-layer-body,
+      #fw-layer .fw-layer-body {
+        background: #F6F2EA !important;
+        background-color: #F6F2EA !important;
+      }
       .cx-list858 { list-style: none; margin: 12px 0; padding: 0; }
       .cx-list858 li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); font-size: 14px; }
       .cx-list858 li i { flex: 0 0 18px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); }
@@ -8981,7 +9012,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-26.87.24</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-26.87.25</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12946,7 +12977,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-26.87.24";
+var WARDROBE_BUILD = "2026-11-26.87.25";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }

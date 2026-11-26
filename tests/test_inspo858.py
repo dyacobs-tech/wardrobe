@@ -74,6 +74,18 @@ def run(browser):
     page.evaluate("() => document.querySelector('[data-cx858-open]').click()")
     sheet = page.evaluate("() => ({ open: !document.getElementById('cx-sheet858').hidden, pieces: document.querySelectorAll('#cx-sheet858 .cx-list858 li').length, title: document.getElementById('cx-title858').textContent })")
     assert sheet["open"] and sheet["pieces"] >= 3, sheet
+    cream = page.evaluate("""() => {
+      const card = document.querySelector('#cx-sheet858 .cx-sheet858');
+      const img = document.querySelector('#cx-sheet858 .cx-big858');
+      const head = document.querySelector('#cx-sheet858 .principles-head');
+      return {
+        card: card ? getComputedStyle(card).backgroundColor : null,
+        img: img ? getComputedStyle(img).backgroundColor : null,
+        head: head ? getComputedStyle(head).backgroundColor : null
+      };
+    }""")
+    cream_ok = "rgb(246, 242, 234)"
+    assert cream["card"] == cream_ok and cream["img"] == cream_ok and cream["head"] == cream_ok, ("concept sheet card, header and photo are not the same cream #F6F2EA", cream)
     page.evaluate("() => document.querySelector('[data-cx858-sheetlike]').click()")
     kept = page.evaluate("() => savedLooks.filter(l => l.concept).map(l => ({ t: l.title, v: l.verdict, img: l.img, n: l.swatches.length }))")
     assert len(kept) == 1 and kept[0]["v"] == "like" and kept[0]["t"] == sheet["title"] and (kept[0]["img"].startswith("assets/inspo-concepts-hires/") or kept[0]["img"].startswith("assets/inspo-concepts/")) and kept[0]["n"] >= 3, kept
