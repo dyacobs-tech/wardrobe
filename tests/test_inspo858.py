@@ -62,7 +62,7 @@ def run(browser):
       imgs: [...document.querySelectorAll('#ins-ideas858 .cx-card858 img')].map(i => i.getAttribute('src')), prices: /\\$\\d/.test(document.getElementById('ins-ideas858').textContent),
       feeds: !!document.querySelector('#outfits-inspo-view') && document.querySelector('#outfits-inspo-view').offsetParent !== null, tinted: document.querySelectorAll('#ins-ideas858 [class*="cx-g8"], #ins-ideas858 [style*="mask-image"]').length })""")
     assert first["levels"] == [5] and len(set(first["ids"])) == 6, first
-    assert all(s.startswith("assets/inspo-concepts/cx-") for s in first["imgs"]) and not first["prices"] and not first["feeds"] and first["tinted"] == 0, first
+    assert all(s.startswith("assets/inspo-concepts-hires/") or s.startswith("assets/inspo-concepts/cx-") for s in first["imgs"]) and not first["prices"] and not first["feeds"] and first["tinted"] == 0, first
     page.wait_for_function("() => [...document.querySelectorAll('#ins-ideas858 .cx-card858 img')].slice(0, 2).every(i => i.complete && i.naturalWidth > 100)", timeout=20000)
 
     # six more are six different ones
@@ -76,7 +76,7 @@ def run(browser):
     assert sheet["open"] and sheet["pieces"] >= 3, sheet
     page.evaluate("() => document.querySelector('[data-cx858-sheetlike]').click()")
     kept = page.evaluate("() => savedLooks.filter(l => l.concept).map(l => ({ t: l.title, v: l.verdict, img: l.img, n: l.swatches.length }))")
-    assert len(kept) == 1 and kept[0]["v"] == "like" and kept[0]["t"] == sheet["title"] and kept[0]["img"].startswith("assets/inspo-concepts/") and kept[0]["n"] >= 3, kept
+    assert len(kept) == 1 and kept[0]["v"] == "like" and kept[0]["t"] == sheet["title"] and (kept[0]["img"].startswith("assets/inspo-concepts-hires/") or kept[0]["img"].startswith("assets/inspo-concepts/")) and kept[0]["n"] >= 3, kept
     page.evaluate("() => document.querySelector('[data-cx858-find]').click()")
     shop = page.evaluate("() => ({ open: !document.getElementById('find-sheet').hidden, rows: document.querySelectorAll('#find-sheet-pieces [data-find-sheet-piece]').length, face: document.querySelectorAll('#find-sheet-pieces .find-sheet-photo').length })")
     assert shop["open"] and shop["rows"] >= 3 and shop["face"] == 0, shop

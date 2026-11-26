@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-26.87.21" />
+    <meta name="wardrobe-build" content="2026-11-26.87.22" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -7041,7 +7041,7 @@ window.notMenswear853 = function (e) {
       .cx-card858 .lk-sub841 { display: block; }
       .cx-more858 { display: flex; justify-content: center; margin: 14px 16px 0; }
       .cx-end858 { margin: 14px 16px 0; text-align: center; font-size: 13px; color: var(--dim); }
-      .cx-sheet858 .cx-big858 { display: block; width: 62%; margin: 4px auto 0; aspect-ratio: 362 / 1200; object-fit: contain; }
+      .cx-sheet858 .cx-big858 { display: block; width: 100%; margin: 0 auto; aspect-ratio: 9 / 16; object-fit: contain; object-position: center top; background: #F6F2EA; }
       .cx-list858 { list-style: none; margin: 12px 0; padding: 0; }
       .cx-list858 li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); font-size: 14px; }
       .cx-list858 li i { flex: 0 0 18px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); }
@@ -8981,7 +8981,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-26.87.21</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-26.87.22</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12771,7 +12771,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-26.87.21";
+var WARDROBE_BUILD = "2026-11-26.87.22";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -46667,12 +46667,21 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (c.source === "palette") return "From a palette you liked";
     return "Your style" + (iconName(c.icon) ? ", " + iconName(c.icon) + "'s colours" : "");
   }
-  function src(c) { return "assets/inspo-concepts/" + (c.img || c.id) + ".webp"; }   /* .86.67: c.img names a redrawn picture (a new file, so phones load it fresh) */
+  /* .87.22: cream hires for Inspo concepts. The 340×1200 binary cut-outs in
+     assets/inspo-concepts/ had blocky stair-step edges and leftover studio in
+     the arm gaps. The look sheet and cards must never use those masks once a
+     cream hires copy exists. */
+  var CONCEPT_HIRES = {"cx-001":1,"cx-002":1,"cx-003":1,"cx-004":1,"cx-005":1,"cx-006":1,"cx-007":1,"cx-008":1,"cx-009":1,"cx-010":1,"cx-011":1,"cx-012":1,"cx-013":1,"cx-014":1,"cx-016":1,"cx-017":1,"cx-018":1,"cx-019":1,"cx-020":1,"cx-021":1,"cx-022":1,"cx-024":1,"cx-025":1,"cx-026":1,"cx-030":1,"cx-031":1,"cx-034":1,"cx-035":1,"cx-037":1,"cx-038":1,"cx-039":1,"cx-040":1,"cx-041":1,"cx-042":1,"cx-043":1,"cx-044":1,"cx-045":1,"cx-046":1,"cx-048":1,"cx-049":1,"cx-050":1,"cx-051":1,"cx-052":1,"cx-053":1,"cx-054":1,"cx-055":1,"cx-056":1,"cx-057":1,"cx-058":1,"cx-059":1,"cx-061":1,"cx-062":1,};
+  function conceptHiresSrc(c, kind) {
+    if (!c || !c.id || !CONCEPT_HIRES[c.id]) return "";
+    return "assets/inspo-concepts-hires/" + (kind === "full" ? "full/" : "card/") + c.id + ".jpg";
+  }
+  function src(c) { return conceptHiresSrc(c, "card") || ("assets/inspo-concepts/" + (c.img || c.id) + ".webp"); }
   /* this level's concepts, in an order that changes each day; liked ones go to the back so new ideas lead */
   function pool() {
     var lv = level(), day = Math.floor(Date.now() / 86400000);
-    /* .86.83: two ideas whose drawings lost their shoes (cx-058 none, cx-010 the left one) stay out until redrawn */
-    var list = INSPO_CONCEPTS.filter(function (c) { return c.level === lv && c.id !== "cx-058" && c.id !== "cx-010"; });
+    /* .87.22: cx-010 and cx-058 were redrawn at 2k with both shoes visible, so they rejoin the ideas pool. */
+    var list = INSPO_CONCEPTS.filter(function (c) { return c.level === lv; });
     function h(id) { var x = 2166136261, k = id + ":" + day; for (var i = 0; i < k.length; i++) { x ^= k.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
     list.sort(function (a, b) { return (isLiked(a) ? 1 : 0) - (isLiked(b) ? 1 : 0) || h(a.id) - h(b.id); });
     return list;
@@ -46694,7 +46703,9 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   function unlike(c) { var l = savedFor(c); if (l && typeof unlikeLookById === "function") unlikeLookById(l.id); }
   window.conceptFigure858 = function (look) {
     if (!look || !look.concept || !look.concept.id) return "";
-    return '<img class="cx-fig858" src="assets/inspo-concepts/' + E(look.concept.img || look.concept.id) + '.webp" alt="' + E((look.title || "Outfit concept") + " on David") + '" loading="lazy" decoding="async" />';
+    var href = conceptHiresSrc(look.concept, "card");
+    if (!href) return "";
+    return '<img class="cx-fig858" src="' + E(href) + '" alt="' + E((look.title || "Outfit concept") + " on David") + '" loading="lazy" decoding="async" />';
   };
   function host() {
     var el = $("ins-ideas858"); if (el) return el;
@@ -46741,7 +46752,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   function openSheet(c) {
     var sh = sheet(); open = c;
     $("cx-title858").textContent = c.title;
-    $("cx-body858").innerHTML = '<p class="meta">' + E(fromLine(c)) + (c.caption && c.source === "icon" ? " · " + E(c.caption) : "") + " · " + E(levelName(c.level)) + '</p><img class="cx-big858" src="' + E(src(c)) + '" alt="' + E(c.title + " on David") + '" />' +
+    $("cx-body858").innerHTML = '<p class="meta">' + E(fromLine(c)) + (c.caption && c.source === "icon" ? " · " + E(c.caption) : "") + " · " + E(levelName(c.level)) + '</p>' + (conceptHiresSrc(c, "full") ? '<img class="cx-big858" src="' + E(conceptHiresSrc(c, "full")) + '" alt="' + E(c.title + " on David") + '" />' : '<p class="meta">A sharper picture of this idea is on its way.</p>') +
       '<ul class="cx-list858">' + c.pieces.map(function (p) { return '<li><i style="background:' + E(p.hex) + '"></i>' + E(p.name) + "</li>"; }).join("") + "</ul>" +
       '<div class="look-actions"><button type="button" class="btn-ink" data-cx858-sheetlike>' + (isLiked(c) ? "Liked" : "Like and keep") + '</button><button type="button" class="btn-ghost" data-cx858-find>Shop the look</button></div>';
     sh.hidden = false;
