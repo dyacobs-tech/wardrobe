@@ -34,7 +34,8 @@ with sync_playwright() as pw:
     assert "/onbody/" in raw, raw
     stem = raw.split("/")[-1]
     base = Path(stem).stem
-    hires = {Path(e["onbody"]).stem for e in json.loads((ROOT / "assets/onbody-hires/manifest.json").read_text())["r"]}
+    # .87.21: a go-to drawn on his avatar has no older library picture, so its entry names no "onbody" file
+    hires = {Path(e["onbody"]).stem for e in json.loads((ROOT / "assets/onbody-hires/manifest.json").read_text())["r"] if e.get("onbody")}
     got = page.evaluate("""raw => {
       openLookLayer({ id: 'look-test-8708', title: 'Test look', img: raw, source: 'built', swatches: [] });
       const im = document.querySelector('#look-layer-body .look-media img');

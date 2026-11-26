@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-26.87.20" />
+    <meta name="wardrobe-build" content="2026-11-26.87.21" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8981,7 +8981,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-26.87.20</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-26.87.21</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12771,7 +12771,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-26.87.20";
+var WARDROBE_BUILD = "2026-11-26.87.21";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -43314,7 +43314,14 @@ function analyzeFilePiece(card, job, ix) {
       /* .87.14: card grids prefer the cream hires JPEG; else the old picture */
       if (typeof hiresForLook === "function") {
         var hiCard = hiresForLook(look, "card");
-        if (hiCard) shown = hiCard;
+        if (hiCard) {
+          shown = hiCard;
+          /* .87.21 (David, 26 Nov 2026: "MY GO-tos should be shown on my avatar!!!!"): a go-to drawn on his
+             new avatar has a hires picture under its own key and no older library picture. That picture is
+             the figure, ahead of the picture saved with the log entry (his old avatar, or nothing at all
+             when the entry was logged from a mirror photo). */
+          if (!ob) ob = hiCard;
+        }
         else if (ob && typeof window.cutoutFor === "function") shown = window.cutoutFor(ob) || ob;
       } else if (ob && typeof window.cutoutFor === "function") shown = window.cutoutFor(ob) || ob;
     } catch (e) {}
@@ -47095,7 +47102,15 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
      anything: a worn outfit was either not in the deck or in a shape that could not be read, so every go-to
      already showed exactly the pieces he logged. It now does that directly and builds nothing. */
   function lookFor(key, items, title) {
-    return { id: "goto-" + key, title: title, fwPieces: items, composerKey: key };
+    /* .87.21: a go-to opens full screen like any other outfit. The full-screen view lists the outfit's
+       colours, and a go-to carried none, so the tap threw an error and nothing opened. */
+    var sw = [], seen = {};
+    (items || []).forEach(function (p) {
+      if (!p || !p.colourHex || seen[p.colourHex]) return;
+      seen[p.colourHex] = 1;
+      sw.push({ name: (typeof composerColour === "function" && composerColour(p)) || ((typeof nearestWada === "function") ? nearestWada(p.colourHex).name : "Colour"), hex: p.colourHex, role: (typeof composerNoun === "function" && composerNoun(p)) || p.category || "Piece" });
+    });
+    return { id: "goto-" + key, title: title, imgAlt: (items || []).map(function (p) { return p.name; }).join(", "), fwPieces: items, composerKey: key, swatches: sw, notes: [], source: "wardrobe" };
   }
   function dateLabel(iso) {
     try { var d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); } catch (e) { return iso; }
