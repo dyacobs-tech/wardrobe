@@ -5499,6 +5499,41 @@ window.notMenswear853 = function (e) {
         object-fit: contain !important; object-position: center bottom !important;
         background: transparent !important; cursor: pointer; transition: none; z-index: 1;
       }
+      /* .87.14: no mask fade on cream-flattened looks. The 6% linear-gradient
+         mask drew a lighter/yellowish hairline at the 6% stops (visible at the
+         top and bottom of the photo rectangle). Images are already flat #F6F2EA
+         to the edges; mask:none also beats the later --feather: 0% side mask,
+         which can leave a 1px transparent edge where stops coincide. */
+      #panel-today .today-hero.hero-solo:not(.has-cut) img#today-img,
+      #panel-today .today-hero.hero-solo:not(.has-cut) .hero-xfade,
+      .outfit-view .ov-figure:not(.has-cut) > img#ov-img {
+        -webkit-mask-image: none !important;
+        mask-image: none !important;
+        -webkit-mask: none !important;
+        mask: none !important;
+      }
+      /* .87.14: flat cream page behind hires looks — no upper glow or floor band,
+         which would read as a rectangle around the studio photo */
+      body[data-page="today"]:has(#today-hero.hero-solo:not(.has-cut)) {
+        background: #F6F2EA !important;
+        background-image: none !important;
+      }
+      body[data-page="today"]:has(#today-hero.hero-solo:not(.has-cut)) #today-hero.hero-solo .hero-bg {
+        background: none !important;
+        background-image: none !important;
+      }
+      #panel-today .today-hero.hero-solo:not(.has-cut) img.hero-lq {
+        display: none !important;
+        visibility: hidden !important;
+      }
+      .outfit-view .ov-figure:not(.has-cut) {
+        background: #F6F2EA !important;
+      }
+      .outfit-view .ov-figure:not(.has-cut) .hero-bg {
+        background: none !important;
+        background-image: none !important;
+      }
+
       #panel-today .today-hero.hero-solo .hero-xfade {
         position: absolute; left: 0; width: 100%; object-fit: contain; object-position: center bottom; pointer-events: none;
         opacity: 1; transition: opacity .18s linear; z-index: 2; background: transparent; will-change: opacity;
@@ -5690,6 +5725,40 @@ window.notMenswear853 = function (e) {
       .outfit-view .ov-figure, html[data-theme="dark"] .outfit-view .ov-figure { background: var(--ow-base, #F6F2EA) !important; }
       .outfit-view .ov-figure .hero-bg img { display: none !important; }
       .outfit-view .ov-figure .hero-bg { background: radial-gradient(ellipse 58% 40% at 50% 30%, var(--ow-glow, #FDFBF7), transparent), linear-gradient(to bottom, transparent 80%, var(--ow-floor, #E9E2D5) 96%, transparent 100%) !important; }
+      /* .87.14: re-assert flat cream after the .78.9c glow/floor gradients so
+         hires studio looks have no rectangle, hairline, or floor band. */
+      body[data-page="today"]:has(#today-hero.hero-solo:not(.has-cut)) {
+        background: #F6F2EA !important;
+        background-image: none !important;
+        background-attachment: scroll !important;
+      }
+      body[data-page="today"]:has(#today-hero.hero-solo:not(.has-cut)) #today-hero.hero-solo .hero-bg,
+      body[data-page="today"]:has(#today-hero.hero-solo:not(.has-cut)) #panel-today #today-hero.hero-solo .hero-bg {
+        background: none !important;
+        background-image: none !important;
+        background-color: transparent !important;
+      }
+      body[data-page="today"]:has(#today-hero.hero-solo:not(.has-cut)) #today-hero.hero-solo .hero-bg::after,
+      body[data-page="today"]:has(#today-hero.hero-solo:not(.has-cut)) #panel-today #today-hero.hero-solo .hero-bg::after {
+        display: none !important;
+        content: none !important;
+        background: none !important;
+      }
+      .outfit-view .ov-figure:not(.has-cut) {
+        background: #F6F2EA !important;
+      }
+      .outfit-view .ov-figure:not(.has-cut) .hero-bg {
+        background: none !important;
+        background-image: none !important;
+      }
+      #panel-today .today-hero.hero-solo:not(.has-cut) img#today-img,
+      #panel-today .today-hero.hero-solo:not(.has-cut) .hero-xfade,
+      .outfit-view .ov-figure:not(.has-cut) > img#ov-img {
+        -webkit-mask-image: none !important;
+        mask-image: none !important;
+        -webkit-mask: none !important;
+        mask: none !important;
+      }
       /* ================= Build .79.1 — Closet: search + filters + Add on one row =================
          A compact search pill (magnifier + "Search"), the three category
          filters and a round + for Add a piece, one row at 390 and 430.
