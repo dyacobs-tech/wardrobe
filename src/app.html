@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-26.87.25" />
+    <meta name="wardrobe-build" content="2026-11-26.87.26" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -9012,7 +9012,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-26.87.25</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-26.87.26</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12977,7 +12977,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-26.87.25";
+var WARDROBE_BUILD = "2026-11-26.87.26";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -49012,8 +49012,17 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       if (typeof isGraduatedLook === "function" && isGraduatedLook(l)) return false;
       if (typeof lookPhotoBanned === "function" && lookPhotoBanned(l)) return false;
       var r = window.renderFor782 ? window.renderFor782(l) : null;
-      return !!(r && window.cutoutFor && window.cutoutFor(r) && !(typeof isDislikedImg === "function" && isDislikedImg(r)));
+      return !!(r && shownFor8726(r) && !(typeof isDislikedImg === "function" && isDislikedImg(r)));
     } catch (e) { return false; }
+  }
+  /* .87.26: since .87.23 a redrawn look's picture is its high-res studio copy, which has no separate cut-out.
+     The look-ahead only counted a look as showable when its picture had a cut-out, so every redrawn look was
+     pushed behind the few old pictures, the queue was rebuilt on every Next, and a look from the last few
+     Nexts could come straight back. A high-res picture is showable as it is. */
+  function shownFor8726(r) {
+    if (!r) return "";
+    if (/onbody-hires\//.test(String(r))) return r;
+    return (window.cutoutFor && window.cutoutFor(r)) || "";
   }
   if (typeof homeComposerLooks75 === "function" && typeof dealHeroForSource === "function") {
     var _hcl = homeComposerLooks75, _dh = dealHeroForSource;
@@ -49055,7 +49064,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       ric2(function () {
         try {
           var look = typeof todayLook !== "undefined" ? todayLook : null, r4 = window.renderFor782, urls = [];
-          var cur = look && r4 ? r4(look) : null; if (cur && window.cutoutFor && window.cutoutFor(cur)) urls.push(window.cutoutFor(cur));
+          var cur = look && r4 ? r4(look) : null; if (cur && shownFor8726(cur)) urls.push(shownFor8726(cur));
           if (look && typeof _hcl === "function") {
             var keepQ = Q && Q.sig === qsig() && Q.list.filter(dealable).length >= 4;
             var list = keepQ ? Q.list : (_hcl(8) || []);
@@ -49075,7 +49084,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
             if (!keepQ) Q = { sig: qsig(), list: good.concat(rest) };
             var nx = good.filter(function (l) { return l.title !== look.title; });
             /* .80.3: the next three at high priority, ahead of any background download */
-            nx.slice(0, 5).forEach(function (l, i) { var u = r4(l); if (!u) return; var c = window.cutoutFor(u); if (c) urls.push(c); if (i < 3) warmOne(u, true); });
+            nx.slice(0, 5).forEach(function (l, i) { var u = r4(l); if (!u) return; var c = shownFor8726(u); if (c) urls.push(c); if (i < 3) warmOne(u, true); });
             if (window.lqRemember793) window.lqRemember793(urls.map(function (u) { var m = u.match(/onbody-cut\/([^\/?#]+?)\./); return m ? m[1] : ""; }));
           }
           var sw = navigator.serviceWorker && navigator.serviceWorker.controller;
