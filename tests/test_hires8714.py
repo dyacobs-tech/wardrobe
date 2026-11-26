@@ -49,8 +49,8 @@ def main() -> None:
         fail("hires manifest has no looks")
     app = APP.read_text()
     sw = SW.read_text()
-    if "2026-11-26.87.15" not in app or "2026-11-26.87.15" not in sw:
-        fail("build stamp is not 2026-11-26.87.15")
+    if "2026-11-26.87.16" not in app or "2026-11-26.87.16" not in sw:
+        fail("build stamp is not 2026-11-26.87.16")
     for needle in (
         "function hiresForLook",
         "function hiresForKey",
