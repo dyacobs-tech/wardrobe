@@ -38,7 +38,12 @@ with sync_playwright() as pw:
     got = page.evaluate("""raw => {
       openLookLayer({ id: 'look-test-8708', title: 'Test look', img: raw, source: 'built', swatches: [] });
       const im = document.querySelector('#look-layer-body .look-media img');
-      const out = { layer: im ? im.getAttribute('src') : null, pop: im ? im.getAttribute('data-popout') : null };
+      const card = document.querySelector('#look-layer-body .look-card');
+      const pane = im && im.closest('.pane');
+      const out = { layer: im ? im.getAttribute('src') : null, pop: im ? im.getAttribute('data-popout') : null,
+        layerBg: im ? getComputedStyle(im).backgroundColor : null,
+        paneBg: pane ? getComputedStyle(pane).backgroundColor : null,
+        cardBg: card ? getComputedStyle(card).backgroundColor : null };
       closeLookLayer();
       openPopout(raw, 'Test');
       const pe = document.getElementById('photo-popout');
@@ -48,14 +53,15 @@ with sync_playwright() as pw:
       out.thumb = cleanPic8708(raw, true);
       out.other = cleanPic8708('assets/photos/2f6757ee2dbc.jpg');
       return out; }""", raw)
+    assert got["light"] == "rgb(246, 242, 234)", ("the full-screen view is not cream #F6F2EA edge to edge", got)
     if base in hires:
         assert got["layer"] and got["layer"].endswith("onbody-hires/full/" + base + ".jpg"), ("the look page should show the high-res studio redraw", got)
         assert got["popout"].endswith("onbody-hires/full/" + base + ".jpg"), ("the full-screen view should show the high-res studio redraw", got)
         assert got["thumb"].endswith("onbody-hires/card/" + base + ".jpg"), ("Calendar should show the high-res card", got)
+        assert got.get("layerBg") == "rgb(246, 242, 234)" and got.get("cardBg") == "rgb(246, 242, 234)", ("the look page picture and the card around it must be the same cream", got)
     else:
         assert got["layer"] and got["layer"].endswith("onbody-cut-hq/" + stem), ("the look page shows the studio drawing", got)
         assert got["popout"].endswith("onbody-cut-hq/" + stem), ("the full-screen view shows the studio drawing", got)
-        assert got["light"] == "rgb(246, 242, 234)", ("the full-screen view is not on the light ground", got)
         assert got["thumb"].endswith("onbody-cut/" + stem), ("Calendar would show the studio drawing", got)
     assert got["other"] == "assets/photos/2f6757ee2dbc.jpg", got
     assert not errors, errors

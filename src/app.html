@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-25.87.14" />
+    <meta name="wardrobe-build" content="2026-11-26.87.15" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -3589,7 +3589,7 @@ window.notMenswear853 = function (e) {
       .look-media.single .pane img {
         object-fit: contain; object-position: center center;
         width: 100%; height: auto; max-height: 76dvh; aspect-ratio: auto;
-        background: var(--surface-alt);
+        background: #F6F2EA;
       }
       /* ---- One card system ---- */
       .saved-grid, .item-grid, .options-grid, .iconic-row { align-items: stretch; }
@@ -5781,6 +5781,28 @@ window.notMenswear853 = function (e) {
         background: #F6F2EA !important;
         background-color: #F6F2EA !important;
       }
+      /* .87.15 (David, 26 Nov 2026: the look page picture sat in a slightly different cream box
+         from the card around it): the card, the picture box and the photo are all exact #F6F2EA. */
+      #look-layer .look-card,
+      #look-layer .look-media,
+      #look-layer .look-media .pane,
+      #look-layer .look-media .pane img,
+      #look-layer .look-media.single .pane img {
+        background: #F6F2EA !important;
+        background-color: #F6F2EA !important;
+      }
+      /* .87.15: the full-screen outfit view is cream #F6F2EA edge to edge, with no dark or off-cream letterbox */
+      html:not([data-theme="dark"]) .outfit-view,
+      html:not([data-theme="dark"]) .outfit-view .ov-scroll,
+      html:not([data-theme="dark"]) .outfit-view .ov-figure,
+      html:not([data-theme="dark"]) .outfit-view .ov-figure.has-cut {
+        background: #F6F2EA !important;
+      }
+      html:not([data-theme="dark"]) .outfit-view .ov-figure .hero-bg,
+      html:not([data-theme="dark"]) .outfit-view .ov-figure.has-cut .hero-bg {
+        background: none !important;
+        background-image: none !important;
+      }
       /* ================= Build .79.1 — Closet: search + filters + Add on one row =================
          A compact search pill (magnifier + "Search"), the three category
          filters and a round + for Add a piece, one row at 390 and 430.
@@ -7027,13 +7049,17 @@ window.notMenswear853 = function (e) {
       .cx-sheet858 .look-actions > * { flex: 1 1 140px; min-height: 44px; }
       .ins-dress841 { padding: 0 16px 96px; }
       .dm-wrap841 { display: flex; gap: 10px; align-items: stretch; }
-      .dm-av841 { position: relative; flex: 0 0 40%; min-height: 360px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
-      .dm-av841 img { width: 100%; height: 100%; max-height: 440px; object-fit: contain; object-position: bottom center; display: block; }
+      .dm-av841 { position: relative; flex: 0 0 40%; aspect-ratio: 9 / 16; min-height: 0; align-self: flex-start; border-radius: 16px; background: #F6F2EA; border: 1px solid var(--border); overflow: hidden; display: flex; align-items: stretch; justify-content: center; }
+      .dm-av841 img { width: 100%; height: 100%; max-height: none; object-fit: contain; object-position: center top; display: block; background: #F6F2EA; }
       /* .87.06 (David, 24 Nov 2026: "Issue with all arm cut off sleeves wrong pls fix"): every picture is scaled up to
          15% so he stands the same height everywhere, and this frame clips at its edge, so a scaled-up picture had his
          arms cut off by a straight line here. The picture now takes 88% of the frame's width, which leaves room for
          the largest scale on both sides. */
       .dm-av841 img { width: 88%; }
+      /* .87.15 (David, 26 Nov 2026: Dress me placed the new picture low, with a blank band above his head):
+         the frame is the same 9:16 as Home, the cream photo fills it, and his head sits near the top.
+         Older cut-outs keep the 88% width so a 15% height scale cannot clip his arms. */
+      .dm-av841 img[src*="onbody-hires"] { width: 100%; height: 100%; object-fit: contain; object-position: center top; background: #F6F2EA; }
       .dm-off841 img { opacity: .45; filter: grayscale(.3); }
       .dm-note841 { position: absolute; left: 8px; right: 8px; top: 10px; text-align: center; font-size: 12px; font-weight: 600; color: var(--dim); }
       .dm-slots841 { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -8955,7 +8981,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">Donna</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-25.87.14</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-26.87.15</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12745,7 +12771,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-25.87.14";
+var WARDROBE_BUILD = "2026-11-26.87.15";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -39651,7 +39677,9 @@ window.addEventListener("resize", placePopoutClose);
 function openPopout(src, alt) {
   if (!src || !popoutEl) return;
   if (window.cleanPic8708) src = window.cleanPic8708(src);   /* .87.08: the clean cut-out on a light ground, not the studio drawing */
-  popoutEl.classList.toggle("popout-cut8708", /\/onbody-cut(-hq)?\//.test(src));
+  /* .87.15 (David, 26 Nov 2026: full-screen view had black bars above and below the cream picture):
+     cream-flattened hires copies use the same light ground as the cut-outs, never the dark letterbox. */
+  popoutEl.classList.toggle("popout-cut8708", /\/onbody-cut(-hq)?\//.test(src) || /onbody-hires\//.test(src));
   popoutImg.src = src;
   popoutImg.alt = alt || "";
   popoutEl.hidden = false;
@@ -50792,6 +50820,15 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var eager = i < 6;
     var cells = l.pieces.map(function (p) { return cellHTML(p, eager); });
     var fig845 = l.render || l.on845 || "";
+    /* .87.15 (David, 26 Nov 2026: The Edit > New + mine still showed the old avatar):
+       use the cream hires card when one exists for the same look or on-body file. */
+    if (fig845 && typeof cardPicForLook === "function") {
+      try {
+        var pcsEn = (l.pieces || []).map(function (p) { return p.it || p.e || p; }).filter(Boolean);
+        var hiFig = cardPicForLook({ composerKey: l.key, fwPieces: pcsEn, pieces: pcsEn }, fig845);
+        if (hiFig) fig845 = hiFig;
+      } catch (eHiEn) {}
+    }
     var media = fig845
       ? '<span class="flatlay onbody-split ob-n' + Math.min(4, cells.length) + '"><span class="ob-figure en-render"><img src="' + E(fig845) + '" alt="' + E(l.title + " on David") + '" loading="lazy" decoding="async" /></span><span class="ob-pieces">' + cells.slice(0, 4).join("") + "</span></span>"
       : '<span class="flatlay fl-n' + cells.length + ' en-flat">' + cells.join("") + "</span>";

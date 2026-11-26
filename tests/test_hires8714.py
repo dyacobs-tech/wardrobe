@@ -49,8 +49,8 @@ def main() -> None:
         fail("hires manifest has no looks")
     app = APP.read_text()
     sw = SW.read_text()
-    if "2026-11-25.87.14" not in app or "2026-11-25.87.14" not in sw:
-        fail("build stamp is not 2026-11-25.87.14")
+    if "2026-11-26.87.15" not in app or "2026-11-26.87.15" not in sw:
+        fail("build stamp is not 2026-11-26.87.15")
     for needle in (
         "function hiresForLook",
         "function hiresForKey",
@@ -59,6 +59,11 @@ def main() -> None:
         'hiresForLook(look, "card")',
         "function cardPicForLook",
         "card grids prefer the cream hires JPEG",
+        'img[src*="onbody-hires"]',
+        "onbody-hires\\//.test(src)",
+        "#look-layer .look-card",
+        ".dm-av841 img[src*=\"onbody-hires\"]",
+        "The Edit > New + mine still showed the old avatar",
     ):
         if needle not in app:
             fail(f"app is missing {needle!r}")
