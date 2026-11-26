@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-26.87.23" />
+    <meta name="wardrobe-build" content="2026-11-26.87.24" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -8981,7 +8981,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-26.87.23</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-26.87.24</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10952,6 +10952,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     /* .87.22 (David, 26 Nov 2026: "why are all the blazers my red one? Formal looks can use all of the blazers"):
        at Formal, no single blazer may take more than about 1/N of a rolling window. */
     var BLZ_WIN8722 = 18, blzCnt8722 = {}, blzSeq8722 = [];
+    var TIE_WIN8724 = 14, tieCnt8724 = {}, tieSeq8724 = [];
     for (var rs879 = Math.max(0, recentArr.length - CAP_WIN8713); rs879 < recentArr.length; rs879++) {
       var sid8713 = null;
       String(recentArr[rs879] || "").split("|").forEach(function (id) { if (shoeIds8713[id]) sid8713 = id; });
@@ -11156,12 +11157,31 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
           acc = tieFor851(ties851, pc);
         }
         if (!acc) { n--; continue; }
+        /* .87.24: spread ties the way blazers are spread, so Formal is not almost all navy */
+        var nTieKind8724 = ties851.length || 1;
+        var capTie8724 = Math.max(1, Math.ceil(TIE_WIN8724 / nTieKind8724));
+        var lastTie8724 = tieSeq8724.length ? tieSeq8724[tieSeq8724.length - 1] : null;
+        var overTie8724 = (tieCnt8724[acc.id] || 0) >= capTie8724 || acc.id === lastTie8724;
+        if (overTie8724) {
+          var hasFreshTie8724 = false;
+          for (var qt8724 = 0; qt8724 < pool.length; qt8724++) {
+            if (!excluded[qt8724] && qt8724 !== chosen) {
+              var altT8724 = picturedTieForCore8722(pool[qt8724], ties851, opts && opts.onlyKeys) || (!opts.strictKeys ? tieFor851(ties851, pool[qt8724]) : null);
+              if (altT8724 && altT8724.id !== lastTie8724 && (tieCnt8724[altT8724.id] || 0) < capTie8724) { hasFreshTie8724 = true; break; }
+            }
+          }
+          if (hasFreshTie8724) { n--; continue; }
+        }
       }
       var belt = beltFor(this.belts, pc, lv);
       picked.push({ _i: chosen, key: pc.key, ids: pc.ids.slice(), top: pc.t, bottom: pc.b, shoes: pc.s, layer: pc.l, acc: acc, belt: belt, score: pc.score, mask: pc.mask, tuck: pc.tuck, tucked: pc.tuck, tuckPrompt: pc.tuckPrompt });
       if (lv === 6 && pc.l) {
         blzSeq8722.push(pc.l.id); blzCnt8722[pc.l.id] = (blzCnt8722[pc.l.id] || 0) + 1;
         if (blzSeq8722.length > BLZ_WIN8722) { var old8722 = blzSeq8722.shift(); if (old8722) blzCnt8722[old8722]--; }
+      }
+      if (lv === 6 && acc) {
+        tieSeq8724.push(acc.id); tieCnt8724[acc.id] = (tieCnt8724[acc.id] || 0) + 1;
+        if (tieSeq8724.length > TIE_WIN8724) { var oldTie8724 = tieSeq8724.shift(); if (oldTie8724) tieCnt8724[oldTie8724]--; }
       }
     }
     return picked;
@@ -12926,7 +12946,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-26.87.23";
+var WARDROBE_BUILD = "2026-11-26.87.24";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -51341,12 +51361,18 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (btn) { btn.setAttribute("aria-pressed", "true"); btn.textContent = "Queued"; }
     if (typeof toast === "function") toast("Queued \u2014 tonight's renders put you in it.");
   }
-  /* Mine cards: Render on me on the flat-lay (no render yet) cards */
+  /* Mine cards: Render on me on the flat-lay (no render yet) cards.
+     .87.24: hide it whenever a cream hires or older on-body picture already exists,
+     at every dress level. */
   window.__cfEdit81 = function (idx) {
     return PV ? '<button type="button" class="pv-edit" data-pv-edit="' + idx + '" aria-label="Edit">Edit</button>' : "";
   };
   window.__cfExtra81 = function (look, idx) {
-    if (!look || (typeof onbodyForLook === "function" && onbodyForLook(look))) return "";
+    if (!look) return "";
+    var pictured8724 = false;
+    try { if (typeof hiresForLook === "function" && hiresForLook(look, "card")) pictured8724 = true; } catch (eHi) {}
+    try { if (!pictured8724 && typeof onbodyForLook === "function" && onbodyForLook(look)) pictured8724 = true; } catch (eOb) {}
+    if (pictured8724) return "";
     var q = S.rq.some(function (r) { return r.key === look.composerKey; });
     return '<button type="button" class="chip en-rme" data-cf-rme="' + idx + '" aria-pressed="' + (q ? "true" : "false") + '">' + (q ? "Queued" : (PV ? "Render me" : "Render on me")) + "</button>";
   };
