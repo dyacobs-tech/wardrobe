@@ -33,7 +33,9 @@ MEASURE = """() => { const q = s => document.querySelector(s);
 def run(browser):
     ctx = browser.new_context(viewport={"width": W, "height": H}, is_mobile=True, has_touch=True, service_workers="block")
     ctx.route("**/*", lambda route: route.continue_() if route.request.url.startswith(URL) and route.request.method == "GET" else route.abort())
-    ctx.add_init_script("localStorage.setItem('wardrobe.items'," + json.dumps(json.dumps(photographed_closet())) + ");localStorage.setItem('wardrobe.formality','6')")
+    ctx.add_init_script("localStorage.setItem('wardrobe.items'," + json.dumps(json.dumps(photographed_closet())) + ");localStorage.setItem('wardrobe.formality','5')")
+    # level 5 (Nighttime Dressy), not 6: since .87.23 Formal only shows outfits with a tie, and this sample
+    # closet has no ties, so Formal would show its empty card and there would be no picture to measure
     page = ctx.new_page()
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))

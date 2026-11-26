@@ -11,7 +11,7 @@ Headless WebKit, iPhone size, all *.workers.dev traffic aborted.
 3. Outfits > Mine: the "From your closet" feed shows on-body renders.
 4. A closet with no rendered outfits falls back to a flat-lay of real
    photos: no on-body image and no colour-swatch cells.
-5. The service worker caches renders cache-first in wardrobe-onbody-v7,
+5. The service worker caches renders cache-first in its on-body cache (the name is read from sw.js),
    kept across builds; the manifest is not in that cache.
 
 Usage: PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 python tests/test_onbody75.py [base_url]
@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 import random
 import struct
 import sys
@@ -122,9 +123,14 @@ def main():
             pass
         allowed = pg.evaluate("""rows => rows.filter(e => !onbodyFileBanned(e.f) &&
           !onbodyKeyBanned866(e.k)).map(e => [e.k, 'assets/onbody/' + e.f])""", man["r"])
-        mapped = pg.evaluate("Object.entries(onbodyKeys())")
-        check(dict(mapped) == dict(allowed) and len(allowed) >= 300,
-              "all %d eligible outfit photos are available" % len(allowed))
+        mapped = dict(pg.evaluate("Object.entries(onbodyKeys())"))
+        # .87.23 made every high-res redraw dealable too, so the app's list is the eligible library photos
+        # plus outfits that only have a high-res picture (assets/onbody-hires/...). Every eligible library
+        # photo must still be there under its own file, and nothing else may be added.
+        extra = [v for k, v in mapped.items() if k not in dict(allowed)]
+        check(all(mapped.get(k) == v for k, v in allowed) and len(allowed) >= 300
+              and all(str(v).startswith("assets/onbody-hires/") for v in extra),
+              "all %d eligible outfit photos are available (%d more have only a high-res picture)" % (len(allowed), len(extra)))
         home = pg.evaluate("""() => {
           const c = document.getElementById('today-collage');
           /* .78.2c: the Home hero is the render itself (#today-img), no collage */
@@ -152,16 +158,18 @@ def main():
         pg.wait_for_timeout(1500)
         pg.reload(wait_until="load")
         pg.wait_for_timeout(3000)
-        sw = pg.evaluate("""async () => {
+        # the cache name is read from sw.js, never written here, so a renamed cache does not fail this check
+        cache_name = re.search(r"const ONBODY_CACHE = NS \+ '([^']+)'", (ROOT / "sw.js").read_text()).group(1)
+        sw = pg.evaluate("""async name => {
           const ctl = !!navigator.serviceWorker.controller;
-          const has = await caches.has('wardrobe-onbody-v7');
+          const has = await caches.has(name);
           let webp = 0, man = 0;
-          if (has) { const k = await (await caches.open('wardrobe-onbody-v7')).keys();
+          if (has) { const k = await (await caches.open(name)).keys();
             webp = k.filter(r => /\/assets\/onbody(?:-cut)?\//.test(r.url) && r.url.endsWith('.webp')).length;
             man = k.filter(r => r.url.endsWith('manifest.json')).length; }
           return { ctl, has, webp, man };
-        }""")
-        check(sw["ctl"] and sw["has"] and sw["webp"] > 0, "SW caches renders in wardrobe-onbody-v7 (%d)" % sw["webp"])
+        }""", cache_name)
+        check(sw["ctl"] and sw["has"] and sw["webp"] > 0, "SW caches renders in %s (%d)" % (cache_name, sw["webp"]))
         check(sw["man"] == 0, "manifest is not cache-first")
         swsrc = (ROOT / "sw.js").read_text()
         check("ONBODY_CACHE" in swsrc and "keep = [SHELL_CACHE, PHOTO_CACHE, ASSET_CACHE, ONBODY_CACHE" in swsrc, "render cache survives activate")
