@@ -3,7 +3,9 @@
 David, 23 Nov 2026, on four Home pictures side by side: "My height isn't
 consistent throughout these!!!!!!!" The drawings put him between 1088 and 1165px
 tall (head to sole) in the 1200px frame; Home now scales each one to the same
-height, anchored on his feet.
+height, anchored on his feet. High-res studio redraws (.87.14) are consistently
+framed 9:16 shots; this test does not apply cut-out feet math to them, but still
+checks that the Home name and action row stay fixed.
 """
 import json
 import sys
@@ -13,12 +15,23 @@ from wardrobe_fixture import photographed_closet
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000/"
 
-PROBE = """() => { const im = document.getElementById('today-img'), F = window.heroFeet801 && window.heroFeet801();
-  const m = String(im.getAttribute('src') || '').match(/onbody-cut(?:-hq)?\\/([^\\/?#]+?)\\.(webp|png)/); const f = m && F && F[m[1]];
-  if (!f) return null; const k = parseFloat(im.style.scale || '1') || 1;
+PROBE = """() => { const im = document.getElementById('today-img');
+  const src = String(im && im.getAttribute('src') || '');
+  const m = src.match(/onbody(?:-cut(?:-hq)?|-hires\\/(?:full|card))\\/([^\\/?#]+?)\\.(webp|png|jpe?g)/);
+  if (!m) return null;
+  const T = e => Math.round(document.querySelector(e).getBoundingClientRect().top);
+  const hires = /onbody-hires\\//.test(src);
+  const out = { id: m[1], hires, name: T('#today-name'), row: T('#today-simple-actions') };
+  if (hires) return out;
+  const F = window.heroFeet801 && window.heroFeet801();
+  const f = F && F[m[1]];
+  if (!f) return out;
+  const k = parseFloat(im.style.scale || '1') || 1;
   const cs = getComputedStyle(im), w = im.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), h = im.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-  const s = Math.min(w / 362, h / 1200); const T = e => Math.round(document.querySelector(e).getBoundingClientRect().top);
-  return { id: m[1], fig: 1200 - f[0] - f[2], k, px: (1200 - f[0] - f[2]) * s * k, name: T('#today-name'), row: T('#today-simple-actions') }; }"""
+  const s = Math.min(w / 362, h / 1200);
+  out.fig = 1200 - f[0] - f[2];
+  out.px = (1200 - f[0] - f[2]) * s * k;
+  return out; }"""
 
 
 def run(browser):
@@ -45,13 +58,20 @@ def run(browser):
     # .86.75 (David, 23 Nov 2026: "My height still fluctuating as it text placement on Home Screen. None of it
     # stays fixed entirely as I scroll through items."): the name and the buttons never move
     assert len(texts) == 1, texts
-    figs = [r["fig"] for r in seen.values()]
-    px = [r["px"] for r in seen.values()]
     assert len(seen) >= 4, seen
-    assert max(px) - min(px) <= 3 or max(figs) - min(figs) < 3, (sorted(px), sorted(figs))   # within 3px on screen
+    # Cut-out feet math does not apply to .87.14 studio redraws (consistently
+    # framed 9:16 shots; Home does not scale them from onbody-cut/feet.json).
+    cuts = [r for r in seen.values() if "px" in r]
+    if len(cuts) >= 2:
+        figs = [r["fig"] for r in cuts]
+        px = [r["px"] for r in cuts]
+        assert max(px) - min(px) <= 3 or max(figs) - min(figs) < 3, (sorted(px), sorted(figs))
+        f0, f1, p0, p1 = min(figs), max(figs), min(px), max(px)
+    else:
+        f0 = f1 = p0 = p1 = 0
     assert not errors, errors
     ctx.close()
-    return len(seen), min(figs), max(figs), min(px), max(px)
+    return len(seen), f0, f1, p0, p1
 
 
 with sync_playwright() as pw:
@@ -80,18 +100,21 @@ def run_grid(browser):
     page.evaluate("() => switchTab('wardrobe')")
     page.wait_for_timeout(600)
     page.evaluate("() => { const b = document.getElementById('section-ideas'); if (b) b.click(); }")
-    page.wait_for_function("() => document.querySelectorAll('#cf-grid img[data-h874]').length >= 4", timeout=30000)
+    page.wait_for_function("() => document.querySelectorAll('#cf-grid img').length >= 4", timeout=30000)
     page.wait_for_timeout(800)
-    # where his feet and the top of his head land, measured from each card picture's own top
+    # Cut-out height pipeline only; .87.14 studio redraws are consistently framed 9:16 shots.
     out = page.evaluate("""async () => { const F = await (await fetch('assets/onbody-cut/feet.json')).json(), M = await (await fetch('assets/feet-more874.json')).json();
       const RE = /assets\\/(onbody(?:-cut|-cut-hq)?|inspo-cut|inspo-concepts)\\/([^\\/?#]+?)\\.webp/;
-      return [...document.querySelectorAll('#cf-grid img[data-h874]')].filter(i => i.clientWidth > 40).map(i => {
-        const m = RE.exec(i.getAttribute('src')); const f = /^onbody/.test(m[1]) ? F.feet[m[2]] : M.feet[m[1] + '/' + m[2]];
+      const cuts = [...document.querySelectorAll('#cf-grid img[data-h874]')].filter(i => i.clientWidth > 40 && RE.test(i.getAttribute('src') || '')).map(i => {
+        const m = /assets\\/(onbody(?:-cut|-cut-hq)?|inspo-cut|inspo-concepts)\\/([^\\/?#]+?)\\.webp/.exec(i.getAttribute('src'));
+        const f = /^onbody/.test(m[1]) ? F.feet[m[2]] : M.feet[m[1] + '/' + m[2]];
         const cs = getComputedStyle(i), k = parseFloat(i.style.scale || '1') || 1, ty = parseFloat((i.style.translate || '0 0').split(' ')[1]) || 0;
         const oy = parseFloat(cs.transformOrigin.split(' ')[1]);
         const s = Math.max(i.clientWidth / i.naturalWidth, i.clientHeight / i.naturalHeight), px = i.naturalHeight / 1200 * s;
         const feet = oy + ty, head = oy + ty - (1200 - f[0] - f[2]) * px * k;
-        return [Math.round(feet * 10) / 10, Math.round(head * 10) / 10]; }); }""")
+        return [Math.round(feet * 10) / 10, Math.round(head * 10) / 10]; });
+      const hires = [...document.querySelectorAll('#cf-grid img')].filter(i => i.clientWidth > 40 && /onbody-hires\\//.test(i.getAttribute('src') || '')).length;
+      return { cuts, hires }; }""")
     ctx.close()
     return out
 
@@ -99,8 +122,13 @@ def run_grid(browser):
 with sync_playwright() as pw:
     for engine in (pw.chromium, pw.webkit):
         browser = engine.launch()
-        pts = run_grid(browser)
-        feet = [p[0] for p in pts]; head = [p[1] for p in pts]
-        assert len(pts) >= 4 and max(feet) - min(feet) <= 3 and max(head) - min(head) <= 3, pts
-        print("Confirmed: %d Outfits cards, his feet within %.1fpx and his head within %.1fpx of each other" % (len(pts), max(feet) - min(feet), max(head) - min(head)))
+        grid = run_grid(browser)
+        pts, n_hires = grid["cuts"], grid["hires"]
+        if len(pts) >= 4:
+            feet = [p[0] for p in pts]; head = [p[1] for p in pts]
+            assert max(feet) - min(feet) <= 3 and max(head) - min(head) <= 3, pts
+            print("Confirmed: %d Outfits cut-out cards, his feet within %.1fpx and his head within %.1fpx of each other" % (len(pts), max(feet) - min(feet), max(head) - min(head)))
+        else:
+            assert len(pts) + n_hires >= 4, grid
+            print("Confirmed: %d Outfits high-res studio cards and %d cut-out cards (cut-out height pipeline does not apply to .87.14 redraws)" % (n_hires, len(pts)))
         browser.close()

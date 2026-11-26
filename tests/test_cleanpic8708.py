@@ -1,20 +1,24 @@
-"""The look page, the full-screen view and Calendar show his clean cut-out, not the studio drawing (.87.08).
+"""Look page, full-screen view and Calendar use the high-res studio redraw
+when one exists (.87.14), otherwise the clean cut-out (.87.08).
 
-David, 24 Nov 2026, with a screenshot of a look page showing his picture inside its grey studio box: "wtf is this
-quality looks like shit!!!!". Home, Looks and the outfit view show the cut-out of each picture on the app's own
-background; the look page, the full-screen view and the Calendar week still showed the raw drawing with its grey
-studio backdrop. They now show the cut-out too (the sharp copy where the picture is big, the small copy in Calendar).
-Checks: a look whose picture is one of his drawings opens on the look page with the sharp cut-out; the full-screen
-view opened with the raw drawing shows the sharp cut-out on the light ground; Calendar thumbnails ask for the small
-cut-out; a picture that is not one of his drawings is left as it is.
+David, 24 Nov 2026, with a screenshot of a look page showing an old drawing
+inside its grey studio box: "wtf is this quality looks like shit!!!!". The
+look page, full-screen view and Calendar were switched to the cut-out. The
+.87.14 high-res studio redraws (assets/onbody-hires) are the approved
+picture for those surfaces when a look has one; looks not yet redrawn still
+use the sharp cut-out on the light ground. A picture that is not one of his
+drawings is left as it is.
 """
 import json
 import sys
+from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 from wardrobe_fixture import photographed_closet
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000/"
+ROOT = Path(__file__).resolve().parent.parent
+
 
 with sync_playwright() as pw:
     browser = pw.chromium.launch()
@@ -29,6 +33,8 @@ with sync_playwright() as pw:
     raw = page.evaluate("() => { const k = Object.keys(ONBODY.map)[0]; return ONBODY.map[k]; }")
     assert "/onbody/" in raw, raw
     stem = raw.split("/")[-1]
+    base = Path(stem).stem
+    hires = {Path(e["onbody"]).stem for e in json.loads((ROOT / "assets/onbody-hires/manifest.json").read_text())["r"]}
     got = page.evaluate("""raw => {
       openLookLayer({ id: 'look-test-8708', title: 'Test look', img: raw, source: 'built', swatches: [] });
       const im = document.querySelector('#look-layer-body .look-media img');
@@ -42,11 +48,19 @@ with sync_playwright() as pw:
       out.thumb = cleanPic8708(raw, true);
       out.other = cleanPic8708('assets/photos/2f6757ee2dbc.jpg');
       return out; }""", raw)
-    assert got["layer"] and got["layer"].endswith("onbody-cut-hq/" + stem), ("the look page shows the studio drawing", got)
-    assert got["popout"].endswith("onbody-cut-hq/" + stem), ("the full-screen view shows the studio drawing", got)
-    assert got["light"] == "rgb(246, 242, 234)", ("the full-screen view is not on the light ground", got)
-    assert got["thumb"].endswith("onbody-cut/" + stem), ("Calendar would show the studio drawing", got)
+    if base in hires:
+        assert got["layer"] and got["layer"].endswith("onbody-hires/full/" + base + ".jpg"), ("the look page should show the high-res studio redraw", got)
+        assert got["popout"].endswith("onbody-hires/full/" + base + ".jpg"), ("the full-screen view should show the high-res studio redraw", got)
+        assert got["thumb"].endswith("onbody-hires/card/" + base + ".jpg"), ("Calendar should show the high-res card", got)
+    else:
+        assert got["layer"] and got["layer"].endswith("onbody-cut-hq/" + stem), ("the look page shows the studio drawing", got)
+        assert got["popout"].endswith("onbody-cut-hq/" + stem), ("the full-screen view shows the studio drawing", got)
+        assert got["light"] == "rgb(246, 242, 234)", ("the full-screen view is not on the light ground", got)
+        assert got["thumb"].endswith("onbody-cut/" + stem), ("Calendar would show the studio drawing", got)
     assert got["other"] == "assets/photos/2f6757ee2dbc.jpg", got
     assert not errors, errors
     browser.close()
-print("Confirmed the look page, the full-screen view and Calendar show the cut-out of %s, not the studio drawing" % stem)
+if base in hires:
+    print("Confirmed the look page, the full-screen view and Calendar show the high-res studio redraw of %s" % stem)
+else:
+    print("Confirmed the look page, the full-screen view and Calendar show the cut-out of %s, not the studio drawing" % stem)
