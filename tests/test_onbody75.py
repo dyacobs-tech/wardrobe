@@ -134,7 +134,7 @@ def main():
         home = pg.evaluate("""() => {
           const c = document.getElementById('today-collage');
           /* .78.2c: the Home hero is the render itself (#today-img), no collage */
-          const im0 = document.getElementById('today-img'); const im = im0 && !im0.hidden && /\/onbody\//.test(im0.getAttribute('data-render') || im0.getAttribute('src') || '') ? im0 : null;
+          const im0 = document.getElementById('today-img'); const im = im0 && !im0.hidden && /\/onbody(-hires)?\//.test(im0.getAttribute('data-render') || im0.getAttribute('src') || '') ? im0 : null;
           const ids = (todayLook && todayLook.fwPieces || []).map(p => p.id);
           /* .84: built-in library pieces (his tees, polos) are his clothes; what
              must not appear is a piece that is not in his closet at all */
@@ -143,7 +143,9 @@ def main():
                    key: todayLook && todayLook.composerKey, ids, seed: notMine,
                    sw: c ? c.querySelectorAll('.fl-swatch').length : -1 };
         }""")
-        check(bool(home["src"]) and home["src"].startswith("assets/onbody/"), "Home OOTD shows an on-body render (%s)" % home["src"])
+        # .87.23: a redrawn outfit's picture is its high-res studio copy (assets/onbody-hires/...), so Home may
+        # show either that or an older library picture, depending on which outfit is dealt
+        check(bool(home["src"]) and home["src"].startswith(("assets/onbody/", "assets/onbody-hires/")), "Home OOTD shows an on-body render (%s)" % home["src"])
         check(home["ok"], "the Home render loads")
         check(home["seed"] == 0 and len(home["ids"]) >= 3, "Home OOTD uses only pieces in his closet (%d pieces, %d not in it: %s)" % (len(home["ids"]), home["seed"], home["key"]))
         check(home["sw"] == 0, "no swatch cells on Home")
@@ -165,7 +167,7 @@ def main():
           const has = await caches.has(name);
           let webp = 0, man = 0;
           if (has) { const k = await (await caches.open(name)).keys();
-            webp = k.filter(r => /\/assets\/onbody(?:-cut)?\//.test(r.url) && r.url.endsWith('.webp')).length;
+            webp = k.filter(r => (/\/assets\/onbody(?:-cut)?\//.test(r.url) && r.url.endsWith('.webp')) || /\/assets\/onbody-hires\/.+\.jpe?g$/.test(r.url)).length;
             man = k.filter(r => r.url.endsWith('manifest.json')).length; }
           return { ctl, has, webp, man };
         }""", cache_name)

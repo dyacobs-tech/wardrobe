@@ -261,7 +261,7 @@ def main() -> int:
             after = page.evaluate("({ key: todayLook.composerKey, dis: localStorage.getItem('wardrobe.dislikedImgs'), banned: Object.keys((JSON.parse(localStorage.getItem('wardrobe.composerPrefs') || '{}').banned) || {}) })")
             check("hero Dislike deals a new combo", after["key"] and after["key"] != home["key"])
             added = [x for x in json.loads(after["dis"] or "[]") if x not in json.loads(dis_before or "[]")]
-            check("hero Dislike bans the combo (and only his on-body render), not a piece photo", home["key"] in after["banned"] and all("/onbody/" in x for x in added), (added, home["key"], after))
+            check("hero Dislike bans the combo (and only his on-body render), not a piece photo", home["key"] in after["banned"] and all("/onbody/" in x or "/onbody-hires/" in x for x in added), (added, home["key"], after))   # .87.23: a redrawn outfit's picture is its high-res copy
 
             page.locator("#section-ideas").click(); page.wait_for_timeout(250)
             page.wait_for_function("() => __cfLooks81().length >= 8")   # .86.72: fewer layered looks after the lighter-under-darker rule
