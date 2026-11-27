@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-27.87.28" />
+    <meta name="wardrobe-build" content="2026-11-27.87.29" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -9020,7 +9020,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-27.87.28</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-27.87.29</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12521,7 +12521,23 @@ function homeComposerLooks75(count) {
     /* shorts are occasional in warm Palm Beach — below unlayered trousers looks */
     return (shorts ? 0 : 8) + (layered ? 0 : 10) + warmTopRank84(look);
   }
-  if (temp >= 72) vis = vis.slice().sort(function (a, b) { return warmHeroRank84(b) - warmHeroRank84(a); });
+  /* .87.29: at 72°F and above, weather is only a light boost. It must
+     not replace the icon ranking. A short-sleeve unlayered look can
+     rise when icon scores are close; a clearly better icon match stays
+     ahead (the boost is at most 0.25 on the icon-score scale). */
+  if (temp >= 72 && vis.length > 1) {
+    var wMin = Infinity, wMax = -Infinity;
+    vis.forEach(function (l) { var ww = warmHeroRank84(l); if (ww < wMin) wMin = ww; if (ww > wMax) wMax = ww; });
+    var wSpan = wMax - wMin;
+    vis = vis.slice().sort(function (a, b) {
+      var wa = wSpan ? (warmHeroRank84(a) - wMin) / wSpan : 0;
+      var wb = wSpan ? (warmHeroRank84(b) - wMin) / wSpan : 0;
+      var sa = (+a._iconW || 0) + 0.25 * wa;
+      var sb = (+b._iconW || 0) + 0.25 * wb;
+      if (sb !== sa) return sb - sa;
+      return warmHeroRank84(b) - warmHeroRank84(a);
+    });
+  }
   /* .86.10: if Formal or Black Tie has no true looks, show the empty
      state rather than a sport blazer and chinos from a nearby level. */
   return vis.slice(0, want);
@@ -12698,15 +12714,20 @@ function composerLooks(opts) {
     strictKeys: !!opts.strictKeys
   };
   var want = opts.count || 6;
+  /* .87.29: when icon weights are on, deal a wide pool first so the
+     weights choose among many valid looks, not only re-sort a short
+     first deal. */
+  var iconDeal = !opts.noIconWeights && window.iconWeights81 && typeof window.iconWeights81.scoreLook === "function";
+  var dealN = iconDeal ? Math.max(want * 20, 48) : want;
   var outs = [];
   /* Build .75: outfits David has been rendered wearing come first. */
   if (opts.renderedFirst && typeof onbodyKeys === "function") {
     var keys = opts.renderKeys || onbodyKeys();
-    if (keys) outs = deck.deal(want, Object.assign({}, dealOpts, { onlyKeys: keys })) || [];
+    if (keys) outs = deck.deal(dealN, Object.assign({}, dealOpts, { onlyKeys: keys })) || [];
   }
-  if (outs.length < want) {
+  if (outs.length < dealN) {
     var have = outs.map(function (o) { return o.key; });
-    var more = deck.deal(want - outs.length, Object.assign({}, dealOpts, { recent: recent.concat(have) })) || [];
+    var more = deck.deal(dealN - outs.length, Object.assign({}, dealOpts, { recent: recent.concat(have) })) || [];
     more.forEach(function (o) { if (have.indexOf(o.key) === -1) outs.push(o); });
   }
   var looks = outs.map(function (o, i) { return composerOutfitToLook(o, i, null); });
@@ -12722,26 +12743,28 @@ function composerLooks(opts) {
      so a small first deal could come back empty although the closet has
      plenty that pass. Keep dealing past what was rejected until enough
      pass or the deck has nothing new. */
-  if ((rulesOn || typeof opts.filter === "function") && looks.length < want) {
+  if ((rulesOn || typeof opts.filter === "function" || iconDeal) && looks.length < (iconDeal ? dealN : want)) {
     var seen861 = {};
     outs.forEach(function (o) { seen861[o.key] = 1; });
     looks.forEach(function (l) { if (l.composerKey) seen861[l.composerKey] = 1; });
-    for (var round = 0; round < 8 && looks.length < want; round++) {
+    var need861 = iconDeal ? dealN : want;
+    for (var round = 0; round < 8 && looks.length < need861; round++) {
       var ex = Object.keys(seen861);
-      var batch = deck.deal(Math.max(24, want * 3), Object.assign({}, dealOpts, { recent: recent.concat(ex), strictKeys: true })) || [];
+      var batch = deck.deal(Math.max(24, need861), Object.assign({}, dealOpts, { recent: recent.concat(ex), strictKeys: true })) || [];
       var fresh = batch.filter(function (o) { return o && !seen861[o.key]; });
       if (!fresh.length) break;
       fresh.forEach(function (o) { seen861[o.key] = 1; });
-      fresh.map(function (o, i) { return composerOutfitToLook(o, outs.length + i, null); }).filter(keep861).forEach(function (l) { if (looks.length < want) looks.push(l); });
+      fresh.map(function (o, i) { return composerOutfitToLook(o, outs.length + i, null); }).filter(keep861).forEach(function (l) { if (looks.length < need861) looks.push(l); });
     }
   }
-  /* .86.7: blend per-level icon weights into Home / composer ranking.
-     A weighting never revives a look that rules or the dress-shoe rule rejected. */
-  if (!opts.noIconWeights && window.iconWeights81 && typeof window.iconWeights81.scoreLook === "function") {
+  /* .86.7 / .87.29: blend per-level icon weights into Home / composer
+     ranking, over the wide dealt pool. A weighting never revives a look
+     that rules or the dress-shoe rule rejected. */
+  if (iconDeal) {
     looks.forEach(function (l) { l._iconW = window.iconWeights81.scoreLook(l, level); });
     looks.sort(function (a, b) { return (b._iconW || 0) - (a._iconW || 0); });
   }
-  return looks;
+  return looks.slice(0, want);
 }
 
     </script>
@@ -12996,7 +13019,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-27.87.28";
+var WARDROBE_BUILD = "2026-11-27.87.29";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -21417,7 +21440,11 @@ function dealerLook(opts) {
   clone.desc = "A surprise pick from the book";
   clone.version = opts.version || 1;
   if (opts.iconId) clone.iconId = opts.iconId;
-  else if (!clone.iconId) { var pool = allIcons(); clone.iconId = pool[Math.floor(Math.random() * pool.length)].id; }
+  else if (!clone.iconId) {
+    var pickedIc = (typeof pickWeightedIconForLevel === "function") ? pickWeightedIconForLevel(typeof formalityLevel !== "undefined" ? formalityLevel : 4) : null;
+    var pool = allIcons();
+    clone.iconId = (pickedIc && pickedIc.id) || (pool.length ? pool[Math.floor(Math.random() * pool.length)].id : null);
+  }
   if (opts.blendId) clone.blendId = opts.blendId;
   var ic = iconById(clone.iconId);
   if (ic && !clone.notes.length) clone.notes = [ic.rules[0], ic.rules[1]];
@@ -21559,6 +21586,21 @@ function freshComboTitle(icon, plate, usedTitles) {
    formality × anchor variants of the space, whose full
    combination keys have never been dealt, under a serial title
    from the ladder above. The supply does not run out. */
+function pickWeightedIconForLevel(level, w) {
+  if (window.iconWeights81 && typeof window.iconWeights81.pickIcon === "function") {
+    var ic = window.iconWeights81.pickIcon(level, w);
+    if (ic) return ic;
+  }
+  var pool = typeof allIcons === "function" ? allIcons() : [];
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+}
+function weightedIconOrderForLevel(level, w) {
+  if (window.iconWeights81 && typeof window.iconWeights81.weightedOrder === "function") {
+    var ord = window.iconWeights81.weightedOrder(level, w);
+    if (ord && ord.length) return ord;
+  }
+  return shuffleArr((typeof allIcons === "function" ? allIcons() : []).slice());
+}
 function generateComboLook(opts) {
   opts = opts || {};
   var icons = allIcons();
@@ -21576,11 +21618,14 @@ function generateComboLook(opts) {
     return n.length > 1 ? n[0] + " & " + n[1] : (n[0] || "");
   }
   function plateFree(ic, p) { return !dealtIP[ic.id + "|" + p.plate] && !exclPlates[p.plate]; }
-  /* Icon order: the requested icon first, then the rest shuffled,
-     so generation spreads across all nine directions instead of
-     draining one icon's plates first. */
-  var iconOrder = shuffleArr(icons.slice());
+  /* Icon order: the requested icon first, otherwise icons in
+     weighted order (.87.29) so generation follows his sliders
+     instead of a uniform shuffle. */
   var reqIcon = opts.iconId ? iconById(opts.iconId) : null;
+  var iconOrder = (typeof weightedIconOrderForLevel === "function")
+    ? weightedIconOrderForLevel(typeof formalityLevel !== "undefined" ? formalityLevel : 4)
+    : shuffleArr(icons.slice());
+  if (!iconOrder || !iconOrder.length) iconOrder = shuffleArr(icons.slice());
   if (reqIcon) {
     iconOrder = iconOrder.filter(function (ic) { return ic.id !== reqIcon.id; });
     iconOrder.unshift(reqIcon);
@@ -50214,19 +50259,67 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     Object.keys(m || {}).forEach(function (k) { o[k] = clampW((+m[k] || 0) * factor); });
     return o;
   }
+  function mapSum(m) {
+    var t = 0;
+    Object.keys(m || {}).forEach(function (k) { t += Math.max(0, +m[k] || 0); });
+    return t;
+  }
+  function needsV1Scale(raw) {
+    if (!raw || typeof raw !== "object") return false;
+    var mx = mapMax(raw.all), maxSum = mapSum(raw.all);
+    GROUP_ORDER.forEach(function (g) {
+      var m = raw.byLevel && raw.byLevel[g];
+      var n = mapMax(m); if (n > mx) mx = n;
+      var sm = mapSum(m); if (sm > maxSum) maxSum = sm;
+    });
+    if (mx > 10) return false;
+    /* v1 was 0–10. A later stamp of v:2 / scale:100 without scaling
+       left totals around 18–30. Real 0–100 maps sum to ~100 or more. */
+    if (!isV2(raw)) return mx > 0;
+    return maxSum > 0 && maxSum <= 40;
+  }
   function upgradeWeights(raw) {
     if (!raw || typeof raw !== "object") return raw;
-    if (isV2(raw)) return raw;
-    var mx = mapMax(raw.all);
-    GROUP_ORDER.forEach(function (g) { var n = mapMax(raw.byLevel && raw.byLevel[g]); if (n > mx) mx = n; });
-    if (mx > 10) return raw;
+    if (!needsV1Scale(raw)) return raw;
     var out = { mode: raw.mode === "all" ? "all" : "per", all: scaleMap(raw.all, 10), byLevel: {} };
     GROUP_ORDER.forEach(function (g) { out.byLevel[g] = scaleMap(raw.byLevel && raw.byLevel[g], 10); });
     return out;
   }
+  /* Each level's weights share 100%. Zeros stay zero (Agnelli and
+     Grant at 0% for Daytime stay off). Positive shares keep their
+     proportions; rounding remainder goes to the largest positive. */
+  function shareNormalizeMap(map) {
+    var ids = icons().map(function (ic) { return ic.id; });
+    if (!ids.length) return Object.assign({}, map || {});
+    var out = {}, pos = [], tot = 0;
+    ids.forEach(function (id) {
+      var v = clampW(map && map[id] != null ? map[id] : MID);
+      if (!(v > 0)) { out[id] = 0; return; }
+      out[id] = v; pos.push(id); tot += v;
+    });
+    if (!pos.length || tot === 100) return out;
+    /* Largest-remainder: equal raw weights (Kraft + Beckham at 80) stay tied. */
+    var exact = {}, used = 0;
+    pos.forEach(function (id) { exact[id] = out[id] * 100 / tot; out[id] = Math.floor(exact[id]); used += out[id]; });
+    var rem = 100 - used;
+    pos.slice().sort(function (a, b) {
+      var fa = exact[a] - out[a], fb = exact[b] - out[b];
+      if (fb !== fa) return fb - fa;
+      return ids.indexOf(a) - ids.indexOf(b);
+    }).forEach(function (id) { if (rem > 0) { out[id] += 1; rem--; } });
+    return out;
+  }
+  function shareNormalizeState(w) {
+    w = normalize(w);
+    w.all = shareNormalizeMap(w.all);
+    GROUP_ORDER.forEach(function (g) { w.byLevel[g] = shareNormalizeMap(w.byLevel[g]); });
+    w.scale = 100;
+    w.v = 2;
+    return w;
+  }
   function loadWeights() {
     var raw = rawFromProfile() || (readStore().weights);
-    return normalize(upgradeWeights(raw));
+    return shareNormalizeState(upgradeWeights(raw));
   }
   /* .86.42: Evening Casual used to share the casual weights; it now has
      its own group, which starts from them once (so its looks don't change) */
@@ -50244,9 +50337,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   setTimeout(migrate842, 0); setTimeout(migrate842, 4000);
   window.addEventListener("wardrobe:synced", migrate842);
   function saveWeights(w) {
-    w = normalize(w);
-    w.scale = 100;
-    w.v = 2;
+    w = shareNormalizeState(upgradeWeights(w));
     writeStore({ weights: w });
     try {
       if (typeof profile !== "undefined") {
@@ -50491,8 +50582,8 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     HIGH: HIGH, MID: MID, MAX: MAX, GROUPS: GROUPS,
     groupForLevel: groupForLevel,
     state: loadWeights,
-    setState: function (w) { saveWeights(normalize(w)); paintWeights(); },
-    resetDefaults: function () { var d = defaultState(); saveWeights(d); paintWeights(); return d; },
+    setState: function (w) { saveWeights(w); paintWeights(); },
+    resetDefaults: function () { var d = shareNormalizeState(defaultState()); saveWeights(d); paintWeights(); return d; },
     weightsForLevel: weightsForLevel,
     scorePiece: scorePiece,
     topLens: topLens,
@@ -50502,6 +50593,40 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       var t = 0;
       ((look && look.fwPieces) || []).forEach(function (pc) { t += scorePiece(pc, level, w); });
       return t;
+    },
+    pickIcon: function (level, w) {
+      var wt = weightsForLevel(level, w), arr = [], ww = [];
+      icons().forEach(function (ic) {
+        var x = +wt[ic.id] || 0;
+        if (x > 0) { arr.push(ic); ww.push(Math.pow(x, 2.5)); }
+      });
+      if (!arr.length) return null;
+      var tot = 0; ww.forEach(function (x) { tot += x; });
+      var r = Math.random() * tot, i = 0;
+      for (; i < arr.length; i++) { r -= ww[i]; if (r <= 0) return arr[i]; }
+      return arr[arr.length - 1];
+    },
+    weightedOrder: function (level, w) {
+      var left = icons().slice(), out = [];
+      while (left.length) {
+        var wt = weightsForLevel(level, w), arr = [], ww = [];
+        left.forEach(function (ic) {
+          var x = +wt[ic.id] || 0;
+          if (x > 0) { arr.push(ic); ww.push(Math.pow(x, 2.5)); }
+        });
+        var ic = null;
+        if (arr.length) {
+          var tot = 0; ww.forEach(function (x) { tot += x; });
+          var r = Math.random() * tot, i = 0;
+          for (; i < arr.length; i++) { r -= ww[i]; if (r <= 0) { ic = arr[i]; break; } }
+          ic = ic || arr[arr.length - 1];
+        } else {
+          ic = left[Math.floor(Math.random() * left.length)];
+        }
+        out.push(ic);
+        left = left.filter(function (x) { return x.id !== ic.id; });
+      }
+      return out;
     },
     pctLabel: function (n) { return clampW(n) + "%"; },
     seedNote: "Casual seeds to Squarzi (Alexander Skarsgård is not in the icon set). Business and Formal seed to Kraft and Beckham."
@@ -51952,9 +52077,10 @@ function dealMine(q) {
     extraW.forEach(function (x) { if (haveW.indexOf(x.key) === -1) { haveW.push(x.key); outs.push(x); } });
     var Lset = weightLenses(q), tw = 0;
     var wMax = (q.weights && (q.weights.scale === 100 || q.weights.v === 2)) ? 100 : 10;
-    var focusAt = wMax === 100 ? 80 : 8;
+    var wTot = 0; Lset.forEach(function (L) { wTot += (+L.w || 0); });
     Lset.forEach(function (L) { L.pw = Math.pow((L.w || 0) / wMax, 2.5); tw += L.pw; });
-    var focus = Lset.filter(function (L) { return L.w >= focusAt; });
+    /* .87.29: a leading icon is ~20%+ of the 100, not a raw 80. */
+    var focus = Lset.filter(function (L) { return wTot > 0 && (+L.w || 0) / wTot >= 0.20; });
     outs.forEach(function (x) {
       var scores = {}, t = 0, othersMax = -1e9;
       Lset.forEach(function (L) {
@@ -51991,11 +52117,33 @@ function groupForLevel(level) {
   if (n === 5) return "business";
   return "formal";
 }
+function shareNorm81(map) {
+  var ids = ICONS.map(function (ic) { return ic.id; });
+  if (!ids.length) return map || {};
+  var out = {}, pos = [], tot = 0, mx = 0;
+  ids.forEach(function (id) {
+    var v = Math.max(0, Math.round(+(map && map[id] || 0)));
+    if (!(v > 0)) { out[id] = 0; return; }
+    out[id] = v; pos.push(id); tot += v; if (v > mx) mx = v;
+  });
+  if (!pos.length) return out;
+  if (mx <= 10 && tot <= 40) { pos.forEach(function (id) { out[id] *= 10; }); tot *= 10; }
+  if (tot === 100) return out;
+  var exact = {}, used = 0;
+  pos.forEach(function (id) { exact[id] = out[id] * 100 / tot; out[id] = Math.floor(exact[id]); used += out[id]; });
+  var rem = 100 - used;
+  pos.slice().sort(function (a, b) {
+    var fa = exact[a] - out[a], fb = exact[b] - out[b];
+    if (fb !== fa) return fb - fa;
+    return ids.indexOf(a) - ids.indexOf(b);
+  }).forEach(function (id) { if (rem > 0) { out[id] += 1; rem--; } });
+  return out;
+}
 function weightsFor(q) {
   var W = (q && q.weights) || {};
-  if (W.mode === "all") return W.all || {};
+  if (W.mode === "all") return shareNorm81(W.all || {});
   var g = groupForLevel(q && q.level);
-  return (W.byLevel && W.byLevel[g]) || W.all || {};
+  return shareNorm81((W.byLevel && W.byLevel[g]) || W.all || {});
 }
 function weightLenses(q) {
   var wt = weightsFor(q), out = [];
@@ -52010,16 +52158,14 @@ function weightLenses(q) {
 }
 function iconShare(feed, wt, W) {
   var tot = 0, on = 0, maxW = 0;
-  /* .86.39: weights are 0-100 since v2 (were 0-10); "8+" means 80+ there.
-     The old fixed 8 made every default 20 count as a strong icon, so
-     icon looks always took the large share whatever was set. */
-  var hiAt = (W && (W.scale === 100 || W.v === 2)) ? 80 : 8;
+  /* .87.29: after each level is normalised to 100, a leader is about
+     25–33% (Squarzi or Kraft/Beckham), not 80. High share now follows
+     the leading icon's share of the total, so Daytime and Evening
+     Casual follow those sliders. Uniform mid weights stay modest. */
   ICONS.forEach(function (ic) { var w = +wt[ic.id] || 0; if (w > 0) { tot += w; on++; if (w > maxW) maxW = w; } });
   if (!on || tot <= 0) return 0;
-  /* When an icon is set to 8+, Icons take a clear majority of New and a
-     substantial share of Mix. Uniform mid weights stay modest so the
-     contrast is visible. Zero total still means no icon-seeded looks. */
-  var high = maxW >= hiAt;
+  var lead = maxW / tot;
+  var high = lead >= 0.20;
   if (feed === "allnew") return high ? 0.70 : 0.32;
   return high ? 0.50 : 0.16;
 }

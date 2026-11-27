@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Live Curate, icon weightings, engine + Shop the look ranker.
 
+.87.29: weights are 0–100% and each level sums to 100; v1 0–10
+values are scaled before they are stored. Agnelli/Grant at 0% stay 0.
+
 Usage: PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 python3 tests/test_curate81.py
 """
 from __future__ import annotations
@@ -235,11 +238,11 @@ def main():
         }""")
         check("Filters icon list uses same Icons data", filt.get("sameSet") and filt.get("noneFirst"), filt)
         check("Filters icon list is sorted by current-level weights", filt.get("orderOk"), filt)
-        # seed a zero weight so dimming is observable (smart-casual default mid=2, none off)
+        # seed a zero weight so dimming is observable (0–100 scale; Ford off, Squarzi leads)
         pg.evaluate("""() => {
           const st = window.iconWeights81.state();
-          const mid = {}; allIcons().forEach(ic => mid[ic.id] = 2);
-          mid.ford = 0; mid.squarzi = 8;
+          const mid = {}; allIcons().forEach(ic => mid[ic.id] = 20);
+          mid.ford = 0; mid.squarzi = 80;
           window.iconWeights81.setState({ mode: 'all', all: mid, byLevel: st.byLevel });
         }""")
         pg.wait_for_timeout(400)
@@ -253,7 +256,8 @@ def main():
           const ford = host.querySelector('[data-pv-lens=ford]');
           return { first, fordOff: ford && ford.classList.contains('pv-ic-off'), fordBadge: !!(ford && ford.querySelector('.pv-w')), squarziBadge: host.querySelector('[data-pv-lens=squarzi] .pv-w') && host.querySelector('[data-pv-lens=squarzi] .pv-w').textContent };
         }""")
-        check("Filters dims weight-0 icons and badges the rest", filt2.get("first") == "squarzi" and filt2.get("fordOff") and filt2.get("squarziBadge") == "8%" and not filt2.get("fordBadge"), filt2)
+        badge = str(filt2.get("squarziBadge") or "")
+        check("Filters dims weight-0 icons and badges the rest", filt2.get("first") == "squarzi" and filt2.get("fordOff") and badge.endswith("%") and badge != "0%" and not filt2.get("fordBadge"), filt2)
         pg.screenshot(path=str(SHOTS / "390-light-looks-filters-icons.png"), full_page=False)
         # restore seeded per-level defaults so later engine tests use the same weights
         pg.evaluate("() => window.iconWeights81.resetDefaults()")
@@ -309,20 +313,20 @@ def main():
         def mid_weights():
             return pg.evaluate("""() => {
               const mid = {};
-              allIcons().forEach(ic => mid[ic.id] = 2);
+              allIcons().forEach(ic => mid[ic.id] = 20);
               const by = { casual: Object.assign({}, mid), smart: Object.assign({}, mid), business: Object.assign({}, mid), formal: Object.assign({}, mid) };
-              return { mode: 'per', all: mid, byLevel: by };
+              return { mode: 'per', all: mid, byLevel: by, scale: 100, v: 2 };
             }""")
 
         def seeded_weights():
             return pg.evaluate("""() => {
               const mid = {};
-              allIcons().forEach(ic => mid[ic.id] = 2);
+              allIcons().forEach(ic => mid[ic.id] = 20);
               const by = { casual: Object.assign({}, mid), smart: Object.assign({}, mid), business: Object.assign({}, mid), formal: Object.assign({}, mid) };
-              by.casual.squarzi = 8; by.smart.squarzi = 8;  // .86.42: Evening Casual has its own group, seeded like Daytime
-              by.business.kraft = 8; by.business.beckham = 8;
-              by.formal.kraft = 8; by.formal.beckham = 8;
-              return { mode: 'per', all: mid, byLevel: by };
+              by.casual.squarzi = 80; by.smart.squarzi = 80;  // .86.42: Evening Casual has its own group, seeded like Daytime
+              by.business.kraft = 80; by.business.beckham = 80;
+              by.formal.kraft = 80; by.formal.beckham = 80;
+              return { mode: 'per', all: mid, byLevel: by, scale: 100, v: 2 };
             }""")
 
         def measure(feed, level, weights, n=80, lens=None):
@@ -340,9 +344,39 @@ def main():
             # confirm defaults match seeded
             pg.evaluate("w => window.iconWeights81.setState(w)", seeded)
             st = pg.evaluate("() => window.iconWeights81.weightsForLevel(3)")
-            check("casual default seeds Squarzi high", st.get("squarzi") == 8, st)
             stf = pg.evaluate("() => window.iconWeights81.weightsForLevel(6)")
-            check("formal default seeds Kraft and Beckham high", stf.get("kraft") == 8 and stf.get("beckham") == 8, stf)
+            def wsum(m):
+                return sum(max(0, int(v or 0)) for v in (m or {}).values())
+            check("casual weights sum to 100", wsum(st) == 100, st)
+            check("casual default seeds Squarzi as the unique high share", st.get("squarzi", 0) == max(st.values() or [0]) and st.get("squarzi", 0) >= 20 and all((st.get(i) or 0) < st["squarzi"] for i in st if i != "squarzi"), st)
+            check("formal weights sum to 100", wsum(stf) == 100, stf)
+            check("formal default seeds Kraft and Beckham high", stf.get("kraft", 0) >= 20 and stf.get("beckham", 0) >= 20 and stf.get("kraft") == stf.get("beckham") and stf.get("kraft") == max(stf.values() or [0]), stf)
+
+            # v1 0–10 values are scaled x10, then normalised, even if v:2 was stamped early
+            v1 = pg.evaluate("""() => {
+              const mid = {}; allIcons().forEach(ic => mid[ic.id] = 2);
+              const by = { casual: Object.assign({}, mid), smart: Object.assign({}, mid), business: Object.assign({}, mid), formal: Object.assign({}, mid) };
+              by.casual.squarzi = 8; by.smart.squarzi = 8;
+              by.business.kraft = 8; by.business.beckham = 8;
+              by.formal.kraft = 8; by.formal.beckham = 8;
+              window.iconWeights81.setState({ mode: 'per', all: mid, byLevel: by, scale: 100, v: 2 });
+              return { casual: window.iconWeights81.weightsForLevel(3), formal: window.iconWeights81.weightsForLevel(6), state: window.iconWeights81.state() };
+            }""")
+            cv, fv = v1.get("casual") or {}, v1.get("formal") or {}
+            check("v1 upgrade scales 0-10 then sums to 100", wsum(cv) == 100 and wsum(fv) == 100 and (v1.get("state") or {}).get("v") == 2, v1)
+            check("v1 upgrade leaves Squarzi leading casual, not stuck at 8", cv.get("squarzi", 0) > 20 and cv.get("squarzi") != 8, cv)
+            check("v1 upgrade leaves Kraft and Beckham leading formal", fv.get("kraft", 0) > 15 and fv.get("beckham", 0) > 15, fv)
+
+            # zeros stay zero (Agnelli and Grant at 0% for Daytime)
+            zed = pg.evaluate("""() => {
+              const mid = {}; allIcons().forEach(ic => mid[ic.id] = 20);
+              mid.squarzi = 61; mid.beckham = 71; mid.agnelli = 0; mid.grant = 0;
+              const by = { casual: Object.assign({}, mid), smart: Object.assign({}, mid), business: Object.assign({}, mid), formal: Object.assign({}, mid) };
+              window.iconWeights81.setState({ mode: 'per', all: mid, byLevel: { casual: mid, smart: Object.assign({}, mid), business: Object.assign({}, mid), formal: Object.assign({}, mid) }, scale: 100, v: 2 });
+              return window.iconWeights81.weightsForLevel(2);
+            }""")
+            check("Daytime zero weights stay zero after normalise", zed.get("agnelli") == 0 and zed.get("grant") == 0 and wsum(zed) == 100 and zed.get("beckham", 0) > zed.get("squarzi", 0) > 0, zed)
+            pg.evaluate("w => window.iconWeights81.setState(w)", seeded)
 
             results = {}
             for label, wts in (("before", uniform), ("after", seeded)):
