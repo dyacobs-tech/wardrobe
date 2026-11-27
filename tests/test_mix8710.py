@@ -5,8 +5,7 @@ this???? Like new mix". The old Looks "Mix" became The Edit's "New + mine", whic
 my avatar!!!") shows only outfits drawn on him, with the mixes behind a button at the end; and the gap list behind
 its "Fills gap" marks had dried up, so no mix was ever marked. Asked what to bring back, he chose "Mix in The Edit".
 Checks (Evening Casual, fixture closet): Mix sits between New + mine and All new; it opens straight into mixes with a
-piece for sale, none of them drawn on him, with no button to tap; some say "Fills gap"; the note under the title says
-what Mix is; New + mine still shows only outfits drawn on him and its button; Mix is hidden at Pool / Beach.
+piece for sale, none of them drawn on him, with no button to tap; some say "Fills gap"; no helper caption under the title; New + mine still shows only outfits drawn on him and its button; Mix is hidden at Pool / Beach.
 .87.12: Mix tapped before the feed's code has loaded (a slow phone, or a busy CI machine: this test failed on .87.10
 and .87.11 that way) still opens as Mix, not as New + mine under a pressed Mix; checked by holding back app/endless.
 """
@@ -63,7 +62,8 @@ def run(browser, slow=False):
     assert m["priced"] >= m["cards"] - 1, ("every mix carries a piece for sale", m)
     assert m["gap"] >= 1, ("no mix is marked as filling a gap", m)
     assert not m["button"], ("Mix should not stop at the Show ideas button", m)
-    assert "Fills gap" in (m["note"] or ""), m
+    assert not (m["note"] or "").strip(), ("Ideas should not show a helper caption under the title", m)
+    # "Fills gap" still appears on Mix cards themselves, not as a title note
     # New + mine is unchanged: drawn on him only, then the button
     page.evaluate("() => { window.scrollTo(0, 0); document.querySelector('[data-ins-feed=\"withmine\"]').click(); }")
     page.wait_for_function("() => { const c = [...document.querySelectorAll('#en-grid-withmine .cf-card:not(.en-skel)')]; const n = document.querySelector('.en-undrawn857'); return ((n && !n.hidden) || c.length >= 4) && c.every(x => x.querySelector('.en-render img')); }", timeout=60000)

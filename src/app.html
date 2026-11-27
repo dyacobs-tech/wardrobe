@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-27.87.29" />
+    <meta name="wardrobe-build" content="2026-11-27.87.30" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -9020,7 +9020,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-27.87.29</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-27.87.30</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -13019,7 +13019,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-27.87.29";
+var WARDROBE_BUILD = "2026-11-27.87.30";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -47158,8 +47158,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       /* .86.58 (David, 22 Nov 2026, asked whether an icon's page should also have a closet-only view in that icon's
          style or whether "New + mine" and "All new" are enough: "Both"). On an icon's page a third choice, Mine,
          shows outfits made only from his closet (the ones drawn on him), ranked by that icon. */
-      '<button type="button" data-ins-feed="mine" hidden>Mine</button><button type="button" data-ins-feed="withmine">New + mine</button><button type="button" data-ins-feed="mix">Mix</button><button type="button" data-ins-feed="allnew">All new</button></div>' +
-      '<p class="ins-note854">Pieces for sale, worn with yours and drawn on you. A price marks what is new. Outfits made only from your closet are in Looks.</p>';
+      '<button type="button" data-ins-feed="mine" hidden>Mine</button><button type="button" data-ins-feed="withmine">New + mine</button><button type="button" data-ins-feed="mix">Mix</button><button type="button" data-ins-feed="allnew">All new</button></div>';
     top.parentNode.insertBefore(h, top.nextSibling);
     /* the filter (price) on the Ideas header: a stand-in that taps the
        original (its sheet and state live with the feed's top bar) */
@@ -47235,12 +47234,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
        happened to this???? Like new mix"; he chose "Mix in The Edit"): Mix is the old Looks Mix, new pieces for sale
        mixed with his own, the ones not drawn on him yet, each marked when it fills a gap in his closet. New + mine
        keeps showing only the outfits drawn on him (22 Nov: "With mine should be on my avatar!!!"). */
-    var nt8710 = document.querySelector("#ins-head841 .ins-note854");
-    if (nt8710) {
-      var tx8710 = insFeed === "mix" ? "New pieces for sale mixed with your closet, not drawn on you yet. \u201cFills gap\u201d marks a piece your closet is missing."
-        : "Pieces for sale, worn with yours and drawn on you. A price marks what is new. Outfits made only from your closet are in Looks.";
-      if (nt8710.textContent !== tx8710) nt8710.textContent = tx8710;
-    }
+    /* .87.30: helper captions under Ideas removed (David: no helper captions). */
     var fx899 = document.querySelector(".ins-filter841");   /* the price filter is for pieces for sale */
     if (fx899) fx899.style.display = pool ? "none" : "";
     var had858 = R.getAttribute("data-insf") === "mine", now858 = insFeed === "mine" && cur() === "inspo";
