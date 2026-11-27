@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-26.87.26" />
+    <meta name="wardrobe-build" content="2026-11-26.87.27" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -7155,8 +7155,12 @@ window.notMenswear853 = function (e) {
       .ins-ich841 b { display: block; font-size: 17px; }
       .ins-ich841 span { color: var(--dim); font-size: 12.5px; }
       .ins-x841 { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-strong); background: transparent; color: var(--text); font-size: 18px; line-height: 1; cursor: pointer; }
-      .ins-strip841 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
-      .ins-strip841 img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; border-radius: 10px; display: block; }
+      .ins-strip841, .icon-photos-cream { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+      .ins-strip841 img, .icon-photos-cream img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; border-radius: 10px; display: block; }
+      .icon-photos-cream { background: #F6F2EA; }
+      .icon-detail-card.icon-detail-cream { background: #F6F2EA; border: 0; box-shadow: none; }
+      .icon-detail-card.icon-detail-cream h3 { margin: 0 0 14px; font: 650 22px/1.2 var(--font-display); color: #221c16; }
+      .icon-detail-card.icon-detail-cream .lane { display: none; }
       .ins-pal841 { display: flex; gap: 6px; margin-bottom: 8px; }
       .ins-pal841 i { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border); }
       .ins-wt841 { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 600; }
@@ -9012,7 +9016,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-26.87.26</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-26.87.27</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12977,7 +12981,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-26.87.26";
+var WARDROBE_BUILD = "2026-11-26.87.27";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -30820,32 +30824,29 @@ function sortedIcons() {
     return an < bn ? -1 : an > bn ? 1 : 0;
   });
 }
+function iconPhotoGridHTML(ic, limit) {
+  /* Each icon already has ~100 real menswear photos in assets/photos.
+     The icon page used to hard-cap the strip at 3 (.slice(0, 3)). That cap
+     is gone. The page aims for 10–12 photos, cream, no captions. */
+  var looks = ic.looks || [];
+  var n = 0, i, lk, html = "";
+  var max = (limit == null || limit <= 0) ? looks.length : limit;
+  for (i = 0; i < looks.length && n < max; i++) {
+    lk = looks[i];
+    if (!lk || !(lk.img || lk.src)) continue;
+    html += '<button type="button" class="ins-look868" data-ins-look868="' + esc(ic.id) + '" data-look-idx="' + i + '" aria-label="' + esc(ic.name) + '">' +
+      '<img src="' + esc(lk.img || lk.src) + '" alt="" loading="lazy" decoding="async"></button>';
+    n++;
+  }
+  return html ? '<div class="icon-photos-cream" role="list">' + html + "</div>" : "";
+}
 function iconDetailHTML(ic) {
-  var pal = ic.palette.map(function (hex) { return { name: hex, hex: hex }; });
   return '<button type="button" class="btn-ghost icon-back" data-back-icons>← Back</button>' +
-    '<article class="card icon-card icon-detail-card">' +
+    '<article class="card icon-card icon-detail-card icon-detail-cream">' +
     (ic.custom ? '<span class="your-badge">Your icon</span>' : "") +
-    '<p class="lane">' + esc(ic.lane) + "</p>" +
-    '<div class="card-head-info"><h3>' + esc(ic.name) + '</h3></div>' +
-    stripHTML(pal, "sm") +
-    "<h5>Signature outfit</h5>" +
-    '<p class="blurb blurb">' + esc(ic.signatureDesc) + "</p>" +
-    "<h5>Signature pieces</h5>" +
-    '<div class="sig-row">' + ic.signatures.map(function (s) { return "<span>" + esc(s) + "</span>"; }).join("") + "</div>" +
-    (ic.looks && ic.looks.length ? lookboardHTML(ic) : "") +
-    "<h5>The shoe</h5>" +
-    '<p class="blurb">' + esc(ic.shoeLabel) + " — " + esc(ic.shoeDetail) + "</p>" +
-    "<h5>The rules</h5>" +
-    '<ol class="icon-rules">' + ic.rules.map(function (r, i) {
-      return '<li><span class="n">' + String(i + 1).padStart(2, "0") + "</span><span>" + esc(r) + "</span></li>";
-    }).join("") + "</ol>" +
-    '<p class="avoid">' + esc(ic.avoid) + "</p>" +
-    '<div class="look-actions">' +
-    '<button type="button" class="btn-accent" data-style-icon="' + ic.id + '">Style like ' + esc(ic.name.split(" ").pop()) + "</button>" +
-    '<button type="button" class="btn-ghost" data-find-signature="' + ic.id + '">Find the signature outfit</button>' +
-    '<button type="button" class="btn-ghost" data-set-direction="' + ic.id + '">Set as Studio direction</button>' +
-    (ic.custom ? '<button type="button" class="btn-ghost" data-delete-icon="' + ic.id + '">Delete</button>' : "") +
-    "</div></article>";
+    "<h3>" + esc(ic.name) + "</h3>" +
+    iconPhotoGridHTML(ic, 12) +
+    "</article>";
 }
 function showIconList() {
   var browsing = !!(document.getElementById("panel-icons") && document.getElementById("panel-icons").classList.contains("is-browse"));
@@ -47125,10 +47126,11 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var ic = insLens ? icons().filter(function (x) { return x.id === insLens; })[0] : null;
     if (title) title.textContent = ic ? "On you, in his style" : (pool899() ? "Pool looks from your closet" : "Ideas for you");
     if (!ic) { box.hidden = true; box.innerHTML = ""; return; }
-    var L = (ic.looks || []).slice(0, 3), pal = (ic.palette || []).slice(0, 6), w = weightOf(ic.id);
+    /* .87.27: each icon already has ~100 real photos; the page had hard-capped the strip at 3. Cap removed; show 12, no captions. */
+    var L = (ic.looks || []).filter(function (l) { return l && (l.img || l.src); }).slice(0, 12), pal = (ic.palette || []).slice(0, 6), w = weightOf(ic.id);
     box.innerHTML = '<div class="ins-ich841"><div><b>' + E(ic.name || ic.id) + "</b>" + (ic.lane ? "<span>" + E(ic.lane) + "</span>" : "") + "</div>" +
       '<button type="button" class="ins-x841" data-ins-clear aria-label="Back to all your icons">×</button></div>' +
-      (L.length ? '<div class="ins-strip841">' + L.map(function (l, li) { return '<button type="button" class="ins-look868" data-ins-look868="' + E(ic.id) + '" data-look-idx="' + li + '" aria-label="' + E(l.caption || "Look") + '"><img src="' + E(l.img || l.src || "") + '" alt="' + E(l.caption || "") + '" loading="lazy" decoding="async"></button>'; }).join("") + "</div>" : "") +
+      (L.length ? '<div class="ins-strip841">' + L.map(function (l, li) { return '<button type="button" class="ins-look868" data-ins-look868="' + E(ic.id) + '" data-look-idx="' + (ic.looks || []).indexOf(l) + '" aria-label="' + E(ic.name || "Look") + '"><img src="' + E(l.img || l.src || "") + '" alt="" loading="lazy" decoding="async"></button>'; }).join("") + "</div>" : "") +
       (pal.length ? '<div class="ins-pal841">' + pal.map(function (c) { return '<i style="background:' + E(typeof c === "string" ? c : (c.hex || "")) + '"></i>'; }).join("") + "</div>" : "") +
       '<label class="ins-wt841"><span>His weight in your looks</span><input type="range" min="0" max="100" step="1" value="' + w + '" data-ins-weight="' + E(ic.id) + '"><output>' + w + "</output></label>";
     box.hidden = false;

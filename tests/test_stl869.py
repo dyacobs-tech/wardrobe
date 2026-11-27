@@ -27,6 +27,8 @@ def run(browser):
     page.wait_for_selector("[data-ins-icon]", timeout=30000)
     page.evaluate("() => document.querySelector('[data-ins-icon]').click()")
     page.wait_for_selector("[data-ins-look868]", timeout=15000)
+    n = page.evaluate("() => document.querySelectorAll('#ins-icon841 [data-ins-look868]').length")
+    assert 10 <= n <= 12, n
     page.evaluate("() => document.querySelector('[data-ins-look868]').click()")
     page.wait_for_selector("#ins-look-sheet868:not([hidden]) [data-find-icon-look]", timeout=10000)
     btns = page.evaluate("() => [...document.querySelectorAll('#ins-look-sheet868 button')].map(b => b.textContent.trim())")
