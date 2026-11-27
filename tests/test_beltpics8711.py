@@ -18,6 +18,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 P = json.loads((ROOT / "tests/pictures8711.json").read_text())
 from picture_names import current
+from oldpics import is_redrawn
 src = (ROOT / "src/app.html").read_text()
 seed = json.loads(re.search(r"var ONBODY_SEED = (\{.*?\});\n", src).group(1))
 files = {e["f"] for e in seed["r"]}
@@ -27,9 +28,12 @@ left = []
 for old, new0 in P["renamed"].items():
     new = current(new0)
     assert old + ".webp" not in files and new + ".webp" in files, ("recoloured picture not listed", old, new)
+    gone = is_redrawn(new)   # .87.27: since redrawn in high-res, so its old files were removed
     for d in ("assets/onbody/", "assets/onbody-cut/", "assets/onbody-cut-hq/"):
-        assert (ROOT / d / (new + ".webp")).exists(), ("missing file", d, new)
+        assert gone or (ROOT / d / (new + ".webp")).exists(), ("missing file", d, new)
         assert not (ROOT / d / (old + ".webp")).exists(), ("old file left behind", d, old)
+    if gone:
+        continue
     if new != new0:
         continue   # since redrawn under a newer name; its belt is checked there
     y0, y1 = P["belt_rows"][new]

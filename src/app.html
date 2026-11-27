@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-26.87.27" />
+    <meta name="wardrobe-build" content="2026-11-27.87.28" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -7643,11 +7643,14 @@ window.notMenswear853 = function (e) {
               var P = HTMLImageElement.prototype, D = Object.getOwnPropertyDescriptor(P, "src"), SA = Element.prototype.setAttribute;
               function cutOf(v) {
                 var m = String(v || "").match(/(^|\/)assets\/onbody\/([0-9a-f]{8,})\.webp(\?.*)?$/i); if (!m) return v;
-                var c = typeof window.cutoutFor === "function" ? window.cutoutFor("assets/onbody/" + m[2] + ".webp") : "assets/onbody-cut/" + m[2] + ".webp";
-                return c || v;
+                /* .87.27: most old renders and their cut-outs are gone (replaced by high-res redraws), so a
+                   cut-out path is never guessed and a render with no cut-out is not loaded: the picture on
+                   screen stays until the app sets the high-res one */
+                var c = typeof window.cutoutFor === "function" ? window.cutoutFor("assets/onbody/" + m[2] + ".webp") : null;
+                return c || null;
               }
-              im.setAttribute = function (n, v) { return SA.call(this, n, String(n).toLowerCase() === "src" ? cutOf(v) : v); };
-              if (D && D.set) Object.defineProperty(im, "src", { configurable: true, get: function () { return D.get.call(this); }, set: function (v) { D.set.call(this, cutOf(v)); } });
+              im.setAttribute = function (n, v) { if (String(n).toLowerCase() === "src") { v = cutOf(v); if (v === null) return; } return SA.call(this, n, v); };
+              if (D && D.set) Object.defineProperty(im, "src", { configurable: true, get: function () { return D.get.call(this); }, set: function (v) { v = cutOf(v); if (v === null) return; D.set.call(this, v); } });
               /* the hero goes first on a slow link: the Edit catalogue and the
                  inspiration manifest (not used on Home) wait until it has painted */
               var F = window.fetch;
@@ -7661,7 +7664,8 @@ window.notMenswear853 = function (e) {
               }
               var d = new Date(), day = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
               var j = JSON.parse(localStorage.getItem("wardrobe.hero793") || "null");
-              if (j && j.date === day && /^assets\/onbody-cut\/[\w-]+\.webp$/.test(j.cut || "")) {
+              if (j && j.date === day && /^assets\/(onbody-cut\/[\w-]+\.webp|onbody-hires\/full\/[\w-]+\.jpe?g)$/.test(j.cut || "")) {
+                if (/onbody-hires\//.test(j.cut)) h.classList.remove("has-cut");   /* .87.27: a high-res redraw sits on cream, not the closet backdrop */
                 if (j.lq) lq.src = j.lq;
                 im.setAttribute("data-render", j.render || "");
                 im.src = j.cut;
@@ -9016,7 +9020,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-26.87.27</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-27.87.28</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12258,8 +12262,11 @@ function hiresRefresh() {
   try {
     if (typeof fetch !== "function") return;
     ((window.__takeEarly803 && window.__takeEarly803("hires")) || fetch("assets/onbody-hires/manifest.json", { cache: "no-cache" })).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-      if (!j || !j.r) return;
+      if (!j || !j.r) { HIRES.failed = true; try { if (typeof renderToday === "function") renderToday(); } catch (e0) {} return; }
       hiresIngest(j);
+      /* .87.27: keep a small copy on the phone (only what the app reads), tied to this build, so the next open
+         has every high-res picture from its first moment and Home never reaches for an old drawing first */
+      try { localStorage.setItem("wardrobe.hires", JSON.stringify({ b: onbodyBuild878(), r: j.r.map(function (e) { var o = { k: e.k, card: e.card, full: e.full }; if (e.onbody) o.onbody = e.onbody; return o; }) })); } catch (eSv) {}
       try { if (typeof renderToday === "function") renderToday(); } catch (e) {}
       try { if (typeof window.composerSyncFeed === "function") window.composerSyncFeed(false); } catch (eCf) {}
       try { if (typeof window.__lkRenderLiked845 === "function") window.__lkRenderLiked845(); } catch (eLk) {}
@@ -12267,9 +12274,13 @@ function hiresRefresh() {
       try { if (typeof renderWeekPlan === "function") renderWeekPlan(); } catch (eWk) {}
       try { if (typeof renderWornLog === "function") renderWornLog(); } catch (eWn) {}
       try { if (typeof renderFindLookMode === "function") renderFindLookMode(); } catch (eSh) {}
-    }).catch(function () {});
+    }).catch(function () { HIRES.failed = true; try { if (typeof renderToday === "function") renderToday(); } catch (e3) {} });
   } catch (e2) {}
 }
+/* .87.27 (David, 27 Nov 2026, on the site being over GitHub's size limit: "Do 2", remove the old pictures that
+   have a high-res replacement). A redrawn outfit has no old picture to fall back on any more, so the high-res
+   list has to be there before Home paints: it is read from the phone first, then refreshed from the network. */
+try { var _hic = localStorage.getItem("wardrobe.hires"); if (_hic) { _hic = JSON.parse(_hic); if (_hic && _hic.b && _hic.b === onbodyBuild878() && _hic.r) hiresIngest(_hic); } } catch (eHc) {}
 hiresRefresh();
 /* .86.78 (David, 23 Nov 2026, Home screenshot of the navy tee and stone chinos: "Head messed up and no belt
    again!!!!!!!"). The list saved on the phone was read after the built-in list and put back pictures that a newer
@@ -12399,9 +12410,13 @@ function lookHeroVisible84(look) {
   if (formal8722) return false;
   var ob = typeof onbodyForLook === "function" ? onbodyForLook(look) : null;
   if (!ob) return false;
+  /* .87.27: until the high-res list is in, its redraws cannot be told from the rest; Home waits for it to paint */
+  if (hiresPending8727()) return true;
   try { if (typeof window.cutoutFor === "function") return !!window.cutoutFor(ob); } catch (e) {}
   return true;
 }
+function hiresPending8727() { return typeof HIRES !== "undefined" && !HIRES.ready && !HIRES.failed; }
+window.hiresPending8727 = hiresPending8727;
 window.photoIsReady84 = photoIsReady84;
 window.lookHeroVisible84 = lookHeroVisible84;
 /* .85.3 (ported from .84.1, Swim/Pool tightened): Home only deals looks
@@ -12981,7 +12996,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-26.87.27";
+var WARDROBE_BUILD = "2026-11-27.87.28";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -32515,7 +32530,11 @@ function initToday() {
   try {
     var r806 = todayLook && (todayLook.fwRender || (typeof onbodyForLook === "function" ? onbodyForLook(todayLook) : ""));
     var m806 = r806 && String(r806).match(/(?:^|\/)onbody\/([0-9a-f]{8,})\.webp/i);
-    if (m806) { var pre806 = new Image(); try { pre806.fetchPriority = "high"; } catch (e) {} pre806.decoding = "async"; pre806.src = "assets/onbody-cut/" + m806[1] + ".webp"; window.__heroPre806 = pre806; }
+    /* .87.27: the picture Home will actually show: the high-res redraw when the outfit has one (its old
+       cut-out is gone), else the cut-out only if the cut-out list has it. Never a guessed path. */
+    var hi806 = null; try { hi806 = (typeof hiresForLook === "function" && hiresForLook(todayLook, "full")) || null; } catch (eHi806) {}
+    var src806 = hi806 || (m806 && typeof window.cutoutFor === "function" && window.cutoutFor("assets/onbody/" + m806[1] + ".webp")) || "";
+    if (src806) { var pre806 = new Image(); try { pre806.fetchPriority = "high"; } catch (e) {} pre806.decoding = "async"; pre806.src = src806; window.__heroPre806 = pre806; }
   } catch (e) {}
   renderToday();
   /* The Today selector shows the mode the hero was actually
@@ -48375,6 +48394,9 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       if (!formalHero8722 && todayLook && todayLook.fwPieces) formalHero8722 = todayLook.fwPieces.some(function (p) { return p && /^ties?$/i.test(String(p.category || "")); });
       if (formalHero8722 && !hiresFull) src = null;
     } catch (eFh) {}
+    /* .87.27: the outfit has no old cut-out and the high-res list is still loading: keep what is on screen
+       and paint when the list arrives (it calls renderToday), never an old drawing and never a re-deal */
+    if (src && !hiresFull && typeof window.cutoutFor === "function" && !window.cutoutFor(src) && typeof window.hiresPending8727 === "function" && window.hiresPending8727()) return;
     /* .78.9a: Home only deals a render that has its cut-out, unless .87.14 has a high-res studio redraw */
     if (src && typeof window.cutoutFor === "function" && !window.cutoutFor(src) && !hiresFull) src = null;
     /* .78.2c: a render he gave a thumbs-down never comes back */
@@ -48510,7 +48532,7 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   function heroLoaded() {
     lqSync(); lqPlace();
     var src = img.getAttribute("src") || "";
-    if (!(img.naturalWidth > 0 && isCutSrc(src))) return;
+    if (!(img.naturalWidth > 0 && (isCutSrc(src) || isHiresSrc(src)))) return;   /* .87.27: a high-res redraw is the hero too */
     if (window.__heroReady793) try { window.__heroReady793(); } catch (e) {}
     try {
       var day = typeof localTodayISO === "function" ? localTodayISO() : "";
@@ -48576,10 +48598,16 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var look = ovFromHome && typeof todayLook !== "undefined" ? todayLook : ovLook;
     if (!look) return;
     var src0 = renderFor(look) || (typeof lookImg === "function" ? lookImg(look) : "");
-    var src = (typeof window.cutoutFor === "function" && window.cutoutFor(src0)) || src0;
-    var fig0 = document.getElementById("ov-figure"); if (fig0) fig0.classList.toggle("has-cut", src !== src0);
+    /* .87.27: the outfit view shows the high-res redraw when there is one. An outfit kept from before the
+       redraws still names its old picture, which no longer exists; while the high-res list is loading the
+       view keeps what it has rather than ask for that old file. */
+    var hiOv = null;
+    try { hiOv = (typeof hiresForLook === "function" && hiresForLook(look, "full")) || (typeof hiresForOnbody === "function" && hiresForOnbody(src0, "full")) || null; } catch (eHiOv) {}
+    var src = hiOv || (typeof window.cutoutFor === "function" && window.cutoutFor(src0)) || src0;
+    var fig0 = document.getElementById("ov-figure"); if (fig0) fig0.classList.toggle("has-cut", !hiOv && src !== src0);
     var im = document.getElementById("ov-img"), prev = im.getAttribute("src");
-    if (prev !== src) {
+    if (!hiOv && src === src0 && /(^|\/)assets\/onbody\/[0-9a-f]{8,}\.webp/i.test(src0) && typeof window.hiresPending8727 === "function" && window.hiresPending8727()) src = prev || "";
+    if (src && prev !== src) {
       if (prev && ovOpen) { im.classList.add("swap"); setTimeout(function () { im.setAttribute("src", src); im.classList.remove("swap"); }, 180); }
       else im.setAttribute("src", src);
     }
@@ -48814,6 +48842,13 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     if (!src) return "";
     var id = idOf(src); if (!id || BADCUT[id]) return "";
     if (CUT.map) return CUT.map[id] || "";
+    /* .87.27: before the cut-out list has loaded a path used to be guessed. Most old cut-outs are gone now
+       (their outfits have high-res redraws), so nothing is guessed for a redrawn outfit, nor while the
+       high-res list is still loading. */
+    try {
+      if (typeof window.hiresPending8727 === "function" && window.hiresPending8727()) return "";
+      if (typeof hiresForOnbody === "function" && hiresForOnbody("assets/onbody/" + id + ".webp", "card")) return "";
+    } catch (eHi) {}
     return "assets/onbody-cut/" + id + ".webp";
   };
   /* .87.08 (David, 24 Nov 2026, on a look page showing his picture in its grey studio box: "wtf is this quality
@@ -48834,6 +48869,15 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
     var c = window.cutoutFor(src); if (!c) return src;
     return small ? c : c.replace("onbody-cut/", "onbody-cut-hq/");
   };
+  /* .87.27: the old pictures that have a high-res redraw were removed. Anything that still asks for one (an
+     outfit saved long ago, a screen drawn before the high-res list arrived) gets the redraw instead. */
+  document.addEventListener("error", function (e) {
+    var t = e.target; if (!t || t.tagName !== "IMG" || t.hasAttribute("data-hi8727")) return;
+    var m = String(t.getAttribute("src") || "").match(/assets\/onbody(?:-cut(?:-hq)?)?\/([0-9a-f]{8,})\.(?:webp|png)/i); if (!m) return;
+    var hi = null; try { hi = typeof hiresForOnbody === "function" ? hiresForOnbody("assets/onbody/" + m[1] + ".webp", (t.clientWidth || 0) > 260 ? "full" : "card") : null; } catch (x) {}
+    if (!hi) return;
+    t.setAttribute("data-hi8727", "1"); t.setAttribute("src", hi);
+  }, true);
   /* a cut-out that fails to load is dropped and Home re-deals */
   document.addEventListener("error", function (e) {
     var t = e.target; if (!t || t.tagName !== "IMG") return;

@@ -119,7 +119,9 @@ def main() -> int:
             if path.stem == REPORTED and why:
                 fails.append(f"reported outfit {path.name} still has a cut-off foot")
     # the reported render must be in both pools
-    for folder in dirs:
+    # .87.27: unless it has since been redrawn in high-res, in which case its old cut-outs were removed
+    from oldpics import is_redrawn
+    for folder in ([] if is_redrawn(REPORTED) else dirs):
         if not (ROOT / folder / f"{REPORTED}.webp").exists():
             fails.append(f"missing {folder}/{REPORTED}.webp")
     print(f"checked {n} cut-outs")

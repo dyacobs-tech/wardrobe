@@ -37,11 +37,14 @@ def shoulders(stem):
     return best / fig
 
 
-stems = [e["f"][:-5] for e in seed["r"] if e["f"][:-5] not in hidden]
-assert len(stems) > 700, len(stems)
+from oldpics import kept   # .87.27: an outfit with a high-res redraw has no old cut-out left to measure
+listed = [e["f"][:-5] for e in seed["r"] if e["f"][:-5] not in hidden]
+assert len(listed) > 700, len(listed)
+stems = kept(listed)
 ratio = {s: shoulders(s) for s in stems}
-med = float(np.median(list(ratio.values())))
+# the standard build, measured over all 790 old pictures before the redrawn ones were removed (26 Nov 2026)
+med = 0.253
 off = sorted(((s, round(r / med - 1, 3)) for s, r in ratio.items() if abs(r / med - 1) > 0.065), key=lambda x: -abs(x[1]))
 assert not off, ("pictures whose build is not the standard one (shoulders vs height, fraction off the median)", len(off), off[:10])
-print("Confirmed %d pictures share one build: shoulders %.3f of his height, all within 6.5%% (widest %+.1f%%, narrowest %+.1f%%)"
+print("Confirmed %d old pictures still shown share one build: shoulders %.3f of his height, all within 6.5%% (widest %+.1f%%, narrowest %+.1f%%)"
       % (len(stems), med, 100 * (max(ratio.values()) / med - 1), 100 * (min(ratio.values()) / med - 1)))

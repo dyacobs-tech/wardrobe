@@ -19,6 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 P = json.loads((ROOT / "tests/pictures8705.json").read_text())
 from picture_names import current
+from oldpics import is_redrawn
 src = (ROOT / "src/app.html").read_text()
 seed = json.loads(re.search(r"var ONBODY_SEED = (\{.*?\});\n", src).group(1))
 files = {e["f"] for e in seed["r"]}
@@ -32,9 +33,12 @@ assert kinds.count("arms") == len(P["unhidden"]) and len(P["unhidden"]) >= 12, l
 for old, new in P["renamed"].items():
     new = current(new)
     assert old + ".webp" not in files and new + ".webp" in files, ("redrawn picture not listed", old, new)
+    gone = is_redrawn(new)   # .87.27: since redrawn in high-res, so its old files were removed
     for d in ("assets/onbody/", "assets/onbody-cut/", "assets/onbody-cut-hq/"):
-        assert (ROOT / d / (new + ".webp")).exists(), ("missing file", d, new)
+        assert gone or (ROOT / d / (new + ".webp")).exists(), ("missing file", d, new)
         assert not (ROOT / d / (old + ".webp")).exists(), ("old file left behind", d, old)
+    if gone:
+        continue
     assert new in feet and new in lq and cman.get(new + ".webp"), ("redrawn picture missing from feet/lq/cut manifest", new)
 for old, new in P["renamed"].items():
     if P["kind"][new] == "arms":

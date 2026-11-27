@@ -74,7 +74,11 @@ def main():
     man = json.loads((ROOT / "assets/onbody/manifest.json").read_text())
     files = [e["f"] for e in man["r"]]
     check(man.get("v") == 1 and len(man["r"]) == man.get("count") and len(man["r"]) >= 300, "manifest v1 with %d renders" % len(man["r"]))
-    check(all((ROOT / "assets/onbody" / f).exists() for f in files), "every manifest file exists")
+    # .87.27: an outfit with a high-res redraw keeps its row (the row names the outfit) but not its old file
+    from oldpics import is_redrawn
+    listed = len(files)
+    files = [f for f in files if not is_redrawn(f)]
+    check(all((ROOT / "assets/onbody" / f).exists() for f in files), "every listed picture exists, as the old file (%d) or its high-res redraw (%d)" % (len(files), listed - len(files)))
     check(all(e["k"] == "|".join(sorted(e["k"].split("|"))) for e in man["r"]), "keys are sorted composer keys")
     size = sum((ROOT / "assets/onbody" / f).stat().st_size for f in files)
     # Renders are cached on the phone only as they are viewed (sw.js

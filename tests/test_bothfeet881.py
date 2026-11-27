@@ -12,8 +12,10 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 man = json.loads((ROOT / "assets/onbody/manifest.json").read_text())["r"]
+from oldpics import kept   # .87.27: an outfit with a high-res redraw has no old cut-out left to check
+allf = sorted({e["f"] for e in man})
 bad = []
-for f in sorted({e["f"] for e in man}):
+for f in kept(allf):
     for d in ("onbody-cut", "onbody-cut-hq"):
         a = np.asarray(Image.open(ROOT / "assets" / d / f).convert("RGBA"))[..., 3] > 127
         h, w = a.shape
@@ -23,4 +25,4 @@ for f in sorted({e["f"] for e in man}):
         if min(left, right) / max(left, right, 1) < 0.55:
             bad.append((d, f))
 assert not bad, ("a shoe is missing in", bad[:8])
-print("Confirmed both shoes are in all %d outfit pictures" % len({e["f"] for e in man}))
+print("Confirmed both shoes are in the %d old outfit pictures still shown (%d more have a high-res redraw)" % (len(kept(allf)), len(allf) - len(kept(allf))))

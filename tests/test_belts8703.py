@@ -19,7 +19,8 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 B = json.loads((ROOT / "tests/belts8703.json").read_text())
-from picture_names import current   # .87.04: a belted picture may since have been repaired under a newer name
+from picture_names import current
+from oldpics import is_redrawn   # .87.04: a belted picture may since have been repaired under a newer name
 src = (ROOT / "src/app.html").read_text()
 seed = json.loads(re.search(r"var ONBODY_SEED = (\{.*?\});\n", src).group(1))
 files = {e["f"] for e in seed["r"]}
@@ -30,16 +31,19 @@ assert len(B["belted"]) == 113 and len(B["left_out"]) == 36, (len(B["belted"]), 
 for old, new in B["belted"].items():
     new = current(new)
     assert old + ".webp" not in files and new + ".webp" in files, ("belted picture not listed", old, new)
+    gone = is_redrawn(new)   # .87.27: since redrawn in high-res, so its old files were removed
     for d in ("assets/onbody/", "assets/onbody-cut/", "assets/onbody-cut-hq/"):
-        assert (ROOT / d / (new + ".webp")).exists(), ("missing file", d, new)
+        assert gone or (ROOT / d / (new + ".webp")).exists(), ("missing file", d, new)
         assert not (ROOT / d / (old + ".webp")).exists(), ("old file left behind", d, old)
+    if gone:
+        continue
     assert new in feet and new in lq and cman.get(new + ".webp"), ("belted picture missing from feet/lq/cut manifest", new)
     hq = Image.open(ROOT / "assets/onbody-cut-hq" / (new + ".webp"))
     assert hq.size == (386, 1280), (new, hq.size)
 for old in B["left_out"]:
     assert current(old) + ".webp" in files, ("a left-out picture was dropped", old)
 # the outline (alpha) of a belted cut-out matches its small copy: nothing was cut away at the waist
-for new in [current(n) for n in list(B["belted"].values())[:20]]:
+for new in [c for c in (current(n) for n in B["belted"].values()) if not is_redrawn(c)][:20]:
     a = np.asarray(Image.open(ROOT / "assets/onbody-cut-hq" / (new + ".webp")).convert("RGBA"))[..., 3] > 127
     s = np.asarray(Image.open(ROOT / "assets/onbody-cut" / (new + ".webp")).convert("RGBA").resize((386, 1280)))[..., 3] > 127
     assert (a != s).mean() < 0.02, ("cut-out and small copy disagree", new)

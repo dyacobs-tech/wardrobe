@@ -13,5 +13,6 @@ man = json.loads((ROOT / "assets/onbody/manifest.json").read_text())["r"]
 files = [e["f"] for e in man]
 assert not [f for f in OLD if f in files], "a long-sleeve picture is still listed"
 mine = [e for e in man if TEE in e["k"]]
-assert len(mine) >= 5 and all((ROOT / "assets/onbody-cut-hq" / e["f"]).exists() for e in mine), mine
+from oldpics import is_redrawn   # .87.27: a picture with a high-res redraw has no old cut-out any more
+assert len(mine) >= 5 and all((ROOT / "assets/onbody-cut-hq" / e["f"]).exists() or is_redrawn(e["f"]) for e in mine), mine
 print("Confirmed the %d Zegna grey tee pictures are the redrawn short-sleeve ones" % len(mine))

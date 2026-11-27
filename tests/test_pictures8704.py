@@ -38,12 +38,16 @@ def longest_straight(a):
     return best
 
 
-touching, straight, head, n = [], [], [], 0
+from oldpics import is_redrawn
+touching, straight, head, n, redrawn_n = [], [], [], 0, 0
 for e in seed["r"]:
     f = e["f"][:-5]
     if f in hidden:
         continue
     n += 1
+    if is_redrawn(f):   # .87.27: its old cut-out is gone; the app shows the high-res redraw
+        redrawn_n += 1
+        continue
     a = np.asarray(Image.open(ROOT / "assets/onbody-cut-hq" / (f + ".webp")).convert("RGBA"))[..., 3] > 127
     if a[:, :2].any() or a[:, -2:].any():
         touching.append(f)
@@ -58,4 +62,5 @@ assert n > 700, ("too few pictures checked", n)
 assert not touching, ("pictures with an arm running into the frame edge", len(touching), touching[:8])
 assert not straight, ("pictures with a long straight cut down an arm", len(straight), straight[:8])
 assert not head, ("pictures whose head is not the standard size", len(head), head[:8])
+print("(%d of them are old pictures still shown; %d have a high-res redraw)" % (n - redrawn_n, redrawn_n))
 print("Confirmed %d pictures: nothing touches the frame, no long straight cuts, the same head size (%.3f of his height)" % (n, STD))

@@ -40,10 +40,17 @@ def need(stem):
     return max(-left, right - 362)
 
 
-shown = [e["f"][:-5] for e in seed["r"] if e["f"][:-5] not in hidden and e["f"][:-5] in feet]
+from oldpics import is_redrawn   # .87.27: only old pictures still have a cut-out; a redrawn outfit shows its high-res copy
+shown = [e["f"][:-5] for e in seed["r"] if e["f"][:-5] not in hidden and e["f"][:-5] in feet and not is_redrawn(e["f"])]
 ranked = sorted(shown, key=need, reverse=True)
 RISK = ranked[:6]
-assert need(RISK[0]) > 2, ("the riskiest picture no longer reaches past its edge; pick a harder case", RISK[0], need(RISK[0]))
+if need(RISK[0]) <= 2:
+    # .87.27: the outfits whose arms reached past the picture's edge all have high-res redraws now, and their
+    # old cut-outs were removed. A redraw is a full-frame studio picture, so its own edge cannot cut an arm
+    # (tests/test_hires8714.py checks Dress me shows it). No old picture still shown needs the extra room.
+    print("Confirmed: of the %d old pictures still shown, none reaches past its own edge once scaled (the widest stays %.1fpx inside); the outfits that did are high-res redraws now"
+          % (len(shown), -need(RISK[0])))
+    sys.exit(0)
 
 MEASURE = """async (src) => {
   const img = document.querySelector('.dm-av841 img');

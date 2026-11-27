@@ -65,17 +65,22 @@ SHOES_HIDDEN = ["8004b7f7e6517a4f"]
 src = (ROOT / "src/app.html").read_text()
 # .87.03 / .87.04: these pictures may since have been repaired under a new name (tests/picture_names.py)
 from picture_names import current as cur
+from oldpics import is_redrawn
 seed = json.loads(re.search(r"var ONBODY_SEED = (\{.*?\});\n", src).group(1))
 files = {e["f"] for e in seed["r"]}
 for old, new in FIXED.items():
     assert old + ".webp" not in files, ("the old cut-out is still listed", old)
     new = cur(new)
     assert new + ".webp" in files, ("the repaired picture is not listed", new)
+    if is_redrawn(new):   # .87.27: its old files are gone; the app shows the high-res redraw
+        continue
     n = light_holes(new)
     assert n < 60, ("light stripes cut out of the picture", new, n)
 for old, new in SHOES.items():
     new = cur(new)
     assert old + ".webp" not in files and new + ".webp" in files, ("shoe repair not listed", old, new)
+    if is_redrawn(new):
+        continue
     a = np.asarray(Image.open(ROOT / f"assets/onbody-cut-hq/{new}.webp").convert("RGBA"))[..., 3]
     assert (a[1050:, :6] > 127).sum() == 0 and (a[1050:, -6:] > 127).sum() == 0, ("stray strip at the frame edge", new)
 hidden = re.search(r"var ONBODY_AUDIT883 = (\{.*?\});", src).group(1)
