@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-28.87.31" />
+    <meta name="wardrobe-build" content="2026-11-28.87.32" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -9020,7 +9020,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-28.87.31</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-28.87.32</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -13033,7 +13033,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-28.87.31";
+var WARDROBE_BUILD = "2026-11-28.87.32";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -39624,11 +39624,17 @@ function openPlanSheet(iso, selected, focusSelector) {
     html += '<p class="meta">No outfits recorded for this day.</p>';
   }
   if (!past) {
-    var cands = planCandidates();
+    /* .87.31 (nightly audit, 28 Nov 2026: 22 of the 31 tiles were empty picture boxes). A liked look that is colours
+       only has no picture of him (it is a palette, on Liked > Palettes), so it is not offered as an outfit to plan.
+       A tile whose picture fails to load is taken out rather than left as a broken box. */
+    var cands = planCandidates().map(function (l) {
+      return { l: l, pic: (typeof cardPicForLook === "function") ? cardPicForLook(l, lookImg(l)) : lookImg(l) };
+    }).filter(function (c) { return !!c.pic; });
     html += '<button type="button" class="btn-accent wp-deal" data-plan-deal>Deal a fresh one</button>';
     if (cands.length) {
-      html += '<p class="wp-pick-label">Liked &amp; queued</p><div class="wp-pick-grid">' + cands.map(function (l) {
-        return '<button type="button" class="wp-pick" data-plan-pick="' + esc(l.id) + '" aria-label="Plan ' + esc(l.title) + '"><img src="' + esc((typeof cardPicForLook === "function") ? cardPicForLook(l, lookImg(l)) : lookImg(l)) + '" alt="" loading="lazy" decoding="async" /></button>';
+      html += '<p class="wp-pick-label">Liked &amp; queued</p><div class="wp-pick-grid">' + cands.map(function (c) {
+        var l = c.l;
+        return '<button type="button" class="wp-pick" data-plan-pick="' + esc(l.id) + '" aria-label="Plan ' + esc(l.title) + '"><img src="' + esc(c.pic) + '" alt="" loading="lazy" decoding="async" data-wp8731="1" /></button>';
       }).join("") + "</div>";
     } else {
       html += '<p class="wp-pick-label">No liked or queued looks yet</p>';
@@ -39636,6 +39642,11 @@ function openPlanSheet(iso, selected, focusSelector) {
   }
   showCalendarSheet(d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" }), html, focusSelector);
 }
+document.addEventListener("error", function (e) {
+  var t = e.target; if (!t || t.tagName !== "IMG" || !t.hasAttribute("data-wp8731")) return;
+  /* the old-picture safety net may still swap it to a high-res redraw; only a tile with nothing left is removed */
+  setTimeout(function () { if (!(t.complete && t.naturalWidth > 0) && !t.hasAttribute("data-hi8727")) { var b = t.closest(".wp-pick"); if (b) b.remove(); } }, 0);
+}, true);
 function closePlanSheet() {
   var opener = planMonth ? document.getElementById("plan-month-open") : document.querySelector('[data-plan-day="' + planSheetDate + '"]');
   document.getElementById("plan-sheet").hidden = true;
