@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-28.87.33" />
+    <meta name="wardrobe-build" content="2026-11-28.87.34" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -9023,7 +9023,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-28.87.33</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-28.87.34</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -10445,6 +10445,8 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       if (cat === "Belts") beltProfile(p, item, name, colourName, notes844);
     }
     if (p.role === "bottom") p.beltless = p.kind === "swim" || !!item.nb || BELTLESS_RE.test(name + " " + notes844);
+    /* .87.34: a drawstring or elastic waist, by its name or by his notes on the piece, never takes a tucked shirt */
+    if (p.role === "bottom") p.noTuck8734 = p.kind === "swim" || !!p.swim || /drawstring|draw-string|elasticated|elastic waist|pull-on|jogger/.test(name + " " + notes844);
     /* .86.77 (David, 23 Nov 2026: "The purple white striped pants should not be worn tucked!!!!! Or with belt!!!!") */
     if (p.role === "bottom" && (item.id === "item-1795296663305-695652" || /never tucked|not tucked|untucked only/.test(notes844))) { p.beltless = true; p.noTuck877 = true; }
     if (/cashmere|wool|flannel|corduroy/.test(n) && p.warm < 1 && p.role !== "shoes") p.warm = 1;
@@ -10756,9 +10758,18 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
   var DRESS_TEE_RE = /silk|fine[-\s]?gauge|merceris|merceriz|lisle|filo|cashmere|merino|fil\s*d['’]?ecosse|dress\s*t-?shirt|dress\s*tee/i;
   function isFlannelPiece(p) { return !!(p && /flannel/i.test(p.n || p.name || "")); }
   function isDressTee(p) { return !!(p && p.kind === "tee" && (p.dressTee || DRESS_TEE_RE.test(p.n || p.name || ""))); }
-  function tuckOf(top, layer) {
+  /* .87.34 (David, 28 Nov 2026: "Button downs should NEVER be tucked into a bathing suit or drawstring pants!!!!!!"):
+     swim trunks and trousers with a drawstring or elastic waist never take a tucked shirt */
+  function noTuckBottom8734(bottom) {
+    if (!bottom) return false;
+    if (bottom.kind === "swim" || bottom.swim || bottom.noTuck8734) return true;
+    var n = String(bottom.n || bottom.name || "").toLowerCase() + " " + String(bottom.notes || "").toLowerCase();
+    return /drawstring|draw-string|elasticated|elastic waist|pull-on|jogger/.test(n);
+  }
+  function tuckOf(top, layer, bottom) {
     if (!top) return false;
     if (isFlannelPiece(top)) return false;
+    if (noTuckBottom8734(bottom) && top.kind === "shirt") return false;
     /* .86.83 (audit; David, 23 Nov 2026: "Untucked under blazer", and tees hang untucked): a tee is never tucked,
        dress tee or not, and never into swim trunks. */
     if (top.kind === "tee") return false;
@@ -10815,13 +10826,14 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
       for (var L = ev.lo; L <= ev.hi; L++) if (fitsLevel(L, t, bt, s, ly)) mask |= (1 << L);
       if (!mask) return;
       var cids = ly ? [t.id, bt.id, s.id, ly.id] : [t.id, bt.id, s.id];
-      var tucked = tuckOf(t, ly);
+      var tucked = tuckOf(t, ly, bt);
       /* .80.35: wardrobe rules override the default tuck (HAN-12 tuckOf). */
       if (root.WardrobeRules && typeof root.WardrobeRules.applyTuck === "function") {
         var over = root.WardrobeRules.applyTuck(tucked, t, ly, undefined, bt);
         if (over === true || over === false) tucked = over;
       }
       if (bt && bt.noTuck877) tucked = false;   /* .86.77: never tucked into the striped trousers, whatever else says */
+      if (t && t.kind === "shirt" && noTuckBottom8734(bt)) tucked = false;   /* .87.34: never into swim or drawstring, whatever else says */
       /* .87.00 / .87.02 (David, 23 Nov 2026: "Evening casual should be untucked. Evening sharp either tucked or
          untucked"). An outfit that fits Evening Casual is worn untucked there; Evening Sharp takes either, so the
          same outfit stays at both. Two cases cannot be untucked and leave Evening Casual instead: a picture already
@@ -11262,6 +11274,7 @@ window.onbodyKeyBanned866 = onbodyKeyBanned866;
     isDressTee: isDressTee,
     isTailoredLayer: isTailoredLayer,
     tuckOf: tuckOf,
+    noTuckBottom: noTuckBottom8734,
     tuckPromptOf: tuckPromptOf,
     Deck: Deck,
     comboKey: comboKey,
@@ -12166,11 +12179,22 @@ onbodyIngest(ONBODY_SEED);
    look cards and grids use the smaller card copy. Looks not yet redrawn keep their previous picture.
    Phone copies were made from the 4k original, never from another copy. */
 var HIRES = { map: {}, byFile: {}, ready: false };
+/* .87.34 (David, 28 Nov 2026: "Button downs should NEVER be tucked into a bathing suit or drawstring pants!!!!!!").
+   These high-res pictures show a shirt tucked into swim trunks or drawstring trousers. They stay hidden until they
+   are redrawn untucked; the outfits are dealt untucked meanwhile and simply have no picture. */
+var HIRES_TUCKED8734 = {"4b72b149007f9192": 1, "90b76b19e5a86c7b": 1, "b9b05a0840ed4381": 1, "e5d913d163a7c6d9": 1, "29577040b611e83d": 1, "a03e3cc67654e686": 1, "c7a631b6c6d41163": 1, "8d5c5bf5ac5c278f": 1, "98a9590df2ab9cda": 1, "9c5ab5ba6df4ba9f": 1, "156b9033181fb590": 1, "d3713bdd02a42afa": 1, "72acc95a0add2c01": 1, "f3de4f807b176659": 1, "a02265f5817a8354": 1, "c32077d51bd700f1": 1, "958e75ca02fb97e4": 1, "67dc8a3ca4c1c71f": 1, "5e6d10762c6fd328": 1};
+/* .87.34 (David, 28 Nov 2026, on Home showing him with a white tee tucked into jeans and no belt: "wtf!!!!!!! Untucked
+   or WITH belt!!!!!!"). Every high-res picture was checked at the waist. These show a top tucked in with no belt (or
+   tucked into swim trunks or drawstring trousers, which take no belt). They stay hidden until redrawn untucked or
+   with a belt. Pictures of a top tucked in WITH a belt are kept. */
+var HIRES_NOBELT8734 = {"35239d6d27b986a1": 1, "319cafb7f283f014": 1, "c9117bcbb5224803": 1, "78b2bee36d7f31da": 1, "d37779458dbc221a": 1, "0a4fe638530e6175": 1, "867837df6e4f5c8b": 1, "18559a4c35cbdb72": 1, "e10c3e4b72738800": 1, "06b0b8ed9641be73": 1, "b339268efa97aaf1": 1, "42b9fc11c71cf3be": 1, "6a3b7af92b8abef0": 1, "2d58525aaf3439be": 1, "e477bc8b30e7aa10": 1, "bf88a257c2725c2c": 1, "d6fe1b934c86fc01": 1, "651e81e2609a777b": 1, "4878b5e131d5dec1": 1, "aadcc1f2ccd39c05": 1, "d0176c1234b3653b": 1, "00b29c7dcb032060": 1, "063a9121d9e75730": 1, "10fa17554ee9ec58": 1, "c20f4fd439cb6c7d": 1, "70bc6beb0f802375": 1, "5ef881e9b3fa942e": 1, "d23a771fcf931eb1": 1, "25deabf3cdb7c81b": 1, "1f2df88b8e99b071": 1, "2c3bc26518728313": 1, "b0b20e976e46004b": 1, "1e472a19ba955571": 1, "8b7c7ddd63b6f2ef": 1, "6654f6bf74e11a2d": 1, "cb13dc6c91fd350d": 1, "da6cd48a02cfb46c": 1, "8d3c805bea0a47cb": 1, "d3baeb28aed496c2": 1, "2b64318a87134c1a": 1, "4d6501db5a6a3872": 1, "b4a75ef726bb367f": 1, "4a332569fe0b242b": 1, "f5f595051067cf13": 1, "c3433e3bf26f9ab5": 1, "5f2ddba2ba475c7d": 1, "7a1d4c4f9ebb7899": 1, "ca9500aad854c5ca": 1, "517ef23b150f640b": 1, "75adf0b70e1e97dd": 1, "40c5842d12d5649a": 1, "8bff0baf0153c882": 1, "a6bcf10fa20bd9b9": 1, "d643991054c91e21": 1, "bc117c02bb52453c": 1, "a50162267b4dbb33": 1, "221c3b713d03338d": 1, "3b2d6af73872369e": 1, "6babadfdd8d16359": 1, "f158b0e54c9f2585": 1, "9a59ea76151cd0b2": 1, "925a42cdcb70115b": 1, "f3dba7f63f9d8835": 1, "eeb14c0d939bafd5": 1, "302ebee0a25c3fcf": 1, "322d8c95ac29b33b": 1, "95cde66088f8784f": 1, "e481b551dd7368dd": 1, "db07ede57ec37af0": 1, "576258c1d3e694aa": 1, "3df01ee52e5b5db9": 1, "e6e83ed70a631ed7": 1, "c3d958d9093ed275": 1, "f9fc87bfc0095bdf": 1, "50118f6e84ad027e": 1, "601c4dd7b1c52052": 1, "da8574af5236fcc2": 1, "29aabd684f3f94c0": 1, "51a31d506d3413ec": 1, "cf6c430d725f67ea": 1, "9f2925dfae11717d": 1, "872fba64d2e8d5cd": 1, "2d84eda71caffa10": 1, "6d86062527d64128": 1, "412bb66e82beda65": 1, "3868861b8b9a22a7": 1, "353e1ed289717a8e": 1, "c652db7cb3371bae": 1, "8a44cdda320ef097": 1, "f8cb368151af1ffe": 1, "158dd2e54c47e185": 1, "cd33d51d13b3bef4": 1, "78cce629ff632762": 1, "85826874cdbffa0b": 1, "53931e2ec8f5991f": 1, "a7c54de46d3edf5a": 1, "90462e8ba4656a51": 1, "d075daa4ec0a580b": 1, "05dd11786a3c384e": 1, "0c41877c414dd9c3": 1, "a4a01145301314d3": 1, "b1547cc4a4cdcc50": 1, "8d0c469d22642089": 1, "8293ae5961dafc56": 1, "86e8198e274ecfad": 1, "315a80330877e11e": 1, "33db53f84af31218": 1, "639d9bb2782678fe": 1, "e0ac514521e6af29": 1, "2a8e8ad07bfd6c5f": 1, "41bd0b0ef12ed6b5": 1, "4cced282c05fef2d": 1, "589b4201833c3013": 1, "289b424432c83ccf": 1, "a90534b72f403bbd": 1, "07b4644629ec14bd": 1, "08a4498beb97ed0e": 1, "06b3f327c5a0bdf1": 1, "b47a69477b9c2979": 1, "9732b8497556f803": 1, "30004969f88ce141": 1, "1685e425ca31fd11": 1, "7f9998fb8ea57d12": 1, "d8e5db47f51eb5b9": 1, "49aa13e9741adb47": 1, "856836707d0d2d16": 1, "988a1ce85c87e97c": 1, "585df3de35cad13e": 1, "5a76e50e5bbfd258": 1, "9cac22517e7bbfa9": 1, "2427d792f8b3d56e": 1, "17b59cf2ba08b43c": 1, "1c9aa33d401d5a2f": 1, "09f94c4b44a4d7ab": 1, "6f59941be0897e0d": 1, "7378d6bd80bbe9d7": 1, "51f76619ee9839f0": 1, "26ce103bb570374b": 1, "5a0bf380155069f5": 1, "f938fe18a36fc43c": 1, "90944ac2b030be21": 1, "dbd5fc93725cf7f6": 1, "27524bf6dfc84de8": 1, "3995083868f375bf": 1, "3b0d9707127341af": 1, "7aa73fc398624ab8": 1, "3b164fb623d1ed39": 1, "df019bbe470fbd40": 1, "df4fd92a205f4b81": 1, "9bddd175ad413743": 1, "12fef3c8980a38fb": 1, "327e0fb5dc1e8458": 1, "355c0b0076526e0b": 1, "edd84b8d31b15c13": 1, "3c2dac8f2f2dbe85": 1, "c6b681278571622a": 1, "86edabf34ffd25b5": 1, "e1c66694d7b147c5": 1, "3d8d9e413aff64e6": 1, "fe1dabee1f7bea1d": 1, "3a92256c2d23b259": 1, "07bd296af7c90527": 1, "9f116c497b18d798": 1, "f358ccebf92724e7": 1, "ded6087d758fa7c9": 1, "36255231dec46971": 1, "6dd4d1c3284f8438": 1, "c2607f54d2f3fbe1": 1, "5637264bf322d32b": 1, "a1f22d6e9d4c9182": 1, "613405c9ba5b86a3": 1, "afeb763da10fbdfd": 1, "06341d56cffcb15e": 1, "15c4d94d1065f545": 1, "c587cf43a9db5321": 1, "2cf1c2c6d56a76b0": 1, "60efafae295cf86e": 1, "d4228ffc9dd440e6": 1, "a3aed1a3d6c4cff7": 1, "befc1b4de53b209d": 1, "40e654029961b76d": 1, "c060f4a53432e27f": 1, "d91ef836bc2024f0": 1, "5f2ec2216989bc18": 1, "eaf55eaea411b72f": 1, "569439d42c5898cd": 1, "09effb620652515e": 1, "d9e632b601ec7a67": 1, "0ed929abf401f1aa": 1, "1fc9606428bd2470": 1, "fafc3071982784ab": 1, "96aae780a0da0638": 1, "39a58fddb048b903": 1};
 function hiresIngest(j) {
   if (!j || !j.r) return 0;
   var n = 0;
   j.r.forEach(function (e) {
     if (!e || !e.k) return;
+    var stem8734 = String(e.full || e.card || "").replace(/^.*\//, "").replace(/\.[a-z]+$/i, "");
+    if (HIRES_TUCKED8734[stem8734] || HIRES_NOBELT8734[stem8734]) return;
     HIRES.map[e.k] = e;
     if (e.onbody) HIRES.byFile[String(e.onbody).replace(/^.*\//, "")] = e;
     n++;
@@ -13040,7 +13064,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-28.87.33";
+var WARDROBE_BUILD = "2026-11-28.87.34";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -39401,7 +39425,7 @@ document.getElementById("panel-calendar").addEventListener("click", function (e)
       var C = Cx(), tp = profOf(s.parts.top), lp = s.parts.layer ? profOf(s.parts.layer, true) : null;
       var ids = [s.parts.top, s.parts.bottom, s.parts.shoe, s.parts.layer].filter(Boolean);
       s.key = C.comboKey(ids); s.relaxed = 0;
-      try { var tk = C.tuckOf(tp, lp); s.tuckPrompt = C.tuckPromptOf(tp, lp, tk); } catch (er) {}
+      try { var bp8734 = s.parts.bottom ? profOf(s.parts.bottom) : null; var tk = C.tuckOf(tp, lp, bp8734); s.tuckPrompt = C.tuckPromptOf(tp, lp, tk); } catch (er) {}
       TP.swap = null; TP.dirty = true; render(); return;
     }
     if ((b = e.target.closest("[data-tp-pack]"))) {
