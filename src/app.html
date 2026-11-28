@@ -77,7 +77,7 @@
     <meta name="twitter:title" content="Donna" />
     <meta name="twitter:description" content="A personal wardrobe app — daily looks from your own closet, your watches and your style icons, with trips, packing and shopping built in." />
     <meta name="twitter:image" content="https://dyacobs-tech.github.io/wardrobe/assets/og-preview.jpg" />
-    <meta name="wardrobe-build" content="2026-11-28.87.32" />
+    <meta name="wardrobe-build" content="2026-11-28.87.33" />
     <script>
 /* .85.3: catalogue entries that are not men's outdoor shoes/clothes. */
 window.notMenswear853 = function (e) {
@@ -5629,6 +5629,9 @@ window.notMenswear853 = function (e) {
         position: static !important; left: auto !important; right: auto !important; top: auto !important;
         min-width: 0 !important; transform: none !important; margin: 0 !important; flex: 0 0 auto;
       }
+      /* .87.33 (nightly audit, 28 Nov: after Like the button became a plain black dot). A pressed button is dark,
+         and the thumb is drawn in the text colour, which was dark too; on a pressed button the thumb is cream. */
+      .cf-actions [data-cf-like][aria-pressed="true"], .cf-actions [data-cf-dislike][aria-pressed="true"] { color: #F6F2EA !important; }
       /* ================= Build .78.4b — Home hero: two layers =================
          Background layer (#hero-bg): today the same render, full-bleed,
          blurred once and scaled past its blurred edges; replaceable by a
@@ -9020,7 +9023,7 @@ window.notMenswear853 = function (e) {
           <p id="data-status"></p>
         </div>
         <p class="form-note about-name">DONNA</p>
-        <p class="form-note" id="build-stamp">App build 2026-11-28.87.32</p>
+        <p class="form-note" id="build-stamp">App build 2026-11-28.87.33</p>
         <p class="form-note" id="nav-diag" hidden></p>
       </section>
 
@@ -12416,6 +12419,10 @@ function lookHeroVisible84(look) {
   if (!ob) return false;
   /* .87.27: until the high-res list is in, its redraws cannot be told from the rest; Home waits for it to paint */
   if (hiresPending8727()) return true;
+  /* .87.33 (nightly audit, 27 and 28 Nov: after "Navy Tee & Khaki Chinos" showed, his figure on Home dropped from
+     402x584 to 384x557 and stayed smaller). The few old drawings left, of outfits not yet redrawn, are on his old
+     face in the old studio frame. Home shows only the new high-res pictures of him. */
+  if (typeof HIRES !== "undefined" && HIRES.ready) return false;
   try { if (typeof window.cutoutFor === "function") return !!window.cutoutFor(ob); } catch (e) {}
   return true;
 }
@@ -13033,7 +13040,7 @@ function sanitizeIncoming(v, key) {
 /* Build marker — bumped on every refresh of the standalone site;
    the service worker's cache names key off the same value there.
    Mirrored in the wardrobe-build meta tag in the head. */
-var WARDROBE_BUILD = "2026-11-28.87.32";
+var WARDROBE_BUILD = "2026-11-28.87.33";
 var THEME_KEY = "wardrobe-theme";
 function currentTheme() {
   try { return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
@@ -29026,6 +29033,14 @@ var WARD_CAT_GROUPS = [
   { key: "accessories", label: "Accessories", cats: ["Belts", "Gloves", "Hats", "Scarves", "Socks", "Sunglasses", "Ties", "Watches"] },
   { key: "shoes", label: "Shoes", cats: ["Shoes"] }
 ];
+/* .87.33 (nightly audit, 28 Nov: Clothing, "All 186" showed all 277 pieces). "All" inside a group menu is that
+   group's pieces only: the filter holds "@clothing" (or "@accessories", "@shoes"). */
+function wardGroupOf833(f) { if (String(f || "").charAt(0) !== "@") return null; var k = f.slice(1); for (var gi = 0; gi < WARD_CAT_GROUPS.length; gi++) if (WARD_CAT_GROUPS[gi].key === k) return WARD_CAT_GROUPS[gi]; return null; }
+function wardInFilter833(i) {
+  if (wardFilter === "All") return true;
+  var g = wardGroupOf833(wardFilter);
+  return g ? g.cats.indexOf(i.category) !== -1 : i.category === wardFilter;
+}
 function wardCatCounts() {
   var counts = {};
   wardrobeItems.forEach(function (i) { counts[i.category] = (counts[i.category] || 0) + 1; });
@@ -29037,6 +29052,8 @@ function syncWardCatLabels() {
     if (!lab) return;
     /* Show only the selected category (e.g. "Watches"), not "Accessories · Watches", so the closet filter row never overflows a 375px phone. */
     lab.textContent = (wardFilter !== "All" && g.cats.indexOf(wardFilter) !== -1) ? wardFilter : g.label;
+    var btn833 = document.getElementById("ward-cat-" + g.key + "-btn");
+    if (btn833) btn833.setAttribute("data-on833", (wardFilter === "@" + g.key || g.cats.indexOf(wardFilter) !== -1) ? "1" : "0");
   });
 }
 function wardWatchCount() {
@@ -29050,7 +29067,7 @@ function fillWardCatMenu(g) {
   counts["Watches"] = wardWatchCount();
   var present = g.cats.filter(function (c) { return c === "Watches" || counts[c] > 0; });
   var total = present.reduce(function (n, c) { return n + (c === "Watches" ? 0 : (counts[c] || 0)); }, 0);
-  var html = '<button type="button" class="cdd-opt" role="menuitem" data-cat-pick="All" aria-pressed="' + (wardFilter === "All") + '"><span class="cdd-opt-name">All</span>' + (total ? '<span class="cat-count">' + total + "</span>" : "") + "</button>";
+  var html = '<button type="button" class="cdd-opt" role="menuitem" data-cat-pick="@' + g.key + '" aria-pressed="' + (wardFilter === "@" + g.key) + '"><span class="cdd-opt-name">All</span>' + (total ? '<span class="cat-count">' + total + "</span>" : "") + "</button>";
   html += present.map(function (c) {
     return '<button type="button" class="cdd-opt" role="menuitem" data-cat-pick="' + esc(c) + '" aria-pressed="' + (wardFilter === c) + '"><span class="cdd-opt-name">' + esc(c) + '</span><span class="cat-count">' + counts[c] + "</span></button>";
   }).join("");
@@ -29232,14 +29249,32 @@ function colourFam875(i) {
   var fam = ""; try { if (window.WardrobeComposer) fam = WardrobeComposer.profile(i, 0).fam || ""; } catch (e) {}
   return COLOUR_FAM875[fam] || (fam ? fam.charAt(0).toUpperCase() + fam.slice(1) : "Other");
 }
-function brandOf875(i) { var b = (typeof wardBrandKey === "function" ? wardBrandKey(i) : (i.brand || "")) || ""; return String(b).trim() || "Other"; }
+/* .87.33 (nightly audit, 28 Nov: about 60 of the 131 brands were piece names such as "Tobacco Suede Belt", and
+   "Alex mill" and "Alex Mill" were two entries). A piece's brand is the one typed on it, or a known brand its name
+   starts with; a piece with neither is under "No brand", not under its own name. Brands are matched ignoring capitals. */
+function brandOf875(i) {
+  var typed = String((i && i.brand) || "").trim(); if (typed) return typed;
+  var name = String((i && i.name) || ""), list = (typeof wardBrandList === "function") ? wardBrandList() : [];
+  for (var k = 0; k < list.length; k++) if (name === list[k] || name.toLowerCase().indexOf(String(list[k]).toLowerCase() + " ") === 0) return list[k];
+  return "No brand";
+}
+var brandForms875 = {};
+function brandShown875(b) {
+  /* "Alex mill" and "Alex Mill" are one brand: shown in the spelling with the most capitals */
+  b = String(b || ""); var k = b.toLowerCase(), cur = brandForms875[k];
+  var caps = function (x) { return (String(x).match(/[A-Z]/g) || []).length; };
+  if (!cur || caps(b) > caps(cur)) brandForms875[k] = cur = b;
+  return cur;
+}
 function paintWardFilters875() {
   var bs = document.getElementById("ward-brand875"), cs = document.getElementById("ward-colour875"); if (!bs || !cs) return;
   var brands = {}, cols = {};
-  wardrobeItems.forEach(function (i) { if (wardFilter !== "All" && i.category !== wardFilter) return; brands[brandOf875(i)] = 1; cols[colourFam875(i)] = 1; });
+  wardrobeItems.forEach(function (i) { brandShown875(brandOf875(i)); });
+  wardrobeItems.forEach(function (i) { if (!wardInFilter833(i)) return; brands[brandShown875(brandOf875(i))] = 1; cols[colourFam875(i)] = 1; });
   function opts(sel, all, label, cur) {
-    var keys = Object.keys(all).sort(function (a, b) { return a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b); });
-    var h = '<option value="">' + label + ': all</option>' + keys.map(function (k) { return '<option value="' + esc(k) + '"' + (k === cur ? " selected" : "") + ">" + esc(k) + "</option>"; }).join("");
+    var last = function (k) { return k === "Other" || k === "No Brand" || k === "No brand"; };
+    var keys = Object.keys(all).sort(function (a, b) { return last(a) ? 1 : last(b) ? -1 : a.localeCompare(b); });
+    var h = '<option value="">' + label + ': all</option>' + keys.map(function (k) { return '<option value="' + esc(k) + '"' + (k.toLowerCase() === String(cur || "").toLowerCase() ? " selected" : "") + ">" + esc(k) + "</option>"; }).join("");
     if (sel.innerHTML !== h) sel.innerHTML = h;
   }
   opts(bs, brands, "Brand", wardBrand875); opts(cs, cols, "Colour", wardColour875);
@@ -29251,8 +29286,8 @@ function renderWardrobe() {
   paintWardFilters875();
   var items = wardrobeItems.filter(function (i) {
     if (staleSet && !staleSet[i.id]) return false;
-    if (wardFilter !== "All" && i.category !== wardFilter) return false;
-    if (wardBrand875 && brandOf875(i) !== wardBrand875) return false;
+    if (!wardInFilter833(i)) return false;
+    if (wardBrand875 && brandOf875(i).toLowerCase() !== wardBrand875.toLowerCase()) return false;
     if (wardColour875 && colourFam875(i) !== wardColour875) return false;
     if (!words875.length) return true;
     var hay = (i.name + " " + (i.brand || "") + " " + brandOf875(i) + " " + i.category + " " + (i.colourName || "") + " " +
@@ -29269,7 +29304,7 @@ function renderWardrobe() {
     return { it: it, ix: ix, bk: bk };
   });
   decorated.sort(function (a, b) {
-    if (wardFilter === "All") {
+    if (wardFilter === "All" || String(wardFilter).charAt(0) === "@") {
       var cc = String(a.it.category || "").toLowerCase().localeCompare(String(b.it.category || "").toLowerCase());
       if (cc) return cc;
     }
@@ -38065,7 +38100,8 @@ function renderWornLog() {
     var attrs = "";
     if (en.id) attrs = ' data-worn-edit="' + esc(en.id) + '" role="button" tabindex="0"';
     else if (en.synthetic && en.lookId) attrs = ' data-worn-look="' + esc(en.lookId) + '" data-worn-date="' + esc(en.date || "") + '" role="button" tabindex="0"';
-    var wornImg = en.img ? ((en.selfie || typeof cardPicForLook !== "function") ? en.img : (cardPicForLook(null, en.img) || en.img)) : "";
+    /* .87.33: his avatar wearing it when there is a high-res picture of those pieces (see wornAvatarPic833) */
+    var wornImg = (typeof wornAvatarPic833 === "function" && wornAvatarPic833(en)) || (en.img ? ((en.selfie || typeof cardPicForLook !== "function") ? en.img : (cardPicForLook(null, en.img) || en.img)) : "");
     html += '<div class="worn-row compact' + (en.selfie ? " selfie" : "") + '"' + attrs + '>' + (wornImg ? '<img src="' + wornImg + '" alt="" loading="lazy" data-popout="' + wornImg + '" />' : '<span class="worn-thumb-ph" aria-hidden="true"></span>') +
       '<span class="w-main"><span class="w-name">' + esc(label) + '</span>' +
       (subParts.length ? '<span class="w-sub">' + esc(subParts.join(" \u00b7 ")) + "</span>" : "") + "</span></div>";
@@ -39467,8 +39503,21 @@ function wornForDate(iso) {
      list — one wear, one entry. */
   return mergedWornEntries(iso);
 }
+/* .87.33 (David, 28 Nov 2026, asked about the mirror photos on 23, 24 and 26 Nov in Calendar: "replace w avatar").
+   A logged outfit shows him on his avatar wherever a high-res picture of those pieces exists, as Go-to's does. The
+   photo he logged is kept with the entry (nothing in his synced data is changed); it is only not the picture shown. */
+function wornAvatarPic833(entry) {
+  try {
+    if (!entry || typeof hiresKeyOfLook !== "function" || typeof hiresForKey !== "function" || typeof closetItemById !== "function") return "";
+    var ids = (entry.pieceIds || []).map(function (p) { return p && typeof p === "object" ? p.id : p; }).filter(Boolean);
+    var items = ids.map(function (id) { return closetItemById(id); }).filter(Boolean);
+    if (items.length < 2) return "";
+    return hiresForKey(hiresKeyOfLook({ fwPieces: items }), "card") || "";
+  } catch (e) { return ""; }
+}
+window.wornAvatarPic833 = wornAvatarPic833;
 function calendarOutfits(worn, planned) {
-  var entries = worn.map(function (entry) { return { worn: entry, title: entry.title || "Logged outfit", image: entry.img || "" }; });
+  var entries = worn.map(function (entry) { return { worn: entry, title: entry.title || "Logged outfit", image: wornAvatarPic833(entry) || entry.img || "" }; });
   if (planned) {
     var photo = lookImg(planned);
     var match = entries.find(function (item) {
@@ -43846,6 +43895,13 @@ function analyzeFilePiece(card, job, ix) {
     }
     if (!looks && workerFeed38() && !feedLooks.length) {
       if (emptyTries829 >= 4) { mineEmpty829(); return 0; }
+      /* .87.33 (nightly audit, 28 Nov: Black Tie sat on six blank cards for six seconds or more before saying there
+         are none). Black Tie needs a dinner jacket; with none in his closet there is nothing to wait for. */
+      var lvs833 = feedLevels838() || (fi.level ? [fi.level] : []);
+      if (lvs833.length && lvs833.every(function (L) { return +L === 7; }) && !(typeof wardrobeItems !== "undefined" ? wardrobeItems : []).some(function (it) {
+        var t = String((it && it.name) || "").toLowerCase();
+        return /tuxedo|dinner jacket|dinner-jacket|\bdinner\b|shawl collar|evening jacket/.test(t) || (/velvet/.test(t) && /tuxedo|dinner|evening|shawl/.test(t));
+      })) { mineEmpty829(); return 0; }
       feedSkeleton38(); waitForWorker38(); return 0;
     }
     if (!looks && workerFeed38()) return 0;
@@ -46785,7 +46841,8 @@ window.inspoView = "withmine";
     return list.indexOf(cur) === -1 ? [cur] : list;
   }
   function levelName(lv) { for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i][0] === lv) return LEVELS[i][1]; return "Daytime"; }
-  var SHORT = { 1: "Pool", 2: "Day", 3: "Casual", 5: "Dressy", 6: "Formal", 7: "Black Tie" };
+  /* .87.33 (nightly audit: the button read "undefined +1" with Evening Sharp chosen): every level has a short name */
+  var SHORT = { 1: "Pool", 2: "Day", 3: "Casual", 4: "Sharp", 5: "Dressy", 6: "Formal", 7: "Black Tie" };
   try { var saved = JSON.parse(sessionStorage.getItem(KEY) || "null"); if (Array.isArray(saved) && saved.length) sel = saved.filter(function (id) { return BANDS.some(function (b) { return b.id === id; }); }); } catch (e) {}
   if (!sel.length) sel = ["now"];
   function band(id) { for (var i = 0; i < BANDS.length; i++) if (BANDS[i].id === id) return BANDS[i]; return null; }
@@ -47963,6 +48020,10 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
       var r = _st.apply(this, arguments);
       if (name === "inspo") { ensureHost(); if (R.getAttribute("data-insv") === "dress") paint(); else if (R.getAttribute("data-insv") === "ideas" && typeof window.inspoPaint858 === "function") window.inspoPaint858(); }
       else R.removeAttribute("data-insv");
+      /* .87.33 (nightly audit, 28 Nov: Looks, pencil on a card, Home, The Edit showed Icons with "Dress me" lit):
+         the lit tab always follows the page The Edit shows */
+      var v833 = R.getAttribute("data-insv") || "icons";
+      [].forEach.call(document.querySelectorAll("[data-ins-seg]"), function (b) { b.setAttribute("aria-selected", b.getAttribute("data-ins-seg") === v833 ? "true" : "false"); });
       return r;
     };
     try { switchTab = window.switchTab; } catch (e) {}
@@ -48295,6 +48356,20 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
         /* one frame: old figure off, new figure on (never both: cut-outs are
            transparent, so overlapping them would double-expose) */
         hero.querySelectorAll(".hero-next").forEach(function (x) { if (x !== nx) x.remove(); });
+        /* .87.33 (David, 28 Nov 2026: "When I [move] between looks on home there a flicker"). The incoming picture
+           came in at 85% and brightened while the old one was already hidden, so the cream showed through for a
+           fifth of a second on every Next. A high-res picture is opaque, so it now fades in over the old one,
+           which stays fully shown underneath until the new one is complete: no dip, no blank frame. */
+        if (/onbody-hires\//.test(shown) && /onbody-hires\//.test(cur) && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+          nx.style.setProperty("transition", "opacity .16s linear", "important"); nx.style.opacity = "0"; void nx.offsetWidth; nx.style.opacity = "1";
+          setTimeout(function () {
+            if (cancel()) return;
+            img.style.visibility = "hidden";
+            img.setAttribute("src", shown);
+            finish();
+          }, 180);
+          return;
+        }
         img.style.visibility = "hidden";
         nx.style.opacity = "";
         if (!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) nx.classList.add("hero-in");
@@ -49577,16 +49652,29 @@ var INSPO_CONCEPTS = /*INSPO_CONCEPTS_BEGIN*/[{"id":"cx-001","title":"Black Polo
   var nm = document.getElementById("today-name");
   function fit() {
     if (!nm) return;
-    nm.style.fontSize = "";
+    /* .87.33: sizes are set as important, because a stylesheet rule sets the title's size as important and
+       silently beat the fit, so a long name was never shrunk and ended in "…" */
+    ["font-size", "white-space", "text-overflow", "line-height", "height", "overflow", "display", "align-items", "justify-content"].forEach(function (k) { nm.style.removeProperty(k); });
     /* .86.75 (David, 23 Nov 2026: "text placement on Home Screen. None of it stays fixed"): the line keeps the
        height of the full-size name, so a shrunk name never moves the text above or below it */
-    nm.style.height = ""; nm.style.lineHeight = "";
-    var h0 = nm.offsetHeight; if (h0 > 0) { nm.style.height = h0 + "px"; nm.style.lineHeight = h0 + "px"; }
+    var h0 = nm.offsetHeight;
+    if (h0 > 0) { nm.style.setProperty("height", h0 + "px", "important"); nm.style.setProperty("line-height", h0 + "px", "important"); }
     var cw = nm.clientWidth, sw = nm.scrollWidth;
-    if (cw > 0 && sw > cw + 1) {
-      var fs = parseFloat(getComputedStyle(nm).fontSize) || 28;
-      nm.style.fontSize = Math.max(19, Math.floor(fs * cw / sw * 10) / 10) + "px";
-    }
+    if (!(cw > 0 && sw > cw + 1)) return;
+    var fs = parseFloat(getComputedStyle(nm).fontSize) || 28;
+    var one = Math.floor(fs * cw / sw * 10) / 10;
+    /* .87.33 (nightly audit: every Formal title ended in "…" before the tie): one line down to 16px; a name that
+       still does not fit takes two lines inside the same box (they may reach a few pixels into the gap above
+       and below), so nothing above or below it moves; never below 12px */
+    if (one >= 16) { nm.style.setProperty("font-size", one + "px", "important"); return; }
+    nm.style.setProperty("white-space", "normal", "important");
+    nm.style.setProperty("text-overflow", "clip", "important");
+    nm.style.setProperty("overflow", "visible", "important");
+    var f2 = 16;
+    function set2(f) { nm.style.setProperty("font-size", f + "px", "important"); nm.style.setProperty("line-height", Math.round(f * 1.1) + "px", "important"); }
+    set2(f2);
+    while (f2 > 12 && (nm.scrollWidth > nm.clientWidth + 1 || nm.scrollHeight > Math.round(f2 * 1.1) * 2 + 1)) { f2 -= 0.5; set2(f2); }
+    nm.style.setProperty("display", "flex", "important"); nm.style.setProperty("align-items", "center", "important"); nm.style.setProperty("justify-content", "center", "important");
   }
   if (nm) {
     new MutationObserver(fit).observe(nm, { childList: true, characterData: true, subtree: true });

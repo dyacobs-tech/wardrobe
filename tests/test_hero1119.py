@@ -38,7 +38,10 @@ FRAME_JS = """() => { window.__hf = []; const hero = document.getElementById('to
     /* .86.74: the picture is scaled so he stands one height ("My height isn't consistent"); the layout box,
        not the scaled drawing, is what must never move */
     const sc = img.style.scale; img.style.scale = ''; const r = img.getBoundingClientRect(); img.style.scale = sc;
-    window.__hf.push([figs.length, figs.every(ok) ? 1 : 0, Math.round(r.top), Math.round(r.height), Math.round(r.width)]);
+    /* .87.33 (David, 28 Nov 2026: "When I [move] between looks on home there a flicker"): high-res pictures are opaque,
+       so the new one fades in over the old one, which stays fully shown underneath; two figures are allowed only then */
+    const opaque = figs.length === 2 && figs.every(e => /onbody-hires\//.test(e.getAttribute('src') || '')) && figs.some(e => parseFloat(getComputedStyle(e).opacity) > 0.99);
+    window.__hf.push([opaque ? 1 : figs.length, figs.every(ok) ? 1 : 0, Math.round(r.top), Math.round(r.height), Math.round(r.width)]);
     if (window.__hf.length < 4000) requestAnimationFrame(tick); };
   requestAnimationFrame(tick); }"""
 
