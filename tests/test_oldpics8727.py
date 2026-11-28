@@ -86,6 +86,9 @@ def run(browser):
     # first open: nothing saved on the phone, the list is late; Home waits and then shows a picture
     page.goto(URL, wait_until="load")
     page.wait_for_function(shown, timeout=30000)
+    # an outfit that has no redraw keeps its old cut-out and may paint before the late list arrives (CI, 28 Nov
+    # 2026); so wait for the list, then check it was kept on the phone
+    page.wait_for_function("() => typeof HIRES !== 'undefined' && HIRES.ready && !!localStorage.getItem('wardrobe.hires')", timeout=30000)
     first = page.evaluate(hero)
     assert first["ready"] and first["saved"], ("the high-res list was not kept on the phone", first)
 
